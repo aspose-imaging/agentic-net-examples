@@ -6,7 +6,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 64 |
+| Total Examples | 95 |
 | Categories | 1 |
 | Pass Rate | 100.0% |
 | Last Updated | 2026-03-05 |
@@ -15,13 +15,13 @@
 
 ```
 examples/
-+-- Image and Photo Filters/
-    |-- 13366_apply_alpha_blending_filter.cs
-    |-- 13367_apply_magic_wand_filter.cs
-    |-- 13368_remove_watermark_from_image.cs
-    |-- 13369_explore_image_photo_filters.cs
-    |-- 13370_review_image_photo_filters_overview.cs
-    |-- ... (59 more)
++-- Merge Images/
+    |-- 13361_merge_jpg_images_to_jpeg.cs
+    |-- 13362_merge_images_horizontal_jpeg.cs
+    |-- 13363_merge_images_vertical_jpeg.cs
+    |-- 13364_merge_jpg_images_to_pdf.cs
+    |-- 13365_merge_jpg_to_png.cs
+    |-- ... (90 more)
     +-- agents.md
 ```
 
@@ -29,7 +29,7 @@ examples/
 
 | Category | Examples | Pass Rate | Details |
 |----------|----------|-----------|---------|
-| [Image and Photo Filters](./examples/Image and Photo Filters/) | 64 | 100.0% | [agents.md](./examples/Image and Photo Filters/agents.md) |
+| [Merge Images](./examples/Merge Images/) | 95 | 100.0% | [agents.md](./examples/Merge Images/agents.md) |
 
 ## How to Use
 
@@ -38,7 +38,7 @@ examples/
 git clone https://github.com/aspose-imaging/agentic-net-examples.git
 
 # Navigate to a category
-cd examples/Image and Photo Filters
+cd examples/Merge Images
 
 # Run any example
 dotnet run ExampleFile.cs
@@ -51,4 +51,4 @@ dotnet run ExampleFile.cs
 
 ---
 
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260305_150524` | 2026-03-05*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260305_151657` | 2026-03-05*
