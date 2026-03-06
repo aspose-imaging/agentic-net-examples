@@ -6,8 +6,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 162 |
-| Categories | 1 |
+| Total Examples | 396 |
+| Categories | 2 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-03-06 |
 
@@ -18,6 +18,7 @@ agents.md
 README.md
 examples/
 +-- Conversion/
++-- Kernel_Filters/
 ```
 
 ## Categories
@@ -25,6 +26,7 @@ examples/
 | Category | Examples | Pass Rate | Details |
 |----------|----------|-----------|---------|
 | [Conversion](./examples/Conversion/) | 162 | 100.0% | [agents.md](./examples/Conversion/agents.md) |
+| [Kernel Filters](./examples/Kernel_Filters/) | 234 | 100.0% | [agents.md](./examples/Kernel_Filters/agents.md) |
 
 ## How to Use
 
@@ -40,4 +42,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260306_101809` | 2026-03-06*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260306_111718` | 2026-03-06*
