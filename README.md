@@ -6,22 +6,22 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 95 |
+| Total Examples | 156 |
 | Categories | 1 |
 | Pass Rate | 100.0% |
-| Last Updated | 2026-03-05 |
+| Last Updated | 2026-03-06 |
 
 ## Repository Structure
 
 ```
 examples/
-+-- Merge Images/
-    |-- 13361_merge_jpg_images_to_jpeg.cs
-    |-- 13362_merge_images_horizontal_jpeg.cs
-    |-- 13363_merge_images_vertical_jpeg.cs
-    |-- 13364_merge_jpg_images_to_pdf.cs
-    |-- 13365_merge_jpg_to_png.cs
-    |-- ... (90 more)
++-- Working With Drawing Images/
+    |-- 13635_draw_images_onto_image.cs
+    |-- 13636_draw_lines_on_image.cs
+    |-- 13637_draw_ellipse_on_image.cs
+    |-- 13638_draw_rectangle_on_image.cs
+    |-- 13639_draw_arc_on_image.cs
+    |-- ... (151 more)
     +-- agents.md
 ```
 
@@ -29,7 +29,7 @@ examples/
 
 | Category | Examples | Pass Rate | Details |
 |----------|----------|-----------|---------|
-| [Merge Images](./examples/Merge Images/) | 95 | 100.0% | [agents.md](./examples/Merge Images/agents.md) |
+| [Working With Drawing Images](./examples/Working With Drawing Images/) | 156 | 100.0% | [agents.md](./examples/Working With Drawing Images/agents.md) |
 
 ## How to Use
 
@@ -38,7 +38,7 @@ examples/
 git clone https://github.com/aspose-imaging/agentic-net-examples.git
 
 # Navigate to a category
-cd examples/Merge Images
+cd examples/Working With Drawing Images
 
 # Run any example
 dotnet run ExampleFile.cs
@@ -51,4 +51,4 @@ dotnet run ExampleFile.cs
 
 ---
 
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260305_151657` | 2026-03-05*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260306_021613` | 2026-03-06*
