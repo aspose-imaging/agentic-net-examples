@@ -6,8 +6,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 64 |
-| Categories | 1 |
+| Total Examples | 159 |
+| Categories | 2 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-03-15 |
 
@@ -17,6 +17,7 @@
 agents.md
 README.md
 +-- image-and-photo-filters/
++-- merge-images/
 ```
 
 ## Categories
@@ -24,6 +25,7 @@ README.md
 | Category | Examples | Pass Rate | Details |
 |----------|----------|-----------|---------|
 | [Image and Photo Filters](./image-and-photo-filters/) | 64 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
+| [Merge Images](./merge-images/) | 95 | 100.0% | [agents.md](./merge-images/agents.md) |
 
 ## How to Use
 
@@ -35,8 +37,8 @@ dotnet run <example-file.cs>
 
 ## Prerequisites
 
-- .NET SDK 8.0+
+- .NET SDK (net9.0)
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260315_141418` | 2026-03-15*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260315_142625` | 2026-03-15*
