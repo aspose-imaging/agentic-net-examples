@@ -1,34 +1,31 @@
 using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.FileFormats.Svg;
 
-class SvgToBmpConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source SVG file
-        string inputSvgPath = @"C:\Images\source.svg";
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Desired output BMP file path
-        string outputBmpPath = @"C:\Images\converted.bmp";
-
-        // Load the SVG image using Aspose.Imaging's unified loader
-        using (Image image = Image.Load(inputSvgPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Obtain rasterization options that match the SVG's dimensions.
-            // The first argument sets the background color for rasterization.
-            var rasterizationOptions = (SvgRasterizationOptions)image.GetDefaultOptions(
-                new object[] { Color.White, image.Width, image.Height });
-
-            // Create BMP save options and attach the rasterization settings.
-            var bmpOptions = new BmpOptions
+            using (BmpOptions bmpOptions = new BmpOptions())
             {
-                VectorRasterizationOptions = rasterizationOptions
-            };
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageWidth = image.Width;
+                rasterOptions.PageHeight = image.Height;
+                rasterOptions.BackgroundColor = Color.White;
+                rasterOptions.SmoothingMode = SmoothingMode.AntiAlias;
+                rasterOptions.TextRenderingHint = TextRenderingHint.AntiAlias;
 
-            // Save the rasterized image as BMP, preserving visual fidelity.
-            image.Save(outputBmpPath, bmpOptions);
+                bmpOptions.VectorRasterizationOptions = rasterOptions;
+
+                image.Save(outputPath, bmpOptions);
+            }
         }
     }
 }
