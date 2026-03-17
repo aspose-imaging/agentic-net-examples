@@ -1,56 +1,55 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
-namespace SvgToPngConversion
+class SvgToPngConverter
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        // Input SVG file path
+        string inputSvgPath = @"C:\Images\input.svg";
+
+        // Output PNG file path
+        string outputPngPath = @"C:\Images\output.png";
+
+        // Open the SVG file as a stream and load it into a SvgImage instance
+        using (Stream svgStream = File.OpenRead(inputSvgPath))
+        using (SvgImage svgImage = new SvgImage(svgStream))
         {
-            // Input SVG file path
-            string inputSvgPath = @"C:\Temp\input.svg";
-
-            // Output PNG file path
-            string outputPngPath = @"C:\Temp\output.png";
-
-            // Load the SVG image using the generic Image.Load method
-            using (Image svgImage = Image.Load(inputSvgPath))
+            // Configure rasterization options – these control how the vector SVG is rasterized
+            var rasterOptions = new SvgRasterizationOptions
             {
-                // Prepare rasterization options required for vector to raster conversion
-                // The default options are obtained via GetDefaultOptions, providing background color,
-                // and the desired width and height (same as source to preserve fidelity).
-                var rasterizationOptions = (SvgRasterizationOptions)svgImage.GetDefaultOptions(
-                    new object[] { Color.White, svgImage.Width, svgImage.Height });
+                // Preserve the original SVG dimensions
+                PageSize = svgImage.Size,
 
-                // Optionally fine‑tune rendering quality (e.g., anti‑aliasing, smoothing)
-                rasterizationOptions.TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias;
-                rasterizationOptions.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+                // Optional: set a white background to avoid transparency issues
+                BackgroundColor = Color.White,
 
-                // Configure PNG save options and attach the rasterization options
-                var pngSaveOptions = new PngOptions
-                {
-                    // Preserve original resolution if needed
-                    ResolutionSettings = new ResolutionSetting(svgImage.Width, svgImage.Height),
+                // Preserve visual fidelity
+                SmoothingMode = SmoothingMode.None,
+                TextRenderingHint = TextRenderingHint.AntiAlias
+            };
 
-                    // Use truecolor with alpha for full color fidelity
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
+            // Configure PNG save options
+            var pngOptions = new PngOptions
+            {
+                // Attach the rasterization options so the SVG is rendered to raster before saving
+                VectorRasterizationOptions = rasterOptions,
 
-                    // Enable progressive loading (optional)
-                    Progressive = true,
+                // Preserve full color depth and alpha channel
+                ColorType = PngColorType.TruecolorWithAlpha,
+                BitDepth = 8,
 
-                    // Attach vector rasterization options so the SVG is rasterized during save
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+                // Use maximum compression while keeping progressive loading
+                CompressionLevel = 9,
+                Progressive = true
+            };
 
-                // Save the rasterized image as PNG
-                svgImage.Save(outputPngPath, pngSaveOptions);
-            }
-
-            Console.WriteLine("SVG has been successfully converted to PNG.");
+            // Save the rasterized image as PNG
+            svgImage.Save(outputPngPath, pngOptions);
         }
     }
 }

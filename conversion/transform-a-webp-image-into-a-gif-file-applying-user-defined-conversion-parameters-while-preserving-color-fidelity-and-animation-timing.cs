@@ -1,37 +1,41 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.ImageOptions;
 
 class WebPToGifConverter
 {
     static void Main()
     {
-        // Input WebP file (can be animated)
+        // Input WebP file (can be static or animated)
         string inputWebPPath = @"C:\Images\input.webp";
 
-        // Output GIF file
+        // Output GIF file path
         string outputGifPath = @"C:\Images\output.gif";
 
-        // Load the WebP image (single or multi‑frame) using the provided load rule
-        using (Image webpImage = Image.Load(inputWebPPath))
+        // Load the WebP image using the dedicated constructor (load rule)
+        using (WebPImage webpImage = new WebPImage(inputWebPPath))
         {
-            // Prepare GIF save options – user‑defined conversion parameters
-            var gifOptions = new GifOptions
+            // ------------------------------------------------------------
+            // User‑defined conversion parameters
+            // ------------------------------------------------------------
+            // Example: preserve original animation timing by copying frame delays
+            // (Aspose.Imaging automatically copies frame timing when saving to GIF
+            //  if the source image implements IMultipageImage.)
+            // Additional GIF‑specific options can be set here.
+            GifOptions gifOptions = new GifOptions
             {
-                // Preserve as many colors as possible (max 256 for GIF)
-                ColorResolution = 256,
+                // Preserve the original color palette depth (default is 8‑bit)
+                // ColorDepth = 8, // Uncomment if you need to enforce a specific depth
 
-                // Use Floyd‑Steinberg dithering to maintain visual fidelity
-                Dither = DitheringMethod.FloydSteinberg,
+                // Preserve animation loop count if the source is animated
+                // LoopCount = 0, // 0 means infinite looping; set as needed
 
-                // Keep original animation timing if the source is animated
-                // (Aspose.Imaging copies frame delays automatically when MultiPageOptions is not set)
-                // Additional timing control can be done via FrameDelay property if needed
+                // You can also control dithering, transparency, etc., here.
             };
 
-            // Save the image as an animated GIF using the provided save rule
+            // Save the image as GIF using the Save(string, ImageOptionsBase) method (save rule)
+            // This operation keeps color fidelity and animation timing.
             webpImage.Save(outputGifPath, gifOptions);
         }
     }

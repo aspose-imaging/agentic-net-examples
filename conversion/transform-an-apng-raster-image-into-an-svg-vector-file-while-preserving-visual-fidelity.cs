@@ -2,36 +2,28 @@ using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
-class ApngToSvgConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source APNG file
-        string inputFile = @"C:\Images\animation.apng";
+        string inputPath = "input.apng";
+        string outputPath = "output.svg";
 
-        // Desired output SVG file path
-        string outputFile = @"C:\Images\animation_converted.svg";
-
-        // Load the APNG image (raster image with multiple frames)
-        using (Image image = Image.Load(inputFile))
+        using (Image image = Image.Load(inputPath))
         {
-            // Obtain default vector rasterization options.
-            // This creates options that will embed the raster data into an SVG,
-            // preserving visual fidelity of the original APNG.
-            var vectorOptions = (VectorRasterizationOptions)image.GetDefaultOptions(
-                new object[] { Aspose.Imaging.Color.White, image.Width, image.Height });
-
-            // Configure SVG save options with the rasterization settings.
-            var svgOptions = new SvgOptions
+            SvgOptions svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = vectorOptions,
-                // Optional: keep original metadata if needed
-                KeepMetadata = true
+                VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                }
             };
 
-            // Save the image as an SVG file.
-            image.Save(outputFile, svgOptions);
+            image.Save(outputPath, svgOptions);
         }
     }
 }
