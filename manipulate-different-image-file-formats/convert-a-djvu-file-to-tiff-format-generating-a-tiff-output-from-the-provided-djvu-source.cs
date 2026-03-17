@@ -3,28 +3,27 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input DjVu file and output TIFF file
-        string inputPath = "input.djvu";
+        // Input DjVu file path
+        string inputPath = "sample.djvu";
+        // Output TIFF file path
         string outputPath = "output.tif";
 
-        // Open the DjVu file as a stream
-        using (Stream stream = File.OpenRead(inputPath))
+        // Open the DjVu file stream
+        using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
         {
-            // Load the DjVu image from the stream
+            // Load DjVu image from the stream
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Configure TIFF save options (default format)
+                // Configure TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                // Export all pages of the DjVu document to the TIFF
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-                // Save the DjVu image as a multi-page TIFF
+                // Save all pages as a multi-page TIFF
                 djvuImage.Save(outputPath, tiffOptions);
             }
         }
