@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,18 +15,27 @@ class Program
         // Load the JPEG image
         using (JpegImage image = (JpegImage)Image.Load(inputPath))
         {
-            // Access EXIF data as JpegExifData
-            var jpegExif = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
-            if (jpegExif != null)
+            // Access EXIF data
+            var exif = image.ExifData;
+            if (exif != null)
             {
-                // Update some EXIF fields
-                jpegExif.Make = "MyCameraManufacturer";
-                jpegExif.Model = "ModelX1000";
-                jpegExif.Artist = "John Doe";
-                jpegExif.Copyright = "© 2024 MyCompany";
+                // Cast to JpegExifData (fully qualified to avoid extra using)
+                var jpegExif = exif as Aspose.Imaging.Exif.JpegExifData;
+                if (jpegExif != null)
+                {
+                    // Read some existing tags
+                    Console.WriteLine($"Original Make: {jpegExif.Make}");
+                    Console.WriteLine($"Original Model: {jpegExif.Model}");
+
+                    // Update EXIF tags
+                    jpegExif.Make = "MyCameraMaker";
+                    jpegExif.Model = "MyCameraModel";
+                    jpegExif.Artist = "John Doe";
+                    jpegExif.Copyright = "© 2026 MyCompany";
+                }
             }
 
-            // Save the modified image
+            // Save the image with updated EXIF metadata
             image.Save(outputPath);
         }
     }
