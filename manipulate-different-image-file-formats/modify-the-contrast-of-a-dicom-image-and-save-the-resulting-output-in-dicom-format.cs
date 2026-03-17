@@ -3,29 +3,25 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+class DicomContrastAdjustment
 {
     static void Main()
     {
-        // Path to the source DICOM image
-        string inputPath = @"c:\temp\sample.dicom";
-
-        // Path where the adjusted DICOM image will be saved
+        // Input and output file paths
+        string inputPath = @"c:\temp\sample.dcm";
         string outputPath = @"c:\temp\sample_contrast.dcm";
 
-        // Load the DICOM image using Aspose.Imaging's Image.Load method
+        // Load the DICOM image from file
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to DicomImage to access DICOM-specific methods
+            // Cast the generic Image to DicomImage to access DICOM‑specific methods
             DicomImage dicomImage = (DicomImage)image;
 
-            // Adjust the contrast; value must be in the range [-100, 100]
+            // Adjust contrast (value must be in the range [-100, 100])
             dicomImage.AdjustContrast(50f);
 
-            // Prepare DICOM save options (default options are sufficient for this case)
+            // Save the modified image back to DICOM format using default DICOM options
             DicomOptions saveOptions = new DicomOptions();
-
-            // Save the modified image back to DICOM format
             dicomImage.Save(outputPath, saveOptions);
         }
     }
