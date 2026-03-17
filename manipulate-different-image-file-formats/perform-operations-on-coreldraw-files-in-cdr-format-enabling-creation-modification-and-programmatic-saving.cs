@@ -1,32 +1,47 @@
 using System;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
-class Program
+namespace ProgramNamespace
 {
-    static void Main(string[] args)
+    class Program
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.cdr";
-
-        using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+        static void Main(string[] args)
         {
-            var page = cdr.Pages[0] as CdrImagePage;
+            string cdrPath = "input.cdr";
+            string pngPath = "output.png";
 
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(page);
-            graphics.Clear(Aspose.Imaging.Color.White);
-
-            graphics.DrawRectangle(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2), new Aspose.Imaging.Rectangle(100, 100, 200, 150));
-            graphics.DrawEllipse(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2), new Aspose.Imaging.Rectangle(150, 150, 100, 100));
-
-            using (SolidBrush brush = new SolidBrush())
+            using (CdrImage cdrImage = (CdrImage)Image.Load(cdrPath))
             {
-                brush.Color = Aspose.Imaging.Color.Green;
-                brush.Opacity = 100;
-                graphics.DrawString("Hello CDR", new Aspose.Imaging.Font("Arial", 24, Aspose.Imaging.FontStyle.Regular), brush, new Aspose.Imaging.PointF(120, 120));
-            }
+                int width = cdrImage.Width;
+                int height = cdrImage.Height;
 
-            cdr.Save(outputPath);
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.Source = new FileCreateSource(pngPath, false);
+
+                using (Image canvas = Image.Create(pngOptions, width, height))
+                {
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(Color.White);
+
+                    Pen rectanglePen = new Pen(Color.Blue, 5);
+                    graphics.DrawRectangle(rectanglePen, 50, 50, width - 100, height - 100);
+
+                    Pen linePen = new Pen(Color.Red, 3);
+                    graphics.DrawLine(linePen, 0, 0, width, height);
+
+                    Font font = new Font("Arial", 24, FontStyle.Regular);
+                    using (SolidBrush blackBrush = new SolidBrush(Color.Black))
+                    {
+                        graphics.DrawString("Modified CDR Canvas", font, blackBrush, width - 250, height - 40);
+                    }
+
+                    canvas.Save();
+                }
+            }
         }
     }
 }
