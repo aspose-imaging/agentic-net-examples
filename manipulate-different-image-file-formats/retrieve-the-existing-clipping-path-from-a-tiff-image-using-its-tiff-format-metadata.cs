@@ -10,19 +10,10 @@ class Program
         // Load the TIFF image from file
         using (var image = (TiffImage)Image.Load("Sample.tif"))
         {
-            // Retrieve the collection of clipping paths stored in the TIFF metadata
-            var paths = image.ActiveFrame.PathResources;
-
-            // Check if any clipping paths exist
-            if (paths == null || paths.Count == 0)
+            // Access the clipping paths stored in the active frame's PathResources
+            foreach (var path in image.ActiveFrame.PathResources)
             {
-                Console.WriteLine("No clipping paths found in the TIFF image.");
-                return;
-            }
-
-            // Output the name of each clipping path
-            foreach (var path in paths)
-            {
+                // Display each clipping path's name
                 Console.WriteLine($"Clipping Path: {path.Name}");
             }
         }
