@@ -6,35 +6,30 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output JPEG2000 file paths
-        string inputPath = "input.jp2";
-        string outputPath = "output.jp2";
+        string inputPath = "input.j2k";
+        string outputPath = "output.j2k";
 
-        // Load the JPEG2000 image
-        using (Image image = Image.Load(inputPath))
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // If the image supports raster operations, perform a resize
-            if (image is RasterImage raster)
-            {
-                if (!raster.IsCached) raster.CacheData();
+            if (!image.IsCached)
+                image.CacheData();
 
-                // Resize to 75% of original dimensions using nearest-neighbour resampling
-                int newWidth = raster.Width * 3 / 4;
-                int newHeight = raster.Height * 3 / 4;
-                raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-            }
+            var cropRect = new Rectangle(50, 50, image.Width - 100, image.Height - 100);
+            image.Crop(cropRect);
 
-            // Configure JPEG2000 save options
-            var jp2Options = new Jpeg2000Options
+            image.Resize(image.Width / 2, image.Height / 2, ResizeType.NearestNeighbourResample);
+
+            image.Rotate(45.0f, true, Color.White);
+
+            var saveOptions = new Jpeg2000Options
             {
-                Irreversible = false,                     // lossless compression
-                CompressionRatios = new double[] { 2.0 }, // example compression ratio
-                KeepMetadata = true,                       // retain original metadata
-                Comments = new string[] { "Processed by Aspose.Imaging" } // add comment
+                Irreversible = true,
+                CompressionRatios = new int[] { 10, 5 },
+                Comments = new string[] { "Processed with Aspose.Imaging" },
+                KeepMetadata = true
             };
 
-            // Save the image back as JPEG2000 without changing the format
-            image.Save(outputPath, jp2Options);
+            image.Save(outputPath, saveOptions);
         }
     }
 }
