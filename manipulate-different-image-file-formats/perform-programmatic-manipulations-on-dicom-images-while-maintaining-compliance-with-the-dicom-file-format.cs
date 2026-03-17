@@ -9,23 +9,30 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output DICOM file paths
+        // Input DICOM file path
         string inputPath = "input.dcm";
-        string outputPath = "output.dcm";
+        // Output DICOM file path
+        string outputPath = "output_compressed.dcm";
 
         // Load the DICOM image
-        using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
         {
+            // Cache image data for better performance
+            if (!dicomImage.IsCached)
+                dicomImage.CacheData();
+
             // Adjust brightness (+30)
-            dicom.AdjustBrightness(30);
+            dicomImage.AdjustBrightness(30);
 
-            // Resize image to double its size using nearest neighbour resampling
-            dicom.Resize(dicom.Width * 2, dicom.Height * 2, ResizeType.NearestNeighbourResample);
+            // Resize to half of original size using nearest neighbour resampling
+            int newWidth = dicomImage.Width / 2;
+            int newHeight = dicomImage.Height / 2;
+            dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-            // Configure DICOM save options with JPEG compression and RGB color type
-            DicomOptions options = new DicomOptions
+            // Configure DICOM save options with grayscale color type and JPEG compression
+            var options = new DicomOptions
             {
-                ColorType = ColorType.Rgb24Bit,
+                ColorType = ColorType.Grayscale8Bit,
                 Compression = new Compression
                 {
                     Type = CompressionType.Jpeg,
@@ -38,8 +45,8 @@ class Program
                 }
             };
 
-            // Save the modified DICOM image with the specified options
-            dicom.Save(outputPath, options);
+            // Save the modified image as DICOM with the specified options
+            dicomImage.Save(outputPath, options);
         }
     }
 }
