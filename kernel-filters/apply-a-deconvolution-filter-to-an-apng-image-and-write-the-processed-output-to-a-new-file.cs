@@ -1,45 +1,41 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using System.Drawing;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
 
-class DeconvolutionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the folder containing the source APNG file.
-        string dataDir = @"c:\temp\";
+        // Input and output file paths
+        string inputPath = "input.apng";
+        string outputPath = "output.apng";
 
-        // Load the APNG image.
-        using (Image image = Image.Load(dataDir + "input.apng"))
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to ApngImage to access APNG‑specific members.
+            // Cast to ApngImage to access frames
             ApngImage apngImage = (ApngImage)image;
 
-            // Define a simple 3×3 sharpening kernel.
-            // The kernel is supplied as a one‑dimensional array in row‑major order.
-            double[] kernel = new double[]
+            // Apply a deconvolution filter to each frame
+            for (int i = 0; i < apngImage.PageCount; i++)
             {
-                0, -1, 0,
-               -1, 5, -1,
-                0, -1, 0
-            };
+                // Each page is a raster image (ApngFrame)
+                var frame = (RasterImage)apngImage.Pages[i];
 
-            // Create deconvolution filter options with the kernel.
-            DeconvolutionFilterOptions deconvOptions = new DeconvolutionFilterOptions(kernel)
+                // Apply Motion Wiener deconvolution filter
+                frame.Filter(
+                    frame.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
+            }
+
+            // Save the processed APNG to a new file
+            ApngOptions saveOptions = new ApngOptions
             {
-                // Optional: adjust brightness and signal‑to‑noise ratio if needed.
-                Brightness = 1.15,   // default value
-                Snr = 0.007           // default value
+                Source = new FileCreateSource(outputPath, false)
             };
-
-            // Apply the deconvolution filter to the whole image.
-            apngImage.Filter(apngImage.Bounds, deconvOptions);
-
-            // Save the processed image to a new PNG file.
-            apngImage.Save(dataDir + "output.png", new PngOptions());
+            apngImage.Save(outputPath, saveOptions);
         }
     }
 }

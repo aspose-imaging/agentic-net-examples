@@ -1,19 +1,38 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
-string inputPath = @"C:\Images\sample.psd";
-string outputPath = @"C:\Images\sample_edge.psd";
-
-using (Image image = Image.Load(inputPath))
+class Program
 {
-    // Most PSD files are raster based, so cast to RasterImage to access filtering methods
-    RasterImage raster = (RasterImage)image;
+    static void Main(string[] args)
+    {
+        // Input and output file paths
+        string inputPath = "input.psd";
+        string outputPath = "output_edge.psd";
 
-    // Apply an edge‑detection filter to the entire image area
-    raster.Filter(raster.Bounds, new EdgeDetectionFilterOptions());
+        // Load the PSD image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage for filtering
+            RasterImage raster = (RasterImage)image;
 
-    // Save the processed image to a new file
-    raster.Save(outputPath);
+            // Edge detection kernel (3x3)
+            double[,] kernel = new double[,]
+            {
+                { -1, -1, -1 },
+                { -1,  8, -1 },
+                { -1, -1, -1 }
+            };
+
+            // Apply convolution filter with the edge detection kernel
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+            // Prepare PSD save options (default settings)
+            PsdOptions saveOptions = new PsdOptions();
+
+            // Save the processed image as PSD
+            raster.Save(outputPath, saveOptions);
+        }
+    }
 }

@@ -1,30 +1,49 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.Filters;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source EMF image
-        string inputPath = @"C:\Images\source.emf";
+        string inputPath = @"C:\Temp\input.emf";
+        string tempPngPath = Path.Combine(Path.GetDirectoryName(inputPath), "temp.png");
+        string outputPath = Path.Combine(Path.GetDirectoryName(inputPath), "output_edge.png");
 
-        // Path where the processed image will be saved
-        string outputPath = @"C:\Images\edge_detected.emf";
-
-        // Load the EMF image using Aspose.Imaging's unified loader
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to EmfImage to access EMF‑specific members
             EmfImage emfImage = (EmfImage)image;
+            var rasterOptions = new VectorRasterizationOptions
+            {
+                BackgroundColor = Aspose.Imaging.Color.White,
+                PageWidth = emfImage.Width,
+                PageHeight = emfImage.Height
+            };
+            emfImage.Save(tempPngPath, new PngOptions { VectorRasterizationOptions = rasterOptions });
+        }
 
-            // Apply an edge detection filter to the whole image area
-            // EdgeDetectionFilterOptions uses default parameters; customize if needed
-            emfImage.Filter(emfImage.Bounds, new EdgeDetectionFilterOptions());
+        using (Image rasterImageContainer = Image.Load(tempPngPath))
+        {
+            RasterImage rasterImage = (RasterImage)rasterImageContainer;
 
-            // Save the processed image back to EMF format
-            emfImage.Save(outputPath);
+            double[,] kernel = new double[,]
+            {
+                { -1, 0, 1 },
+                { -2, 0, 2 },
+                { -1, 0, 1 }
+            };
+
+            rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
+
+            rasterImage.Save(outputPath, new PngOptions());
+        }
+
+        if (File.Exists(tempPngPath))
+        {
+            File.Delete(tempPngPath);
         }
     }
 }

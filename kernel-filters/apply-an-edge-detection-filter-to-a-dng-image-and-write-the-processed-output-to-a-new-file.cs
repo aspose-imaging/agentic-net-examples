@@ -1,29 +1,35 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
-class EdgeDetectionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the folder containing the source DNG image
-        string dir = @"c:\temp\";
+        // Input DNG file and output PNG file paths
+        string inputPath = "input.dng";
+        string outputPath = "output.png";
 
-        // Load the DNG image using the standard Image.Load method
-        using (Image image = Image.Load(dir + "input.dng"))
+        // Load the DNG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to a DngImage to access DNG‑specific functionality
-            DngImage dngImage = (DngImage)image;
+            // Cast to RasterImage to apply filters
+            RasterImage raster = (RasterImage)image;
 
-            // Apply an edge detection filter to the whole image.
-            // The Filter method takes a rectangle (the area to process) and a filter options object.
-            dngImage.Filter(dngImage.Bounds, new EdgeDetectionFilterOptions());
+            // Define an edge detection kernel (Laplacian)
+            double[,] kernel = new double[,]
+            {
+                { -1, -1, -1 },
+                { -1,  8, -1 },
+                { -1, -1, -1 }
+            };
 
-            // Save the processed image. Here we choose PNG as the output format,
-            // but any supported format can be used by providing the appropriate options.
-            dngImage.Save(dir + "output.png", new PngOptions());
+            // Apply the convolution filter with the edge detection kernel
+            raster.Filter(raster.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+            // Save the processed image as PNG
+            raster.Save(outputPath, new PngOptions());
         }
     }
 }

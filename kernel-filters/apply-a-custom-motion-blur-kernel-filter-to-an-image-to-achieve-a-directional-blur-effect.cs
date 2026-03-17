@@ -1,21 +1,29 @@
-// Load the source image
-string inputPath = @"C:\Images\input.jpg";
-string outputPath = @"C:\Images\output.jpg";
+using System;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+class Program
 {
-    // Cast to RasterImage to gain access to the Filter method
-    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+    static void Main(string[] args)
+    {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-    // Create a motion blur kernel (size = 9, angle = 45 degrees)
-    double[] motionKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(9, 45);
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage rasterImage = (RasterImage)image;
 
-    // Prepare convolution filter options with the custom kernel
-    var convolutionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(motionKernel);
+            int kernelSize = 15;
+            double angle = 45.0;
 
-    // Apply the filter to the whole image
-    rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
+            double[,] motionKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(kernelSize, angle);
 
-    // Save the processed image
-    rasterImage.Save(outputPath);
+            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(motionKernel);
+
+            rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+            var saveOptions = new PngOptions();
+            rasterImage.Save(outputPath, saveOptions);
+        }
+    }
 }

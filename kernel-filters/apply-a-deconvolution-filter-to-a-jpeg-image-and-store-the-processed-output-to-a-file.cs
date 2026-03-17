@@ -1,47 +1,30 @@
 using System;
-using System.Drawing;                     // For Rectangle
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
-class DeconvolutionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source JPEG image
-        string inputPath = @"C:\Images\source.jpg";
+        // Paths for input JPEG and output processed image
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
-        // Path where the processed image will be saved
-        string outputPath = @"C:\Images\deconvolved.png";
-
-        // Load the JPEG image using Aspose.Imaging's lifecycle method
+        // Load the JPEG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access the Filter method
-            var rasterImage = (RasterImage)image;
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Define a simple deconvolution kernel (e.g., sharpening kernel)
-            // The kernel can be any array of doubles; here we use a 3x3 example.
-            double[] kernel = new double[]
-            {
-                0, -1, 0,
-               -1, 5, -1,
-                0, -1, 0
-            };
+            // Apply a Gauss‑Wiener deconvolution filter (radius = 5, sigma = 4.0)
+            rasterImage.Filter(rasterImage.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
 
-            // Create Deconvolution filter options with the kernel
-            var deconvOptions = new DeconvolutionFilterOptions(kernel)
-            {
-                // Optional: adjust brightness (default 1.15) and SNR if needed
-                Brightness = 1.15,
-                Snr = 0.007,
-                Grayscale = false   // Process in RGB mode
-            };
+            // Configure JPEG save options (default settings)
+            JpegOptions jpegOptions = new JpegOptions();
 
-            // Apply the deconvolution filter to the entire image bounds
-            rasterImage.Filter(rasterImage.Bounds, deconvOptions);
-
-            // Save the processed image to the desired output file (PNG format in this case)
-            rasterImage.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions());
+            // Save the processed image to the specified output path
+            rasterImage.Save(outputPath, jpegOptions);
         }
     }
 }

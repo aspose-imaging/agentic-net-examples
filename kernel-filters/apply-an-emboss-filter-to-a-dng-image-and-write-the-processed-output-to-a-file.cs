@@ -1,29 +1,29 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Dng;
 
-class EmbossDngExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the folder containing the source DNG file.
-        string dataDir = @"c:\temp\";
+        // Define input DNG file and output PNG file paths
+        string inputPath = "input.dng";
+        string outputPath = "output.png";
 
-        // Load the DNG image.
-        using (Image image = Image.Load(dataDir + "input.dng"))
+        // Load the DNG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to a DngImage to access DNG‑specific members.
-            DngImage dngImage = (DngImage)image;
+            // Cast to RasterImage for filtering
+            RasterImage raster = (RasterImage)image;
 
-            // Apply an emboss filter to the entire image.
-            // The Bounds property represents the full rectangular area of the image.
-            dngImage.Filter(dngImage.Bounds, new EmbossFilterOptions());
+            // Apply Emboss filter using predefined kernel
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-            // Save the processed image. Here we choose PNG as the output format,
-            // but any supported format can be used by providing the appropriate options.
-            dngImage.Save(dataDir + "output_emboss.png", new PngOptions());
+            // Save the processed image as PNG
+            raster.Save(outputPath, new PngOptions());
         }
     }
 }

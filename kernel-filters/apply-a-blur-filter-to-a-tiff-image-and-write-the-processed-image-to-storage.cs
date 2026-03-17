@@ -1,31 +1,33 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Input and output file paths
-        string inputPath = @"C:\temp\sample.tif";
-        string outputPath = @"C:\temp\sample.GaussianBlur.tif";
+        string inputPath = "input.tif";
+        string outputPath = "output_blur.tif";
 
         // Load the TIFF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to TiffImage to access the Filter method
-            var tiffImage = (Aspose.Imaging.FileFormats.Tiff.TiffImage)image;
+            // Cast to TiffImage to access TIFF-specific methods
+            TiffImage tiffImage = (TiffImage)image;
 
             // Apply Gaussian blur filter to the entire image
-            // Radius = 5, Sigma = 4.0 (adjust as needed)
-            tiffImage.Filter(
-                tiffImage.Bounds,
-                new GaussianBlurFilterOptions(5, 4.0));
+            tiffImage.Filter(tiffImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the processed image back to TIFF format
-            tiffImage.Save(outputPath, new TiffOptions(tiffImage.FileFormat));
+            // Prepare TIFF save options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+            // Save the processed image
+            tiffImage.Save(outputPath, tiffOptions);
         }
     }
 }

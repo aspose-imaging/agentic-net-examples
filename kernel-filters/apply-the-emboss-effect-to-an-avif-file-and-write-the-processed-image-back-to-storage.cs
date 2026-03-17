@@ -1,24 +1,29 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Avif;          // AvifImage class
-using Aspose.Imaging.Filters;                 // EmbossFilter
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths to the source AVIF file and the destination file
+        // Input AVIF file path
         string inputPath = "input.avif";
-        string outputPath = "output.avif";
+        // Output JPEG file path (fallback since AVIF save options are unavailable)
+        string outputPath = "output.jpg";
 
-        // Load the AVIF image (lifecycle: load)
-        using (AvifImage avif = (AvifImage)Image.Load(inputPath))
+        // Load the AVIF image
+        using (Image image = Image.Load(inputPath))
         {
-            // Apply the Emboss effect to the whole image (filter operation)
-            avif.Filter(avif.Bounds, new EmbossFilter());
+            // Cast to RasterImage to apply filters
+            RasterImage raster = (RasterImage)image;
 
-            // Save the processed image back to storage (lifecycle: save)
-            avif.Save(outputPath);
+            // Apply emboss effect using a predefined convolution kernel
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+            // Save the processed image as JPEG
+            raster.Save(outputPath, new JpegOptions());
         }
     }
 }
