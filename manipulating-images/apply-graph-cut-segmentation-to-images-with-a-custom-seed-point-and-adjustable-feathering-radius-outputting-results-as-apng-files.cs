@@ -1,68 +1,76 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
-class GraphCutSegmentationExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Input image path
         string inputPath = "input.jpg";
+        // Output APNG path
+        string outputPath = "output.apng";
 
-        // Output APNG path (the result will be saved as an animated PNG)
-        string outputPath = "segmented_output.apng";
+        // Adjustable feathering radius
+        int featheringRadius = 5;
 
-        // Custom seed point (foreground) – adjust as needed
+        // Custom seed point for foreground (example coordinates)
         int seedX = 150;
-        int seedY = 200;
+        int seedY = 120;
 
-        // Load the source image (lifecycle rule)
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Prepare masking arguments with a foreground seed point.
+        // First array = background points (empty), second array = foreground points.
+        AutoMaskingArgs maskingArgs = new AutoMaskingArgs
         {
-            // Calculate an adjustable feathering radius based on image dimensions
-            int featheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1;
-
-            // Configure GraphCut masking options (feature rule)
-            GraphCutMaskingOptions options = new GraphCutMaskingOptions
+            ObjectsPoints = new Point[][]
             {
-                FeatheringRadius = featheringRadius,
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false, // we want a single foreground mask
-                BackgroundReplacementColor = Color.Transparent,
-                // Export options – the temporary file will later be saved as APNG
-                ExportOptions = new PngOptions
+                new Point[] { },                     // No background points
+                new Point[] { new Point(seedX, seedY) } // Foreground seed point
+            }
+        };
+
+        // Export options for intermediate PNG (used by the masking engine)
+        PngOptions pngExport = new PngOptions
+        {
+            ColorType = PngColorType.TruecolorWithAlpha,
+            Source = new StreamSource(new MemoryStream())
+        };
+
+        // Configure GraphCut masking options
+        GraphCutMaskingOptions maskingOptions = new GraphCutMaskingOptions
+        {
+            FeatheringRadius = featheringRadius,
+            Method = SegmentationMethod.GraphCut,
+            Decompose = false,
+            ExportOptions = pngExport,
+            BackgroundReplacementColor = Color.Transparent,
+            Args = maskingArgs
+        };
+
+        // Load the source image as RasterImage
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        {
+            // Perform graph cut segmentation
+            using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
+            {
+                // Retrieve the foreground (object) image
+                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath) // APNG file
-                },
-                // Provide the seed point as a foreground point.
-                // The first array is treated as background points (empty here),
-                // the second array as foreground points.
-                Args = new AutoMaskingArgs
-                {
-                    ObjectsPoints = new Point[][]
+                    // Save the result as an animated PNG (APNG)
+                    foreground.Save(outputPath, new ApngOptions
                     {
-                        new Point[0],                     // background points (none)
-                        new Point[] { new Point(seedX, seedY) } // foreground seed point
-                    }
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        DefaultFrameTime = 200, // milliseconds per frame
+                        NumPlays = 0            // 0 = infinite loop
+                    });
                 }
-            };
-
-            // Perform the segmentation (lifecycle rule)
-            MaskingResult[] results = new ImageMasking(image).Decompose(options);
-
-            // Retrieve the foreground mask (index 1 corresponds to the foreground object)
-            using (RasterImage resultImage = (RasterImage)results[1].GetImage())
-            {
-                // Save the result as an APNG (using the same export options)
-                resultImage.Save(outputPath, new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                });
             }
         }
     }
