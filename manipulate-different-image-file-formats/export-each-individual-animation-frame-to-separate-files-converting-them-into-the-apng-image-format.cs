@@ -1,24 +1,46 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 
-string sourceFile = "animation.webp";
-
-// Load the multi‑frame image (e.g., animated WebP, GIF, etc.)
-using (Image image = Image.Load(sourceFile))
+class Program
 {
-    int frameCount = image.PageCount;
-
-    // Iterate through each frame
-    for (int i = 0; i < frameCount; i++)
+    static void Main(string[] args)
     {
-        // Obtain the current frame as a RasterImage
-        using (RasterImage frame = (RasterImage)image.Frames[i])
-        {
-            // Define output file name for the individual frame
-            string outputFile = $"frame_{i}.png";
+        // Input animated image path (any supported multi-page format)
+        string inputPath = "input_animation.webp";
+        // Directory to store extracted frames as APNG files
+        string outputDir = "ExtractedFrames";
+        Directory.CreateDirectory(outputDir);
 
-            // Save the single frame as an APNG file (single‑frame animation)
-            frame.Save(outputFile, new ApngOptions());
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Check if the image supports multiple pages/frames
+            if (image is IMultipageImage multipage)
+            {
+                // Iterate through each frame
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    // Cast the page to RasterImage for saving
+                    using (RasterImage frame = (RasterImage)multipage.Pages[i])
+                    {
+                        string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.png");
+                        // Save the single frame as an APNG image
+                        frame.Save(outputPath, new ApngOptions());
+                    }
+                }
+            }
+            else
+            {
+                // Single-frame image case: save directly as APNG
+                using (RasterImage raster = (RasterImage)image)
+                {
+                    string outputPath = Path.Combine(outputDir, "frame_1.png");
+                    raster.Save(outputPath, new ApngOptions());
+                }
+            }
         }
     }
 }
