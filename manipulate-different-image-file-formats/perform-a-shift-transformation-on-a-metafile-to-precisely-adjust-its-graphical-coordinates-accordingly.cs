@@ -1,35 +1,29 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.FileFormats.Wmf;
 
-class MetafileShiftExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputFile = @"C:\Temp\input.emf";
-        string outputFile = @"C:\Temp\output_shifted.emf";
+        // Input WMF file path
+        string inputPath = "input.wmf";
+        // Output WMF file path
+        string outputPath = "output_shifted.wmf";
 
-        // Load the EMF metafile
-        using (EmfImage emfImage = (EmfImage)Image.Load(inputFile))
+        // Shift values (positive values shift right and down)
+        int shiftX = 20;
+        int shiftY = 30;
+
+        // Load the WMF image
+        using (WmfImage wmf = (WmfImage)Image.Load(inputPath))
         {
-            // Create a recorder graphics object from the loaded image
-            EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
+            // Resize the canvas to apply the shift.
+            // Negative X/Y moves the existing content right/down by the specified amounts.
+            wmf.ResizeCanvas(new Rectangle(-shiftX, -shiftY, wmf.Width + shiftX, wmf.Height + shiftY));
 
-            // Define the translation offsets (shift values)
-            float offsetX = 20f; // shift right by 20 units
-            float offsetY = 30f; // shift down by 30 units
-
-            // Apply the translation to the graphics' world transform
-            graphics.TranslateTransform(offsetX, offsetY);
-
-            // Finish recording and obtain the transformed metafile
-            using (EmfImage shiftedEmf = graphics.EndRecording())
-            {
-                // Save the shifted metafile to the output path
-                shiftedEmf.Save(outputFile);
-            }
+            // Save the shifted WMF image
+            wmf.Save(outputPath);
         }
     }
 }
