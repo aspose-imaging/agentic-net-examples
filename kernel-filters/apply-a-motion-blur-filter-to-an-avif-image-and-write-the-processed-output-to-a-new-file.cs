@@ -1,31 +1,33 @@
 using System;
-using System.Drawing; // For Rectangle
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Avif; // AvifImage class
-using Aspose.Imaging.ImageFilters.FilterOptions; // MotionWienerFilterOptions
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
-class MotionBlurAvifExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths to the source AVIF image and the destination file
+        // Input AVIF image path
         string inputPath = "input.avif";
-        string outputPath = "output.avif";
+        // Output JPEG image path (fallback since AVIF save options are not available)
+        string outputPath = "output.jpg";
 
-        // Load the AVIF image using Aspose.Imaging's Image.Load method
+        // Load the AVIF image (as a generic Image) and cast to RasterImage for processing
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to AvifImage to access raster operations
-            AvifImage avifImage = (AvifImage)image;
+            // Ensure the image is a raster image
+            using (RasterImage rasterImage = (RasterImage)image)
+            {
+                // Apply a motion Wiener filter (used here as a motion‑blur effect)
+                // Parameters: length = 10, smooth = 1.0, angle = 90.0 degrees
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
 
-            // Apply a motion‑blur (motion Wiener) filter to the whole image.
-            // Parameters: length (kernel size), sigma (smoothing), angle (degrees)
-            avifImage.Filter(
-                avifImage.Bounds,
-                new MotionWienerFilterOptions(length: 10, sigma: 1.0, angle: 90.0));
-
-            // Save the processed image to a new AVIF file
-            avifImage.Save(outputPath);
+                // Save the processed image as JPEG
+                JpegOptions jpegOptions = new JpegOptions();
+                rasterImage.Save(outputPath, jpegOptions);
+            }
         }
     }
 }

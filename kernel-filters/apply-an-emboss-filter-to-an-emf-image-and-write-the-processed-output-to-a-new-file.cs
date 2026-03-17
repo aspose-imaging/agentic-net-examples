@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
@@ -11,40 +11,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input EMF file and output PNG file paths
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
+        // Paths for input EMF, temporary raster PNG, and final output PNG
+        string inputEmfPath = "input.emf";
+        string tempPngPath = "temp.png";
+        string outputPngPath = "output.png";
 
-        // Load the EMF image
-        using (Image emfImage = Image.Load(inputPath))
+        // Step 1: Load the EMF image and rasterize it to a PNG file
+        using (Image emfImage = Image.Load(inputEmfPath))
         {
-            // Obtain default vector rasterization options for the EMF image
-            VectorRasterizationOptions vectorOptions = (VectorRasterizationOptions)emfImage.GetDefaultOptions(
-                new object[] { Aspose.Imaging.Color.White, emfImage.Width, emfImage.Height });
-
-            // Create a temporary PNG file to rasterize the EMF image
-            string tempPngPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
-
-            // Rasterize EMF to PNG using the vector options
-            emfImage.Save(tempPngPath, new PngOptions { VectorRasterizationOptions = vectorOptions });
-
-            // Load the rasterized PNG as a RasterImage
-            using (Image rasterImageContainer = Image.Load(tempPngPath))
+            // Configure rasterization options for EMF to PNG conversion
+            EmfOptions emfOptions = new EmfOptions
             {
-                RasterImage rasterImage = (RasterImage)rasterImageContainer;
+                VectorRasterizationOptions = new EmfRasterizationOptions
+                {
+                    PageSize = emfImage.Size,
+                    BackgroundColor = Aspose.Imaging.Color.White
+                }
+            };
 
-                // Apply emboss filter using a predefined convolution kernel
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            // Save the rasterized image as a temporary PNG
+            emfImage.Save(tempPngPath, emfOptions);
+        }
 
-                // Save the processed image to the final output file
-                rasterImage.Save(outputPath, new PngOptions());
-            }
+        // Step 2: Load the rasterized PNG, apply emboss filter, and save the result
+        using (Image rasterImage = Image.Load(tempPngPath))
+        {
+            RasterImage raster = (RasterImage)rasterImage;
 
-            // Clean up the temporary raster file
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
-            }
+            // Use the predefined emboss kernel (3x3) from ConvolutionFilter
+            double[,] embossKernel = ConvolutionFilter.Emboss3x3;
+
+            // Apply the emboss filter to the entire image
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(embossKernel));
+
+            // Save the processed image as PNG
+            raster.Save(outputPngPath, new PngOptions());
+        }
+
+        // Optional: clean up the temporary PNG file
+        if (File.Exists(tempPngPath))
+        {
+            File.Delete(tempPngPath);
         }
     }
 }

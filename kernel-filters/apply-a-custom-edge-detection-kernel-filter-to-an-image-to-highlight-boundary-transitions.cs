@@ -1,47 +1,35 @@
 using System;
-using System.Drawing;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class EdgeDetectionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source image
-        string inputPath = @"C:\temp\input.png";
-        // Path to save the processed image
-        string outputPath = @"C:\temp\output_edge.png";
+        // Define input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output_edge.png";
 
-        // Load the image using Aspose.Imaging
+        // Load the image as a RasterImage
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access the Filter method
-            RasterImage rasterImage = (RasterImage)image;
+            RasterImage raster = (RasterImage)image;
 
-            // Define a 3x3 edge detection (Laplacian) kernel
-            // Kernel layout (row‑major order):
-            // -1  -1  -1
-            // -1   8  -1
-            // -1  -1  -1
-            double[] edgeKernel = new double[]
+            // Custom edge detection kernel (Laplacian)
+            double[,] kernel = new double[,]
             {
-                -1, -1, -1,
-                -1,  8, -1,
-                -1, -1, -1
+                { -1, -1, -1 },
+                { -1,  8, -1 },
+                { -1, -1, -1 }
             };
 
-            // Factor is typically 1.0 for edge detection; bias can be 0
-            double factor = 1.0;
-            int bias = 0;
+            // Apply the convolution filter with the custom kernel
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-            // Create convolution filter options with the custom kernel
-            var convolutionOptions = new ConvolutionFilterOptions(edgeKernel, factor, bias);
-
-            // Apply the filter to the whole image bounds
-            rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
-
-            // Save the result (preserving original format or converting to PNG)
-            rasterImage.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions());
+            // Save the processed image as PNG
+            PngOptions options = new PngOptions();
+            raster.Save(outputPath, options);
         }
     }
 }

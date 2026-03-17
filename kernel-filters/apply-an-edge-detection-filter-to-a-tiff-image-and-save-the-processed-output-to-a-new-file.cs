@@ -1,19 +1,29 @@
+using System;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
-string dataDir = @"c:\temp\";
-
-// Load the source TIFF image
-using (Image image = Image.Load(dataDir + "source.tif"))
+class EdgeDetectionExample
 {
-    // Cast to TiffImage to access TIFF‑specific functionality
-    TiffImage tiffImage = (TiffImage)image;
+    static void Main()
+    {
+        // Define input and output file paths
+        string inputPath = @"C:\temp\sample.tif";
+        string outputPath = @"C:\temp\sample.EdgeDetection.png";
 
-    // Apply an edge detection filter to the whole image
-    tiffImage.Filter(tiffImage.Bounds, new EdgeDetectionFilterOptions());
+        // Load the TIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast the generic Image to a TiffImage to access TIFF‑specific methods
+            TiffImage tiffImage = (TiffImage)image;
 
-    // Save the processed image as PNG (or any desired format)
-    tiffImage.Save(dataDir + "edge_detected.png", new PngOptions());
+            // Apply a sharpen filter (commonly used for edge‑enhancement) to the whole image.
+            // The SharpenFilterOptions constructor takes kernel size and sigma.
+            tiffImage.Filter(tiffImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image to a new file (PNG format in this example)
+            tiffImage.Save(outputPath, new PngOptions());
+        }
+    }
 }

@@ -1,16 +1,35 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tga;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
-string inputPath = "input.tga";
-string outputPath = "output.tga";
-
-using (TgaImage tgaImage = new TgaImage(inputPath))
+class Program
 {
-    // Apply an edge detection filter to the whole image
-    tgaImage.Filter(tgaImage.Bounds, new EdgeDetectionFilterOptions());
+    static void Main(string[] args)
+    {
+        // Input and output file paths
+        string inputPath = args.Length > 0 ? args[0] : "input.tga";
+        string outputPath = args.Length > 1 ? args[1] : "output.tga";
 
-    // Save the processed image to a new file
-    tgaImage.Save(outputPath);
+        // Load the TGA image as a raster image
+        using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+        {
+            // Define a simple edge detection kernel (Laplacian)
+            double[,] edgeKernel = new double[,]
+            {
+                { -1, -1, -1 },
+                { -1,  8, -1 },
+                { -1, -1, -1 }
+            };
+
+            // Create convolution filter options with the custom kernel
+            var convolutionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel);
+
+            // Apply the edge detection filter to the entire image
+            rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
+
+            // Save the processed image as TGA
+            rasterImage.Save(outputPath, new TgaOptions());
+        }
+    }
 }

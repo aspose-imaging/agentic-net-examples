@@ -1,58 +1,34 @@
 using System;
-using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf; // EMZ is handled as EMF image format
 
-class Program
+class DeconvolutionExample
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input EMZ (compressed EMF) file path
-        string inputPath = "input.emz";
-        // Output raster image path after applying deconvolution filter
-        string outputPath = "output.png";
+        // Path to the source EMZ image
+        string inputPath = @"C:\Images\sample.emz";
 
-        // Load the EMZ image as a vector image
-        using (Image vectorImage = Image.Load(inputPath))
+        // Path for the processed output image
+        string outputPath = @"C:\Images\sample_deconvolved.png";
+
+        // Load the EMZ image
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare rasterization options for converting vector to raster
-            var rasterOptions = new EmfRasterizationOptions
-            {
-                PageSize = vectorImage.Size,
-                BackgroundColor = Color.White
-            };
+            // Cast to RasterImage to access the Filter method
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Rasterize the vector image into a memory stream as PNG
-            using (MemoryStream rasterStream = new MemoryStream())
-            {
-                var pngSaveOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                vectorImage.Save(rasterStream, pngSaveOptions);
-                rasterStream.Position = 0;
+            // Apply a Gauss-Wiener deconvolution filter to the entire image
+            // Parameters: radius = 5, sigma = 4.0 (adjust as needed)
+            rasterImage.Filter(
+                rasterImage.Bounds,
+                new GaussWienerFilterOptions(5, 4.0));
 
-                // Load the rasterized image as RasterImage
-                using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
-                {
-                    // Define a simple deconvolution kernel (sharpen-like)
-                    double[] kernel = new double[]
-                    {
-                        0.0, -1.0, 0.0,
-                        -1.0, 5.0, -1.0,
-                        0.0, -1.0, 0.0
-                    };
-
-                    // Apply the deconvolution filter to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, new DeconvolutionFilterOptions(kernel));
-
-                    // Save the processed image to the output file
-                    rasterImage.Save(outputPath, new PngOptions());
-                }
-            }
+            // Save the processed image as PNG
+            rasterImage.Save(outputPath, new PngOptions());
         }
     }
 }

@@ -4,7 +4,6 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -12,40 +11,35 @@ class Program
     {
         // Input WMF file path
         string inputPath = "input.wmf";
-        // Output raster image path (PNG)
-        string outputPath = "output.png";
+        // Output WMF file path
+        string outputPath = "output.wmf";
 
         // Load the WMF image
         using (Image wmfImage = Image.Load(inputPath))
         {
-            // Obtain vector rasterization options for converting WMF to raster
-            var vectorOptions = (VectorRasterizationOptions)wmfImage.GetDefaultOptions(
-                new object[] { Color.White, wmfImage.Width, wmfImage.Height });
-
-            // Prepare PNG options with the vector rasterization settings
-            var pngOptions = new PngOptions
+            // Prepare rasterization options for converting WMF to raster format
+            var rasterOptions = new WmfRasterizationOptions
             {
-                VectorRasterizationOptions = vectorOptions
+                PageSize = wmfImage.Size,
+                BackgroundColor = Color.White
             };
 
-            // Rasterize the WMF into a memory stream
+            // Rasterize the WMF image to a PNG stored in memory
             using (var memoryStream = new MemoryStream())
             {
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
                 wmfImage.Save(memoryStream, pngOptions);
                 memoryStream.Position = 0;
 
-                // Load the rasterized image
-                using (Image rasterImageContainer = Image.Load(memoryStream))
+                // Load the rasterized image as a RasterImage
+                using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
                 {
-                    var rasterImage = (RasterImage)rasterImageContainer;
+                    // Apply the emboss effect using a predefined convolution kernel
+                    rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                    // Apply Emboss effect using a predefined convolution kernel
-                    rasterImage.Filter(
-                        rasterImage.Bounds,
-                        new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-
-                    // Save the processed image to the output file
-                    rasterImage.Save(outputPath, new PngOptions());
+                    // Save the processed raster image back to WMF format
+                    var wmfSaveOptions = new WmfOptions { VectorRasterizationOptions = rasterOptions };
+                    rasterImage.Save(outputPath, wmfSaveOptions);
                 }
             }
         }
