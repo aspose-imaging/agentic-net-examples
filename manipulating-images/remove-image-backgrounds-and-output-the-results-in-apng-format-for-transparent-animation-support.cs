@@ -2,63 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
-// Input raster or vector image path
-string inputPath = "input_image.png";
-// Output APNG file path
-string outputPath = "output_image.apng";
-
-// Load the source image
-using (Image sourceImage = Image.Load(inputPath))
+class Program
 {
-    // If the loaded image is a vector image, remove its background
-    if (sourceImage is Aspose.Imaging.VectorImage vectorImg)
+    static void Main(string[] args)
     {
-        // Removes the background from the vector image
-        vectorImg.RemoveBackground();
-    }
+        // Input image path and output APNG path
+        string inputPath = "input.jpg";
+        string outputPath = "output.apng";
 
-    // Prepare APNG creation options
-    ApngOptions apngOptions = new ApngOptions
-    {
-        // Define the file where the APNG will be created
-        Source = new FileCreateSource(outputPath, false),
-        // Ensure the APNG supports alpha channel
-        ColorType = PngColorType.TruecolorWithAlpha,
-        // Set default frame duration (in milliseconds)
-        DefaultFrameTime = 500
-    };
-
-    // Create an empty APNG image with the same dimensions as the source
-    using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, sourceImage.Width, sourceImage.Height))
-    {
-        // Remove the automatically added default frame
-        apngImage.RemoveAllFrames();
-
-        // Add the processed source image as a single frame
-        // If the source is not a RasterImage, rasterize it via a temporary PNG stream
-        if (sourceImage is RasterImage rasterImg)
+        // Load the source image as RasterImage
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            apngImage.AddFrame(rasterImg);
-        }
-        else
-        {
-            // Rasterize the vector image to a raster image using PNG options
-            using (MemoryStream ms = new MemoryStream())
+            // Prepare export options for masking (in-memory source)
+            var exportOptions = new PngOptions
             {
-                // Save vector image to memory as PNG with alpha
-                sourceImage.Save(ms, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                ms.Position = 0;
-                using (RasterImage rasterized = (RasterImage)Image.Load(ms))
+                ColorType = PngColorType.TruecolorWithAlpha,
+                Source = new StreamSource(new MemoryStream())
+            };
+
+            // Configure auto masking options (GraphCut with default strokes)
+            var maskingOptions = new AutoMaskingGraphCutOptions
+            {
+                CalculateDefaultStrokes = true,
+                FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
+                Method = SegmentationMethod.GraphCut,
+                Decompose = false,
+                ExportOptions = exportOptions,
+                BackgroundReplacementColor = Color.Transparent
+            };
+
+            // Perform masking
+            var masking = new ImageMasking(sourceImage);
+            using (MaskingResult results = masking.Decompose(maskingOptions))
+            {
+                // Get the foreground (masked object) image
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    apngImage.AddFrame(rasterized);
+                    // Save the foreground as an animated PNG (APNG)
+                    var apngSaveOptions = new ApngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    };
+                    foreground.Save(outputPath, apngSaveOptions);
                 }
             }
         }
-
-        // Save the APNG to the specified file (the Save method uses the options' Source)
-        apngImage.Save();
     }
 }
