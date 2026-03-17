@@ -1,47 +1,88 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
 
-public class WebPProcessing
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
-        // Paths for input and output files
-        string inputPath = @"c:\temp\input.webp";
-        string outputWebPPath = @"c:\temp\output.webp";
-        string outputPngPath = @"c:\temp\output.png";
+        // Paths (adjust as needed)
+        string inputWebP = "input.webp";
+        string outputPng = "decoded.png";
+        string outputResizedWebP = "resized.webp";
+        string outputCroppedWebP = "cropped.webp";
+        string outputCreatedWebP = "created.webp";
 
-        // Load a WebP image from a file using the provided constructor
-        using (WebPImage webPImage = new WebPImage(inputPath))
+        // ------------------------------
+        // Decode: Load WebP and save as PNG
+        // ------------------------------
+        using (WebPImage webP = new WebPImage(inputWebP))
         {
-            // ----- Transformations -----
-            // Resize the image to 200x200 pixels
-            webPImage.Resize(200, 200);
+            webP.Save(outputPng, new PngOptions());
+        }
 
-            // Rotate the image 45 degrees, expand canvas, fill background with white
-            webPImage.Rotate(45f, true, Color.White);
+        // ------------------------------
+        // Transform: Resize WebP (2x larger) and save
+        // ------------------------------
+        using (WebPImage webPResize = new WebPImage(inputWebP))
+        {
+            int newWidth = webPResize.Width * 2;
+            int newHeight = webPResize.Height * 2;
+            webPResize.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-            // Increase brightness by 20 units
-            webPImage.AdjustBrightness(20);
-
-            // ----- Save as WebP (encoding) -----
-            // Create WebP save options (lossy compression with quality 80)
-            WebPOptions saveOptions = new WebPOptions
+            var resizeOptions = new WebPOptions
             {
                 Lossless = false,
                 Quality = 80f
             };
-            // Save the transformed image back to WebP using the provided Save method
-            webPImage.Save(outputWebPPath, saveOptions);
+            webPResize.Save(outputResizedWebP, resizeOptions);
+        }
 
-            // ----- Decode to PNG (saving) -----
-            // Save the active frame of the WebP image as PNG
-            PngOptions pngOptions = new PngOptions();
-            webPImage.Save(outputPngPath, pngOptions);
+        // ------------------------------
+        // Transform: Crop a central region and save
+        // ------------------------------
+        using (WebPImage webPCrop = new WebPImage(inputWebP))
+        {
+            if (!webPCrop.IsCached)
+                webPCrop.CacheData();
+
+            // Define a rectangle (e.g., central 50% area)
+            int cropWidth = webPCrop.Width / 2;
+            int cropHeight = webPCrop.Height / 2;
+            int x = (webPCrop.Width - cropWidth) / 2;
+            int y = (webPCrop.Height - cropHeight) / 2;
+            var rect = new Rectangle(x, y, cropWidth, cropHeight);
+
+            webPCrop.Crop(rect);
+
+            var cropOptions = new WebPOptions
+            {
+                Lossless = true,
+                Quality = 100f
+            };
+            webPCrop.Save(outputCroppedWebP, cropOptions);
+        }
+
+        // ------------------------------
+        // Encode: Create a new blank WebP, draw a red rectangle, and save
+        // ------------------------------
+        var createOptions = new WebPOptions
+        {
+            Lossless = true,
+            Quality = 100f
+        };
+        using (WebPImage newWebP = new WebPImage(200, 200, createOptions))
+        {
+            // Draw a solid red rectangle covering the whole canvas
+            Graphics graphics = new Graphics(newWebP);
+            SolidBrush brush = new SolidBrush(Color.Red);
+            graphics.FillRectangle(brush, newWebP.Bounds);
+
+            // Save the created WebP image
+            newWebP.Save(outputCreatedWebP);
         }
     }
 }
