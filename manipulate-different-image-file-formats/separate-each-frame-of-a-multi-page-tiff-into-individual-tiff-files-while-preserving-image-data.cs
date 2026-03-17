@@ -8,29 +8,32 @@ class TiffFrameExtractor
     static void Main()
     {
         // Path to the multi‑page TIFF file
-        string sourcePath = @"C:\Images\multiframe.tif";
+        string sourcePath = @"C:\Images\multipage.tif";
 
         // Directory where individual frames will be saved
         string outputDir = @"C:\Images\Frames";
         Directory.CreateDirectory(outputDir);
 
-        // Load the multi‑page TIFF using the provided Image.Load method
-        using (TiffImage multiPage = Image.Load(sourcePath) as TiffImage)
+        // Load the multi‑page TIFF using Aspose.Imaging's load rule
+        using (Image image = Image.Load(sourcePath))
         {
-            if (multiPage == null)
-                throw new InvalidOperationException("The file is not a valid TIFF image.");
+            // Cast the loaded image to TiffImage to access frames
+            TiffImage tiffImage = (TiffImage)image;
 
-            // Iterate through each frame in the TIFF
-            for (int i = 0; i < multiPage.Frames.Length; i++)
+            // Retrieve all frames from the TIFF
+            TiffFrame[] frames = tiffImage.Frames;
+
+            // Iterate through each frame and save it as a separate TIFF file
+            for (int i = 0; i < frames.Length; i++)
             {
                 // Create a new TiffImage that contains only the current frame
-                using (TiffImage singleFrame = new TiffImage(multiPage.Frames[i]))
+                using (TiffImage singleFrameImage = new TiffImage(frames[i]))
                 {
-                    // Build the output file name (e.g., page_1.tif, page_2.tif, ...)
-                    string outPath = Path.Combine(outputDir, $"page_{i + 1}.tif");
+                    // Build the output file name (e.g., frame_1.tif)
+                    string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.tif");
 
-                    // Save the single‑frame TIFF using the provided Save(string) method
-                    singleFrame.Save(outPath);
+                    // Save the single‑frame TIFF using Aspose.Imaging's save rule
+                    singleFrameImage.Save(outputPath);
                 }
             }
         }
