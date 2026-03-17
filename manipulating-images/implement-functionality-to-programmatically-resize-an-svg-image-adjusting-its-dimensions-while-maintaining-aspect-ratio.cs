@@ -3,45 +3,34 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
-namespace SvgResizeExample
+class SvgResizeExample
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Path to the source SVG file
+        string inputPath = @"C:\Images\source.svg";
+
+        // Path where the resized SVG will be saved
+        string outputPath = @"C:\Images\resized.svg";
+
+        // Desired dimensions (the aspect ratio will be preserved by the Resize method)
+        int newWidth = 300;
+        int newHeight = 300;
+
+        // Load the SVG image using the standard Image.Load method (lifecycle rule)
+        using (Image image = Image.Load(inputPath))
         {
-            // Example usage:
-            // Resize "input.svg" so that it fits within 800x600 while keeping aspect ratio,
-            // and save the result as "output.svg".
-            ResizeSvg("input.svg", "output.svg", 800, 600);
+            // Cast the generic Image to SvgImage to access SVG‑specific functionality
+            SvgImage svgImage = (SvgImage)image;
+
+            // Resize while preserving aspect ratio.
+            // ResizeType.LanczosResample provides high‑quality resampling; any ResizeType can be used.
+            svgImage.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+
+            // Save the resized SVG (lifecycle rule)
+            svgImage.Save(outputPath);
         }
 
-        /// <summary>
-        /// Loads an SVG image, resizes it to fit within the specified dimensions while preserving
-        /// the aspect ratio, and saves the resized image.
-        /// </summary>
-        /// <param name="inputPath">Path to the source SVG file.</param>
-        /// <param name="outputPath">Path where the resized SVG will be saved.</param>
-        /// <param name="maxWidth">Maximum width of the resized image.</param>
-        /// <param name="maxHeight">Maximum height of the resized image.</param>
-        static void ResizeSvg(string inputPath, string outputPath, int maxWidth, int maxHeight)
-        {
-            // Load the SVG image using the provided Image.Load method.
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast the loaded image to SvgImage to access SVG-specific functionality.
-                SvgImage svgImage = image as SvgImage;
-                if (svgImage == null)
-                {
-                    throw new InvalidOperationException("The loaded file is not a valid SVG image.");
-                }
-
-                // Resize the SVG. The Resize method automatically preserves the aspect ratio.
-                // ResizeType.Lanczos provides high-quality resampling.
-                svgImage.Resize(maxWidth, maxHeight, ResizeType.Lanczos);
-
-                // Save the resized SVG using the provided Save method.
-                svgImage.Save(outputPath);
-            }
-        }
+        Console.WriteLine("SVG image resized and saved to: " + outputPath);
     }
 }
