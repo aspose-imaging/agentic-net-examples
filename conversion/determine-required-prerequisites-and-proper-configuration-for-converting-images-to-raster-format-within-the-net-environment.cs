@@ -1,49 +1,32 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
-namespace AsposeImagingRasterConversion
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main()
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
+
+        using (Image vectorImage = Image.Load(inputPath))
         {
-            // Prerequisite 1: Add reference to Aspose.Imaging.dll (NuGet package Aspose.Imaging)
-            // Prerequisite 2: Ensure the target framework is .NET 6.0 or lower if you need RasterImage.ToBitmap,
-            //               because this method is not supported in .NET 7.0+.
-
-            // Input image path (any supported format)
-            string inputPath = @"C:\Temp\sample.jpg";
-
-            // Output raster image path (BMP format)
-            string outputPath = @"C:\Temp\sample_converted.bmp";
-
-            // Load the source image using the Aspose.Imaging lifecycle Load rule
-            using (Image sourceImage = Image.Load(inputPath))
+            var rasterOptions = new VectorRasterizationOptions
             {
-                // The loaded image is a RasterImage (or derived) that can be saved as a raster format.
-                // Create BMP save options to define raster-specific settings.
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    // Example configuration: 24 bits per pixel, no compression
-                    BitsPerPixel = 24,
-                    Compression = BitmapCompression.Rgb,
-                    // Set resolution if required
-                    ResolutionSettings = new ResolutionSetting(96, 96)
-                };
+                BackgroundColor = Color.White,
+                PageWidth = vectorImage.Width,
+                PageHeight = vectorImage.Height,
+                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = SmoothingMode.None
+            };
 
-                // Optional: If you need to work with the image as a System.Drawing.Bitmap,
-                // you can use ToBitmap (only on .NET versions < 7.0)
-                // System.Drawing.Bitmap gdibitmap = ((RasterImage)sourceImage).ToBitmap();
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-                // Save the image as a raster BMP using the Aspose.Imaging Save rule
-                sourceImage.Save(outputPath, bmpOptions);
-            }
-
-            // At this point the image has been converted to a raster BMP file.
-            Console.WriteLine("Conversion completed successfully.");
+            vectorImage.Save(outputPath, pngOptions);
         }
     }
 }
