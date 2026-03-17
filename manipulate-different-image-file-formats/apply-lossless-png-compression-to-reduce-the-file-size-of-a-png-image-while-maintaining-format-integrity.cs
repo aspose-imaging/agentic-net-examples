@@ -8,28 +8,23 @@ class Program
     static void Main(string[] args)
     {
         // Path to the source PNG image
-        string inputPath = "input.png";
+        string sourcePath = "input.png";
 
         // Path where the compressed PNG will be saved
-        string outputPath = "output_compressed.png";
+        string outputPath = "output.png";
 
-        // Load the existing PNG image
-        using (Image image = Image.Load(inputPath))
+        // Load the PNG image
+        using (Image image = Image.Load(sourcePath))
         {
             // Configure lossless PNG compression options
-            var options = new PngOptions
+            PngOptions options = new PngOptions
             {
-                // Maximum compression level (0-9)
-                CompressionLevel = 9,
-
-                // Adaptive filtering provides the best compression for lossless PNG
-                FilterType = PngFilterType.Adaptive,
-
-                // Enable progressive loading (optional, does not affect losslessness)
-                Progressive = true
+                CompressionLevel = 9,                 // Maximum compression (0-9)
+                FilterType = PngFilterType.Adaptive, // Adaptive filter for best results
+                Progressive = true                    // Enable progressive loading (optional)
             };
 
-            // Save the image with the specified compression options
+            // Save the image with the specified options
             image.Save(outputPath, options);
         }
     }
