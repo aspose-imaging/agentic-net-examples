@@ -1,31 +1,38 @@
 using System;
+using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.BigTiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input and output images
-        string inputPath = "input.png";
+        // Path to the source TIFF image
+        string sourcePath = "input.tif";
+
+        // Path where the resulting BIGTIFF will be saved
         string outputPath = "output.tif";
 
         // Load the source image
-        using (Image image = Image.Load(inputPath))
+        using (Image image = Image.Load(sourcePath))
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage raster = (RasterImage)image;
+            // Cast to TiffImage to access TIFF-specific functionality
+            TiffImage tiffImage = (TiffImage)image;
 
-            // Apply a Gaussian blur filter (radius: 5, sigma: 4.0) to the entire image
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            // Apply a Gaussian blur filter to the entire image
+            // Radius = 5, Sigma = 4.0 (adjust as needed)
+            tiffImage.Filter(tiffImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Configure BigTIFF saving options
-            var bigTiffOptions = new BigTiffOptions(TiffExpectedFormat.BigTiffDeflateRgb);
+            // Create a BigTiffImage from the filtered TIFF frames
+            BigTiffImage bigTiff = new BigTiffImage(tiffImage.Frames);
 
-            // Save the processed image as a BigTIFF file
-            raster.Save(outputPath, bigTiffOptions);
+            // Save the result as a BIGTIFF file
+            bigTiff.Save(outputPath);
+
+            // Dispose the BigTiffImage explicitly
+            bigTiff.Dispose();
         }
     }
 }
