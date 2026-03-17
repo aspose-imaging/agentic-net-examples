@@ -1,56 +1,61 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png; // For PngColorType if needed
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Sources;
 
-class SvgToApngConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input SVG file path
         string inputSvgPath = "input.svg";
-
-        // Desired dimensions for the resized image
-        int newWidth = 800;
-        int newHeight = 600;
-
-        // Output APNG file path
         string outputApngPath = "output.apng";
 
-        // Load the SVG image from file
-        using (SvgImage svgImage = new SvgImage(inputSvgPath))
+        int targetWidth = 400;
+        int targetHeight = 300;
+
+        using (Image svgImage = Image.Load(inputSvgPath))
         {
-            // Resize the SVG while preserving aspect ratio (choose a resize type)
-            svgImage.Resize(newWidth, newHeight, ResizeType.Lanczos);
+            svgImage.Resize(targetWidth, targetHeight);
 
-            // Prepare rasterization options for converting SVG to raster frames
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            using (MemoryStream pngStream = new MemoryStream())
             {
-                // Set the page size to match the resized dimensions
-                PageSize = new Size(newWidth, newHeight)
-            };
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = svgImage.Size
+                    }
+                };
+                svgImage.Save(pngStream, pngOptions);
+                pngStream.Position = 0;
 
-            // Configure APNG export options
-            ApngOptions apngOptions = new ApngOptions
-            {
-                // Set default frame duration (in milliseconds)
-                DefaultFrameTime = 500,
+                using (RasterImage raster = (RasterImage)Image.Load(pngStream))
+                {
+                    ApngOptions apngOptions = new ApngOptions
+                    {
+                        Source = new FileCreateSource(outputApngPath, false),
+                        DefaultFrameTime = 500,
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
 
-                // Use truecolor with alpha for full color support
-                ColorType = PngColorType.TruecolorWithAlpha,
+                    using (ApngImage apng = (ApngImage)Image.Create(apngOptions, raster.Width, raster.Height))
+                    {
+                        apng.RemoveAllFrames();
 
-                // Assign the rasterization options so the SVG is rasterized correctly
-                VectorRasterizationOptions = rasterOptions,
+                        int frameCount = 5;
+                        for (int i = 0; i < frameCount; i++)
+                        {
+                            apng.AddFrame(raster);
+                        }
 
-                // Optional: specify the source for the created APNG file
-                Source = new FileCreateSource(outputApngPath, false)
-            };
-
-            // Save the resized SVG as an animated PNG (APNG)
-            svgImage.Save(outputApngPath, apngOptions);
+                        apng.Save();
+                    }
+                }
+            }
         }
     }
 }
