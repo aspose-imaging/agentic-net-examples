@@ -1,50 +1,34 @@
 using System;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths to the source and destination JPEG files
         string inputPath = "input.jpg";
         string outputPath = "output.jpg";
 
-        // Load the JPEG image
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
         {
-            // Retrieve existing EXIF data
-            var exif = image.ExifData;
-            if (exif != null)
-            {
-                // Cast to JPEG-specific EXIF container
-                var jpegExif = exif as Aspose.Imaging.Exif.JpegExifData;
-                if (jpegExif != null)
-                {
-                    // Modify desired EXIF tags
-                    jpegExif.Artist = "John Doe";
-                    jpegExif.Copyright = "© 2023 My Company";
-                    jpegExif.ImageDescription = "Sample image with modified EXIF";
-                    jpegExif.Make = "MyCamera";
-                    jpegExif.Model = "ModelX";
-                }
-            }
-            else
-            {
-                // Create new EXIF data if none exists
-                var newExif = new Aspose.Imaging.Exif.JpegExifData
-                {
-                    Artist = "John Doe",
-                    Copyright = "© 2023 My Company",
-                    ImageDescription = "Sample image with new EXIF",
-                    Make = "MyCamera",
-                    Model = "ModelX"
-                };
-                image.ExifData = newExif;
-            }
+            var exifData = jpegImage.ExifData ?? new Aspose.Imaging.Exif.JpegExifData();
 
-            // Save the image with the updated EXIF metadata
-            image.Save(outputPath);
+            exifData.Make = "MyCamera";
+            exifData.Model = "ModelX";
+            exifData.Artist = "John Doe";
+            exifData.Copyright = "©2026";
+
+            jpegImage.ExifData = exifData;
+
+            JpegOptions saveOptions = new JpegOptions
+            {
+                Quality = 90,
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            jpegImage.Save(outputPath, saveOptions);
         }
     }
 }
