@@ -1,20 +1,38 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-string inputBmpPath = @"C:\temp\input.bmp";
-string outputPdfPath = @"C:\temp\output.pdf";
-
-using (Image image = Image.Load(inputBmpPath)) // Load the BMP image
+class Program
 {
-    // Create PDF export options
-    PdfOptions pdfOptions = new PdfOptions();
+    static void Main(string[] args)
+    {
+        // Paths for input BMP and output PDF
+        string inputPath = "input.bmp";
+        string outputPath = "output.pdf";
 
-    // Custom PDF configuration
-    pdfOptions.KeepMetadata = true;                     // Preserve original image metadata
-    pdfOptions.UseOriginalImageResolution = true;       // Use the BMP's DPI for the PDF
-    pdfOptions.PageSize = new SizeF(595f, 842f);        // Set page size to A4 (points at 72 DPI)
+        // Configure PDF export options
+        using (PdfOptions pdfOptions = new PdfOptions())
+        {
+            // Preserve original metadata
+            pdfOptions.KeepMetadata = true;
+            // Ensure full frame is used
+            pdfOptions.FullFrame = true;
+            // Set page size (e.g., A4 size in points)
+            pdfOptions.PageSize = new Size(595, 842);
+            // Define PDF compliance version
+            pdfOptions.PdfCoreOptions = new PdfCoreOptions
+            {
+                PdfCompliance = PdfComplianceVersion.PdfA1b
+            };
 
-    // Save the loaded image as a PDF using the configured options
-    image.Save(outputPdfPath, pdfOptions);
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save the image as PDF with the custom options
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+    }
 }
