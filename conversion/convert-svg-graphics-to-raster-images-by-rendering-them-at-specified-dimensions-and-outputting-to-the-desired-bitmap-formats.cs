@@ -1,69 +1,67 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-public static class SvgRasterConverter
+class Program
 {
-    /// <summary>
-    /// Converts an SVG file to a raster image with the specified dimensions and format.
-    /// </summary>
-    /// <param name="inputSvgPath">Full path to the source SVG file.</param>
-    /// <param name="outputPath">Full path for the rasterized output file (extension determines format).</param>
-    /// <param name="targetWidth">Desired width of the output image in pixels.</param>
-    /// <param name="targetHeight">Desired height of the output image in pixels.</param>
-    public static void ConvertSvgToRaster(string inputSvgPath, string outputPath, int targetWidth, int targetHeight)
+    static void Main(string[] args)
     {
-        // Load the SVG image using the unified Image.Load method.
+        if (args.Length < 4)
+        {
+            Console.WriteLine("Usage: <inputSvgPath> <outputImagePath> <width> <height>");
+            return;
+        }
+
+        string inputSvgPath = args[0];
+        string outputImagePath = args[1];
+        int targetWidth = int.Parse(args[2]);
+        int targetHeight = int.Parse(args[3]);
+
+        string ext = Path.GetExtension(outputImagePath).ToLowerInvariant();
+
         using (Image image = Image.Load(inputSvgPath))
         {
-            // Prepare rasterization options: set background, page size, and scaling.
-            var rasterizationOptions = new SvgRasterizationOptions
-            {
-                // Background color for the rasterized image (optional, default is white).
-                BackgroundColor = Color.White,
-                // Define the output size. If one dimension is zero, aspect ratio is preserved.
-                PageSize = new SizeF(targetWidth, targetHeight)
-            };
-
-            // Choose the appropriate raster image options based on the output file extension.
-            ImageOptionsBase saveOptions;
-            string ext = System.IO.Path.GetExtension(outputPath).ToLowerInvariant();
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+            rasterOptions.PageSize = new SizeF(targetWidth, targetHeight);
+            rasterOptions.BackgroundColor = Color.White;
 
             if (ext == ".png")
             {
-                var pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterizationOptions;
-                saveOptions = pngOptions;
+                var options = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                image.Save(outputImagePath, options);
             }
             else if (ext == ".jpg" || ext == ".jpeg")
             {
-                var jpegOptions = new JpegOptions();
-                jpegOptions.VectorRasterizationOptions = rasterizationOptions;
-                saveOptions = jpegOptions;
+                var options = new JpegOptions { VectorRasterizationOptions = rasterOptions };
+                image.Save(outputImagePath, options);
             }
             else if (ext == ".bmp")
             {
-                var bmpOptions = new BmpOptions();
-                bmpOptions.VectorRasterizationOptions = rasterizationOptions;
-                saveOptions = bmpOptions;
+                var options = new BmpOptions { VectorRasterizationOptions = rasterOptions };
+                image.Save(outputImagePath, options);
             }
             else if (ext == ".gif")
             {
-                var gifOptions = new GifOptions();
-                gifOptions.VectorRasterizationOptions = rasterizationOptions;
-                saveOptions = gifOptions;
+                var options = new GifOptions { VectorRasterizationOptions = rasterOptions };
+                image.Save(outputImagePath, options);
+            }
+            else if (ext == ".webp")
+            {
+                var options = new WebPOptions { VectorRasterizationOptions = rasterOptions };
+                image.Save(outputImagePath, options);
+            }
+            else if (ext == ".tif" || ext == ".tiff")
+            {
+                var options = new TiffOptions(TiffExpectedFormat.Default) { VectorRasterizationOptions = rasterOptions };
+                image.Save(outputImagePath, options);
             }
             else
             {
                 throw new NotSupportedException($"Unsupported output format: {ext}");
             }
-
-            // Save the rasterized image to the desired location.
-            image.Save(outputPath, saveOptions);
         }
     }
 }
-
-// Example usage:
-// SvgRasterConverter.ConvertSvgToRaster("C:\\Images\\example.svg", "C:\\Images\\output.png", 800, 600);
