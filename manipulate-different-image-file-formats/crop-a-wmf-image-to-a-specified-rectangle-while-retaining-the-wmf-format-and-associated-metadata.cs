@@ -1,31 +1,36 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input WMF file path
-        string inputPath = "input.wmf";
-        // Output WMF file path (cropped image)
-        string outputPath = "output.wmf";
+        // Path to the source WMF file
+        string inputPath = @"C:\Images\source.wmf";
 
-        // Define the rectangle to crop: (x, y, width, height)
-        int cropX = 50;
-        int cropY = 50;
-        int cropWidth = 200;
-        int cropHeight = 150;
+        // Path where the cropped WMF will be saved
+        string outputPath = @"C:\Images\cropped.wmf";
 
-        // Load the WMF image and cast to WmfImage
-        using (Aspose.Imaging.FileFormats.Wmf.WmfImage wmfImage = 
-               (Aspose.Imaging.FileFormats.Wmf.WmfImage)Image.Load(inputPath))
+        // Load the WMF image using Aspose.Imaging's unified loader
+        using (Image image = Image.Load(inputPath))
         {
-            // Perform cropping using the specified rectangle
-            wmfImage.Crop(new Rectangle(cropX, cropY, cropWidth, cropHeight));
+            // Cast to WmfImage to access WMF‑specific functionality
+            WmfImage wmfImage = (WmfImage)image;
+
+            // Define the rectangle to crop (example: central half of the image)
+            int x = wmfImage.Width / 4;
+            int y = wmfImage.Height / 4;
+            int width = wmfImage.Width / 2;
+            int height = wmfImage.Height / 2;
+            Rectangle cropArea = new Rectangle(x, y, width, height);
+
+            // Crop the image; metadata remains attached to the image object
+            wmfImage.Crop(cropArea);
 
             // Save the cropped image back to WMF format, preserving metadata
-            wmfImage.Save(outputPath);
+            wmfImage.Save(outputPath, new WmfOptions());
         }
     }
 }
