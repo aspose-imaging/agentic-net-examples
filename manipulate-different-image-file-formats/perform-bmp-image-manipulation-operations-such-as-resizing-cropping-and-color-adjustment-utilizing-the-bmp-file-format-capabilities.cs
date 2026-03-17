@@ -1,7 +1,7 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,26 +11,34 @@ class Program
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
 
-        // Load the BMP image
-        using (BmpImage image = (BmpImage)Image.Load(inputPath))
+        // Load the BMP image as a RasterImage
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Cache image data for better performance
+            // Cache data for better performance
             if (!image.IsCached)
+            {
                 image.CacheData();
+            }
 
-            // Adjust brightness (+30) and contrast (+0.2)
+            // Increase brightness by 30 (range -255 to 255)
             image.AdjustBrightness(30);
-            image.AdjustContrast(0.2f);
 
-            // Resize the image to 800x600 (default NearestNeighbourResample)
-            image.Resize(800, 600);
+            // Increase contrast by 20%
+            image.AdjustContrast(1.2f);
 
-            // Crop a rectangle starting at (50,50) with size 400x300
-            var cropRect = new Rectangle(50, 50, 400, 300);
+            // Apply gamma correction (value less than 1 darkens the image)
+            image.AdjustGamma(0.9f);
+
+            // Crop a rectangle starting at (50,50) with width=200 and height=150
+            var cropRect = new Rectangle(50, 50, 200, 150);
             image.Crop(cropRect);
 
+            // Resize the image to 400x300 using the default NearestNeighbourResample
+            image.Resize(400, 300);
+
             // Save the processed image as BMP
-            image.Save(outputPath, new BmpOptions());
+            BmpOptions bmpOptions = new BmpOptions();
+            image.Save(outputPath, bmpOptions);
         }
     }
 }
