@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -8,41 +9,45 @@ class BatchTiffExport
 {
     static void Main()
     {
-        // Folder that contains source images (any supported format)
-        string sourceFolder = @"C:\Images\Source";
-        // Folder where the exported TIFF files will be saved
-        string outputFolder = @"C:\Images\ExportedTiff";
+        // Define input image files (any supported format) and output directory
+        string[] inputFiles = new string[]
+        {
+            @"C:\Images\sample1.jpg",
+            @"C:\Images\sample2.png",
+            @"C:\Images\sample3.bmp"
+        };
+
+        string outputDirectory = @"C:\Images\ExportedTiff\";
 
         // Ensure the output directory exists
-        Directory.CreateDirectory(outputFolder);
+        Directory.CreateDirectory(outputDirectory);
 
-        // Get all files in the source folder (you can filter by extension if needed)
-        string[] files = Directory.GetFiles(sourceFolder);
-
-        foreach (string inputPath in files)
+        // Prepare common TIFF export options
+        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
         {
-            // Build the output file name with .tif extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".tif");
+            // Example settings – adjust as needed
+            BitsPerSample = new ushort[] { 8, 8, 8 },                     // 8 bits per color component
+            ByteOrder = TiffByteOrder.LittleEndian,                     // Little‑endian (Intel)
+            Compression = TiffCompressions.Lzw,                         // LZW compression
+            Photometric = TiffPhotometrics.Rgb,                         // RGB color model
+            PlanarConfiguration = TiffPlanarConfigs.Contiguous,        // Single plane storage
+            Predictor = TiffPredictor.Horizontal                        // Predictor for LZW
+        };
 
-            // Load the source image using the standard load rule
+        foreach (string inputPath in inputFiles)
+        {
+            // Derive output file name with .tif extension
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
+
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Create TIFF save options (default format)
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Example of applying common TIFF settings
-                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };                     // 8 bits per color component
-                tiffOptions.Compression = TiffCompressions.Lzw;                         // LZW compression
-                tiffOptions.Photometric = TiffPhotometrics.Rgb;                         // RGB color model
-                tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;        // Single plane
-                tiffOptions.ByteOrder = TiffByteOrder.LittleEndian;                    // Little‑endian (default)
-
-                // Save the image as TIFF using the standard save rule
+                // Save the image as TIFF using the predefined options
                 image.Save(outputPath, tiffOptions);
             }
         }
 
-        Console.WriteLine("Batch export completed.");
+        Console.WriteLine("Batch TIFF export completed.");
     }
 }
