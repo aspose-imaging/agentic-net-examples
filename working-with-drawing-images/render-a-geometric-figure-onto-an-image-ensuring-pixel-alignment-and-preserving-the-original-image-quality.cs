@@ -1,92 +1,57 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspise.Imaging; // placeholder for any missing namespaces
+using Aspose.Imaging.Sources;
 
-class RenderGeometricFigure
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define image dimensions and DPI
-        int width = 500;
-        int height = 500;
-        int dpi = 96;
+        const int width = 400;
+        const int height = 400;
+        const string outputPath = "output.png";
 
-        // Create a PNG image with the specified size
-        PngOptions pngOptions = new PngOptions
+        // Create a file stream for the output PNG
+        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
-            Source = new StreamSource(new System.IO.MemoryStream()), // placeholder stream source
-            HorizontalResolution = dpi,
-            VerticalResolution = dpi
-        };
+            // Set up PNG options with the stream source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new StreamSource(stream);
 
-        using (Image image = Image.Create(pngOptions, width, height))
-        {
-            // Initialize Graphics object for drawing
-            using (Graphics graphics = new Graphics(image))
+            // Create a new image with the specified dimensions
+            using (Image image = Image.Create(pngOptions, width, height))
             {
-                // Clear background with a light color
-                graphics.Clear(Color.Wheat);
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-                // Ensure pixel-perfect rendering by disabling anti-aliasing
-                graphics.SmoothingMode = SmoothingMode.None;
+                // Clear background to white
+                graphics.Clear(Color.White);
 
-                // Draw a black rectangle border (pixel-aligned)
-                Pen borderPen = new Pen(Color.Black, 1);
-                graphics.DrawRectangle(borderPen, 0, 0, width - 1, height - 1);
+                // Define a black pen for outlines
+                Pen blackPen = new Pen(Color.Black, 2);
 
-                // Fill a centered rectangle with a solid color
-                Brush fillBrush = new SolidBrush(Color.WhiteSmoke);
-                graphics.FillRectangle(fillBrush, new Rectangle(50, 50, width - 100, height - 100));
+                // Draw outer rectangle
+                graphics.DrawRectangle(blackPen, new Rectangle(50, 50, 300, 300));
 
-                // Draw a diagonal line using integer coordinates
-                Pen linePen = new Pen(Color.DarkGreen, 1);
-                graphics.DrawLine(linePen, 0, 0, width - 1, height - 1);
-                graphics.DrawLine(linePen, 0, height - 1, width - 1, 0);
+                // Draw inner ellipse
+                graphics.DrawEllipse(blackPen, new Rectangle(100, 100, 200, 200));
 
-                // Draw an ellipse inside the filled rectangle
-                Pen ellipsePen = new Pen(Color.Blue, 2);
-                graphics.DrawEllipse(ellipsePen, 100, 100, width - 200, height - 200);
-
-                // Load an external raster image (preserve original quality)
-                using (RasterImage overlay = (RasterImage)Image.Load("sample.bmp"))
+                // Fill a centered smaller ellipse with light blue
+                using (SolidBrush fillBrush = new SolidBrush(Color.LightBlue))
                 {
-                    // Draw the overlay image without scaling (pixel-aligned)
-                    graphics.DrawImageUnscaled(overlay, new Point(200, 200));
+                    fillBrush.Opacity = 100;
+                    graphics.FillEllipse(fillBrush, new Rectangle(150, 150, 100, 100));
                 }
 
-                // Optionally draw a string with a solid brush
-                Font font = new Font("Arial", 24, FontStyle.Regular);
-                Brush textBrush = new SolidBrush(Color.DarkRed);
-                graphics.DrawString("Aspose.Imaging Demo", font, textBrush, new PointF(120, height - 40));
-            }
+                // Draw cross lines through the center
+                graphics.DrawLine(blackPen, new Point(50, 200), new Point(350, 200));
+                graphics.DrawLine(blackPen, new Point(200, 50), new Point(200, 350));
 
-            // Save the resulting image preserving original quality
-            image.Save("output.png");
+                // Save changes to the image
+                image.Save();
+            }
         }
     }
 }
