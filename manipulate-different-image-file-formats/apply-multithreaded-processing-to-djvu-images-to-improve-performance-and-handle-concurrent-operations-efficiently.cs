@@ -1,43 +1,35 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input DjVu file path (first argument) or default.
-        string inputPath = args.Length > 0 ? args[0] : "sample.djvu";
+        string dir = @"c:\temp\";
 
-        // Output directory (second argument) or default.
-        string outputDir = args.Length > 1 ? args[1] : "output";
-
-        // Ensure the output directory exists.
-        if (!Directory.Exists(outputDir))
+        // Load the DjVu document from a file stream.
+        using (Stream stream = File.OpenRead(Path.Combine(dir, "sample.djvu")))
         {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        // Load the DjVu image.
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            int pageCount = djvuImage.PageCount;
-
-            // Process each page in parallel.
-            System.Threading.Tasks.Parallel.For(0, pageCount, i =>
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Access the page.
-                var page = djvuImage.Pages[i];
+                // Process each page concurrently.
+                Parallel.ForEach(djvuImage.Pages, pageObj =>
+                {
+                    // The Pages collection returns Image objects; cast to DjvuPage.
+                    DjvuPage page = (DjvuPage)pageObj;
 
-                // Build output file name.
-                string outPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                    // Build the output file name based on the page number.
+                    string fileName = $"sample.{page.PageNumber}.png";
+                    string outputPath = Path.Combine(dir, fileName);
 
-                // Save the page as PNG.
-                page.Save(outPath, new PngOptions());
-            });
+                    // Save the page as a PNG image.
+                    page.Save(outputPath, new PngOptions());
+                });
+            }
         }
     }
 }
