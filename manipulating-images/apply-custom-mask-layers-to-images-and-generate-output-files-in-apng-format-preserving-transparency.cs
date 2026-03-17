@@ -2,60 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input image and output APNG
-        string inputPath = "input.png";
-        string outputPath = "output.apng";
+        // Input and output file paths
+        string inputPath = args.Length > 0 ? args[0] : "input.png";
+        string outputPath = args.Length > 1 ? args[1] : "output.apng";
 
-        // Create a manual mask using geometric shapes
-        GraphicsPath manualMask = new GraphicsPath();
-        Figure figure = new Figure();
-        figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 200)));
-        figure.AddShape(new RectangleShape(new RectangleF(100, 100, 150, 150)));
-        manualMask.AddFigure(figure);
-
-        // Configure masking options with the manual mask
-        ManualMaskingArgs maskArgs = new ManualMaskingArgs { Mask = manualMask };
-        MaskingOptions maskingOptions = new MaskingOptions
+        // Load the source image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            Method = Masking.Options.SegmentationMethod.Manual,
-            Decompose = false,
-            Args = maskArgs,
-            BackgroundReplacementColor = Color.Transparent,
-            ExportOptions = new PngOptions
+            // Create and apply a custom mask using MagicWand
+            MagicWandTool
+                .Select(image, new MagicWandSettings(100, 100))
+                .Union(new MagicWandSettings(200, 200))
+                .Invert()
+                .Subtract(new MagicWandSettings(150, 150) { Threshold = 50 })
+                .Subtract(new RectangleMask(0, 0, 800, 150))
+                .Subtract(new RectangleMask(0, 380, 600, 220))
+                .Subtract(new RectangleMask(930, 520, 110, 40))
+                .Subtract(new RectangleMask(1370, 400, 120, 200))
+                .GetFeathered(new FeatheringSettings() { Size = 3 })
+                .Apply();
+
+            // Save the masked image as an animated PNG (APNG) preserving transparency
+            image.Save(outputPath, new ApngOptions
             {
                 ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            }
-        };
-
-        // Load the source image as a raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Perform masking
-            ImageMasking masking = new ImageMasking(sourceImage);
-            using (MaskingResult result = masking.Decompose(maskingOptions))
-            using (RasterImage foreground = (RasterImage)result[1].GetImage())
-            {
-                // Save the masked foreground as an APNG preserving transparency
-                ApngOptions apngOptions = new ApngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
-                };
-                foreground.Save(outputPath, apngOptions);
-            }
+                DefaultFrameTime = 200,
+                NumPlays = 0 // infinite loop
+            });
         }
     }
 }
