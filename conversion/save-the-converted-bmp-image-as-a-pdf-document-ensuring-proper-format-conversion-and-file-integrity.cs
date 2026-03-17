@@ -1,29 +1,30 @@
 using System;
-using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+class BmpToPdfConverter
 {
     static void Main()
     {
-        // Path to the source BMP file
-        string bmpPath = @"C:\temp\sample.bmp";
+        // Path to the source BMP image
+        string bmpFilePath = @"C:\Images\sample.bmp";
 
         // Desired output PDF file path
-        string pdfPath = @"C:\temp\sample.pdf";
+        string pdfFilePath = @"C:\Images\sample.pdf";
 
         // Load the BMP image using Aspose.Imaging's lifecycle rule
-        using (Image image = Image.Load(bmpPath))
+        using (Image image = Image.Load(bmpFilePath))
         {
-            // Create PDF export options (provided rule)
+            // Create PDF export options
             PdfOptions pdfOptions = new PdfOptions();
 
-            // Set the PDF page size to match the image dimensions (optional but ensures proper layout)
-            pdfOptions.PageSize = new SizeF(image.Width, image.Height);
+            // Optional: preserve original DPI resolution
+            pdfOptions.UseOriginalImageResolution = true;
 
-            // Save the image as a PDF document using the Save(string, ImageOptionsBase) rule
-            image.Save(pdfPath, pdfOptions);
+            // Save the loaded image as a PDF document using the Save(string, ImageOptionsBase) rule
+            image.Save(pdfFilePath, pdfOptions);
         }
+
+        Console.WriteLine("BMP image successfully converted to PDF.");
     }
 }

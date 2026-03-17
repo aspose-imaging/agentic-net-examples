@@ -1,33 +1,32 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class JpegToPdfConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source JPEG image
-        string jpegPath = @"C:\Images\source.jpg";
+        // Input JPEG file path (first argument or default)
+        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
+        // Output PDF file path (second argument or default)
+        string outputPath = args.Length > 1 ? args[1] : "output.pdf";
 
-        // Desired output PDF file path
-        string pdfPath = @"C:\Images\output.pdf";
-
-        // Load the JPEG image using the provided load rule
-        using (Image jpegImage = Image.Load(jpegPath))
+        // Load the JPEG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Retrieve the original image dimensions
-            int imgWidth = jpegImage.Width;
-            int imgHeight = jpegImage.Height;
-
-            // Create PDF options and set the page size to match the image dimensions
-            PdfOptions pdfOptions = new PdfOptions
+            // Prepare PDF options with page size matching the image dimensions
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                // Ensure the PDF page exactly fits the image to preserve quality
-                PageSize = new SizeF(imgWidth, imgHeight)
-            };
+                // Set page size to the image size (width, height)
+                pdfOptions.PageSize = new Size(image.Width, image.Height);
+                // Preserve original image DPI resolution
+                pdfOptions.UseOriginalImageResolution = true;
 
-            // Save the image as a PDF using the provided save rule
-            jpegImage.Save(pdfPath, pdfOptions);
+                // Save the image as a PDF document
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

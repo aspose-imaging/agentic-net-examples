@@ -1,40 +1,25 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf; // Namespace for PDF options (if needed)
 
-class BmpToPdf
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source BMP image that contains an alpha channel
+        // Define input BMP file (with alpha channel) and output PDF file paths
         string inputPath = "input.bmp";
-
-        // Desired path for the resulting PDF document
         string outputPath = "output.pdf";
 
-        // Load the BMP image using Aspose.Imaging's generic Image.Load method
+        // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF saving options.
-            // PdfOptions uses VectorRasterizationOptions to define how the raster image
-            // is placed on the PDF page. Setting the background to Transparent
-            // preserves the original alpha channel.
-            var pdfOptions = new PdfOptions
+            // Create PDF options
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                VectorRasterizationOptions = new PdfVectorRasterizationOptions
-                {
-                    // Use the original image dimensions for the PDF page size
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-
-                    // Preserve transparency by using a transparent background
-                    BackgroundColor = Color.Transparent
-                }
-            };
-
-            // Save the loaded image as a PDF document while keeping transparency
-            image.Save(outputPath, pdfOptions);
+                // Save the image as PDF while preserving transparency
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

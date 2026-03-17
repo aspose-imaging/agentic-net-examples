@@ -17,33 +17,32 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 ## Required Namespaces
 
-- `using Aspose.Imaging;` (158/162 files) ← category-specific
-- `using System;` (155/162 files)
-- `using Aspose.Imaging.ImageOptions;` (153/162 files) ← category-specific
-- `using System.IO;` (58/162 files)
-- `using Aspose.Imaging.FileFormats.Svg;` (37/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Webp;` (18/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (16/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (13/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (10/162 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (9/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (7/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif;` (7/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (5/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (5/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg;` (4/162 files) ← category-specific
-- `using System.Drawing;` (4/162 files)
-- `using System.Collections.Generic;` (4/162 files)
-- `using Aspose.Imaging.FileFormats.Apng;` (3/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cmx;` (3/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cdr;` (2/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Psd;` (2/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Eps;` (2/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (2/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Dicom;` (1/162 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.OpenDocument;` (1/162 files) ← category-specific
-- `using System.Reflection;` (1/162 files)
-- `using Aspose.Imaging.FileFormats.BigTiff;` (1/162 files) ← category-specific
+- `using System;` (156/161 files)
+- `using Aspose.Imaging;` (156/161 files) ← category-specific
+- `using Aspose.Imaging.ImageOptions;` (153/161 files) ← category-specific
+- `using System.IO;` (62/161 files)
+- `using Aspose.Imaging.FileFormats.Svg;` (36/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Webp;` (18/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (17/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Pdf;` (14/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (9/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (8/161 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (7/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif;` (7/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (5/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (5/161 files) ← category-specific
+- `using System.Collections.Generic;` (5/161 files)
+- `using Aspose.Imaging.FileFormats.Jpeg;` (4/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Apng;` (3/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cmx;` (3/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cdr;` (2/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Psd;` (2/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Eps;` (2/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (2/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Dicom;` (1/161 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.OpenDocument;` (1/161 files) ← category-specific
+- `using System.Reflection;` (1/161 files)
+- `using Aspose.Imaging.FileFormats.BigTiff;` (1/161 files) ← category-specific
 
 ## Files in this folder
 
@@ -53,7 +52,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [convert-an-image-to-a-specified-output-format-programmatically-using-the-net-imaging-library.cs](./convert-an-image-to-a-specified-output-format-programmatically-using-the-net-imaging-library.cs) |  | 13326 convert an image to a specified output format programmatically using the n... |
 | [determine-which-image-formats-can-serve-as-source-and-destination-types-for-conversion-within-the-net-imaging-library.cs](./determine-which-image-formats-can-serve-as-source-and-destination-types-for-conversion-within-the-net-imaging-library.cs) |  | 13327 determine which image formats can serve as source and destination types fo... |
 | [examine-the-net-imaging-library-s-supported-image-conversion-formats-and-configuration-options-for-developers.cs](./examine-the-net-imaging-library-s-supported-image-conversion-formats-and-configuration-options-for-developers.cs) | `BmpOptions`, `JpegOptions`, `PdfOptions` | 13328 examine the net imaging library s supported image conversion formats and c... |
-| [transform-a-source-image-into-a-target-format-programmatically-via-the-net-imaging-api.cs](./transform-a-source-image-into-a-target-format-programmatically-via-the-net-imaging-api.cs) | `BmpOptions`, `GifOptions`, `IcoOptions` | 13329 transform a source image into a target format programmatically via the net... |
+| [transform-a-source-image-into-a-target-format-programmatically-via-the-net-imaging-api.cs](./transform-a-source-image-into-a-target-format-programmatically-via-the-net-imaging-api.cs) | `ApngOptions`, `BmpOptions`, `GifOptions` | Transform a source image into a target format programmatically via the .NET imag... |
 | [convert-an-apng-file-to-a-png-image-using-the-net-imaging-library-while-preserving-image-quality.cs](./convert-an-apng-file-to-a-png-image-using-the-net-imaging-library-while-preserving-image-quality.cs) | `PngOptions` | 13330 convert an apng file to a png image using the net imaging library while pr... |
 | [extract-the-initial-frame-from-an-apng-image-and-output-it-as-a-png-file-using-net-apis.cs](./extract-the-initial-frame-from-an-apng-image-and-output-it-as-a-png-file-using-net-apis.cs) | `ApngFrame`, `ApngImage`, `PngOptions` | 13331 extract the initial frame from an apng image and output it as a png file u... |
 | [transform-animated-apng-files-into-single-frame-png-images-within-net-applications-preserving-color-fidelity-and-metadata.cs](./transform-animated-apng-files-into-single-frame-png-images-within-net-applications-preserving-color-fidelity-and-metadata.cs) | `PngOptions`, `RasterImage` | 13332 transform animated apng files into single frame png images within net appl... |
@@ -62,7 +61,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [transform-a-cdr-vector-file-into-a-jpg-raster-image-using-the-net-imaging-api.cs](./transform-a-cdr-vector-file-into-a-jpg-raster-image-using-the-net-imaging-api.cs) | `CdrRasterizationOptions`, `JpegOptions` | 13335 transform a cdr vector file into a jpg raster image using the net imaging ... |
 | [transform-a-cdr-file-into-a-png-image-using-the-net-imaging-library-while-preserving-visual-fidelity.cs](./transform-a-cdr-file-into-a-png-image-using-the-net-imaging-library-while-preserving-visual-fidelity.cs) | `CdrImage`, `CdrRasterizationOptions`, `PngOptions` | 13336 transform a cdr file into a png image using the net imaging library while ... |
 | [transform-a-cdr-file-into-a-pdf-document-using-the-net-imaging-library-while-preserving-vector-quality-and-metadata.cs](./transform-a-cdr-file-into-a-pdf-document-using-the-net-imaging-library-while-preserving-vector-quality-and-metadata.cs) | `CdrRasterizationOptions`, `PdfOptions` | 13337 transform a cdr file into a pdf document using the net imaging library whi... |
-| [transform-a-cdr-file-into-a-psd-image-programmatically-using-the-net-imaging-library.cs](./transform-a-cdr-file-into-a-psd-image-programmatically-using-the-net-imaging-library.cs) | `MultiPageOptions`, `PsdOptions`, `VectorRasterizationOptions` | 13338 transform a cdr file into a psd image programmatically using the net imagi... |
+| [transform-a-cdr-file-into-a-psd-image-programmatically-using-the-net-imaging-library.cs](./transform-a-cdr-file-into-a-psd-image-programmatically-using-the-net-imaging-library.cs) | `PsdOptions`, `VectorRasterizationOptions` | Transform a CDR file into a PSD image programmatically using the .NET imaging li... |
 | [convert-a-cmx-image-to-a-specified-output-format-using-the-net-imaging-library.cs](./convert-a-cmx-image-to-a-specified-output-format-using-the-net-imaging-library.cs) | `CmxImage`, `PngOptions` | Convert a CMX image to a specified output format using the .NET imaging library. |
 | [transform-a-cmx-file-into-a-jpg-image-programmatically-within-a-net-application-preserving-visual-fidelity.cs](./transform-a-cmx-file-into-a-jpg-image-programmatically-within-a-net-application-preserving-visual-fidelity.cs) | `JpegOptions`, `VectorRasterizationOptions` | 13340 transform a cmx file into a jpg image programmatically within a net applic... |
 | [transform-a-cmx-file-into-a-pdf-document-utilizing-the-net-imaging-library-s-conversion-capabilities.cs](./transform-a-cmx-file-into-a-pdf-document-utilizing-the-net-imaging-library-s-conversion-capabilities.cs) | `CmxRasterizationOptions`, `PdfOptions` | 13341 transform a cmx file into a pdf document utilizing the net imaging library... |
@@ -70,7 +69,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [convert-a-dicom-image-to-a-desired-raster-format-using-the-net-imaging-library.cs](./convert-a-dicom-image-to-a-desired-raster-format-using-the-net-imaging-library.cs) | `PngOptions` | 13343 convert a dicom image to a desired raster format using the net imaging lib... |
 | [transform-a-dicom-file-into-a-png-image-utilizing-the-net-imaging-api-programmatically.cs](./transform-a-dicom-file-into-a-png-image-utilizing-the-net-imaging-api-programmatically.cs) | `DicomImage`, `PngOptions` | 13344 transform a dicom file into a png image utilizing the net imaging api prog... |
 | [convert-an-eps-vector-image-to-the-target-raster-format-using-the-net-imaging-api.cs](./convert-an-eps-vector-image-to-the-target-raster-format-using-the-net-imaging-api.cs) | `EpsImage`, `EpsRasterizationOptions`, `PngOptions` | 13345 convert an eps vector image to the target raster format using the net imag... |
-| [convert-an-eps-file-to-a-pdf-document-using-the-net-imaging-library-with-high-fidelity.cs](./convert-an-eps-file-to-a-pdf-document-using-the-net-imaging-library-with-high-fidelity.cs) | `EpsImage`, `PdfCoreOptions`, `PdfOptions` | 13346 convert an eps file to a pdf document using the net imaging library with h... |
+| [convert-an-eps-file-to-a-pdf-document-using-the-net-imaging-library-with-high-fidelity.cs](./convert-an-eps-file-to-a-pdf-document-using-the-net-imaging-library-with-high-fidelity.cs) | `PdfCoreOptions`, `PdfOptions` | Convert an EPS file to a PDF document using the .NET imaging library with high f... |
 | [transform-an-eps-file-into-a-psd-image-within-a-net-application-preserving-layer-and-color-data.cs](./transform-an-eps-file-into-a-psd-image-within-a-net-application-preserving-layer-and-color-data.cs) | `EpsImage`, `PsdOptions`, `PsdVectorizationOptions` | 13347 transform an eps file into a psd image within a net application preserving... |
 | [transform-wmf-or-emf-files-into-a-specified-raster-image-format-using-the-net-imaging-library.cs](./transform-wmf-or-emf-files-into-a-specified-raster-image-format-using-the-net-imaging-library.cs) | `BmpOptions`, `GifOptions`, `JpegOptions` | 13348 transform wmf or emf files into a specified raster image format using the ... |
 | [transform-an-open-document-graphic-into-a-specified-image-format-using-the-net-imaging-api.cs](./transform-an-open-document-graphic-into-a-specified-image-format-using-the-net-imaging-api.cs) | `OdgRasterizationOptions`, `PdfOptions`, `PngOptions` | 13349 transform an open document graphic into a specified image format using the... |
@@ -87,7 +86,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [convert-a-webp-image-to-a-gif-image-programmatically-using-the-net-imaging-library.cs](./convert-a-webp-image-to-a-gif-image-programmatically-using-the-net-imaging-library.cs) | `GifOptions` | 13360 convert a webp image to a gif image programmatically using the net imaging... |
 | [convert-an-apng-raster-image-into-a-pdf-document-while-maintaining-original-image-fidelity.cs](./convert-an-apng-raster-image-into-a-pdf-document-while-maintaining-original-image-fidelity.cs) | `PdfOptions` | 13918 convert an apng raster image into a pdf document while maintaining origina... |
 | [transform-bmp-image-files-into-pdf-documents-preserving-image-fidelity-and-embedding-metadata-appropriately.cs](./transform-bmp-image-files-into-pdf-documents-preserving-image-fidelity-and-embedding-metadata-appropriately.cs) | `PdfOptions` | 13919 transform bmp image files into pdf documents preserving image fidelity and... |
-| [transform-a-jpeg-image-into-a-pdf-document-maintaining-original-image-quality-and-appropriate-page-sizing.cs](./transform-a-jpeg-image-into-a-pdf-document-maintaining-original-image-quality-and-appropriate-page-sizing.cs) | `PdfOptions` | 13920 transform a jpeg image into a pdf document maintaining original image qual... |
+| [transform-a-jpeg-image-into-a-pdf-document-maintaining-original-image-quality-and-appropriate-page-sizing.cs](./transform-a-jpeg-image-into-a-pdf-document-maintaining-original-image-quality-and-appropriate-page-sizing.cs) | `PdfOptions` | Transform a JPEG image into a PDF document, maintaining original image quality a... |
 | [transform-a-png-image-into-a-pdf-document-while-maintaining-image-fidelity-and-embedding-appropriate-metadata.cs](./transform-a-png-image-into-a-pdf-document-while-maintaining-image-fidelity-and-embedding-appropriate-metadata.cs) | `PdfOptions` | 13921 transform a png image into a pdf document while maintaining image fidelity... |
 | [transform-a-tiff-image-into-a-pdf-document-ensuring-vector-fidelity-and-appropriate-page-sizing.cs](./transform-a-tiff-image-into-a-pdf-document-ensuring-vector-fidelity-and-appropriate-page-sizing.cs) | `PdfOptions` | 13922 transform a tiff image into a pdf document ensuring vector fidelity and ap... |
 | [transform-a-gif-image-into-a-pdf-document-maintaining-visual-fidelity-and-appropriate-page-layout.cs](./transform-a-gif-image-into-a-pdf-document-maintaining-visual-fidelity-and-appropriate-page-layout.cs) | `PdfOptions` | 13923 transform a gif image into a pdf document maintaining visual fidelity and ... |
@@ -106,8 +105,8 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [transform-a-webp-image-file-into-an-animated-or-static-gif-while-preserving-its-visual-fidelity.cs](./transform-a-webp-image-file-into-an-animated-or-static-gif-while-preserving-its-visual-fidelity.cs) | `GifOptions` | 13940 transform a webp image file into an animated or static gif while preservin... |
 | [transform-a-bmp-raster-image-into-a-pdf-document-while-preserving-image-fidelity-and-metadata.cs](./transform-a-bmp-raster-image-into-a-pdf-document-while-preserving-image-fidelity-and-metadata.cs) | `PdfOptions` | 13941 transform a bmp raster image into a pdf document while preserving image fi... |
 | [transform-a-png-raster-image-into-a-pdf-document-while-maintaining-image-fidelity-and-resolution.cs](./transform-a-png-raster-image-into-a-pdf-document-while-maintaining-image-fidelity-and-resolution.cs) | `PdfOptions` | 13942 transform a png raster image into a pdf document while maintaining image f... |
-| [transform-a-tiff-raster-image-into-a-pdf-document-while-preserving-original-image-fidelity.cs](./transform-a-tiff-raster-image-into-a-pdf-document-while-preserving-original-image-fidelity.cs) | `PdfOptions`, `TiffImage` | 13943 transform a tiff raster image into a pdf document while preserving origina... |
-| [determine-required-prerequisites-and-proper-configuration-for-converting-images-to-raster-format-within-the-net-environment.cs](./determine-required-prerequisites-and-proper-configuration-for-converting-images-to-raster-format-within-the-net-environment.cs) | `BmpOptions`, `RasterImage` | 13944 determine required prerequisites and proper configuration for converting i... |
+| [transform-a-tiff-raster-image-into-a-pdf-document-while-preserving-original-image-fidelity.cs](./transform-a-tiff-raster-image-into-a-pdf-document-while-preserving-original-image-fidelity.cs) | `PdfOptions` | Transform a TIFF raster image into a PDF document while preserving original imag... |
+| [determine-required-prerequisites-and-proper-configuration-for-converting-images-to-raster-format-within-the-net-environment.cs](./determine-required-prerequisites-and-proper-configuration-for-converting-images-to-raster-format-within-the-net-environment.cs) | `PngOptions`, `VectorRasterizationOptions` | Determine required prerequisites and proper configuration for converting images ... |
 | [provide-a-comprehensive-list-of-raster-image-conversion-input-formats-supported-by-the-api-including-all-file-types.cs](./provide-a-comprehensive-list-of-raster-image-conversion-input-formats-supported-by-the-api-including-all-file-types.cs) |  | 13945 provide a comprehensive list of raster image conversion input formats supp... |
 | [transform-a-jpeg-raster-image-into-a-pdf-document-retaining-image-fidelity-and-embedding.cs](./transform-a-jpeg-raster-image-into-a-pdf-document-retaining-image-fidelity-and-embedding.cs) | `PdfOptions` | 13946 transform a jpeg raster image into a pdf document retaining image fidelity... |
 | [write-the-processed-image-data-to-a-pdf-file-preserving-image-fidelity-and-format-compliance.cs](./write-the-processed-image-data-to-a-pdf-file-preserving-image-fidelity-and-format-compliance.cs) | `PdfCoreOptions`, `PdfOptions` | 13947 write the processed image data to a pdf file preserving image fidelity and... |
@@ -115,18 +114,18 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [outline-the-steps-required-to-convert-raster-images-between-supported-formats-while-maintaining-image-fidelity.cs](./outline-the-steps-required-to-convert-raster-images-between-supported-formats-while-maintaining-image-fidelity.cs) | `BmpOptions`, `GifOptions`, `JpegOptions` | 13949 outline the steps required to convert raster images between supported form... |
 | [convert-a-bmp-image-file-into-a-pdf-document-maintaining-image-fidelity-and-appropriate-page-dimensions.cs](./convert-a-bmp-image-file-into-a-pdf-document-maintaining-image-fidelity-and-appropriate-page-dimensions.cs) | `BmpImage` | 13950 convert a bmp image file into a pdf document maintaining image fidelity an... |
 | [transform-a-24-bit-bmp-image-into-a-pdf-document-while-maintaining-full-color-fidelity.cs](./transform-a-24-bit-bmp-image-into-a-pdf-document-while-maintaining-full-color-fidelity.cs) | `PdfOptions` | 13951 transform a 24 bit bmp image into a pdf document while maintaining full co... |
-| [transform-a-bmp-image-containing-an-alpha-channel-into-a-pdf-document-while-maintaining-transparency.cs](./transform-a-bmp-image-containing-an-alpha-channel-into-a-pdf-document-while-maintaining-transparency.cs) | `PdfOptions`, `PdfVectorRasterizationOptions` | 13952 transform a bmp image containing an alpha channel into a pdf document whil... |
+| [transform-a-bmp-image-containing-an-alpha-channel-into-a-pdf-document-while-maintaining-transparency.cs](./transform-a-bmp-image-containing-an-alpha-channel-into-a-pdf-document-while-maintaining-transparency.cs) | `PdfOptions` | Transform a BMP image containing an alpha channel into a PDF document while main... |
 | [determine-the-required-prerequisites-and-environment-settings-for-converting-bmp-images-to-pdf-format.cs](./determine-the-required-prerequisites-and-environment-settings-for-converting-bmp-images-to-pdf-format.cs) | `PdfOptions` | 13953 determine the required prerequisites and environment settings for converti... |
 | [enumerate-all-bmp-input-parameters-and-options-supported-for-image-conversion-processes-within-the-library.cs](./enumerate-all-bmp-input-parameters-and-options-supported-for-image-conversion-processes-within-the-library.cs) | `BmpOptions` | 13954 enumerate all bmp input parameters and options supported for image convers... |
-| [transform-a-bmp-image-into-a-pdf-document-applying-specified-custom-pdf-configuration-options.cs](./transform-a-bmp-image-into-a-pdf-document-applying-specified-custom-pdf-configuration-options.cs) | `PdfOptions` | 13955 transform a bmp image into a pdf document applying specified custom pdf co... |
-| [save-the-converted-bmp-image-as-a-pdf-document-ensuring-proper-format-conversion-and-file-integrity.cs](./save-the-converted-bmp-image-as-a-pdf-document-ensuring-proper-format-conversion-and-file-integrity.cs) | `PdfOptions` | 13956 save the converted bmp image as a pdf document ensuring proper format conv... |
+| [transform-a-bmp-image-into-a-pdf-document-applying-specified-custom-pdf-configuration-options.cs](./transform-a-bmp-image-into-a-pdf-document-applying-specified-custom-pdf-configuration-options.cs) | `PdfCoreOptions`, `PdfOptions` | Transform a BMP image into a PDF document applying specified custom PDF configur... |
+| [save-the-converted-bmp-image-as-a-pdf-document-ensuring-proper-format-conversion-and-file-integrity.cs](./save-the-converted-bmp-image-as-a-pdf-document-ensuring-proper-format-conversion-and-file-integrity.cs) | `PdfOptions` | Save the converted BMP image as a PDF document, ensuring proper format conversio... |
 | [transform-the-provided-bmp-image-into-a-pdf-document-preserving-image-fidelity-and-suitable-page-sizing.cs](./transform-the-provided-bmp-image-into-a-pdf-document-preserving-image-fidelity-and-suitable-page-sizing.cs) | `PdfOptions` | 13957 transform the provided bmp image into a pdf document preserving image fide... |
 | [outline-the-procedure-to-convert-bmp-images-into-a-pdf-document-preserving-image-fidelity-and-layout.cs](./outline-the-procedure-to-convert-bmp-images-into-a-pdf-document-preserving-image-fidelity-and-layout.cs) | `PdfOptions` | 13958 outline the procedure to convert bmp images into a pdf document preserving... |
 | [transform-a-png-raster-image-into-a-pdf-document-preserving-visual-fidelity-and-embedding-appropriate-metadata.cs](./transform-a-png-raster-image-into-a-pdf-document-preserving-visual-fidelity-and-embedding-appropriate-metadata.cs) | `PdfOptions` | 13959 transform a png raster image into a pdf document preserving visual fidelit... |
 | [convert-a-png-image-with-transparency-into-a-pdf-while-preserving-its-alpha-channel.cs](./convert-a-png-image-with-transparency-into-a-pdf-while-preserving-its-alpha-channel.cs) | `PdfOptions` | 13960 convert a png image with transparency into a pdf while preserving its alph... |
 | [transform-a-high-resolution-png-image-into-a-pdf-document-maintaining-original-image-quality-and-dimensions.cs](./transform-a-high-resolution-png-image-into-a-pdf-document-maintaining-original-image-quality-and-dimensions.cs) | `PdfOptions` | 13961 transform a high resolution png image into a pdf document maintaining orig... |
 | [determine-the-necessary-prerequisites-to-successfully-convert-png-images-into-pdf-documents-using-the-library.cs](./determine-the-necessary-prerequisites-to-successfully-convert-png-images-into-pdf-documents-using-the-library.cs) | `PdfOptions` | 13962 determine the necessary prerequisites to successfully convert png images i... |
-| [enumerate-the-png-input-parameters-that-can-be-used-when-performing-a-successful-conversion.cs](./enumerate-the-png-input-parameters-that-can-be-used-when-performing-a-successful-conversion.cs) | `PngOptions` | 13963 enumerate the png input parameters that can be used when performing a succ... |
+| [enumerate-the-png-input-parameters-that-can-be-used-when-performing-a-successful-conversion.cs](./enumerate-the-png-input-parameters-that-can-be-used-when-performing-a-successful-conversion.cs) | `PngOptions` | Enumerate the PNG input parameters that can be used when performing a successful... |
 | [convert-a-png-image-to-a-pdf-file-using-custom-specified-pdf-generation-options.cs](./convert-a-png-image-to-a-pdf-file-using-custom-specified-pdf-generation-options.cs) | `PdfCoreOptions`, `PdfOptions` | 13964 convert a png image to a pdf file using custom specified pdf generation op... |
 | [convert-the-png-image-to-pdf-format-and-write-the-resulting-pdf-file-to-disk.cs](./convert-the-png-image-to-pdf-format-and-write-the-resulting-pdf-file-to-disk.cs) | `PdfOptions` | 13965 convert the png image to pdf format and write the resulting pdf file to di... |
 | [transform-the-provided-png-image-into-a-pdf-document-maintaining-the-original-visual-fidelity.cs](./transform-the-provided-png-image-into-a-pdf-document-maintaining-the-original-visual-fidelity.cs) | `PngImage` | 13966 transform the provided png image into a pdf document maintaining the origi... |
@@ -139,7 +138,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [transform-a-tiff-raster-image-into-an-svg-vector-graphic-while-maintaining-visual-fidelity.cs](./transform-a-tiff-raster-image-into-an-svg-vector-graphic-while-maintaining-visual-fidelity.cs) | `SvgOptions`, `SvgRasterizationOptions` | 13973 transform a tiff raster image into an svg vector graphic while maintaining... |
 | [persist-the-transformed-image-to-an-svg-file-while-preserving-visual-fidelity-and-maintaining-scalable-vector-properties.cs](./persist-the-transformed-image-to-an-svg-file-while-preserving-visual-fidelity-and-maintaining-scalable-vector-properties.cs) | `SvgOptions`, `SvgRasterizationOptions` | 13974 persist the transformed image to an svg file while preserving visual fidel... |
 | [transform-a-sample-bmp-image-into-an-svg-vector-file-maintaining-visual-fidelity-and-color-accuracy.cs](./transform-a-sample-bmp-image-into-an-svg-vector-file-maintaining-visual-fidelity-and-color-accuracy.cs) | `RasterImage`, `SvgOptions` | 13975 transform a sample bmp image into an svg vector file maintaining visual fi... |
-| [outline-the-process-for-converting-raster-images-into-svg-format-detailing-each-required-transformation-step.cs](./outline-the-process-for-converting-raster-images-into-svg-format-detailing-each-required-transformation-step.cs) | `SvgOptions`, `SvgRasterizationOptions` | 13976 outline the process for converting raster images into svg format detailing... |
+| [outline-the-process-for-converting-raster-images-into-svg-format-detailing-each-required-transformation-step.cs](./outline-the-process-for-converting-raster-images-into-svg-format-detailing-each-required-transformation-step.cs) | `SvgOptions`, `SvgRasterizationOptions` | Outline the process for converting raster images into SVG format, detailing each... |
 | [transform-an-svg-vector-graphic-into-a-bmp-raster-image-ensuring-correct-color-depth-and-resolution.cs](./transform-an-svg-vector-graphic-into-a-bmp-raster-image-ensuring-correct-color-depth-and-resolution.cs) | `BmpOptions`, `SvgRasterizationOptions` | 13977 transform an svg vector graphic into a bmp raster image ensuring correct c... |
 | [transform-an-svg-graphic-into-a-png-raster-image-maintaining-visual-fidelity-and-appropriate-color-depth.cs](./transform-an-svg-graphic-into-a-png-raster-image-maintaining-visual-fidelity-and-appropriate-color-depth.cs) | `PngOptions`, `SvgRasterizationOptions` | 13978 transform an svg graphic into a png raster image maintaining visual fideli... |
 | [transform-an-svg-vector-graphic-into-a-jpeg-raster-image-ensuring-appropriate-color-depth-and-compression.cs](./transform-an-svg-vector-graphic-into-a-jpeg-raster-image-ensuring-appropriate-color-depth-and-compression.cs) | `JpegOptions`, `SvgRasterizationOptions` | 13979 transform an svg vector graphic into a jpeg raster image ensuring appropri... |
@@ -148,11 +147,11 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [transform-an-svg-image-into-a-tiff-raster-file-ensuring-proper-resolution-and-color-fidelity-during-conversion.cs](./transform-an-svg-image-into-a-tiff-raster-file-ensuring-proper-resolution-and-color-fidelity-during-conversion.cs) | `SvgRasterizationOptions`, `TiffOptions` | 13982 transform an svg image into a tiff raster file ensuring proper resolution ... |
 | [save-the-svg-output-after-conversion-to-a-bmp-image-ensuring-correct-pixel-format-and-file-integrity.cs](./save-the-svg-output-after-conversion-to-a-bmp-image-ensuring-correct-pixel-format-and-file-integrity.cs) | `BmpOptions`, `SvgRasterizationOptions` | 13983 save the svg output after conversion to a bmp image ensuring correct pixel... |
 | [transform-a-sample-svg-image-into-a-png-file-while-maintaining-visual-fidelity-using-the-conversion-api.cs](./transform-a-sample-svg-image-into-a-png-file-while-maintaining-visual-fidelity-using-the-conversion-api.cs) | `PngOptions`, `SvgImage`, `SvgRasterizationOptions` | 13984 transform a sample svg image into a png file while maintaining visual fide... |
-| [convert-svg-graphics-to-raster-images-by-rendering-them-at-specified-dimensions-and-outputting-to-the-desired-bitmap-formats.cs](./convert-svg-graphics-to-raster-images-by-rendering-them-at-specified-dimensions-and-outputting-to-the-desired-bitmap-formats.cs) | `BmpOptions`, `GifOptions`, `JpegOptions` | 13985 convert svg graphics to raster images by rendering them at specified dimen... |
+| [convert-svg-graphics-to-raster-images-by-rendering-them-at-specified-dimensions-and-outputting-to-the-desired-bitmap-formats.cs](./convert-svg-graphics-to-raster-images-by-rendering-them-at-specified-dimensions-and-outputting-to-the-desired-bitmap-formats.cs) |  | Convert SVG graphics to raster images by rendering them at specified dimensions ... |
 | [convert-an-svg-vector-graphic-to-a-bmp-raster-image-while-maintaining-visual-fidelity-and-color-accuracy.cs](./convert-an-svg-vector-graphic-to-a-bmp-raster-image-while-maintaining-visual-fidelity-and-color-accuracy.cs) | `BmpOptions`, `SvgRasterizationOptions` | 13986 convert an svg vector graphic to a bmp raster image while maintaining visu... |
 | [render-an-svg-vector-image-to-a-high-resolution-bmp-file-preserving-detail-and-color-fidelity.cs](./render-an-svg-vector-image-to-a-high-resolution-bmp-file-preserving-detail-and-color-fidelity.cs) | `BmpOptions`, `SvgRasterizationOptions` | 13987 render an svg vector image to a high resolution bmp file preserving detail... |
 | [transform-a-layered-svg-image-into-a-bmp-raster-file-while-preserving-layer-visibility.cs](./transform-a-layered-svg-image-into-a-bmp-raster-file-while-preserving-layer-visibility.cs) | `BmpOptions`, `SvgRasterizationOptions` | 13988 transform a layered svg image into a bmp raster file while preserving laye... |
-| [determine-required-prerequisites-for-converting-svg-images-to-bmp-format-including-necessary-libraries-and-supported-features.cs](./determine-required-prerequisites-for-converting-svg-images-to-bmp-format-including-necessary-libraries-and-supported-features.cs) | `BmpOptions`, `SvgImage`, `SvgRasterizationOptions` | 13989 determine required prerequisites for converting svg images to bmp format i... |
+| [determine-required-prerequisites-for-converting-svg-images-to-bmp-format-including-necessary-libraries-and-supported-features.cs](./determine-required-prerequisites-for-converting-svg-images-to-bmp-format-including-necessary-libraries-and-supported-features.cs) |  | Determine required prerequisites for converting SVG images to BMP format, includ... |
 | [enumerate-the-available-svg-input-configurations-applicable-when-converting-to-bmp-format-using-the-library.cs](./enumerate-the-available-svg-input-configurations-applicable-when-converting-to-bmp-format-using-the-library.cs) |  | 13990 enumerate the available svg input configurations applicable when convertin... |
 | [transform-an-svg-graphic-into-a-bmp-file-applying-user-defined-conversion-parameters-and-options.cs](./transform-an-svg-graphic-into-a-bmp-file-applying-user-defined-conversion-parameters-and-options.cs) | `BmpOptions`, `SvgRasterizationOptions` | 13991 transform an svg graphic into a bmp file applying user defined conversion ... |
 | [transform-the-provided-svg-file-into-a-bmp-image-using-appropriate-rendering-settings-while-maintaining-visual-fidelity.cs](./transform-the-provided-svg-file-into-a-bmp-image-using-appropriate-rendering-settings-while-maintaining-visual-fidelity.cs) | `BmpOptions`, `SvgRasterizationOptions` | 13993 transform the provided svg file into a bmp image using appropriate renderi... |
@@ -183,7 +182,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [transform-a-webp-image-into-a-gif-file-applying-user-defined-conversion-parameters-while-preserving-color-fidelity-and-animation-timing.cs](./transform-a-webp-image-into-a-gif-file-applying-user-defined-conversion-parameters-while-preserving-color-fidelity-and-animation-timing.cs) | `GifOptions`, `WebPImage` | 14018 transform a webp image into a gif file applying user defined conversion pa... |
 | [save-the-webp-image-after-conversion-to-a-gif-format-ensuring-proper-encoding-and-file-integrity.cs](./save-the-webp-image-after-conversion-to-a-gif-format-ensuring-proper-encoding-and-file-integrity.cs) | `GifOptions`, `WebPImage` | 14019 save the webp image after conversion to a gif format ensuring proper encod... |
 | [convert-the-supplied-webp-image-to-gif-format-preserving-visual-fidelity-and-retaining-any-animation-frames.cs](./convert-the-supplied-webp-image-to-gif-format-preserving-visual-fidelity-and-retaining-any-animation-frames.cs) | `GifOptions`, `WebPImage` | 14020 convert the supplied webp image to gif format preserving visual fidelity a... |
-| [convert-webp-images-to-gif-format-handling-frame-extraction-color-palette-reduction-and-animation-encoding.cs](./convert-webp-images-to-gif-format-handling-frame-extraction-color-palette-reduction-and-animation-encoding.cs) | `GifOptions`, `WebPImage` | 14021 convert webp images to gif format handling frame extraction color palette ... |
+| [convert-webp-images-to-gif-format-handling-frame-extraction-color-palette-reduction-and-animation-encoding.cs](./convert-webp-images-to-gif-format-handling-frame-extraction-color-palette-reduction-and-animation-encoding.cs) | `GifOptions`, `WebPImage` | Convert WebP images to GIF format, handling frame extraction, color palette redu... |
 | [transform-an-apng-raster-image-into-a-pdf-file-while-maintaining-its-original-image-fidelity.cs](./transform-an-apng-raster-image-into-a-pdf-file-while-maintaining-its-original-image-fidelity.cs) | `PdfOptions` | 14270 transform an apng raster image into a pdf file while maintaining its origi... |
 | [convert-an-avif-raster-image-to-a-pdf-document-preserving-image-quality-and-metadata.cs](./convert-an-avif-raster-image-to-a-pdf-document-preserving-image-quality-and-metadata.cs) | `PdfOptions` | 14271 convert an avif raster image to a pdf document preserving image quality an... |
 | [convert-a-bigtiff-raster-image-into-a-pdf-document-while-preserving-the-original-image-fidelity.cs](./convert-a-bigtiff-raster-image-into-a-pdf-document-while-preserving-the-original-image-fidelity.cs) | `BigTiffImage`, `PdfOptions` | 14272 convert a bigtiff raster image into a pdf document while preserving the or... |
@@ -221,6 +220,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 - `ApngFrame`
 - `ApngImage`
+- `ApngOptions`
 - `BigTiffImage`
 - `BmpImage`
 - `BmpOptions`
@@ -233,14 +233,11 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `EpsRasterizationOptions`
 - `GifImage`
 - `GifOptions`
-- `IcoOptions`
 - `JpegOptions`
-- `MultiPageOptions`
 - `OdgRasterizationOptions`
 - `OtgRasterizationOptions`
 - `PdfCoreOptions`
 - `PdfOptions`
-- `PdfVectorRasterizationOptions`
 - `PngImage`
 - `PngOptions`
 - `PsdOptions`
@@ -249,7 +246,6 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `SvgImage`
 - `SvgOptions`
 - `SvgRasterizationOptions`
-- `TiffImage`
 - `TiffOptions`
 - `VectorRasterizationOptions`
 - `WebPImage`
@@ -259,5 +255,5 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 All tasks passed ✅
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-03-17 | Run: `20260317_053549` | Examples: 162
+Updated: 2026-03-17 | Run: `20260317_091306` | Examples: 162
 <!-- AUTOGENERATED:END -->

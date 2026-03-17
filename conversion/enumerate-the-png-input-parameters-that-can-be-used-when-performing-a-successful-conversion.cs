@@ -1,56 +1,45 @@
 using System;
-using Aspose.Imaging;
+using System.Collections.Generic;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input image (any supported format) – this demonstrates the conversion source.
-        string inputPath = @"c:\temp\input.jpg";
-
-        // Output PNG file path.
-        string outputPath = @"c:\temp\output.png";
-
-        // Load the source image using Aspose.Imaging's Load method (lifecycle rule).
-        using (Image sourceImage = Image.Load(inputPath))
+        var pngParameters = new List<string>
         {
-            // Create PNG options – constructor provided by the API (lifecycle rule).
-            PngOptions pngOptions = new PngOptions();
+            nameof(PngOptions.BitDepth),
+            nameof(PngOptions.BufferSizeHint),
+            nameof(PngOptions.ColorType),
+            nameof(PngOptions.FilterType),
+            nameof(PngOptions.FullFrame),
+            nameof(PngOptions.KeepMetadata),
+            nameof(PngOptions.MultiPageOptions),
+            nameof(PngOptions.Palette),
+            nameof(PngOptions.PngCompressionLevel),
+            nameof(PngOptions.Progressive),
+            nameof(PngOptions.ResolutionSettings),
+            nameof(PngOptions.Source),
+            nameof(PngOptions.VectorRasterizationOptions),
+            nameof(PngOptions.XmpData),
+            nameof(PngOptions.ExifData),
+            nameof(PngOptions.ProgressEventHandler)
+        };
 
-            // -----------------------------------------------------------------
-            // Enumerating PNG input parameters that influence the conversion.
-            // -----------------------------------------------------------------
+        Console.WriteLine("PNG conversion input parameters:");
+        foreach (var param in pngParameters)
+        {
+            Console.WriteLine("- " + param);
+        }
 
-            // BitDepth – allowed values: 1, 2, 4, 8, 16.
-            pngOptions.BitDepth = 8;
-
-            // ColorType – defines the PNG color model (e.g., Grayscale, Truecolor, etc.).
-            pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
-
-            // PngCompressionLevel – compression intensity (0 = none, 9 = maximum).
-            pngOptions.PngCompressionLevel = 9;
-
-            // FilterType – PNG filter applied during saving.
-            pngOptions.FilterType = PngFilterType.Adaptive;
-
-            // Progressive – enables progressive (interlaced) PNG.
-            pngOptions.Progressive = true;
-
-            // KeepMetadata – retains original image metadata in the PNG.
-            pngOptions.KeepMetadata = true;
-
-            // FullFrame – indicates whether the full frame should be saved.
-            pngOptions.FullFrame = false;
-
-            // BufferSizeHint – optional hint for internal buffer size (example value).
-            pngOptions.BufferSizeHint = 1024 * 1024; // 1 MB
-
-            // -----------------------------------------------------------------
-            // Save the image as PNG using the configured options (lifecycle rule).
-            // -----------------------------------------------------------------
-            sourceImage.Save(outputPath, pngOptions);
+        using (var options = new PngOptions())
+        {
+            options.BitDepth = 8;
+            options.ColorType = PngColorType.TruecolorWithAlpha;
+            options.PngCompressionLevel = PngCompressionLevel.ZipLevel9;
+            options.Progressive = true;
+            options.FilterType = PngFilterType.Sub;
         }
     }
 }

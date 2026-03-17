@@ -1,44 +1,41 @@
 using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
-public static class RasterToSvgConverter
+class Program
 {
-    /// <summary>
-    /// Converts a raster image (e.g., PNG, JPEG, BMP) to an SVG file.
-    /// The raster data is embedded into the SVG as a base‑64 encoded image.
-    /// </summary>
-    /// <param name="inputPath">Full path to the source raster image.</param>
-    /// <param name="outputPath">Full path where the resulting SVG will be saved.</param>
-    public static void Convert(string inputPath, string outputPath)
+    static void Main(string[] args)
     {
-        // Load the raster image using the unified Image.Load method.
-        using (Image rasterImage = Image.Load(inputPath))
+        // Input raster image path (e.g., PNG, JPG). Use first argument or default.
+        string inputPath = args.Length > 0 ? args[0] : "input.png";
+        // Output SVG file path. Use second argument or default.
+        string outputPath = args.Length > 1 ? args[1] : "output.svg";
+
+        // Load the raster image. Image.Load works for all supported raster formats.
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG rasterization options.
+            // If the loaded image is a raster type, cache its data for optimal processing.
+            if (image is RasterImage raster && !raster.IsCached)
+            {
+                raster.CacheData();
+            }
+
+            // Create SVG save options.
+            var svgOptions = new SvgOptions();
+
+            // Configure vector rasterization options.
             // PageSize defines the dimensions of the resulting SVG canvas.
-            // BackgroundColor can be set if a specific background is required.
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+            var vectorOptions = new SvgRasterizationOptions
             {
-                PageSize = rasterImage.Size,
-                BackgroundColor = Color.White // optional: set background to white
+                PageSize = image.Size
             };
+            svgOptions.VectorRasterizationOptions = vectorOptions;
 
-            // Configure SVG save options.
-            // TextAsShapes is irrelevant for raster images but shown for completeness.
-            SvgOptions svgSaveOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions,
-                TextAsShapes = false,   // keep text as text (no effect for raster)
-                Compress = false        // output plain SVG (set true for .svgz)
-            };
+            // Optional: render text as shapes to preserve appearance.
+            // svgOptions.TextAsShapes = true;
 
-            // Save the raster image as SVG. The raster data will be embedded.
-            rasterImage.Save(outputPath, svgSaveOptions);
+            // Save the raster image as an SVG file.
+            image.Save(outputPath, svgOptions);
         }
     }
 }
-
-// Example usage:
-// RasterToSvgConverter.Convert(@"C:\Images\photo.jpg", @"C:\Images\photo.svg");

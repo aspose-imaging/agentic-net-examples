@@ -1,46 +1,35 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Psd;
 
-class CdrToPsdConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source CDR file
-        string inputCdrPath = @"C:\Temp\sample.cdr";
+        string inputPath = args.Length > 0 ? args[0] : Path.Combine(Environment.CurrentDirectory, "input.cdr");
+        string outputPath = args.Length > 1 ? args[1] : Path.Combine(Environment.CurrentDirectory, "output.psd");
 
-        // Desired output PSD file path
-        string outputPsdPath = @"C:\Temp\sample_converted.psd";
-
-        // Load the CDR image (vector or multipage)
-        using (Image cdrImage = Image.Load(inputCdrPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare PSD export options
-            var psdOptions = new PsdOptions();
+            CdrImage cdrImage = image as CdrImage;
+            if (cdrImage == null)
+                throw new InvalidOperationException("The provided file is not a valid CDR image.");
 
-            // If the source is a vector image, configure rasterization options
-            if (cdrImage is VectorImage vectorImg)
+            PsdOptions psdOptions = new PsdOptions
             {
-                // Obtain default rasterization options based on the source size and background color
-                psdOptions.VectorRasterizationOptions = (VectorRasterizationOptions)vectorImg.GetDefaultOptions(
-                    new object[] { Color.White, cdrImage.Width, cdrImage.Height });
+                CompressionMethod = CompressionMethod.RLE,
+                ColorMode = ColorModes.Rgb,
+                VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    PageWidth = cdrImage.Width,
+                    PageHeight = cdrImage.Height
+                }
+            };
 
-                // Set rendering preferences for crisp vector conversion
-                psdOptions.VectorRasterizationOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-                psdOptions.VectorRasterizationOptions.SmoothingMode = SmoothingMode.None;
-            }
-
-            // If the source is multipage, export selected pages as separate PSD layers
-            if (cdrImage is IMultipageImage multiPageImg && multiPageImg.PageCount > 2)
-            {
-                // Export the first two pages (0 and 1) as layers
-                psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 2));
-            }
-
-            // Save the image as PSD using the configured options
-            cdrImage.Save(outputPsdPath, psdOptions);
+            cdrImage.Save(outputPath, psdOptions);
         }
     }
 }
