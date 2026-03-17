@@ -1,30 +1,15 @@
-using Aspose.Imaging.ImageOptions;
-
-class Program
+// Load the SVG image from file
+using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(@"C:\Images\input.svg"))
 {
-    static void Main(string[] args)
+    // Configure vector rasterization options – set the page size to match the source image size
+    Aspose.Imaging.ImageOptions.EmfRasterizationOptions rasterOptions = new Aspose.Imaging.ImageOptions.EmfRasterizationOptions
     {
-        // Input SVG file path
-        string inputPath = "input.svg";
-        // Desired EMF output file path
-        string outputPath = "output.emf";
+        PageSize = image.Size
+    };
 
-        // Load the SVG image using Aspose.Imaging.Image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Set up vector rasterization options for EMF conversion
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-            {
-                PageSize = image.Size // Preserve original dimensions
-            };
-
-            // Configure EMF save options and assign rasterization settings
-            using (EmfOptions emfOptions = new EmfOptions())
-            {
-                emfOptions.VectorRasterizationOptions = rasterOptions;
-                // Save the image as EMF, preserving vector fidelity
-                image.Save(outputPath, emfOptions);
-            }
-        }
-    }
+    // Save the image as EMF using the configured options
+    image.Save(@"C:\Images\output.emf", new Aspose.Imaging.ImageOptions.EmfOptions
+    {
+        VectorRasterizationOptions = rasterOptions
+    });
 }
