@@ -1,30 +1,24 @@
 using System;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect the image file path as the first argument.
-        if (args.Length == 0)
+        // Path to the image file (can be JPEG, PNG, APNG, TGA, etc.)
+        string imagePath = "sample.jpg";
+
+        // Load the image using Aspose.Imaging
+        using (Image image = Image.Load(imagePath))
         {
-            Console.WriteLine("Please provide the image file path as an argument.");
-            return;
-        }
-
-        string inputPath = args[0];
-
-        // Load the image using Aspose.Imaging. The Image class is the base for all formats.
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access the GetModifyDate method.
-            RasterImage raster = (RasterImage)image;
-
             // Retrieve the last modified timestamp.
-            // The 'true' argument tells the method to fall back to FileInfo if metadata is missing.
-            DateTime modifyDate = raster.GetModifyDate(true);
+            // The 'true' argument tells the method to fall back to the file system's
+            // timestamp if the image metadata does not contain a modification date.
+            DateTime lastModified = ((RasterImage)image).GetModifyDate(true);
 
-            Console.WriteLine($"Last modified timestamp: {modifyDate}");
+            // Display the result
+            Console.WriteLine($"Last modified: {lastModified}");
         }
     }
 }
