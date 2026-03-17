@@ -1,35 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
 
-class EdgeDetectionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source DJVU image
-        string inputPath = @"C:\temp\sample.djvu";
+        // Input DJVU file path
+        string inputPath = "input.djvu";
+        // Output PNG file path
+        string outputPath = "output.png";
 
-        // Path where the processed image will be saved
-        string outputPath = @"C:\temp\sample.EdgeDetected.png";
-
-        // Load the DJVU image using the Aspose.Imaging load rule
+        // Load the DJVU image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to DjvuImage to access DJVU‑specific functionality
+            // Cast to DjvuImage to access DJVU-specific methods
             DjvuImage djvuImage = (DjvuImage)image;
 
-            // Apply an edge‑like effect.
-            // Aspose.Imaging does not provide a dedicated edge detection filter,
-            // so we use a Sharpen filter as a close approximation.
-            // The filter is applied to the whole image (djvuImage.Bounds).
-            djvuImage.Filter(
-                djvuImage.Bounds,
-                new SharpenFilterOptions(kernelSize: 5, sigma: 4.0));
+            // Define an edge detection kernel
+            double[,] edgeKernel = new double[,]
+            {
+                { -1, -1, -1 },
+                { -1,  8, -1 },
+                { -1, -1, -1 }
+            };
 
-            // Save the processed image using the Aspose.Imaging save rule.
-            // The image is saved as PNG; any supported format can be used.
+            // Create convolution filter options with the custom kernel
+            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel);
+
+            // Apply the filter to the entire image
+            djvuImage.Filter(djvuImage.Bounds, filterOptions);
+
+            // Save the processed image as PNG
             djvuImage.Save(outputPath, new PngOptions());
         }
     }
