@@ -2,32 +2,40 @@ using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.BigTiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class BigTiffProcessor
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths for source BIGTIFF and destination PNG
-        string sourcePath = "source_big.tif";
-        string destinationPath = "processed_image.png";
+        string inputPath = @"C:\Images\input.bigtiff";
+        string outputBigTiffPath = @"C:\Images\output.bigtiff";
+        string outputPngPath = @"C:\Images\output.png";
 
-        // Load the BIGTIFF image (lifecycle: load)
-        using (BigTiffImage bigTiff = (BigTiffImage)Image.Load(sourcePath))
+        using (var bigTiff = (BigTiffImage)Image.Load(inputPath))
         {
-            // Example edit: increase brightness by 20 units
-            bigTiff.AdjustBrightness(20);
+            if (!bigTiff.IsCached)
+                bigTiff.CacheData();
 
-            // Example edit: rotate the image 90 degrees clockwise
-            bigTiff.Rotate(90);
+            bigTiff.Resize(bigTiff.Width / 2, bigTiff.Height / 2, ResizeType.NearestNeighbourResample);
 
-            // Example edit: resize to 50% of original dimensions
-            int newWidth = bigTiff.Width / 2;
-            int newHeight = bigTiff.Height / 2;
-            bigTiff.Resize(newWidth, newHeight);
+            int cropWidth = (int)(bigTiff.Width * 0.8);
+            int cropHeight = (int)(bigTiff.Height * 0.8);
+            int cropX = (bigTiff.Width - cropWidth) / 2;
+            int cropY = (bigTiff.Height - cropHeight) / 2;
+            var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+            bigTiff.Crop(cropRect);
 
-            // Convert and save to PNG format (lifecycle: save)
+            bigTiff.Rotate(45f, true, Color.White);
+
+            var saveOptions = new BigTiffOptions(TiffExpectedFormat.Default);
+            bigTiff.Save(outputBigTiffPath, saveOptions);
+        }
+
+        using (var editedBigTiff = (BigTiffImage)Image.Load(outputBigTiffPath))
+        {
             var pngOptions = new PngOptions();
-            bigTiff.Save(destinationPath, pngOptions);
+            editedBigTiff.Save(outputPngPath, pngOptions);
         }
     }
 }
