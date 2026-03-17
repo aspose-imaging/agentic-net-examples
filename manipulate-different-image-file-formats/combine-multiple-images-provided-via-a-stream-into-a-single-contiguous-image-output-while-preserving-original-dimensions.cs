@@ -1,10 +1,10 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -18,15 +18,14 @@ class Program
             "image3.png"
         };
 
-        // Output image path
+        // Output combined image path
         string outputPath = "combined.png";
 
-        // Collect sizes of all images
-        List<Size> sizes = new List<Size>();
+        // Collect sizes of all input images
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
         foreach (string path in inputPaths)
         {
-            using (FileStream fs = File.OpenRead(path))
-            using (RasterImage img = (RasterImage)Image.Load(fs))
+            using (RasterImage img = (RasterImage)Image.Load(path))
             {
                 sizes.Add(img.Size);
             }
@@ -35,24 +34,28 @@ class Program
         // Calculate canvas dimensions for horizontal concatenation
         int newWidth = 0;
         int newHeight = 0;
-        foreach (Size sz in sizes)
+        foreach (Aspose.Imaging.Size sz in sizes)
         {
             newWidth += sz.Width;
-            if (sz.Height > newHeight) newHeight = sz.Height;
+            if (sz.Height > newHeight)
+                newHeight = sz.Height;
         }
 
-        // Create output file source and PNG options
-        Source outSource = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = outSource };
+        // Create a file source for the output image
+        Source fileSource = new FileCreateSource(outputPath, false);
 
-        // Create canvas image
+        // Set PNG options with the file source
+        PngOptions pngOptions = new PngOptions() { Source = fileSource };
+
+        // Create a blank canvas with the calculated dimensions
         using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
         {
             int offsetX = 0;
+
+            // Merge each image onto the canvas side by side
             foreach (string path in inputPaths)
             {
-                using (FileStream fs = File.OpenRead(path))
-                using (RasterImage img = (RasterImage)Image.Load(fs))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
                     Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -60,7 +63,7 @@ class Program
                 }
             }
 
-            // Save the combined image (canvas is already bound to the output source)
+            // Save the bound canvas to the output file
             canvas.Save();
         }
     }
