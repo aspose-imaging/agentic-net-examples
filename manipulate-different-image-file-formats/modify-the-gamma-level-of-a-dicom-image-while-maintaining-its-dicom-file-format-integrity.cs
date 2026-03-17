@@ -1,17 +1,18 @@
-// Path to the folder containing the DICOM file
-string dir = @"c:\temp\";
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
 
-// Load the DICOM image using Aspose.Imaging's Image.Load method
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dir + "sample.dicom"))
+string inputPath = @"c:\temp\sample.dicom";
+string outputPath = @"c:\temp\sample_gamma.dicom";
+
+// Load the DICOM image
+using (Image image = Image.Load(inputPath))
 {
-    // Cast the generic Image to a DicomImage to access DICOM‑specific methods
-    Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
+    // Cast to DicomImage to access DICOM‑specific methods
+    DicomImage dicomImage = (DicomImage)image;
 
     // Apply gamma correction (same value for R, G, B channels)
-    // Adjust the value as needed; here 2.0f is used as an example
-    dicomImage.AdjustGamma(2.0f);
+    dicomImage.AdjustGamma(2.0f); // Adjust the gamma factor as needed
 
-    // Save the modified image back to DICOM format.
-    // Saving without specifying options preserves the original DICOM file format.
-    dicomImage.Save(dir + "sample_gamma.dcm");
+    // Save the image back in DICOM format to preserve file integrity
+    dicomImage.Save(outputPath);
 }
