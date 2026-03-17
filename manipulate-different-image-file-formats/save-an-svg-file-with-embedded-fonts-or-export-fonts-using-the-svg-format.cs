@@ -1,36 +1,46 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-class Program
+class SaveSvgWithEmbeddedFonts
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input and output SVG files
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
+        // Input WMF (or any vector) file path
+        string inputPath = @"C:\temp\test.wmf";
 
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        // Output SVG file path – fonts will be embedded
+        string outputPath = @"C:\temp\test_with_fonts.svg";
+
+        // Load the vector image using the unified Image.Load method
+        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
         {
-            // Configure SVG save options
-            SvgOptions saveOptions = new SvgOptions
+            // Create SVG save options
+            SvgOptions svgOptions = new SvgOptions();
+
+            // Keep text as text (do NOT convert to shapes) so fonts can be embedded
+            svgOptions.TextAsShapes = false;
+
+            // Assign the default resource keeper callback – it handles font and image resources
+            svgOptions.Callback = new SvgResourceKeeperCallback();
+
+            // Configure rasterization options specific to WMF
+            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
             {
-                // Keep text as text to allow font embedding
-                TextAsShapes = false
+                PageSize = wmfImage.Size,                     // Preserve original size
+                BackgroundColor = Color.White,                // Optional background
+                RenderMode = WmfRenderMode.Auto               // Auto-select rendering mode
             };
 
-            // Optional: set vector rasterization options (e.g., page size)
-            VectorRasterizationOptions vectorOpts = new SvgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-            saveOptions.VectorRasterizationOptions = vectorOpts;
+            // Attach rasterization options to the SVG options
+            svgOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the SVG with embedded fonts (if fonts are referenced in the source)
-            image.Save(outputPath, saveOptions);
+            // Save the image as SVG with embedded fonts
+            wmfImage.Save(outputPath, svgOptions);
         }
+
+        Console.WriteLine("SVG saved with embedded fonts to: " + outputPath);
     }
 }
