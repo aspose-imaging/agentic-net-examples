@@ -1,55 +1,36 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Psd.Enums;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.Sources;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        string inputPath = "input.eps";
+        string outputPath = "output.psd";
+
+        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
         {
-            // Input EPS file path (first argument) and output PSD file path (second argument)
-            string inputPath = args.Length > 0 ? args[0] : "input.eps";
-            string outputPath = args.Length > 1 ? args[1] : "output.psd";
-
-            // Load the EPS image
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (PsdOptions psdOptions = new PsdOptions())
             {
-                // Configure PSD saving options
-                using (PsdOptions psdOptions = new PsdOptions())
+                psdOptions.CompressionMethod = CompressionMethod.RLE;
+                psdOptions.ColorMode = ColorModes.Rgb;
+
+                var vectorOptions = new VectorRasterizationOptions
                 {
-                    // Use RLE compression for reasonable file size
-                    psdOptions.CompressionMethod = CompressionMethod.RLE;
+                    PageWidth = epsImage.Width,
+                    PageHeight = epsImage.Height
+                };
+                psdOptions.VectorRasterizationOptions = vectorOptions;
 
-                    // Preserve original colors in RGB mode
-                    psdOptions.ColorMode = ColorModes.Rgb;
+                psdOptions.VectorizationOptions = new PsdVectorizationOptions
+                {
+                    VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
+                };
 
-                    // Set PSD version (6 is common)
-                    psdOptions.Version = 6;
-
-                    // Preserve vector layers by rasterizing with vector options
-                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        PageWidth = epsImage.Width,
-                        PageHeight = epsImage.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-
-                    // Export vector data as separate layers in the PSD
-                    psdOptions.VectorizationOptions = new PsdVectorizationOptions
-                    {
-                        VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
-                    };
-
-                    // Save the EPS content as a PSD file preserving layers and colors
-                    epsImage.Save(outputPath, psdOptions);
-                }
+                epsImage.Save(outputPath, psdOptions);
             }
         }
     }
