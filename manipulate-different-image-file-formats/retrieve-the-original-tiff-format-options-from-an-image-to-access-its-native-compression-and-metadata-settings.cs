@@ -1,40 +1,32 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+class RetrieveTiffOriginalOptions
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input TIFF file path (first argument or default)
-        string inputPath = args.Length > 0 ? args[0] : "input.tif";
+        // Path to the source TIFF image
+        string inputPath = "input.tif";
 
-        // Load the TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        // Load the image using Aspose.Imaging
+        using (Image image = Image.Load(inputPath))
         {
-            // Retrieve original saving options from the loaded image
-            TiffOptions originalOptions = tiffImage.GetOriginalOptions() as TiffOptions;
+            // Cast the loaded image to TiffImage to access TIFF‑specific members
+            TiffImage tiffImage = (TiffImage)image;
 
-            if (originalOptions != null)
-            {
-                // Output native compression
-                Console.WriteLine("Original Compression: " + originalOptions.Compression);
+            // Retrieve the original saving options derived from the source file
+            TiffOptions originalOptions = (TiffOptions)tiffImage.GetOriginalOptions();
 
-                // Output bits per sample (e.g., [8,8,8] for RGB)
-                if (originalOptions.BitsPerSample != null)
-                {
-                    Console.WriteLine("Bits Per Sample: " + string.Join(", ", originalOptions.BitsPerSample));
-                }
+            // Access native compression type
+            var compression = originalOptions.Compression;
 
-                // Output photometric interpretation
-                Console.WriteLine("Photometric: " + originalOptions.Photometric);
-            }
-            else
-            {
-                Console.WriteLine("Failed to retrieve original TIFF options.");
-            }
+            // Example: output compression and other relevant settings
+            Console.WriteLine($"Original Compression: {compression}");
+            Console.WriteLine($"Bits Per Sample: {originalOptions.BitsPerSample}");
+            Console.WriteLine($"Photometric: {originalOptions.Photometric}");
+            Console.WriteLine($"Resolution Unit: {originalOptions.ResolutionUnit}");
         }
     }
 }
