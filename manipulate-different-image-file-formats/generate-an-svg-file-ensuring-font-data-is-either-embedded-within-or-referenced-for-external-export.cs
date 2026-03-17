@@ -1,74 +1,66 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging;
 
-class Program
+// Custom callback to control how fonts and the final SVG document are stored
+class MySvgResourceKeeperCallback : SvgResourceKeeperCallback
+{
+    // Embed fonts directly into the SVG as base64 data
+    public override void OnFontResourceReady(FontStoringArgs args)
+    {
+        // Ensure fonts are embedded; other options are None or Stream
+        args.FontStoreType = FontStoreType.Embedded;
+    }
+
+    // Save the generated SVG data to a file and return its path
+    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
+    {
+        // Use the suggested file name (or modify as needed)
+        string outputPath = Path.Combine(Environment.CurrentDirectory, suggestedFileName);
+        File.WriteAllBytes(outputPath, htmlData);
+        return outputPath;
+    }
+}
+
+class SvgExportExample
 {
     static void Main()
     {
-        // Input vector image (EMF, WMF, etc.) and output SVG file paths
-        string inputPath = "input.emf";
-        string outputPath = "output.svg";
+        // Input vector image (e.g., WMF, EMF, CDR, etc.)
+        string inputPath = @"C:\Temp\example.wmf";
+        // Desired output SVG file name (the callback will receive this)
+        string outputFileName = "example_output.svg";
 
-        // Load the source image using Aspose.Imaging.Image.Load (lifecycle rule)
+        // Load the source image using Aspose.Imaging's unified loader
         using (Image image = Image.Load(inputPath))
         {
-            // Configure SVG export options
-            var svgOptions = new SvgOptions
+            // Prepare SVG export options
+            SvgOptions svgOptions = new SvgOptions
             {
-                // Keep text as text so that fonts can be embedded (instead of converting to shapes)
+                // Keep text as text (fonts will be embedded via the callback)
                 TextAsShapes = false,
-                // Assign a callback that controls how fonts are stored
-                Callback = new FontEmbeddingCallback()
+                // Assign our custom callback to handle font embedding and final saving
+                Callback = new MySvgResourceKeeperCallback()
             };
 
-            // Set appropriate vector rasterization options based on source type
-            if (image is EmfImage emfImage)
+            // Configure rasterization options required for vector images
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                var rasterOptions = new EmfRasterizationOptions
-                {
-                    PageSize = emfImage.Size,
-                    BackgroundColor = Color.White,
-                    RenderMode = EmfRenderMode.Auto
-                };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-            }
-            else if (image is WmfImage wmfImage)
-            {
-                var rasterOptions = new WmfRasterizationOptions
-                {
-                    PageSize = wmfImage.Size,
-                    BackgroundColor = Color.White,
-                    RenderMode = WmfRenderMode.Auto
-                };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-            }
-            else
-            {
-                // Generic fallback for other vector images
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-            }
+                // Set the page size to match the source image dimensions
+                PageSize = image.Size,
+                // Optional: background color, rendering mode, etc.
+                BackgroundColor = Color.White
+            };
 
-            // Save the image as SVG using the configured options (lifecycle rule)
-            image.Save(outputPath, svgOptions);
-        }
-    }
+            svgOptions.VectorRasterizationOptions = rasterOptions;
 
-    // Callback that forces fonts to be embedded in the SVG as base64 data
-    private class FontEmbeddingCallback : SvgResourceKeeperCallback
-    {
-        public override void OnFontResourceReady(FontStoringArgs args)
-        {
-            // Embed fonts directly into the SVG file
-            args.FontStoreType = FontStoreType.Embedded;
+            // Save the image as SVG; the callback will embed fonts and write the file
+            image.Save(outputFileName, svgOptions);
         }
+
+        Console.WriteLine("SVG export completed with embedded fonts.");
     }
 }
