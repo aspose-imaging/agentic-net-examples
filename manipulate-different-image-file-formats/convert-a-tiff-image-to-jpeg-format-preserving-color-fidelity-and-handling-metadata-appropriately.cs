@@ -9,23 +9,23 @@ class TiffToJpegConverter
         // Path to the source TIFF image
         string tiffPath = @"C:\Images\source.tif";
 
-        // Desired output path for the JPEG image
+        // Desired path for the output JPEG image
         string jpegPath = @"C:\Images\converted.jpg";
 
-        // Load the TIFF image using Aspose.Imaging's load rule
+        // Load the TIFF image using Aspose.Imaging's built‑in load method
         using (Image tiffImage = Image.Load(tiffPath))
         {
-            // Configure JPEG save options
+            // Configure JPEG export options
             JpegOptions jpegOptions = new JpegOptions
             {
                 // Preserve original metadata (EXIF, XMP, etc.)
                 KeepMetadata = true,
 
-                // Set desired quality (0-100). Adjust as needed.
+                // Set the quality level (0‑100). Adjust as needed.
                 Quality = 90
             };
 
-            // Save the image as JPEG using the save rule
+            // Save the image as JPEG using the configured options
             tiffImage.Save(jpegPath, jpegOptions);
         }
     }
