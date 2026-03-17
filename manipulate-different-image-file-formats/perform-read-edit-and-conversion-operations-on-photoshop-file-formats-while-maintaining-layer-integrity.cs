@@ -1,41 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input PSD, edited PSD, and output PNG
-        string inputPsdPath = "input.psd";
+        // Input PSD file path
+        string inputPath = "input.psd";
+
+        // Output paths
         string editedPsdPath = "edited.psd";
-        string outputPngPath = "output.png";
+        string pngPath = "converted.png";
 
-        // Load the original PSD file
-        using (Image psdImage = Image.Load(inputPsdPath))
+        // Load the PSD image
+        using (Image image = Image.Load(inputPath))
         {
-            // Draw a red rectangle on the image to demonstrate editing
-            Graphics graphics = new Graphics(psdImage);
-            Pen redPen = new Pen(Color.Red, 5);
-            Rectangle rect = new Rectangle(50, 50, 200, 200);
-            graphics.DrawRectangle(redPen, rect);
+            // Cast to RasterImage for pixel-level operations
+            RasterImage raster = (RasterImage)image;
+            if (!raster.IsCached)
+                raster.CacheData();
 
-            // Save the edited image back to PSD, preserving layers
-            PsdOptions psdSaveOptions = new PsdOptions
+            // Example edit: increase brightness by 30 units
+            raster.AdjustBrightness(30);
+
+            // Save the edited image back to PSD format, preserving layers
+            PsdOptions psdOptions = new PsdOptions
             {
-                CompressionMethod = CompressionMethod.RLE
+                CompressionMethod = CompressionMethod.RLE,
+                ColorMode = ColorModes.Rgb,
+                Source = new FileCreateSource(editedPsdPath, false)
             };
-            psdImage.Save(editedPsdPath, psdSaveOptions);
-        }
+            image.Save(editedPsdPath, psdOptions);
 
-        // Load the edited PSD and convert it to PNG
-        using (Image editedImage = Image.Load(editedPsdPath))
-        {
+            // Convert the edited PSD to PNG (layers will be flattened in the PNG)
             PngOptions pngOptions = new PngOptions();
-            editedImage.Save(outputPngPath, pngOptions);
+            image.Save(pngPath, pngOptions);
         }
-
-        Console.WriteLine("Editing and conversion completed.");
     }
 }
