@@ -1,50 +1,86 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input SVG file (vector graphic)
-        const string inputSvgPath = "input.svg";
+        // Input vector file (SVG) and output APNG file paths
+        string inputVectorPath = "input.svg";
+        string outputApngPath = "output.apng";
 
-        // Output APNG file (animated PNG)
-        const string outputApngPath = "output.apng";
-
-        // Desired dimensions for the rasterized output
-        const int targetWidth = 800;
-        const int targetHeight = 600;
-
-        // Load the vector image using Aspose.Imaging's generic Image loader
-        using (Image vectorImage = Image.Load(inputSvgPath))
+        // Load the vector image
+        using (Image vectorImage = Image.Load(inputVectorPath))
         {
-            // Resize the vector image – this changes the vector's viewport size.
-            // The Resize method works for VectorImage derivatives such as SvgImage.
-            vectorImage.Resize(targetWidth, targetHeight);
+            // Original dimensions of the vector image
+            int originalWidth = vectorImage.Width;
+            int originalHeight = vectorImage.Height;
 
-            // Configure rasterization options so the vector is rasterized at the target size.
-            var rasterizationOptions = new SvgRasterizationOptions
+            // Define a scaling factor for the second frame
+            double scaleFactor = 2.0;
+            int scaledWidth = (int)(originalWidth * scaleFactor);
+            int scaledHeight = (int)(originalHeight * scaleFactor);
+
+            // Determine canvas size (largest frame)
+            int canvasWidth = Math.Max(originalWidth, scaledWidth);
+            int canvasHeight = Math.Max(originalHeight, scaledHeight);
+
+            // Set up APNG creation options
+            ApngOptions apngOptions = new ApngOptions
             {
-                PageSize = new Size(targetWidth, targetHeight)
+                Source = new FileCreateSource(outputApngPath, false),
+                DefaultFrameTime = 500, // 500 ms per frame
+                ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Set up APNG export options.
-            // DefaultFrameTime defines the duration of each frame (in milliseconds).
-            // NumPlays = 0 means the animation will loop infinitely.
-            // VectorRasterizationOptions tells the saver how to rasterize the vector content.
-            var apngOptions = new ApngOptions
+            // Create the APNG image with the calculated canvas size
+            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, canvasWidth, canvasHeight))
             {
-                DefaultFrameTime = 100,               // 100 ms per frame
-                NumPlays = 0,                         // infinite looping
-                ColorType = PngColorType.TruecolorWithAlpha,
-                VectorRasterizationOptions = rasterizationOptions
-            };
+                // Ensure the APNG starts without any default frame
+                apngImage.RemoveAllFrames();
 
-            // Save the resized vector as an animated PNG.
-            // This uses the built‑in Save method with ApngOptions, complying with the lifecycle rules.
-            vectorImage.Save(outputApngPath, apngOptions);
+                // Helper local function to rasterize the vector image at a given size and add as a frame
+                void AddRasterizedFrame(int frameWidth, int frameHeight)
+                {
+                    // Configure rasterization options for the desired size
+                    PngOptions rasterOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageWidth = frameWidth,
+                            PageHeight = frameHeight
+                        }
+                    };
+
+                    // Rasterize the vector image into a memory stream
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        vectorImage.Save(ms, rasterOptions);
+                        ms.Position = 0;
+
+                        // Load the rasterized image and add it as a frame
+                        using (RasterImage rasterFrame = (RasterImage)Image.Load(ms))
+                        {
+                            apngImage.AddFrame(rasterFrame);
+                        }
+                    }
+                }
+
+                // Add first frame at original size
+                AddRasterizedFrame(originalWidth, originalHeight);
+
+                // Add second frame at scaled size
+                AddRasterizedFrame(scaledWidth, scaledHeight);
+
+                // Save the APNG (output is already bound to the source)
+                apngImage.Save();
+            }
         }
     }
 }
