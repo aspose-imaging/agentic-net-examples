@@ -1,40 +1,31 @@
-using System;
-using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging;
 
-class ConfigureJpegExample
+// Define the folder where the images are located.
+string dataDir = @"c:\temp\";
+
+// Load an existing image (any supported format, e.g., BMP).
+using (Image image = Image.Load(dataDir + "input.bmp"))
 {
-    static void Main()
-    {
-        // Define input and output file paths
-        string dataDir = @"c:\temp\";
-        string inputPath = Path.Combine(dataDir, "input.png");
-        string outputPath = Path.Combine(dataDir, "output.jpg");
+    // Create JPEG save options.
+    JpegOptions jpegOptions = new JpegOptions();
 
-        // Create JPEG options and configure color model and compression algorithm
-        JpegOptions jpegOptions = new JpegOptions();
+    // Set the compression algorithm to Progressive JPEG.
+    jpegOptions.CompressionType = JpegCompressionMode.Progressive;
 
-        // Set the desired compression type (e.g., Progressive JPEG)
-        jpegOptions.CompressionType = JpegCompressionMode.Progressive;
+    // Choose the desired color model (e.g., YCbCr – standard JPEG color space).
+    jpegOptions.ColorType = JpegCompressionColorMode.YCbCr;
 
-        // Set the desired color model (e.g., YCbCr – standard JPEG color space)
-        jpegOptions.ColorType = JpegCompressionColorMode.YCbCr;
+    // Optional: set image quality (1‑100). Higher value = better quality, larger file.
+    jpegOptions.Quality = 90;
 
-        // Optional: set additional common JPEG parameters
-        jpegOptions.Quality = 90;                     // Quality range: 1‑100
-        jpegOptions.BitsPerChannel = 8;               // 8 bits per channel
-        jpegOptions.ResolutionSettings = new ResolutionSetting(96.0, 96.0);
-        jpegOptions.ResolutionUnit = ResolutionUnit.Inch;
+    // Optional: configure bits per channel and resolution.
+    jpegOptions.BitsPerChannel = 8;
+    jpegOptions.ResolutionSettings = new ResolutionSetting(96.0, 96.0);
+    jpegOptions.ResolutionUnit = ResolutionUnit.Inch;
 
-        // Load the source image using the standard load rule
-        using (Image image = Image.Load(inputPath))
-        {
-            // Save the image with the configured JPEG options using the standard save rule
-            image.Save(outputPath, jpegOptions);
-        }
-
-        Console.WriteLine("Image saved with configured JPEG settings to: " + outputPath);
-    }
+    // Save the image as JPEG using the configured options.
+    image.Save(dataDir + "output.jpg", jpegOptions);
 }
