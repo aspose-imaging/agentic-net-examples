@@ -3,38 +3,36 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        // Folder containing BMP files
-        string inputFolder = @"C:\Images\BmpFiles";
-        // Output PDF file path
-        string outputPdf = @"C:\Images\Combined.pdf";
+        // Input directory containing BMP files and output PDF file path
+        string inputDirectory = @"C:\Images\BmpInput";
+        string outputPdfPath = @"C:\Images\output.pdf";
 
-        // Get all BMP file paths
-        string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
+        // Retrieve all BMP files from the input directory
+        string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
         if (bmpFiles.Length == 0)
         {
-            Console.WriteLine("No BMP files found in the specified folder.");
+            Console.WriteLine("No BMP files found in the specified directory.");
             return;
         }
 
-        // Create a multipage image from the BMP files
+        // Create a multipage image where each BMP file becomes a page
         using (Image multipageImage = Image.Create(bmpFiles))
         {
-            // Configure PDF export options
-            using (PdfOptions pdfOptions = new PdfOptions())
-            {
-                // Optional: set image compression for PDF pages
-                pdfOptions.ImageCompression = PdfImageCompressionOptions.Flate;
+            // Configure PDF save options
+            PdfOptions pdfOptions = new PdfOptions();
 
-                // Save the multipage image as a PDF document
-                multipageImage.Save(outputPdf, pdfOptions);
-            }
+            // Optional: set image compression for the PDF pages
+            // pdfOptions.Compression = PdfImageCompressionOptions.Flate;
+
+            // Save the multipage image as a PDF document
+            multipageImage.Save(outputPdfPath, pdfOptions);
         }
 
-        Console.WriteLine("PDF document created successfully at: " + outputPdf);
+        Console.WriteLine("PDF document created successfully at: " + outputPdfPath);
     }
 }
