@@ -1,25 +1,24 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output.tga";
+        // Path to the source JPEG file
+        string jpegPath = "source.jpg";
 
-        if (Path.GetExtension(outputPath).Equals(".tga", StringComparison.OrdinalIgnoreCase))
-        {
-            outputPath = Path.ChangeExtension(outputPath, ".jpg");
-        }
+        // Desired path for the resulting TGA file
+        string tgaPath = "result.tga";
 
-        using (Image image = Image.Load(inputPath))
+        // Load the JPEG image using Aspose.Imaging's Image.Load method
+        // The cast to JpegImage ensures we work with the correct raster type
+        using (RasterImage image = (JpegImage)Image.Load(jpegPath))
         {
-            var jpegOptions = new JpegOptions();
-            image.Save(outputPath, jpegOptions);
+            // Save the loaded image as TGA using TgaOptions
+            image.Save(tgaPath, new TgaOptions());
         }
     }
 }
