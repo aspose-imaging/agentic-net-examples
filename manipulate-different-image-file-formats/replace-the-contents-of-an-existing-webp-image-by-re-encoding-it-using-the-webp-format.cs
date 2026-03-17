@@ -13,18 +13,21 @@ class ReencodeWebP
         // Path where the re‑encoded WebP image will be saved
         string outputPath = @"C:\Images\reencoded.webp";
 
-        // Load the existing WebP image from file
+        // Load the existing WebP image using the dedicated constructor
         using (WebPImage webPImage = new WebPImage(inputPath))
         {
-            // Create WebP save options (adjust as needed)
+            // Optional: clear any existing animation blocks to ensure a fresh encoding
+            webPImage.ClearBlocks();
+
+            // Configure WebP save options (adjust as needed)
             WebPOptions saveOptions = new WebPOptions
             {
-                // Example: use lossless compression with maximum quality
-                Lossless = true,
-                Quality = 100f
+                // Example: use lossy compression with a quality factor of 80
+                Lossless = false,
+                Quality = 80f
             };
 
-            // Re‑encode and save the image using the specified WebP options
+            // Re‑encode and save the image in WebP format
             webPImage.Save(outputPath, saveOptions);
         }
     }
