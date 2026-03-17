@@ -10,18 +10,17 @@ class GifToWebpConverter
         string inputGifPath = @"C:\temp\input.gif";
         string outputWebpPath = @"C:\temp\output.webp";
 
-        // Load the GIF image (can be animated or single‑frame)
+        // Load the GIF image (only the active frame will be considered for conversion)
         using (Image gifImage = Image.Load(inputGifPath))
         {
-            // Configure WebP saving options (adjust as needed)
+            // Configure WebP saving options (lossless compression with high quality)
             WebPOptions webpOptions = new WebPOptions
             {
-                // Example: use lossless compression with maximum quality
                 Lossless = true,
-                Quality = 100f
+                Quality = 90f
             };
 
-            // Save the loaded GIF (or its active frame) as a WebP image
+            // Save the active frame of the GIF as a WebP image
             gifImage.Save(outputWebpPath, webpOptions);
         }
     }
