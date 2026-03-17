@@ -4,22 +4,23 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+class DjvuToPdfConverter
 {
     static void Main()
     {
-        // Paths for the source DjVu file and the target PDF file
-        string inputDjvuPath = "input.djvu";
-        string outputPdfPath = "output.pdf";
+        // Path to the source DjVu file
+        string inputPath = "sample.djvu";
+        // Desired path for the resulting PDF file
+        string outputPath = "sample.pdf";
 
-        // Open a read‑only stream for the DjVu file
-        using (FileStream inputStream = File.OpenRead(inputDjvuPath))
+        // Open the DjVu file as a read‑only stream
+        using (FileStream inputStream = File.OpenRead(inputPath))
         {
-            // Load the DjVu document from the stream
+            // Load the DjVu document using Aspose.Imaging's LoadDocument method
             using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
             {
-                // Save the loaded DjVu document as a PDF file
-                djvuImage.Save(outputPdfPath, new PdfOptions());
+                // Save the loaded DjVu document as a PDF using PdfOptions
+                djvuImage.Save(outputPath, new PdfOptions());
             }
         }
     }
