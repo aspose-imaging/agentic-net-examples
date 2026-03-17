@@ -9,7 +9,7 @@
 | Total Examples | 1047 |
 | Categories | 7 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-03-15 |
+| Last Updated | 2026-03-17 |
 
 ## Repository Structure
 
@@ -51,4 +51,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260315_180320` | 2026-03-15*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260317_043636` | 2026-03-17*
