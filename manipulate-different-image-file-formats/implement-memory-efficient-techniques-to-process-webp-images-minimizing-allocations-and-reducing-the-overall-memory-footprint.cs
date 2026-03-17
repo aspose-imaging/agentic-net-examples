@@ -4,55 +4,45 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Expected arguments: <inputWebP> <outputWebP> [newWidth newHeight]
-        if (args.Length < 2)
-        {
-            Console.WriteLine("Usage: <inputWebP> <outputWebP> [width height]");
-            return;
-        }
+        // Input and output file paths
+        string inputPath = "input.webp";
+        string outputPath = "output_resized.webp";
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-        int? newWidth = null;
-        int? newHeight = null;
-
-        // Optional resizing parameters
-        if (args.Length >= 4 && int.TryParse(args[2], out int w) && int.TryParse(args[3], out int h))
+        // Configure load options with a modest buffer size to limit memory allocations
+        LoadOptions loadOptions = new LoadOptions
         {
-            newWidth = w;
-            newHeight = h;
-        }
-
-        // Configure LoadOptions with a modest buffer to limit memory allocations
-        var loadOptions = new LoadOptions
-        {
-            BufferSizeHint = 4 * 1024 * 1024 // 4 MiB buffer
+            BufferSizeHint = 4 * 1024 * 1024 // 4 MB buffer
         };
 
-        // Load the WebP image via a stream to avoid locking the file and to enable buffering
-        using (var stream = File.OpenRead(inputPath))
-        using (WebPImage webp = new WebPImage(stream, loadOptions))
+        // Open the input WebP file as a stream to avoid loading the whole file into memory at once
+        using (FileStream inputStream = File.OpenRead(inputPath))
+        // Load the WebP image using the stream and the configured load options
+        using (WebPImage webpImage = new WebPImage(inputStream, loadOptions))
         {
-            // Perform resizing only if dimensions were supplied; use NearestNeighbour for low memory overhead
-            if (newWidth.HasValue && newHeight.HasValue)
-            {
-                webp.Resize(newWidth.Value, newHeight.Value, ResizeType.NearestNeighbourResample);
-            }
+            // Determine new dimensions (e.g., reduce size by 50%)
+            int newWidth = webpImage.Width / 2;
+            int newHeight = webpImage.Height / 2;
 
-            // Prepare save options with matching buffer size and moderate quality
-            var saveOptions = new WebPOptions
+            // Perform a memory‑efficient resize using nearest‑neighbour resampling
+            webpImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+            // Prepare save options with a buffer hint and desired compression settings
+            WebPOptions saveOptions = new WebPOptions
             {
+                BufferSizeHint = 4 * 1024 * 1024, // match load buffer size
                 Lossless = false,
-                Quality = 80,
-                BufferSizeHint = 4 * 1024 * 1024 // align with load buffer
+                Quality = 80
             };
 
-            // Save directly to the target file; no intermediate bitmap or pixel array is created
-            webp.Save(outputPath, saveOptions);
+            // Save the processed image directly to the output stream
+            using (FileStream outputStream = File.OpenWrite(outputPath))
+            {
+                webpImage.Save(outputStream, saveOptions);
+            }
         }
     }
 }
