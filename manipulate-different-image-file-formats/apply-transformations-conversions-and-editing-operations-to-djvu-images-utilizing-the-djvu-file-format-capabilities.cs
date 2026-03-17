@@ -1,62 +1,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class Program
+class DjvuProcessingExample
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.djvu";
-        string outputDir = "output";
+        // Input and output file paths
+        string inputPath = @"C:\Temp\sample.djvu";
+        string outputPath = @"C:\Temp\sample_processed.png";
 
-        if (!Directory.Exists(outputDir))
+        // Load the DjVu document from a file stream using the provided LoadDocument method
+        using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+        using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
         {
-            Directory.CreateDirectory(outputDir);
-        }
+            // Adjust contrast (range -100 to 100)
+            djvuImage.AdjustContrast(30f);
 
-        using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-        {
-            foreach (var pageObj in djvu.Pages)
-            {
-                DjvuPage page = (DjvuPage)pageObj;
+            // Adjust brightness (range -255 to 255)
+            djvuImage.AdjustBrightness(20);
 
-                page.Grayscale();
-                page.Resize(page.Width / 2, page.Height / 2, ResizeType.NearestNeighbourResample);
+            // Rotate the image by 5 degrees around its center
+            djvuImage.Rotate(5f);
 
-                string pagePath = Path.Combine(outputDir, $"page_{page.PageNumber}.png");
-                page.Save(pagePath, new PngOptions());
-            }
+            // Apply a Gaussian blur filter to the entire image
+            djvuImage.Filter(
+                djvuImage.Bounds,
+                new GaussianBlurFilterOptions(5, 4.0));
 
-            if (djvu.Pages.Length >= 2)
-            {
-                DjvuPage firstPage = (DjvuPage)djvu.Pages[0];
-                DjvuPage secondPage = (DjvuPage)djvu.Pages[1];
-
-                int canvasWidth = firstPage.Width + secondPage.Width;
-                int canvasHeight = Math.Max(firstPage.Height, secondPage.Height);
-
-                var jpegOptions = new JpegOptions { Quality = 90 };
-                jpegOptions.Source = new FileCreateSource(Path.Combine(outputDir, "combined.jpg"), false);
-
-                using (RasterImage canvas = (RasterImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-                {
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                    graphics.Clear(Aspose.Imaging.Color.White);
-                    graphics.DrawImage(firstPage, new Aspose.Imaging.Rectangle(0, 0, firstPage.Width, firstPage.Height));
-                    graphics.DrawImage(secondPage, new Aspose.Imaging.Rectangle(firstPage.Width, 0, secondPage.Width, secondPage.Height));
-                    canvas.Save();
-                }
-            }
-
-            string pdfPath = Path.Combine(outputDir, "document.pdf");
-            var pdfOptions = new PdfOptions();
-            djvu.Save(pdfPath, pdfOptions);
+            // Save the processed image as PNG using the provided Save method and PngOptions
+            djvuImage.Save(outputPath, new PngOptions());
         }
     }
 }
