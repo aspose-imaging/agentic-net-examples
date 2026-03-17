@@ -7,47 +7,38 @@ using Aspose.Imaging.FileFormats.Png;
 class PngMemoryOptimization
 {
     // Optimizes memory usage while processing a PNG image.
+    // Loads the source image, applies memory‑friendly PNG save options,
+    // and writes the result to the specified output path.
     public static void OptimizePng(string inputPath, string outputPath)
     {
-        // Open the source file as a stream to avoid loading the whole file into memory at once.
-        using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        // Load the PNG image. The using block ensures the image is disposed promptly,
+        // releasing native resources and reducing the overall memory footprint.
+        using (Image image = Image.Load(inputPath))
         {
-            // Load the image from the stream (Aspose.Imaging handles internal buffering).
-            using (Image image = Image.Load(inputStream))
+            // Configure PNG save options for low memory consumption and high compression.
+            PngOptions options = new PngOptions
             {
-                // Configure PNG save options for low memory footprint.
-                PngOptions options = new PngOptions
-                {
-                    // Reduce color depth by using an indexed palette (max 256 colors).
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.IndexedColor,
-                    Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(
-                        (RasterImage)image, 256, Aspose.Imaging.PaletteMiningMethod.Histogram),
+                // Highest compression (0‑9). Reduces file size at the cost of CPU, but does not increase memory.
+                CompressionLevel = 9,
 
-                    // Highest compression level (more CPU, less output size).
-                    CompressionLevel = 9,
+                // Sub filter offers a good trade‑off between speed and compression.
+                FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Sub,
 
-                    // Choose a fast filter that works well for many images.
-                    FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Sub,
+                // Progressive PNG can be rendered incrementally, useful for large images.
+                Progressive = true,
 
-                    // Enable progressive PNG to allow incremental decoding.
-                    Progressive = true,
+                // BufferSizeHint limits the size of internal buffers (e.g., 1 MB) to keep memory usage bounded.
+                BufferSizeHint = 1024 * 1024
+            };
 
-                    // Hint to limit internal buffer size (e.g., 4 MB) to cap peak memory usage.
-                    BufferSizeHint = 4 * 1024 * 1024
-                };
-
-                // Save directly to a file stream to keep memory usage minimal.
-                using (FileStream outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    image.Save(outputStream, options);
-                }
-            }
+            // Save the image directly to the output file using the optimized options.
+            image.Save(outputPath, options);
         }
     }
 
-    // Sample entry point demonstrating the optimization.
     static void Main()
     {
+        // Example usage.
         string inputFile = @"C:\temp\large_input.png";
         string outputFile = @"C:\temp\optimized_output.png";
 
