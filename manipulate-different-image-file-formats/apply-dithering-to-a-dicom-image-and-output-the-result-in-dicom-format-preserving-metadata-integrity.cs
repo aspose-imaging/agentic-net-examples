@@ -2,26 +2,28 @@ using System;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class DicomDitheringExample
 {
     static void Main()
     {
-        // Input and output file paths
-        string inputPath = @"C:\Temp\sample.dicom";
-        string outputPath = @"C:\Temp\sample.dithered.dcm";
+        // Path to the source DICOM image
+        string inputPath = "input.dcm";
+
+        // Path where the dithered DICOM image will be saved
+        string outputPath = "output.dcm";
 
         // Load the DICOM image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DicomImage to access DICOM-specific methods
+            // Cast the generic Image to DicomImage to access DICOM‑specific methods
             DicomImage dicomImage = (DicomImage)image;
 
-            // Apply Floyd‑Steinberg dithering with a 1‑bit palette (black & white)
-            dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+            // Apply Floyd‑Steinberg dithering using a 4‑bit palette (16 colors)
+            // The third parameter (customPalette) is null because we use the default palette
+            dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
 
-            // Prepare DICOM save options and preserve original metadata
+            // Prepare save options that preserve original metadata
             DicomOptions saveOptions = new DicomOptions
             {
                 KeepMetadata = true
