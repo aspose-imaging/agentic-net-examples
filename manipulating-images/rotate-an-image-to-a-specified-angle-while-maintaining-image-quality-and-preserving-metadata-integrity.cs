@@ -5,7 +5,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Expect: inputPath outputPath angle
+        // Expect: input file path, output file path, rotation angle in degrees
         if (args.Length < 3)
         {
             Console.WriteLine("Usage: <inputPath> <outputPath> <angle>");
@@ -16,16 +16,25 @@ class Program
         string outputPath = args[1];
         if (!float.TryParse(args[2], out float angle))
         {
-            Console.WriteLine("Invalid angle.");
+            Console.WriteLine("Invalid rotation angle.");
             return;
         }
 
-        // Load the image, rotate, and save while preserving metadata
+        // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            // Rotate around center, resize canvas proportionally, white background
-            image.Rotate(angle, true, Color.White);
-            image.Save(outputPath);
+            // Perform rotation only if the image supports arbitrary angle rotation
+            if (image is RasterCachedImage rasterImage)
+            {
+                // Rotate around the center, resize canvas proportionally, fill empty areas with white
+                rasterImage.Rotate(angle, true, Color.White);
+                // Save preserving original format and metadata
+                rasterImage.Save(outputPath);
+            }
+            else
+            {
+                Console.WriteLine("The loaded image format does not support arbitrary angle rotation.");
+            }
         }
     }
 }

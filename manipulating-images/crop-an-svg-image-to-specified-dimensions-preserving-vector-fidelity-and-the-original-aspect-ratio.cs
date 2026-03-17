@@ -1,60 +1,51 @@
 using System;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging;
 
-class SvgCropExample
+// Input SVG file path
+string inputPath = @"C:\Images\input.svg";
+// Output SVG file path
+string outputPath = @"C:\Images\output.svg";
+
+// Desired dimensions for the cropped SVG (preserve aspect ratio)
+int targetWidth = 200;
+int targetHeight = 100;
+
+using (SvgImage svgImage = new SvgImage(inputPath))
 {
-    static void Main()
+    // Original dimensions
+    int originalWidth = svgImage.Width;
+    int originalHeight = svgImage.Height;
+
+    // Compute aspect ratios
+    double originalRatio = (double)originalWidth / originalHeight;
+    double targetRatio = (double)targetWidth / targetHeight;
+
+    // Determine cropping rectangle to match target aspect ratio
+    int cropX = 0, cropY = 0, cropWidth = originalWidth, cropHeight = originalHeight;
+
+    if (originalRatio > targetRatio)
     {
-        // Input SVG file path
-        string inputPath = @"C:\Images\input.svg";
-        // Output SVG file path
-        string outputPath = @"C:\Images\output.svg";
-
-        // Desired dimensions after cropping (preserve aspect ratio)
-        int targetWidth = 300;   // e.g., 300 pixels
-        int targetHeight = 200;  // e.g., 200 pixels
-
-        // Load the SVG image from file
-        using (SvgImage svgImage = new SvgImage(inputPath))
-        {
-            // Original dimensions
-            int originalWidth = svgImage.Width;
-            int originalHeight = svgImage.Height;
-
-            // Compute aspect ratios
-            double targetRatio = (double)targetWidth / targetHeight;
-            double originalRatio = (double)originalWidth / originalHeight;
-
-            // Determine crop size that matches the target aspect ratio
-            int cropWidth, cropHeight;
-            if (originalRatio > targetRatio)
-            {
-                // Original is wider than target – crop width
-                cropHeight = originalHeight;
-                cropWidth = (int)(cropHeight * targetRatio);
-            }
-            else
-            {
-                // Original is taller (or equal) – crop height
-                cropWidth = originalWidth;
-                cropHeight = (int)(cropWidth / targetRatio);
-            }
-
-            // Center the crop rectangle
-            int left = (originalWidth - cropWidth) / 2;
-            int top = (originalHeight - cropHeight) / 2;
-
-            // Create the rectangle and perform cropping
-            Rectangle cropRect = new Rectangle(left, top, cropWidth, cropHeight);
-            svgImage.Crop(cropRect);
-
-            // Resize to the exact target dimensions (now aspect ratio matches)
-            svgImage.Resize(targetWidth, targetHeight, ResizeType.Lanczos);
-
-            // Save the cropped SVG preserving vector fidelity
-            svgImage.Save(outputPath);
-        }
+        // Image is wider than target: crop width
+        cropWidth = (int)(originalHeight * targetRatio);
+        cropX = (originalWidth - cropWidth) / 2;
     }
+    else if (originalRatio < targetRatio)
+    {
+        // Image is taller than target: crop height
+        cropHeight = (int)(originalWidth / targetRatio);
+        cropY = (originalHeight - cropHeight) / 2;
+    }
+    // If ratios are equal, no cropping needed (full image)
+
+    // Create rectangle for cropping
+    Rectangle cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+
+    // Perform the crop operation
+    svgImage.Crop(cropRect);
+
+    // Save the cropped SVG, preserving vector fidelity
+    svgImage.Save(outputPath);
 }

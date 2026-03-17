@@ -1,39 +1,33 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Drawing;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class ApplySmoothingModeExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Define input and output file paths
-        string inputPath = @"c:\temp\sample.png";
-        string outputPath = @"c:\temp\sample_smooth.png";
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-        // Load the raster image using the unified load method
+        // Load the image as a raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access drawing capabilities
-            RasterImage rasterImage = (RasterImage)image;
+            RasterImage raster = (RasterImage)image;
 
-            // Create a Graphics object for the raster image
-            using (Graphics graphics = new Graphics(rasterImage))
-            {
-                // Set the desired smoothing mode (high quality with antialiasing)
-                graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.HighQuality;
+            // Create bilateral smoothing filter options with a kernel size of 5
+            var filterOptions = new BilateralSmoothingFilterOptions(5);
+            // Adjust additional properties if needed
+            filterOptions.ColorFactor = 1.0;
+            filterOptions.SpatialFactor = 1.0;
 
-                // Example drawing operation: draw a filled ellipse with a border
-                // This operation will benefit from the smoothing mode set above
-                Pen pen = new Pen(Color.Blue, 3);
-                Brush brush = new SolidBrush(Color.FromArgb(128, Color.Red));
-                graphics.FillEllipse(brush, new RectangleF(50, 50, 200, 150));
-                graphics.DrawEllipse(pen, new RectangleF(50, 50, 200, 150));
-            }
+            // Apply the smoothing filter to the entire image
+            raster.Filter(raster.Bounds, filterOptions);
 
-            // Save the modified image using the appropriate save method
-            rasterImage.Save(outputPath);
+            // Save the processed image as PNG
+            var pngOptions = new PngOptions();
+            raster.Save(outputPath, pngOptions);
         }
     }
 }

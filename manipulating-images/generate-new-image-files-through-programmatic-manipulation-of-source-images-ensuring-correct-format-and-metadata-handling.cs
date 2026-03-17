@@ -1,44 +1,64 @@
+using System;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for source and output images
-        string inputPath = "input.jpg";
-        string pngPath = "output.png";
-        string tiffPath = "output.tiff";
-
-        // Load the JPEG image, resize it, add a text watermark, and save as PNG
-        using (Image image = Image.Load(inputPath))
+        string[] inputPaths = new string[]
         {
-            // High‑quality resize using Lanczos resampling
-            image.Resize(800, 600, ResizeType.LanczosResample);
+            "image1.tif",
+            "image2.tif",
+            "image3.tif"
+        };
 
-            // Draw watermark text onto the image
-            Graphics graphics = new Graphics(image);
-            Font font = new Font("Arial", 24);
-            SolidBrush brush = new SolidBrush(Color.Yellow);
-            Point position = new Point(image.Width - 200, image.Height - 40);
-            graphics.DrawString("Sample Watermark", font, brush, position);
+        string outputPath = "merged_big.tif";
 
-            // Save the processed image as PNG
-            using (PngOptions pngOptions = new PngOptions())
+        List<Size> sizes = new List<Size>();
+        foreach (string path in inputPaths)
+        {
+            using (RasterImage img = (RasterImage)Image.Load(path))
             {
-                image.Save(pngPath, pngOptions);
+                sizes.Add(img.Size);
             }
         }
 
-        // Load the PNG image and convert it to TIFF with LZW compression
-        using (Image pngImage = Image.Load(pngPath))
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        foreach (Size sz in sizes)
         {
-            using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzw))
+            canvasWidth += sz.Width;
+            if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+        }
+
+        Source fileSource = new FileCreateSource(outputPath, false);
+        BigTiffOptions tiffOptions = new BigTiffOptions(TiffExpectedFormat.Default)
+        {
+            Source = fileSource
+        };
+
+        using (TiffImage canvas = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
+        {
+            int offsetX = 0;
+            foreach (string path in inputPaths)
             {
-                pngImage.Save(tiffPath, tiffOptions);
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    if (!img.IsCached) img.CacheData();
+
+                    Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
+
+                    offsetX += img.Width;
+                }
             }
+
+            canvas.Save();
         }
     }
 }

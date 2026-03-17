@@ -1,52 +1,50 @@
 using System;
-using System.Drawing; // For Rectangle
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
 
-class SvgToApngCrop
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Input SVG file path
-        string inputSvgPath = @"C:\Images\source.svg";
+        string inputPath = "input.svg";
+        // Output APNG file path
+        string outputPath = "output.apng";
 
-        // Output APNG file path (extension .png is used for APNG)
-        string outputApngPath = @"C:\Images\cropped_output.png";
-
-        // Define the rectangle area to keep after cropping
-        // Example: keep a 200x200 area starting at (50,50)
-        Rectangle cropRect = new Rectangle(50, 50, 200, 200);
+        // Define the crop rectangle (example values)
+        Rectangle cropRect = new Rectangle(10, 10, 200, 200);
 
         // Load the SVG image
-        using (Image image = Image.Load(inputSvgPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast to SvgImage to access vector-specific members
+            // Cast to SvgImage to access vector-specific methods
             SvgImage svgImage = (SvgImage)image;
 
-            // Crop the SVG to the desired rectangle
+            // Crop the SVG image to the specified rectangle
             svgImage.Crop(cropRect);
 
-            // Prepare rasterization options for vector to raster conversion
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Prepare APNG save options with rasterization settings
+            using (ApngOptions apngOptions = new ApngOptions())
             {
-                // Use the size of the cropped SVG as the raster size
-                PageSize = svgImage.Size
-            };
+                // Set the output source (file creation)
+                apngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Configure APNG saving options (inherits from PngOptions)
-            ApngOptions apngOptions = new ApngOptions
-            {
-                // Assign the rasterization options so the vector image is rasterized during save
-                VectorRasterizationOptions = rasterOptions,
+                // Configure vector rasterization to preserve fidelity
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size,          // Use the cropped size
+                    BackgroundColor = Color.White      // Set background color if needed
+                };
 
-                // Optional: set default frame time (e.g., 500 ms) for the APNG
-                DefaultFrameTime = 500
-            };
+                apngOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the cropped SVG as an APNG file
-            svgImage.Save(outputApngPath, apngOptions);
+                // Save the cropped SVG as an APNG file
+                svgImage.Save(outputPath, apngOptions);
+            }
         }
     }
 }

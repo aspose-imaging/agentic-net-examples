@@ -1,70 +1,66 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // -------------------------------------------------
-        // Load an existing JPEG image and apply transformations
-        // -------------------------------------------------
-        using (Image image = Image.Load("input.jpg"))
+        // Input image, overlay image, and output directory (fallback defaults)
+        string inputPath = args.Length > 0 ? args[0] : "input.png";
+        string overlayPath = args.Length > 1 ? args[1] : "overlay.png";
+        string outputDir = args.Length > 2 ? args[2] : "output";
+
+        Directory.CreateDirectory(outputDir);
+
+        // Load the base image as a raster image
+        using (RasterImage baseImage = (RasterImage)Image.Load(inputPath))
         {
-            // Adjust brightness and contrast (specific to JPEG images)
-            if (image is JpegImage jpeg)
+            if (!baseImage.IsCached) baseImage.CacheData();
+
+            // Apply brightness, contrast, gamma adjustments and convert to grayscale
+            baseImage.AdjustBrightness(20);
+            baseImage.AdjustContrast(0.5f);
+            baseImage.AdjustGamma(1.2f);
+            baseImage.Grayscale();
+
+            // Rotate 45 degrees, expand canvas, fill background with white
+            baseImage.Rotate(45f, true, Color.White);
+
+            // Resize to half of the original dimensions
+            int newWidth = baseImage.Width / 2;
+            int newHeight = baseImage.Height / 2;
+            baseImage.Resize(newWidth, newHeight);
+
+            // Save as JPEG with quality 80
+            string jpegPath = Path.Combine(outputDir, "result.jpg");
+            var jpegOptions = new JpegOptions { Quality = 80 };
+            baseImage.Save(jpegPath, jpegOptions);
+
+            // Save as PNG
+            string pngPath = Path.Combine(outputDir, "result.png");
+            baseImage.Save(pngPath, new PngOptions());
+
+            // Remove metadata and save as BMP
+            baseImage.RemoveMetadata();
+            string bmpPath = Path.Combine(outputDir, "result.bmp");
+            baseImage.Save(bmpPath, new BmpOptions());
+
+            // Load overlay image and blend it onto the base image at (0,0) with 50% opacity
+            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
             {
-                jpeg.AdjustBrightness(30);          // increase brightness
-                jpeg.AdjustContrast(1.2f);          // increase contrast
+                if (!overlay.IsCached) overlay.CacheData();
+                baseImage.Blend(new Point(0, 0), overlay, 128);
             }
 
-            // Rotate the image 45 degrees around its centre
-            image.Rotate(45);
-
-            // Resize to 800x600 using a high‑quality resampling filter
-            var resizeSettings = new ImageResizeSettings
-            {
-                Mode = ResizeType.CubicBSpline,
-                FilterType = ImageFilterType.Lanczos
-            };
-            image.Resize(800, 600, resizeSettings);
-
-            // Convert the image to grayscale
-            image.Grayscale();
-
-            // Replace pure red with blue, allowing a tolerance of 10
-            image.ReplaceColor(Color.Red, 10, Color.Blue);
-
-            // Remove all metadata (EXIF, XMP, etc.)
-            image.RemoveMetadata();
-
-            // Save the processed image as PNG using default PNG options
-            var pngOptions = new PngOptions();
-            image.Save("output.png", pngOptions);
-        }
-
-        // -------------------------------------------------
-        // Create a new blank BMP image, set background, and save
-        // -------------------------------------------------
-        var bmpOptions = new BmpOptions
-        {
-            BitsPerPixel = 24,
-            // Define the file where the new image will be created
-            Source = new Aspose.Imaging.Sources.FileCreateSource("blank.bmp", false)
-        };
-
-        // Create a 500x500 BMP image using the specified options
-        using (Image blank = Image.Create(bmpOptions, 500, 500))
-        {
-            // Set a light‑gray background color
-            blank.BackgroundColor = Color.LightGray;
-            blank.HasBackgroundColor = true;
-
-            // Save the newly created image to the file defined in FileCreateSource
-            blank.Save();
+            // Save the blended result as GIF
+            string gifPath = Path.Combine(outputDir, "blended.gif");
+            baseImage.Save(gifPath, new GifOptions());
         }
     }
 }
