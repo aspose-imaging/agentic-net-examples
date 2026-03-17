@@ -1,47 +1,49 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Filters;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class PngFilterExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define input and output paths
-        string dir = @"c:\temp\";
-        string inputPath = System.IO.Path.Combine(dir, "input.png");
-        string outputPath = System.IO.Path.Combine(dir, "output.png");
+        // Input PNG file path
+        string inputPath = @"C:\Images\input.png";
 
-        // Load the PNG image from a file using the provided constructor
-        using (PngImage pngImage = new PngImage(inputPath))
+        // Output directory
+        string outputDir = @"C:\Images\Processed\";
+
+        // Ensure the output directory exists
+        System.IO.Directory.CreateDirectory(outputDir);
+
+        // Apply Median filter
+        using (Image image = Image.Load(inputPath))
         {
-            // Define the rectangle that covers the whole image
-            Rectangle rect = pngImage.Bounds;
+            RasterImage raster = (RasterImage)image;
+            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-            // Apply a Gaussian blur filter to the entire image using the Filter method
-            // (FilterOptionsBase derived class)
-            GaussianBlurFilterOptions blurOptions = new GaussianBlurFilterOptions(5); // radius = 5
-            pngImage.Filter(rect, blurOptions);
+            PngOptions saveOptions = new PngOptions();
+            raster.Save(System.IO.Path.Combine(outputDir, "median_filtered.png"), saveOptions);
+        }
 
-            // Load the 32‑bit ARGB pixel data for further custom processing
-            int[] argbPixels = pngImage.LoadArgb32Pixels(rect);
+        // Apply Gaussian Blur filter
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage raster = (RasterImage)image;
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Example pixel manipulation: invert colors while preserving alpha
-            for (int i = 0; i < argbPixels.Length; i++)
-            {
-                int argb = argbPixels[i];
-                int a = (argb >> 24) & 0xFF;
-                int r = 255 - ((argb >> 16) & 0xFF);
-                int g = 255 - ((argb >> 8) & 0xFF);
-                int b = 255 - (argb & 0xFF);
-                argbPixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
-            }
+            PngOptions saveOptions = new PngOptions();
+            raster.Save(System.IO.Path.Combine(outputDir, "gaussian_blur.png"), saveOptions);
+        }
 
-            // Write the modified pixel data back to the image
-            pngImage.SaveArgb32Pixels(rect, argbPixels);
+        // Apply Sharpen filter
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage raster = (RasterImage)image;
+            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image to a new file using the provided Save method
-            pngImage.Save(outputPath);
+            PngOptions saveOptions = new PngOptions();
+            raster.Save(System.IO.Path.Combine(outputDir, "sharpened.png"), saveOptions);
         }
     }
 }
