@@ -2,38 +2,43 @@ using System;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.Brushes;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main()
     {
-        // Define image dimensions in pixels
-        int deviceWidth = 600;
-        int deviceHeight = 400;
+        // Image dimensions in pixels
+        int width = 600;
+        int height = 400;
 
-        // Convert dimensions to millimeters (approximation: 1 pixel = 0.01 mm)
-        int deviceWidthMm = (int)(deviceWidth / 100f);
-        int deviceHeightMm = (int)(deviceHeight / 100f);
+        // Convert dimensions to millimeters (1 pixel ≈ 0.01 mm)
+        int widthMm = (int)(width / 100f);
+        int heightMm = (int)(height / 100f);
 
-        // Define the drawing frame
-        Rectangle frame = new Rectangle(0, 0, deviceWidth, deviceHeight);
+        // Define the frame rectangle for the metafile
+        Rectangle frame = new Rectangle(0, 0, width, height);
 
-        // Create the EMF recorder graphics object
+        // Create an EMF recorder graphics object
         EmfRecorderGraphics2D graphics = new EmfRecorderGraphics2D(
             frame,
-            new Size(deviceWidth, deviceHeight),
-            new Size(deviceWidthMm, deviceHeightMm));
+            new Size(width, height),
+            new Size(widthMm, heightMm));
 
-        // Create a black pen with 1-pixel width
-        Pen pen = new Pen(Color.Black, 1);
+        // Define a solid brush for filling
+        Brush fillBrush = new SolidBrush(Color.LightGray);
 
-        // Draw a rectangle covering the entire canvas
-        graphics.DrawRectangle(pen, 0, 0, deviceWidth, deviceHeight);
+        // Define the rectangle to fill (x, y, width, height)
+        Rectangle fillRect = new Rectangle(50, 50, 500, 300);
 
-        // Finalize recording and save the EMF file
+        // Fill the rectangle on the metafile
+        graphics.FillRectangle(fillBrush, fillRect);
+
+        // End recording and obtain the EMF image
         using (EmfImage emfImage = graphics.EndRecording())
         {
-            emfImage.Save("output.emf");
+            // Save the resulting EMF file
+            emfImage.Save("filled_rectangle.emf");
         }
     }
 }
