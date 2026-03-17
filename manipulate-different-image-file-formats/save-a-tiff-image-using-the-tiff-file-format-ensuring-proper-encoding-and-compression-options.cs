@@ -1,42 +1,41 @@
 using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output file path
-        string outputPath = "output.tif";
+        // Destination folder
+        string dir = @"C:\temp\";
 
-        // Configure TIFF options with LZW compression and RGB photometric
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-        tiffOptions.ByteOrder = TiffByteOrder.LittleEndian;
-        tiffOptions.Compression = TiffCompressions.Lzw;
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-        // Create a TIFF frame (200x200) using the configured options
-        TiffFrame frame = new TiffFrame(tiffOptions, 200, 200);
-
-        // Fill the frame with a blue‑yellow linear gradient
-        LinearGradientBrush brush = new LinearGradientBrush(
-            new Point(0, 0),
-            new Point(frame.Width, frame.Height),
-            Color.Blue,
-            Color.Yellow);
-
-        Graphics graphics = new Graphics(frame);
-        graphics.FillRectangle(brush, frame.Bounds);
-
-        // Create a TIFF image from the frame and save it
-        using (TiffImage tiffImage = new TiffImage(frame))
+        // Create a simple BMP image (100x100) to be saved as TIFF
+        using (Image bmp = new Aspose.Imaging.FileFormats.Bmp.BmpImage(100, 100))
         {
-            tiffImage.Save(outputPath);
+            // Fill the image with a blue‑yellow linear gradient
+            LinearGradientBrush gradientBrush = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(bmp.Width, bmp.Height),
+                Color.Blue,
+                Color.Yellow);
+
+            Graphics graphics = new Graphics(bmp);
+            graphics.FillRectangle(gradientBrush, bmp.Bounds);
+
+            // Configure TIFF save options with desired encoding/compression
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };               // 8 bits per color component
+            tiffOptions.ByteOrder = TiffByteOrder.BigEndian;                  // Motorola byte order
+            tiffOptions.Compression = TiffCompressions.Lzw;                   // LZW compression
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;                   // RGB color model
+            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous; // Single plane storage
+            tiffOptions.Predictor = TiffPredictor.Horizontal;                // Predictor for LZW
+
+            // Save the image as a TIFF file using the configured options
+            bmp.Save(dir + "output.tif", tiffOptions);
         }
     }
 }
