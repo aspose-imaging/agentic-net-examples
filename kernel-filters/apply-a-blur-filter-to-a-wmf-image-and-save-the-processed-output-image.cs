@@ -1,30 +1,56 @@
-// Load the WMF image
-using (Aspose.Imaging.Image wmfImg = Aspose.Imaging.Image.Load(@"C:\Images\input.wmf"))
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+
+class Program
 {
-    // Rasterize the WMF to a PNG image
-    var rasterOptions = new Aspose.Imaging.ImageOptions.WmfRasterizationOptions
+    static void Main(string[] args)
     {
-        PageSize = wmfImg.Size,
-        BackgroundColor = Aspose.Imaging.Color.White // optional background
-    };
-    var pngSaveOptions = new Aspose.Imaging.ImageOptions.PngOptions
-    {
-        VectorRasterizationOptions = rasterOptions
-    };
-    string tempPngPath = @"C:\Images\temp.png";
-    wmfImg.Save(tempPngPath, pngSaveOptions);
-}
+        // Input WMF file path
+        string inputWmfPath = "input.wmf";
+        // Temporary rasterized PNG path
+        string tempPngPath = "temp.png";
+        // Final output image path (blurred PNG)
+        string outputPath = "output.png";
 
-// Load the rasterized PNG image
-using (Aspose.Imaging.Image rasterImg = Aspose.Imaging.Image.Load(@"C:\Images\temp.png"))
-{
-    // Cast to a raster image type that supports filtering (e.g., PngImage)
-    var pngImage = (Aspose.Imaging.FileFormats.Png.PngImage)rasterImg;
+        // Load the WMF image and rasterize it to a PNG file
+        using (Image wmfImage = Image.Load(inputWmfPath))
+        {
+            // Configure rasterization options for WMF
+            var rasterOptions = new WmfRasterizationOptions
+            {
+                PageSize = wmfImage.Size,
+                BackgroundColor = Aspose.Imaging.Color.White
+            };
 
-    // Apply a Gaussian blur filter to the entire image
-    pngImage.Filter(pngImage.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(radius: 5, sigma: 4.0));
+            // Set PNG options with the vector rasterization options
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-    // Save the blurred image
-    pngImage.Save(@"C:\Images\output_blurred.png", new Aspose.Imaging.ImageOptions.PngOptions());
+            // Save the rasterized image to a temporary PNG file
+            wmfImage.Save(tempPngPath, pngOptions);
+        }
+
+        // Load the rasterized PNG, apply Gaussian blur, and save the result
+        using (Image rasterImage = Image.Load(tempPngPath))
+        {
+            RasterImage raster = (RasterImage)rasterImage;
+
+            // Apply Gaussian blur with radius 5 and sigma 4.0 to the entire image
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the blurred image as PNG
+            raster.Save(outputPath, new PngOptions());
+        }
+
+        // Optionally delete the temporary file
+        if (File.Exists(tempPngPath))
+        {
+            File.Delete(tempPngPath);
+        }
+    }
 }
