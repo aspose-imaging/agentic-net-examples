@@ -1,49 +1,51 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.BigTiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
-class Program
+namespace BigTiffProcessingDemo
 {
-    static void Main(string[] args)
+    class Program
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.bigtiff";
-
-        using (Image loadedImage = Image.Load(inputPath))
+        static void Main()
         {
-            TiffImage tiffImage = loadedImage as TiffImage;
-            if (tiffImage == null)
+            // Path to the source BigTIFF file
+            const string inputPath = @"C:\Images\source_big.tif";
+
+            // Path where the edited BigTIFF will be saved
+            const string outputPath = @"C:\Images\edited_big.tif";
+
+            // Load the BigTIFF image using Aspose.Imaging's built‑in loader.
+            // The returned Image is cast to BigTiffImage to access BigTIFF‑specific members.
+            using (BigTiffImage bigTiff = (BigTiffImage)Image.Load(inputPath))
             {
-                Console.WriteLine("The input file is not a TIFF image.");
-                return;
-            }
+                // -----------------------------------------------------------------
+                // Example edit 1: Adjust brightness (+30)
+                // -----------------------------------------------------------------
+                bigTiff.AdjustBrightness(30);
 
-            if (!tiffImage.IsCached)
-                tiffImage.CacheData();
-
-            TiffFrame copiedFrame = TiffFrame.CopyFrame(tiffImage.ActiveFrame);
-
-            using (BigTiffImage bigTiff = new BigTiffImage(copiedFrame))
-            {
-                bigTiff.AdjustBrightness(20);
+                // -----------------------------------------------------------------
+                // Example edit 2: Rotate the image 45 degrees around its centre
+                // -----------------------------------------------------------------
                 bigTiff.Rotate(45f);
-                bigTiff.Crop(new Rectangle(50, 50, 200, 200));
 
-                using (BigTiffOptions saveOptions = new BigTiffOptions(TiffExpectedFormat.Default))
-                {
-                    saveOptions.Compression = TiffCompressions.AdobeDeflate;
-                    saveOptions.Photometric = TiffPhotometrics.Rgb;
-                    saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                    saveOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                // -----------------------------------------------------------------
+                // Example edit 3: Resize the image to 50% of its original dimensions
+                // -----------------------------------------------------------------
+                int newWidth = bigTiff.Width / 2;
+                int newHeight = bigTiff.Height / 2;
+                bigTiff.Resize(newWidth, newHeight);
 
-                    bigTiff.Save(outputPath, saveOptions);
-                }
+                // -----------------------------------------------------------------
+                // Save the modified image back to disk.
+                // The Save(string) overload handles format detection automatically.
+                // -----------------------------------------------------------------
+                bigTiff.Save(outputPath);
             }
-        }
 
-        Console.WriteLine("BigTIFF processing completed.");
+            Console.WriteLine("BigTIFF processing completed successfully.");
+        }
     }
 }
