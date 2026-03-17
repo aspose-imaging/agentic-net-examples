@@ -2,35 +2,28 @@ using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = "input.tif";
-        string outputPath = "output_copy.tif";
-
-        // Load the TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        // Load a TIFF image from disk
+        using (Image image = Image.Load("input.tif"))
         {
-            // Retrieve the original saving options derived from the file
-            ImageOptionsBase originalOptionsBase = tiffImage.GetOriginalOptions();
+            // Retrieve the original saving options derived from the loaded file
+            ImageOptionsBase originalOptions = image.GetOriginalOptions();
 
-            // Cast to TiffOptions to access TIFF-specific properties
-            TiffOptions originalOptions = originalOptionsBase as TiffOptions;
-            if (originalOptions != null)
+            // If the options are specific to TIFF, cast to TiffOptions to access native metadata
+            if (originalOptions is TiffOptions tiffOptions)
             {
-                // Example: display some native metadata
-                Console.WriteLine("BitsPerSample: " + string.Join(",", originalOptions.BitsPerSample));
-                Console.WriteLine("Compression: " + originalOptions.Compression);
-                Console.WriteLine("Photometric: " + originalOptions.Photometric);
-                Console.WriteLine("Resolution (DPI): " + tiffImage.HorizontalResolution + "x" + tiffImage.VerticalResolution);
+                // Example: output some TIFF-specific settings
+                Console.WriteLine($"BitsPerSample: {tiffOptions.BitsPerSample}");
+                Console.WriteLine($"Compression: {tiffOptions.Compression}");
+                Console.WriteLine($"Photometric: {tiffOptions.Photometric}");
             }
 
-            // Save a copy of the image using the retrieved original options
-            tiffImage.Save(outputPath, originalOptions);
+            // Save the image using the original options to preserve its original characteristics
+            image.Save("output.tif", originalOptions);
         }
     }
 }
