@@ -1,6 +1,6 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.Brushes;
@@ -9,31 +9,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = args.Length > 0 ? args[0] : Path.Combine("C:", "temp", "input.svg");
-        string outputPath = args.Length > 1 ? args[1] : Path.Combine("C:", "temp", "output.svg");
+        // Input and output SVG file paths
+        string inputPath = "input.svg";
+        string outputPath = "output.svg";
 
+        // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            SvgImage svgImage = (SvgImage)image;
+            // Cast to SvgImage for SVG-specific operations
+            SvgImage svg = (SvgImage)image;
 
-            // Scale the SVG to new dimensions.
-            svgImage.Resize(400, 300, ResizeType.LanczosResample);
+            // Scale the SVG (double its size)
+            int newWidth = svg.Width * 2;
+            int newHeight = svg.Height * 2;
+            svg.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-            // Set a light gray background.
-            svgImage.BackgroundColor = Color.LightGray;
-            svgImage.HasBackgroundColor = true;
+            // Adjust background color
+            svg.BackgroundColor = Color.LightGray;
+            svg.HasBackgroundColor = true;
 
-            // Draw a red rectangle and fill it with yellow.
-            var graphics = new SvgGraphics2D(svgImage);
-            var pen = new Pen(Color.Red, 3);
-            var brush = new SolidBrush(Color.Yellow);
-            graphics.DrawRectangle(pen, 20, 20, 360, 260);
-            graphics.FillRectangle(pen, brush, 20, 20, 360, 260);
+            // Modify elements using SvgGraphics2D
+            SvgGraphics2D graphics = new SvgGraphics2D(svg);
 
-            // Save the modified SVG.
-            svgImage.Save(outputPath);
+            // Draw a red rectangle border around the image
+            graphics.DrawRectangle(new Pen(Color.Red, 2), 0, 0, svg.Width, svg.Height);
+
+            // Fill a yellow rectangle inside the image
+            graphics.FillRectangle(
+                new Pen(Color.Black, 1),
+                new SolidBrush(Color.Yellow),
+                20, 20,
+                svg.Width - 40,
+                svg.Height - 40);
+
+            // Finalize drawing and obtain the modified SVG image
+            using (SvgImage finalSvg = graphics.EndRecording())
+            {
+                // Save the modified SVG
+                finalSvg.Save(outputPath);
+            }
         }
-
-        Console.WriteLine("SVG processing completed.");
     }
 }
