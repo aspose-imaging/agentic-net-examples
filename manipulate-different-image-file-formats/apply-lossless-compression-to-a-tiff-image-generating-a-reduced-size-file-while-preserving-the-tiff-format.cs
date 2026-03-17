@@ -1,28 +1,33 @@
 using System;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class Program
+class TiffLosslessCompression
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths (provide via command line or use defaults)
-        string inputPath = args.Length > 0 ? args[0] : "input.tif";
-        string outputPath = args.Length > 1 ? args[1] : "output_compressed.tif";
+        // Input TIFF file path
+        string inputPath = @"C:\Images\input.tif";
 
-        // Load the existing TIFF image
-        using (Image image = Image.Load(inputPath))
+        // Output TIFF file path (compressed)
+        string outputPath = @"C:\Images\output_compressed.tif";
+
+        // Load the TIFF image
+        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
         {
-            // Configure lossless compression (LZW) and predictor for better size reduction
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Compression = TiffCompressions.Lzw;
-            tiffOptions.Predictor = TiffPredictor.Horizontal;
+            // Retrieve the original saving options to preserve original settings (bit depth, etc.)
+            TiffOptions saveOptions = (TiffOptions)tiffImage.GetOriginalOptions();
 
-            // Save the image with the specified TIFF options
-            image.Save(outputPath, tiffOptions);
+            // Set a lossless compression method (LZW)
+            saveOptions.Compression = TiffCompressions.Lzw;
+
+            // Optionally, enable a predictor for better LZW compression on continuous-tone images
+            saveOptions.Predictor = TiffPredictor.Horizontal;
+
+            // Save the image with the new compression while keeping the TIFF format
+            tiffImage.Save(outputPath, saveOptions);
         }
-
-        Console.WriteLine($"Compressed TIFF saved to: {outputPath}");
     }
 }
