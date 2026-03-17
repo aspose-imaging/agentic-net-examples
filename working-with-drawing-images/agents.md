@@ -21,21 +21,21 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `using System;` (141/155 files)
 - `using Aspose.Imaging.ImageOptions;` (119/155 files) ← category-specific
 - `using Aspose.Imaging.Sources;` (83/155 files) ← category-specific
-- `using System.IO;` (74/155 files)
+- `using System.IO;` (75/155 files)
 - `using Aspose.Imaging.Brushes;` (53/155 files) ← category-specific
 - `using Aspose.Imaging.Shapes;` (48/155 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (20/155 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (20/155 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg;` (15/155 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (15/155 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (10/155 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Wmf;` (10/155 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg;` (17/155 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (16/155 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf;` (12/155 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg;` (12/155 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Tiff.Enums;` (10/155 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Gif;` (10/155 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (9/155 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Emf.Graphics;` (9/155 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Gif.Blocks;` (8/155 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Wmf;` (7/155 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Svg.Graphics;` (7/155 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (7/155 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (6/155 files) ← category-specific
 - `using System.Collections.Generic;` (5/155 files)
 - `using Aspose.Imaging.FileFormats.Wmf.Graphics;` (4/155 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Tiff.PathResources;` (2/155 files) ← category-specific
@@ -71,7 +71,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [calculate-the-dimensions-of-a-text-string-rendered-on-an-image-using-the-graphics-measurement-api.cs](./calculate-the-dimensions-of-a-text-string-rendered-on-an-image-using-the-graphics-measurement-api.cs) | `Graphics`, `PngOptions`, `StringFormat` | Calculate the dimensions of a text string rendered on an image using the graphic... |
 | [render-geometric-shapes-onto-an-image-s-figure-maintaining-existing-pixel-data-and-layer-integrity.cs](./render-geometric-shapes-onto-an-image-s-figure-maintaining-existing-pixel-data-and-layer-integrity.cs) | `PngOptions` | Render geometric shapes onto an image's figure, maintaining existing pixel data ... |
 | [create-and-attach-a-figures-array-to-an-image-instance-for-handling-multiple-figure-objects.cs](./create-and-attach-a-figures-array-to-an-image-instance-for-handling-multiple-figure-objects.cs) | `BmpOptions`, `Graphics` | Create and attach a Figures array to an image instance for handling multiple fig... |
-| [render-a-geometric-figure-onto-an-image-ensuring-pixel-alignment-and-preserving-the-original-image-quality.cs](./render-a-geometric-figure-onto-an-image-ensuring-pixel-alignment-and-preserving-the-original-image-quality.cs) | `Graphics`, `PngOptions`, `RasterImage` | Render a geometric figure onto an image, ensuring pixel alignment and preserving... |
+| [render-a-geometric-figure-onto-an-image-ensuring-pixel-alignment-and-preserving-the-original-image-quality.cs](./render-a-geometric-figure-onto-an-image-ensuring-pixel-alignment-and-preserving-the-original-image-quality.cs) | `Graphics`, `PngOptions`, `SolidBrush` | Render a geometric figure onto an image, ensuring pixel alignment and preserving... |
 | [instantiate-a-graphicspath-object-associated-with-a-specific-image-to-enable-vector-drawing-operations.cs](./instantiate-a-graphicspath-object-associated-with-a-specific-image-to-enable-vector-drawing-operations.cs) | `Graphics`, `TiffOptions` | Instantiate a GraphicsPath object associated with a specific image to enable vec... |
 | [render-vector-paths-onto-an-image-applying-specified-stroke-and-fill-attributes-as-needed.cs](./render-vector-paths-onto-an-image-applying-specified-stroke-and-fill-attributes-as-needed.cs) | `Graphics`, `PngOptions`, `SolidBrush` | Render vector paths onto an image, applying specified stroke and fill attributes... |
 | [render-color-or-pattern-fills-into-defined-vector-paths-within-an-image-while-maintaining-the-original-dimensions.cs](./render-color-or-pattern-fills-into-defined-vector-paths-within-an-image-while-maintaining-the-original-dimensions.cs) | `Graphics`, `PngOptions`, `SolidBrush` | Render color or pattern fills into defined vector paths within an image while ma... |
@@ -248,5 +248,5 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 All tasks passed ✅
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-03-15 | Run: `20260315_180320` | Examples: 155
+Updated: 2026-03-17 | Run: `20260317_055052` | Examples: 155
 <!-- AUTOGENERATED:END -->
