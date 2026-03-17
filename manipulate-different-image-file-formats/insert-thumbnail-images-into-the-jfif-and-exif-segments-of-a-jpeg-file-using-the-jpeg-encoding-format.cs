@@ -1,40 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Jpeg.JFIF;
 using Aspose.Imaging.Exif;
 
-// Load the original JPEG image
-using (Image image = Image.Load("input.jpg"))
+class Program
 {
-    // Cast to JpegImage to access JPEG‑specific properties
-    JpegImage jpeg = (JpegImage)image;
-
-    // Create a thumbnail by resizing the original image (e.g., 160x120)
-    // The Resize method returns a new RasterImage instance
-    using (RasterImage thumbnail = (RasterImage)jpeg.Clone())
+    static void Main(string[] args)
     {
-        // Resize the clone to thumbnail dimensions
-        thumbnail.Resize(160, 120);
+        // Paths for source JPEG, thumbnail image, and output JPEG
+        string sourceJpegPath = "source.jpg";
+        string thumbnailPath = "thumb.png";
+        string outputJpegPath = "output.jpg";
 
-        // Assign the thumbnail to the EXIF segment
-        // ExifData may be null if the source image has no EXIF block, so create it if necessary
-        if (jpeg.ExifData == null)
+        // Load the thumbnail image as a raster image
+        using (RasterImage thumbnail = (RasterImage)Image.Load(thumbnailPath))
         {
-            jpeg.ExifData = new JpegExifData();
-        }
-        jpeg.ExifData.Thumbnail = thumbnail;
+            // Load the source JPEG image
+            using (JpegImage jpegImage = new JpegImage(sourceJpegPath))
+            {
+                // Ensure JFIF segment exists and assign the thumbnail
+                jpegImage.Jfif = new JFIFData();
+                jpegImage.Jfif.Thumbnail = thumbnail;
 
-        // Assign the same thumbnail to the JFIF segment
-        // Jfif may be null; create a new JFIFData instance if needed
-        if (jpeg.Jfif == null)
-        {
-            jpeg.Jfif = new JFIFData();
-        }
-        jpeg.Jfif.Thumbnail = thumbnail;
+                // Ensure EXIF data exists and assign the thumbnail
+                if (jpegImage.ExifData == null)
+                {
+                    jpegImage.ExifData = new JpegExifData();
+                }
+                jpegImage.ExifData.Thumbnail = thumbnail;
 
-        // Save the modified JPEG with the new thumbnail data
-        jpeg.Save("output.jpg");
+                // Save the modified JPEG image
+                jpegImage.Save(outputJpegPath);
+            }
+        }
     }
 }
