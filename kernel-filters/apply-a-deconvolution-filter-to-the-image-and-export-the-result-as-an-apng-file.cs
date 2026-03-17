@@ -1,47 +1,47 @@
-using System.Drawing;
+using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-class DeconvolutionApngExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Input raster image path
-        const string inputPath = "input.png";
+        string inputPath = "input.png";
         // Output APNG file path
-        const string outputPath = "output.apng";
+        string outputPath = "output.apng";
 
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
+        // Load the raster image
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Cast to ApngImage to access APNG-specific members
-            ApngImage apngImage = (ApngImage)image;
+            // Apply a motion deconvolution filter (MotionWienerFilterOptions)
+            var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0);
+            sourceImage.Filter(sourceImage.Bounds, deconvOptions);
 
-            // Define a simple sharpening kernel for the deconvolution filter
-            double[] kernel = new double[]
+            // Set up APNG creation options
+            using (ApngOptions apngCreateOptions = new ApngOptions
             {
-                -1, -1, -1,
-                -1,  9, -1,
-                -1, -1, -1
-            };
-
-            // Create deconvolution filter options with the kernel
-            DeconvolutionFilterOptions deconvOptions = new DeconvolutionFilterOptions(kernel)
+                Source = new FileCreateSource(outputPath, false),
+                DefaultFrameTime = 100, // frame duration in milliseconds
+                ColorType = PngColorType.TruecolorWithAlpha
+            })
             {
-                // Optional: adjust brightness and signal‑to‑noise ratio
-                Brightness = 1.15f,
-                Snr = 0.007f
-            };
+                // Create the APNG image canvas
+                using (ApngImage apngImage = (ApngImage)Image.Create(apngCreateOptions, sourceImage.Width, sourceImage.Height))
+                {
+                    // Ensure no default frame remains
+                    apngImage.RemoveAllFrames();
 
-            // Apply the filter to the whole image rectangle
-            Rectangle fullRect = new Rectangle(0, 0, apngImage.Width, apngImage.Height);
-            apngImage.Filter(fullRect, deconvOptions);
+                    // Add the filtered image as a single frame
+                    apngImage.AddFrame(sourceImage);
 
-            // Save the processed image as an animated PNG (APNG)
-            ApngOptions apngOptions = new ApngOptions();
-            apngImage.Save(outputPath, apngOptions);
+                    // Save the APNG (output is already bound to the source)
+                    apngImage.Save();
+                }
+            }
         }
     }
 }
