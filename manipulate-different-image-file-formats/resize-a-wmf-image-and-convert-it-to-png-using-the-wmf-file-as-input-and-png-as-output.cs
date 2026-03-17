@@ -1,37 +1,33 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Input WMF file path
-        string inputPath = "input.wmf";
-        // Output PNG file path
-        string outputPath = "output.png";
-        // Desired dimensions after resizing
-        int newWidth = 800;
-        int newHeight = 600;
+        string inputFile = @"C:\Images\sample.wmf";
 
-        // Load the WMF image
-        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+        // Output PNG file path
+        string outputFile = @"C:\Images\sample_resized.png";
+
+        // Desired dimensions (example: half of original size)
+        using (Image image = Image.Load(inputFile))
         {
-            // Resize the WMF image using nearest neighbour resampling
+            // Cast the loaded image to WmfImage to access WMF‑specific methods
+            WmfImage wmfImage = (WmfImage)image;
+
+            // Calculate new width and height (here we scale down by 50%)
+            int newWidth = wmfImage.Width / 2;
+            int newHeight = wmfImage.Height / 2;
+
+            // Resize the WMF image using NearestNeighbour resampling
             wmfImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-            // Prepare PNG save options with vector rasterization settings
-            var pngOptions = new PngOptions();
-            var rasterOptions = new WmfRasterizationOptions
-            {
-                // Set the page size to match the resized image dimensions
-                PageSize = wmfImage.Size
-            };
-            pngOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save the resized image as PNG
-            wmfImage.Save(outputPath, pngOptions);
+            // Save the resized image as PNG using the built‑in PngOptions
+            wmfImage.Save(outputFile, new PngOptions());
         }
     }
 }
