@@ -7,27 +7,38 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths (provide via command line or use defaults)
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output_indexed.png";
+        // Paths for input and output PNG files
+        string inputPath = "input.png";
+        string outputPath = "output_indexed.png";
 
-        // Load the source image (preserves transparency)
+        // Load the source image (must contain transparency)
         using (Image image = Image.Load(inputPath))
         {
             // Cast to RasterImage for palette generation
             RasterImage raster = (RasterImage)image;
 
-            // Configure PNG options for indexed color while keeping transparency
-            PngOptions options = new PngOptions
-            {
-                ColorType = PngColorType.IndexedColor,
-                CompressionLevel = 9,
-                // Generate an optimal 8‑bit palette (includes transparent entries if present)
-                Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256, PaletteMiningMethod.Histogram)
-            };
+            // Generate an optimal 256‑color palette (preserves transparency)
+            var palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256, PaletteMiningMethod.Histogram);
 
-            // Save the image as an indexed PNG; transparency is retained in the palette
-            image.Save(outputPath, options);
+            // Create a new PNG image with indexed color type from the raster source
+            using (PngImage indexedPng = new PngImage(raster, PngColorType.IndexedColor))
+            {
+                // Preserve transparency in the indexed PNG
+                indexedPng.HasTransparentColor = true;
+                indexedPng.TransparentColor = Color.Transparent;
+
+                // Configure PNG save options
+                PngOptions saveOptions = new PngOptions
+                {
+                    CompressionLevel = 9,
+                    ColorType = PngColorType.IndexedColor,
+                    Palette = palette,
+                    Progressive = true
+                };
+
+                // Save the indexed PNG while keeping transparency
+                indexedPng.Save(outputPath, saveOptions);
+            }
         }
     }
 }
