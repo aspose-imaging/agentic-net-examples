@@ -1,34 +1,40 @@
 using System;
-using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.OpenDocument;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
-class EmbossOdgExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input ODG file path
-        string inputPath = @"C:\Images\sample.odg";
+        string inputPath = "input.odg";
+        string tempPath = "temp.png";
+        string outputPath = "output.png";
 
-        // Output file path (PNG format)
-        string outputPath = @"C:\Images\sample_embossed.png";
-
-        // Load the ODG image using the unified Image.Load method
-        using (Image image = Image.Load(inputPath))
+        using (Image odgImage = Image.Load(inputPath))
         {
-            // Cast the loaded image to OdgImage to access ODG‑specific members
-            OdgImage odgImage = (OdgImage)image;
+            var rasterOptions = new VectorRasterizationOptions
+            {
+                BackgroundColor = Aspose.Imaging.Color.White,
+                PageWidth = odgImage.Width,
+                PageHeight = odgImage.Height
+            };
 
-            // Apply an emboss filter to the whole image area
-            odgImage.Filter(
-                odgImage.Bounds,                     // Target rectangle (entire image)
-                new EmbossFilterOptions()            // Emboss filter options (default parameters)
-            );
+            using (PngOptions pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            })
+            {
+                odgImage.Save(tempPath, pngOptions);
+            }
+        }
 
-            // Save the processed image to a new file (PNG format)
-            odgImage.Save(outputPath, new PngOptions());
+        using (Image rasterImg = Image.Load(tempPath))
+        {
+            RasterImage raster = (RasterImage)rasterImg;
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            raster.Save(outputPath);
         }
     }
 }
