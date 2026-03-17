@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.ImageOptions;
 
 class ExtractWebPFrames
 {
@@ -18,19 +17,28 @@ class ExtractWebPFrames
         Directory.CreateDirectory(outputDir);
 
         // Load the animated WebP image using the provided constructor
-        using (WebPImage webPImage = new WebPImage(inputPath))
+        using (WebPImage animatedImage = new WebPImage(inputPath))
         {
-            // Access all frames (pages) of the animated WebP
-            Image[] frames = webPImage.Pages;
+            // Access all frames (blocks) of the animated image
+            Image[] frames = animatedImage.Pages;
 
             // Iterate through each frame and save it as a separate WebP file
             for (int i = 0; i < frames.Length; i++)
             {
-                // Build the output file name for the current frame
-                string outputPath = Path.Combine(outputDir, $"frame_{i}.webp");
+                // Each frame is a WebPFrameBlock; cast it accordingly
+                WebPFrameBlock frameBlock = frames[i] as WebPFrameBlock;
+                if (frameBlock == null)
+                    continue; // Skip if casting fails (should not happen for animated WebP)
 
-                // Save the frame using WebPOptions (default options)
-                frames[i].Save(outputPath, new WebPOptions());
+                // Create a new WebPImage from the single frame block using the provided constructor
+                using (WebPImage singleFrameImage = new WebPImage(frameBlock))
+                {
+                    // Build the output file name
+                    string outputPath = Path.Combine(outputDir, $"frame_{i}.webp");
+
+                    // Save the single frame as a WebP file using the provided Save method
+                    singleFrameImage.Save(outputPath);
+                }
             }
         }
     }

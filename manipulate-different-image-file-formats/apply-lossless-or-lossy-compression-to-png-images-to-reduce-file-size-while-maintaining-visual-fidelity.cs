@@ -7,30 +7,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input PNG file path (default if not provided)
-        string sourcePath = args.Length > 0 ? args[0] : "input.png";
-        // Output PNG file path (default if not provided)
-        string outputPath = args.Length > 1 ? args[1] : "output_compressed.png";
+        // Input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output_compressed.png";
 
         // Load the source image
-        using (Image image = Image.Load(sourcePath))
+        using (Image image = Image.Load(inputPath))
         {
+            // Cast to RasterImage for palette generation
+            RasterImage raster = image as RasterImage;
+
             // Configure PNG compression options
-            var options = new PngOptions
+            PngOptions options = new PngOptions
             {
-                // Maximum lossless compression (0-9)
+                // Maximum lossless compression level (0-9)
                 CompressionLevel = 9,
-                // Adaptive filter provides best compression for most images
-                FilterType = PngFilterType.Adaptive,
-                // Enable progressive loading (optional)
+                // Enable progressive loading
                 Progressive = true,
-                // Preserve full color with alpha channel
-                ColorType = PngColorType.TruecolorWithAlpha,
-                // Standard 8‑bit per channel depth
-                BitDepth = 8
+                // Use adaptive filter for best results
+                FilterType = PngFilterType.Adaptive,
+                // Convert to indexed color with an optimal palette (lossless reduction)
+                ColorType = PngColorType.IndexedColor,
+                // Generate a palette that closely matches the source image
+                Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256, PaletteMiningMethod.Histogram)
             };
 
-            // Save the image with the specified compression options
+            // Save the compressed PNG
             image.Save(outputPath, options);
         }
     }

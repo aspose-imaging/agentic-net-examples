@@ -1,34 +1,40 @@
 using System;
+using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 
 class MultiFrameTiffProcessor
 {
     static void Main()
     {
-        // Path to the source multi‑frame TIFF file
-        string sourcePath = @"C:\Images\source_multi.tif";
+        // Paths for the source multi‑frame TIFF and the processed output TIFF
+        string sourcePath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.tif";
 
-        // Path where the processed TIFF will be saved
-        string destinationPath = @"C:\Images\preserved_multi.tif";
-
-        // Load the existing TIFF image (multi‑frame) using Aspose.Imaging's load mechanism
-        using (TiffImage tiffImage = (TiffImage)Image.Load(sourcePath))
+        // Load the existing TIFF image (multi‑frame)
+        using (TiffImage sourceTiff = (TiffImage)Image.Load(sourcePath))
         {
-            // Iterate through each frame to demonstrate that frames are accessible
-            // No modifications are performed to keep each frame's integrity intact
-            for (int i = 0; i < tiffImage.Frames.Length; i++)
+            // Ensure the source TIFF actually contains frames
+            if (sourceTiff.Frames == null || sourceTiff.Frames.Length == 0)
+                throw new InvalidOperationException("The source TIFF does not contain any frames.");
+
+            // Create a new TIFF image using the first frame of the source.
+            // This utilizes the TiffImage(TiffFrame) constructor.
+            using (TiffImage processedTiff = new TiffImage(sourceTiff.Frames[0]))
             {
-                TiffFrame frame = tiffImage.Frames[i];
-                // Example placeholder: you could read metadata or perform read‑only operations here
-                Console.WriteLine($"Frame {i + 1}: {frame.Width}x{frame.Height} pixels");
+                // Add the remaining frames to the new image.
+                // The AddFrames method integrates an array of frames while preserving their data.
+                TiffFrame[] remainingFrames = sourceTiff.Frames.Skip(1).ToArray();
+                if (remainingFrames.Length > 0)
+                {
+                    processedTiff.AddFrames(remainingFrames);
+                }
+
+                // Save the new multi‑frame TIFF, preserving each frame's integrity.
+                processedTiff.Save(outputPath);
             }
-
-            // Save the TIFF image back to disk.
-            // The Save method preserves all frames exactly as they were loaded.
-            tiffImage.Save(destinationPath);
         }
-
-        Console.WriteLine("Multi‑frame TIFF processing completed successfully.");
     }
 }

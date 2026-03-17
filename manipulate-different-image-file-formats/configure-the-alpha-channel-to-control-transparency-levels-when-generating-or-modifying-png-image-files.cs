@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
@@ -9,67 +10,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Create a new PNG image with a semi‑transparent gradient
-        string gradientOutputPath = "gradient.png";
-        Source gradientSource = new FileCreateSource(gradientOutputPath, false);
-        PngOptions gradientOptions = new PngOptions()
+        string outputPath = Path.Combine(Environment.CurrentDirectory, "alpha_gradient.png");
+
+        PngOptions pngOptions = new PngOptions
         {
-            Source = gradientSource,
             ColorType = PngColorType.TruecolorWithAlpha,
             BitDepth = 8,
-            CompressionLevel = 9,
-            Progressive = true
+            Source = new FileCreateSource(outputPath, false)
         };
 
-        using (PngImage gradientImage = (PngImage)Image.Create(gradientOptions, 200, 200))
+        int width = 400;
+        int height = 400;
+
+        using (PngImage pngImage = (PngImage)Image.Create(pngOptions, width, height))
         {
-            // Brush that fades from blue (opaque) to transparent
             LinearGradientBrush gradientBrush = new LinearGradientBrush(
                 new Point(0, 0),
-                new Point(gradientImage.Width, gradientImage.Height),
-                Color.Blue,
-                Color.Transparent);
+                new Point(width, height),
+                Color.FromArgb(0, 0, 0, 255),
+                Color.FromArgb(255, 0, 0, 255)
+            );
 
-            Graphics graphics = new Graphics(gradientImage);
-            graphics.FillRectangle(gradientBrush, gradientImage.Bounds);
-
-            // Since the image is bound to a file source, just call Save()
-            gradientImage.Save();
+            Graphics graphics = new Graphics(pngImage);
+            graphics.FillRectangle(gradientBrush, pngImage.Bounds);
+            pngImage.Save();
         }
 
-        // Load an existing PNG, adjust its alpha channel uniformly, and save
-        string inputPath = "input.png";
-        string modifiedOutputPath = "modified.png";
-
-        using (RasterImage sourceRaster = (RasterImage)Image.Load(inputPath))
-        {
-            // Load all ARGB pixels
-            int[] argbPixels = sourceRaster.LoadArgb32Pixels(sourceRaster.Bounds);
-
-            // Set alpha to 128 (50% transparency) for every pixel
-            for (int i = 0; i < argbPixels.Length; i++)
-            {
-                int rgb = argbPixels[i] & 0x00FFFFFF; // keep RGB
-                argbPixels[i] = (128 << 24) | rgb;    // set new alpha
-            }
-
-            // Prepare options for the output PNG
-            Source modifiedSource = new FileCreateSource(modifiedOutputPath, false);
-            PngOptions modifiedOptions = new PngOptions()
-            {
-                Source = modifiedSource,
-                ColorType = PngColorType.TruecolorWithAlpha,
-                BitDepth = 8,
-                CompressionLevel = 9,
-                Progressive = true
-            };
-
-            // Create a new PNG canvas and write the modified pixels
-            using (PngImage modifiedImage = (PngImage)Image.Create(modifiedOptions, sourceRaster.Width, sourceRaster.Height))
-            {
-                modifiedImage.SaveArgb32Pixels(modifiedImage.Bounds, argbPixels);
-                modifiedImage.Save();
-            }
-        }
+        Console.WriteLine($"PNG image with alpha gradient saved to: {outputPath}");
     }
 }

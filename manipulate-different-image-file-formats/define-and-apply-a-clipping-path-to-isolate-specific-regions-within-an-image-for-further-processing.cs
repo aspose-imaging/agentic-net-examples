@@ -15,51 +15,49 @@ class Program
     {
         // Input and output file paths
         string inputPath = "input.png";
-        string outputPath = "clipped.png";
+        string outputPath = "output.png";
 
-        // Load the source image as RasterImage
+        // Load the source image as a RasterImage
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Define a manual clipping mask (e.g., an ellipse)
+            // Define a manual clipping path (mask)
             GraphicsPath manualMask = new GraphicsPath();
             Figure figure = new Figure();
-            // Adjust the rectangle to define the region to keep
-            figure.AddShape(new EllipseShape(new RectangleF(100, 100, 300, 300)));
+            // Example shapes: an ellipse and a rectangle
+            figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 150)));
+            figure.AddShape(new RectangleShape(new RectangleF(100, 200, 120, 80)));
             manualMask.AddFigure(figure);
 
-            // Prepare manual masking arguments
+            // Set up manual masking arguments
             ManualMaskingArgs maskingArgs = new ManualMaskingArgs();
             maskingArgs.Mask = manualMask;
 
-            // Prepare export options (required for masking)
-            using (MemoryStream ms = new MemoryStream())
+            // Export options for the resulting image (transparent PNG)
+            PngOptions exportOptions = new PngOptions
             {
-                PngOptions exportOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(ms)
-                };
+                ColorType = PngColorType.TruecolorWithAlpha,
+                Source = new StreamSource(new MemoryStream())
+            };
 
-                // Configure masking options
-                MaskingOptions maskingOptions = new MaskingOptions
-                {
-                    Method = SegmentationMethod.Manual,
-                    Decompose = false,               // Keep mask as a single foreground object
-                    Args = maskingArgs,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = exportOptions
-                };
+            // Configure masking options
+            MaskingOptions maskingOptions = new MaskingOptions
+            {
+                Method = SegmentationMethod.Manual,
+                Decompose = false,
+                Args = maskingArgs,
+                BackgroundReplacementColor = Color.Transparent,
+                ExportOptions = exportOptions
+            };
 
-                // Perform manual masking
-                ImageMasking masking = new ImageMasking(image);
-                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+            // Perform masking
+            ImageMasking masking = new ImageMasking(image);
+            using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+            {
+                // The foreground (masked region) is typically at index 1
+                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
                 {
-                    // The foreground (clipped region) is at index 1
-                    using (RasterImage clipped = (RasterImage)maskingResult[1].GetImage())
-                    {
-                        // Save the clipped image
-                        clipped.Save(outputPath, exportOptions);
-                    }
+                    // Save the isolated region
+                    foreground.Save(outputPath, exportOptions);
                 }
             }
         }

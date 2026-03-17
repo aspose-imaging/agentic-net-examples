@@ -1,30 +1,35 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input raster image path (first argument or default)
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        // Output TIFF path (second argument or default)
-        string outputPath = args.Length > 1 ? args[1] : "output.tif";
+        // Path to the source raster image (any supported format, e.g., PNG, JPEG, BMP)
+        string sourcePath = @"C:\Images\input.png";
 
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
+        // Desired output TIFF file path
+        string outputPath = @"C:\Images\output_deflate.tif";
+
+        // Load the raster image using Aspose.Imaging's load rule
+        using (Image rasterImage = Image.Load(sourcePath))
         {
-            // Configure TIFF options with Deflate compression
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Compression = TiffCompressions.Deflate;
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+            // Create TIFF save options (default expected format)
+            TiffOptions tiffSaveOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-            // Save the image as TIFF using the configured options
-            image.Save(outputPath, tiffOptions);
+            // Apply Deflate compression to reduce file size
+            tiffSaveOptions.Compression = TiffCompressions.Deflate;
+
+            // Optional: set common TIFF parameters (bits per sample, photometric, etc.)
+            tiffSaveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };                     // 8 bits per color component
+            tiffSaveOptions.Photometric = TiffPhotometrics.Rgb;                         // RGB color model
+            tiffSaveOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;        // Single plane storage
+
+            // Save the image as a TIFF using the defined options (save rule)
+            rasterImage.Save(outputPath, tiffSaveOptions);
         }
     }
 }

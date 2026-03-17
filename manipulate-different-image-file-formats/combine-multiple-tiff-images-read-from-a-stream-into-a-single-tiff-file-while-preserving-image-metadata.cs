@@ -7,59 +7,59 @@ using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Input TIFF file paths (replace with actual paths or obtain from args)
-        string[] inputPaths = new string[]
+        static void Main(string[] args)
         {
-            "input1.tif",
-            "input2.tif",
-            "input3.tif"
-        };
-
-        // Output combined TIFF file path
-        string outputPath = "combined.tif";
-
-        // Collect frames from each input TIFF stream
-        List<TiffFrame> frames = new List<TiffFrame>();
-        foreach (string path in inputPaths)
-        {
-            // Open the source file as a stream
-            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            // Input TIFF files (replace with actual paths or streams)
+            string[] inputPaths = new string[]
             {
-                // Create a TiffFrame from the stream (preserves metadata)
-                TiffFrame frame = new TiffFrame(stream);
-                frames.Add(frame);
+                "input1.tif",
+                "input2.tif",
+                "input3.tif"
+            };
+
+            // Output combined TIFF file
+            string outputPath = "combined.tif";
+
+            // Load the first image to obtain dimensions and basic options
+            using (TiffImage firstImage = (TiffImage)Image.Load(inputPaths[0]))
+            {
+                // Prepare TiffOptions for the output file
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Source = new FileCreateSource(outputPath, false);
+                tiffOptions.Photometric = TiffPhotometrics.Rgb;
+                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                tiffOptions.Compression = TiffCompressions.Lzw;
+
+                // Create the output TIFF canvas using the dimensions of the first frame
+                using (TiffImage outputTiff = (TiffImage)Image.Create(tiffOptions, firstImage.ActiveFrame.Width, firstImage.ActiveFrame.Height))
+                {
+                    // Add frames from each input TIFF
+                    foreach (string path in inputPaths)
+                    {
+                        using (TiffImage src = (TiffImage)Image.Load(path))
+                        {
+                            // Preserve metadata by adding the whole image (its frames) to the output
+                            outputTiff.Add(src);
+                        }
+                    }
+
+                    // Remove the initially created default frame
+                    TiffFrame defaultFrame = outputTiff.ActiveFrame;
+                    if (outputTiff.Frames.Length > 1)
+                    {
+                        outputTiff.ActiveFrame = outputTiff.Frames[1];
+                        outputTiff.RemoveFrame(0);
+                    }
+                    defaultFrame.Dispose();
+
+                    // Save the combined TIFF
+                    outputTiff.Save();
+                }
             }
         }
-
-        if (frames.Count == 0)
-        {
-            Console.WriteLine("No input TIFF files were provided.");
-            return;
-        }
-
-        // Configure output TIFF options
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-        {
-            Source = new FileCreateSource(outputPath, false)
-        };
-
-        // Create the output TIFF image using the first frame
-        using (TiffImage tiffImage = new TiffImage(frames[0]))
-        {
-            // Add remaining frames
-            for (int i = 1; i < frames.Count; i++)
-            {
-                tiffImage.AddFrame(frames[i]);
-            }
-
-            // Save the combined TIFF (metadata from each frame is retained)
-            tiffImage.Save();
-        }
-
-        Console.WriteLine($"Combined TIFF saved to: {outputPath}");
     }
 }

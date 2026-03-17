@@ -1,33 +1,26 @@
+using System;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.PathResources;
-using System;
 
 class Program
 {
     static void Main()
     {
-        // Load the TIFF image using the provided load rule
-        using (TiffImage tiff = (TiffImage)Image.Load("Sample.tif"))
+        // Load the TIFF image using Aspose.Imaging's Image.Load method
+        using (var image = (TiffImage)Image.Load("Sample.tif"))
         {
-            // Access clipping paths stored in the active frame's PathResources
-            foreach (PathResource path in tiff.ActiveFrame.PathResources)
+            // Retrieve the clipping path resources from the active frame
+            List<PathResource> clippingPaths = image.ActiveFrame.PathResources;
+
+            // Iterate through each path and output its details
+            foreach (var path in clippingPaths)
             {
-                // Output basic information about each clipping path
-                Console.WriteLine($"Path Name : {path.Name}");
-                Console.WriteLine($"Block Id  : {path.BlockId}");
-                Console.WriteLine($"Records   : {path.Records?.Count ?? 0}");
-
-                // Optionally list the type of each record in the path
-                if (path.Records != null)
-                {
-                    foreach (var record in path.Records)
-                    {
-                        Console.WriteLine($"  Record Type: {record.GetType().Name}");
-                    }
-                }
-
-                Console.WriteLine(); // Blank line between paths
+                Console.WriteLine($"Path Name: {path.Name}");
+                Console.WriteLine($"Block Id: {path.BlockId}");
+                Console.WriteLine($"Number of Records: {path.Records?.Count ?? 0}");
+                Console.WriteLine();
             }
         }
     }

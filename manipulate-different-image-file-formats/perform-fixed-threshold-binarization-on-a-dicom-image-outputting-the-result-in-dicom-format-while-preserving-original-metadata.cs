@@ -1,31 +1,15 @@
-using System;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.ImageOptions;
+// Define the folder containing the DICOM files
+string dir = @"c:\temp\";
 
-class FixedThresholdBinarization
+// Load the original DICOM image
+using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dir + "sample.dicom"))
 {
-    static void Main()
-    {
-        // Path to the source DICOM image
-        string inputPath = @"C:\temp\sample.dicom";
+    // Cast the generic Image to DicomImage to access DICOM‑specific methods
+    Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
 
-        // Path for the binarized DICOM output (metadata will be preserved)
-        string outputPath = @"C:\temp\sample_binarized.dicom";
+    // Apply fixed‑threshold binarization (threshold value 127)
+    dicomImage.BinarizeFixed(127);
 
-        // Load the DICOM image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to DicomImage to access DICOM‑specific methods
-            DicomImage dicomImage = (DicomImage)image;
-
-            // Apply fixed‑threshold binarization (threshold value: 127)
-            dicomImage.BinarizeFixed(127);
-
-            // Save the processed image back to DICOM format,
-            // using DicomOptions to retain original metadata
-            DicomOptions dicomOptions = new DicomOptions();
-            dicomImage.Save(outputPath, dicomOptions);
-        }
-    }
+    // Save the processed image back to DICOM format, preserving metadata
+    dicomImage.Save(dir + "sample.BinarizeFixed.dcm", new Aspose.Imaging.ImageOptions.DicomOptions());
 }

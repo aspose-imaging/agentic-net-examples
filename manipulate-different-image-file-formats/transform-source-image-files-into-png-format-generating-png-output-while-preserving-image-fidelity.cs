@@ -3,35 +3,34 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+class ImageConverter
 {
     static void Main()
     {
         // Directory containing source images (any supported format)
-        string inputDir = @"C:\temp\input";
-        // Directory where PNG files will be written
-        string outputDir = @"C:\temp\output";
+        string sourceDir = @"C:\SourceImages";
+
+        // Directory where PNG files will be saved
+        string targetDir = @"C:\PngOutput";
 
         // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
+        Directory.CreateDirectory(targetDir);
 
-        // Process each file in the input directory
-        foreach (string sourcePath in Directory.GetFiles(inputDir))
+        // Process each file in the source directory
+        foreach (string sourcePath in Directory.GetFiles(sourceDir))
         {
-            // Load the image using Aspose.Imaging's generic loader
+            // Load the image using Aspose.Imaging's built‑in loader (handles all supported formats)
             using (Image image = Image.Load(sourcePath))
             {
-                // Use default PNG options to preserve original fidelity
-                PngOptions pngOptions = new PngOptions();
+                // Build the output file name with a .png extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(sourcePath);
+                string targetPath = Path.Combine(targetDir, fileNameWithoutExt + ".png");
 
-                // Construct the output file name with a .png extension
-                string outputPath = Path.Combine(
-                    outputDir,
-                    Path.GetFileNameWithoutExtension(sourcePath) + ".png");
-
-                // Save the loaded image as PNG using the provided Save overload
-                image.Save(outputPath, pngOptions);
+                // Save the image as PNG using default PNG options (preserves fidelity)
+                image.Save(targetPath, new PngOptions());
             }
         }
+
+        Console.WriteLine("Conversion completed.");
     }
 }

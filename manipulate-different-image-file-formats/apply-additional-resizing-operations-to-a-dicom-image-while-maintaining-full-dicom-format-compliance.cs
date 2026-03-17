@@ -1,33 +1,33 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
-class DicomResizeExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the folder containing the source DICOM file.
-        string dir = @"c:\temp\";
+        // Input and output DICOM file paths
+        string inputPath = args.Length > 0 ? args[0] : "input.dcm";
+        string outputPath = args.Length > 1 ? args[1] : "output_resized.dcm";
 
-        // Load the DICOM image.
-        using (DicomImage dicom = (DicomImage)Image.Load(dir + "sample.dicom"))
+        // Load the DICOM image
+        using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
         {
-            // 1. Upscale the image by 150% using Bilinear resampling.
-            int upWidth = (int)(dicom.Width * 1.5);
-            int upHeight = (int)(dicom.Height * 1.5);
-            dicom.Resize(upWidth, upHeight, ResizeType.BilinearResample);
+            // Upscale by 2x using NearestNeighbour resampling
+            dicomImage.Resize(dicomImage.Width * 2, dicomImage.Height * 2, ResizeType.NearestNeighbourResample);
 
-            // 2. Downscale the image proportionally so that the width becomes 200 pixels,
-            //    preserving the aspect ratio, using Nearest‑Neighbour resampling.
-            dicom.ResizeWidthProportionally(200, ResizeType.NearestNeighbourResample);
+            // Downscale by 2x using Bilinear resampling
+            dicomImage.Resize(dicomImage.Width / 2, dicomImage.Height / 2, ResizeType.BilinearResample);
 
-            // 3. (Optional) Adjust the image resolution to 300 dpi for both axes.
-            dicom.SetResolution(300.0, 300.0);
+            // Increase width proportionally (height adjusted automatically) using HighQuality resampling
+            dicomImage.ResizeWidthProportionally(dicomImage.Width * 3, ResizeType.HighQualityResample);
 
-            // Save the processed image back to DICOM format.
-            // The file extension determines the output format; using ".dcm" keeps it DICOM.
-            dicom.Save(dir + "sample_resized.dcm");
+            // Decrease height proportionally (width adjusted automatically) using NearestNeighbour resampling
+            dicomImage.ResizeHeightProportionally(dicomImage.Height / 2, ResizeType.NearestNeighbourResample);
+
+            // Save the resized image back to DICOM format, preserving compliance
+            var dicomOptions = new DicomOptions();
+            dicomImage.Save(outputPath, dicomOptions);
         }
     }
 }

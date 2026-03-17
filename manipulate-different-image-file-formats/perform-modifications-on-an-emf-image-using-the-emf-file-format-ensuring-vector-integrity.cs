@@ -9,30 +9,30 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("C:\\Temp", "input.emf");
-        string outputPath = Path.Combine("C:\\Temp", "output_modified.emf");
+        // Define input and output EMF file paths
+        string dir = @"c:\temp\";
+        string inputPath = Path.Combine(dir, "test.emf");
+        string outputPath = Path.Combine(dir, "test.modified.emf");
 
+        // Load the existing EMF image
         using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
         {
+            // Create a graphics recorder that contains all records from the loaded EMF
             EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
 
-            graphics.DrawRectangle(new Pen(Color.Red, 2), 0, 0, emfImage.Width, emfImage.Height);
+            // Draw a red rectangle
+            graphics.DrawRectangle(new Pen(Color.Red, 2), 50, 50, 200, 100);
 
-            using (SolidBrush brush = new SolidBrush(Color.Yellow))
-            {
-                brush.Opacity = 50;
-                int rectWidth = emfImage.Width / 2;
-                int rectHeight = emfImage.Height / 2;
-                int rectX = (emfImage.Width - rectWidth) / 2;
-                int rectY = (emfImage.Height - rectHeight) / 2;
-                graphics.FillRectangle(brush, new Rectangle(rectX, rectY, rectWidth, rectHeight));
-            }
+            // Fill a blue rectangle
+            graphics.FillRectangle(new SolidBrush(Color.Blue), new Rectangle(300, 50, 150, 100));
 
-            Font watermarkFont = new Font("Arial", 36, FontStyle.Bold);
-            graphics.DrawString("Modified", watermarkFont, Color.Blue, emfImage.Width - 200, emfImage.Height - 50);
+            // Draw a text string
+            graphics.DrawString("Modified", new Font("Arial", 36, FontStyle.Bold), Color.Green, 100, 200);
 
+            // Finalize the recording and obtain the modified EMF image
             using (EmfImage modifiedEmf = graphics.EndRecording())
             {
+                // Save the modified EMF image, preserving vector data
                 modifiedEmf.Save(outputPath);
             }
         }

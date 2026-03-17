@@ -1,21 +1,36 @@
-// Specify the source DICOM file, target dimensions and output file
-string sourcePath = @"C:\temp\sample.dicom";
-string outputPath = @"C:\temp\sample_resized.dicom";
-int targetWidth = 512;   // desired width
-int targetHeight = 512;  // desired height
+using System;
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
-// Load the DICOM image using the generic Image.Load method
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(sourcePath))
+class DicomResizeExample
 {
-    // Cast the loaded image to DicomImage to access DICOM‑specific operations
-    Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage =
-        (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
+    static void Main()
+    {
+        // Input DICOM file path
+        string inputPath = @"c:\temp\sample.dicom";
 
-    // Resize the image. Choose a resampling algorithm (e.g., BilinearResample)
-    dicomImage.Resize(targetWidth, targetHeight, Aspose.Imaging.ResizeType.BilinearResample);
+        // Output DICOM file path
+        string outputPath = @"c:\temp\sample_resized.dicom";
 
-    // Save the resized image back to DICOM format.
-    // DicomOptions ensures that all original DICOM metadata is retained.
-    var dicomSaveOptions = new Aspose.Imaging.ImageOptions.DicomOptions();
-    dicomImage.Save(outputPath, dicomSaveOptions);
+        // Desired dimensions
+        int newWidth = 512;
+        int newHeight = 512;
+
+        // Load the DICOM image using the generic Image.Load method
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to DicomImage to access DICOM‑specific functionality
+            DicomImage dicomImage = (DicomImage)image;
+
+            // Resize the image; metadata is retained automatically
+            dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+            // Prepare DICOM save options (preserves existing metadata)
+            DicomOptions saveOptions = new DicomOptions();
+
+            // Save the resized image back to DICOM format
+            dicomImage.Save(outputPath, saveOptions);
+        }
+    }
 }

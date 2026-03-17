@@ -1,31 +1,42 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Load the TIFF image using Aspose.Imaging (lifecycle rule)
-        using (var image = (TiffImage)Image.Load("input.tif"))
+        // Path to the source TIFF file
+        string inputPath = "Sample.tif";
+
+        // Load the TIFF image
+        using (TiffImage image = (TiffImage)Image.Load(inputPath))
         {
             // Retrieve clipping paths (PathResources) from the active frame
-            List<PathResource> clippingPaths = image.ActiveFrame.PathResources;
+            List<Aspose.Imaging.FileFormats.Tiff.PathResources.PathResource> clippingPaths = image.ActiveFrame.PathResources;
 
-            // Display the name of each clipping path
+            // Display the names of the clipping paths
             foreach (var path in clippingPaths)
             {
-                Console.WriteLine($"Clipping Path: {path.Name}");
+                Console.WriteLine($"Clipping Path Name: {path.Name}");
             }
 
-            // Optional: keep only the first clipping path and discard the rest
-            if (clippingPaths.Count > 0)
-            {
-                image.ActiveFrame.PathResources = new List<PathResource> { clippingPaths[0] };
-                // Save the modified image (save rule)
-                image.Save("output.tif");
-            }
+            // Convert the clipping paths to a GraphicsPath for vector‑based editing
+            Aspose.Imaging.GraphicsPath graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter
+                .ToGraphicsPath(image.ActiveFrame.PathResources.ToArray(), image.ActiveFrame.Size);
+
+            // Example: draw the clipping path outline on the image (optional)
+            Graphics graphics = new Graphics(image);
+            Pen pen = new Pen(Color.Red, 2);
+            graphics.DrawPath(pen, graphicsPath);
+
+            // Save the modified image (overwrites the original file)
+            image.Save();
         }
     }
 }

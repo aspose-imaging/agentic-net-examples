@@ -1,44 +1,41 @@
-using System;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
+// Specify the output directory
+string outputDir = @"c:\temp\";
 
-class Program
+// Configure TIFF saving options with desired encoding parameters
+Aspose.Imaging.ImageOptions.TiffOptions tiffOptions = new Aspose.Imaging.ImageOptions.TiffOptions(
+    Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
+
+// 8 bits per color component (RGB)
+tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+
+// Use Big Endian byte order (Motorola)
+tiffOptions.ByteOrder = Aspose.Imaging.FileFormats.Tiff.Enums.TiffByteOrder.BigEndian;
+
+// Apply LZW compression
+tiffOptions.Compression = Aspose.Imaging.FileFormats.Tiff.Enums.TiffCompressions.Lzw;
+
+// Use horizontal predictor to improve LZW compression efficiency
+tiffOptions.Predictor = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPredictor.Horizontal;
+
+// Set the photometric interpretation to RGB
+tiffOptions.Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb;
+
+// Store all color components in a single plane
+tiffOptions.PlanarConfiguration = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPlanarConfigs.Contiguous;
+
+// Create a raster image (BMP) to be saved as TIFF
+using (Aspose.Imaging.Image bmpImage = new Aspose.Imaging.FileFormats.Bmp.BmpImage(100, 100))
 {
-    static void Main(string[] args)
-    {
-        // Output file path
-        string outputPath = "output.tif";
+    // Fill the image with a blue‑yellow linear gradient
+    Aspose.Imaging.Brushes.LinearGradientBrush gradientBrush = new Aspose.Imaging.Brushes.LinearGradientBrush(
+        new Aspose.Imaging.Point(0, 0),
+        new Aspose.Imaging.Point(bmpImage.Width, bmpImage.Height),
+        Aspose.Imaging.Color.Blue,
+        Aspose.Imaging.Color.Yellow);
 
-        // Configure TIFF encoding options
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-        tiffOptions.ByteOrder = TiffByteOrder.BigEndian;
-        tiffOptions.Compression = TiffCompressions.Lzw;
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-        tiffOptions.Predictor = TiffPredictor.Horizontal;
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
+    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(bmpImage);
+    graphics.FillRectangle(gradientBrush, bmpImage.Bounds);
 
-        // Create a TIFF image with the specified options
-        using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 200, 200))
-        {
-            // Fill the image with a blue‑yellow gradient
-            using (LinearGradientBrush brush = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(tiffImage.Width, tiffImage.Height),
-                Color.Blue,
-                Color.Yellow))
-            {
-                Graphics graphics = new Graphics(tiffImage.ActiveFrame);
-                graphics.FillRectangle(brush, tiffImage.Bounds);
-            }
-
-            // Save the image (file is already bound by the source)
-            tiffImage.Save();
-        }
-    }
+    // Save the image as a TIFF file using the configured options
+    bmpImage.Save(System.IO.Path.Combine(outputDir, "output.tif"), tiffOptions);
 }

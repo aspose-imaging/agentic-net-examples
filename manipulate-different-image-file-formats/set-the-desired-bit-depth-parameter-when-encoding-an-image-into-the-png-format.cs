@@ -2,35 +2,37 @@ using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Brushes;
 
-class SetPngBitDepth
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        // Path to the source image (any supported format)
-        string sourcePath = @"c:\temp\input.png";
+        // Output file path
+        string outputPath = "output.png";
 
-        // Path for the resulting PNG image
-        string outputPath = @"c:\temp\output_8bit.png";
+        // Configure PNG options, including the desired bit depth
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.BitDepth = 8; // Valid values: 1, 2, 4, 8, 16 (depending on ColorType)
+        pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
+        pngOptions.CompressionLevel = 9;
+        pngOptions.Progressive = true;
 
-        // Load the source image
-        using (Image image = Image.Load(sourcePath))
+        // Create a PNG image with the specified options
+        using (PngImage pngImage = new PngImage(pngOptions, 200, 200))
         {
-            // Create PNG save options
-            PngOptions pngOptions = new PngOptions();
+            // Fill the image with a gradient
+            LinearGradientBrush brush = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(pngImage.Width, pngImage.Height),
+                Color.Blue,
+                Color.Transparent);
 
-            // Desired bit depth (allowed values: 1, 2, 4, 8, 16)
-            pngOptions.BitDepth = 8;
+            Graphics graphics = new Graphics(pngImage);
+            graphics.FillRectangle(brush, pngImage.Bounds);
 
-            // Set a compatible color type for the chosen bit depth
-            // TruecolorWithAlpha supports 8 and 16 bits per channel
-            pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
-
-            // Optional: set maximum compression (0‑9)
-            pngOptions.CompressionLevel = 9;
-
-            // Save the image using the configured PNG options
-            image.Save(outputPath, pngOptions);
+            // Save the image; the BitDepth setting is applied during save
+            pngImage.Save(outputPath);
         }
     }
 }

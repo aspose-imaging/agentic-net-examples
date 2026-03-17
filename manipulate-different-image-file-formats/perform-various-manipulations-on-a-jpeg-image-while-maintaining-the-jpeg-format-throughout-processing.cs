@@ -7,47 +7,43 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths (can be passed as command‑line arguments)
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output.jpg";
+        // Input and output JPEG file paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
         // Load the JPEG image
         using (JpegImage image = (JpegImage)Image.Load(inputPath))
         {
-            // Auto‑rotate based on EXIF orientation
-            image.AutoRotate();
+            // Cache data for optimal performance
+            if (!image.IsCached)
+                image.CacheData();
 
-            // Brightness (+20) and contrast (+0.2)
-            image.AdjustBrightness(20);
-            image.AdjustContrast(0.2f);
+            // Adjust image properties
+            image.AdjustBrightness(20);          // Increase brightness
+            image.AdjustContrast(0.2f);          // Increase contrast
+            image.AdjustGamma(1.1f);             // Slight gamma correction
 
-            // Rotate 90 degrees clockwise, filling empty corners with white
-            image.Rotate(90f, true, Color.White);
+            // Rotate 90 degrees clockwise
+            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-            // Resize to half of the current dimensions using nearest‑neighbour resampling
+            // Resize to half the original size using high‑quality Lanczos resampling
             int newWidth = image.Width / 2;
             int newHeight = image.Height / 2;
-            image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+            image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-            // Crop the central 80% of the resized image
-            int cropWidth = (int)(newWidth * 0.8);
-            int cropHeight = (int)(newHeight * 0.8);
-            int cropX = (newWidth - cropWidth) / 2;
-            int cropY = (newHeight - cropHeight) / 2;
-            image.Crop(new Rectangle(cropX, cropY, cropWidth, cropHeight));
+            // Crop 10 pixels from each edge
+            var cropRect = new Rectangle(10, 10, image.Width - 20, image.Height - 20);
+            image.Crop(cropRect);
 
-            // Prepare JPEG save options
-            JpegOptions saveOptions = new JpegOptions
+            // Configure JPEG save options
+            var jpegOptions = new JpegOptions
             {
                 Quality = 90,
-                CompressionType = JpegCompressionMode.Progressive,
-                ColorType = JpegCompressionColorMode.YCbCr,
-                ResolutionSettings = new ResolutionSetting(96, 96),
-                ResolutionUnit = ResolutionUnit.Inch
+                CompressionType = JpegCompressionMode.Baseline
             };
 
-            // Save the processed image, preserving JPEG format
-            image.Save(outputPath, saveOptions);
+            // Save the processed image while preserving JPEG format
+            image.Save(outputPath, jpegOptions);
         }
     }
 }

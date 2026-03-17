@@ -7,33 +7,27 @@ class DicomAdjustmentExample
 {
     static void Main()
     {
-        // Path to the source DICOM file
-        string inputPath = @"C:\Temp\sample.dicom";
+        // Paths to the source DICOM file and the destination file
+        string sourcePath = @"C:\Temp\sample.dicom";
+        string destinationPath = @"C:\Temp\sample_adjusted.dicom";
 
-        // Path where the adjusted DICOM file will be saved
-        string outputPath = @"C:\Temp\sample_adjusted.dicom";
-
-        // Load the DICOM image using Aspose.Imaging's generic Image loader
-        using (Image image = Image.Load(inputPath))
+        // Load the DICOM image using Aspose.Imaging's generic Image.Load method
+        using (Image image = Image.Load(sourcePath))
         {
-            // Cast the generic Image to DicomImage to access DICOM‑specific adjustment methods
+            // Cast the loaded image to DicomImage to access DICOM‑specific adjustment methods
             DicomImage dicomImage = (DicomImage)image;
 
-            // Adjust brightness: value range is [-255, 255]
-            dicomImage.AdjustBrightness(50);   // increase brightness
+            // Adjust brightness (range: -255 to 255)
+            dicomImage.AdjustBrightness(50);
 
-            // Adjust contrast: value range is [-100, 100]
-            dicomImage.AdjustContrast(30f);    // increase contrast
+            // Adjust contrast (range: -100f to 100f)
+            dicomImage.AdjustContrast(30f);
 
             // Adjust gamma uniformly for all channels
-            dicomImage.AdjustGamma(1.2f);      // slight gamma correction
+            dicomImage.AdjustGamma(1.2f);
 
-            // Save the image back in DICOM format.
-            // Using the file extension ".dicom" lets Aspose.Imaging infer the correct format.
-            // Alternatively, explicit DicomOptions can be supplied.
-            dicomImage.Save(outputPath, new DicomOptions());
+            // Save the modified image back to DICOM format, preserving the original file type
+            dicomImage.Save(destinationPath, new DicomOptions());
         }
-
-        Console.WriteLine("Brightness, contrast, and gamma adjustments applied and saved to DICOM file.");
     }
 }

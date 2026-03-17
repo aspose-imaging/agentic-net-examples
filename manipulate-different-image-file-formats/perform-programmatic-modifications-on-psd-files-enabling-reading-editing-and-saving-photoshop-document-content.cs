@@ -1,43 +1,47 @@
 using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using System.Drawing;
+using Aspose.Imaging.Brushes;
 
-class PsdProcessor
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        // Path to the source PSD file
-        string inputPath = @"C:\Images\source.psd";
+        // Input and output PSD file paths
+        string inputPath = "input.psd";
+        string outputPath = "output.psd";
 
-        // Path where the modified PSD will be saved
-        string outputPath = @"C:\Images\modified.psd";
-
-        // Load the PSD document (Aspose.Imaging automatically detects the format)
+        // Load the existing PSD image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to a raster image to access common editing methods
-            // Most PSD files are loaded as RasterImage derivatives
-            var raster = image as RasterImage;
-            if (raster == null)
+            // Create a Graphics object for drawing
+            Graphics graphics = new Graphics(image);
+
+            // Clear the canvas (optional)
+            graphics.Clear(Color.Transparent);
+
+            // Draw a red rectangle
+            Pen redPen = new Pen(Color.Red);
+            graphics.DrawRectangle(redPen, new Rectangle(50, 50, 200, 150));
+
+            // Fill a blue ellipse
+            using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
             {
-                Console.WriteLine("The loaded file is not a raster image and cannot be edited with this example.");
-                return;
+                graphics.FillEllipse(blueBrush, new Rectangle(300, 100, 150, 100));
             }
 
-            // Example edit: increase brightness by 30 units
-            raster.AdjustBrightness(30);
+            // Draw text onto the PSD
+            using (SolidBrush blackBrush = new SolidBrush(Color.Black))
+            {
+                Font font = new Font("Arial", 24);
+                graphics.DrawString("Hello PSD", font, blackBrush, new Point(100, 250));
+            }
 
-            // Example edit: rotate the image 15 degrees clockwise
-            raster.Rotate(15);
+            // Prepare PSD save options (default settings)
+            PsdOptions psdOptions = new PsdOptions();
 
-            // Example edit: convert the image to grayscale
-            raster.Grayscale();
-
-            // Save the edited PSD back to disk, preserving the original format
-            raster.Save(outputPath);
+            // Save the modified image as a PSD file
+            image.Save(outputPath, psdOptions);
         }
-
-        Console.WriteLine("PSD processing completed successfully.");
     }
 }

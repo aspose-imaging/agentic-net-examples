@@ -3,11 +3,11 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 
-class TiffCombiner
+class Program
 {
     static void Main()
     {
-        // Paths of source TIFF files to combine
+        // Paths of the source TIFF files to be merged
         string[] sourceFiles = new string[]
         {
             @"C:\Images\page1.tif",
@@ -15,25 +15,25 @@ class TiffCombiner
             @"C:\Images\page3.tif"
         };
 
-        // Path of the resulting combined TIFF file
-        string outputFile = @"C:\Images\combined.tif";
+        // Path of the resulting multi‑page TIFF file
+        string outputFile = @"C:\Images\merged.tif";
 
-        // Load the first TIFF image – it will serve as the base container
-        using (TiffImage combinedImage = (TiffImage)Image.Load(sourceFiles[0]))
+        // Load the first TIFF image – it will serve as the base image
+        using (TiffImage mergedImage = (TiffImage)Image.Load(sourceFiles[0]))
         {
-            // Iterate over the remaining TIFF files and merge their frames
+            // Iterate over the remaining TIFF files and add their frames to the base image
             for (int i = 1; i < sourceFiles.Length; i++)
             {
-                // Load the next TIFF image
-                using (TiffImage nextImage = (TiffImage)Image.Load(sourceFiles[i]))
+                // Load the current source TIFF
+                using (TiffImage srcImage = (TiffImage)Image.Load(sourceFiles[i]))
                 {
-                    // Add all frames from the next image into the combined image
-                    combinedImage.Add(nextImage);
+                    // Add all frames from srcImage into mergedImage, preserving original properties
+                    mergedImage.Add(srcImage);
                 }
             }
 
-            // Save the combined multi‑page TIFF preserving original properties
-            combinedImage.Save(outputFile);
+            // Save the combined multi‑page TIFF to disk
+            mergedImage.Save(outputFile);
         }
     }
 }

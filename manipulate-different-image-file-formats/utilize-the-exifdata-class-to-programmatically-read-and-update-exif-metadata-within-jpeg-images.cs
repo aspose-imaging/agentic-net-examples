@@ -1,26 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output.jpg";
+        // Define input and output JPEG file paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        // Load the JPEG image using Aspose.Imaging
+        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
         {
-            var exif = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
+            // Access the EXIF data container; cast to JpegExifData for JPEG-specific tags
+            Aspose.Imaging.Exif.JpegExifData exif = jpegImage.ExifData as Aspose.Imaging.Exif.JpegExifData;
+
             if (exif != null)
             {
+                // Display some existing EXIF values
+                Console.WriteLine($"Original Artist: {exif.Artist}");
+                Console.WriteLine($"Original Copyright: {exif.Copyright}");
+                Console.WriteLine($"Original Image Description: {exif.ImageDescription}");
+
+                // Update EXIF metadata
                 exif.Artist = "John Doe";
-                exif.Copyright = "© 2026";
-                exif.Software = "Aspose.Imaging";
-                exif.Orientation = Aspose.Imaging.Exif.Orientation.TopLeft;
+                exif.Copyright = "© 2026 John Doe";
+                exif.ImageDescription = "Updated description";
+
+                // Example: change orientation and auto-rotate if needed
+                // exif.Orientation = Aspose.Imaging.Exif.Orientation.TopLeft;
+                // jpegImage.AutoRotate();
             }
 
-            image.Save(outputPath);
+            // Save the modified image to the output path
+            jpegImage.Save(outputPath);
         }
     }
 }

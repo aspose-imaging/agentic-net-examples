@@ -1,43 +1,35 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect input and output file paths as command‑line arguments.
-        if (args.Length < 2)
+        // Path to the large PNG file to be read.
+        string sourcePath = @"C:\Images\large_input.png";
+
+        // Path where the image will be saved after loading (optional, demonstrates preserving fidelity).
+        string destinationPath = @"C:\Images\large_output.png";
+
+        // Load the PNG image using the constructor that accepts a file path.
+        // This follows the provided load rule and ensures the image is opened efficiently.
+        using (PngImage pngImage = new PngImage(sourcePath))
         {
-            Console.WriteLine("Usage: program <inputPngPath> <outputPngPath>");
-            return;
-        }
+            // Example of accessing image properties without fully materializing extra data.
+            int width = pngImage.Width;
+            int height = pngImage.Height;
+            Console.WriteLine($"Loaded PNG: {width}x{height} pixels");
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+            // Retrieve the original saving options to preserve all original settings
+            // (bit depth, color type, compression level, etc.).
+            PngOptions originalOptions = (PngOptions)pngImage.GetOriginalOptions();
 
-        // Define a memory limit (in megabytes) for internal buffers.
-        const int memoryLimitMb = 100;
-
-        // Load the PNG image with a buffer size hint to limit memory usage.
-        var loadOptions = new LoadOptions { BufferSizeHint = memoryLimitMb };
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            // Cache the image data to avoid repeated disk reads during processing.
-            if (!image.IsCached)
-                image.CacheData();
-
-            // Configure PNG save options to preserve fidelity and stay within the memory limit.
-            var saveOptions = new PngOptions
-            {
-                BufferSizeHint = memoryLimitMb, // Apply the same memory constraint on save.
-                Progressive = true,            // Enable progressive PNG for efficient loading.
-                CompressionLevel = 9           // Use maximum compression without quality loss.
-                // No changes to ColorType, BitDepth, etc., so original fidelity is retained.
-            };
-
-            // Save the image to the specified output path using the configured options.
-            image.Save(outputPath, saveOptions);
+            // Save the image using the original options to maintain full fidelity.
+            // This follows the provided save rule.
+            pngImage.Save(destinationPath, originalOptions);
         }
     }
 }

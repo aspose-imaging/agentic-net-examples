@@ -2,31 +2,38 @@ using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class GenericImageProcessor
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = "input.jpg";
+        // Define input and output file paths
+        string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Load the image using Aspose.Imaging's built‑in load method
-        using (RasterImage image = Image.Load(inputPath) as RasterImage)
+        // Load the image as a RasterImage
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            if (image == null)
-                throw new InvalidOperationException("The loaded file is not a raster image.");
+            // Cache image data for better performance
+            if (!image.IsCached)
+                image.CacheData();
 
-            // Resize the image to 200x200 pixels (default NearestNeighbourResample)
-            image.Resize(200, 200);
+            // Increase brightness by 30 units
+            image.AdjustBrightness(30);
 
-            // Convert the image to grayscale
-            image.Grayscale();
+            // Increase contrast by a factor of 1.2
+            image.AdjustContrast(1.2f);
 
-            // Save the processed image as PNG using the appropriate save options
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            // Resize the image to half of its original dimensions
+            int newWidth = image.Width / 2;
+            int newHeight = image.Height / 2;
+            image.Resize(newWidth, newHeight); // Uses default NearestNeighbourResample
+
+            // Rotate the image 90 degrees clockwise
+            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+            // Save the processed image as PNG
+            PngOptions options = new PngOptions();
+            image.Save(outputPath, options);
         }
-
-        Console.WriteLine("Image processing completed successfully.");
     }
 }

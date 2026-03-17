@@ -1,4 +1,5 @@
 using System;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
@@ -8,44 +9,52 @@ class Program
 {
     static void Main(string[] args)
     {
-        const string sourcePath = "base.png";
-        const string outputPath = "animation.apng";
+        // Input raster image and output APNG file paths
+        string sourcePath = "not_animated.png";
+        string outputPath = "animated_output.png";
 
-        const int animationDurationMs = 2000;
-        const int frameDurationMs = 100;
-
-        using (Aspose.Imaging.RasterImage sourceImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(sourcePath))
+        // Load the source raster image
+        using (RasterImage sourceImage = (RasterImage)Image.Load(sourcePath))
         {
+            // Configure APNG creation options; binding the output file via FileCreateSource
             ApngOptions apngOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = (uint)frameDurationMs,
+                DefaultFrameTime = 70, // 70 ms per frame
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            using (ApngImage apngImage = (ApngImage)Aspose.Imaging.Image.Create(apngOptions, sourceImage.Width, sourceImage.Height))
+            // Create the APNG canvas with the same dimensions as the source image
+            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, sourceImage.Width, sourceImage.Height))
             {
+                // Remove the default frame that exists upon creation
                 apngImage.RemoveAllFrames();
 
-                int totalFrames = animationDurationMs / frameDurationMs;
-
+                // Add the first frame (original image)
                 apngImage.AddFrame(sourceImage);
 
+                // Add intermediate frames with varying adjustments
+                int totalFrames = 10;
                 for (int i = 1; i < totalFrames - 1; i++)
                 {
+                    // Append a new frame based on the source image
                     apngImage.AddFrame(sourceImage);
+
+                    // Retrieve the newly added frame
                     ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
 
-                    float gamma = 0.5f + (float)i / totalFrames;
-                    frame.AdjustGamma(gamma);
+                    // Apply varying visual modifications per frame
+                    int brightness = i * 10;            // Incremental brightness
+                    float gamma = 1.0f + i * 0.1f;      // Incremental gamma
 
-                    int brightness = (i % 2 == 0) ? 10 : -10;
                     frame.AdjustBrightness(brightness);
-                    float contrast = 1.0f + (i % 3) * 0.1f;
-                    frame.AdjustContrast(contrast);
+                    frame.AdjustGamma(gamma);
                 }
 
+                // Add the final frame (original image)
                 apngImage.AddFrame(sourceImage);
+
+                // Save the APNG; the file is already bound to the output path
                 apngImage.Save();
             }
         }

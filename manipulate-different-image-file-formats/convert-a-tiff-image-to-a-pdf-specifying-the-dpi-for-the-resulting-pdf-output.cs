@@ -1,32 +1,31 @@
 using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class TiffToPdfConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input TIFF file path
-        string tiffPath = @"C:\Temp\input.tif";
+        // Paths to the input TIFF and output PDF files
+        string inputPath = "input.tif";
+        string outputPath = "output.pdf";
 
-        // Output PDF file path
-        string pdfPath = @"C:\Temp\output.pdf";
+        // Desired DPI for the PDF
+        double dpiX = 300;
+        double dpiY = 300;
 
-        // Desired DPI for the PDF output
-        const double dpiX = 300.0;
-        const double dpiY = 300.0;
-
-        // Load the TIFF image using the standard Image.Load method (lifecycle rule)
-        using (Image tiffImage = Image.Load(tiffPath))
+        // Load the TIFF image
+        using (Image image = Image.Load(inputPath))
         {
-            // Set the resolution (DPI) for the image – this will affect the PDF rendering
-            tiffImage.SetResolution(dpiX, dpiY);
+            // Configure PDF options with the specified DPI
+            PdfOptions pdfOptions = new PdfOptions
+            {
+                ResolutionSettings = new ResolutionSetting(dpiX, dpiY)
+            };
 
-            // Prepare PDF save options (no custom presentation logic required)
-            var pdfOptions = new PdfOptions();
-
-            // Save the image as PDF using the standard Image.Save method (lifecycle rule)
-            tiffImage.Save(pdfPath, pdfOptions);
+            // Save the image as PDF with the DPI settings
+            image.Save(outputPath, pdfOptions);
         }
     }
 }

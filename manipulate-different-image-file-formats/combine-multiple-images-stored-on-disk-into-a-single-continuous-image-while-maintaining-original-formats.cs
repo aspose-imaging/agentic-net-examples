@@ -3,27 +3,29 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+class CombineImages
 {
     static void Main()
     {
         // Folder containing the source images
         string inputFolder = @"C:\Images\Input";
 
-        // Output file – the combined image will be saved here.
-        // The format (e.g., .tif, .pdf) can be any supported by Aspose.Imaging.
-        string outputPath = @"C:\Images\Output\combined.tif";
+        // Output file – a multipage TIFF that will hold all images
+        string outputFile = @"C:\Images\Combined\combined.tiff";
 
-        // Gather all image files from the input folder.
-        // Adjust the search pattern if you need to limit to specific formats.
+        // Get all image files from the folder (you can adjust the filter as needed)
         string[] imageFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
 
-        // Create a multipage image that contains all the specified files.
-        // This uses the Image.Create(string[]) overload, preserving each file's original format.
-        using (Image combinedImage = Image.Create(imageFiles))
+        // Create a multipage image from the specified files.
+        // This uses the provided Image.Create(string[]) overload which builds a multi‑page image
+        // while preserving each source image's original format.
+        using (Image multiPageImage = Image.Create(imageFiles))
         {
-            // Save the resulting multipage image to the desired location.
-            combinedImage.Save(outputPath);
+            // Save the combined image to disk.
+            // The Save(string) method follows the lifecycle rule for persisting the image.
+            multiPageImage.Save(outputFile);
         }
+
+        Console.WriteLine("Images combined successfully into: " + outputFile);
     }
 }

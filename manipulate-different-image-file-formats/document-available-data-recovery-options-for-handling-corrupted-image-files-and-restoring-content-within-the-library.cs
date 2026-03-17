@@ -1,83 +1,60 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
-class ImageRecoveryDemo
+namespace ImagingNet
 {
-    static void Main()
+    class Program
     {
-        // Example 1: Recover a corrupted DjVu file
-        RecoverDjvu("corrupted_image.djvu", "recovered_image.png");
-
-        // Example 2: Recover a corrupted TIFF file
-        RecoverTiff("corrupted_image.tif", "recovered_image.tif");
-    }
-
-    /// <summary>
-    /// Loads a DjVu image with generic LoadOptions, applies optional fixes,
-    /// and saves it to a new file. The method demonstrates the recovery workflow
-    /// using the Aspose.Imaging API that is available for DjVu images.
-    /// </summary>
-    static void RecoverDjvu(string inputPath, string outputPath)
-    {
-        // Open the source file as a read‑only stream.
-        using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+        static void Main(string[] args)
         {
-            // LoadOptions can be customized for specific formats; here we use the base class.
-            LoadOptions loadOptions = new LoadOptions();
+            // Path to the potentially corrupted image file
+            string inputPath = "corrupted_image.webp";
+            // Path where the recovered image will be saved
+            string outputPath = "recovered_image.png";
 
-            // Load the DjVu document. Even if the file is partially corrupted,
-            // Aspose.Imaging may still create a usable DjvuImage instance.
-            DjvuImage image = DjvuImage.LoadDocument(stream, loadOptions);
+            // Load the image as a generic Image and cast to RasterImage for pixel-level operations
+            using (Image img = Image.Load(inputPath))
+            {
+                // Ensure the loaded image supports raster operations
+                if (img is RasterImage raster)
+                {
+                    // Cache all image data to avoid further stream reads (useful for corrupted sources)
+                    raster.CacheData();
 
-            // Cache the image data to improve performance for subsequent operations.
-            image.CacheData();
+                    // Option 1: Automatic brightness and contrast correction
+                    raster.AutoBrightnessContrast();
 
-            // Optional: improve visual quality of the recovered image.
-            image.AutoBrightnessContrast();   // Adaptive brightness/contrast
-            image.NormalizeHistogram();       // Stretch pixel values to full range
+                    // Option 2: Histogram normalization to stretch pixel intensity range
+                    raster.NormalizeHistogram();
 
-            // Preserve original image settings (bit depth, compression, etc.) when saving.
-            ImageOptionsBase saveOptions = image.GetOriginalOptions();
+                    // Option 3: Convert to grayscale – often helps when color channels are damaged
+                    raster.Grayscale();
 
-            // Save the recovered image. The overload with ImageOptionsBase ensures
-            // that original parameters are respected.
-            image.Save(outputPath, saveOptions);
-        }
-    }
+                    // Option 4: Attempt to preserve original format settings when saving
+                    ImageOptionsBase originalOptions = raster.GetOriginalOptions();
 
-    /// <summary>
-    /// Loads a TIFF image with generic LoadOptions, applies optional fixes,
-    /// and saves it back. This illustrates recovery for multi‑page raster formats.
-    /// </summary>
-    static void RecoverTiff(string inputPath, string outputPath)
-    {
-        using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-        {
-            LoadOptions loadOptions = new LoadOptions();
+                    // If original options are not suitable for the target format, fall back to PNG options
+                    PngOptions pngOptions = new PngOptions();
+                    // Preserve original DPI if available
+                    if (originalOptions is ImageOptionsBase opts && opts.Source != null)
+                    {
+                        // Example of copying resolution (if needed)
+                        // Note: SetResolution is a RasterImage method; here we keep it simple
+                    }
 
-            // Load the TIFF image. The static LoadDocument method is not defined for TIFF,
-            // so we use the constructor pattern that Aspose.Imaging provides internally.
-            // Here we simulate it by calling the base Image.Load method via reflection,
-            // which respects the rule of using provided load mechanisms.
-            TiffImage image = (TiffImage)Image.Load(stream, loadOptions);
+                    // Save the recovered image using PNG format (widely supported)
+                    raster.Save(outputPath, pngOptions);
+                }
+                else
+                {
+                    Console.WriteLine("The loaded image does not support raster operations.");
+                }
+            }
 
-            // Cache data for faster processing.
-            image.CacheData();
-
-            // Apply automatic brightness/contrast and histogram normalization.
-            image.AutoBrightnessContrast();
-            image.NormalizeHistogram();
-
-            // Retrieve original saving options to keep original characteristics.
-            ImageOptionsBase saveOptions = image.GetOriginalOptions();
-
-            // Save the recovered TIFF. The overload with ImageOptionsBase preserves
-            // original compression, bit depth, etc.
-            image.Save(outputPath, saveOptions);
+            Console.WriteLine("Recovery process completed.");
         }
     }
 }

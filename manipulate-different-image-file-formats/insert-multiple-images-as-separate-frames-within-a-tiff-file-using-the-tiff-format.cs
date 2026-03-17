@@ -1,81 +1,56 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
-class Program
+class InsertMultipleFramesIntoTiff
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output TIFF file path
-        string outputPath = "output.tif";
+        // Directory where source images are located and where the resulting TIFF will be saved
+        string sourceDir = @"C:\Images\";
+        string outputPath = @"C:\Images\combined.tif";
 
-        // Input image files to be added as frames (modify paths as needed)
-        string[] inputPaths = new string[]
+        // List of source image file names to be added as separate frames
+        string[] sourceFiles = new string[]
         {
-            "image1.png",
+            "image1.jpg",
             "image2.png",
-            "image3.png"
+            "image3.bmp"
         };
 
-        // Configure TIFF options for the output file
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-        tiffOptions.Compression = TiffCompressions.Lzw;
-        tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+        // Collection to hold the created TiffFrame objects
+        List<TiffFrame> tiffFrames = new List<TiffFrame>();
 
-        // Determine canvas size based on the first existing image, or fallback to 100x100
-        int canvasWidth = 100;
-        int canvasHeight = 100;
-        if (inputPaths.Length > 0 && File.Exists(inputPaths[0]))
+        // Create a TiffOptions instance that will be used for each frame
+        TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+        frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+        frameOptions.ByteOrder = TiffByteOrder.LittleEndian;
+        frameOptions.Compression = TiffCompressions.Lzw;
+        frameOptions.Photometric = TiffPhotometrics.Rgb;
+        frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+        // Load each source image, convert it to a TiffFrame, and add to the collection
+        foreach (string fileName in sourceFiles)
         {
-            using (Image firstImg = Image.Load(inputPaths[0]))
+            string fullPath = System.IO.Path.Combine(sourceDir, fileName);
+
+            // Load the raster image (any supported format)
+            using (RasterImage raster = (RasterImage)Image.Load(fullPath))
             {
-                canvasWidth = firstImg.Width;
-                canvasHeight = firstImg.Height;
+                // Create a TiffFrame from the raster image using the predefined options
+                TiffFrame frame = new TiffFrame(raster, frameOptions);
+                tiffFrames.Add(frame);
             }
         }
 
-        // Create the TIFF image canvas
-        using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
+        // Initialize a TiffImage with the array of frames
+        using (TiffImage tiffImage = new TiffImage(tiffFrames.ToArray()))
         {
-            // Add each input image as a separate frame
-            foreach (string path in inputPaths)
-            {
-                if (!File.Exists(path))
-                    continue; // Skip missing files
-
-                using (Image img = Image.Load(path))
-                {
-                    // Ensure the loaded image is a raster image
-                    RasterImage raster = img as RasterImage;
-                    if (raster == null)
-                        continue;
-
-                    // Create a TIFF frame from the raster image
-                    TiffFrame frame = new TiffFrame(raster);
-
-                    // Append the frame to the TIFF image
-                    tiffImage.AddFrame(frame);
-                }
-            }
-
-            // Remove the initially created default frame if additional frames were added
-            if (tiffImage.Frames.Length > 1)
-            {
-                TiffFrame defaultFrame = tiffImage.ActiveFrame;
-                tiffImage.ActiveFrame = tiffImage.Frames[1];
-                tiffImage.RemoveFrame(0);
-                defaultFrame.Dispose();
-            }
-
-            // Save the multi-frame TIFF file
-            tiffImage.Save();
+            // Save the multi‑frame TIFF to the specified path
+            tiffImage.Save(outputPath);
         }
     }
 }

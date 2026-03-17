@@ -1,48 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
-class MetafileProcessing
+namespace MetafileProcessing
 {
-    static void Main()
+    class Program
     {
-        // Input WMF file path
-        string inputPath = @"C:\Images\sample.wmf";
-
-        // Output PNG file path (rasterized version of the WMF)
-        string outputPath = @"C:\Images\sample_converted.png";
-
-        // Load the WMF image using the unified Image.Load method
-        using (Image image = Image.Load(inputPath))
+        static void Main(string[] args)
         {
-            // Cast to WmfImage to access vector‑specific functionality
-            WmfImage wmfImage = (WmfImage)image;
+            // Input EMF file path
+            string inputPath = Path.Combine("C:", "Metafiles", "sample.emf");
+            // Output PNG file path
+            string outputPath = Path.Combine("C:", "Metafiles", "sample_converted.png");
 
-            // Example operation: resize the metafile to 800x600 pixels
-            // (Resize uses the default NearestNeighbourResample algorithm)
-            wmfImage.Resize(800, 600);
-
-            // Prepare rasterization options for converting the vector WMF to a raster format
-            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+            // Load EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                // Set the page size to match the resized image dimensions
-                PageSize = wmfImage.Size,
+                // Configure vector rasterization options
+                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageSize = image.Size
+                };
 
-                // Optional: set background color for the rasterized image
-                BackgroundColor = Color.White
-            };
-
-            // Configure PNG save options and attach the rasterization options
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the rasterized image as PNG
-            wmfImage.Save(outputPath, pngOptions);
+                // Set PNG options with vector rasterization
+                using (PngOptions pngOptions = new PngOptions())
+                {
+                    pngOptions.VectorRasterizationOptions = vectorOptions;
+                    // Save as PNG
+                    image.Save(outputPath, pngOptions);
+                }
+            }
         }
-
-        Console.WriteLine("Metafile conversion completed successfully.");
     }
 }

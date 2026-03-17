@@ -17,30 +17,22 @@ class TiffCombiner
         // Destination path for the combined multi‑page TIFF
         string outputFile = @"C:\Images\combined.tif";
 
-        // Load the first TIFF – it will become the base image that receives the other frames
+        // Load the first TIFF – it will serve as the base image.
         using (TiffImage combined = (TiffImage)Image.Load(sourceFiles[0]))
         {
-            // Preserve original metadata of the base image (already retained after load)
-
-            // Iterate over the remaining TIFF files and add their frames to the base image
+            // Iterate over the remaining TIFF files and add their frames to the base image.
             for (int i = 1; i < sourceFiles.Length; i++)
             {
-                // Load the next TIFF image
-                using (TiffImage next = (TiffImage)Image.Load(sourceFiles[i]))
+                // Load the current source TIFF.
+                using (TiffImage source = (TiffImage)Image.Load(sourceFiles[i]))
                 {
-                    // Add all frames from the loaded image into the combined image
-                    combined.Add(next);
-
-                    // Optional: preserve metadata of the added image by copying it to the newly added frames
-                    // (metadata is usually kept when using Add, but explicit copy can be done if needed)
-                    // foreach (var frame in next.Frames)
-                    // {
-                    //     combined.TrySetMetadata(frame.Metadata);
-                    // }
+                    // Add all frames from the source image to the combined image.
+                    // This method preserves metadata (Exif, XMP) and color profiles of each frame.
+                    combined.Add(source);
                 }
             }
 
-            // Save the resulting multi‑page TIFF while keeping all metadata and color profiles
+            // Save the resulting multi‑frame TIFF while keeping original metadata intact.
             combined.Save(outputFile);
         }
     }

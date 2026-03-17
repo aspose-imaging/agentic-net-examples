@@ -16,20 +16,20 @@ class Program
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PSD saving options to preserve image fidelity
+            // Configure PSD saving options to preserve fidelity
             PsdOptions psdOptions = new PsdOptions
             {
-                // No compression – keeps raw pixel data
+                // Use RAW compression (no compression) to keep original pixel data
                 CompressionMethod = CompressionMethod.Raw,
 
-                // Preserve color information; most images use RGB
+                // Preserve the original color mode when possible; default to RGB
                 ColorMode = ColorModes.Rgb,
 
                 // Standard 8 bits per channel
                 ChannelBitsCount = 8,
 
-                // Number of channels (RGBA = 4, RGB = 3). Here we assume 4 for maximum compatibility.
-                ChannelsCount = 4,
+                // Set channel count based on presence of alpha channel
+                ChannelsCount = (short)((image is RasterImage raster && raster.HasAlpha) ? 4 : 3),
 
                 // Keep original metadata (EXIF, XMP, etc.)
                 KeepMetadata = true

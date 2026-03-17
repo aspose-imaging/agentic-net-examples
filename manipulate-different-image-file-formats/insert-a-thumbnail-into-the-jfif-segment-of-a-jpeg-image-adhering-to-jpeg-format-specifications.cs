@@ -1,34 +1,42 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Jpeg.Jfif;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Brushes;
 
-class InsertJfifThumbnail
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Load the source JPEG image
-        using (JpegImage jpeg = (JpegImage)Image.Load("input.jpg"))
-        {
-            // Create a thumbnail (e.g., 160x120) from the source image
-            using (RasterImage thumb = jpeg.Clone())
-            {
-                thumb.Resize(new Size(160, 120), ResizeType.NearestNeighbour);
+        // Input JPEG file path
+        string inputPath = "input.jpg";
+        // Output JPEG file path with thumbnail inserted
+        string outputPath = "output_with_thumbnail.jpg";
 
-                // Ensure the JFIF segment exists
-                if (jpeg.Jfif == null)
+        // Load the JPEG image
+        using (JpegImage jpegImage = new JpegImage(inputPath))
+        {
+            // Create a thumbnail raster image (100x100 pixels)
+            using (RasterImage thumbnail = (RasterImage)Image.Create(new JpegOptions(), 100, 100))
+            {
+                // Fill the thumbnail with a solid red color
+                Graphics graphics = new Graphics(thumbnail);
+                SolidBrush brush = new SolidBrush(Color.Red);
+                graphics.FillRectangle(brush, thumbnail.Bounds);
+
+                // Ensure JFIF data container exists
+                if (jpegImage.Jfif == null)
                 {
-                    jpeg.Jfif = new JFIFData();
+                    jpegImage.Jfif = new JFIFData();
                 }
 
                 // Assign the thumbnail to the JFIF segment
-                // Clone the thumbnail so the JFIF segment owns its own instance
-                jpeg.Jfif.Thumbnail = thumb.Clone() as RasterImage;
-            }
+                jpegImage.Jfif.Thumbnail = thumbnail;
 
-            // Save the JPEG with the new JFIF thumbnail
-            jpeg.Save("output.jpg");
+                // Save the JPEG image with the new thumbnail
+                jpegImage.Save(outputPath);
+            }
         }
     }
 }

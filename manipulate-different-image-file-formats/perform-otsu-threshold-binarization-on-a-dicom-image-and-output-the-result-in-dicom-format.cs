@@ -3,27 +3,24 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+class DicomOtsuBinarization
 {
     static void Main()
     {
-        // Path to the source DICOM file
-        string inputPath = @"c:\temp\sample.dicom";
+        // Paths for input and output DICOM files
+        string inputPath = @"c:\temp\sample.dcm";
+        string outputPath = @"c:\temp\sample.Binarized.dcm";
 
-        // Path for the output DICOM file
-        string outputPath = @"c:\temp\sample.BinarizeOtsu.dicom";
-
-        // Load the DICOM image using Aspose.Imaging's generic Image.Load method
+        // Load the DICOM image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to a DicomImage to access DICOM‑specific methods
+            // Cast to DicomImage to access DICOM‑specific methods
             DicomImage dicomImage = (DicomImage)image;
 
-            // Apply Otsu thresholding – the library determines the optimal threshold automatically
+            // Apply Otsu threshold binarization
             dicomImage.BinarizeOtsu();
 
-            // Save the processed image back to DICOM format.
-            // DicomOptions is the appropriate options class for DICOM output.
+            // Save the binarized image back in DICOM format
             dicomImage.Save(outputPath, new DicomOptions());
         }
     }

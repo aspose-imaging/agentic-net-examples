@@ -12,14 +12,14 @@ class Program
         // Path where the processed TIFF will be saved
         string outputPath = "output.tif";
 
-        // Load the TIFF image from disk
+        // Load the TIFF image from disk using Aspose.Imaging's load rule
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to TiffImage to work with TIFF‑specific functionality
+            // Cast the generic Image to TiffImage to work with TIFF‑specific methods
             TiffImage tiffImage = (TiffImage)image;
 
             // Save the image back to TIFF format.
-            // No modifications are performed, so the original pixel data is preserved.
+            // This uses the built‑in Save(string) rule and preserves the original pixel data.
             tiffImage.Save(outputPath);
         }
     }

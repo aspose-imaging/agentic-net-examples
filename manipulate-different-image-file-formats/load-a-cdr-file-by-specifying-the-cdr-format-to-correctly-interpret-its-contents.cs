@@ -4,7 +4,7 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageLoadOptions;
 
-class Program
+class LoadCdrExample
 {
     static void Main()
     {
@@ -20,9 +20,9 @@ class Program
             // Initialize CdrImage with the stream and load options
             using (CdrImage cdrImage = new CdrImage(stream, loadOptions))
             {
-                // Retrieve and display the file format to confirm correct loading
+                // Retrieve and display the detected file format
                 var format = cdrImage.FileFormat;
-                Console.WriteLine($"Loaded CDR file format: {format}");
+                Console.WriteLine($"Loaded file format: {format}");
 
                 // Additional processing can be performed here using cdrImage
             }

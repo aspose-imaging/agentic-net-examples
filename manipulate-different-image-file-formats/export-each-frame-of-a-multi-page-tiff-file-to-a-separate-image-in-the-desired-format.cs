@@ -1,47 +1,74 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+class ExportTiffFrames
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = @"C:\Images\multipage.tif";
+        // Path to the source multi‑page TIFF file
+        string inputFilePath = @"C:\Images\multipage.tif";
+
+        // Folder where extracted frames will be saved
         string outputFolder = @"C:\Images\Frames";
-        string outputExtension = ".png";
 
-        Directory.CreateDirectory(outputFolder);
+        // Desired output format for each frame (png, jpg, bmp, tiff)
+        string outputFormat = "png";
 
-        using (TiffImage tiff = (TiffImage)Aspose.Imaging.Image.Load(inputPath))
+        // Load the multi‑page TIFF using the provided load rule
+        using (Image image = Image.Load(inputFilePath))
         {
-            for (int i = 0; i < tiff.Frames.Length; i++)
-            {
-                TiffFrame frame = tiff.Frames[i];
-                string outputPath = Path.Combine(outputFolder, $"frame_{i + 1}{outputExtension}");
+            // Cast to TiffImage to access the Frames collection
+            TiffImage tiffImage = image as TiffImage;
+            if (tiffImage == null)
+                throw new InvalidOperationException("The loaded image is not a TIFF.");
 
-                if (outputExtension.Equals(".png", StringComparison.OrdinalIgnoreCase))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Iterate through each frame in the TIFF
+            for (int i = 0; i < tiffImage.Frames.Length; i++)
+            {
+                TiffFrame frame = tiffImage.Frames[i];
+
+                // Create a temporary single‑frame image from the current TiffFrame
+                using (TiffImage singleFrameImage = new TiffImage(frame))
                 {
-                    frame.Save(outputPath, new PngOptions());
-                }
-                else if (outputExtension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                         outputExtension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase))
-                {
-                    frame.Save(outputPath, new JpegOptions());
-                }
-                else if (outputExtension.Equals(".bmp", StringComparison.OrdinalIgnoreCase))
-                {
-                    frame.Save(outputPath, new BmpOptions());
-                }
-                else if (outputExtension.Equals(".tif", StringComparison.OrdinalIgnoreCase) ||
-                         outputExtension.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
-                {
-                    frame.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
-                }
-                else
-                {
-                    frame.Save(outputPath, new PngOptions());
+                    // Choose save options based on the desired output format
+                    ImageOptionsBase saveOptions;
+                    string outputFilePath;
+
+                    switch (outputFormat.ToLower())
+                    {
+                        case "png":
+                            saveOptions = new PngOptions();
+                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.png");
+                            break;
+                        case "jpg":
+                        case "jpeg":
+                            saveOptions = new JpegOptions();
+                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.jpg");
+                            break;
+                        case "bmp":
+                            saveOptions = new BmpOptions();
+                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.bmp");
+                            break;
+                        case "tif":
+                        case "tiff":
+                            saveOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
+                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.tif");
+                            break;
+                        default:
+                            // Fallback to PNG if an unknown format is specified
+                            saveOptions = new PngOptions();
+                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.png");
+                            break;
+                    }
+
+                    // Save the single frame using the provided save rule
+                    singleFrameImage.Save(outputFilePath, saveOptions);
                 }
             }
         }

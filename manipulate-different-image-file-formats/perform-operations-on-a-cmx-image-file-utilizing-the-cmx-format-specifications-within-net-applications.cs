@@ -2,52 +2,38 @@ using System;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths – adjust as needed
-        string cmxPath = "canvas.cmx";
-        string outputPath = "merged.png";
-        string[] rasterPaths = new string[] { "image1.jpg", "image2.png", "image3.bmp" };
+        // Input CMX file path
+        string inputPath = @"C:\Temp\sample.cmx";
+        // Output PNG file path
+        string outputPath = @"C:\Temp\sample_converted.png";
 
-        // Load CMX canvas to obtain its dimensions
-        using (CmxImage cmx = (CmxImage)Image.Load(cmxPath))
+        // Load the CMX image
+        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
         {
-            int canvasWidth = cmx.Width;
-            int canvasHeight = cmx.Height;
+            // Cache the default page
+            cmxImage.CacheData();
 
-            // Prepare output file source
-            Source outSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = outSource };
-
-            // Create a raster canvas bound to the output file
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+            // Cache all pages to avoid further data loading
+            foreach (CmxImagePage page in cmxImage.Pages)
             {
-                int offsetX = 0;
+                page.CacheData();
 
-                // Merge each raster image onto the canvas horizontally
-                foreach (string rasterPath in rasterPaths)
+                // Example operation: resize each page to half its original size
+                int newWidth = page.Width / 2;
+                int newHeight = page.Height / 2;
+                if (newWidth > 0 && newHeight > 0)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(rasterPath))
-                    {
-                        // Define destination rectangle on the canvas
-                        Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
-
-                        // Copy pixel data from source image to canvas
-                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
-
-                        // Update horizontal offset for next image
-                        offsetX += img.Width;
-                    }
+                    page.Resize(newWidth, newHeight);
                 }
-
-                // Since the canvas is bound to the file source, simply call Save()
-                canvas.Save();
             }
+
+            // Save the CMX image as a raster PNG
+            cmxImage.Save(outputPath, new PngOptions());
         }
     }
 }

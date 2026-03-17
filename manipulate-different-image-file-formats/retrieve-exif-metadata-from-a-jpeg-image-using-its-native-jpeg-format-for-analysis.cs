@@ -7,31 +7,35 @@ class Program
 {
     static void Main()
     {
-        // Path to the JPEG image
-        string imagePath = "sample.jpg";
+        // Path to the JPEG file
+        string jpegPath = @"C:\Temp\sample.jpg";
 
-        // Load the JPEG image using Aspose.Imaging
-        using (JpegImage jpegImage = (JpegImage)Image.Load(imagePath))
+        // Load the JPEG image using Aspose.Imaging's Image.Load method
+        // Cast the loaded image to JpegImage to access JPEG-specific properties
+        using (JpegImage jpegImage = (JpegImage)Image.Load(jpegPath))
         {
-            // Retrieve the EXIF data container
-            JpegExifData jpegExif = jpegImage.ExifData as JpegExifData;
+            // Retrieve the EXIF data container from the image
+            JpegExifData exifData = jpegImage.ExifData as JpegExifData;
 
-            if (jpegExif != null)
+            if (exifData != null)
             {
-                // Output selected EXIF tags
-                Console.WriteLine($"Make: {jpegExif.Make}");
-                Console.WriteLine($"Model: {jpegExif.Model}");
-                Console.WriteLine($"Orientation: {jpegExif.Orientation}");
-                Console.WriteLine($"Software: {jpegExif.Software}");
-                Console.WriteLine($"Date/Time: {jpegExif.DateTime}");
-                Console.WriteLine($"Exposure Time: {jpegExif.ExposureTime}");
-                Console.WriteLine($"FNumber: {jpegExif.FNumber}");
-                Console.WriteLine($"ISO Speed: {jpegExif.ISOSpeed}");
-                // Add additional tags as required
+                // Output some common EXIF tags
+                Console.WriteLine("Camera Manufacturer: {0}", exifData.Make);
+                Console.WriteLine("Camera Model: {0}", exifData.Model);
+                Console.WriteLine("Image Description: {0}", exifData.ImageDescription);
+                Console.WriteLine("Orientation: {0}", exifData.Orientation);
+                Console.WriteLine("Software: {0}", exifData.Software);
+                Console.WriteLine("Date/Time Original: {0}", exifData.DateTimeOriginal);
+                Console.WriteLine("Exposure Time: {0}", exifData.ExposureTime);
+                Console.WriteLine("FNumber (Aperture): {0}", exifData.FNumber);
+                Console.WriteLine("ISO Speed: {0}", exifData.ISOSpeed);
+                Console.WriteLine("Focal Length: {0}", exifData.FocalLength);
+                Console.WriteLine("GPS Latitude: {0}", exifData.GPSLatitude);
+                Console.WriteLine("GPS Longitude: {0}", exifData.GPSLongitude);
             }
             else
             {
-                Console.WriteLine("No EXIF data found in the image.");
+                Console.WriteLine("No EXIF data found in the JPEG image.");
             }
         }
     }

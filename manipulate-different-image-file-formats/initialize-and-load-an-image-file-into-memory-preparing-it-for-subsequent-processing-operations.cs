@@ -1,18 +1,24 @@
 using System;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Determine the image file path (use first argument or a default placeholder)
-        string inputPath = args.Length > 0 ? args[0] : "sample.jpg";
+        // Specify the path to the image file to be loaded
+        string imagePath = @"C:\temp\sample.bmp";
 
-        // Load the image into a RasterImage instance
-        using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        // Load the image into memory using Aspose.Imaging's static Load method
+        // The using statement ensures the image resources are released after processing
+        using (Image image = Image.Load(imagePath))
         {
-            // The image is now in memory and ready for further processing
-            Console.WriteLine($"Image loaded: {inputPath}");
-            Console.WriteLine($"Dimensions: {image.Width}x{image.Height}");
+            // The image is now initialized and ready for further processing
+            // Example: retrieve basic properties
+            int width = image.Width;
+            int height = image.Height;
+
+            // Placeholder for additional image processing logic
+            // ...
         }
     }
 }

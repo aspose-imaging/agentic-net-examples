@@ -1,45 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
-class ExtractEmbeddedRasterImages
+class Program
 {
     static void Main()
     {
-        // Path to the vector file (e.g., CorelDRAW, SVG, etc.)
+        // Path to the vector file that may contain embedded raster images (e.g., .cdr, .svg, .pdf)
         string inputFile = "test.cdr";
 
-        // Load the vector image using Aspose.Imaging's generic Image.Load method.
-        // The returned object is cast to VectorImage to access vector‑specific members.
+        // Load the file using Aspose.Imaging's generic loader
         using (Image image = Image.Load(inputFile))
         {
-            // Ensure the loaded image is a vector type.
+            // Cast the loaded image to VectorImage to access vector‑specific members
             var vectorImage = image as VectorImage;
             if (vectorImage == null)
             {
-                Console.WriteLine("The specified file is not a supported vector image.");
+                Console.WriteLine("The provided file is not a supported vector format.");
                 return;
             }
 
-            // Retrieve all embedded raster images.
-            // This uses the VectorImage.GetEmbeddedImages() method as defined in the API.
+            // Retrieve all embedded raster images
             EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
 
-            // Export each embedded image while preserving its original pixel format.
-            for (int i = 0; i < embeddedImages.Length; i++)
+            int index = 0;
+            foreach (EmbeddedImage embedded in embeddedImages)
             {
-                // Construct an output file name (e.g., image0.png, image1.png, ...).
-                string outFile = $"image{i}.png";
+                // Build an output file name that preserves the original image format
+                string extension = "." + embedded.Image.FileFormat.ToString().ToLower();
+                string outputFile = $"image{index}{extension}";
 
-                // Each EmbeddedImage implements IDisposable and contains an Image instance.
-                using (EmbeddedImage embedded = embeddedImages[i])
-                {
-                    // Save the raster image using PNG format.
-                    // PNGOptions automatically retains the source pixel format.
-                    embedded.Image.Save(outFile, new PngOptions());
-                }
+                // Save the embedded raster image using its native format
+                // (Save(string) keeps the original pixel data format)
+                embedded.Image.Save(outputFile);
 
-                Console.WriteLine($"Extracted embedded image saved to: {outFile}");
+                // Dispose the EmbeddedImage instance as required by the lifecycle rule
+                embedded.Dispose();
+
+                Console.WriteLine($"Extracted embedded image saved to: {outputFile}");
+                index++;
             }
         }
     }

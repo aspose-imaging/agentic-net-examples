@@ -1,60 +1,68 @@
 using System;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging;
 
-class TiffProcessingDemo
+class Program
 {
     static void Main()
     {
-        // Paths for input and output TIFF files
+        // Paths to the source and destination TIFF files
         string inputPath = @"C:\Temp\input.tif";
-        string outputPath = @"C:\Temp\output_processed.tif";
+        string outputPath = @"C:\Temp\output.tif";
 
         // Load the existing TIFF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the loaded image to TiffImage to access TIFF‑specific members
+            // Cast the loaded image to TiffImage to access TIFF‑specific functionality
             TiffImage tiffImage = image as TiffImage;
             if (tiffImage == null)
-            {
-                Console.WriteLine("The loaded file is not a TIFF image.");
-                return;
-            }
+                throw new InvalidOperationException("The loaded file is not a TIFF image.");
 
-            // ----- Image processing on the active frame -----
-            // Increase brightness by 30 (value range depends on image depth)
-            tiffImage.ActiveFrame.AdjustBrightness(30);
+            // -----------------------------------------------------------------
+            // Perform a series of image processing operations on the active frame
+            // -----------------------------------------------------------------
 
-            // Increase contrast by 0.2 (float, 0‑1 range)
-            tiffImage.ActiveFrame.AdjustContrast(0.2f);
+            // Increase brightness by 20 units
+            tiffImage.ActiveFrame.AdjustBrightness(20);
 
-            // Rotate the image 90 degrees clockwise
-            tiffImage.ActiveFrame.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            // Increase contrast by a factor of 1.2
+            tiffImage.ActiveFrame.AdjustContrast(1.2f);
 
             // Convert the active frame to grayscale
             tiffImage.ActiveFrame.Grayscale();
 
-            // ----- Create a grayscale copy of the processed frame -----
-            // Prepare options for the new grayscale frame
-            TiffOptions grayFrameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            grayFrameOptions.Photometric = TiffPhotometrics.MinIsBlack; // Grayscale photometric
-            grayFrameOptions.BitsPerSample = new ushort[] { 8 };       // 8‑bit grayscale
+            // Resize the active frame to 800x600 pixels (default NearestNeighbourResample)
+            tiffImage.ActiveFrame.Resize(800, 600);
 
-            // Create a new frame from the active frame using the grayscale options
-            TiffFrame grayFrame = TiffFrame.CreateFrameFrom(tiffImage.ActiveFrame, grayFrameOptions);
+            // -----------------------------------------------------------------
+            // Create a new grayscale frame from the processed active frame
+            // -----------------------------------------------------------------
 
-            // Add the new grayscale frame to the TIFF image (now it has two frames)
-            tiffImage.AddFrame(grayFrame);
+            // Define options for the new frame – 8‑bit grayscale (MinIsBlack photometric)
+            TiffOptions newFrameOptions = new TiffOptions(TiffExpectedFormat.Default)
+            {
+                Photometric = TiffPhotometrics.MinIsBlack,
+                BitsPerSample = new ushort[] { 8 }
+            };
 
-            // ----- Save the modified TIFF image -----
-            // Use default save options (preserve original compression, etc.)
+            // Create the new frame while preserving pixel data
+            TiffFrame newFrame = TiffFrame.CreateFrameFrom(tiffImage.ActiveFrame, newFrameOptions);
+
+            // Add the newly created frame to the multi‑page TIFF image
+            tiffImage.AddFrame(newFrame);
+
+            // -----------------------------------------------------------------
+            // Adjust image resolution (e.g., set to 300 DPI for both axes)
+            // -----------------------------------------------------------------
+            tiffImage.SetResolution(300, 300);
+
+            // -----------------------------------------------------------------
+            // Save the modified TIFF image to the specified output path
+            // -----------------------------------------------------------------
             tiffImage.Save(outputPath);
         }
-
-        Console.WriteLine("TIFF processing completed successfully.");
     }
 }

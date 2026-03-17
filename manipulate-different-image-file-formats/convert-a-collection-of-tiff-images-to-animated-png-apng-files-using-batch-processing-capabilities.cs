@@ -5,46 +5,37 @@ using Aspose.Imaging.ImageOptions;
 
 class TiffToApngBatchConverter
 {
-    // Folder containing source TIFF files
-    private const string SourceFolder = @"C:\Images\TiffSource";
-
-    // Folder where the resulting APNG files will be saved
-    private const string OutputFolder = @"C:\Images\ApngOutput";
-
-    // Default duration for each frame in milliseconds
-    private const uint DefaultFrameDuration = 500; // 0.5 seconds
-
+    // Entry point
     static void Main()
     {
-        // Ensure the output directory exists
-        Directory.CreateDirectory(OutputFolder);
+        // Folder containing TIFF files
+        string inputFolder = @"C:\Images\TiffInput";
+        // Folder to store generated APNG files
+        string outputFolder = @"C:\Images\ApngOutput";
 
-        // Get all TIFF files in the source folder (including subfolders if needed)
-        string[] tiffFiles = Directory.GetFiles(SourceFolder, "*.tif", SearchOption.TopDirectoryOnly);
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputFolder);
 
-        foreach (string tiffPath in tiffFiles)
+        // Get all TIFF files (both .tif and .tiff extensions)
+        string[] tiffFiles = Directory.GetFiles(inputFolder, "*.tif");
+        string[] tiffFilesAlt = Directory.GetFiles(inputFolder, "*.tiff");
+        string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
+        tiffFiles.CopyTo(allTiffFiles, 0);
+        tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
+
+        // Process each TIFF file
+        foreach (string tiffPath in allTiffFiles)
         {
-            // Build the output file name (same name with .png extension)
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(tiffPath);
-            string apngPath = Path.Combine(OutputFolder, fileNameWithoutExt + ".png");
-
             // Load the TIFF image (multi‑page TIFF is supported)
             using (Image tiffImage = Image.Load(tiffPath))
             {
-                // Save as APNG using ApngOptions.
-                // The ApngOptions class inherits from PngOptions and allows us to set
-                // the default frame time and other animation parameters.
-                var apngOptions = new ApngOptions
-                {
-                    DefaultFrameTime = DefaultFrameDuration,
-                    // NumPlays = 0; // 0 means infinite looping (default)
-                };
+                // Determine output file name (same base name with .png extension)
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(tiffPath);
+                string apngPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
 
-                // Export the TIFF (all its pages/frames) to an animated PNG.
-                tiffImage.Save(apngPath, apngOptions);
+                // Save as APNG with a default frame duration (e.g., 500 ms)
+                tiffImage.Save(apngPath, new ApngOptions() { DefaultFrameTime = 500 });
             }
-
-            Console.WriteLine($"Converted '{tiffPath}' to '{apngPath}'.");
         }
 
         Console.WriteLine("Batch conversion completed.");

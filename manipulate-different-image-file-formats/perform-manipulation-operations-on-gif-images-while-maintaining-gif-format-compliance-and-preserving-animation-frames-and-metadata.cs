@@ -1,51 +1,55 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
-class GifManipulation
+namespace GifManipulationDemo
 {
-    static void Main()
+    class Program
     {
-        // Paths for input and output GIF files
-        string inputPath = "input.gif";
-        string outputPath = "output.gif";
-
-        // Load the existing GIF image
-        using (Image image = Image.Load(inputPath))
+        static void Main(string[] args)
         {
-            // Cast to GifImage to access GIF‑specific functionality
-            GifImage gif = image as GifImage;
-            if (gif == null)
-                throw new InvalidOperationException("The loaded file is not a GIF image.");
+            // Paths for input and output GIF files
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
 
-            // Preserve original metadata (Exif and XMP) before modifications
-            var originalExif = gif.ExifData;
-            var originalXmp = gif.XmpData;
-
-            // Example operation: resize the whole animation using full‑frame resizing
-            int newWidth = gif.Width / 2;   // halve the width
-            int newHeight = gif.Height / 2; // halve the height
-            gif.ResizeFullFrame(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-            // Example operation: adjust brightness uniformly across all frames
-            gif.AdjustBrightness(20); // increase brightness by 20 units
-
-            // Restore metadata (if any changes cleared them)
-            gif.ExifData = originalExif;
-            gif.XmpData = originalXmp;
-
-            // Prepare save options to keep GIF‑specific settings and metadata
-            GifOptions saveOptions = new GifOptions
+            // Load the animated GIF
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                KeepMetadata = true,                     // retain original metadata
-                LoopsCount = gif.LoopsCount,             // preserve loop count
-                BackgroundColor = gif.BackgroundColor,   // preserve background color
-                FullFrame = true                         // ensure full‑frame handling on save
-            };
+                // Preserve original loop count
+                int originalLoops = gif.LoopsCount;
 
-            // Save the modified GIF while maintaining format compliance
-            gif.Save(outputPath, saveOptions);
+                // Iterate through each frame and apply transformations
+                for (int i = 0; i < gif.PageCount; i++)
+                {
+                    // Set the active frame to the current page
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+
+                    // Rotate the active frame 90 degrees clockwise
+                    gif.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                }
+
+                // Resize all frames uniformly (full frame resize)
+                // Example new dimensions; adjust as needed
+                int newWidth = gif.Width / 2;
+                int newHeight = gif.Height / 2;
+                gif.ResizeFullFrame(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                // Restore the original loop count
+                gif.LoopsCount = originalLoops;
+
+                // Prepare GIF save options to keep metadata and loops
+                GifOptions saveOptions = new GifOptions
+                {
+                    LoopsCount = gif.LoopsCount,
+                    KeepMetadata = true
+                };
+
+                // Save the modified GIF
+                gif.Save(outputPath, saveOptions);
+            }
         }
     }
 }

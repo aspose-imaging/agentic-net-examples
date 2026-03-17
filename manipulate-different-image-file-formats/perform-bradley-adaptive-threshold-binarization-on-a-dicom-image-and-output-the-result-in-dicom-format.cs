@@ -1,13 +1,27 @@
-// Load the DICOM image from disk
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(@"c:\temp\sample.dicom"))
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
+
+class Program
 {
-    // Cast the generic Image to DicomImage to access DICOM‑specific methods
-    Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
+    static void Main()
+    {
+        // Input and output file paths
+        string inputPath = @"c:\temp\sample.dicom";
+        string outputPath = @"c:\temp\sample.BinarizeBradley5_10x10.dicom";
 
-    // Apply Bradley's adaptive thresholding
-    // brightnessDifference = 5, windowSize = 10 (10x10 pixel window)
-    dicomImage.BinarizeBradley(5, 10);
+        // Load the DICOM image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to DicomImage to access DICOM-specific methods
+            DicomImage dicomImage = (DicomImage)image;
 
-    // Save the processed image back in DICOM format
-    dicomImage.Save(@"c:\temp\sample.BinarizeBradley5_10x10.dcm", new Aspose.Imaging.ImageOptions.DicomOptions());
+            // Apply Bradley's adaptive thresholding
+            // brightnessDifference = 5, windowSize = 10 (10x10 window)
+            dicomImage.BinarizeBradley(5, 10);
+
+            // Save the processed image back in DICOM format
+            dicomImage.Save(outputPath, new DicomOptions());
+        }
+    }
 }

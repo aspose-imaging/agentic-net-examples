@@ -1,62 +1,55 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input PNG file
-        string inputPngPath = "input.png";
+        string inputPath = "input.png";
+        string resizedPath = "resized.png";
+        string croppedPath = "cropped.png";
+        string tiffPath = "output.tif";
 
-        // Output paths
-        string croppedResizedPngPath = "output_cropped_resized.png";
-        string convertedJpegPath = "output_converted.jpg";
-        string convertedTiffPath = "output_converted.tif";
-
-        // -----------------------------------------------------------------
-        // 1. Load PNG, crop, resize, and save as PNG (lossless)
-        // -----------------------------------------------------------------
-        using (RasterImage pngImage = (RasterImage)Image.Load(inputPngPath))
+        // Resize the image to half its original dimensions using lossless nearest-neighbour resampling
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Ensure image data is cached for better performance
-            if (!pngImage.IsCached)
-                pngImage.CacheData();
+            if (!image.IsCached) image.CacheData();
 
-            // Define crop rectangle (example values)
-            Rectangle cropRect = new Rectangle(50, 50, 200, 200);
-            pngImage.Crop(cropRect);
+            int newWidth = image.Width / 2;
+            int newHeight = image.Height / 2;
 
-            // Resize to desired dimensions
-            pngImage.Resize(100, 100); // Uses default NearestNeighbourResample
+            image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+            image.Save(resizedPath, new PngOptions());
 
-            // Save with PNG options (compression level set to maximum)
-            PngOptions pngSaveOptions = new PngOptions
-            {
-                CompressionLevel = 9 // 0 (fastest) to 9 (smallest size)
-            };
-            pngImage.Save(croppedResizedPngPath, pngSaveOptions);
+            Console.WriteLine($"Resized image saved to {resizedPath}");
         }
 
-        // -----------------------------------------------------------------
-        // 2. Convert original PNG to JPEG (high quality) and TIFF
-        // -----------------------------------------------------------------
-        using (Image originalImage = Image.Load(inputPngPath))
+        // Crop the central region of the image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // JPEG conversion with maximum quality (lossless as far as JPEG allows)
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Quality = 100
-            };
-            originalImage.Save(convertedJpegPath, jpegOptions);
+            if (!image.IsCached) image.CacheData();
 
-            // TIFF conversion (TIFF is lossless by default)
+            int cropWidth = image.Width / 2;
+            int cropHeight = image.Height / 2;
+            int x = (image.Width - cropWidth) / 2;
+            int y = (image.Height - cropHeight) / 2;
+
+            Rectangle rect = new Rectangle(x, y, cropWidth, cropHeight);
+            image.Crop(rect);
+            image.Save(croppedPath, new PngOptions());
+
+            Console.WriteLine($"Cropped image saved to {croppedPath}");
+        }
+
+        // Convert the PNG image to a lossless TIFF format
+        using (Image image = Image.Load(inputPath))
+        {
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            originalImage.Save(convertedTiffPath, tiffOptions);
+            image.Save(tiffPath, tiffOptions);
+
+            Console.WriteLine($"Image converted to TIFF and saved to {tiffPath}");
         }
     }
 }

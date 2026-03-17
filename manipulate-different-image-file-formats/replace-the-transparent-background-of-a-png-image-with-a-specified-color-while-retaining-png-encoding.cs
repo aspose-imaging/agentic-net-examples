@@ -1,4 +1,5 @@
 using System;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -10,36 +11,41 @@ class Program
         string inputPath = "input.png";
         // Output PNG with background replaced
         string outputPath = "output.png";
-
-        // Opaque red color in ARGB format (Alpha=255, Red=255, Green=0, Blue=0)
-        int replaceArgb = unchecked((int)0xFFFF0000);
+        // Color to replace transparent pixels (example: solid blue)
+        Aspose.Imaging.Color replaceColor = Aspose.Imaging.Color.Blue;
 
         // Load the PNG as a raster image
-        using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
         {
-            // Load all pixels (including alpha channel)
-            int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+            // Get the full image bounds
+            Aspose.Imaging.Rectangle bounds = raster.Bounds;
+
+            // Load ARGB pixel data
+            int[] pixels = raster.LoadArgb32Pixels(bounds);
 
             // Replace fully transparent pixels (alpha == 0) with the specified color
+            int replaceArgb = (0xFF << 24) | (replaceColor.ToArgb() & 0x00FFFFFF);
             for (int i = 0; i < pixels.Length; i++)
             {
-                if ((pixels[i] & unchecked((int)0xFF000000)) == 0)
+                int alpha = (pixels[i] >> 24) & 0xFF;
+                if (alpha == 0)
                 {
                     pixels[i] = replaceArgb;
                 }
             }
 
-            // Write modified pixels back to the image
-            raster.SaveArgb32Pixels(raster.Bounds, pixels);
+            // Save the modified pixel data back to the image
+            raster.SaveArgb32Pixels(bounds, pixels);
 
             // Prepare PNG save options
-            PngOptions options = new PngOptions
+            PngOptions pngOptions = new PngOptions
             {
+                // Ensure the output is written as a PNG file
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Save the modified image as PNG
-            raster.Save(outputPath, options);
+            // Save the image with PNG encoding
+            raster.Save(outputPath, pngOptions);
         }
     }
 }
