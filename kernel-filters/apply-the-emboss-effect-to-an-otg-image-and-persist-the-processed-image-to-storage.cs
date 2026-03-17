@@ -1,49 +1,45 @@
 using System;
-using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths
+        // Paths for input OTG, temporary PNG, and final output
         string inputPath = "input.otg";
         string tempPngPath = "temp.png";
         string outputPath = "output.png";
 
-        // Step 1: Rasterize OTG to PNG
+        // Load the OTG image and rasterize it to a PNG file
         using (Image otgImage = Image.Load(inputPath))
         {
-            var rasterOptions = new Aspose.Imaging.ImageOptions.OtgRasterizationOptions
+            // Set up rasterization options for OTG
+            OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
             {
                 PageSize = otgImage.Size
             };
-            var pngOptions = new PngOptions
+
+            // Configure PNG save options with the rasterization settings
+            PngOptions pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
+
+            // Save the rasterized image to a temporary PNG file
             otgImage.Save(tempPngPath, pngOptions);
         }
 
-        // Step 2: Load raster PNG and apply Emboss filter
+        // Load the rasterized PNG as a RasterImage
         using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
         {
-            var embossKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
-            var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
-            raster.Filter(raster.Bounds, embossOptions);
+            // Apply the Emboss effect using a predefined convolution kernel
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-            // Step 3: Save the processed image
-            var source = new FileCreateSource(outputPath, false);
-            var saveOptions = new PngOptions { Source = source };
-            raster.Save(outputPath, saveOptions);
-        }
-
-        // Cleanup temporary file
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+            // Save the processed image to the desired output path
+            raster.Save(outputPath);
         }
     }
 }
