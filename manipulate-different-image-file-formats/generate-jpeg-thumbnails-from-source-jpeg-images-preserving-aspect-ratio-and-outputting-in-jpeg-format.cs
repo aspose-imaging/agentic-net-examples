@@ -1,45 +1,64 @@
 using System;
-using Aspose.Imaging.FileFormats.Jpeg;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-class ThumbnailGenerator
+class Program
 {
-    // Generates a JPEG thumbnail while preserving the aspect ratio.
-    // Parameters:
-    //   sourcePath - full path to the source JPEG image.
-    //   thumbnailPath - full path where the thumbnail will be saved.
-    //   maxDimension - maximum width or height of the thumbnail (in pixels).
-    public static void CreateThumbnail(string sourcePath, string thumbnailPath, int maxDimension)
+    static void Main(string[] args)
     {
-        // Load the source JPEG image using the provided constructor rule.
-        using (JpegImage jpegImage = new JpegImage(sourcePath))
+        // Define input and output directories
+        string inputDir = "InputImages";
+        string outputDir = "Thumbnails";
+
+        // Desired maximum thumbnail dimensions
+        int maxWidth = 150;
+        int maxHeight = 150;
+
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDir))
         {
-            // Determine the scaling factor to fit within the max dimension while preserving aspect ratio.
-            double widthRatio = (double)maxDimension / jpegImage.Width;
-            double heightRatio = (double)maxDimension / jpegImage.Height;
-            double scale = Math.Min(widthRatio, heightRatio);
-
-            // If the image is already smaller than the requested size, keep original dimensions.
-            if (scale < 1.0)
-            {
-                int newWidth = (int)(jpegImage.Width * scale);
-                int newHeight = (int)(jpegImage.Height * scale);
-
-                // Resize the image using the Resize method (preserves aspect ratio because we calculated dimensions).
-                jpegImage.Resize(newWidth, newHeight);
-            }
-
-            // Save the thumbnail as a JPEG using the provided Save method rule.
-            jpegImage.Save(thumbnailPath);
+            Directory.CreateDirectory(outputDir);
         }
-    }
 
-    // Example usage.
-    static void Main()
-    {
-        string source = @"C:\Images\photo.jpg";
-        string thumb = @"C:\Images\photo_thumb.jpg";
-        int maxSize = 150; // Max width or height for the thumbnail.
+        // Process each JPEG file in the input directory
+        foreach (string inputPath in Directory.GetFiles(inputDir, "*.jpg"))
+        {
+            // Load the source image as a RasterImage
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Cache data for better performance
+                if (!image.IsCached)
+                {
+                    image.CacheData();
+                }
 
-        CreateThumbnail(source, thumb, maxSize);
+                // Calculate scaling factor to preserve aspect ratio
+                double widthScale = (double)maxWidth / image.Width;
+                double heightScale = (double)maxHeight / image.Height;
+                double scale = Math.Min(widthScale, heightScale);
+                // Do not upscale images smaller than the target size
+                scale = Math.Min(1.0, scale);
+
+                int thumbWidth = Math.Max(1, (int)(image.Width * scale));
+                int thumbHeight = Math.Max(1, (int)(image.Height * scale));
+
+                // Resize the image to thumbnail dimensions
+                image.Resize(thumbWidth, thumbHeight);
+
+                // Prepare JPEG save options
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 75 // Adjust quality as needed
+                };
+
+                // Build output file path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + "_thumb.jpg");
+
+                // Save the thumbnail as JPEG
+                image.Save(outputPath, jpegOptions);
+            }
+        }
     }
 }
