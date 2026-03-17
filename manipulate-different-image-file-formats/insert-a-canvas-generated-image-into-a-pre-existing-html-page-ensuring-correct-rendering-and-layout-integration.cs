@@ -1,57 +1,62 @@
 using System;
 using System.IO;
+using System.Text;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
-class Program
+class CanvasInsertionExample
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths
-        string existingHtmlPath = "page.html";
-        string canvasHtmlPath = "canvas.html";
-        string outputHtmlPath = "output.html";
+        // Paths for the source vector image, the existing HTML page, and the output HTML page
+        string vectorImagePath = @"Sample.svg";
+        string existingHtmlPath = @"page.html";
+        string outputHtmlPath = @"page_with_canvas.html";
 
-        // Canvas dimensions
-        int width = 400;
-        int height = 300;
-
-        // Create a PNG canvas
-        PngOptions pngOptions = new PngOptions();
-        using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pngOptions, width, height))
+        // Load the vector image (e.g., SVG) that will be rendered as a Canvas element
+        using (Image vectorImage = Image.Load(vectorImagePath))
         {
-            // Draw on the canvas
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-            graphics.Clear(Aspose.Imaging.Color.LightGray);
-            graphics.DrawRectangle(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), new Aspose.Imaging.Rectangle(20, 20, width - 40, height - 40));
-
-            // Save only the canvas tag (no full HTML page)
-            canvas.Save(canvasHtmlPath, new Html5CanvasOptions
+            // Prepare HTML5 Canvas options:
+            // - Export only the <canvas> tag (FullHtmlPage = false)
+            // - Assign a unique identifier to the canvas element
+            var canvasOptions = new Html5CanvasOptions
             {
                 FullHtmlPage = false,
-                CanvasTagId = "generatedCanvas"
-            });
+                CanvasTagId = "myCanvas",
+                VectorRasterizationOptions = new SvgRasterizationOptions()
+            };
+
+            // Save the canvas markup to a memory stream to avoid creating a temporary file
+            using (var canvasStream = new MemoryStream())
+            {
+                vectorImage.Save(canvasStream, canvasOptions);
+                // Convert the stream content to a string using the specified encoding (default UTF-8)
+                string canvasHtml = Encoding.UTF8.GetString(canvasStream.ToArray());
+
+                // Read the existing HTML page
+                string existingHtml = File.ReadAllText(existingHtmlPath, Encoding.UTF8);
+
+                // Determine where to insert the canvas tag.
+                // Here we insert it just before the closing </body> tag.
+                string insertionMarker = "</body>";
+                int insertPos = existingHtml.IndexOf(insertionMarker, StringComparison.OrdinalIgnoreCase);
+                string finalHtml;
+
+                if (insertPos >= 0)
+                {
+                    finalHtml = existingHtml.Insert(insertPos, canvasHtml + Environment.NewLine);
+                }
+                else
+                {
+                    // If </body> is not found, append the canvas at the end of the file
+                    finalHtml = existingHtml + Environment.NewLine + canvasHtml;
+                }
+
+                // Write the combined HTML to the output file
+                File.WriteAllText(outputHtmlPath, finalHtml, Encoding.UTF8);
+            }
         }
 
-        // Read the existing HTML page
-        string htmlContent = File.ReadAllText(existingHtmlPath);
-
-        // Read the generated canvas tag
-        string canvasTag = File.ReadAllText(canvasHtmlPath);
-
-        // Insert the canvas tag before the closing </body> tag if present
-        int bodyCloseIndex = htmlContent.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
-        if (bodyCloseIndex >= 0)
-        {
-            htmlContent = htmlContent.Insert(bodyCloseIndex, canvasTag + Environment.NewLine);
-        }
-        else
-        {
-            // Append at the end if </body> not found
-            htmlContent += Environment.NewLine + canvasTag;
-        }
-
-        // Write the merged HTML to the output file
-        File.WriteAllText(outputHtmlPath, htmlContent);
+        Console.WriteLine("Canvas image inserted successfully into the HTML page.");
     }
 }
