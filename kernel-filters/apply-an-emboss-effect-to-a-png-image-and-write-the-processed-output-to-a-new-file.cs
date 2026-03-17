@@ -1,17 +1,31 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Filters;
 
-string dir = @"c:\temp\";
-
-// Load the PNG image from file
-using (PngImage pngImage = new PngImage(Path.Combine(dir, "input.png")))
+class Program
 {
-    // Apply the emboss filter to the entire image area
-    Rectangle fullRect = new Rectangle(0, 0, pngImage.Width, pngImage.Height);
-    pngImage.Filter(fullRect, new EmbossFilter());
+    static void Main(string[] args)
+    {
+        // Input and output file paths
+        string inputPath = args.Length > 0 ? args[0] : "input.png";
+        string outputPath = args.Length > 1 ? args[1] : "output_emboss.png";
 
-    // Save the processed image to a new file
-    pngImage.Save(Path.Combine(dir, "output_emboss.png"));
+        // Load the PNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage for filtering
+            RasterImage raster = (RasterImage)image;
+
+            // Apply emboss effect using the predefined 3x3 emboss kernel
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+            // Save the processed image as PNG
+            PngOptions saveOptions = new PngOptions();
+            raster.Save(outputPath, saveOptions);
+        }
+    }
 }
