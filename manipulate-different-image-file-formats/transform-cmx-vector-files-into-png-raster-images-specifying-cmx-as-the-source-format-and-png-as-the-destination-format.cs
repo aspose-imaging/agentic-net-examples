@@ -1,28 +1,35 @@
 using System;
+using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        string inputPath = args.Length > 0 ? args[0] : "input.cmx";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
-
-        using (Aspose.Imaging.Image cmxImage = Aspose.Imaging.Image.Load(inputPath))
+        static void Main(string[] args)
         {
-            var rasterOptions = new VectorRasterizationOptions
-            {
-                BackgroundColor = Aspose.Imaging.Color.White,
-                PageWidth = cmxImage.Width,
-                PageHeight = cmxImage.Height
-            };
+            string inputPath = args.Length > 0 ? args[0] : "input.cmx";
+            string outputPath = args.Length > 1 ? args[1] : "output.png";
 
-            var pngOptions = new PngOptions
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterOptions
-            };
+                using (PngOptions pngOptions = new PngOptions())
+                {
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    };
+                    pngOptions.VectorRasterizationOptions = vectorOptions;
 
-            cmxImage.Save(outputPath, pngOptions);
+                    image.Save(outputPath, pngOptions);
+                }
+            }
         }
     }
 }
