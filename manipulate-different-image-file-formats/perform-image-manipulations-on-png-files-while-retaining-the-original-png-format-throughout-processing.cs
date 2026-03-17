@@ -1,38 +1,36 @@
 using System;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
 
-class Program
+class PngProcessingExample
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output PNG file paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Path to the source PNG file.
+        string inputPath = @"C:\Images\source.png";
 
-        // Load the PNG image
-        using (PngImage png = (PngImage)Aspose.Imaging.Image.Load(inputPath))
+        // Path where the processed PNG will be saved.
+        string outputPath = @"C:\Images\processed.png";
+
+        // Load the PNG image using the constructor that accepts a file path.
+        using (PngImage pngImage = new PngImage(inputPath))
         {
-            // Resize the image using high-quality Lanczos resampling
-            png.Resize(200, 200, Aspose.Imaging.ResizeType.LanczosResample);
+            // Convert the image to grayscale. The image remains a PNG.
+            pngImage.Grayscale();
 
-            // Crop a region from the resized image
-            png.Crop(new Aspose.Imaging.Rectangle(10, 10, 180, 180));
+            // Resize the image to 50% of its original dimensions.
+            // The Resize method keeps the image type unchanged.
+            int newWidth = pngImage.Width / 2;
+            int newHeight = pngImage.Height / 2;
+            pngImage.Resize(newWidth, newHeight);
 
-            // Draw a blue rectangle on the image
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(png);
-            Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
-            graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(20, 20, 100, 100));
+            // Rotate the image 45 degrees around its centre.
+            // Rotation also preserves the PNG format.
+            pngImage.Rotate(45);
 
-            // Prepare PNG save options
-            PngOptions options = new PngOptions
-            {
-                CompressionLevel = 6,
-                Progressive = true
-            };
-
-            // Save the processed image as PNG
-            png.Save(outputPath, options);
+            // Save the modified image back to PNG format.
+            // Using Save(string) ensures the file is written as PNG.
+            pngImage.Save(outputPath);
         }
     }
 }
