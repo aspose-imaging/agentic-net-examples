@@ -1,46 +1,36 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output.png";
 
-        // Define the solid background color (e.g., opaque red)
-        Color backgroundColor = Color.FromArgb(255, 255, 0, 0);
-        int backgroundArgb = backgroundColor.ToArgb();
-
-        // Load the PNG image as a raster image
-        using (RasterImage png = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Load all ARGB pixels
-            int[] pixels = png.LoadArgb32Pixels(png.Bounds);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Replace fully transparent pixels with the background color
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                int alpha = (pixels[i] >> 24) & 0xFF;
-                if (alpha == 0)
-                {
-                    pixels[i] = backgroundArgb;
-                }
-            }
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the modified pixels back to the image
-            png.SaveArgb32Pixels(png.Bounds, pixels);
+        // Load the PNG image
+        using (PngImage pngImage = new PngImage(inputPath))
+        {
+            // Set a solid background color (e.g., white) and enable it
+            pngImage.BackgroundColor = Aspose.Imaging.Color.White;
+            pngImage.HasBackgroundColor = true;
 
-            // Prepare output options and source
-            Source source = new FileCreateSource(outputPath, false);
-            PngOptions options = new PngOptions() { Source = source };
-
-            // Save the image with the specified options
-            png.Save(outputPath, options);
+            // Save the modified image
+            pngImage.Save(outputPath);
         }
     }
 }
