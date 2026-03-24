@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -9,21 +10,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input DNG file and output PNG file paths
+        // Hardcoded input and output paths
         string inputPath = "input.dng";
         string outputPath = "output.png";
 
-        // Load the DNG image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load DNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
+            // Cast to DngImage (inherits RasterImage) for filtering
+            DngImage dngImage = (DngImage)image;
 
-            // Apply Emboss filter using predefined kernel
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            // Apply emboss filter using convolution kernel
+            dngImage.Filter(dngImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-            // Save the processed image as PNG
-            raster.Save(outputPath, new PngOptions());
+            // Save processed image as PNG
+            dngImage.Save(outputPath, new PngOptions());
         }
     }
 }
