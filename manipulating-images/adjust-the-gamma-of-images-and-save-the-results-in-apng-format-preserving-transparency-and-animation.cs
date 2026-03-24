@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -9,67 +10,59 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Expect input image path and output APNG path as arguments
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <inputImagePath> <outputApngPath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the source raster image (preserves transparency)
+        // Load source raster image
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            const int AnimationDuration = 1000; // total animation time in ms
-            const int FrameDuration = 70;       // each frame duration in ms
-
             // Configure APNG creation options
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = (uint)FrameDuration,
+                DefaultFrameTime = 70, // milliseconds per frame
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create the APNG canvas with the same dimensions as the source image
-            using (ApngImage apngImage = (ApngImage)Image.Create(
-                createOptions,
-                sourceImage.Width,
-                sourceImage.Height))
+            // Create APNG image canvas
+            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
-                // Ensure the image starts with no frames
+                // Remove the default initial frame
                 apngImage.RemoveAllFrames();
 
-                int numOfFrames = AnimationDuration / FrameDuration;
+                // Animation parameters
+                const int animationDuration = 1000; // total duration in ms
+                const int frameDuration = 70;       // per-frame duration in ms
+                int numOfFrames = animationDuration / frameDuration;
                 int halfFrames = numOfFrames / 2;
 
-                // Add the first frame (original image)
+                // Add first frame
                 apngImage.AddFrame(sourceImage);
 
-                // Add intermediate frames with varying gamma adjustments
+                // Add intermediate frames with gamma adjustment
                 for (int frameIndex = 1; frameIndex < numOfFrames - 1; ++frameIndex)
                 {
-                    // Duplicate the source image into a new frame
                     apngImage.AddFrame(sourceImage);
-
-                    // Retrieve the newly added frame
                     ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-
-                    // Calculate gamma value: increase then decrease across the animation
-                    float gamma = frameIndex >= halfFrames
-                        ? numOfFrames - frameIndex - 1
-                        : frameIndex;
-
-                    // Apply gamma correction to the frame
+                    float gamma = frameIndex >= halfFrames ? numOfFrames - frameIndex - 1 : frameIndex;
                     lastFrame.AdjustGamma(gamma);
                 }
 
-                // Add the final frame (original image)
+                // Add last frame
                 apngImage.AddFrame(sourceImage);
 
-                // Save the APNG; the output path is already bound via FileCreateSource
+                // Save the APNG animation
                 apngImage.Save();
             }
         }
