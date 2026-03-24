@@ -1,52 +1,50 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
-using System.Drawing;   // for Rectangle if needed
+using Aspose.Imaging.FileFormats.Apng;
 
-class ApngFilterChain
+class Program
 {
     static void Main()
     {
-        // Load an existing APNG file. The Image.Load method follows the required lifecycle rule.
-        using (ApngImage apng = (ApngImage)Image.Load("input.apng"))
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // -----------------------------------------------------------------
-            // 1. Apply a brightness increase to every frame.
-            //    AdjustBrightness works on the whole image (all frames) and
-            //    returns the modified image, allowing further chaining.
-            // -----------------------------------------------------------------
-            apng.AdjustBrightness(30);   // increase brightness by 30 units
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // -----------------------------------------------------------------
-            // 2. Increase contrast globally.
-            // -----------------------------------------------------------------
-            apng.AdjustContrast(1.2f);   // 20% more contrast
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // -----------------------------------------------------------------
-            // 3. Apply gamma correction globally.
-            // -----------------------------------------------------------------
-            apng.AdjustGamma(0.85f);     // slightly darken via gamma
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to ApngImage to access frames
+            ApngImage apngImage = (ApngImage)image;
 
-            // -----------------------------------------------------------------
-            // 4. Convert the whole animation to grayscale.
-            // -----------------------------------------------------------------
-            apng.Grayscale();
-
-            // -----------------------------------------------------------------
-            // 5. If you need per‑frame fine‑tuning, iterate over the frames.
-            //    Here we demonstrate an additional per‑frame filter (contrast).
-            // -----------------------------------------------------------------
-            foreach (ApngFrame frame in apng.Pages)
+            // Apply a series of filters to each frame
+            for (int i = 0; i < apngImage.PageCount; i++)
             {
-                // Each frame is a RasterCachedImage, so the same filter methods are available.
-                frame.AdjustContrast(1.1f);   // subtle extra contrast per frame
+                ApngFrame frame = (ApngFrame)apngImage.Pages[i];
+
+                // Increase brightness
+                frame.AdjustBrightness(20);          // +20 brightness
+
+                // Enhance contrast
+                frame.AdjustContrast(1.2f);          // 20% more contrast
+
+                // Apply gamma correction
+                frame.AdjustGamma(0.9f);             // Slight darkening
             }
 
-            // -----------------------------------------------------------------
-            // Save the processed APNG. The Save method follows the required lifecycle rule.
-            // -----------------------------------------------------------------
-            apng.Save("output.apng");
+            // Save the modified APNG with default options
+            apngImage.Save(outputPath, new ApngOptions());
         }
     }
 }
