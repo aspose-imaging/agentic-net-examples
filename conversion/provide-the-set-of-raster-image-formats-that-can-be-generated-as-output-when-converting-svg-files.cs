@@ -5,16 +5,21 @@ class Program
 {
     static void Main()
     {
-        // The SvgImageType enumeration defines the raster formats that can be produced
-        // when an SVG image is rasterized (converted to a bitmap).
-        // Iterate through the enum values and display the supported formats.
-        foreach (SvgImageType format in Enum.GetValues(typeof(SvgImageType)))
+        // Raster image formats that Aspose.Imaging can produce when converting an SVG.
+        // These correspond to the values of the SvgImageType enumeration (excluding Unknown).
+        var rasterFormats = new[]
         {
-            // Skip the Unknown value as it does not represent a valid output format.
-            if (format == SvgImageType.Unknown)
-                continue;
+            SvgImageType.Jpeg, // JPEG JFIF
+            SvgImageType.Png,  // Portable Network Graphics
+            SvgImageType.Bmp,  // Windows Bitmap
+            SvgImageType.Gif,  // GIF image format
+            SvgImageType.Tiff  // TIFF image format
+        };
 
-            Console.WriteLine($"{format} ({(int)format})");
+        Console.WriteLine("Raster image formats available for SVG conversion:");
+        foreach (var format in rasterFormats)
+        {
+            Console.WriteLine("- " + format);
         }
     }
 }
