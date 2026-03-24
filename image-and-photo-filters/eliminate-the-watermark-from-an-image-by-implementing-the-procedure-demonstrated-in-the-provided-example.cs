@@ -1,36 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input\\image.png";
+        string outputPath = "output\\result.png";
 
-        // Load the image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
         using (var image = Image.Load(inputPath))
         {
-            // Cast to the specific format (PNG in this example)
+            // Cast to specific format (PNG in this example)
             var pngImage = (PngImage)image;
 
-            // Define the mask region (example ellipse)
+            // Define the mask region (ellipse in this case)
             var mask = new GraphicsPath();
             var figure = new Figure();
             figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
             mask.AddFigure(figure);
 
-            // Create watermark removal options using the Telea algorithm
+            // Configure Telea algorithm options
             var options = new TeleaWatermarkOptions(mask);
 
-            // Perform watermark removal
-            using (RasterImage result = WatermarkRemover.PaintOver(pngImage, options))
+            // Remove the watermark
+            using (var result = WatermarkRemover.PaintOver(pngImage, options))
             {
                 // Save the cleaned image
                 result.Save(outputPath);
