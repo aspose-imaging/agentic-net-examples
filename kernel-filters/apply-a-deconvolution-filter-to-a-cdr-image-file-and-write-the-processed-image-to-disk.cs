@@ -1,33 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
-class DeconvolutionExample
+class Program
 {
     static void Main()
     {
-        // Path to the source CDR file
-        string inputPath = "input.cdr";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Temp\input.cdr";
+        string outputPath = @"C:\Temp\output.png";
 
-        // Path where the processed image will be saved
-        string outputPath = "output.png";
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the CDR image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to gain access to the Filter method
-            RasterImage rasterImage = (RasterImage)image;
+            // The filter works on RasterImage, so cast accordingly
+            RasterImage raster = image as RasterImage;
+            if (raster == null)
+            {
+                Console.Error.WriteLine("Loaded image is not a raster image.");
+                return;
+            }
 
-            // Create deconvolution filter options (Gauss‑Wiener filter)
-            // Parameters: radius = 5, sigma = 4.0
-            var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
-
-            // Apply the filter to the whole image
-            rasterImage.Filter(rasterImage.Bounds, deconvOptions);
+            // Apply a Gauss‑Wiener deconvolution filter (a concrete Deconvolution filter)
+            var filterOptions = new GaussWienerFilterOptions(5, 4.0);
+            raster.Filter(raster.Bounds, filterOptions);
 
             // Save the processed image as PNG
-            rasterImage.Save(outputPath, new PngOptions());
+            var pngOptions = new PngOptions();
+            raster.Save(outputPath, pngOptions);
         }
     }
 }
