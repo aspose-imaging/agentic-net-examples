@@ -1,35 +1,39 @@
 using System;
+using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length < 2)
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.bmp";
+
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <input_svg_path> <output_bmp_path>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            var rasterOptions = new SvgRasterizationOptions
+            var rasterOptions = new VectorRasterizationOptions
             {
+                BackgroundColor = Color.White,
                 PageWidth = image.Width,
                 PageHeight = image.Height,
-                BackgroundColor = Aspose.Imaging.Color.White
+                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = SmoothingMode.None
             };
 
-            var bmpOptions = new BmpOptions
+            using (var bmpOptions = new BmpOptions())
             {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            image.Save(outputPath, bmpOptions);
+                bmpOptions.VectorRasterizationOptions = rasterOptions;
+                image.Save(outputPath, bmpOptions);
+            }
         }
     }
 }
