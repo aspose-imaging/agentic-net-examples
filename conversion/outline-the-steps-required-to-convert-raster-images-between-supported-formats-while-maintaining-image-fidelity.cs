@@ -2,77 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Path to the source raster image
-        string inputPath = "input.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
 
-        // Verify that the source file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
-            Console.WriteLine($"Source file not found: {inputPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the raster image
+        // Load the raster image (any supported format)
         using (Image image = Image.Load(inputPath))
         {
-            // Convert to JPEG with maximum quality to preserve fidelity
-            string jpegPath = "output.jpg";
-            using (JpegOptions jpegOptions = new JpegOptions())
-            {
-                jpegOptions.Quality = 100; // highest quality
-                image.Save(jpegPath, jpegOptions);
-            }
+            // Convert to PNG
+            string pngOutput = @"C:\temp\output\sample.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(pngOutput));
+            image.Save(pngOutput, new PngOptions());
 
-            // Convert to PNG (lossless format)
-            string pngPath = "output.png";
-            using (PngOptions pngOptions = new PngOptions())
-            {
-                image.Save(pngPath, pngOptions);
-            }
+            // Convert to JPEG with high quality to preserve fidelity
+            string jpegOutput = @"C:\temp\output\sample.jpg";
+            Directory.CreateDirectory(Path.GetDirectoryName(jpegOutput));
+            var jpegOptions = new JpegOptions { Quality = 95 };
+            image.Save(jpegOutput, jpegOptions);
 
-            // Convert to BMP (uncompressed truecolor)
-            string bmpPath = "output.bmp";
-            using (BmpOptions bmpOptions = new BmpOptions())
-            {
-                bmpOptions.BitsPerPixel = 24;
-                image.Save(bmpPath, bmpOptions);
-            }
+            // Convert to TIFF (lossless)
+            string tiffOutput = @"C:\temp\output\sample.tif";
+            Directory.CreateDirectory(Path.GetDirectoryName(tiffOutput));
+            var tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
+            image.Save(tiffOutput, tiffOptions);
 
-            // Convert to TIFF (default compression)
-            string tiffPath = "output.tif";
-            using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-            {
-                image.Save(tiffPath, tiffOptions);
-            }
+            // Convert to GIF (if needed)
+            string gifOutput = @"C:\temp\output\sample.gif";
+            Directory.CreateDirectory(Path.GetDirectoryName(gifOutput));
+            image.Save(gifOutput, new GifOptions());
 
-            // Convert to GIF (palette based)
-            string gifPath = "output.gif";
-            using (GifOptions gifOptions = new GifOptions())
-            {
-                image.Save(gifPath, gifOptions);
-            }
-
-            // Convert to WebP (lossless)
-            string webpPath = "output.webp";
-            using (WebPOptions webpOptions = new WebPOptions())
-            {
-                webpOptions.Lossless = true;
-                image.Save(webpPath, webpOptions);
-            }
+            // Convert to BMP with specific bits per pixel
+            string bmpOutput = @"C:\temp\output\sample_24bpp.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(bmpOutput));
+            var bmpOptions = new BmpOptions { BitsPerPixel = 24 };
+            image.Save(bmpOutput, bmpOptions);
         }
-
-        Console.WriteLine("All conversions completed successfully.");
     }
 }
