@@ -1,8 +1,9 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
@@ -10,14 +11,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input JPEG files to merge
-        string[] inputFiles = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-        // Output PNG file path
-        string outputPath = "merged.png";
+        // Hardcoded input JPG files
+        string[] inputPaths = {
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
+        };
+
+        // Hardcoded output PNG file
+        string outputPath = @"C:\Images\merged_output.png";
+
+        // Validate input files
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Collect sizes of all input images
         List<Size> sizes = new List<Size>();
-        foreach (string path in inputFiles)
+        foreach (string path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
@@ -25,23 +44,19 @@ class Program
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
-        {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight) canvasHeight = sz.Height;
-        }
+        // Calculate canvas size for horizontal merge
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
 
-        // Create PNG canvas with bound file source
-        Source pngSource = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = pngSource };
+        // Create PNG options with bound source
+        Source src = new FileCreateSource(outputPath, false);
+        PngOptions pngOptions = new PngOptions() { Source = src };
+
+        // Create canvas image
         using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
         {
-            // Merge images horizontally onto the canvas
             int offsetX = 0;
-            foreach (string path in inputFiles)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -51,20 +66,8 @@ class Program
                 }
             }
 
-            // Save the merged PNG image
+            // Save the merged image (already bound to outputPath)
             canvas.Save();
-        }
-
-        // Attempt to utilize AVIF encoding (unsupported in Aspose.Imaging)
-        try
-        {
-            // Placeholder for AVIF encoding logic
-            // Since AVIF is not supported, we explicitly throw an exception
-            throw new NotSupportedException("AVIF format is not supported by Aspose.Imaging.");
-        }
-        catch (NotSupportedException ex)
-        {
-            Console.WriteLine($"AVIF encoding skipped: {ex.Message}");
         }
     }
 }
