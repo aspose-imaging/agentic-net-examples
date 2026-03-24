@@ -2,37 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input BMP and output PDF
-        string inputPath = "input.bmp";
-        string outputPath = "output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\output.pdf";
 
-        // Configure PDF export options
-        using (PdfOptions pdfOptions = new PdfOptions())
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Preserve original metadata
-            pdfOptions.KeepMetadata = true;
-            // Ensure full frame is used
-            pdfOptions.FullFrame = true;
-            // Set page size (e.g., A4 size in points)
-            pdfOptions.PageSize = new Size(595, 842);
-            // Define PDF compliance version
-            pdfOptions.PdfCoreOptions = new PdfCoreOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure PDF export options
+            PdfOptions pdfOptions = new PdfOptions
             {
-                PdfCompliance = PdfComplianceVersion.PdfA1b
+                // Example custom settings
+                KeepMetadata = true,
+                UseOriginalImageResolution = true,
+                // Set page size (A4 in points: 595x842)
+                PageSize = new Size(595, 842)
             };
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Save the image as PDF with the custom options
-                image.Save(outputPath, pdfOptions);
-            }
+            // Save the image as PDF with the specified options
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
