@@ -1,34 +1,43 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png; // for PngFilterType
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
         string outputPath = "output_filtered.apng";
 
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            for (int i = 0; i < apng.PageCount; i++)
-            {
-                ApngFrame frame = (ApngFrame)apng.Pages[i];
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
-                frame.Filter(frame.Bounds, blurOptions);
-            }
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            ApngOptions saveOptions = new ApngOptions
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the existing APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure APNG save options, including a PNG filter type
+            var saveOptions = new ApngOptions
             {
-                Source = new FileCreateSource(outputPath, false),
+                // Apply the Sub filter during PNG compression
+                FilterType = PngFilterType.Sub,
+                // Set default frame duration (in milliseconds)
                 DefaultFrameTime = 200,
-                NumPlays = 3,
-                ColorType = PngColorType.TruecolorWithAlpha
+                // Loop infinitely (0 means infinite)
+                NumPlays = 0
             };
 
-            apng.Save(outputPath, saveOptions);
+            // Save the image with the specified options
+            image.Save(outputPath, saveOptions);
         }
     }
 }
