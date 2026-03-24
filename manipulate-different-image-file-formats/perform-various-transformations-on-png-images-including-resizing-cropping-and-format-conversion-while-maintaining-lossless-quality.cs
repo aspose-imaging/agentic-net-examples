@@ -1,55 +1,59 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.png";
-        string resizedPath = "resized.png";
-        string croppedPath = "cropped.png";
-        string tiffPath = "output.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string resizedPath = @"C:\temp\output_resized.png";
+        string croppedPath = @"C:\temp\output_cropped.png";
+        string convertedPath = @"C:\temp\output_converted.bmp";
 
-        // Resize the image to half its original dimensions using lossless nearest-neighbour resampling
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            if (!image.IsCached) image.CacheData();
-
-            int newWidth = image.Width / 2;
-            int newHeight = image.Height / 2;
-
-            image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-            image.Save(resizedPath, new PngOptions());
-
-            Console.WriteLine($"Resized image saved to {resizedPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Crop the central region of the image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(resizedPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(croppedPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(convertedPath));
+
+        // ---------- Resize PNG (maintain lossless PNG) ----------
+        using (PngImage png = new PngImage(inputPath))
         {
-            if (!image.IsCached) image.CacheData();
-
-            int cropWidth = image.Width / 2;
-            int cropHeight = image.Height / 2;
-            int x = (image.Width - cropWidth) / 2;
-            int y = (image.Height - cropHeight) / 2;
-
-            Rectangle rect = new Rectangle(x, y, cropWidth, cropHeight);
-            image.Crop(rect);
-            image.Save(croppedPath, new PngOptions());
-
-            Console.WriteLine($"Cropped image saved to {croppedPath}");
+            // Resize to 200x200 pixels
+            png.Resize(200, 200);
+            // Save resized image preserving PNG options
+            png.Save(resizedPath);
         }
 
-        // Convert the PNG image to a lossless TIFF format
-        using (Image image = Image.Load(inputPath))
+        // ---------- Crop PNG ----------
+        using (PngImage png = new PngImage(inputPath))
         {
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            image.Save(tiffPath, tiffOptions);
+            // Define crop rectangle (x, y, width, height)
+            var cropRect = new Rectangle(50, 50, 100, 100);
+            // Crop the image
+            png.Crop(cropRect);
+            // Save cropped image
+            png.Save(croppedPath);
+        }
 
-            Console.WriteLine($"Image converted to TIFF and saved to {tiffPath}");
+        // ---------- Convert PNG to BMP (lossless conversion) ----------
+        using (PngImage png = new PngImage(inputPath))
+        {
+            // Create BMP options (default lossless settings)
+            var bmpOptions = new BmpOptions();
+            // Save as BMP using the options
+            png.Save(convertedPath, bmpOptions);
         }
     }
 }
