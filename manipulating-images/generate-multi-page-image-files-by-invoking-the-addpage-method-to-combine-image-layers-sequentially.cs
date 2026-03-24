@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
@@ -7,54 +8,61 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Validate input
-        if (args.Length == 0)
+        // Hardcoded input image paths
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Please provide input image file paths as command-line arguments.");
-            return;
-        }
+            @"C:\Images\input1.png",
+            @"C:\Images\input2.png",
+            @"C:\Images\input3.png"
+        };
 
-        // Output file path
-        string outputPath = "multipage.tif";
-
-        // Load the first image to obtain canvas dimensions
-        int canvasWidth, canvasHeight;
-        using (RasterImage first = (RasterImage)Image.Load(args[0]))
+        // Validate input files
+        foreach (string path in inputPaths)
         {
-            canvasWidth = first.Width;
-            canvasHeight = first.Height;
-        }
-
-        // Configure TIFF creation options
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-        // Create the TIFF image (first page is a default blank frame)
-        using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
-        {
-            // Add each input image as a new page
-            foreach (string path in args)
+            if (!File.Exists(path))
             {
-                using (RasterImage page = (RasterImage)Image.Load(path))
-                {
-                    tiffImage.AddPage(page);
-                }
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
-
-            // Remove the initial default frame
-            var defaultFrame = tiffImage.ActiveFrame;
-            tiffImage.ActiveFrame = tiffImage.Frames[1];
-            tiffImage.RemoveFrame(0);
-            defaultFrame.Dispose();
-
-            // Save the multipage TIFF
-            tiffImage.Save();
         }
 
-        Console.WriteLine($"Multipage TIFF saved to {outputPath}");
+        // Hardcoded output path
+        string outputPath = @"C:\Images\output.tif";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the first image to obtain canvas size
+        using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+        {
+            // Prepare TIFF options with bound source
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            {
+                Source = new FileCreateSource(outputPath, false),
+                Photometric = TiffPhotometrics.Rgb,
+                BitsPerSample = new ushort[] { 8, 8, 8 }
+            };
+
+            // Create TIFF canvas with the size of the first image
+            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, firstImage.Width, firstImage.Height))
+            {
+                // Add the first image as the first page
+                tiff.AddPage(firstImage);
+
+                // Add remaining images as additional pages
+                for (int i = 1; i < inputPaths.Length; i++)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
+                    {
+                        tiff.AddPage(img);
+                    }
+                }
+
+                // Save the multi-page TIFF (bound to source, so no path needed)
+                tiff.Save();
+            }
+        }
     }
 }
