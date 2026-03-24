@@ -1,38 +1,43 @@
+using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging;
-using Aspose.Imaging;
 
-// Create a file stream for the output PNG
-using (FileStream stream = new FileStream(@"C:\temp\lines_output.png", FileMode.Create))
+class Program
 {
-    // Initialize PNG options and associate the stream as the source
-    PngOptions pngOptions = new PngOptions();
-    pngOptions.Source = new StreamSource(stream);
-
-    // Create a 400x400 PNG image using the options
-    using (Image image = Image.Create(pngOptions, 400, 400))
+    static void Main(string[] args)
     {
-        // Obtain a Graphics object for drawing on the image
-        Graphics graphics = new Graphics(image);
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
-        // Optional: clear the background with a light color
-        graphics.Clear(Color.LightGray);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Define a pen (color and thickness) for the lines
-        Pen blackPen = new Pen(Color.Black, 2);
-        Pen redPen   = new Pen(Color.Red, 3);
-        Pen bluePen  = new Pen(Color.Blue, 1);
+        // Set up PNG options with a file create source bound to the output path
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Draw several straight lines using different coordinates
-        graphics.DrawLine(blackPen, new Point(50, 50), new Point(350, 50));   // Top horizontal line
-        graphics.DrawLine(redPen,   new Point(50, 100), new Point(350, 300)); // Diagonal line
-        graphics.DrawLine(bluePen,  new Point(50, 350), new Point(350, 350)); // Bottom horizontal line
-        graphics.DrawLine(blackPen, new Point(200, 50), new Point(200, 350)); // Vertical line
+        // Create a new PNG image with the specified dimensions
+        using (Image image = Image.Create(pngOptions, 500, 500))
+        {
+            // Initialize graphics for drawing
+            Graphics graphics = new Graphics(image);
 
-        // Save all changes to the PNG file
-        image.Save();
+            // Clear the canvas with a white background
+            graphics.Clear(Color.White);
+
+            // Define a black pen with a thickness of 2 pixels
+            Pen pen = new Pen(Color.Black, 2);
+
+            // Draw straight lines to form a rectangle
+            graphics.DrawLine(pen, new Point(50, 50), new Point(450, 50));
+            graphics.DrawLine(pen, new Point(450, 50), new Point(450, 450));
+            graphics.DrawLine(pen, new Point(450, 450), new Point(50, 450));
+            graphics.DrawLine(pen, new Point(50, 450), new Point(50, 50));
+
+            // Save the image (the file is already bound via FileCreateSource)
+            image.Save();
+        }
     }
 }
