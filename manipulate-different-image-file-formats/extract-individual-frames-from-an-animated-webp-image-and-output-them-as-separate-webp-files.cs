@@ -2,43 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
-class ExtractWebPFrames
+class Program
 {
     static void Main()
     {
-        // Path to the animated WebP file
-        string inputPath = @"C:\temp\animated.webp";
+        // Hardcoded input path
+        string inputPath = "C:\\temp\\animated.webp";
 
-        // Directory where individual frames will be saved
-        string outputDir = @"C:\temp\frames";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Load the animated WebP image using the provided constructor
-        using (WebPImage animatedImage = new WebPImage(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Access all frames (blocks) of the animated image
-            Image[] frames = animatedImage.Pages;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Iterate through each frame and save it as a separate WebP file
-            for (int i = 0; i < frames.Length; i++)
+        // Load the animated WebP image
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // Access multipage interface to enumerate frames
+            IMultipageImage multipage = webPImage as IMultipageImage;
+            if (multipage == null || multipage.PageCount == 0)
             {
-                // Each frame is a WebPFrameBlock; cast it accordingly
-                WebPFrameBlock frameBlock = frames[i] as WebPFrameBlock;
-                if (frameBlock == null)
-                    continue; // Skip if casting fails (should not happen for animated WebP)
+                Console.WriteLine("No frames found in the WebP image.");
+                return;
+            }
 
-                // Create a new WebPImage from the single frame block using the provided constructor
-                using (WebPImage singleFrameImage = new WebPImage(frameBlock))
-                {
-                    // Build the output file name
-                    string outputPath = Path.Combine(outputDir, $"frame_{i}.webp");
+            // Iterate through each frame and save it as an individual WebP file
+            for (int i = 0; i < multipage.PageCount; i++)
+            {
+                // Each page is a RasterImage
+                RasterImage frame = multipage.Pages[i] as RasterImage;
+                if (frame == null)
+                    continue;
 
-                    // Save the single frame as a WebP file using the provided Save method
-                    singleFrameImage.Save(outputPath);
-                }
+                // Hardcoded output path for the current frame
+                string outputPath = $"C:\\temp\\frame_{i}.webp";
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the frame as a WebP image using default options
+                frame.Save(outputPath, new WebPOptions());
             }
         }
     }
