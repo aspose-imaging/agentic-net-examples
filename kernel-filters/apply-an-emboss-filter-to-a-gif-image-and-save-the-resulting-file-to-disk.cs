@@ -1,31 +1,39 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input GIF file path
-        string inputPath = "input.gif";
-        // Output GIF file path
-        string outputPath = "output_emboss.gif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.gif";
+        string outputPath = @"C:\Images\output_embossed.gif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the GIF image
-        using (Image image = Image.Load(inputPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Cast to GifImage to access GIF-specific methods
-            GifImage gif = (GifImage)image;
+            // Cast to GifImage to access GIF-specific members
+            GifImage gifImage = (GifImage)image;
 
-            // Apply an emboss filter using a predefined convolution kernel
-            gif.Filter(gif.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            // Apply emboss filter using a predefined convolution kernel
+            gifImage.Filter(gifImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-            // Save the processed image as a GIF
-            gif.Save(outputPath, new GifOptions());
+            // Save the processed image as GIF
+            gifImage.Save(outputPath, new GifOptions());
         }
     }
 }
