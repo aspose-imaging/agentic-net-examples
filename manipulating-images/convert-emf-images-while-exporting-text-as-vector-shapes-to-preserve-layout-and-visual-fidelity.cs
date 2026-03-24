@@ -1,48 +1,55 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace EmfToSvgConverter
 {
-    static void Main()
+    class Program
     {
-        // Folder containing the source EMF file
-        string dir = @"c:\temp\";
-        string inputPath = System.IO.Path.Combine(dir, "test.emf");
-        string outputPath = System.IO.Path.Combine(dir, "test.output.svg");
-
-        // Load the EMF image using the unified Image.Load method
-        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        static void Main()
         {
-            // Create SVG save options and enable conversion of all text to vector shapes
-            SvgOptions svgOptions = new SvgOptions
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.emf";
+            string outputPath = @"C:\temp\output.svg";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                TextAsShapes = true
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Configure rasterization options specific to EMF
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
             {
-                // Set a light background for the drawing surface
-                BackgroundColor = Color.WhiteSmoke,
+                // Prepare SVG save options with text rendered as shapes
+                SvgOptions saveOptions = new SvgOptions
+                {
+                    TextAsShapes = true
+                };
 
-                // Use the original EMF size as the page size
-                PageSize = emfImage.Size,
+                // Configure rasterization options for the EMF source
+                EmfRasterizationOptions rasterizationOptions = new EmfRasterizationOptions
+                {
+                    BackgroundColor = Color.WhiteSmoke,
+                    PageSize = emfImage.Size,
+                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                    // Optional margins; adjust as needed
+                    BorderX = 0,
+                    BorderY = 0
+                };
 
-                // Automatically choose the appropriate render mode (EMF or WMF)
-                RenderMode = EmfRenderMode.Auto,
+                // Attach rasterization options to the SVG options
+                saveOptions.VectorRasterizationOptions = rasterizationOptions;
 
-                // Optional margins around the drawing
-                BorderX = 50,
-                BorderY = 50
-            };
-
-            // Attach the rasterization options to the SVG options
-            svgOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save the EMF as SVG while preserving text as vector shapes
-            emfImage.Save(outputPath, svgOptions);
+                // Save the image as SVG using the configured options
+                emfImage.Save(outputPath, saveOptions);
+            }
         }
     }
 }
