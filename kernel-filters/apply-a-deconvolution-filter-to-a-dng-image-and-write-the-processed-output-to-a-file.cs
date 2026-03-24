@@ -1,30 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
-class DeconvolutionExample
+class Program
 {
     static void Main()
     {
-        // Input DNG file path
-        string inputPath = @"c:\temp\input.dng";
-        // Output file path (PNG format)
-        string outputPath = @"c:\temp\output.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.dng";
+        string outputPath = "output.png";
 
-        // Load the DNG image using Aspose.Imaging's load rule
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DngImage to access RAW-specific features
-            DngImage dngImage = (DngImage)image;
+            // Cast to RasterImage to apply filters
+            RasterImage raster = (RasterImage)image;
 
-            // Apply a Gauss‑Wiener deconvolution filter to the entire image
-            // Radius = 5, Sigma = 4.0 (adjust as needed)
-            dngImage.Filter(dngImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
+            // Apply a Gauss-Wiener deconvolution filter (radius 5, sigma 4.0)
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
 
-            // Save the processed image using Aspose.Imaging's save rule
-            dngImage.Save(outputPath, new PngOptions());
+            // Save the processed image as PNG
+            raster.Save(outputPath, new PngOptions());
         }
     }
 }
