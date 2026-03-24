@@ -1,42 +1,41 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input vector image path (supports SVG, EMF, WMF, CDR, CMX, etc.)
-        string inputFilePath = @"C:\Images\input.svg";
-        // Output PNG path with transparent background
-        string outputFilePath = @"C:\Images\output.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.svg";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the image using Aspose.Imaging
-        using (Image image = Image.Load(inputFilePath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast to VectorImage to access vector-specific methods
-            VectorImage vectorImage = image as VectorImage;
-            if (vectorImage != null)
+            // Process only vector images
+            if (image is VectorImage vectorImage)
             {
-                // Remove background using default settings
-                vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                // Remove the background while preserving vector data
+                vectorImage.RemoveBackground();
+
+                // Save the resulting image to the output path
+                vectorImage.Save(outputPath);
             }
-
-            // Configure PNG options for transparency
-            var pngOptions = new PngOptions
+            else
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.Transparent,
-                    PageSize = image.Size
-                }
-            };
-
-            // Save the processed image as PNG with transparent background
-            image.Save(outputFilePath, pngOptions);
+                Console.Error.WriteLine("The provided file is not a supported vector image.");
+            }
         }
     }
 }
