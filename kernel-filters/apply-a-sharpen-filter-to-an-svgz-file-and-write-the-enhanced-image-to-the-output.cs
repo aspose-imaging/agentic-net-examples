@@ -1,54 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect input SVGZ path as first argument and output PNG path as second argument.
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svgz";
+        string outputPath = @"C:\Images\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <input.svgz> <output.png>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the compressed SVG (SVGZ) image.
+        // Load the compressed SVG (SVGZ) image
         using (Image vectorImage = Image.Load(inputPath))
         {
-            // Prepare rasterization options for converting vector to raster.
-            var rasterOptions = new SvgRasterizationOptions
+            // Prepare rasterization options to convert SVG to raster format
+            var rasterizationOptions = new SvgRasterizationOptions
             {
                 PageSize = vectorImage.Size
             };
 
-            // Set up PNG save options with the rasterization options.
+            // Set up PNG save options with the rasterization settings
             var pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Rasterize the SVGZ to a PNG stored in memory.
-            using (MemoryStream rasterStream = new MemoryStream())
+            // Rasterize the SVGZ into a memory stream
+            using (var memoryStream = new MemoryStream())
             {
-                vectorImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0;
+                vectorImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0; // Reset stream position for reading
 
-                // Load the rasterized PNG as a RasterImage.
-                using (Image rasterImageContainer = Image.Load(rasterStream))
+                // Load the rasterized image from the memory stream
+                using (Image rasterImage = Image.Load(memoryStream))
                 {
-                    RasterImage rasterImage = (RasterImage)rasterImageContainer;
+                    var raster = (RasterImage)rasterImage;
 
-                    // Apply sharpen filter with kernel size 5 and sigma 4.0.
-                    rasterImage.Filter(rasterImage.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                    // Apply a sharpen filter to the entire image
+                    raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Save the enhanced image to the specified output path.
-                    rasterImage.Save(outputPath, new PngOptions());
+                    // Save the enhanced raster image to the output path
+                    raster.Save(outputPath);
                 }
             }
         }
