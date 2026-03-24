@@ -8,40 +8,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input SVGZ file path
-        string inputPath = "input.svgz";
-        // Output blurred image path (PNG format)
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svgz";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the compressed SVG (SVGZ) image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVGZ image (auto-detected)
         using (Image vectorImage = Image.Load(inputPath))
         {
-            // Set up rasterization options for SVG
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = vectorImage.Size
-            };
+            // Rasterize vector image to PNG in memory
+            var rasterOptions = new SvgRasterizationOptions { PageSize = vectorImage.Size };
+            var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
 
-            // Rasterize SVGZ to a PNG stored in memory
             using (var memoryStream = new MemoryStream())
             {
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
                 vectorImage.Save(memoryStream, pngOptions);
                 memoryStream.Position = 0;
 
-                // Load the rasterized image from memory
-                using (Image rasterImage = Image.Load(memoryStream))
+                // Load rasterized image as RasterImage
+                using (Image rasterImageBase = Image.Load(memoryStream))
                 {
-                    var raster = (RasterImage)rasterImage;
+                    var rasterImage = (RasterImage)rasterImageBase;
 
                     // Apply Gaussian blur filter to the entire image
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                    // Save the blurred image to the output file
-                    raster.Save(outputPath, new PngOptions());
+                    // Save the processed raster image to the output file
+                    rasterImage.Save(outputPath, new PngOptions());
                 }
             }
         }
