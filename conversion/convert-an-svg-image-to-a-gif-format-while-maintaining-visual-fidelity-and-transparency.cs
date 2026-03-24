@@ -1,33 +1,37 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.gif";
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.gif";
 
-        using (Image image = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            GifOptions gifOptions = new GifOptions
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            GifOptions gifOptions = new GifOptions();
+
+            if (image is Aspose.Imaging.VectorImage)
             {
-                VectorRasterizationOptions = rasterOptions,
-                HasTransparentColor = true
-            };
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    BackgroundColor = Aspose.Imaging.Color.White
+                };
+                gifOptions.VectorRasterizationOptions = rasterOptions;
+            }
 
             image.Save(outputPath, gifOptions);
         }
