@@ -1,37 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = "input.psd";
-        string outputPath = "output.psd";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.psd";
+        string outputPath = @"C:\Images\output.psd";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PSD image
         using (Image image = Image.Load(inputPath))
         {
             // Cast to RasterImage to apply filters
-            RasterImage raster = (RasterImage)image;
-
-            // Create a deconvolution filter (Motion Wiener) with desired parameters
-            var deconvOptions = new MotionWienerFilterOptions(10, 1.0, 0.0);
-
-            // Apply the filter to the entire image
-            raster.Filter(raster.Bounds, deconvOptions);
-
-            // Prepare PSD save options (optional compression setting)
-            var psdOptions = new PsdOptions
+            RasterImage rasterImage = image as RasterImage;
+            if (rasterImage == null)
             {
-                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE
-            };
+                Console.Error.WriteLine("The loaded image is not a raster image and cannot be processed.");
+                return;
+            }
+
+            // Apply a Gaussian deconvolution filter (Gauss-Wiener) to the whole image
+            var filterOptions = new GaussWienerFilterOptions(5, 4.0);
+            rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
             // Save the processed image as PSD
-            image.Save(outputPath, psdOptions);
+            var saveOptions = new PsdOptions();
+            rasterImage.Save(outputPath, saveOptions);
         }
     }
 }
