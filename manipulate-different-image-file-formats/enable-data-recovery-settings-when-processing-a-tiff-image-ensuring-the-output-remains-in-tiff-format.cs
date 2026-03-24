@@ -1,34 +1,42 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.tif";
+        string outputPath = @"C:\Temp\output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Input and output file paths
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Configure load options to enable data recovery for corrupted TIFF files
-            LoadOptions loadOptions = new LoadOptions
-            {
-                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
-                DataBackgroundColor = Color.White
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image with the specified recovery settings
-            using (Image image = Image.Load(inputPath, loadOptions))
-            {
-                // Set up TIFF save options (default format)
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+        // Configure load options with data recovery
+        LoadOptions loadOptions = new LoadOptions
+        {
+            DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+            DataBackgroundColor = Color.White
+        };
 
-                // Save the recovered image back to TIFF format
-                image.Save(outputPath, tiffOptions);
-            }
+        // Load the TIFF image with recovery settings
+        using (Image image = Image.Load(inputPath, loadOptions))
+        {
+            // Prepare TIFF save options (default format)
+            TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+            // Save the recovered image back to TIFF
+            image.Save(outputPath, saveOptions);
         }
     }
 }
