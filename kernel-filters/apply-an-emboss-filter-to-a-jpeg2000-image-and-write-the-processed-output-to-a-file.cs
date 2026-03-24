@@ -1,6 +1,7 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
@@ -8,25 +9,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input JPEG2000 file path
+        // Hardcoded input and output paths
         string inputPath = "input.jp2";
-        // Output JPEG2000 file path
         string outputPath = "output.jp2";
 
-        // Load the JPEG2000 image
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load JPEG2000 image
+        using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(inputPath))
         {
             // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
+            RasterImage raster = jpeg2000Image;
 
-            // Apply emboss filter using a predefined convolution kernel
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            // Apply emboss filter using predefined kernel
+            double[,] embossKernel = ConvolutionFilter.Emboss3x3;
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(embossKernel));
 
-            // Prepare JPEG2000 save options
-            Jpeg2000Options saveOptions = new Jpeg2000Options();
-
-            // Save the processed image as JPEG2000
-            image.Save(outputPath, saveOptions);
+            // Save processed image
+            jpeg2000Image.Save(outputPath);
         }
     }
 }
