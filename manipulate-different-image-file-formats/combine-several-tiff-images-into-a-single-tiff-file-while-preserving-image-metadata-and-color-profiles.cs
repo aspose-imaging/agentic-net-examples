@@ -1,39 +1,75 @@
 using System;
+using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 
-class TiffCombiner
+class Program
 {
     static void Main()
     {
-        // Paths of source TIFF files to be combined
-        string[] sourceFiles = new string[]
+        // Hardcoded input TIFF file paths
+        string[] inputPaths = new string[]
         {
-            @"C:\Images\page1.tif",
-            @"C:\Images\page2.tif",
-            @"C:\Images\page3.tif"
+            @"c:\temp\input1.tif",
+            @"c:\temp\input2.tif",
+            @"c:\temp\input3.tif"
         };
 
-        // Destination path for the combined multi‑page TIFF
-        string outputFile = @"C:\Images\combined.tif";
+        // Hardcoded output TIFF file path
+        string outputPath = @"c:\temp\combined.tif";
 
-        // Load the first TIFF – it will serve as the base image.
-        using (TiffImage combined = (TiffImage)Image.Load(sourceFiles[0]))
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            // Iterate over the remaining TIFF files and add their frames to the base image.
-            for (int i = 1; i < sourceFiles.Length; i++)
+            if (!File.Exists(inputPath))
             {
-                // Load the current source TIFF.
-                using (TiffImage source = (TiffImage)Image.Load(sourceFiles[i]))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load each TIFF image and extract its frame
+        List<TiffFrame> frames = new List<TiffFrame>();
+        foreach (string inputPath in inputPaths)
+        {
+            using (Image img = Image.Load(inputPath))
+            {
+                // Cast to RasterImage (TiffImage derives from RasterImage)
+                RasterImage raster = img as RasterImage;
+                if (raster == null)
                 {
-                    // Add all frames from the source image to the combined image.
-                    // This method preserves metadata (Exif, XMP) and color profiles of each frame.
-                    combined.Add(source);
+                    Console.Error.WriteLine($"Unable to process image: {inputPath}");
+                    return;
                 }
+
+                // Create a TiffFrame from the raster image (preserves metadata and color profile)
+                TiffFrame frame = new TiffFrame(raster);
+                frames.Add(frame);
+            }
+        }
+
+        if (frames.Count == 0)
+        {
+            Console.Error.WriteLine("No frames were loaded.");
+            return;
+        }
+
+        // Create a new multi‑page TIFF image using the first frame
+        using (TiffImage tiffImage = new TiffImage(frames[0]))
+        {
+            // Add remaining frames
+            for (int i = 1; i < frames.Count; i++)
+            {
+                tiffImage.AddFrame(frames[i]);
             }
 
-            // Save the resulting multi‑frame TIFF while keeping original metadata intact.
-            combined.Save(outputFile);
+            // Save the combined TIFF
+            tiffImage.Save(outputPath);
         }
     }
 }
