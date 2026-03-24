@@ -2,41 +2,55 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = "input.jpg";
-        string resizedPath = "resized.png";
-        string croppedPath = "cropped.png";
-        string convertedPath = "converted.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string resizedOutputPath = @"C:\temp\output_resized.png";
+        string croppedOutputPath = @"C:\temp\output_cropped.bmp";
 
-        // Load image from a file stream, resize, and save as PNG
-        using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-        using (Image image = Image.Load(inputStream))
+        // Input file existence check
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage for raster operations
-            RasterImage raster = (RasterImage)image;
-            if (!raster.IsCached) raster.CacheData();
-
-            // Resize to 800x600 using nearest neighbour resampling
-            raster.Resize(800, 600, ResizeType.NearestNeighbourResample);
-            raster.Save(resizedPath, new PngOptions());
-
-            // Crop a rectangle (x=100, y=100, width=400, height=300)
-            Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(100, 100, 400, 300);
-            raster.Crop(cropRect);
-            raster.Save(croppedPath, new PngOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the original image again and convert it to WebP format
-        using (FileStream inputStream2 = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-        using (Image image2 = Image.Load(inputStream2))
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(resizedOutputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(croppedOutputPath));
+
+        // Load the image, resize it, and save as PNG (format conversion)
+        using (Image image = Image.Load(inputPath))
         {
-            image2.Save(convertedPath, new WebPOptions());
+            // Resize to 800x600 using default resampling
+            image.Resize(800, 600);
+
+            // Save resized image as PNG
+            var pngOptions = new PngOptions();
+            image.Save(resizedOutputPath, pngOptions);
+        }
+
+        // Load the image again, crop a central region, and save as BMP
+        using (Image image = Image.Load(inputPath))
+        {
+            // Define a rectangle that represents the central half of the image
+            int cropX = image.Width / 4;
+            int cropY = image.Height / 4;
+            int cropWidth = image.Width / 2;
+            int cropHeight = image.Height / 2;
+            var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+
+            // Perform cropping
+            image.Crop(cropRect);
+
+            // Save cropped image as BMP
+            var bmpOptions = new BmpOptions();
+            image.Save(croppedOutputPath, bmpOptions);
         }
     }
 }
