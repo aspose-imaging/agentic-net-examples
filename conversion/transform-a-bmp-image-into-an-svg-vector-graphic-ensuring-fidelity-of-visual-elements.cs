@@ -1,35 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class BmpToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source BMP file
-        string inputPath = @"C:\Temp\sample.bmp";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Desired path for the resulting SVG file
-        string outputPath = @"C:\Temp\sample.svg";
+        // Verify that the input BMP file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the BMP image using Aspose.Imaging's unified loader
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP image using Aspose.Imaging
         using (Image bmpImage = Image.Load(inputPath))
         {
-            // Configure rasterization options so the SVG page matches the BMP dimensions
-            var rasterOptions = new SvgRasterizationOptions
+            // Configure rasterization options for the SVG output
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = bmpImage.Size // Preserve original size for fidelity
+                // Set the page size to match the source image dimensions
+                PageSize = bmpImage.Size
             };
 
-            // Set up SVG save options and attach the rasterization settings
+            // Prepare SVG save options
             var svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = rasterOptions,
-                // For a raster source, rendering text as shapes is unnecessary
-                TextAsShapes = false
+                VectorRasterizationOptions = rasterizationOptions,
+                // Preserve metadata from the source image (optional)
+                KeepMetadata = true
             };
 
-            // Save the image as an SVG file; the BMP will be embedded as a raster element
+            // Save the image as an SVG file
             bmpImage.Save(outputPath, svgOptions);
         }
     }
