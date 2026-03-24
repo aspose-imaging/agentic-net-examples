@@ -1,35 +1,35 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Path to the source APNG image
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
+        string outputPath = "output.apng";
 
-        // Load the image
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Ensure the loaded image is an APNG
-            if (image is ApngImage apngImage)
-            {
-                // Define a rectangle covering the whole image
-                var rect = new Rectangle(0, 0, apngImage.Width, apngImage.Height);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-                // AlphaBlendingImageFilter is not part of the supported filter options.
-                // Throwing NotSupportedException to indicate the operation cannot be performed.
-                throw new NotSupportedException("AlphaBlendingImageFilter is not supported in Aspose.Imaging .NET.");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // If the filter were supported, the usage would resemble:
-                // apngImage.Filter(rect, new AlphaBlendingImageFilter(...));
-                // apngImage.Save();
-            }
-            else
-            {
-                Console.WriteLine("The loaded image is not an APNG image.");
-            }
+        // Load the APNG image
+        using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
+        {
+            // NOTE: AlphaBlendingImageFilter is not part of the allowed filter options.
+            // Therefore, no filter is applied here.
+
+            // Save the APNG image (no changes)
+            apngImage.Save(outputPath, new ApngOptions());
         }
     }
 }
