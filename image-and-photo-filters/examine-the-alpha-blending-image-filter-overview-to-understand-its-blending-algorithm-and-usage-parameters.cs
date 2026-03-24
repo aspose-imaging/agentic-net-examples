@@ -1,43 +1,47 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths to the background and overlay images.
-        string backgroundPath = "background.jpg";
-        string overlayPath = "overlay.png";
-        string outputPath = "blended_output.jpg";
+        // Hard‑coded input and output paths
+        string backgroundPath = @"C:\Images\background.png";
+        string overlayPath = @"C:\Images\overlay.png";
+        string outputPath = @"C:\Images\blended.png";
 
-        // Load the background image as a raster image.
+        // Verify input files exist
+        if (!File.Exists(backgroundPath))
+        {
+            Console.Error.WriteLine($"File not found: {backgroundPath}");
+            return;
+        }
+        if (!File.Exists(overlayPath))
+        {
+            Console.Error.WriteLine($"File not found: {overlayPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load background image
         using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
         {
-            // Load the overlay image as a raster image.
+            // Load overlay image
             using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
             {
-                // Define the position where the overlay will be placed on the background.
-                // Aspose.Imaging.Point represents the top‑left corner of the overlay.
-                Aspose.Imaging.Point origin = new Aspose.Imaging.Point(50, 30);
-
-                // Define the opacity of the overlay (0‑255). 128 means 50% transparency.
-                byte overlayOpacity = 128;
-
-                // Blend the overlay onto the background using the specified origin and opacity.
-                // The Blend method performs per‑pixel alpha compositing.
-                background.Blend(origin, overlay, overlayOpacity);
+                // Alpha‑blend overlay onto background at (50,50) with 50 % opacity
+                background.Blend(new Point(50, 50), overlay, 128);
             }
 
-            // Prepare JPEG save options with a file source bound to the output path.
-            Source outputSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = outputSource, Quality = 90 };
-
-            // Save the blended image. Since the image was not created with a bound source,
-            // we use the Save method that accepts the output path and options.
-            background.Save(outputPath, jpegOptions);
+            // Save the blended result as PNG
+            Source outSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOpts = new PngOptions { Source = outSource };
+            background.Save(outputPath, pngOpts);
         }
     }
 }
