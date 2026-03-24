@@ -1,41 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.BigTiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.BigTiff;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Images\input.bigtiff";
-        string outputBigTiffPath = @"C:\Images\output.bigtiff";
-        string outputPngPath = @"C:\Images\output.png";
+        string inputPath = @"C:\Images\input_big.tif";
+        string outputPath = @"C:\Images\output_big.tif";
 
-        using (var bigTiff = (BigTiffImage)Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            if (!bigTiff.IsCached)
-                bigTiff.CacheData();
-
-            bigTiff.Resize(bigTiff.Width / 2, bigTiff.Height / 2, ResizeType.NearestNeighbourResample);
-
-            int cropWidth = (int)(bigTiff.Width * 0.8);
-            int cropHeight = (int)(bigTiff.Height * 0.8);
-            int cropX = (bigTiff.Width - cropWidth) / 2;
-            int cropY = (bigTiff.Height - cropHeight) / 2;
-            var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
-            bigTiff.Crop(cropRect);
-
-            bigTiff.Rotate(45f, true, Color.White);
-
-            var saveOptions = new BigTiffOptions(TiffExpectedFormat.Default);
-            bigTiff.Save(outputBigTiffPath, saveOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        using (var editedBigTiff = (BigTiffImage)Image.Load(outputBigTiffPath))
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Image image = Image.Load(inputPath))
         {
-            var pngOptions = new PngOptions();
-            editedBigTiff.Save(outputPngPath, pngOptions);
+            var bigTiff = image as BigTiffImage;
+            if (bigTiff == null)
+            {
+                Console.Error.WriteLine("The loaded image is not a BigTiffImage.");
+                return;
+            }
+
+            bigTiff.Resize(2000, 2000);
+            bigTiff.Grayscale();
+
+            using (var options = new BigTiffOptions(TiffExpectedFormat.Default))
+            {
+                bigTiff.Save(outputPath, options);
+            }
         }
     }
 }
