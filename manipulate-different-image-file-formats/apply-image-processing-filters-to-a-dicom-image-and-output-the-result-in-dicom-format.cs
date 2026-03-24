@@ -1,34 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
-class DicomFilterExample
+class Program
 {
     static void Main()
     {
-        // Paths to the source and destination DICOM files
+        // Hardcoded input and output paths
         string inputPath = "input.dcm";
         string outputPath = "output.dcm";
 
-        // Load the DICOM image from file
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to a DicomImage to access DICOM‑specific methods
-            DicomImage dicomImage = (DicomImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a Gaussian blur filter to the whole image
-            // Rectangle covering the entire image is obtained via dicomImage.Bounds
-            // Radius = 5, Sigma = 4.0 (adjust as needed)
-            dicomImage.Filter(dicomImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prepare DICOM save options.
-            // Here we keep the default color type; you can customize it if required.
-            DicomOptions saveOptions = new DicomOptions();
+        // Load the DICOM image
+        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        {
+            // Apply a simple brightness adjustment to each page
+            foreach (DicomPage page in dicomImage.DicomPages)
+            {
+                // Increase brightness by 20 (value can be adjusted as needed)
+                page.AdjustBrightness(20);
+            }
+
+            // Set DICOM save options (e.g., RGB 24‑bit color)
+            var options = new DicomOptions
+            {
+                ColorType = ColorType.Rgb24Bit
+            };
 
             // Save the processed image back to DICOM format
-            dicomImage.Save(outputPath, saveOptions);
+            dicomImage.Save(outputPath, options);
         }
     }
 }
