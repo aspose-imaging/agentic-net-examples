@@ -2,55 +2,64 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.emz";
         string outputPath = @"C:\Images\sample_embossed.emz";
-        string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_emboss.png");
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EMZ (vector) image
         using (Image vectorImage = Image.Load(inputPath))
         {
-            var vectorOptions = new VectorRasterizationOptions
+            // Prepare rasterization options for converting vector to raster
+            var rasterOptions = new EmfRasterizationOptions
             {
-                PageSize = new Size(vectorImage.Width, vectorImage.Height),
+                PageSize = vectorImage.Size,
                 BackgroundColor = Color.White
             };
 
-            var pngOptions = new PngOptions
+            // Rasterize the vector image into a PNG stored in memory
+            using (var pngStream = new MemoryStream())
             {
-                VectorRasterizationOptions = vectorOptions
-            };
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                vectorImage.Save(pngStream, pngOptions);
+                pngStream.Position = 0;
 
-            vectorImage.Save(tempPngPath, pngOptions);
-        }
-
-        using (Image rasterImg = Image.Load(tempPngPath))
-        {
-            RasterImage raster = (RasterImage)rasterImg;
-
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-
-            var emfOptions = new EmfOptions
-            {
-                Compress = true,
-                VectorRasterizationOptions = new EmfRasterizationOptions
+                // Load the rasterized image
+                using (Image rasterImage = Image.Load(pngStream))
                 {
-                    PageSize = raster.Size,
-                    BackgroundColor = Color.White
+                    var raster = (RasterImage)rasterImage;
+
+                    // Apply Emboss filter using convolution kernel
+                    var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
+                    raster.Filter(raster.Bounds, embossOptions);
+
+                    // Save the filtered raster back to EMZ format (compressed EMF)
+                    var emfOptions = new EmfOptions
+                    {
+                        Compress = true,
+                        VectorRasterizationOptions = rasterOptions
+                    };
+                    raster.Save(outputPath, emfOptions);
                 }
-            };
-
-            raster.Save(outputPath, emfOptions);
-        }
-
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+            }
         }
     }
 }
