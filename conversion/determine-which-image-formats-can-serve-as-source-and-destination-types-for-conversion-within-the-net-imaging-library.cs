@@ -1,31 +1,59 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Retrieve the formats that can be loaded (source formats)
-        FileFormat sourceFormats = ImageLoadersRegistry.RegisteredFormats;
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output\dummy.txt";
 
-        // Retrieve the formats that can be exported/saved (destination formats)
-        FileFormat destinationFormats = ImageExportersRegistry.RegisteredFormats;
-
-        Console.WriteLine("Supported source (loadable) formats:");
-        foreach (FileFormat fmt in Enum.GetValues(typeof(FileFormat)))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // The FileFormat enum is flagged, so we can test each flag with a bitwise AND
-            if ((sourceFormats & fmt) != 0)
-            {
-                Console.WriteLine($"- {fmt}");
-            }
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine();
-        Console.WriteLine("Supported destination (exportable) formats:");
-        foreach (FileFormat fmt in Enum.GetValues(typeof(FileFormat)))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Determine source format
+        FileFormat sourceFormat = Image.GetFileFormat(inputPath);
+        Console.WriteLine($"Source format: {sourceFormat}");
+
+        // Load the image
+        using (Image image = Image.Load(inputPath))
         {
-            if ((destinationFormats & fmt) != 0)
+            // Find all ImageOptions types in the Aspose.Imaging.ImageOptions namespace
+            var optionsTypes = Assembly.GetAssembly(typeof(ImageOptionsBase))
+                .GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && typeof(ImageOptionsBase).IsAssignableFrom(t));
+
+            var destinationFormats = new List<string>();
+
+            foreach (var optType in optionsTypes)
+            {
+                // Create an instance using the default constructor
+                var optionsInstance = Activator.CreateInstance(optType) as ImageOptionsBase;
+                if (optionsInstance == null) continue;
+
+                // Check if the loaded image can be saved with these options
+                bool canSave = image.CanSave(optionsInstance);
+                if (canSave)
+                {
+                    destinationFormats.Add(optType.Name.Replace("Options", ""));
+                }
+            }
+
+            Console.WriteLine("Possible destination formats for conversion:");
+            foreach (var fmt in destinationFormats.Distinct())
             {
                 Console.WriteLine($"- {fmt}");
             }
