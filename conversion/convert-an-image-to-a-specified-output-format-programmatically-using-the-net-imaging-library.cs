@@ -1,25 +1,30 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class ImageConversion
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source image
-        string inputPath = @"C:\Images\source.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output.jpg";
 
-        // Desired output path with the target format extension (e.g., .jpg, .bmp, .tiff)
-        string outputPath = @"C:\Images\converted.jpg";
-
-        // Load the image using Aspose.Imaging's built‑in Load method
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Save the image to the specified output format.
-            // The format is inferred from the file extension of outputPath.
-            image.Save(outputPath);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Image conversion completed.");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image and save it in the desired format
+        using (Image image = Image.Load(inputPath))
+        {
+            image.Save(outputPath, new JpegOptions());
+        }
     }
 }
