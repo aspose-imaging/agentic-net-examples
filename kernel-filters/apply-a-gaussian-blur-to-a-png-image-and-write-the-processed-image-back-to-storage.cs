@@ -1,24 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Define the folder containing the images.
-        string dir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output.gaussian.png";
 
-        // Load the PNG image from a file using the provided constructor.
-        using (PngImage pngImage = new PngImage(dir + "input.png"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Apply a Gaussian blur filter to the entire image.
-            // Radius = 5, Sigma = 4.0 (adjust as needed).
-            pngImage.Filter(pngImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the processed image back to storage using the provided Save method.
-            pngImage.Save(dir + "output.png");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering functionality
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+            rasterImage.Filter(
+                rasterImage.Bounds,
+                new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }
