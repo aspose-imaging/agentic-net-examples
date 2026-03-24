@@ -1,35 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
 
-class WebpToGifConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source WebP file (can be animated)
-        string inputWebpPath = @"C:\Temp\input.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.gif";
 
-        // Path where the resulting GIF will be saved
-        string outputGifPath = @"C:\Temp\output.gif";
-
-        // Load the WebP image (single or multi‑frame) using the provided constructor
-        using (WebPImage webpImage = new WebPImage(inputWebpPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create GIF save options – this object follows the required lifecycle rules
-            GifOptions gifOptions = new GifOptions();
-
-            // Optional: reduce the color palette to 256 colors (maximum for GIF)
-            // If the source image has more colors, Aspose.Imaging will automatically
-            // generate a suitable palette when saving.
-            // gifOptions.Palette = webpImage.Palette; // uncomment if you want to reuse a palette
-
-            // Save the WebP image (including all frames) as an animated GIF.
-            // The Save method respects the multi‑page nature of the source image.
-            webpImage.Save(outputGifPath, gifOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Conversion completed successfully.");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image (supports animated WebP)
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // Configure GIF options to export all frames
+            var gifOptions = new GifOptions
+            {
+                // Export each frame as a full image (required for proper animation)
+                FullFrame = true
+                // No MultiPageOptions needed; default exports all pages
+            };
+
+            // Save the image as an animated GIF
+            webPImage.Save(outputPath, gifOptions);
+        }
     }
 }
