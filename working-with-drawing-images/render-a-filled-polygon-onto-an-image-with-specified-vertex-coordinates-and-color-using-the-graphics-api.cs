@@ -1,49 +1,51 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging;
 
-class FillPolygonExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define image size
-        int width = 400;
-        int height = 300;
+        // Output file path (hardcoded)
+        string outputPath = "output\\filled_polygon.png";
 
-        // Create PNG options and set the output file as the source
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Set up PNG options with a file create source
         PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource("filled_polygon.png", false);
+        pngOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create a new image with the specified dimensions
-        using (Image image = Image.Create(pngOptions, width, height))
+        // Create a new image canvas (400x400)
+        using (Image image = Image.Create(pngOptions, 400, 400))
         {
-            // Initialize Graphics object for drawing
+            // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
-
-            // Optional: clear background with a light color
-            graphics.Clear(Color.Wheat);
+            graphics.Clear(Color.White); // optional background clear
 
             // Define polygon vertices
             Point[] polygonPoints = new Point[]
             {
                 new Point(50, 50),
-                new Point(350, 40),
-                new Point(300, 200),
-                new Point(100, 250)
+                new Point(350, 50),
+                new Point(300, 300),
+                new Point(100, 300)
             };
 
             // Create a solid brush with the desired fill color
-            SolidBrush brush = new SolidBrush();
-            brush.Color = Color.CornflowerBlue; // fill color
-            brush.Opacity = 100; // fully opaque
+            using (SolidBrush brush = new SolidBrush())
+            {
+                brush.Color = Color.Blue;
+                brush.Opacity = 100; // fully opaque
 
-            // Fill the polygon using the brush and points
-            graphics.FillPolygon(brush, polygonPoints);
+                // Fill the polygon
+                graphics.FillPolygon(brush, polygonPoints);
+            }
 
-            // Save the image to the file specified in the options
+            // Save the image (source is already bound to the output file)
             image.Save();
         }
     }
