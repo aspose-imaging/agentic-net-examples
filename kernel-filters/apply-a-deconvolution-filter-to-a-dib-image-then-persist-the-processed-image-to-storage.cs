@@ -1,16 +1,25 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input DIB (BMP) image and output image
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
+        // Hardcoded input and output paths
+        string inputPath = "input.dib";
+        string outputPath = "output.dib";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DIB image
         using (Image image = Image.Load(inputPath))
@@ -19,17 +28,11 @@ class Program
             RasterImage raster = (RasterImage)image;
 
             // Apply a Gauss-Wiener deconvolution filter (radius=5, sigma=4.0)
-            var deconvFilter = new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0);
-            raster.Filter(raster.Bounds, deconvFilter);
-
-            // Prepare BMP save options with a file source
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
+            var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
+            raster.Filter(raster.Bounds, deconvOptions);
 
             // Save the processed image
-            raster.Save(outputPath, bmpOptions);
+            raster.Save(outputPath);
         }
     }
 }
