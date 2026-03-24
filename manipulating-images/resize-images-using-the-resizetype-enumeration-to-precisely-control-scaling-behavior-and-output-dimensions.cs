@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -6,29 +7,37 @@ class Program
 {
     static void Main()
     {
-        // Paths for the source image and the resized outputs
-        string inputPath = "input.jpg";
-        string outputPathNearest = "output_nearest.jpg";
-        string outputPathBilinear = "output_bilinear.jpg";
+        // Hardcoded input and output paths
+        string inputPath = "input\\Photo.jpg";
+        string outputPath = "output\\ResizedPhoto_CatmullRom.jpg";
 
-        // Load the image (load rule)
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Resize the image by scaling up 2x using NearestNeighbourResample (ResizeType)
-            image.Resize(image.Width * 2, image.Height * 2, ResizeType.NearestNeighbourResample);
-
-            // Save the resized image (save rule)
-            image.Save(outputPathNearest);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the image again for a different resize operation
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image, resize using CatmullRom interpolation, and save
         using (Image image = Image.Load(inputPath))
         {
-            // Resize the image by scaling down 2x using BilinearResample (ResizeType)
-            image.Resize(image.Width / 2, image.Height / 2, ResizeType.BilinearResample);
+            image.Resize(640, 480, ResizeType.CatmullRom);
+            image.Save(outputPath);
+        }
 
-            // Save the resized image
-            image.Save(outputPathBilinear);
+        // Second example: resize with BilinearResample
+        string outputPath2 = "output\\ResizedPhoto_Bilinear.jpg";
+
+        // Ensure output directory exists (same directory, call again as required)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
+
+        using (Image image = Image.Load(inputPath))
+        {
+            image.Resize(800, 600, ResizeType.BilinearResample);
+            image.Save(outputPath2);
         }
     }
 }
