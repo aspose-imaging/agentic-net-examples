@@ -3,41 +3,49 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input EMF file path
-        string inputPath = "input.emf";
-        // Output APNG file path
-        string outputPath = "output.apng";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\sample.apng";
 
-        // Load the EMF image
-        using (Image emfImage = Image.Load(inputPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure vector rasterization options for EMF rendering
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EMF metafile
+        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        {
+            // Configure rasterization so that text is rendered as shapes (no font dependency)
             EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
             {
                 PageSize = emfImage.Size,
                 BackgroundColor = Color.White,
-                RenderMode = EmfRenderMode.Auto,
-                // Optional: improve rendering quality
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
+                // Render text as bitmap shapes to preserve visual fidelity without fonts
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = Aspose.Imaging.SmoothingMode.None
             };
 
-            // Set up APNG options with the rasterization settings
+            // Set up APNG save options and attach the rasterization options
             ApngOptions apngOptions = new ApngOptions
             {
-                Source = new FileCreateSource(outputPath, false),
-                VectorRasterizationOptions = rasterOptions,
-                // Single-frame APNG (no animation)
-                DefaultFrameTime = 1000 // 1 second per frame (arbitrary for static image)
+                // Default frame duration (in milliseconds)
+                DefaultFrameTime = 100,
+                // Use the rasterization options defined above
+                VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the EMF as an APNG, converting text to shapes via rasterization
+            // Save the rasterized image as a single‑frame APNG
             emfImage.Save(outputPath, apngOptions);
         }
     }
