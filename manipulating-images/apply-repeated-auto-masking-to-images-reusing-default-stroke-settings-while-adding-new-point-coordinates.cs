@@ -12,15 +12,26 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.jpg";
-        string initialOutputPath = "foreground_initial.png";
-        string updatedOutputPath = "foreground_updated.png";
+        string outputPath = "output.png";
+        string tempExportPath = "tempMask.png";
 
-        // Load the source image as a RasterImage
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+        Directory.CreateDirectory(Path.GetDirectoryName(tempExportPath) ?? string.Empty);
+
+        // Load source image
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // ---------- First auto‑masking pass (calculate default strokes) ----------
+            // First masking pass – calculate default strokes
             AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
             {
                 CalculateDefaultStrokes = true,
@@ -30,56 +41,54 @@ class Program
                 ExportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
+                    Source = new FileCreateSource(tempExportPath, false)
                 },
                 BackgroundReplacementColor = Color.Transparent
             };
 
-            // Perform masking
-            using (MaskingResult firstResult = new ImageMasking(image).Decompose(options))
+            using (MaskingResult maskingResult = new ImageMasking(image).Decompose(options))
             {
-                // Save the initial foreground result
-                using (RasterImage foreground = (RasterImage)firstResult[1].GetImage())
+                // Retrieve default strokes and rectangles
+                Point[] defaultBackgroundStrokes = options.DefaultBackgroundStrokes;
+                Point[] defaultForegroundStrokes = options.DefaultForegroundStrokes;
+                Rectangle[] defaultObjectRectangles = options.DefaultObjectsRectangles;
+
+                // Prepare new point arrays (add one extra point to each)
+                Point[] newBackgroundStrokes = new Point[defaultBackgroundStrokes.Length + 1];
+                defaultBackgroundStrokes.CopyTo(newBackgroundStrokes, 0);
+                newBackgroundStrokes[defaultBackgroundStrokes.Length] = new Point(200, 200); // example point
+
+                Point[] newForegroundStrokes = new Point[defaultForegroundStrokes.Length + 1];
+                defaultForegroundStrokes.CopyTo(newForegroundStrokes, 0);
+                newForegroundStrokes[defaultForegroundStrokes.Length] = new Point(300, 300); // example point
+
+                // Re‑use options for second pass
+                options.CalculateDefaultStrokes = false;
+                options.Args = new AutoMaskingArgs
                 {
-                    foreground.Save(initialOutputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                }
+                    ObjectsPoints = new Point[][]
+                    {
+                        newBackgroundStrokes,
+                        newForegroundStrokes
+                    },
+                    ObjectsRectangles = defaultObjectRectangles
+                };
             }
 
-            // ---------- Re‑use default strokes and add new points ----------
-            // Retrieve the automatically calculated strokes
-            Point[] defaultBackgroundStrokes = options.DefaultBackgroundStrokes;
-            Point[] defaultForegroundStrokes = options.DefaultForegroundStrokes;
-
-            // Extend background strokes with an additional point
-            Point[] extendedBackgroundStrokes = new Point[defaultBackgroundStrokes.Length + 1];
-            Array.Copy(defaultBackgroundStrokes, extendedBackgroundStrokes, defaultBackgroundStrokes.Length);
-            extendedBackgroundStrokes[defaultBackgroundStrokes.Length] = new Point(5, 5); // example point
-
-            // Extend foreground strokes with an additional point
-            Point[] extendedForegroundStrokes = new Point[defaultForegroundStrokes.Length + 1];
-            Array.Copy(defaultForegroundStrokes, extendedForegroundStrokes, defaultForegroundStrokes.Length);
-            extendedForegroundStrokes[defaultForegroundStrokes.Length] = new Point(100, 100); // example point
-
-            // Disable default stroke calculation and provide the extended points
-            options.CalculateDefaultStrokes = false;
-            options.Args = new AutoMaskingArgs
-            {
-                ObjectsPoints = new Point[][]
-                {
-                    extendedBackgroundStrokes,
-                    extendedForegroundStrokes
-                }
-            };
-
-            // ---------- Second auto‑masking pass (using modified strokes) ----------
+            // Second masking pass with added points
             using (MaskingResult secondResult = new ImageMasking(image).Decompose(options))
             {
-                // Save the updated foreground result
                 using (RasterImage foreground = (RasterImage)secondResult[1].GetImage())
                 {
-                    foreground.Save(updatedOutputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
+        }
+
+        // Clean up temporary export file
+        if (File.Exists(tempExportPath))
+        {
+            File.Delete(tempExportPath);
         }
     }
 }
