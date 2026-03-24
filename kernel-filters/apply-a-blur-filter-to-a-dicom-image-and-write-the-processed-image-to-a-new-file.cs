@@ -1,5 +1,5 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -9,23 +9,31 @@ class Program
 {
     static void Main()
     {
-        // Path to the folder containing the DICOM file
-        string dir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = "input\\sample.dicom";
+        string outputPath = "output\\sample.GaussianBlur.png";
 
-        // Load the DICOM image from file
-        using (Image image = Image.Load(dir + "sample.dicom"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to DicomImage to access DICOM‑specific methods
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DICOM image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to DicomImage to access DICOM-specific functionality
             DicomImage dicomImage = (DicomImage)image;
 
-            // Apply a Gaussian blur filter to the entire image.
-            // Radius = 5, Sigma = 4.0 (adjust as needed for desired blur strength)
-            dicomImage.Filter(
-                dicomImage.Bounds,
-                new GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur filter to the whole image
+            dicomImage.Filter(dicomImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the processed image as PNG (you can also save as DICOM by using DicomOptions)
-            dicomImage.Save(dir + "sample.Blur.png", new PngOptions());
+            // Save the processed image as PNG
+            dicomImage.Save(outputPath, new PngOptions());
         }
     }
 }
