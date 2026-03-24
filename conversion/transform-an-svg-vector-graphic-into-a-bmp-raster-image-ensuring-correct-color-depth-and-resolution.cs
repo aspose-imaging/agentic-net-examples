@@ -1,31 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input SVG file path
         string inputPath = "input.svg";
-        // Output BMP file path
-        string outputPath = "output.bmp";
+        string outputPath = "output\\converted.bmp";
 
-        // Load the SVG image
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options for SVG
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-            rasterOptions.PageSize = image.Size;               // Preserve original dimensions
-            rasterOptions.BackgroundColor = Color.White;       // Set background color
+            var bmpOptions = new BmpOptions
+            {
+                BitsPerPixel = 24,
+                VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    BackgroundColor = Color.White,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                }
+            };
 
-            // Configure BMP output options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;                      // 24‑bit color depth
-            bmpOptions.VectorRasterizationOptions = rasterOptions;
-            bmpOptions.ResolutionSettings = new ResolutionSetting(300, 300); // Desired DPI
-
-            // Save the rasterized image as BMP
             image.Save(outputPath, bmpOptions);
         }
     }
