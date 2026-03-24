@@ -2,40 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.FileFormats.Bmp;
 
-class RenderRasterRegionToBmp
+class Program
 {
     static void Main()
     {
-        // Paths to source images and output file
-        string rasterPath = @"C:\Images\raster.jpg";
-        string vectorPath = @"C:\Images\vector.wmf";
-        string outputBmpPath = @"C:\Images\output.bmp";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.bmp";
 
-        // Load the raster image (as RasterImage)
-        using (RasterImage rasterImage = (RasterImage)Image.Load(rasterPath))
-        // Load the vector image (as WmfImage) to obtain its bounds
-        using (WmfImage vectorImage = (WmfImage)Image.Load(vectorPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Define the destination rectangle using the vector image's bounds
-            Rectangle destBounds = new Rectangle(0, 0, vectorImage.Width, vectorImage.Height);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Optionally, define a source rectangle on the raster image.
-            // Here we take the central part of the raster image with the same size as destBounds.
-            int srcX = Math.Max(0, (rasterImage.Width - destBounds.Width) / 2);
-            int srcY = Math.Max(0, (rasterImage.Height - destBounds.Height) / 2);
-            Rectangle srcRect = new Rectangle(srcX, srcY, destBounds.Width, destBounds.Height);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP save options (default options are sufficient for this example)
+        // Load the raster image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Define the rectangular region to render.
+            // Here we use the full bounds of the image; modify as needed.
+            Rectangle bounds = new Rectangle(0, 0, image.Width, image.Height);
+
+            // Set up BMP save options (default options are sufficient for most cases)
             BmpOptions bmpOptions = new BmpOptions();
 
-            // Save only the defined region of the raster image to a BMP file,
-            // using the vector image's bounds as the destination rectangle.
-            // The overload with (filePath, options, boundsRectangle) uses the provided rectangle
-            // as the destination bounds; the source rectangle is taken from the image itself.
-            rasterImage.Save(outputBmpPath, bmpOptions, destBounds);
+            // Save the defined region to a BMP file
+            image.Save(outputPath, bmpOptions, bounds);
         }
     }
 }
