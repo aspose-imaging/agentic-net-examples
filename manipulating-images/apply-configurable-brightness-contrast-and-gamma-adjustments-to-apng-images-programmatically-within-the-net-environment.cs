@@ -1,40 +1,42 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
 
-class ApngAdjustmentExample
+class Program
 {
     static void Main()
     {
-        // Input and output file paths
-        string inputPath = @"C:\Images\sample.apng";
-        string outputPath = @"C:\Images\sample_adjusted.apng";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.apng";
+        string outputPath = @"C:\Images\output_adjusted.png";
 
-        // Adjustable parameters
-        int brightness = 30;          // Range depends on image, positive to increase, negative to decrease
-        float contrast = 20.0f;       // Range [-100; 100], positive to increase contrast
-        float gamma = 1.2f;           // Gamma coefficient (>0), 1.0 means no change
-
-        // Load the APNG image using Aspose.Imaging's lifecycle method
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to ApngImage to access APNG‑specific methods
-            ApngImage apng = (ApngImage)image;
-
-            // Apply brightness adjustment
-            apng.AdjustBrightness(brightness);
-
-            // Apply contrast adjustment
-            apng.AdjustContrast(contrast);
-
-            // Apply gamma correction (same coefficient for R, G, B channels)
-            apng.AdjustGamma(gamma);
-
-            // Save the modified APNG back to disk using the standard Save method
-            apng.Save(outputPath);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("APNG image has been adjusted and saved to: " + outputPath);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Adjustable parameters
+        int brightness = 20;          // Example brightness value (int)
+        float contrast = 30f;         // Example contrast value (float, range -100 to 100)
+        float gamma = 1.2f;           // Example gamma value (float)
+
+        // Load the APNG image
+        using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
+        {
+            // Apply adjustments
+            apngImage.AdjustBrightness(brightness);
+            apngImage.AdjustContrast(contrast);
+            apngImage.AdjustGamma(gamma);
+
+            // Save the adjusted image (using PNG options for compatibility)
+            apngImage.Save(outputPath, new PngOptions());
+        }
     }
 }
