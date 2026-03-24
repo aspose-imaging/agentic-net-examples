@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -10,23 +10,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input raster image path
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        // Output APNG file path
-        string outputPath = "output_apng.png";
+        string outputPath = "output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source raster image
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Define a list of filter options to be applied sequentially
-            var filterOptions = new List<Aspose.Imaging.ImageFilters.FilterOptions.FilterOptionsBase>
-            {
-                new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5),
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0),
-                new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0)
-            };
+            // Apply a sequence of filters to the source image
+            sourceImage.Filter(sourceImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            sourceImage.Filter(sourceImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+            sourceImage.Filter(sourceImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
 
-            // Create APNG options
+            // Set up APNG creation options
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
@@ -34,33 +40,26 @@ class Program
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create the APNG image canvas
+            // Create the APNG canvas
             using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
-                // Remove the default single frame
+                // Remove the default frame that exists upon creation
                 apngImage.RemoveAllFrames();
 
-                // Add the original (unfiltered) frame as the first frame
+                // Add the filtered image as the first frame
                 apngImage.AddFrame(sourceImage);
 
-                // Generate frames with cumulative filters
-                for (int i = 0; i < filterOptions.Count; i++)
+                // Add additional frames with slight gamma adjustments
+                int extraFrames = 4;
+                for (int i = 0; i < extraFrames; i++)
                 {
-                    // Load a fresh copy of the source image for each frame
-                    using (RasterImage frame = (RasterImage)Image.Load(inputPath))
-                    {
-                        // Apply all filters up to the current index (cumulative effect)
-                        for (int j = 0; j <= i; j++)
-                        {
-                            frame.Filter(frame.Bounds, filterOptions[j]);
-                        }
-
-                        // Add the processed frame to the APNG
-                        apngImage.AddFrame(frame);
-                    }
+                    apngImage.AddFrame(sourceImage);
+                    ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                    frame.FrameTime = 100; // consistent frame duration
+                    frame.AdjustGamma(i);   // simple gamma variation per frame
                 }
 
-                // Save the APNG image
+                // Save the APNG (output path is already bound via FileCreateSource)
                 apngImage.Save();
             }
         }
