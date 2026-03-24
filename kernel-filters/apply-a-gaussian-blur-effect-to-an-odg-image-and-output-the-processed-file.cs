@@ -1,36 +1,73 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input and output ODG file paths
-        string inputPath = "input.odg";
-        string outputPath = "output.odg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.odg";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the ODG image using the unified Image.Load method
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the loaded image to OdgImage to access its pages
-            OdgImage odgImage = (OdgImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Iterate through each page (each page is a raster image)
-            foreach (Image page in odgImage.Pages)
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Temporary rasterized PNG path
+        string tempRasterPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_raster.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath));
+
+        // Load the ODG vector image and rasterize it to PNG
+        using (Image vectorImage = Image.Load(inputPath))
+        {
+            // Set up rasterization options for ODG
+            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
             {
-                // Cast the page to RasterImage to apply raster filters
-                RasterImage rasterPage = (RasterImage)page;
+                BackgroundColor = Color.White,
+                PageSize = vectorImage.Size
+            };
 
-                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole page
-                rasterPage.Filter(
-                    rasterPage.Bounds,
-                    new GaussianBlurFilterOptions(5, 4.0));
-            }
+            // Configure PNG save options with vector rasterization
+            PngOptions pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-            // Save the processed ODG image to the specified output file
-            odgImage.Save(outputPath);
+            // Save rasterized image to temporary file
+            vectorImage.Save(tempRasterPath, pngOptions);
+        }
+
+        // Load the rasterized PNG, apply Gaussian blur, and save the final result
+        using (Image rasterImage = Image.Load(tempRasterPath))
+        {
+            RasterImage raster = (RasterImage)rasterImage;
+
+            // Apply Gaussian blur with radius 5 and sigma 4.0
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the processed image
+            raster.Save(outputPath, new PngOptions());
+        }
+
+        // Optionally delete the temporary raster file
+        try
+        {
+            if (File.Exists(tempRasterPath))
+                File.Delete(tempRasterPath);
+        }
+        catch
+        {
+            // Ignore any errors during cleanup
         }
     }
 }
