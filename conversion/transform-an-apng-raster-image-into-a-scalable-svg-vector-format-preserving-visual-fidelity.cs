@@ -1,38 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class ApngToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source APNG file
-        string inputApngPath = @"C:\Images\animation.apng";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.apng";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Desired output SVG file path
-        string outputSvgPath = @"C:\Images\animation_converted.svg";
-
-        // Load the APNG image (supports multi‑frame APNG)
-        using (Image apngImage = Image.Load(inputApngPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options – use the original image size as the SVG page size
-            var rasterizationOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare SVG rasterization options based on the source image size
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                PageSize = apngImage.Size
+                PageSize = image.Size
             };
 
-            // Set up SVG save options with the rasterization settings
-            var svgSaveOptions = new SvgOptions
+            // Configure SVG save options
+            SvgOptions svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = rasterizationOptions,
+                VectorRasterizationOptions = rasterOptions,
                 // Optional: compress the SVG output (set to false for plain SVG)
                 Compress = false
             };
 
-            // Save the APNG as an SVG file
-            apngImage.Save(outputSvgPath, svgSaveOptions);
+            // Save the image as SVG
+            image.Save(outputPath, svgOptions);
         }
-
-        Console.WriteLine("Conversion completed successfully.");
     }
 }
