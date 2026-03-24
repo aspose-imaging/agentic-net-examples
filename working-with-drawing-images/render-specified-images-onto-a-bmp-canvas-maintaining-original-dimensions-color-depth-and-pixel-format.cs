@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -8,20 +9,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input image file paths (modify as needed)
-        string[] imagePaths = new string[]
+        // Hardcoded input image paths
+        string[] inputPaths = new string[]
         {
-            "image1.png",
-            "image2.jpg",
-            "image3.bmp"
+            "input1.jpg",
+            "input2.png",
+            "input3.bmp"
         };
 
-        // Output BMP file path
-        string outputPath = "merged_output.bmp";
+        // Hardcoded output BMP path
+        string outputPath = "output.bmp";
+
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Collect sizes of all input images
         List<Size> sizes = new List<Size>();
-        foreach (string path in imagePaths)
+        foreach (string path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
@@ -29,7 +43,7 @@ class Program
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching
+        // Calculate canvas size for horizontal stitching
         int canvasWidth = 0;
         int canvasHeight = 0;
         foreach (Size sz in sizes)
@@ -39,20 +53,14 @@ class Program
                 canvasHeight = sz.Height;
         }
 
-        // Create BMP options with a file source
-        Source source = new FileCreateSource(outputPath, false);
-        BmpOptions bmpOptions = new BmpOptions
-        {
-            Source = source,
-            BitsPerPixel = 24 // standard 24‑bpp BMP
-        };
-
-        // Create the canvas image (bound to the output file)
+        // Create BMP canvas bound to the output file
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
         using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, canvasWidth, canvasHeight))
         {
+            // Merge images horizontally onto the canvas
             int offsetX = 0;
-            // Merge each image onto the canvas
-            foreach (string path in imagePaths)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -62,7 +70,7 @@ class Program
                 }
             }
 
-            // Save the bound canvas (no path needed)
+            // Save the bound canvas (output file)
             canvas.Save();
         }
     }

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Emf.Graphics;
 using Aspose.Imaging.Brushes;
@@ -9,56 +8,59 @@ using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output EMF file path
-        string outputPath = Path.Combine(Path.GetTempPath(), "filledPolygon.emf");
+        // Hardcoded output path
+        string outputPath = @"C:\Temp\filledPolygon.emf";
 
-        // Canvas size in pixels
-        int width = 600;
-        int height = 400;
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Canvas size in millimeters (1 pixel = 0.01 mm)
-        int widthMm = (int)(width / 100f);
-        int heightMm = (int)(height / 100f);
+        // Define image dimensions (pixels)
+        int deviceWidth = 600;
+        int deviceHeight = 400;
+
+        // Convert dimensions to millimeters (approximation: 1 pixel = 0.01 mm)
+        int deviceWidthMm = (int)(deviceWidth / 100f);
+        int deviceHeightMm = (int)(deviceHeight / 100f);
 
         // Define the drawing frame
-        Rectangle frame = new Rectangle(0, 0, width, height);
+        Rectangle frame = new Rectangle(0, 0, deviceWidth, deviceHeight);
 
-        // Create EMF recorder graphics
+        // Create the EMF graphics recorder
         EmfRecorderGraphics2D graphics = new EmfRecorderGraphics2D(
             frame,
-            new Size(width, height),
-            new Size(widthMm, heightMm));
+            new Size(deviceWidth, deviceHeight),
+            new Size(deviceWidthMm, deviceHeightMm));
 
         // Create a closed figure for the polygon
-        Figure figure = new Figure { IsClosed = true };
-        GraphicsPath path = new GraphicsPath();
-        path.AddFigure(figure);
+        Figure polygonFigure = new Figure { IsClosed = true };
+        GraphicsPath polygonPath = new GraphicsPath();
+        polygonPath.AddFigure(polygonFigure);
 
         // Define polygon vertices
-        figure.AddShapes(new Shape[]
+        PointF[] vertices = new PointF[]
         {
-            new PolygonShape(new PointF[]
-            {
-                new PointF(100, 100),
-                new PointF(300, 80),
-                new PointF(350, 200),
-                new PointF(200, 250),
-                new PointF(120, 180)
-            })
+            new PointF(150, 100),
+            new PointF(450, 100),
+            new PointF(300, 300)
+        };
+
+        // Add the polygon shape to the figure
+        polygonFigure.AddShapes(new Shape[]
+        {
+            new PolygonShape(vertices)
         });
 
-        // Fill the polygon with a solid brush and outline with a pen
-        using (SolidBrush brush = new SolidBrush(Color.CornflowerBlue))
-        {
-            Pen pen = new Pen(Color.Black, 1);
-            graphics.FillPath(pen, brush, path);
-        }
+        // Fill the polygon with a solid blue brush and outline with a black pen
+        Pen outlinePen = new Pen(Color.Black, 2);
+        SolidBrush fillBrush = new SolidBrush(Color.Blue);
+        graphics.FillPath(outlinePen, fillBrush, polygonPath);
 
-        // Finalize and save the EMF image
+        // Finalize recording and obtain the EMF image
         using (EmfImage emfImage = graphics.EndRecording())
         {
+            // Save the EMF image to the specified path
             emfImage.Save(outputPath);
         }
     }

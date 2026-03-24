@@ -1,56 +1,54 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging;
 
-// Create BMP options with 24 bits per pixel
-BmpOptions bmpOptions = new BmpOptions();
-bmpOptions.BitsPerPixel = 24;
-
-// Define output file path (adjust as needed)
-bmpOptions.Source = new FileCreateSource(@"c:\temp\customShape.bmp", false);
-
-// Create a 500x500 bitmap image
-using (Image image = Image.Create(bmpOptions, 500, 500))
+class Program
 {
-    // Initialize graphics object for drawing
-    Graphics graphics = new Graphics(image);
-
-    // Clear background with a light color
-    graphics.Clear(Color.Wheat);
-
-    // Create a new graphics path
-    GraphicsPath graphicsPath = new GraphicsPath();
-
-    // Create a figure to hold custom shapes
-    Figure figure = new Figure();
-
-    // Define points for a star shape
-    PointF[] starPoints = new PointF[]
+    static void Main(string[] args)
     {
-        new PointF(250f, 50f),   // top
-        new PointF(280f, 180f),
-        new PointF(400f, 180f),
-        new PointF(300f, 250f),
-        new PointF(340f, 380f),
-        new PointF(250f, 300f),
-        new PointF(160f, 380f),
-        new PointF(200f, 250f),
-        new PointF(100f, 180f),
-        new PointF(220f, 180f)
-    };
+        // Define output path
+        string outputPath = @"C:\temp\custom_shape.bmp";
 
-    // Add the star shape as a closed polygon
-    figure.AddShape(new PolygonShape(starPoints, true));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-    // Add the figure to the graphics path
-    graphicsPath.AddFigure(figure);
+        // Create a file source for the BMP image
+        Source fileSource = new FileCreateSource(outputPath, false);
 
-    // Draw the custom shape with a thick black pen
-    graphics.DrawPath(new Pen(Color.Black, 3), graphicsPath);
+        // Configure BMP options
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.BitsPerPixel = 24;
+        bmpOptions.Source = fileSource;
 
-    // Save the image to the specified file
-    image.Save();
+        // Create a BMP canvas of size 500x500
+        using (Image image = Image.Create(bmpOptions, 500, 500))
+        {
+            // Initialize graphics for drawing
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.LightGray);
+
+            // Create a graphics path
+            GraphicsPath graphicsPath = new GraphicsPath();
+
+            // Create a figure and add custom shapes
+            Figure figure = new Figure();
+            // Rectangle shape
+            figure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 300f, 200f)));
+            // Ellipse shape to complement the rectangle
+            figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 100f)));
+
+            // Add the figure to the graphics path
+            graphicsPath.AddFigure(figure);
+
+            // Draw the path with a pen
+            Pen pen = new Pen(Color.DarkBlue, 3);
+            graphics.DrawPath(pen, graphicsPath);
+
+            // Save the bound image
+            image.Save();
+        }
+    }
 }

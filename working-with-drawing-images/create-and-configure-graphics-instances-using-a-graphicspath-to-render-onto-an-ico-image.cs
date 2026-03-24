@@ -9,38 +9,44 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output ICO file path
-        string outputPath = "output.ico";
+        // Output ICO file path (hardcoded)
+        string outputPath = "output/icon.ico";
 
-        // Configure ICO options and bind to the output file
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure ICO options with a FileCreateSource bound to the output path
         IcoOptions icoOptions = new IcoOptions();
         icoOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create a 256x256 ICO image canvas
-        using (Image image = Image.Create(icoOptions, 256, 256))
+        // Define canvas dimensions
+        int width = 256;
+        int height = 256;
+
+        // Create the ICO image canvas
+        using (Image image = Image.Create(icoOptions, width, height))
         {
             // Initialize Graphics for drawing on the image
             Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.Transparent); // Clear background
 
-            // Clear the canvas with a transparent background
-            graphics.Clear(Color.Transparent);
-
-            // Create a GraphicsPath to hold figures
+            // Build a GraphicsPath with a rectangle and an ellipse
             GraphicsPath path = new GraphicsPath();
-
-            // Create a Figure and add shapes to it
             Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(20f, 20f, 200f, 200f)));
-            figure.AddShape(new EllipseShape(new RectangleF(50f, 50f, 150f, 150f)));
-            figure.AddShape(new PieShape(new RectangleF(new PointF(80f, 80f), new SizeF(100f, 100f)), 0f, 120f));
 
-            // Add the figure to the graphics path
+            // Rectangle shape
+            figure.AddShape(new RectangleShape(new RectangleF(20f, 20f, 200f, 200f)));
+            // Ellipse shape
+            figure.AddShape(new EllipseShape(new RectangleF(60f, 60f, 120f, 120f)));
+
+            // Add the figure to the path
             path.AddFigure(figure);
 
-            // Draw the path using a black pen of width 3
-            graphics.DrawPath(new Pen(Color.Black, 3), path);
+            // Draw the path using a black pen
+            Pen pen = new Pen(Color.Black, 3);
+            graphics.DrawPath(pen, path);
 
-            // Save the image (file is already bound via FileCreateSource)
+            // Save the image (output path already bound)
             image.Save();
         }
     }

@@ -1,57 +1,66 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.FileFormats.Wmf.Graphics;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
-// Define paths
-string dir = @"c:\temp\";
-string sourcePath = Path.Combine(dir, "source.png");
-string outputPath = Path.Combine(dir, "output.bmp");
-
-// Load the source raster image
-using (Image srcImg = Image.Load(sourcePath))
+class Program
 {
-    // Cast to RasterImage to access pixel dimensions
-    RasterImage raster = (RasterImage)srcImg;
-
-    // Specify the region of the source image to render
-    // Example: rectangle starting at (50,50) with size 200x150
-    Rectangle srcRect = new Rectangle(50, 50, 200, 150);
-
-    // Ensure the source rectangle does not exceed the image bounds
-    srcRect = Rectangle.Intersect(srcRect, raster.Bounds);
-
-    // Define the size of the vector canvas (BMP will have the same dimensions)
-    int canvasWidth = srcRect.Width;
-    int canvasHeight = srcRect.Height;
-
-    // Create a WMF recorder graphics object (vector canvas)
-    // Frame defines the logical size of the canvas; DPI is set to 96 (standard screen resolution)
-    Rectangle frame = new Rectangle(0, 0, canvasWidth, canvasHeight);
-    int dpi = 96;
-    WmfRecorderGraphics2D graphics = new WmfRecorderGraphics2D(frame, dpi);
-
-    // Destination rectangle on the canvas where the source region will be drawn
-    // Here we draw it at the origin (0,0) with the same size as the source region
-    Rectangle destRect = new Rectangle(0, 0, srcRect.Width, srcRect.Height);
-
-    // Render the specified portion of the raster image onto the vector canvas
-    graphics.DrawImage(raster, destRect, srcRect, GraphicsUnit.Pixel);
-
-    // Finalize recording and obtain a WMF image containing the drawing commands
-    using (WmfImage wmf = graphics.EndRecording())
+    static void Main(string[] args)
     {
-        // Prepare BMP save options
-        BmpOptions bmpOptions = new BmpOptions();
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
 
-        // Save the WMF image as a raster BMP file.
-        // The WMF will be rasterized automatically according to the BMP options.
-        using (FileStream fs = new FileStream(outputPath, FileMode.Create))
+        // Specified rectangular region (x, y, width, height)
+        int regionX = 50;
+        int regionY = 30;
+        int regionWidth = 200;
+        int regionHeight = 150;
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            wmf.Save(fs, bmpOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source raster image
+        using (RasterImage source = (RasterImage)Image.Load(inputPath))
+        {
+            // Clamp the region to the source image bounds
+            int x = Math.Max(0, regionX);
+            int y = Math.Max(0, regionY);
+            int w = Math.Min(regionWidth, source.Width - x);
+            int h = Math.Min(regionHeight, source.Height - y);
+
+            if (w <= 0 || h <= 0)
+            {
+                Console.Error.WriteLine("Specified region is outside the image bounds.");
+                return;
+            }
+
+            // Define source rectangle
+            Rectangle srcRect = new Rectangle(x, y, w, h);
+
+            // Create a BMP canvas bound to the output file
+            Source fileSource = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions() { Source = fileSource };
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, w, h))
+            {
+                // Load pixel data from the specified region
+                int[] pixels = source.LoadArgb32Pixels(srcRect);
+
+                // Render the region onto the canvas at (0,0)
+                canvas.SaveArgb32Pixels(new Rectangle(0, 0, w, h), pixels);
+
+                // Save the bound canvas
+                canvas.Save();
+            }
         }
     }
 }

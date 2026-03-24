@@ -1,75 +1,70 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths (adjust as needed)
-        string sourceImagePath = "source.png";
-        string targetImagePath = "target.jpg";
-        string tempSvgPath = "temp.svg";
-        string tempPngPath = "temp_raster.png";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string rasterPath = @"C:\Images\overlay.png";
+        string targetPath = @"C:\Images\background.jpg";
+        string tempSvgRasterPath = @"C:\Images\temp_rasterized.png";
+        string outputPath = @"C:\Images\composited.png";
 
-        // Load the raster image to be rendered onto the SVG layer
-        using (RasterImage sourceImage = (RasterImage)Image.Load(sourceImagePath))
+        // Validate input files
+        if (!File.Exists(rasterPath))
         {
-            int width = sourceImage.Width;
-            int height = sourceImage.Height;
-            int dpi = 96; // typical screen DPI
-
-            // Create an SVG graphics context
-            SvgGraphics2D svgGraphics = new SvgGraphics2D(width, height, dpi);
-
-            // Draw the raster image onto the SVG canvas at (0,0)
-            svgGraphics.DrawImage(sourceImage, new Point(0, 0));
-
-            // Finalize SVG recording
-            using (SvgImage svgImage = svgGraphics.EndRecording())
-            {
-                // Save the SVG (optional, can be omitted)
-                svgImage.Save(tempSvgPath);
-
-                // Rasterize the SVG to a PNG image
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                svgImage.Save(tempPngPath, pngOptions);
-            }
+            Console.Error.WriteLine($"File not found: {rasterPath}");
+            return;
+        }
+        if (!File.Exists(targetPath))
+        {
+            Console.Error.WriteLine($"File not found: {targetPath}");
+            return;
         }
 
-        // Load the rasterized SVG image
-        using (RasterImage rasterizedSvg = (RasterImage)Image.Load(tempPngPath))
-        {
-            // Load the target image onto which the SVG result will be composited
-            using (RasterImage targetImage = (RasterImage)Image.Load(targetImagePath))
-            {
-                // Composite the rasterized SVG onto the target at position (0,0)
-                Rectangle destRect = new Rectangle(0, 0, rasterizedSvg.Width, rasterizedSvg.Height);
-                targetImage.SaveArgb32Pixels(destRect, rasterizedSvg.LoadArgb32Pixels(rasterizedSvg.Bounds));
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(tempSvgRasterPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the final composited image as JPEG
-                Source outSource = new FileCreateSource(outputPath, false);
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Source = outSource,
-                    Quality = 90
-                };
-                targetImage.Save(outputPath, jpegOptions);
+        // Load the target image to obtain canvas size
+        using (Aspose.Imaging.RasterImage targetImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(targetPath))
+        {
+            // Create an SVG graphics canvas matching the target size
+            int canvasWidth = targetImage.Width;
+            int canvasHeight = targetImage.Height;
+            int dpi = 96;
+            SvgGraphics2D svgGraphics = new SvgGraphics2D(canvasWidth, canvasHeight, dpi);
+
+            // Load the raster image to be drawn onto the SVG layer
+            using (Aspose.Imaging.RasterImage overlayImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(rasterPath))
+            {
+                // Draw the raster image at the top-left corner of the SVG canvas
+                svgGraphics.DrawImage(overlayImage, new Aspose.Imaging.Point(0, 0));
             }
+
+            // Finalize SVG image
+            using (SvgImage svgImage = svgGraphics.EndRecording())
+            {
+                // Rasterize the SVG to a temporary PNG file
+                PngOptions pngOpts = new PngOptions();
+                svgImage.Save(tempSvgRasterPath, pngOpts);
+            }
+
+            // Load the rasterized SVG image
+            using (Aspose.Imaging.RasterImage rasterizedSvg = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(tempSvgRasterPath))
+            {
+                // Composite the rasterized SVG onto the target image at (0,0)
+                Aspose.Imaging.Rectangle destRect = new Aspose.Imaging.Rectangle(0, 0, rasterizedSvg.Width, rasterizedSvg.Height);
+                targetImage.SaveArgb32Pixels(destRect, rasterizedSvg.LoadArgb32Pixels(rasterizedSvg.Bounds));
+            }
+
+            // Save the composited image to the final output path as PNG
+            PngOptions outputOptions = new PngOptions();
+            targetImage.Save(outputPath, outputOptions);
         }
     }
 }

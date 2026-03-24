@@ -2,41 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
-// Create a file stream for the output GIF
-using (FileStream stream = new FileStream(@"C:\temp\output.gif", FileMode.Create))
+class Program
 {
-    // Configure GIF options and associate the stream source
-    GifOptions gifOptions = new GifOptions();
-    gifOptions.Source = new StreamSource(stream);
-
-    // Create a new GIF image with desired dimensions
-    using (Image image = Image.Create(gifOptions, 400, 300))
+    static void Main()
     {
-        // Initialize Graphics object for drawing on the image
-        Graphics graphics = new Graphics(image);
+        // Output path (hardcoded)
+        string outputPath = @"C:\Temp\output.gif";
 
-        // Optional: clear the background with a solid color
-        graphics.Clear(Color.White);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Instantiate an empty GraphicsPath
-        GraphicsPath graphicsPath = new GraphicsPath();
+        // Create GIF options with a file source bound to the output path
+        GifOptions gifOptions = new GifOptions
+        {
+            Source = new FileCreateSource(outputPath, false)
+        };
 
-        // Create a Figure and add shapes (rectangle and ellipse) to it
-        Figure figure = new Figure();
-        figure.AddShape(new RectangleShape(new RectangleF(20f, 20f, 200f, 150f)));
-        figure.AddShape(new EllipseShape(new RectangleF(250f, 50f, 100f, 100f)));
+        // Create a new GIF image (200x200) bound to the output file
+        using (Image image = Image.Create(gifOptions, 200, 200))
+        {
+            // Cast to GifImage to access the active frame
+            GifImage gif = (GifImage)image;
 
-        // Add the Figure to the GraphicsPath
-        graphicsPath.AddFigure(figure);
+            // Create a Graphics object for the active frame
+            Graphics graphics = new Graphics(gif.ActiveFrame);
 
-        // Draw the path onto the image using a blue pen of width 3
-        graphics.DrawPath(new Pen(Color.Blue, 3), graphicsPath);
+            // Instantiate a GraphicsPath
+            GraphicsPath graphicsPath = new GraphicsPath();
 
-        // Save all changes to the GIF file
-        image.Save();
+            // Create a Figure and add shapes to it
+            Figure figure = new Figure();
+            figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 180f, 180f)));
+            figure.AddShape(new EllipseShape(new RectangleF(30f, 30f, 140f, 140f)));
+
+            // Add the Figure to the GraphicsPath
+            graphicsPath.AddFigure(figure);
+
+            // Draw the path onto the GIF frame using a blue pen
+            graphics.DrawPath(new Pen(Color.Blue, 3), graphicsPath);
+
+            // Save the image (output file is already bound)
+            image.Save();
+        }
     }
 }

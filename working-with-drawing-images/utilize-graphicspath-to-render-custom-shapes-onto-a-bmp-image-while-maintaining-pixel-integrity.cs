@@ -1,60 +1,56 @@
-using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define canvas size
-        int width = 500;
-        int height = 500;
+        string outputPath = @"c:\temp\custom_shapes.bmp";
 
-        // Output BMP file path
-        string outputPath = "output.bmp";
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure BMP options
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, width, height))
+        BmpOptions bmpOptions = new BmpOptions
         {
-            // Initialize graphics for drawing
+            BitsPerPixel = 24,
+            Source = new FileCreateSource(outputPath, false)
+        };
+
+        using (Image image = Image.Create(bmpOptions, 500, 500))
+        {
             Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.Wheat); // Clear background
+            graphics.Clear(Color.LightGray);
 
-            // Create a graphics path to hold figures
-            GraphicsPath path = new GraphicsPath();
+            GraphicsPath graphicPath = new GraphicsPath();
 
-            // First figure with rectangle and ellipse
             Figure figure1 = new Figure();
             figure1.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
             figure1.AddShape(new EllipseShape(new RectangleF(300f, 50f, 150f, 150f)));
-            path.AddFigure(figure1);
+            graphicPath.AddFigure(figure1);
 
-            // Second figure with pie and polygon
             Figure figure2 = new Figure();
-            figure2.AddShape(new PieShape(new RectangleF(100f, 250f, 200f, 200f), 0f, 120f));
             figure2.AddShape(new PolygonShape(
                 new PointF[]
                 {
-                    new PointF(350f, 300f),
-                    new PointF(400f, 350f),
-                    new PointF(380f, 400f),
-                    new PointF(320f, 380f)
+                    new PointF(100f, 300f),
+                    new PointF(200f, 350f),
+                    new PointF(150f, 400f),
+                    new PointF(80f, 380f)
                 },
                 true));
-            path.AddFigure(figure2);
+            figure2.AddShape(new PieShape(new RectangleF(300f, 300f, 150f, 150f), 0f, 120f));
+            graphicPath.AddFigure(figure2);
 
-            // Draw the combined path with a black pen
-            Pen pen = new Pen(Color.Black, 2);
-            graphics.DrawPath(pen, path);
+            using (SolidBrush fillBrush = new SolidBrush(Color.LightBlue))
+            {
+                graphics.FillPath(fillBrush, graphicPath);
+            }
 
-            // Save the image (file is already bound via FileCreateSource)
+            graphics.DrawPath(new Pen(Color.Black, 2), graphicPath);
+
             image.Save();
         }
     }

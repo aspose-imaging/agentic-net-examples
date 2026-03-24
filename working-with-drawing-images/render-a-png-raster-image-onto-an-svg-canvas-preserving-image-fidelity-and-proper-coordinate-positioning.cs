@@ -1,36 +1,65 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Paths for input PNG and output SVG
-        string dir = @"C:\temp\";
-        string pngPath = System.IO.Path.Combine(dir, "sample.png");
-        string svgPath = System.IO.Path.Combine(dir, "canvas.svg");
+        // Hardcoded input and output paths
+        string inputSvgPath = "input.svg";
+        string inputPngPath = "image.png";
+        string outputSvgPath = "output.svg";
 
-        // Load the PNG raster image
-        using (RasterImage raster = (RasterImage)Image.Load(pngPath))
+        // Verify SVG input exists
+        if (!File.Exists(inputSvgPath))
         {
-            // Define SVG canvas dimensions (using the raster size here)
-            int canvasWidth = raster.Width;
-            int canvasHeight = raster.Height;
-            int dpi = 96; // standard screen DPI
+            Console.Error.WriteLine($"File not found: {inputSvgPath}");
+            return;
+        }
 
-            // Create an SVG graphics context
+        // Verify PNG input exists
+        if (!File.Exists(inputPngPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPngPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
+
+        // Load the source SVG to obtain its dimensions
+        using (SvgImage sourceSvg = new SvgImage(inputSvgPath))
+        {
+            int canvasWidth = sourceSvg.Width;
+            int canvasHeight = sourceSvg.Height;
+            int dpi = 96; // Standard screen DPI
+
+            // Create a new SVG canvas with the same size as the source SVG
             SvgGraphics2D graphics = new SvgGraphics2D(canvasWidth, canvasHeight, dpi);
 
-            // Draw the raster image at the desired location (top‑left corner)
-            graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0));
+            // Optionally, copy existing SVG content onto the new canvas
+            // (If you need to preserve original SVG elements, you could render the source SVG onto the graphics.
+            // For simplicity, this example starts with a blank canvas.)
 
-            // Finalize the SVG recording and obtain the SVG image object
-            using (SvgImage svgImage = graphics.EndRecording())
+            // Load the raster PNG image
+            using (RasterImage rasterImg = (RasterImage)Image.Load(inputPngPath))
             {
-                // Save the SVG file preserving the raster image fidelity
-                svgImage.Save(svgPath);
+                // Define where the PNG should be placed on the SVG canvas
+                // Here we place it at (50, 50) with its original size
+                int posX = 50;
+                int posY = 50;
+                graphics.DrawImage(rasterImg, new Aspose.Imaging.Point(posX, posY));
+            }
+
+            // Finalize the SVG image
+            using (SvgImage resultSvg = graphics.EndRecording())
+            {
+                // Save the resulting SVG
+                resultSvg.Save(outputSvgPath);
             }
         }
     }

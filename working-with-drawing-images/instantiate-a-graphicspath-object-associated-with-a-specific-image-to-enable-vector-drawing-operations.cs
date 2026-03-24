@@ -3,39 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging;
 
-// Create a file stream for the output image
-using (FileStream stream = new FileStream(@"output.tiff", FileMode.Create))
+class Program
 {
-    // Configure TIFF options (using default expected format)
-    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-    tiffOptions.Source = new StreamSource(stream);
-
-    // Create a new 500x500 TIFF image
-    using (Image image = Image.Create(tiffOptions, 500, 500))
+    static void Main()
     {
-        // Initialize Graphics object for the image
-        Graphics graphics = new Graphics(image);
-        graphics.Clear(Color.Wheat); // optional background clear
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.tiff";
+        string outputPath = @"C:\temp\output.tiff";
 
-        // Instantiate a GraphicsPath associated with this image
-        GraphicsPath graphicsPath = new GraphicsPath();
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Create a figure and add some shapes (rectangle and ellipse)
-        Figure figure = new Figure();
-        figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-        figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Add the figure to the GraphicsPath
-        graphicsPath.AddFigure(figure);
+        // Load the image from the input path
+        using (Image image = Image.Load(inputPath))
+        {
+            // Initialize Graphics for the loaded image
+            Graphics graphics = new Graphics(image);
 
-        // Draw the path onto the image using a black pen
-        graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
+            // Create a new GraphicsPath instance
+            GraphicsPath graphicsPath = new GraphicsPath();
 
-        // Save the changes to the image
-        image.Save();
+            // Create a figure and add a rectangle shape to it
+            Figure figure = new Figure();
+            figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 200f, 200f)));
+
+            // Add the figure to the GraphicsPath
+            graphicsPath.AddFigure(figure);
+
+            // Draw the path onto the image using a blue pen
+            graphics.DrawPath(new Pen(Color.Blue, 2), graphicsPath);
+
+            // Save the modified image to the output path
+            image.Save(outputPath);
+        }
     }
 }

@@ -2,28 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Brushes;
 
-class LoadPngFromStream
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the directory containing the PNG file.
-        string dir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
-        // Open a file stream for the PNG image.
-        using (Stream stream = File.OpenRead(Path.Combine(dir, "sample.png")))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Load the PNG image from the stream using the PngImage(Stream) constructor.
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load PNG image from a file stream
+        using (FileStream stream = new FileStream(inputPath, FileMode.Open))
+        {
             using (PngImage pngImage = new PngImage(stream))
             {
-                // Example drawing operation: fill the entire image with solid red.
+                // Create a Graphics instance for drawing operations
                 Graphics graphics = new Graphics(pngImage);
-                SolidBrush brush = new SolidBrush(Color.Red);
-                graphics.FillRectangle(brush, pngImage.Bounds);
 
-                // Save the modified image to a new file.
-                pngImage.Save(Path.Combine(dir, "sample_modified.png"));
+                // Example drawing operation: clear the canvas to white
+                graphics.Clear(Aspose.Imaging.Color.White);
+
+                // Save the modified image to the output path
+                pngImage.Save(outputPath);
             }
         }
     }

@@ -1,46 +1,50 @@
 using System;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using System.IO;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main()
     {
-        // Load an existing image from disk
-        using (Image image = Image.Load("input.jpg"))
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create a Graphics object for drawing on the loaded image
-            Graphics graphics = new Graphics(image);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Clear the surface (optional, comment out if you want to keep original background)
-            // graphics.Clear(Aspose.Imaging.Color.White);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a new GraphicsPath instance
-            GraphicsPath graphicsPath = new GraphicsPath();
+        // Load the existing image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Create graphics for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Create a Figure to hold multiple shapes
-            Figure figure = new Figure();
+            // Create a graphics path and a figure
+            Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
+            Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-            // Add a rectangle shape to the figure
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-
-            // Add an ellipse shape to the figure
-            figure.AddShape(new EllipseShape(new RectangleF(300f, 80f, 180f, 120f)));
-
-            // Add a pie shape to the figure
-            figure.AddShape(new PieShape(new RectangleF(150f, 250f, 200f, 200f), 0f, 120f));
+            // Add shapes to the figure
+            figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(10f, 10f, 200f, 200f)));
+            figure.AddShape(new EllipseShape(new Aspose.Imaging.RectangleF(250f, 50f, 150f, 150f)));
+            figure.AddShape(new PieShape(
+                new Aspose.Imaging.RectangleF(new Aspose.Imaging.PointF(100f, 200f), new Aspose.Imaging.SizeF(200f, 200f)),
+                0f, 90f));
 
             // Add the figure to the graphics path
-            graphicsPath.AddFigure(figure);
+            path.AddFigure(figure);
 
-            // Draw the path onto the image using a black pen of width 3
-            graphics.DrawPath(new Pen(Aspose.Imaging.Color.Black, 3), graphicsPath);
+            // Draw the path onto the image
+            graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), path);
 
-            // Save the modified image to a new file
-            image.Save("output.jpg");
+            // Save the modified image
+            image.Save(outputPath);
         }
     }
 }

@@ -2,62 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output file path and canvas dimensions
-        string outputPath = "output.gif";
-        int width = 500;
-        int height = 500;
+        // Hardcoded output path
+        string outputPath = "output/output.gif";
 
-        // Configure GIF creation options with a file source
-        GifOptions gifOptions = new GifOptions();
-        gifOptions.Source = new FileCreateSource(outputPath, false);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a GIF image canvas bound to the output file
-        using (Image image = Image.Create(gifOptions, width, height))
+        // Create a new GIF image (400x300 pixels)
+        var gifOptions = new GifOptions();
+        using (Image image = Image.Create(gifOptions, 400, 300))
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White); // Set background color
+            // Initialize graphics object for drawing
+            var graphics = new Graphics(image);
 
-            // Build a graphics path containing multiple filled shapes
-            GraphicsPath path = new GraphicsPath();
-            Figure figure = new Figure();
+            // Clear background to white
+            graphics.Clear(Color.White);
+
+            // Build a graphics path with several shapes
+            var path = new GraphicsPath();
+            var figure = new Figure();
 
             // Rectangle shape
             figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
             // Ellipse shape
-            figure.AddShape(new EllipseShape(new RectangleF(300f, 50f, 150f, 150f)));
-            // Polygon shape
-            PointF[] polygonPoints = new PointF[]
-            {
-                new PointF(100f, 300f),
-                new PointF(200f, 250f),
-                new PointF(300f, 300f),
-                new PointF(250f, 400f),
-                new PointF(150f, 400f)
-            };
-            figure.AddShape(new PolygonShape(polygonPoints, true));
+            figure.AddShape(new EllipseShape(new RectangleF(100f, 80f, 150f, 100f)));
+            // Pie shape (arc from 0 to 120 degrees)
+            figure.AddShape(new PieShape(new RectangleF(150f, 100f, 120f, 120f), 0f, 120f));
 
             // Add the figure to the path
             path.AddFigure(figure);
 
-            // Fill the combined path with a solid brush
-            SolidBrush fillBrush = new SolidBrush(Color.LightBlue);
-            graphics.FillPath(fillBrush, path);
+            // Fill the interior of the path with a solid light‑blue brush
+            var brush = new SolidBrush(Color.LightBlue);
+            graphics.FillPath(brush, path);
 
-            // Optional: draw an outline around the filled shapes
-            Pen outlinePen = new Pen(Color.DarkBlue, 2);
-            graphics.DrawPath(outlinePen, path);
+            // Optionally draw the outline with a dark‑blue pen
+            var pen = new Pen(Color.DarkBlue, 2);
+            graphics.DrawPath(pen, path);
 
-            // Save the image (file is already bound via FileCreateSource)
-            image.Save();
+            // Save the rendered GIF image
+            image.Save(outputPath);
         }
     }
 }

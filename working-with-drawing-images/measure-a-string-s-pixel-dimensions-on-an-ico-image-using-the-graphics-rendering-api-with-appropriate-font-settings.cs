@@ -1,37 +1,43 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
-        // Path to the ICO image file
-        string icoPath = "input.ico";
+        // Hardcoded input ICO file path
+        string inputPath = @"C:\temp\input.ico";
 
-        // Text to measure
-        string text = "Sample Text";
-
-        // Load the ICO image as a raster image
-        using (RasterImage icoImage = (RasterImage)Image.Load(icoPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create a Graphics instance for the image
-            Graphics graphics = new Graphics(icoImage);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Define the font to use for measurement
-            Font font = new Font("Arial", 24);
+        // Load the ICO image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Create a Graphics instance for the loaded image
+            Graphics graphics = new Graphics(image);
 
-            // Define the layout area (full image size)
-            SizeF layoutArea = new SizeF(icoImage.Width, icoImage.Height);
+            // Define the font to be used for measurement
+            Font font = new Font("Arial", 24, FontStyle.Regular);
 
-            // Use default string format
+            // Define the layout area (use the whole image)
+            SizeF layoutArea = new SizeF(image.Width, image.Height);
+
+            // Use default string formatting
             StringFormat format = new StringFormat();
 
-            // Measure the string
+            // Text to measure
+            string text = "Sample Text";
+
+            // Measure the string's pixel dimensions
             SizeF measuredSize = graphics.MeasureString(text, font, layoutArea, format);
 
-            // Output the measured dimensions
+            // Output the measured width and height
             Console.WriteLine($"Measured size: Width = {measuredSize.Width}, Height = {measuredSize.Height}");
         }
     }

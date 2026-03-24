@@ -2,61 +2,59 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define output file path
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Create a file stream for the output PNG image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize PNG options and bind the stream as the source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a blank PNG image with the specified dimensions
-            using (Image image = Image.Create(pngOptions, 500, 500))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Initialize Graphics for drawing
+            Graphics graphics = new Graphics(image);
+
+            // Optional: clear the canvas with white background
+            graphics.Clear(Color.White);
+
+            // Draw a red line
+            graphics.DrawLine(new Pen(Color.Red, 3), new Point(50, 50), new Point(450, 50));
+
+            // Draw a blue rectangle
+            graphics.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle(100, 100, 300, 200));
+
+            // Draw a green ellipse
+            graphics.DrawEllipse(new Pen(Color.Green, 2), new Rectangle(150, 150, 200, 100));
+
+            // Fill a rectangle with a solid yellow brush
+            using (SolidBrush fillBrush = new SolidBrush(Color.Yellow))
             {
-                // Initialize Graphics for drawing on the image
-                Graphics graphics = new Graphics(image);
-
-                // Clear the canvas with a wheat background color
-                graphics.Clear(Color.Wheat);
-
-                // Draw a black diagonal line
-                graphics.DrawLine(new Pen(Color.Black, 2), new Point(0, 0), new Point(500, 500));
-
-                // Draw a red rectangle outline
-                graphics.DrawRectangle(new Pen(Color.Red, 3), new Rectangle(100, 100, 300, 200));
-
-                // Fill an ellipse with a solid blue brush
-                using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
-                {
-                    graphics.FillEllipse(blueBrush, new Rectangle(150, 150, 200, 100));
-                }
-
-                // Fill a rectangle with a semi‑transparent purple brush
-                using (SolidBrush purpleBrush = new SolidBrush(Color.Purple))
-                {
-                    purpleBrush.Opacity = 100; // 100% opacity
-                    graphics.FillRectangle(purpleBrush, new Rectangle(200, 250, 100, 100));
-                }
-
-                // Draw a string using a font and a solid black brush
-                using (SolidBrush textBrush = new SolidBrush(Color.Black))
-                {
-                    Font font = new Font("Arial", 24);
-                    graphics.DrawString("Aspose.Imaging Graphics Demo", font, textBrush, new PointF(50, 420));
-                }
-
-                // Save all changes to the bound stream
-                image.Save();
+                graphics.FillRectangle(fillBrush, new Rectangle(120, 120, 100, 80));
             }
+
+            // Draw a text string using a black brush and Arial font
+            Font font = new Font("Arial", 24);
+            using (SolidBrush textBrush = new SolidBrush(Color.Black))
+            {
+                graphics.DrawString("Aspose.Imaging", font, textBrush, new PointF(200, 350));
+            }
+
+            // Save the modified image preserving pixel fidelity
+            image.Save(outputPath, new PngOptions());
         }
     }
 }

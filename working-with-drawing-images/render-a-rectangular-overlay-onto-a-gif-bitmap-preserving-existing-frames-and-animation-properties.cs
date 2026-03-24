@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
@@ -9,44 +10,60 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output GIF paths (can be passed via command line arguments)
-        string inputPath = args.Length > 0 ? args[0] : "input.gif";
-        string outputPath = args.Length > 1 ? args[1] : "output.gif";
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
 
-        // Rectangle overlay parameters
-        int overlayX = 10;
-        int overlayY = 10;
-        int overlayWidth = 50;
-        int overlayHeight = 30;
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the existing GIF image
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the existing GIF
         using (GifImage gif = (GifImage)Image.Load(inputPath))
         {
-            // Create a semi‑transparent red brush for the overlay
-            using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+            // Preserve original loop count
+            int originalLoops = gif.LoopsCount;
+
+            // Define overlay rectangle parameters
+            int rectX = 10;
+            int rectY = 10;
+            int rectWidth = 50;
+            int rectHeight = 30;
+            // Semi‑transparent red color
+            Color overlayColor = Color.FromArgb(128, Color.Red);
+
+            // Apply overlay to each frame
+            for (int i = 0; i < gif.PageCount; i++)
             {
-                // Iterate through all frames and draw the rectangle on each one
-                for (int i = 0; i < gif.PageCount; i++)
+                // Activate the current frame
+                gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+
+                // Create graphics for the active frame
+                Graphics graphics = new Graphics(gif.ActiveFrame);
+
+                // Draw the rectangle overlay
+                using (SolidBrush brush = new SolidBrush(overlayColor))
                 {
-                    // Set the current active frame
-                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-
-                    // Obtain a Graphics object for the active frame
-                    Graphics graphics = new Graphics(gif.ActiveFrame);
-
-                    // Draw the overlay rectangle
-                    graphics.FillRectangle(brush, new Rectangle(overlayX, overlayY, overlayWidth, overlayHeight));
+                    graphics.FillRectangle(brush, new Rectangle(rectX, rectY, rectWidth, rectHeight));
                 }
             }
 
-            // Preserve animation properties (e.g., loop count) when saving
-            GifOptions saveOptions = new GifOptions
-            {
-                LoopsCount = gif.LoopsCount
-            };
+            // Restore loop count (if it was modified)
+            gif.LoopsCount = originalLoops;
 
-            // Save the modified GIF
-            gif.Save(outputPath, saveOptions);
+            // Save the modified GIF preserving animation properties
+            GifOptions options = new GifOptions
+            {
+                LoopsCount = originalLoops,
+                FullFrame = true
+            };
+            gif.Save(outputPath, options);
         }
     }
 }

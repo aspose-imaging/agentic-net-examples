@@ -1,39 +1,61 @@
 using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for the target image, output image, and source images
-        string targetPath = "target.png";
-        string outputPath = "output.png";
-        string[] sourcePaths = { "src1.png", "src2.png", "src3.png" };
-
-        // Positions where each source image will be drawn onto the target
-        var positions = new Aspose.Imaging.Point[]
+        // Hardcoded input and output paths
+        string targetImagePath = @"C:\Images\target.png";
+        string[] overlayImagePaths = new string[]
         {
-            new Aspose.Imaging.Point(0, 0),
-            new Aspose.Imaging.Point(100, 50),
-            new Aspose.Imaging.Point(200, 150)
+            @"C:\Images\overlay1.png",
+            @"C:\Images\overlay2.jpg"
         };
+        string outputImagePath = @"C:\Images\result.png";
+
+        // Verify target image exists
+        if (!File.Exists(targetImagePath))
+        {
+            Console.Error.WriteLine($"File not found: {targetImagePath}");
+            return;
+        }
+
+        // Verify each overlay image exists
+        foreach (var overlayPath in overlayImagePaths)
+        {
+            if (!File.Exists(overlayPath))
+            {
+                Console.Error.WriteLine($"File not found: {overlayPath}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputImagePath));
 
         // Load the target image
-        using (Aspose.Imaging.Image targetImage = Aspose.Imaging.Image.Load(targetPath))
+        using (Image targetImage = Image.Load(targetImagePath))
         {
-            // Create a Graphics instance for drawing onto the target image
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(targetImage);
-
-            // Draw each source image onto the target at the specified position
-            for (int i = 0; i < sourcePaths.Length; i++)
+            // Create a Graphics object for drawing
+            using (Graphics graphics = new Graphics(targetImage))
             {
-                using (Aspose.Imaging.Image srcImage = Aspose.Imaging.Image.Load(sourcePaths[i]))
+                // Draw each overlay image onto the target
+                foreach (var overlayPath in overlayImagePaths)
                 {
-                    graphics.DrawImage(srcImage, positions[i]);
+                    using (Image overlayImage = Image.Load(overlayPath))
+                    {
+                        // Draw at (0,0) preserving original size
+                        graphics.DrawImage(overlayImage, 0, 0);
+                    }
                 }
             }
 
-            // Save the modified target image, preserving its original format
-            targetImage.Save(outputPath);
+            // Save the resulting image (format inferred from file extension)
+            targetImage.Save(outputImagePath);
         }
     }
 }

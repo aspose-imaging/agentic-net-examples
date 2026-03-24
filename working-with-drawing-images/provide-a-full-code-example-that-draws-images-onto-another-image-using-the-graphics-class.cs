@@ -3,41 +3,60 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats;
 
-// Create a PNG image that will serve as the canvas
-using (FileStream canvasStream = new FileStream(@"C:\temp\canvas.png", FileMode.Create))
+class Program
 {
-    // Set up PNG options and associate the stream as the source
-    PngOptions pngOptions = new PngOptions();
-    pngOptions.Source = new StreamSource(canvasStream);
-
-    // Create a 500x500 image
-    using (Image canvas = Image.Create(pngOptions, 500, 500))
+    static void Main(string[] args)
     {
-        // Initialize Graphics for the canvas
-        Graphics graphics = new Graphics(canvas);
+        // Input and output paths
+        string inputPath1 = "input/input1.png";
+        string inputPath2 = "input/input2.png";
+        string outputPath = "output/output.png";
 
-        // Fill the background with a light color
-        graphics.Clear(Color.LightGray);
-
-        // Load an external image that will be drawn onto the canvas
-        // Replace the path with an existing image file on your system
-        using (Image overlay = Image.Load(@"C:\temp\sample.jpg"))
+        // Verify input files exist
+        if (!File.Exists(inputPath1))
         {
-            // 1. Draw the overlay at its original size at position (50,50)
-            graphics.DrawImage(overlay, 50, 50);
-
-            // 2. Draw the overlay scaled to a 150x100 rectangle at position (250,30)
-            graphics.DrawImage(overlay, new Rectangle(250, 30, 150, 100));
-
-            // 3. Draw a portion of the overlay (top‑left 100x100) into a 120x120 rectangle at (100,300)
-            Rectangle srcRect = new Rectangle(0, 0, 100, 100);
-            Rectangle destRect = new Rectangle(100, 300, 120, 120);
-            graphics.DrawImage(overlay, srcRect, destRect, GraphicsUnit.Pixel);
+            Console.Error.WriteLine($"File not found: {inputPath1}");
+            return;
+        }
+        if (!File.Exists(inputPath2))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath2}");
+            return;
         }
 
-        // Save the final canvas image (the stream is already linked to the file)
-        canvas.Save();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source images
+        using (RasterImage src1 = (RasterImage)Image.Load(inputPath1))
+        using (RasterImage src2 = (RasterImage)Image.Load(inputPath2))
+        {
+            // Determine canvas size (width = max of sources, height = sum of heights)
+            int canvasWidth = Math.Max(src1.Width, src2.Width);
+            int canvasHeight = src1.Height + src2.Height;
+
+            // Create output canvas bound to file
+            Source outSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = outSource };
+
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+            {
+                // Initialize graphics for the canvas
+                Graphics graphics = new Graphics(canvas);
+
+                // Clear background
+                graphics.Clear(Color.White);
+
+                // Draw first image at (0,0)
+                graphics.DrawImage(src1, 0, 0);
+
+                // Draw second image below the first
+                graphics.DrawImage(src2, 0, src1.Height);
+
+                // Save the bound canvas
+                canvas.Save();
+            }
+        }
     }
 }

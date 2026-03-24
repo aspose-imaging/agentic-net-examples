@@ -1,20 +1,46 @@
 using System;
+using System.IO;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Path to the SVG file to be loaded
-        string svgFilePath = @"C:\Images\example.svg";
+        // Hardcoded input path
+        string inputPath = @"C:\Temp\input.svg";
 
-        // Load the SVG file into an SvgImage object using the constructor that accepts a file path
-        // This initializes the image and makes it ready for further manipulation or rendering
-        using (SvgImage svgImage = new SvgImage(svgFilePath))
+        // Verify the input file exists
+        if (!File.Exists(inputPath))
         {
-            // At this point svgImage is loaded and can be used for operations such as rasterization,
-            // drawing, resizing, etc.
-            Console.WriteLine($"SVG loaded. Width: {svgImage.Width}, Height: {svgImage.Height}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the SVG image
+        using (SvgImage svgImage = new SvgImage(inputPath))
+        {
+            // Example usage: display image dimensions
+            Console.WriteLine($"Loaded SVG - Width: {svgImage.Width}, Height: {svgImage.Height}");
+
+            // Optional: rasterize and save as PNG
+            string outputPath = @"C:\Temp\output.png";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure rasterization options
+            var rasterOptions = new SvgRasterizationOptions
+            {
+                PageSize = svgImage.Size
+            };
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            // Save the rasterized image
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }

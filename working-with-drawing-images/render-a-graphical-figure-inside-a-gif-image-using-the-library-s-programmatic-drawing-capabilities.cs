@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
@@ -8,39 +9,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define output file path
-        string outputPath = "output.gif";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.gif";
 
-        // Create the first GIF frame (200x200 pixels)
-        using (GifFrameBlock frame = new GifFrameBlock(200, 200))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create the first GIF frame block (canvas) with desired size
+        using (GifFrameBlock firstBlock = new GifFrameBlock(200, 200))
         {
             // Create a Graphics object for drawing on the frame
-            Graphics graphics = new Graphics(frame);
+            Graphics graphics = new Graphics(firstBlock);
 
-            // Clear the background with white color
-            graphics.Clear(Color.White);
-
-            // Draw a red rectangle border
-            graphics.DrawRectangle(new Pen(Color.Red, 3), new Rectangle(10, 10, 180, 180));
-
-            // Fill an inner blue ellipse
-            using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
+            // Fill background with a solid color
+            using (SolidBrush backgroundBrush = new SolidBrush(Color.LightBlue))
             {
-                graphics.FillEllipse(blueBrush, new Rectangle(30, 30, 140, 100));
+                graphics.FillRectangle(backgroundBrush, firstBlock.Bounds);
             }
 
-            // Draw a green diagonal line
-            graphics.DrawLine(new Pen(Color.Green, 2), new Point(10, 10), new Point(190, 190));
+            // Create a Pen for drawing outlines
+            Pen outlinePen = new Pen(Color.Red, 3);
 
-            // Add some text in black
-            using (SolidBrush blackBrush = new SolidBrush(Color.Black))
+            // Draw a rectangle
+            graphics.DrawRectangle(outlinePen, new Rectangle(50, 50, 100, 100));
+
+            // Draw an ellipse inside the rectangle
+            graphics.DrawEllipse(outlinePen, new Rectangle(80, 80, 80, 50));
+
+            // Draw a text string
+            Font font = new Font("Arial", 20);
+            using (SolidBrush textBrush = new SolidBrush(Color.Black))
             {
-                Font font = new Font("Arial", 16);
-                graphics.DrawString("Aspose.Imaging GIF", font, blackBrush, new PointF(20, 150));
+                graphics.DrawString("Hello GIF", font, textBrush, new PointF(60, 150));
             }
 
-            // Create the GIF image with the prepared frame and save it
-            using (GifImage gifImage = new GifImage(frame))
+            // Save the GIF image containing the drawn figure
+            using (GifImage gifImage = new GifImage(firstBlock))
             {
                 gifImage.Save(outputPath);
             }

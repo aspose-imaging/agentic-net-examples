@@ -1,44 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Configure PNG options: 24‑bit truecolor (8 bits per channel)
-        PngOptions pngOptions = new PngOptions
-        {
-            BitDepth = 8,
-            ColorType = PngColorType.Truecolor
-        };
+        // Define output path (hardcoded)
+        string outputPath = @"C:\Temp\ellipse.png";
 
-        // Create a 500x500 PNG image using the options
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Set up PNG options with a FileCreateSource bound to the output path
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Define image dimensions
+        int width = 400;
+        int height = 300;
+
+        // Create the PNG image canvas
+        using (Image image = Image.Create(pngOptions, width, height))
         {
-            // Initialize graphics for drawing on the image
+            // Initialize Graphics for drawing
             Graphics graphics = new Graphics(image);
 
-            // Clear the canvas with a light gray background
-            graphics.Clear(Color.LightGray);
+            // Clear the canvas with a white background
+            graphics.Clear(Color.White);
 
-            // Define the bounding rectangle for the ellipse (position and size)
-            // Top‑left corner at (100, 80), width 300, height 200
-            RectangleF ellipseRect = new RectangleF(100f, 80f, 300f, 200f);
+            // Define the ellipse bounds
+            Rectangle ellipseRect = new Rectangle(50, 50, 300, 200);
 
-            // Draw the ellipse outline with a black pen of thickness 3
-            Pen pen = new Pen(Color.Black, 3);
+            // Draw the ellipse with a blue pen of thickness 5
+            Pen pen = new Pen(Color.Blue, 5);
             graphics.DrawEllipse(pen, ellipseRect);
 
-            // Fill the ellipse with a semi‑transparent blue brush
-            SolidBrush brush = new SolidBrush(Color.Blue);
-            brush.Opacity = 128; // 50 % opacity
-            graphics.FillEllipse(brush, ellipseRect);
-
-            // Save the image (writes to the stream/source defined in pngOptions)
+            // Save the image (output path is already bound via FileCreateSource)
             image.Save();
         }
     }

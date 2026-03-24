@@ -1,54 +1,53 @@
+using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Gif; // Ensure GIF format support
 
-// Create a GIF image, draw vector paths on it, and save the result.
-public class GifVectorPathExample
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = "vector_path_output.gif";
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
 
-        // Create a file stream for the output GIF
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize GIF options and associate the stream as the source
-            GifOptions gifOptions = new GifOptions();
-            gifOptions.Source = new StreamSource(stream);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a new GIF image with desired dimensions (e.g., 400x300)
-            using (Image image = Image.Create(gifOptions, 400, 300))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the GIF image
+        using (GifImage gif = (GifImage)Image.Load(inputPath))
+        {
+            // Use the first frame as the active drawing surface
+            if (gif.PageCount > 0)
             {
-                // Initialize graphics object for drawing
-                Graphics graphics = new Graphics(image);
-
-                // Clear the background with a light color
-                graphics.Clear(Color.LightBlue);
-
-                // Build a graphics path containing a rectangle and an ellipse
-                GraphicsPath graphicsPath = new GraphicsPath();
-                Figure figure = new Figure();
-
-                // Add a rectangle shape to the figure
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-
-                // Add an ellipse shape to the figure
-                figure.AddShape(new EllipseShape(new RectangleF(120f, 80f, 150f, 100f)));
-
-                // Add the figure to the graphics path
-                graphicsPath.AddFigure(figure);
-
-                // Draw the path using a red pen of width 3
-                graphics.DrawPath(new Pen(Color.Red, 3), graphicsPath);
-
-                // Save all changes to the GIF image (the stream is automatically flushed on dispose)
-                image.Save();
+                gif.ActiveFrame = (GifFrameBlock)gif.Pages[0];
             }
+
+            // Create a GraphicsPath with a rectangle and an ellipse
+            GraphicsPath path = new GraphicsPath();
+            Figure figure = new Figure();
+            figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 200f, 150f)));
+            figure.AddShape(new EllipseShape(new RectangleF(50f, 50f, 100f, 100f)));
+            path.AddFigure(figure);
+
+            // Draw the path onto the active frame
+            Graphics graphics = new Graphics(gif.ActiveFrame);
+            Pen pen = new Pen(Color.Blue, 3);
+            graphics.DrawPath(pen, path);
+
+            // Save the modified GIF using GifOptions
+            GifOptions options = new GifOptions();
+            gif.Save(outputPath, options);
         }
     }
 }

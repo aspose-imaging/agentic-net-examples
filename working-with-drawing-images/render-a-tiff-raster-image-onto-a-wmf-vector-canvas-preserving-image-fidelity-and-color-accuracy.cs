@@ -1,40 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.FileFormats.Wmf.Graphics;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input TIFF and output WMF
-        string inputTiffPath = "input.tif";
-        string outputWmfPath = "output.wmf";
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputPath = "output.wmf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the TIFF raster image
-        using (RasterImage tiffImage = (RasterImage)Image.Load(inputTiffPath))
+        using (RasterImage tiffImage = (RasterImage)Image.Load(inputPath))
         {
-            int width = tiffImage.Width;
-            int height = tiffImage.Height;
-            int dpi = 96; // Standard screen DPI
+            // Create a WMF recorder with the same dimensions as the TIFF image
+            Rectangle frame = new Rectangle(0, 0, tiffImage.Width, tiffImage.Height);
+            int dpi = 96; // default screen resolution
 
-            // Create a WMF recorder graphics object with the same size as the TIFF
-            var frame = new Aspose.Imaging.Rectangle(0, 0, width, height);
-            var graphics = new Aspose.Imaging.FileFormats.Wmf.Graphics.WmfRecorderGraphics2D(frame, dpi);
+            WmfRecorderGraphics2D recorder = new WmfRecorderGraphics2D(frame, dpi);
 
-            // Draw the TIFF onto the WMF canvas preserving original size and colors
-            graphics.DrawImage(
+            // Draw the raster image onto the WMF canvas
+            recorder.DrawImage(
                 tiffImage,
-                new Aspose.Imaging.Rectangle(0, 0, width, height),
-                new Aspose.Imaging.Rectangle(0, 0, width, height),
-                Aspose.Imaging.GraphicsUnit.Pixel);
+                new Rectangle(0, 0, tiffImage.Width, tiffImage.Height),
+                new Rectangle(0, 0, tiffImage.Width, tiffImage.Height),
+                GraphicsUnit.Pixel);
 
             // Finalize recording and obtain the WMF image
-            using (Aspose.Imaging.FileFormats.Wmf.WmfImage wmfImage = graphics.EndRecording())
+            using (WmfImage wmfImage = recorder.EndRecording())
             {
                 // Save the WMF file
-                wmfImage.Save(outputWmfPath);
+                wmfImage.Save(outputPath);
             }
         }
     }

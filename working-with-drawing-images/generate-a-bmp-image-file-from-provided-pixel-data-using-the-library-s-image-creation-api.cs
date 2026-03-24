@@ -1,47 +1,47 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define output BMP file path
-        string outputPath = "output.bmp";
-
-        // Define image dimensions
+        // Image dimensions
         int width = 100;
         int height = 100;
 
-        // Prepare pixel data (ARGB format). Here we fill with a gradient.
-        int[] pixels = new int[width * height];
-        for (int y = 0; y < height; y++)
+        // Prepare pixel data (solid red ARGB)
+        int[] pixelData = new int[width * height];
+        int redArgb = unchecked((int)0xFFFF0000); // Alpha=255, Red=255, Green=0, Blue=0
+        for (int i = 0; i < pixelData.Length; i++)
         {
-            for (int x = 0; x < width; x++)
-            {
-                // Example: varying red and green components based on position
-                byte a = 255;
-                byte r = (byte)(x * 255 / (width - 1));
-                byte g = (byte)(y * 255 / (height - 1));
-                byte b = 0;
-                pixels[y * width + x] = (a << 24) | (r << 16) | (g << 8) | b;
-            }
+            pixelData[i] = redArgb;
         }
 
-        // Create a file source for the BMP image
+        // Output file path (hard‑coded)
+        string outputPath = @"C:\temp\output.bmp";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure BMP creation options
         Source source = new FileCreateSource(outputPath, false);
+        BmpOptions bmpOptions = new BmpOptions
+        {
+            Source = source,
+            BitsPerPixel = 32
+        };
 
-        // Set up BMP options with the source
-        BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-        // Create a raster canvas using the BMP options
+        // Create a BMP canvas bound to the output file
         using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
         {
-            // Write pixel data to the canvas
-            canvas.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixels);
+            // Write the pixel data to the canvas
+            canvas.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixelData);
 
-            // Save the bound image (no need to pass path or options)
+            // Save the bound image
             canvas.Save();
         }
     }

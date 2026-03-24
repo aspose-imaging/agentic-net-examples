@@ -1,66 +1,61 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Png;
 
-// Create a new PNG image with desired dimensions
-PngOptions pngOptions = new PngOptions();
-using (Image image = Image.Create(pngOptions, 800, 600))
+class Program
 {
-    // Initialize graphics object for drawing
-    Graphics graphics = new Graphics(image);
-
-    // Clear the background with a light gray color
-    graphics.Clear(Color.LightGray);
-
-    // Create a GraphicsPath to hold vector shapes
-    GraphicsPath graphicsPath = new GraphicsPath();
-
-    // Create a figure that will contain multiple shapes
-    Figure figure = new Figure();
-
-    // Add a rectangle shape
-    figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 200f)));
-
-    // Add an ellipse shape
-    figure.AddShape(new EllipseShape(new RectangleF(400f, 100f, 250f, 150f)));
-
-    // Add a pie shape (arc sector)
-    figure.AddShape(new PieShape(new RectangleF(200f, 300f, 200f, 200f), 30f, 120f));
-
-    // Add a bezier curve shape
-    PointF[] bezierPoints = new PointF[]
+    static void Main()
     {
-        new PointF(100f, 500f),
-        new PointF(150f, 450f),
-        new PointF(250f, 550f),
-        new PointF(300f, 500f)
-    };
-    figure.AddShape(new BezierShape(bezierPoints, true));
+        // Define output file path
+        string outputPath = @"C:\Temp\GraphicsPathOutput.png";
 
-    // Add a polygon shape
-    PointF[] polygonPoints = new PointF[]
-    {
-        new PointF(500f, 400f),
-        new PointF(600f, 350f),
-        new PointF(650f, 450f),
-        new PointF(550f, 500f)
-    };
-    figure.AddShape(new PolygonShape(polygonPoints));
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-    // Add the figure to the graphics path
-    graphicsPath.AddFigure(figure);
+        // Set up PNG options with a file create source
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
 
-    // Draw the path with a thick red pen
-    Pen redPen = new Pen(Color.Red, 4);
-    graphics.DrawPath(redPen, graphicsPath);
+        // Create a new image canvas
+        using (Image image = Image.Create(pngOptions, 500, 500))
+        {
+            // Initialize graphics for drawing
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.Wheat);
 
-    // Optionally fill the same path with a semi‑transparent brush
-    SolidBrush fillBrush = new SolidBrush(Color.FromArgb(80, Color.Yellow));
-    graphics.FillPath(fillBrush, graphicsPath);
+            // Create a graphics path
+            GraphicsPath graphicsPath = new GraphicsPath();
 
-    // Save the resulting image to disk
-    image.Save("VectorShapesOutput.png");
+            // First figure with rectangle, ellipse, and pie
+            Figure figure1 = new Figure();
+            figure1.AddShape(new RectangleShape(new RectangleF(10f, 10f, 300f, 300f)));
+            figure1.AddShape(new EllipseShape(new RectangleF(50f, 50f, 300f, 300f)));
+            figure1.AddShape(new PieShape(new RectangleF(new PointF(250f, 250f), new SizeF(200f, 200f)), 0f, 45f));
+
+            // Second figure with arc, polygon, and rectangle
+            Figure figure2 = new Figure();
+            figure2.AddShape(new ArcShape(new RectangleF(10f, 10f, 300f, 300f), 0f, 45f));
+            figure2.AddShape(new PolygonShape(new[]
+            {
+                new PointF(150f, 10f),
+                new PointF(150f, 200f),
+                new PointF(250f, 300f),
+                new PointF(350f, 400f)
+            }, true));
+            figure2.AddShape(new RectangleShape(new RectangleF(new Point(250, 250), new Size(200, 200))));
+
+            // Add figures to the graphics path
+            graphicsPath.AddFigures(new[] { figure1, figure2 });
+
+            // Draw the path with a black pen
+            graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
+
+            // Save the image (output is already bound to the file source)
+            image.Save();
+        }
+    }
 }

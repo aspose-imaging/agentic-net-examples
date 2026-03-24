@@ -2,49 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
-class BezierCurveDemo
+class Program
 {
     static void Main()
     {
-        // Output file path
-        string outputPath = "bezier_curve.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\bezier_output.png";
 
-        // Create a file stream for the output image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Ensure the output directory exists (unconditional)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a PNG image with the desired dimensions
+        var pngOptions = new PngOptions();
+        using (Image image = Image.Create(pngOptions, 500, 500))
         {
-            // Configure PNG options and associate the stream source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            // Initialize graphics object for drawing
+            var graphics = new Graphics(image);
 
-            // Create a 400x400 pixel image
-            using (Image image = Image.Create(pngOptions, 400, 400))
-            {
-                // Initialize graphics object for drawing
-                Graphics graphics = new Graphics(image);
+            // Clear the canvas with a white background
+            graphics.Clear(Color.White);
 
-                // Clear the canvas with a white background
-                graphics.Clear(Color.White);
+            // Define a blue pen with a thickness of 2 pixels
+            var pen = new Pen(Color.Blue, 2);
 
-                // Set smoothing mode to anti-alias for high‑fidelity curve rendering
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            // Define the four points of the cubic Bézier curve
+            var pt1 = new Point(50, 400);   // Start point
+            var pt2 = new Point(150, 50);   // First control point
+            var pt3 = new Point(350, 50);   // Second control point
+            var pt4 = new Point(450, 400);  // End point
 
-                // Define a blue pen with a 2‑pixel width
-                Pen bezierPen = new Pen(Color.Blue, 2);
+            // Draw the Bézier curve preserving pixel accuracy
+            graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
 
-                // Draw a cubic Bézier curve with pixel‑accurate coordinates
-                // Start point (50,300), control points (150,50) and (250,550), end point (350,300)
-                graphics.DrawBezier(
-                    bezierPen,
-                    new Point(50, 300),
-                    new Point(150, 50),
-                    new Point(250, 550),
-                    new Point(350, 300));
-
-                // Persist the drawing to the output file
-                image.Save();
-            }
+            // Save the resulting image to the hardcoded output path
+            image.Save(outputPath);
         }
     }
 }

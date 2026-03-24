@@ -1,51 +1,50 @@
 using System;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using System.IO;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output JPEG file path
-        string outputPath = "output.jpg";
-        int width = 500;
-        int height = 500;
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.jpg";
 
-        // Configure JPEG options with a file source
-        JpegOptions jpegOptions = new JpegOptions();
-        jpegOptions.Source = new FileCreateSource(outputPath, false);
-        jpegOptions.Quality = 90; // optional quality setting
-
-        // Create the image canvas bound to the output file
-        using (Image image = Image.Create(jpegOptions, width, height))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Build a graphics path with a figure containing shapes
-            GraphicsPath path = new GraphicsPath();
-            Figure figure = new Figure();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Rectangle shape
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-            // Ellipse shape
-            figure.AddShape(new EllipseShape(new RectangleF(300f, 100f, 150f, 150f)));
-            // Pie shape
-            figure.AddShape(new PieShape(new RectangleF(new PointF(150f, 250f), new SizeF(200f, 200f)), 0f, 120f));
+        // Load the JPEG image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Create a Graphics instance for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+
+            // Create a GraphicsPath to hold vector figures
+            Aspose.Imaging.GraphicsPath graphicsPath = new Aspose.Imaging.GraphicsPath();
+
+            // Create a Figure and add shapes to it
+            Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+            figure.AddShape(new Aspose.Imaging.Shapes.RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 200f, 150f)));
+            figure.AddShape(new Aspose.Imaging.Shapes.EllipseShape(new Aspose.Imaging.RectangleF(300f, 100f, 150f, 150f)));
+            figure.AddShape(new Aspose.Imaging.Shapes.PieShape(
+                new Aspose.Imaging.RectangleF(new Aspose.Imaging.PointF(200f, 200f), new Aspose.Imaging.SizeF(100f, 100f)),
+                0f, 90f));
 
             // Add the figure to the path
-            path.AddFigure(figure);
+            graphicsPath.AddFigure(figure);
 
-            // Draw the path with a blue pen
-            Pen pen = new Pen(Color.Blue, 3);
-            graphics.DrawPath(pen, path);
+            // Draw the path onto the image
+            graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 3), graphicsPath);
 
-            // Save the image (output file is already bound)
-            image.Save();
+            // Save the modified image as JPEG
+            image.Save(outputPath);
         }
     }
 }

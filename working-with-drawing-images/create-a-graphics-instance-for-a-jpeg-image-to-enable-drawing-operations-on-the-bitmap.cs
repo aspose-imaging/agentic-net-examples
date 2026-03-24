@@ -1,40 +1,34 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        // Output JPEG file path
+        string inputPath = "input.jpg";
         string outputPath = "output.jpg";
 
-        // Configure JPEG creation options and bind the output file
-        JpegOptions jpegOptions = new JpegOptions();
-        jpegOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Define image dimensions
-        int width = 500;
-        int height = 500;
-
-        // Create a new JPEG image bound to the specified file
-        using (Image image = Image.Create(jpegOptions, width, height))
+        if (!File.Exists(inputPath))
         {
-            // Initialize Graphics for drawing on the JPEG image
-            Graphics graphics = new Graphics(image);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Clear the canvas with white background
-            graphics.Clear(Color.White);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Example drawing: a blue rectangle
-            Pen pen = new Pen(Color.Blue, 5);
-            graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
+        using (JpegImage jpegImage = new JpegImage(inputPath))
+        {
+            Graphics graphics = new Graphics(jpegImage);
 
-            // Save the image (no parameters needed because the source is already bound)
-            image.Save();
+            using (SolidBrush brush = new SolidBrush(Color.Red))
+            {
+                graphics.FillRectangle(brush, jpegImage.Bounds);
+            }
+
+            jpegImage.Save(outputPath);
         }
     }
 }

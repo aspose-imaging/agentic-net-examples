@@ -2,56 +2,59 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input image files to be drawn onto the TIFF canvas
-        string[] inputFiles = { "input1.jpg", "input2.png" };
-        // Output TIFF file path
+        // Hardcoded input and output paths
+        string inputPath1 = "input1.jpg";
+        string inputPath2 = "input2.png";
         string outputPath = "output.tif";
 
-        // Determine canvas size based on input images
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (var file in inputFiles)
+        // Verify input files exist
+        if (!File.Exists(inputPath1))
         {
-            using (Image img = Image.Load(file))
-            {
-                if (img.Width > canvasWidth)
-                    canvasWidth = img.Width;
-                canvasHeight += img.Height;
-            }
+            Console.Error.WriteLine($"File not found: {inputPath1}");
+            return;
+        }
+        if (!File.Exists(inputPath2))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath2}");
+            return;
         }
 
-        // Configure TIFF options and bind the output file
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Create the TIFF canvas with the calculated dimensions
-        using (Image tiffImage = Image.Create(tiffOptions, canvasWidth, canvasHeight))
+        // Configure TIFF options
+        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+        tiffOptions.Photometric = TiffPhotometrics.Rgb;
+        tiffOptions.Compression = TiffCompressions.Lzw;
+        tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+        // Create a blank TIFF canvas (800x600)
+        using (Image tiffImage = Image.Create(tiffOptions, 800, 600))
         {
             // Initialize Graphics for drawing
             Graphics graphics = new Graphics(tiffImage);
-            // Clear the canvas with white background
             graphics.Clear(Color.White);
 
-            // Draw each input image onto the canvas
-            int offsetY = 0;
-            foreach (var file in inputFiles)
+            // Load source images and draw them onto the TIFF canvas
+            using (Image src1 = Image.Load(inputPath1))
+            using (Image src2 = Image.Load(inputPath2))
             {
-                using (Image img = Image.Load(file))
-                {
-                    graphics.DrawImage(img, 0, offsetY);
-                    offsetY += img.Height;
-                }
+                // Draw first image at (0,0)
+                graphics.DrawImage(src1, new Point(0, 0));
+
+                // Draw second image to the right of the first image
+                graphics.DrawImage(src2, new Point(src1.Width, 0));
             }
 
-            // Save the TIFF image (output is already bound to the file)
-            tiffImage.Save();
+            // Save the resulting TIFF file
+            tiffImage.Save(outputPath);
         }
     }
 }

@@ -1,63 +1,28 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    // Supported output formats
-    enum ImageFormat { Png, Bmp, Jpeg, Gif }
-
     static void Main()
     {
-        // Example usage: create a 800x600 PNG image
-        CreateImage(800, 600, @"C:\temp\output.png", ImageFormat.Png);
-    }
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
-    static void CreateImage(int width, int height, string outputPath, ImageFormat format)
-    {
-        // Choose appropriate image options based on the desired format
-        ImageOptionsBase options;
-        switch (format)
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure PNG options with a non‑temporal file source
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Create a new image with the specified dimensions
+        using (Image image = Image.Create(pngOptions, 800, 600))
         {
-            case ImageFormat.Png:
-                var pngOptions = new PngOptions();
-                // Example: set compression level (optional)
-                pngOptions.CompressionLevel = 6;
-                options = pngOptions;
-                break;
-
-            case ImageFormat.Bmp:
-                var bmpOptions = new BmpOptions
-                {
-                    BitsPerPixel = 24 // 24‑bit color
-                };
-                options = bmpOptions;
-                break;
-
-            case ImageFormat.Jpeg:
-                var jpegOptions = new JpegOptions
-                {
-                    Quality = 90 // JPEG quality (0‑100)
-                };
-                options = jpegOptions;
-                break;
-
-            case ImageFormat.Gif:
-                var gifOptions = new GifOptions();
-                options = gifOptions;
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(format), format, null);
-        }
-
-        // Create a new image with the specified dimensions using the selected options
-        using (Image image = Image.Create(options, width, height))
-        {
-            // Optional: perform image processing here (e.g., fill background)
-
-            // Save the image to the target file path
-            image.Save(outputPath);
+            // Save the image to the specified path
+            image.Save();
         }
     }
 }

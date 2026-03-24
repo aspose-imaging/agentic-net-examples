@@ -1,34 +1,36 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Create a file stream for the output PNG image
-        using (FileStream stream = new FileStream("output.png", FileMode.Create))
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Set up PNG options and bind the stream as the source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a new image with the specified dimensions
-            using (Image image = Image.Create(pngOptions, 500, 500))
-            {
-                // Instantiate Graphics and bind it to the image
-                Graphics graphics = new Graphics(image);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Example operation: clear the canvas with a background color
-                graphics.Clear(Color.Wheat);
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Instantiate Graphics bound to the loaded image
+            Graphics graphics = new Graphics(image);
 
-                // Additional drawing operations can be performed using 'graphics' here
+            // Example operation: clear the surface with white color
+            graphics.Clear(Color.White);
 
-                // Save changes to the image (the stream is already bound)
-                image.Save();
-            }
+            // Save the modified image
+            image.Save(outputPath);
         }
     }
 }

@@ -1,29 +1,33 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.Shapes;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Load an existing TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load("input.tif"))
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
         {
-            // Create a new empty GraphicsPath
-            GraphicsPath graphicsPath = new GraphicsPath();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Add a rectangle shape to the path
-            Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 200f, 200f)));
-            graphicsPath.AddFigure(figure);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Draw the path onto the TIFF image
-            Graphics graphics = new Graphics(tiffImage);
-            graphics.DrawPath(new Pen(Color.Blue, 5), graphicsPath);
+        using (TiffImage image = (TiffImage)Image.Load(inputPath))
+        {
+            var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
+                image.ActiveFrame.PathResources.ToArray(),
+                image.ActiveFrame.Size);
 
-            // Save the modified image
-            tiffImage.Save("output.tif");
+            Graphics graphics = new Graphics(image);
+            graphics.DrawPath(new Pen(Color.Red, 5), graphicsPath);
+
+            image.Save(outputPath);
         }
     }
 }

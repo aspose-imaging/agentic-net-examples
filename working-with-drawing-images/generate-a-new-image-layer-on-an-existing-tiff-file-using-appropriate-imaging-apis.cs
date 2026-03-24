@@ -1,45 +1,47 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Expect input and output file paths as arguments.
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputTiffPath = @"c:\temp\input.tif";
+        string layerImagePath = @"c:\temp\layer.png";
+        string outputTiffPath = @"c:\temp\output.tif";
+
+        // Verify input files exist
+        if (!File.Exists(inputTiffPath))
         {
-            Console.WriteLine("Usage: Program <inputTiffPath> <outputTiffPath>");
+            Console.Error.WriteLine($"File not found: {inputTiffPath}");
+            return;
+        }
+        if (!File.Exists(layerImagePath))
+        {
+            Console.Error.WriteLine($"File not found: {layerImagePath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
 
-        // Load the existing TIFF image.
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        // Load the existing TIFF image
+        using (TiffImage tiffImage = (TiffImage)Image.Load(inputTiffPath))
         {
-            // Prepare options for the new frame.
-            TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            frameOptions.Photometric = TiffPhotometrics.Rgb;
-            frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+            // Load the image to be added as a new layer/frame
+            using (RasterImage layerImage = (RasterImage)Image.Load(layerImagePath))
+            {
+                // Create a new TIFF frame from the layer image
+                TiffFrame newFrame = new TiffFrame(layerImage);
 
-            // Create a new blank frame matching the size of the existing image.
-            TiffFrame newFrame = new TiffFrame(frameOptions, tiffImage.Width, tiffImage.Height);
+                // Add the new frame to the TIFF image
+                tiffImage.AddFrame(newFrame);
+            }
 
-            // Fill the new frame with a solid red color.
-            Graphics graphics = new Graphics(newFrame);
-            graphics.Clear(Color.Red);
-
-            // Add the new frame to the TIFF image.
-            tiffImage.AddFrame(newFrame);
-
-            // Save the updated TIFF to the specified output path.
-            tiffImage.Save(outputPath);
+            // Save the modified TIFF to the output path
+            tiffImage.Save(outputTiffPath);
         }
     }
 }

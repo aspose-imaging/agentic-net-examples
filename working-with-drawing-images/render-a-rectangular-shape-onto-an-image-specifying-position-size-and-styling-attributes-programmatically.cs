@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -8,40 +7,36 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = "output.png";
+        // Output file path (hardcoded)
+        string outputPath = @"C:\temp\rectangle.png";
 
-        // Create a file stream for the output image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Set up PNG options with a file create source
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Create a new image canvas (400x300)
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 400, 300))
         {
-            // Set PNG options and bind the stream as the source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            // Initialize graphics for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Create a 400x300 image
-            using (Image image = Image.Create(pngOptions, 400, 300))
-            {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+            // Clear the canvas with white background
+            graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Clear background with white color
-                graphics.Clear(Color.White);
+            // Define a blue pen with thickness 5
+            Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
 
-                // Define rectangle position and size
-                int rectX = 50;
-                int rectY = 60;
-                int rectWidth = 200;
-                int rectHeight = 150;
+            // Define rectangle position (x=50, y=50) and size (width=200, height=150)
+            Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(50, 50, 200, 150);
 
-                // Create a pen with blue color and 3-pixel width
-                Pen pen = new Pen(Color.Blue, 3);
+            // Draw the rectangle onto the image
+            graphics.DrawRectangle(pen, rect);
 
-                // Draw the rectangle
-                graphics.DrawRectangle(pen, rectX, rectY, rectWidth, rectHeight);
-
-                // Save changes to the bound stream
-                image.Save();
-            }
+            // Save the image (output is already bound to the file)
+            image.Save();
         }
     }
 }

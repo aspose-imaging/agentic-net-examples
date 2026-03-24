@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -9,56 +10,50 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output JPEG file path
-        string outputPath = "output.jpg";
+        // Define output path (hard‑coded)
+        string outputPath = "output/output.jpg";
 
-        // Desired canvas size
-        int canvasWidth = 800;
-        int canvasHeight = 600;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file source bound to the output path
-        Source fileSource = new FileCreateSource(outputPath, false);
+        // Canvas size
+        int width = 800;
+        int height = 600;
 
-        // Configure JPEG options (high quality)
+        // JPEG creation options
         JpegOptions jpegOptions = new JpegOptions
         {
-            Source = fileSource,
+            Source = new FileCreateSource(outputPath, false),
             Quality = 100
         };
 
-        // Create a JPEG canvas bound to the file source
-        using (Aspose.Imaging.FileFormats.Jpeg.JpegImage canvas =
-            (Aspose.Imaging.FileFormats.Jpeg.JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        // Create bound JPEG canvas
+        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, width, height))
         {
-            // Initialize Graphics for drawing
+            // Graphics instance for drawing
             Graphics graphics = new Graphics(canvas);
 
-            // Clear background to white
+            // Clear background
             graphics.Clear(Color.White);
 
-            // Prepare a black pen for drawing shapes
-            Pen blackPen = new Pen(Color.Black, 2);
+            // Draw a black rectangle
+            Pen blackPen = new Pen(Color.Black, 3);
+            graphics.DrawRectangle(blackPen, new Rectangle(50, 50, 300, 200));
 
-            // Draw a rectangle
-            graphics.DrawRectangle(blackPen, new Rectangle(50, 50, 200, 150));
+            // Draw a red ellipse
+            Pen redPen = new Pen(Color.Red, 2);
+            graphics.DrawEllipse(redPen, new Rectangle(400, 100, 200, 150));
 
-            // Draw an ellipse inside the rectangle
-            graphics.DrawEllipse(blackPen, new Rectangle(300, 100, 150, 150));
+            // Draw a blue diagonal line
+            Pen bluePen = new Pen(Color.Blue, 4);
+            graphics.DrawLine(bluePen, new Point(0, 0), new Point(width, height));
 
-            // Draw a diagonal line
-            graphics.DrawLine(blackPen, new Point(100, 300), new Point(400, 350));
+            // Draw a text string
+            Font font = new Font("Arial", 24);
+            SolidBrush textBrush = new SolidBrush(Color.DarkGreen);
+            graphics.DrawString("Aspose.Imaging Demo", font, textBrush, new PointF(200, 500));
 
-            // Draw a text string using a solid brush and a font
-            using (SolidBrush textBrush = new SolidBrush())
-            {
-                textBrush.Color = Color.DarkBlue;
-                textBrush.Opacity = 100;
-
-                Font textFont = new Font("Arial", 24);
-                graphics.DrawString("Vector on JPEG", textFont, textBrush, new Point(50, 500));
-            }
-
-            // Save the JPEG image (source is already bound, so just call Save)
+            // Save the bound image
             canvas.Save();
         }
     }

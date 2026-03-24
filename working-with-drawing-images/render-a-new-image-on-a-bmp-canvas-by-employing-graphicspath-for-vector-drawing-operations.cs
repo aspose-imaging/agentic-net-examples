@@ -1,55 +1,58 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define image dimensions
-        int width = 400;
-        int height = 300;
+        // Output BMP file path (hardcoded)
+        string outputPath = @"c:\temp\output.bmp";
 
-        // Create a BMP image using the prescribed creation pattern
-        using (FileStream stream = new FileStream("output.bmp", FileMode.Create))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure BMP options with a bound file source
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.BitsPerPixel = 24;
+        var src = new FileCreateSource(outputPath, false);
+        bmpOptions.Source = src;
+
+        int width = 500;
+        int height = 500;
+
+        // Create a BMP canvas bound to the output file
+        using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(bmpOptions, width, height))
         {
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new Aspose.Imaging.Sources.StreamSource(stream);
+            // Initialize graphics for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+            graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-            using (Image image = Image.Create(bmpOptions, width, height))
-            {
-                // Initialize graphics object for drawing
-                Graphics graphics = new Graphics(image);
+            // Build a graphics path with vector shapes
+            Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
+            Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-                // Clear background to white
-                graphics.Clear(Color.White);
+            // Rectangle shape
+            figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 300f, 300f)));
+            // Ellipse shape
+            figure.AddShape(new EllipseShape(new Aspose.Imaging.RectangleF(100f, 100f, 200f, 200f)));
+            // Pie shape
+            figure.AddShape(new PieShape(
+                new Aspose.Imaging.RectangleF(
+                    new Aspose.Imaging.PointF(150f, 150f),
+                    new Aspose.Imaging.SizeF(200f, 200f)),
+                0f, 45f));
 
-                // Build a GraphicsPath with a rectangle and an ellipse
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
+            // Add the figure to the path
+            path.AddFigure(figure);
 
-                // Add a rectangle shape
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+            // Draw the path onto the canvas
+            graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), path);
 
-                // Add an ellipse shape
-                figure.AddShape(new EllipseShape(new RectangleF(120f, 80f, 150f, 100f)));
-
-                // Attach the figure to the path
-                path.AddFigure(figure);
-
-                // Define a blue pen with 3‑pixel width
-                Pen pen = new Pen(Color.Blue, 3);
-
-                // Render the path onto the image
-                graphics.DrawPath(pen, path);
-
-                // Save the image using the prescribed save pattern
-                image.Save();
-            }
+            // Save the bound image
+            canvas.Save();
         }
     }
 }

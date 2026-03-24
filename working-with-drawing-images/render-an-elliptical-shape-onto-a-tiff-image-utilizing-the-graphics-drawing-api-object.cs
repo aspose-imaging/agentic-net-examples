@@ -2,45 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
 
-class RenderEllipseToTiff
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path where the TIFF image will be saved
-        string outputPath = @"C:\temp\ellipse_output.tiff";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\ellipse.tif";
 
-        // Create a FileStream for writing the TIFF file
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure TIFF options
+        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+        tiffOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Create a new TIFF image (500x500)
+        using (Image image = Image.Create(tiffOptions, 500, 500))
         {
-            // Configure TIFF options (default format)
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Source = new StreamSource(stream);
+            // Initialize Graphics for drawing
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.White);
 
-            // Create a new 500x500 TIFF image
-            using (Image image = Image.Create(tiffOptions, 500, 500))
-            {
-                // Initialize Graphics object for drawing on the image
-                Graphics graphics = new Graphics(image);
+            // Build a GraphicsPath containing an ellipse
+            GraphicsPath graphicsPath = new GraphicsPath();
+            Figure figure = new Figure();
 
-                // Clear the background with a light color
-                graphics.Clear(Color.Wheat);
+            // Define the ellipse bounds
+            RectangleF ellipseRect = new RectangleF(50f, 50f, 400f, 300f);
+            EllipseShape ellipse = new EllipseShape(ellipseRect);
 
-                // Define the bounding rectangle for the ellipse
-                Rectangle ellipseBounds = new Rectangle(100, 100, 300, 200); // x, y, width, height
+            // Add the ellipse shape to the figure
+            figure.AddShape(ellipse);
 
-                // Create a Pen to outline the ellipse (black color, 3-pixel width)
-                Pen ellipsePen = new Pen(Color.Black, 3);
+            // Add the figure to the path
+            graphicsPath.AddFigure(figure);
 
-                // Draw the ellipse onto the graphics surface
-                graphics.DrawEllipse(ellipsePen, ellipseBounds);
+            // Draw the path with a black pen of width 2
+            graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
 
-                // Save all changes to the TIFF file
-                image.Save();
-            }
+            // Save the image (output is already bound to the file)
+            image.Save();
         }
     }
 }

@@ -7,24 +7,30 @@ class Program
 {
     static void Main()
     {
-        // Path to the EMF file
-        string dir = @"c:\temp\";
-        string filePath = Path.Combine(dir, "test.emf");
+        // Hardcoded input path
+        string inputPath = @"C:\temp\input.emf";
 
-        // Load the EMF image using Aspose.Imaging.Image.Load
-        using (EmfImage emfImage = (EmfImage)Image.Load(filePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cache data to ensure all records are loaded (optional but improves performance)
-            emfImage.CacheData();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // The EMF image is now available for further processing.
-            // Example: retrieve basic properties.
-            int width = emfImage.Width;
-            int height = emfImage.Height;
-            Console.WriteLine($"EMF Image Size: {width}x{height}");
+        // Load the EMF image
+        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        {
+            // Example processing: output image dimensions
+            Console.WriteLine($"Loaded EMF image size: {emfImage.Width}x{emfImage.Height}");
 
-            // Additional processing can be performed here, e.g., accessing records:
-            // var recordCount = emfImage.Records.Count;
+            // Hardcoded output path (optional save)
+            string outputPath = @"C:\temp\output.emf";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the image (could be a processed version)
+            emfImage.Save(outputPath);
         }
     }
 }

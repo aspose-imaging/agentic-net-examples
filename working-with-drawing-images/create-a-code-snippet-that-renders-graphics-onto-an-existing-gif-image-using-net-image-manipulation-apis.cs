@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
@@ -8,53 +10,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.gif";
-        string outputPath = "output.gif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.gif";
+        string outputPath = @"C:\temp\output.gif";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the existing GIF image
         using (GifImage gif = (GifImage)Image.Load(inputPath))
         {
-            // Ensure there is at least one frame
+            // Ensure the GIF has at least one frame
             if (gif.PageCount == 0)
             {
-                using (GifFrameBlock newBlock = new GifFrameBlock(200, 200))
-                {
-                    gif.ActiveFrame = newBlock;
-                    gif.AddBlock(newBlock);
-                }
+                Console.Error.WriteLine("The GIF image contains no frames.");
+                return;
             }
 
-            // Set active frame to the first page
+            // Set the active frame to the first frame
             gif.ActiveFrame = (GifFrameBlock)gif.Pages[0];
 
-            // Create graphics for the active frame
-            Graphics graphics = new Graphics(gif.ActiveFrame);
+            // Create a Graphics object for the active frame
+            Graphics graphics = new Graphics((GifFrameBlock)gif.ActiveFrame);
 
-            // Optional: clear the frame background
-            graphics.Clear(Aspose.Imaging.Color.White);
-
-            // Draw a red rectangle
-            Pen redPen = new Pen(Aspose.Imaging.Color.Red, 3);
-            graphics.DrawRectangle(redPen, new Rectangle(10, 10, 100, 50));
-
-            // Fill a blue ellipse
-            using (SolidBrush blueBrush = new SolidBrush(Aspose.Imaging.Color.Blue))
+            // Draw a filled red rectangle on the frame
+            using (SolidBrush brush = new SolidBrush(Color.Red))
             {
-                graphics.FillEllipse(blueBrush, new Rectangle(120, 10, 80, 80));
+                graphics.FillRectangle(brush, new Rectangle(10, 10, 100, 50));
             }
 
-            // Draw a green line
-            Pen greenPen = new Pen(Aspose.Imaging.Color.Green, 2);
-            graphics.DrawLine(greenPen, new Point(10, 100), new Point(200, 150));
-
-            // Draw text
-            Font font = new Font("Arial", 20);
-            using (SolidBrush blackBrush = new SolidBrush(Aspose.Imaging.Color.Black))
-            {
-                graphics.DrawString("Hello GIF", font, blackBrush, new PointF(20, 180));
-            }
-
-            // Save the modified GIF
-            gif.Save(outputPath, new GifOptions());
+            // Save the modified GIF with default options
+            GifOptions options = new GifOptions();
+            gif.Save(outputPath, options);
         }
     }
 }

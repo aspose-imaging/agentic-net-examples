@@ -1,60 +1,60 @@
+using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output file path
-        string outputPath = "output.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
-        // Create a file stream for the output image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create PNG image options
+        var pngOptions = new PngOptions();
+
+        // Create a new image with the specified size
+        using (Image image = Image.Create(pngOptions, 500, 500))
         {
-            // Set PNG options and bind the stream as the source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            // Initialize graphics object for drawing
+            var graphics = new Graphics(image);
 
-            // Create a new image with the specified dimensions
-            using (Image image = Image.Create(pngOptions, 600, 400))
-            {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.LightGray);
+            // Clear the background with a light gray color
+            graphics.Clear(Color.LightGray);
 
-                // Create a graphics path and a figure to hold shapes
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
+            // Create a graphics path to hold vector shapes
+            var graphicsPath = new GraphicsPath();
 
-                // Add a rectangle shape
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-                // Add an ellipse shape
-                figure.AddShape(new EllipseShape(new RectangleF(300f, 100f, 150f, 150f)));
-                // Add a pie shape
-                figure.AddShape(new PieShape(new RectangleF(new PointF(200f, 200f), new SizeF(200f, 200f)), 0f, 120f));
+            // Create a figure and add shapes to it
+            var figure = new Figure();
 
-                // Add the figure to the path
-                path.AddFigure(figure);
+            // Rectangle shape
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
 
-                // Apply a rotation transformation (45 degrees)
-                graphics.RotateTransform(45f);
+            // Ellipse shape
+            figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 150f)));
 
-                // Draw the path outline with a blue pen
-                graphics.DrawPath(new Pen(Color.Blue, 3), path);
+            // Pie shape (arc from 0 to 120 degrees)
+            figure.AddShape(new PieShape(new RectangleF(150f, 150f, 200f, 200f), 0f, 120f));
 
-                // Fill the path with a semi‑transparent red brush
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
-                {
-                    graphics.FillPath(brush, path);
-                }
+            // Add the figure to the graphics path
+            graphicsPath.AddFigure(figure);
 
-                // Save the image (stream is already bound)
-                image.Save();
-            }
+            // Fill the path with a semi‑transparent blue brush
+            var fillBrush = new SolidBrush(Color.FromArgb(128, Color.Blue));
+            graphics.FillPath(fillBrush, graphicsPath);
+
+            // Draw the outline of the path with a red pen
+            var outlinePen = new Pen(Color.Red, 3);
+            graphics.DrawPath(outlinePen, graphicsPath);
+
+            // Save the image to the output file
+            image.Save(outputPath);
         }
     }
 }

@@ -7,25 +7,38 @@ class Program
 {
     static void Main()
     {
-        // Load an existing image from disk using the provided Load(Stream) rule
-        using (FileStream fileStream = new FileStream(@"C:\temp\sample.bmp", FileMode.Open, FileAccess.Read))
-        using (Image image = Image.Load(fileStream))
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create a MemoryStream to hold the image's binary data in memory
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the image from the file
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PNG save options
+            PngOptions pngOptions = new PngOptions();
+
+            // Create a MemoryStream to hold the image data in memory
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                // Save the loaded image into the MemoryStream using the provided Save(Stream, ImageOptionsBase) rule
-                // Here we use PngOptions as an example; any appropriate ImageOptions can be used
-                image.Save(memoryStream, new PngOptions());
+                // Save the image into the MemoryStream using the specified options
+                image.Save(memoryStream, pngOptions);
 
-                // At this point, memoryStream contains the image data and can be used for further in‑memory processing
-                // For demonstration, reset the position to the beginning
-                memoryStream.Position = 0;
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Example: read the first few bytes (header) from the MemoryStream
-                byte[] header = new byte[8];
-                memoryStream.Read(header, 0, header.Length);
-                Console.WriteLine("First 8 bytes of the image data: " + BitConverter.ToString(header));
+                // Write the MemoryStream contents to the output file
+                memoryStream.Position = 0; // Reset stream position before reading
+                using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                {
+                    memoryStream.CopyTo(fileStream);
+                }
             }
         }
     }

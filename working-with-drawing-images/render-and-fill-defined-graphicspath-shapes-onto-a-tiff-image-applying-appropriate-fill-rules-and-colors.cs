@@ -1,59 +1,62 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main()
     {
-        // Output file path and canvas dimensions
-        string outputPath = "output.tif";
-        int width = 800;
-        int height = 600;
+        // Hardcoded input and output paths
+        string inputPath = "Input.tif";
+        string outputPath = "Output.tif";
 
-        // Configure TIFF options with a file create source
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the TIFF image canvas
-        using (Image image = Image.Create(tiffOptions, width, height))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a GraphicsPath with winding fill mode
-            GraphicsPath path = new GraphicsPath(FillMode.Winding);
+        // Load the TIFF image
+        using (var image = (TiffImage)Image.Load(inputPath))
+        {
+            // Create a new GraphicsPath
+            var graphicsPath = new GraphicsPath();
 
-            // Rectangle figure
-            Figure rectFigure = new Figure();
-            rectFigure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 300f, 200f)));
+            // Define a figure with several shapes
+            var figure = new Figure();
+            // Rectangle
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+            // Ellipse
+            figure.AddShape(new EllipseShape(new RectangleF(300f, 80f, 180f, 180f)));
+            // Pie (sector)
+            figure.AddShape(new PieShape(new RectangleF(200f, 250f, 200f, 200f), 0f, 120f));
 
-            // Ellipse figure
-            Figure ellipseFigure = new Figure();
-            ellipseFigure.AddShape(new EllipseShape(new RectangleF(250f, 250f, 300f, 200f)));
+            // Add the figure to the path
+            graphicsPath.AddFigure(figure);
 
-            // Add figures to the path
-            path.AddFigure(rectFigure);
-            path.AddFigure(ellipseFigure);
+            // Create graphics object for drawing
+            var graphics = new Graphics(image);
 
-            // Fill the path with a semi‑transparent blue brush
-            using (SolidBrush fillBrush = new SolidBrush(Color.FromArgb(128, Color.Blue)))
-            {
-                graphics.FillPath(fillBrush, path);
-            }
+            // Fill the path with a solid blue brush
+            var brush = new SolidBrush(Color.Blue);
+            graphics.FillPath(brush, graphicsPath);
 
-            // Draw the outline with a red pen
-            Pen outlinePen = new Pen(Color.Red, 3);
-            graphics.DrawPath(outlinePen, path);
+            // Optionally draw the outline with a black pen
+            var pen = new Pen(Color.Black, 2);
+            graphics.DrawPath(pen, graphicsPath);
 
-            // Save the image (output file is already bound)
-            image.Save();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the modified image
+            image.Save(outputPath);
         }
     }
 }

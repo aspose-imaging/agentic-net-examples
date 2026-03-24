@@ -1,34 +1,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Path to the source BMP file
-        string bmpPath = "sample.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\output.bmp";
 
-        // Load the BMP image using Aspose.Imaging
-        using (Image image = Image.Load(bmpPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create a memory stream to hold the BMP binary data
-            using (MemoryStream memoryStream = new MemoryStream())
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP file into a byte array and wrap it in a MemoryStream
+        byte[] bmpData = File.ReadAllBytes(inputPath);
+        using (MemoryStream memoryStream = new MemoryStream(bmpData))
+        {
+            // Create a BmpImage from the MemoryStream
+            using (BmpImage bmpImage = new BmpImage(memoryStream))
             {
-                // Save the loaded image into the memory stream in BMP format
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(memoryStream, bmpOptions);
+                // Example processing (optional)
+                // bmpImage.BinarizeOtsu();
 
-                // Reset the stream position for subsequent reading
-                memoryStream.Position = 0;
-
-                // Example of further processing: load the BMP image from the memory stream
-                using (BmpImage bmpFromStream = new BmpImage(memoryStream))
-                {
-                    Console.WriteLine($"Width: {bmpFromStream.Width}, Height: {bmpFromStream.Height}");
-                }
+                // Save the processed image to the output path
+                bmpImage.Save(outputPath);
             }
         }
     }
