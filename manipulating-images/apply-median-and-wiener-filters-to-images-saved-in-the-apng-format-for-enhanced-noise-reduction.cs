@@ -1,30 +1,53 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png; // For APNG handling
 
-class ApplyFiltersToApng
+class Program
 {
     static void Main()
     {
-        // Path to the folder containing the APNG file
-        string dir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.apng";
+        string medianOutputPath = @"C:\Images\output.median.apng";
+        string wienerOutputPath = @"C:\Images\output.wiener.apng";
 
-        // Load the APNG image
-        using (Image image = Image.Load(dir + "sample.apng"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to ApngImage (inherits from RasterImage, so Filter method is available)
-            ApngImage apngImage = (ApngImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a median filter with a kernel size of 5 to the whole image
-            apngImage.Filter(apngImage.Bounds, new MedianFilterOptions(5));
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(medianOutputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(wienerOutputPath));
 
-            // Apply a Gauss‑Wiener filter (Wiener deblurring) with radius 5 and sigma 4.0
-            apngImage.Filter(apngImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
+        // Apply Median filter
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage (APNG is handled as a raster image)
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Save the filtered image back to APNG format
-            apngImage.Save(dir + "sample.filtered.apng");
+            // Apply median filter with size 5 to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+            // Save the result as APNG (using PngOptions with default settings)
+            rasterImage.Save(medianOutputPath, new PngOptions());
+        }
+
+        // Apply Gauss-Wiener filter
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply Gauss-Wiener filter with radius 5 and sigma 4.0
+            rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
+
+            // Save the result as APNG
+            rasterImage.Save(wienerOutputPath, new PngOptions());
         }
     }
 }
