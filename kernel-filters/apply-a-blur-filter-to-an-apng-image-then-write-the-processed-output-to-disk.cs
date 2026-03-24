@@ -1,20 +1,42 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
-string inputPath = "input.apng";
-string outputPath = "output_blur.apng";
-
-using (Image image = Image.Load(inputPath))
+class Program
 {
-    // Cast the loaded image to ApngImage
-    ApngImage apng = (ApngImage)image;
+    static void Main(string[] args)
+    {
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output.apng";
 
-    // Apply a Gaussian blur filter to the whole image
-    // radius = 5, sigma = 4.0 (adjust as needed)
-    apng.Filter(apng.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed APNG to disk
-    apng.Save(outputPath);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to ApngImage (fully qualified to avoid extra using)
+            var apngImage = (Aspose.Imaging.FileFormats.Apng.ApngImage)image;
+
+            // Apply Gaussian blur filter to each frame
+            foreach (var page in apngImage.Pages)
+            {
+                var frame = (RasterImage)page;
+                frame.Filter(frame.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            }
+
+            // Save the processed APNG using ApngOptions
+            ApngOptions saveOptions = new ApngOptions();
+            apngImage.Save(outputPath, saveOptions);
+        }
+    }
 }
