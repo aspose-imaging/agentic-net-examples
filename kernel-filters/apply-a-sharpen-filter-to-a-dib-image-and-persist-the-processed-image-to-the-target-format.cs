@@ -1,29 +1,35 @@
 using System;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using System.IO;
 
-class SharpenDibExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths for the source DIB image and the target output file
-        string inputPath = @"c:\temp\input.dib";
-        string outputPath = @"c:\temp\output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\input\sample.dib";
+        string outputPath = @"C:\output\sample_sharpened.png";
 
-        // Load the DIB image using Aspose.Imaging's Image.Load method
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the loaded image to RasterImage to access raster-specific operations
-            RasterImage rasterImage = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a sharpen filter to the entire image.
-            // Kernel size = 5, sigma = 4.0 (as demonstrated in the documentation examples)
-            rasterImage.Filter(
-                rasterImage.Bounds,
-                new SharpenFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image to the desired format (PNG in this case)
-            rasterImage.Save(outputPath);
+        // Load the DIB image, apply Sharpen filter, and save to target format
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Cast to RasterImage for filtering
+            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+
+            // Apply Sharpen filter with kernel size 5 and sigma 4.0
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image as PNG
+            raster.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions());
         }
     }
 }
