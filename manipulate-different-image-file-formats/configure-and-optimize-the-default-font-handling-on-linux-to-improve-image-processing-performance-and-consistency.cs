@@ -8,47 +8,66 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "/path/to/input";
-        string outputPath = "/path/to/output";
-        string fontFolderPath = "/path/to/fonts";
-        string fileName = "sample.emf";
+        // Hardcoded paths
+        string inputPath = "/home/user/input.svg";
+        string outputPath = "/home/user/output.png";
+        string fontFolder = "/home/user/fonts";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure global font settings for Linux
         FontSettings.DefaultFontName = "Arial";
-        FontSettings.SetFontsFolder(fontFolderPath);
+        FontSettings.GetSystemAlternativeFont = false;
 
+        // Prepare LoadOptions with a custom font source delegate
         var loadOptions = new LoadOptions();
         loadOptions.AddCustomFontSource(
             (object[] args) =>
             {
                 string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                var customFonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                var fontDataList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
                 if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                 {
-                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    foreach (var file in Directory.GetFiles(fontsPath))
                     {
-                        customFonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(
-                            Path.GetFileNameWithoutExtension(fontFile),
-                            File.ReadAllBytes(fontFile)));
+                        string fontName = Path.GetFileNameWithoutExtension(file);
+                        byte[] fontBytes = File.ReadAllBytes(file);
+                        fontDataList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
                     }
                 }
-                return customFonts.ToArray();
+                return fontDataList.ToArray();
             },
-            fontFolderPath);
+            fontFolder);
 
-        using (var image = Image.Load(Path.Combine(inputPath, fileName), loadOptions))
+        // Load the vector image with the custom font source
+        using (var image = Image.Load(inputPath, loadOptions))
         {
+            // Set up vector rasterization options
             var vectorOpts = new VectorRasterizationOptions
             {
+                BackgroundColor = Color.White,
                 PageWidth = image.Width,
                 PageHeight = image.Height,
-                BackgroundColor = Color.White,
                 TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                 SmoothingMode = SmoothingMode.None
             };
 
-            var pngOptions = new PngOptions { VectorRasterizationOptions = vectorOpts };
-            string outputFile = Path.Combine(outputPath, Path.GetFileNameWithoutExtension(fileName) + ".png");
-            image.Save(outputFile, pngOptions);
+            // Prepare PNG save options with the rasterization settings
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = vectorOpts
+            };
+
+            // Save the rendered image
+            image.Save(outputPath, pngOptions);
         }
     }
 }
