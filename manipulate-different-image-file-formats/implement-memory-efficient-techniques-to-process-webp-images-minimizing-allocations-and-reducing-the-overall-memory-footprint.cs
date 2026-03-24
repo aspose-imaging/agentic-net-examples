@@ -6,42 +6,37 @@ using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = "input.webp";
-        string outputPath = "output_resized.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.webp";
+        string outputPath = @"c:\temp\output.png";
 
-        // Configure load options with a modest buffer size to limit memory allocations
-        LoadOptions loadOptions = new LoadOptions
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            BufferSizeHint = 4 * 1024 * 1024 // 4 MB buffer
-        };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Open the input WebP file as a stream to avoid loading the whole file into memory at once
+        // Ensure output directory exists (creates even if already exists)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Use a stream to avoid loading the whole file into memory at once
         using (FileStream inputStream = File.OpenRead(inputPath))
-        // Load the WebP image using the stream and the configured load options
-        using (WebPImage webpImage = new WebPImage(inputStream, loadOptions))
         {
-            // Determine new dimensions (e.g., reduce size by 50%)
-            int newWidth = webpImage.Width / 2;
-            int newHeight = webpImage.Height / 2;
-
-            // Perform a memory‑efficient resize using nearest‑neighbour resampling
-            webpImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-            // Prepare save options with a buffer hint and desired compression settings
-            WebPOptions saveOptions = new WebPOptions
+            // LoadOptions with a modest buffer size to limit allocations
+            var loadOptions = new LoadOptions
             {
-                BufferSizeHint = 4 * 1024 * 1024, // match load buffer size
-                Lossless = false,
-                Quality = 80
+                BufferSizeHint = 1024 * 1024 // 1 MB buffer
             };
 
-            // Save the processed image directly to the output stream
-            using (FileStream outputStream = File.OpenWrite(outputPath))
+            // Load the WebP image from the stream with the specified load options
+            using (WebPImage webPImage = new WebPImage(inputStream, loadOptions))
             {
-                webpImage.Save(outputStream, saveOptions);
+                // Save directly to PNG using minimal additional allocations
+                var pngOptions = new PngOptions();
+                webPImage.Save(outputPath, pngOptions);
             }
         }
     }
