@@ -1,46 +1,78 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for the base image, overlay images and the output PNG
-        string baseImagePath = "base.png";
-        string[] overlayPaths = { "overlay1.png", "overlay2.png" };
+        // Hardcoded input and output paths
+        string baseImagePath = "input.png";
+        string overlayImagePath1 = "overlay1.png";
+        string overlayImagePath2 = "overlay2.png";
         string outputPath = "output.png";
 
-        // Load the base image
-        using (RasterImage baseImage = (RasterImage)Image.Load(baseImagePath))
+        // Validate input files
+        if (!File.Exists(baseImagePath))
         {
-            // Prepare PNG options with a file create source (output is bound)
-            Source fileSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = fileSource };
+            Console.Error.WriteLine($"File not found: {baseImagePath}");
+            return;
+        }
+        if (!File.Exists(overlayImagePath1))
+        {
+            Console.Error.WriteLine($"File not found: {overlayImagePath1}");
+            return;
+        }
+        if (!File.Exists(overlayImagePath2))
+        {
+            Console.Error.WriteLine($"File not found: {overlayImagePath2}");
+            return;
+        }
 
-            // Create a canvas with the same dimensions as the base image
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, baseImage.Width, baseImage.Height))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load base image to determine canvas size
+        using (Image baseImg = Image.Load(baseImagePath))
+        {
+            int canvasWidth = baseImg.Width;
+            int canvasHeight = baseImg.Height;
+
+            // Prepare PNG options with bound output source
+            Source outputSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions { Source = outputSource };
+
+            // Create canvas bound to the output file
+            using (PngImage canvas = (PngImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
-                // Copy the base image onto the canvas
-                canvas.SaveArgb32Pixels(
-                    new Rectangle(0, 0, baseImage.Width, baseImage.Height),
-                    baseImage.LoadArgb32Pixels(baseImage.Bounds));
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(canvas);
 
-                // Draw each overlay image onto the canvas at a fixed offset (e.g., 50,50)
-                foreach (string overlayPath in overlayPaths)
+                // Draw the base image at (0,0)
+                graphics.DrawImage(baseImg, new Point(0, 0));
+
+                // Load and draw first overlay
+                using (Image overlay1 = Image.Load(overlayImagePath1))
                 {
-                    using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
-                    {
-                        // Destination rectangle where the overlay will be placed
-                        Rectangle destRect = new Rectangle(50, 50, overlay.Width, overlay.Height);
-
-                        // Load overlay pixels and paste them onto the canvas
-                        canvas.SaveArgb32Pixels(destRect, overlay.LoadArgb32Pixels(overlay.Bounds));
-                    }
+                    // Example position: top‑right corner
+                    int x1 = canvasWidth - overlay1.Width;
+                    int y1 = 0;
+                    graphics.DrawImage(overlay1, new Point(x1, y1));
                 }
 
-                // Save the final merged PNG (output is already bound to the source)
+                // Load and draw second overlay
+                using (Image overlay2 = Image.Load(overlayImagePath2))
+                {
+                    // Example position: bottom‑left corner
+                    int x2 = 0;
+                    int y2 = canvasHeight - overlay2.Height;
+                    graphics.DrawImage(overlay2, new Point(x2, y2));
+                }
+
+                // Save the bound canvas (no path needed)
                 canvas.Save();
             }
         }
