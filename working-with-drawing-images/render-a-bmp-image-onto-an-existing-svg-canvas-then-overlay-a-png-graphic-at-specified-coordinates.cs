@@ -1,31 +1,63 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string svgPath = "input.svg";
-        string bmpPath = "overlay.bmp";
-        string pngPath = "overlay.png";
-        string outputPath = "result.svg";
+        // Hardcoded input and output paths
+        string svgInputPath = "input.svg";
+        string bmpInputPath = "overlay.bmp";
+        string pngOverlayPath = "overlay.png";
+        string outputSvgPath = "output.svg";
 
-        using (SvgImage svgImage = (SvgImage)Image.Load(svgPath))
+        // Verify input files exist
+        if (!File.Exists(svgInputPath))
         {
-            var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(svgImage);
+            Console.Error.WriteLine($"File not found: {svgInputPath}");
+            return;
+        }
+        if (!File.Exists(bmpInputPath))
+        {
+            Console.Error.WriteLine($"File not found: {bmpInputPath}");
+            return;
+        }
+        if (!File.Exists(pngOverlayPath))
+        {
+            Console.Error.WriteLine($"File not found: {pngOverlayPath}");
+            return;
+        }
 
-            using (RasterImage bmpImage = (RasterImage)Image.Load(bmpPath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
+
+        // Load the existing SVG canvas
+        using (SvgImage svgImage = new SvgImage(svgInputPath))
+        {
+            // Create a graphics object for drawing on the SVG
+            SvgGraphics2D graphics = new SvgGraphics2D(svgImage);
+
+            // Load BMP image and draw it onto the SVG at (0,0)
+            using (RasterImage bmpImage = (RasterImage)Image.Load(bmpInputPath))
             {
-                graphics.DrawImage(bmpImage, new Point(50, 50), new Size(bmpImage.Width, bmpImage.Height));
+                graphics.DrawImage(bmpImage, new Aspose.Imaging.Point(0, 0));
             }
 
-            using (RasterImage pngImage = (RasterImage)Image.Load(pngPath))
+            // Load PNG image and overlay it at specified coordinates (e.g., 100,100)
+            using (RasterImage pngImage = (RasterImage)Image.Load(pngOverlayPath))
             {
-                graphics.DrawImage(pngImage, new Point(200, 150), new Size(pngImage.Width, pngImage.Height));
+                graphics.DrawImage(pngImage, new Aspose.Imaging.Point(100, 100));
             }
 
-            svgImage.Save(outputPath);
+            // Finalize drawing and obtain the resulting SVG image
+            using (SvgImage resultSvg = graphics.EndRecording())
+            {
+                // Save the modified SVG to the output path
+                resultSvg.Save(outputSvgPath);
+            }
         }
     }
 }
