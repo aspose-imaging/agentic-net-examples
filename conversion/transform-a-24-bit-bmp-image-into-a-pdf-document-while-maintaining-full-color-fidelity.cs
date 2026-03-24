@@ -5,22 +5,29 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input BMP file path and output PDF file path
-        string inputPath = "input.bmp";
-        string outputPath = "output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.pdf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the 24‑bit BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Create PDF options and preserve original image resolution
-            PdfOptions pdfOptions = new PdfOptions
-            {
-                UseOriginalImageResolution = true
-            };
+            // Prepare PDF save options (default preserves color fidelity)
+            PdfOptions pdfOptions = new PdfOptions();
 
-            // Save the image as a PDF document with full color fidelity
+            // Save the image as a PDF document
             image.Save(outputPath, pdfOptions);
         }
     }
