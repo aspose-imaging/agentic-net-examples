@@ -2,38 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = args.Length > 0 ? args[0] : Path.Combine("D:", "Compressed", "example.emz");
-        string outputPath = args.Length > 1 ? args[1] : inputPath + ".blurred.png";
-        string tempPngPath = Path.Combine(Path.GetDirectoryName(inputPath), "temp_raster.png");
+        string inputPath = @"C:\Images\input.emz";
+        string outputPath = @"C:\Images\output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         using (Image vectorImage = Image.Load(inputPath))
         {
-            var vectorOptions = new VectorRasterizationOptions
+            // Rasterize vector image to a memory stream as PNG
+            using (var memoryStream = new MemoryStream())
             {
-                BackgroundColor = Color.White,
-                PageWidth = vectorImage.Width,
-                PageHeight = vectorImage.Height
-            };
-            var pngOptions = new PngOptions { VectorRasterizationOptions = vectorOptions };
-            vectorImage.Save(tempPngPath, pngOptions);
-        }
+                var vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageSize = vectorImage.Size
+                };
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = vectorOptions
+                };
+                vectorImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
 
-        using (Image rasterImage = Image.Load(tempPngPath))
-        {
-            var raster = (RasterImage)rasterImage;
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-            raster.Save(outputPath);
-        }
+                // Load rasterized image
+                using (Image rasterImageBase = Image.Load(memoryStream))
+                {
+                    RasterImage rasterImage = (RasterImage)rasterImageBase;
 
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+                    // Apply Gaussian blur filter
+                    rasterImage.Filter(
+                        rasterImage.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                    // Save the processed image
+                    rasterImage.Save(outputPath, new PngOptions());
+                }
+            }
         }
     }
 }
