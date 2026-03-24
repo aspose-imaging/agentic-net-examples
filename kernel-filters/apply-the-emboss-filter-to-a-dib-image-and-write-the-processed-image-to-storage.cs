@@ -4,30 +4,36 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input DIB image path and output BMP image path
+        // Hardcoded input and output paths
         string inputPath = "input.dib";
         string outputPath = "output.bmp";
 
-        // Load the DIB image as a raster image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DIB image
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage rasterImage = (RasterImage)image;
+            // Cast to RasterImage for filtering
+            RasterImage raster = (RasterImage)image;
 
-            // Apply the emboss filter using the predefined 5x5 kernel
-            rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+            // Apply Emboss filter using the 3x3 kernel
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-            // Set up BMP save options with a file create source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions saveOptions = new BmpOptions() { Source = source };
-
-            // Save the processed image to storage
-            rasterImage.Save(outputPath, saveOptions);
+            // Save the processed image as BMP
+            raster.Save(outputPath, new BmpOptions());
         }
     }
 }
