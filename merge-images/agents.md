@@ -17,35 +17,35 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 ## Required Namespaces
 
-- `using Aspose.Imaging;` (95/94 files) ← category-specific
-- `using System;` (94/94 files)
-- `using System.IO;` (94/94 files)
-- `using Aspose.Imaging.ImageOptions;` (88/94 files) ← category-specific
-- `using System.Collections.Generic;` (56/94 files)
-- `using Aspose.Imaging.Sources;` (43/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg;` (22/94 files) ← category-specific
-- `using System.Linq;` (18/94 files)
-- `using Aspose.Imaging.FileFormats.Png;` (12/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (8/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Apng;` (4/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (4/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Dicom;` (3/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg2000;` (3/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (3/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.BigTiff;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Ico;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Psd;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Webp;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.OpenDocument;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Wmf;` (2/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif;` (1/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (1/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cmx;` (1/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tga;` (1/94 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (1/94 files) ← category-specific
+- `using Aspose.Imaging;` (96/95 files) ← category-specific
+- `using System;` (95/95 files)
+- `using System.IO;` (95/95 files)
+- `using Aspose.Imaging.ImageOptions;` (89/95 files) ← category-specific
+- `using System.Collections.Generic;` (56/95 files)
+- `using Aspose.Imaging.Sources;` (43/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg;` (22/95 files) ← category-specific
+- `using System.Linq;` (18/95 files)
+- `using Aspose.Imaging.FileFormats.Png;` (12/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Pdf;` (8/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Apng;` (4/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (4/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Dicom;` (3/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg2000;` (3/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg;` (3/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.BigTiff;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Ico;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Psd;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Webp;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.OpenDocument;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Wmf;` (2/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif;` (1/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (1/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cmx;` (1/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tga;` (1/95 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (1/95 files) ← category-specific
 
 ## Files in this folder
 
@@ -81,6 +81,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-utilizing-tga-as-the-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-utilizing-tga-as-the-intermediate-format.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | 14044 programmatically combine multiple jpg images into a single jpg output util... |
 | [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-utilizing-tiff-as-an-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-utilizing-tiff-as-an-intermediate-format.cs) | `Graphics`, `JpegOptions`, `TiffFrame` | 14045 programmatically combine multiple jpg images into a single jpg output by u... |
 | [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-utilizing-wmf-as-the-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-utilizing-wmf-as-the-intermediate-format.cs) | `JpegOptions`, `WmfOptions` | 14046 programmatically combine multiple jpg images into a single jpg output by u... |
+| [programmatically-combine-multiple-jpg-images-into-a-single-emz-file-while-preserving-image-quality.cs](./programmatically-combine-multiple-jpg-images-into-a-single-emz-file-while-preserving-image-quality.cs) | `EmfOptions` | Programmatically combine multiple JPG images into a single EMZ file while preser... |
 | [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-employing-the-wmz-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-employing-the-wmz-format.cs) | `JpegOptions` | 14048 programmatically combine multiple jpg images into a single jpg output empl... |
 | [programmatically-combine-multiple-jpg-files-into-a-single-image-and-output-the-result-in-webp-format.cs](./programmatically-combine-multiple-jpg-files-into-a-single-image-and-output-the-result-in-webp-format.cs) | `RasterImage`, `WebPOptions` | 14049 programmatically combine multiple jpg files into a single image and output... |
 | [create-programmatically-a-side-by-side-composition-of-images-and-output-the-result-in-apng-format.cs](./create-programmatically-a-side-by-side-composition-of-images-and-output-the-result-in-apng-format.cs) | `ApngImage`, `ApngOptions`, `PngOptions` | 14050 create programmatically a side by side composition of images and output th... |
@@ -147,7 +148,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [combine-multiple-jpg-images-into-a-single-jpeg-file-while-preserving-original-image-quality-and-metadata.cs](./combine-multiple-jpg-images-into-a-single-jpeg-file-while-preserving-original-image-quality-and-metadata.cs) | `JpegImage`, `JpegOptions` | 14300 combine multiple jpg images into a single jpeg file while preserving origi... |
 
 ## Category Statistics
-- Total examples: 94
+- Total examples: 95
 - Failed: 0
 - Pass rate: 100.0%
 
@@ -197,5 +198,5 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 All tasks passed ✅
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-03-24 | Run: `20260324_030022` | Examples: 94
+Updated: 2026-03-24 | Run: `20260324_031741` | Examples: 95
 <!-- AUTOGENERATED:END -->
