@@ -1,65 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
-class TiffFrameExporter
+class Program
 {
     static void Main()
     {
-        // Path to the source multi‑frame TIFF file
-        string inputTiffPath = @"C:\Images\source.tif";
-
-        // Directory where extracted frames will be saved
+        // Hardcoded input and output locations
+        string inputPath = @"C:\Images\input.tif";
         string outputDirectory = @"C:\Images\Frames";
 
-        // Desired output image format (e.g., "png", "jpg", "bmp")
-        string outputFormat = "png";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the TIFF image using Aspose.Imaging lifecycle (load)
-        using (Image image = Image.Load(inputTiffPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to TiffImage to access the Frames collection
-            TiffImage tiffImage = (TiffImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Iterate through each frame in the TIFF
+        // Load the TIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to TiffImage to access frames
+            TiffImage tiffImage = image as TiffImage;
+            if (tiffImage == null)
+            {
+                Console.Error.WriteLine("The loaded file is not a TIFF image.");
+                return;
+            }
+
+            // Iterate through each frame
             for (int i = 0; i < tiffImage.Frames.Length; i++)
             {
-                // Retrieve the current frame
-                TiffFrame frame = tiffImage.Frames[i];
-
-                // Wrap the frame into a temporary TiffImage instance (required for Save)
-                using (TiffImage frameImage = new TiffImage(frame))
+                // Create a new TiffImage that contains only the current frame
+                using (TiffImage singleFrame = new TiffImage(tiffImage.Frames[i]))
                 {
-                    // Build the output file name (e.g., frame_0.png)
-                    string outputFilePath = Path.Combine(outputDirectory, $"frame_{i}.{outputFormat}");
+                    // Build output file path (PNG format)
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.png");
 
-                    // Choose appropriate save options based on the requested format
-                    if (outputFormat.Equals("png", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var pngOptions = new PngOptions();
-                        frameImage.Save(outputFilePath, pngOptions);
-                    }
-                    else if (outputFormat.Equals("jpg", StringComparison.OrdinalIgnoreCase) ||
-                             outputFormat.Equals("jpeg", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var jpegOptions = new JpegOptions();
-                        frameImage.Save(outputFilePath, jpegOptions);
-                    }
-                    else if (outputFormat.Equals("bmp", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var bmpOptions = new BmpOptions();
-                        frameImage.Save(outputFilePath, bmpOptions);
-                    }
-                    else
-                    {
-                        // Fallback: save using the default options (same format as source)
-                        frameImage.Save(outputFilePath);
-                    }
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the single-frame image using PNG options
+                    singleFrame.Save(outputPath, new PngOptions());
                 }
             }
         }
