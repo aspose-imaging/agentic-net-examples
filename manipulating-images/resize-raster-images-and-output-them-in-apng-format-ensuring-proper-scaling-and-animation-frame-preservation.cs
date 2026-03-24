@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -7,63 +8,63 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expected arguments: inputPath outputPath targetWidth targetHeight
-        if (args.Length != 4)
+        // Define input raster images (frames) and output APNG path
+        string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
+        string outputPath = "output\\animation.apng";
+
+        // Verify each input file exists
+        foreach (var inputPath in inputPaths)
         {
-            Console.WriteLine("Usage: <inputPath> <outputPath> <targetWidth> <targetHeight>");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-        int targetWidth = int.Parse(args[2]);
-        int targetHeight = int.Parse(args[3]);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image (could be single-frame or multi-frame)
-        using (Image sourceImage = Image.Load(inputPath))
+        // Desired size for resized frames
+        const int targetWidth = 200;
+        const int targetHeight = 200;
+
+        // Prepare APNG creation options
+        ApngOptions apngOptions = new ApngOptions
         {
-            // Prepare APNG creation options
-            ApngOptions createOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // default frame duration in ms
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+            Source = new FileCreateSource(outputPath, false),
+            DefaultFrameTime = 100, // 100 ms per frame
+            ColorType = PngColorType.TruecolorWithAlpha
+        };
 
-            // Create the APNG canvas with the desired size
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, targetWidth, targetHeight))
+        // Load the first image to initialize the APNG canvas
+        using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+        {
+            if (!firstImage.IsCached) firstImage.CacheData();
+            firstImage.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+
+            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, targetWidth, targetHeight))
             {
                 // Remove the default empty frame
                 apngImage.RemoveAllFrames();
 
-                // Check if the source image supports multiple pages/frames
-                if (sourceImage is IMultipageImage multipage)
+                // Add the first resized frame
+                apngImage.AddFrame(firstImage);
+
+                // Process remaining frames
+                for (int i = 1; i < inputPaths.Length; i++)
                 {
-                    // Iterate through each frame/page
-                    foreach (var page in multipage.Pages)
+                    using (RasterImage frame = (RasterImage)Image.Load(inputPaths[i]))
                     {
-                        using (RasterImage frame = (RasterImage)page)
-                        {
-                            if (!frame.IsCached) frame.CacheData();
-                            frame.Resize(targetWidth, targetHeight);
-                            apngImage.AddFrame(frame);
-                        }
-                    }
-                }
-                else
-                {
-                    // Single-frame image handling
-                    using (RasterImage raster = (RasterImage)sourceImage)
-                    {
-                        if (!raster.IsCached) raster.CacheData();
-                        raster.Resize(targetWidth, targetHeight);
-                        apngImage.AddFrame(raster);
+                        if (!frame.IsCached) frame.CacheData();
+                        frame.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+                        apngImage.AddFrame(frame);
                     }
                 }
 
-                // Save the APNG file (output is already bound via FileCreateSource)
+                // Save the APNG (output file is already bound via FileCreateSource)
                 apngImage.Save();
             }
         }
