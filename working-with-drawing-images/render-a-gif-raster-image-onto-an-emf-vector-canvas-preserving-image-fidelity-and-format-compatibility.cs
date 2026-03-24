@@ -8,43 +8,53 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input GIF file path
-        string gifPath = "input.gif";
-        // Output EMF file path
-        string emfPath = "output.emf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.gif";
+        string outputPath = @"C:\Temp\output.emf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the GIF raster image
-        using (RasterImage gifImage = (RasterImage)Image.Load(gifPath))
+        using (RasterImage gifImage = (RasterImage)Image.Load(inputPath))
         {
-            // Determine canvas size based on GIF dimensions
-            int canvasWidth = gifImage.Width;
-            int canvasHeight = gifImage.Height;
+            int gifWidth = gifImage.Width;
+            int gifHeight = gifImage.Height;
 
-            // Convert size to millimeters (approximation: 1 pixel = 0.01 mm)
-            int canvasWidthMm = (int)(canvasWidth / 100f);
-            int canvasHeightMm = (int)(canvasHeight / 100f);
+            // Define device size for EMF (matching GIF size)
+            int deviceWidth = gifWidth;
+            int deviceHeight = gifHeight;
+            int deviceWidthMm = (int)(deviceWidth / 100f);
+            int deviceHeightMm = (int)(deviceHeight / 100f);
 
-            // Define the frame rectangle for the EMF canvas
-            Rectangle frame = new Rectangle(0, 0, canvasWidth, canvasHeight);
+            // Create a frame rectangle for the EMF canvas
+            Aspose.Imaging.Rectangle frame = new Aspose.Imaging.Rectangle(0, 0, deviceWidth, deviceHeight);
 
-            // Create EMF graphics recorder (do NOT wrap in using)
+            // Initialize EMF graphics recorder (do NOT wrap in using)
             EmfRecorderGraphics2D graphics = new EmfRecorderGraphics2D(
                 frame,
-                new Size(canvasWidth, canvasHeight),
-                new Size(canvasWidthMm, canvasHeightMm));
+                new Aspose.Imaging.Size(deviceWidth, deviceHeight),
+                new Aspose.Imaging.Size(deviceWidthMm, deviceHeightMm));
 
             // Draw the GIF onto the EMF canvas, scaling to fit exactly
             graphics.DrawImage(
                 gifImage,
-                new Rectangle(0, 0, canvasWidth, canvasHeight),   // destination rectangle
-                gifImage.Bounds,                                 // source rectangle (full GIF)
-                GraphicsUnit.Pixel);                             // source unit
+                new Aspose.Imaging.Rectangle(0, 0, deviceWidth, deviceHeight),   // destination rectangle
+                new Aspose.Imaging.Rectangle(0, 0, gifWidth, gifHeight),       // source rectangle
+                GraphicsUnit.Pixel);
 
             // Finalize recording and obtain the EMF image
             using (EmfImage emfImage = graphics.EndRecording())
             {
                 // Save the EMF file
-                emfImage.Save(emfPath);
+                emfImage.Save(outputPath);
             }
         }
     }
