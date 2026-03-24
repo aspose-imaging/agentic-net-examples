@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
@@ -8,23 +10,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = "input.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
         string outputPath = "output.png";
 
-        // Load the image as a RasterImage
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image as a raster image
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Create a mask using Magic Wand, combine with another selection,
-            // invert the mask, feather the edges, and apply it to the image
+            // Create a mask using Magic Wand based on a reference point with a custom threshold
             MagicWandTool
                 .Select(image, new MagicWandSettings(120, 100) { Threshold = 150 })
-                .Union(new MagicWandSettings(200, 150))
-                .Invert()
-                .GetFeathered(new FeatheringSettings() { Size = 3 })
                 .Apply();
 
-            // Save the resulting image with transparency support
+            // Save the processed image with PNG options preserving alpha channel
             image.Save(outputPath, new PngOptions
             {
                 ColorType = PngColorType.TruecolorWithAlpha
