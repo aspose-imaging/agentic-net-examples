@@ -1,73 +1,92 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPEG file paths
+        // Hardcoded input JPEG file paths
         string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\img1.jpg",
+            @"C:\Images\img2.jpg",
+            @"C:\Images\img3.jpg"
         };
 
-        // Output merged JPEG file path
-        string outputPath = "merged.jpg";
+        // Hardcoded output JPEG file path
+        string outputPath = @"C:\Images\combined.jpg";
 
-        // Collect image sizes
-        List<Size> sizes = new List<Size>();
-
-        // Prepare JPEG options based on the first image to preserve its compression parameters
-        JpegOptions jpegOptions;
-        using (JpegImage firstImg = new JpegImage(inputPaths[0]))
+        // Validate each input file exists
+        foreach (var path in inputPaths)
         {
-            sizes.Add(firstImg.Size);
-            jpegOptions = new JpegOptions()
+            if (!File.Exists(path))
             {
-                Source = new FileCreateSource(outputPath, false),
-                Quality = firstImg.JpegOptions?.Quality ?? 90,
-                CompressionType = firstImg.JpegOptions?.CompressionType ?? JpegCompressionMode.Baseline,
-                ColorType = firstImg.JpegOptions?.ColorType ?? JpegCompressionColorMode.YCbCr,
-                BitsPerChannel = firstImg.JpegOptions?.BitsPerChannel ?? 8
-            };
-        }
-
-        // Collect sizes of the remaining images
-        for (int i = 1; i < inputPaths.Length; i++)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
-            {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching
-        int newWidth = sizes.Sum(s => s.Width);
-        int newHeight = sizes.Max(s => s.Height);
-
-        // Create a JPEG canvas bound to the output file
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+        // Load all input images
+        Image[] images = new Image[inputPaths.Length];
+        for (int i = 0; i < inputPaths.Length; i++)
         {
+            images[i] = Image.Load(inputPaths[i]);
+        }
+
+        // Determine combined image dimensions (horizontal concatenation)
+        int totalWidth = 0;
+        int maxHeight = 0;
+        foreach (var img in images)
+        {
+            totalWidth += img.Width;
+            if (img.Height > maxHeight) maxHeight = img.Height;
+        }
+
+        // Prepare JPEG options based on the first image to keep original compression parameters
+        JpegOptions jpegOptions = new JpegOptions();
+        if (images[0] is JpegImage firstJpeg && firstJpeg.JpegOptions != null)
+        {
+            jpegOptions.Quality = firstJpeg.JpegOptions.Quality;
+            jpegOptions.CompressionType = firstJpeg.JpegOptions.CompressionType;
+            jpegOptions.ColorType = firstJpeg.JpegOptions.ColorType;
+            jpegOptions.BitsPerChannel = firstJpeg.JpegOptions.BitsPerChannel;
+        }
+        else
+        {
+            // Fallback defaults if the first image is not a JPEG
+            jpegOptions.Quality = 100;
+            jpegOptions.CompressionType = JpegCompressionMode.Baseline;
+            jpegOptions.BitsPerChannel = 8;
+        }
+
+        // Create the combined image using the prepared JPEG options
+        using (Image combined = Image.Create(jpegOptions, totalWidth, maxHeight))
+        {
+            // Draw each source image onto the combined canvas
+            var graphics = new Graphics(combined);
             int offsetX = 0;
-            foreach (string path in inputPaths)
+            foreach (var src in images)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
+                graphics.DrawImage(src, new Rectangle(offsetX, 0, src.Width, src.Height));
+                offsetX += src.Width;
             }
 
-            // Save the bound image (output file is already bound via FileCreateSource)
-            canvas.Save();
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the combined image preserving the JPEG options
+            combined.Save(outputPath, jpegOptions);
+        }
+
+        // Dispose loaded source images
+        foreach (var img in images)
+        {
+            img.Dispose();
         }
     }
 }
