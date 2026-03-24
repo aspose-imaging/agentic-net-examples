@@ -1,35 +1,53 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.ImageOptions;
 
-class OverlayPngOnSvg
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths to the source SVG, the PNG overlay, and the output SVG
-        string svgPath = @"C:\Images\canvas.svg";
-        string pngPath = @"C:\Images\overlay.png";
-        string outputPath = @"C:\Images\canvas_with_overlay.svg";
+        // Hardcoded input and output paths
+        string inputSvgPath = @"C:\Images\canvas.svg";
+        string inputPngPath = @"C:\Images\overlay.png";
+        string outputSvgPath = @"C:\Images\result.svg";
 
-        // Load the existing SVG image
-        using (SvgImage svgImage = new SvgImage(svgPath))
-        // Load the PNG image as a raster image
-        using (RasterImage pngImage = (RasterImage)Image.Load(pngPath))
+        // Verify SVG input exists
+        if (!File.Exists(inputSvgPath))
         {
-            // Create a graphics object that draws onto the loaded SVG
-            SvgGraphics2D graphics = new SvgGraphics2D(svgImage);
+            Console.Error.WriteLine($"File not found: {inputSvgPath}");
+            return;
+        }
 
-            // Define where the PNG should be placed on the SVG canvas
-            // Here we place it at (50,50) with its original dimensions
-            graphics.DrawImage(pngImage, new Point(50, 50), new Size(pngImage.Width, pngImage.Height));
+        // Verify PNG input exists
+        if (!File.Exists(inputPngPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPngPath}");
+            return;
+        }
 
-            // Finalize drawing and obtain the updated SVG image
-            using (SvgImage resultSvg = graphics.EndRecording())
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
+
+        // Load SVG canvas
+        using (SvgImage svgImage = (SvgImage)Image.Load(inputSvgPath))
+        {
+            // Load PNG graphic
+            using (RasterImage pngImage = (RasterImage)Image.Load(inputPngPath))
             {
-                // Save the resulting SVG, preserving vector data and the raster overlay
-                resultSvg.Save(outputPath);
+                // Create graphics object bound to existing SVG
+                SvgGraphics2D graphics = new SvgGraphics2D(svgImage);
+
+                // Draw PNG onto SVG at position (0,0) with original size
+                graphics.DrawImage(pngImage, new Point(0, 0), new Size(pngImage.Width, pngImage.Height));
+
+                // Finalize SVG image
+                using (SvgImage resultSvg = graphics.EndRecording())
+                {
+                    // Save the combined SVG
+                    resultSvg.Save(outputSvgPath);
+                }
             }
         }
     }
