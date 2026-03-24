@@ -1,7 +1,8 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Brushes;
 
@@ -9,38 +10,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output JPEG2000 file path
-        string outputPath = "output.jp2";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jp2";
+        string outputPath = @"C:\temp\output.jp2";
 
-        // Define image dimensions
-        int width = 500;
-        int height = 500;
-
-        // Configure JPEG2000 options with a FileCreateSource (binds the output file)
-        Jpeg2000Options jp2Options = new Jpeg2000Options();
-        jp2Options.Source = new FileCreateSource(outputPath, false);
-
-        // Create the JPEG2000 image canvas
-        using (Image image = Image.Create(jp2Options, width, height))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize Graphics for drawing on the image
-            Graphics graphics = new Graphics(image);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a GraphicsPath that covers the entire canvas
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load JPEG2000 image
+        using (Jpeg2000Image jpegImage = new Jpeg2000Image(inputPath))
+        {
+            // Create graphics object
+            Graphics graphics = new Graphics(jpegImage);
+
+            // Clear the entire surface with white color
+            graphics.Clear(Color.White);
+
+            // Create a graphics path covering the whole image
             GraphicsPath path = new GraphicsPath();
             Figure figure = new Figure();
-            // Add a rectangle shape matching the canvas size
-            figure.AddShape(new RectangleShape(new RectangleF(0f, 0f, width, height)));
+            RectangleF rect = new RectangleF(jpegImage.Bounds.X, jpegImage.Bounds.Y, jpegImage.Bounds.Width, jpegImage.Bounds.Height);
+            figure.AddShape(new RectangleShape(rect));
             path.AddFigure(figure);
 
-            // Fill the path with a solid white brush to clear the surface
+            // Fill the path with white color using a solid brush
             using (SolidBrush brush = new SolidBrush(Color.White))
             {
                 graphics.FillPath(brush, path);
             }
 
-            // Save the image (file is already bound via FileCreateSource)
-            image.Save();
+            // Save the modified image
+            Jpeg2000Options saveOptions = new Jpeg2000Options();
+            jpegImage.Save(outputPath, saveOptions);
         }
     }
 }
