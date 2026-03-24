@@ -1,64 +1,32 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input frame image files (must support transparency, e.g., PNG)
-        List<string> framePaths = new List<string>
-        {
-            "frame1.png",
-            "frame2.png",
-            "frame3.png"
-        };
-
-        // Output APNG file
+        // Hardcoded input and output paths
+        string inputPath = "input_animation.webp";
         string outputPath = "output_animation.png";
 
-        // Load the first frame to obtain canvas size
-        using (RasterImage firstFrame = (RasterImage)Image.Load(framePaths[0]))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            int canvasWidth = firstFrame.Width;
-            int canvasHeight = firstFrame.Height;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create APNG options with alpha support
-            ApngOptions createOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // default 100 ms per frame
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+        // Ensure output directory exists (creates if missing)
+        string outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir ?? ".");
 
-            // Create the APNG canvas
-            using (ApngImage apng = (ApngImage)Image.Create(createOptions, canvasWidth, canvasHeight))
-            {
-                // Ensure no default frame remains
-                apng.RemoveAllFrames();
-
-                // Add each frame preserving its transparency
-                foreach (string path in framePaths)
-                {
-                    using (RasterImage frame = (RasterImage)Image.Load(path))
-                    {
-                        // If frame size differs, resize to canvas size (optional)
-                        if (frame.Width != canvasWidth || frame.Height != canvasHeight)
-                        {
-                            frame.Resize(canvasWidth, canvasHeight, ResizeType.NearestNeighbourResample);
-                        }
-
-                        apng.AddFrame(frame);
-                    }
-                }
-
-                // Save the animated PNG
-                apng.Save();
-            }
+        // Load the source image (animated or multi‑page) and save as APNG preserving frames and transparency
+        using (Image image = Image.Load(inputPath))
+        {
+            // ApngOptions with default settings preserves animation cycles and transparency
+            image.Save(outputPath, new ApngOptions());
         }
     }
 }
