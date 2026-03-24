@@ -3,36 +3,46 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Emf.Graphics;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output EMF file paths
-        string dir = @"c:\temp\";
-        string inputPath = Path.Combine(dir, "test.emf");
-        string outputPath = Path.Combine(dir, "test.modified.emf");
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.emf";
+        string outputPath = @"C:\temp\output.emf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the existing EMF image
         using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
         {
-            // Create a graphics recorder that contains all records from the loaded EMF
+            // Create a graphics recorder that contains all existing records
             EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
 
-            // Draw a red rectangle
-            graphics.DrawRectangle(new Pen(Color.Red, 2), 50, 50, 200, 100);
+            // Draw a blue rectangle around the image border
+            graphics.DrawRectangle(new Pen(Color.Blue, 2), 0, 0, emfImage.Width, emfImage.Height);
 
-            // Fill a blue rectangle
-            graphics.FillRectangle(new SolidBrush(Color.Blue), new Rectangle(300, 50, 150, 100));
-
-            // Draw a text string
-            graphics.DrawString("Modified", new Font("Arial", 36, FontStyle.Bold), Color.Green, 100, 200);
+            // Add a text watermark at the top-left corner
+            graphics.DrawString(
+                "Modified",
+                new Font("Arial", 48, FontStyle.Regular),
+                Color.Red,
+                10,
+                10);
 
             // Finalize the recording and obtain the modified EMF image
             using (EmfImage modifiedEmf = graphics.EndRecording())
             {
-                // Save the modified EMF image, preserving vector data
+                // Save the modified EMF image to the output path
                 modifiedEmf.Save(outputPath);
             }
         }

@@ -1,41 +1,79 @@
 using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Configure cache (optional but useful for monitoring)
-        Cache.CacheType = CacheType.Auto;
-        Cache.MaxMemoryForCache = 200 * 1024 * 1024; // 200 MB memory limit for cache
+        // Hardcoded input and output paths
+        string inputPath1 = @"C:\Images\Input1.png";
+        string inputPath2 = @"C:\Images\Input2.png";
+        string outputPath = @"C:\Images\Output\Merged.png";
 
-        // Set up image creation options with a buffer size hint (limits internal buffers)
-        var createOptions = new PngOptions
+        // Verify input files exist
+        if (!File.Exists(inputPath1))
         {
-            Source = new FileCreateSource("output.png", false),
-            BufferSizeHint = 30 // limit internal buffers to 30 MB
-        };
-
-        // Create a large image while respecting the memory limit
-        using (var image = Image.Create(createOptions, 4000, 4000) as RasterImage)
+            Console.Error.WriteLine($"File not found: {inputPath1}");
+            return;
+        }
+        if (!File.Exists(inputPath2))
         {
-            // Perform drawing operations within the established memory constraints
-            var graphics = new Graphics(image);
-            graphics.Clear(Color.LightSkyBlue);
-            graphics.DrawLine(new Pen(Color.Red, 2f), 0, 0, image.Width, image.Height);
-
-            // Save the image using the provided save rule
-            image.Save();
+            Console.Error.WriteLine($"File not found: {inputPath2}");
+            return;
         }
 
-        // After disposing the image, inspect cache usage to verify memory release
-        long memoryBytes = Cache.AllocatedMemoryBytesCount;
-        long diskBytes = Cache.AllocatedDiskBytesCount;
-        Console.WriteLine($"Memory cache allocated: {memoryBytes} bytes");
-        Console.WriteLine($"Disk cache allocated: {diskBytes} bytes");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load images to collect sizes
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+        using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
+        {
+            sizes.Add(img1.Size);
+        }
+        using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+        {
+            sizes.Add(img2.Size);
+        }
+
+        // Calculate canvas dimensions for horizontal merge
+        int newWidth = sizes.Sum(s => s.Width);
+        int newHeight = sizes.Max(s => s.Height);
+
+        // Create source and options with memory buffer hint
+        Source src = new FileCreateSource(outputPath, false);
+        PngOptions options = new PngOptions
+        {
+            Source = src,
+            BufferSizeHint = 50 // limit internal buffers to 50 MB
+        };
+
+        // Create canvas bound to the output file
+        using (RasterImage canvas = (RasterImage)Image.Create(options, newWidth, newHeight))
+        {
+            int offsetX = 0;
+            // Merge first image
+            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
+            {
+                var bounds = new Rectangle(offsetX, 0, img1.Width, img1.Height);
+                canvas.SaveArgb32Pixels(bounds, img1.LoadArgb32Pixels(img1.Bounds));
+                offsetX += img1.Width;
+            }
+            // Merge second image
+            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+            {
+                var bounds = new Rectangle(offsetX, 0, img2.Width, img2.Height);
+                canvas.SaveArgb32Pixels(bounds, img2.LoadArgb32Pixels(img2.Bounds));
+                offsetX += img2.Width;
+            }
+
+            // Save the bound canvas (no path needed)
+            canvas.Save();
+        }
     }
 }

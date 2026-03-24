@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 
@@ -7,33 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Paths of the source TIFF files to be merged
-        string[] sourceFiles = new string[]
+        // Hardcoded input TIFF file paths
+        string[] inputPaths = new string[]
         {
-            @"C:\Images\page1.tif",
-            @"C:\Images\page2.tif",
-            @"C:\Images\page3.tif"
+            @"c:\temp\image1.tif",
+            @"c:\temp\image2.tif",
+            @"c:\temp\image3.tif"
         };
 
-        // Path of the resulting multi‑page TIFF file
-        string outputFile = @"C:\Images\merged.tif";
+        // Hardcoded output TIFF file path
+        string outputPath = @"c:\temp\combined.tif";
 
-        // Load the first TIFF image – it will serve as the base image
-        using (TiffImage mergedImage = (TiffImage)Image.Load(sourceFiles[0]))
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            // Iterate over the remaining TIFF files and add their frames to the base image
-            for (int i = 1; i < sourceFiles.Length; i++)
+            if (!File.Exists(inputPath))
             {
-                // Load the current source TIFF
-                using (TiffImage srcImage = (TiffImage)Image.Load(sourceFiles[i]))
-                {
-                    // Add all frames from srcImage into mergedImage, preserving original properties
-                    mergedImage.Add(srcImage);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+        }
 
-            // Save the combined multi‑page TIFF to disk
-            mergedImage.Save(outputFile);
+        // Collect frames from all input TIFFs
+        List<TiffFrame> allFrames = new List<TiffFrame>();
+        foreach (string inputPath in inputPaths)
+        {
+            // Load each TIFF as a frame preserving its original properties
+            TiffFrame frame = new TiffFrame(inputPath);
+            allFrames.Add(frame);
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a new multi‑page TIFF from the collected frames and save it
+        using (TiffImage combinedTiff = new TiffImage(allFrames.ToArray()))
+        {
+            combinedTiff.Save(outputPath);
         }
     }
 }

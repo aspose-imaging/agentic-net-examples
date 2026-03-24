@@ -1,65 +1,55 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hard‑coded input TIFF file paths
+        string[] inputPaths = new string[]
         {
-            // Input TIFF files (replace with actual paths or streams)
-            string[] inputPaths = new string[]
+            @"C:\Temp\input1.tif",
+            @"C:\Temp\input2.tif",
+            @"C:\Temp\input3.tif"
+        };
+
+        // Hard‑coded output TIFF file path
+        string outputPath = @"C:\Temp\combined_output.tif";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
+        {
+            if (!File.Exists(inputPath))
             {
-                "input1.tif",
-                "input2.tif",
-                "input3.tif"
-            };
-
-            // Output combined TIFF file
-            string outputPath = "combined.tif";
-
-            // Load the first image to obtain dimensions and basic options
-            using (TiffImage firstImage = (TiffImage)Image.Load(inputPaths[0]))
-            {
-                // Prepare TiffOptions for the output file
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Source = new FileCreateSource(outputPath, false);
-                tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                tiffOptions.Compression = TiffCompressions.Lzw;
-
-                // Create the output TIFF canvas using the dimensions of the first frame
-                using (TiffImage outputTiff = (TiffImage)Image.Create(tiffOptions, firstImage.ActiveFrame.Width, firstImage.ActiveFrame.Height))
-                {
-                    // Add frames from each input TIFF
-                    foreach (string path in inputPaths)
-                    {
-                        using (TiffImage src = (TiffImage)Image.Load(path))
-                        {
-                            // Preserve metadata by adding the whole image (its frames) to the output
-                            outputTiff.Add(src);
-                        }
-                    }
-
-                    // Remove the initially created default frame
-                    TiffFrame defaultFrame = outputTiff.ActiveFrame;
-                    if (outputTiff.Frames.Length > 1)
-                    {
-                        outputTiff.ActiveFrame = outputTiff.Frames[1];
-                        outputTiff.RemoveFrame(0);
-                    }
-                    defaultFrame.Dispose();
-
-                    // Save the combined TIFF
-                    outputTiff.Save();
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+        }
+
+        // Load each TIFF as a frame
+        List<TiffFrame> frames = new List<TiffFrame>();
+        foreach (string inputPath in inputPaths)
+        {
+            // Open the source file as a stream
+            using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+            {
+                // Create a TiffFrame from the stream (preserves metadata)
+                TiffFrame frame = new TiffFrame(stream);
+                frames.Add(frame);
+            }
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Combine frames into a single multi‑page TIFF
+        using (TiffImage tiffImage = new TiffImage(frames.ToArray()))
+        {
+            // Save the combined image to the output path
+            tiffImage.Save(outputPath);
         }
     }
 }

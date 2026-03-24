@@ -5,51 +5,36 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
 
-namespace GifManipulationDemo
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
+
+        if (!File.Exists(inputPath))
         {
-            // Paths for input and output GIF files
-            string inputPath = "input.gif";
-            string outputPath = "output.gif";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Load the animated GIF
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (GifImage gif = (GifImage)Image.Load(inputPath))
+        {
+            for (int i = 0; i < gif.PageCount; i++)
             {
-                // Preserve original loop count
-                int originalLoops = gif.LoopsCount;
-
-                // Iterate through each frame and apply transformations
-                for (int i = 0; i < gif.PageCount; i++)
-                {
-                    // Set the active frame to the current page
-                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-
-                    // Rotate the active frame 90 degrees clockwise
-                    gif.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                }
-
-                // Resize all frames uniformly (full frame resize)
-                // Example new dimensions; adjust as needed
-                int newWidth = gif.Width / 2;
-                int newHeight = gif.Height / 2;
-                gif.ResizeFullFrame(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-                // Restore the original loop count
-                gif.LoopsCount = originalLoops;
-
-                // Prepare GIF save options to keep metadata and loops
-                GifOptions saveOptions = new GifOptions
-                {
-                    LoopsCount = gif.LoopsCount,
-                    KeepMetadata = true
-                };
-
-                // Save the modified GIF
-                gif.Save(outputPath, saveOptions);
+                gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                gif.RotateFlip(RotateFlipType.Rotate90FlipNone);
             }
+
+            GifOptions options = new GifOptions
+            {
+                LoopsCount = gif.LoopsCount,
+                KeepMetadata = true
+            };
+
+            gif.Save(outputPath, options);
         }
     }
 }

@@ -1,36 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source image (can be a multi‑page format like TIFF or a single raster image)
-        string sourcePath = "input.tif";
-
-        // Desired output APNG file path
+        // Hardcoded input and output paths
+        string inputPath = "input.webp";
         string outputPath = "output.apng";
 
-        // Load the source image
-        using (Image image = Image.Load(sourcePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure APNG saving options
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists (creates if null path)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+        // Load the source image (supports animated formats)
+        using (Image sourceImage = Image.Load(inputPath))
+        {
+            // Configure APNG options: default frame duration and infinite looping
             var apngOptions = new ApngOptions
             {
-                // Set default frame duration (in milliseconds)
-                DefaultFrameTime = 200,
-
-                // Number of times the animation should loop (0 = infinite)
-                NumPlays = 0,
-
-                // Preserve original metadata (EXIF, XMP, etc.) in the exported file
-                KeepMetadata = true
+                DefaultFrameTime = 200, // milliseconds per frame
+                NumPlays = 0,            // 0 = infinite loop
+                KeepMetadata = true     // preserve original metadata
             };
 
-            // Save the loaded image as an animated PNG using the configured options
-            image.Save(outputPath, apngOptions);
+            // Save the image as an animated PNG (APNG)
+            sourceImage.Save(outputPath, apngOptions);
         }
     }
 }

@@ -1,39 +1,47 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
+        // Hard‑coded input and output file paths
         string inputPath = "input.png";
         string outputPath = "output_compressed.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists (unconditional call)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for palette generation
-            RasterImage raster = image as RasterImage;
-
             // Configure PNG compression options
-            PngOptions options = new PngOptions
+            var pngOptions = new PngOptions
             {
-                // Maximum lossless compression level (0-9)
+                // Maximum compression (0‑9)
                 CompressionLevel = 9,
-                // Enable progressive loading
+                // Enable progressive loading (optional)
                 Progressive = true,
-                // Use adaptive filter for best results
-                FilterType = PngFilterType.Adaptive,
-                // Convert to indexed color with an optimal palette (lossless reduction)
+                // Use indexed color with an optimal palette for better size reduction
                 ColorType = PngColorType.IndexedColor,
-                // Generate a palette that closely matches the source image
-                Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256, PaletteMiningMethod.Histogram)
+                Palette = ColorPaletteHelper.GetCloseImagePalette(
+                    (RasterImage)image,
+                    256,
+                    PaletteMiningMethod.Histogram)
             };
 
-            // Save the compressed PNG
-            image.Save(outputPath, options);
+            // Save the image with the specified compression options
+            image.Save(outputPath, pngOptions);
         }
     }
 }

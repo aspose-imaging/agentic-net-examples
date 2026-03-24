@@ -2,53 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class ExportTiffFrames
+class Program
 {
     static void Main()
     {
-        // Path to the source multi‑frame TIFF file
-        string inputPath = @"C:\Temp\source_multiframe.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputDirectory = @"C:\temp\output";
 
-        // Directory where individual frame files will be saved
-        string outputDir = @"C:\Temp\Frames";
-        Directory.CreateDirectory(outputDir);
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the TIFF image
+        // Ensure the output directory exists (creates parent directories if needed)
+        Directory.CreateDirectory(outputDirectory);
+
+        // Load the multi‑frame TIFF image
         using (Image image = Image.Load(inputPath))
         {
             // Cast to TiffImage to access frames
-            TiffImage tiffImage = image as TiffImage;
-            if (tiffImage == null)
-                throw new InvalidOperationException("The loaded image is not a TIFF.");
+            TiffImage tiffImage = (TiffImage)image;
 
-            // Iterate through each frame
-            for (int i = 0; i < tiffImage.Frames.Length; i++)
+            // Iterate over each frame
+            TiffFrame[] frames = tiffImage.Frames;
+            for (int i = 0; i < frames.Length; i++)
             {
-                // Create a copy of the current frame (clone via RasterImage constructor)
-                TiffFrame copiedFrame = new TiffFrame((RasterImage)tiffImage.Frames[i]);
+                // Create a new frame based on the current frame (copies pixel data)
+                TiffFrame singleFrame = new TiffFrame(frames[i]);
 
-                // Wrap the copied frame into a new TiffImage instance
-                using (TiffImage singleFrameImage = new TiffImage(copiedFrame))
+                // Create a new TiffImage containing only this frame
+                using (TiffImage singleTiff = new TiffImage(singleFrame))
                 {
-                    // Prepare save options that conform to TIFF specifications
-                    TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        // Preserve typical TIFF settings; adjust as needed
-                        BitsPerSample = new ushort[] { 8, 8, 8 },
-                        ByteOrder = TiffByteOrder.LittleEndian,
-                        Compression = TiffCompressions.Lzw,
-                        Photometric = TiffPhotometrics.Rgb,
-                        PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                    };
+                    // Build output file path for the current frame
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.tif");
 
-                    // Build output file name
-                    string outputPath = Path.Combine(outputDir, $"frame_{i}.tif");
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the single‑frame TIFF
-                    singleFrameImage.Save(outputPath, saveOptions);
+                    singleTiff.Save(outputPath);
                 }
             }
         }

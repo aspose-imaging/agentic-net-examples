@@ -1,31 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Path to the source PNG image
-        string sourcePath = "input.png";
-
-        // Path where the compressed PNG will be saved
+        // Hardcoded input and output file paths
+        string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Load the PNG image
-        using (Image image = Image.Load(sourcePath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure lossless PNG compression options
-            PngOptions options = new PngOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure PNG save options for lossless maximum compression
+            var pngOptions = new PngOptions
             {
-                CompressionLevel = 9,                 // Maximum compression (0-9)
-                FilterType = PngFilterType.Adaptive, // Adaptive filter for best results
-                Progressive = true                    // Enable progressive loading (optional)
+                CompressionLevel = 9,          // Maximal compression (0-9)
+                Progressive = true,            // Enable progressive loading (optional)
+                // You can keep the original color type or set a specific one if needed
+                // ColorType = PngColorType.TruecolorWithAlpha
             };
 
             // Save the image with the specified options
-            image.Save(outputPath, options);
+            image.Save(outputPath, pngOptions);
         }
     }
 }

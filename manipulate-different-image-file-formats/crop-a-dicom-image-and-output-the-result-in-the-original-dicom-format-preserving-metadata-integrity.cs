@@ -3,37 +3,49 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
-// Load the DICOM image from file
-string inputPath = @"c:\temp\sample.dcm";
-using (Image image = Image.Load(inputPath))
+class Program
 {
-    // Cast to DicomImage to access DICOM‑specific functionality
-    DicomImage dicomImage = (DicomImage)image;
-
-    // Define the cropping rectangle (central area of the image)
-    Rectangle cropArea = new Rectangle(
-        dicomImage.Width / 4,          // X coordinate
-        dicomImage.Height / 4,         // Y coordinate
-        dicomImage.Width / 2,          // Width
-        dicomImage.Height / 2);        // Height
-
-    // Perform the crop operation
-    dicomImage.Crop(cropArea);
-
-    // Prepare DICOM save options and preserve original metadata
-    DicomOptions saveOptions = new DicomOptions
+    static void Main()
     {
-        KeepMetadata = true
-    };
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.dicom";
+        string outputPath = @"C:\temp\sample_cropped.dcm";
 
-    // Save the cropped image back to DICOM format
-    string outputPath = @"c:\temp\sample_cropped.dcm";
-    using (Stream outStream = File.Open(outputPath, FileMode.Create))
-    {
-        // Use the full bounds of the cropped image as the destination rectangle
-        Rectangle bounds = new Rectangle(0, 0, dicomImage.Width, dicomImage.Height);
-        dicomImage.Save(outStream, saveOptions, bounds);
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DICOM image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to DicomImage to access DICOM-specific functionality
+            DicomImage dicomImage = (DicomImage)image;
+
+            // Define the cropping rectangle (central area of the image)
+            var cropArea = new Rectangle(
+                dicomImage.Width / 4,
+                dicomImage.Height / 4,
+                dicomImage.Width / 2,
+                dicomImage.Height / 2);
+
+            // Perform the crop operation
+            dicomImage.Crop(cropArea);
+
+            // Prepare DICOM save options to keep original metadata
+            var saveOptions = new DicomOptions
+            {
+                KeepMetadata = true
+            };
+
+            // Save the cropped image back to DICOM format
+            dicomImage.Save(outputPath, saveOptions);
+        }
     }
 }

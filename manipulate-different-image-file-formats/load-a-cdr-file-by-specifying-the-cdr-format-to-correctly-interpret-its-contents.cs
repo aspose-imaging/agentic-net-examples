@@ -2,30 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.ImageOptions;
 
-class LoadCdrExample
+class Program
 {
     static void Main()
     {
-        // Path to the CDR file
-        string cdrFilePath = "sample.cdr";
+        // Hardcoded input CDR file path
+        string inputPath = "input.cdr";
 
-        // Open a file stream for reading the CDR file
-        using (FileStream stream = new FileStream(cdrFilePath, FileMode.Open, FileAccess.Read))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create load options specific for CDR format
-            CdrLoadOptions loadOptions = new CdrLoadOptions();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Initialize CdrImage with the stream and load options
-            using (CdrImage cdrImage = new CdrImage(stream, loadOptions))
+        // Load the CDR image using Aspose.Imaging
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+        {
+            // Output basic information about the loaded CDR image
+            Console.WriteLine($"Loaded CDR image: Width = {cdrImage.Width}, Height = {cdrImage.Height}");
+
+            // Example: export the first page of the CDR document to PDF
+            string outputPath = "output\\page0.pdf";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Retrieve the first page
+            CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+
+            // Configure PDF save options with rasterization settings
+            PdfOptions pdfOptions = new PdfOptions();
+            CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
             {
-                // Retrieve and display the detected file format
-                var format = cdrImage.FileFormat;
-                Console.WriteLine($"Loaded file format: {format}");
+                PageWidth = page.Width,
+                PageHeight = page.Height
+            };
+            pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Additional processing can be performed here using cdrImage
-            }
+            // Save the page as a PDF file
+            page.Save(outputPath, pdfOptions);
         }
     }
 }

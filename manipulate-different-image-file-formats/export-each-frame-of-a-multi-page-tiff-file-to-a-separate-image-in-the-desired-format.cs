@@ -1,74 +1,47 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
-class ExportTiffFrames
+class Program
 {
     static void Main()
     {
-        // Path to the source multi‑page TIFF file
-        string inputFilePath = @"C:\Images\multipage.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputDir = @"C:\temp\output";
 
-        // Folder where extracted frames will be saved
-        string outputFolder = @"C:\Images\Frames";
-
-        // Desired output format for each frame (png, jpg, bmp, tiff)
-        string outputFormat = "png";
-
-        // Load the multi‑page TIFF using the provided load rule
-        using (Image image = Image.Load(inputFilePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to TiffImage to access the Frames collection
-            TiffImage tiffImage = image as TiffImage;
-            if (tiffImage == null)
-                throw new InvalidOperationException("The loaded image is not a TIFF.");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
+        // Ensure the output directory exists (creates parent directories if needed)
+        Directory.CreateDirectory(outputDir);
 
-            // Iterate through each frame in the TIFF
+        // Load the multi‑page TIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to TiffImage to access frames
+            TiffImage tiffImage = (TiffImage)image;
+
+            // Iterate through each frame
             for (int i = 0; i < tiffImage.Frames.Length; i++)
             {
-                TiffFrame frame = tiffImage.Frames[i];
-
-                // Create a temporary single‑frame image from the current TiffFrame
-                using (TiffImage singleFrameImage = new TiffImage(frame))
+                // Each frame is a RasterImage; we can save it directly
+                using (RasterImage frame = (RasterImage)tiffImage.Frames[i])
                 {
-                    // Choose save options based on the desired output format
-                    ImageOptionsBase saveOptions;
-                    string outputFilePath;
+                    // Build output file path for the current frame
+                    string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.png");
 
-                    switch (outputFormat.ToLower())
-                    {
-                        case "png":
-                            saveOptions = new PngOptions();
-                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.png");
-                            break;
-                        case "jpg":
-                        case "jpeg":
-                            saveOptions = new JpegOptions();
-                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.jpg");
-                            break;
-                        case "bmp":
-                            saveOptions = new BmpOptions();
-                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.bmp");
-                            break;
-                        case "tif":
-                        case "tiff":
-                            saveOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
-                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.tif");
-                            break;
-                        default:
-                            // Fallback to PNG if an unknown format is specified
-                            saveOptions = new PngOptions();
-                            outputFilePath = Path.Combine(outputFolder, $"frame_{i}.png");
-                            break;
-                    }
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the single frame using the provided save rule
-                    singleFrameImage.Save(outputFilePath, saveOptions);
+                    // Save the frame as PNG
+                    frame.Save(outputPath, new PngOptions());
                 }
             }
         }

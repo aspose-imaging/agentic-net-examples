@@ -1,25 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
-class DicomGrayscaleConverter
+class Program
 {
     static void Main()
     {
-        // Path to the folder containing the DICOM file
-        string dir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.dcm";
+        string outputPath = @"C:\temp\sample_grayscale.dcm";
 
-        // Load the DICOM image from file
-        using (Image image = Image.Load(dir + "sample.dicom"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to DicomImage to access DICOM‑specific methods
-            DicomImage dicomImage = (DicomImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Convert the image to grayscale while keeping all DICOM metadata intact
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DICOM image, convert to grayscale, and save preserving metadata
+        using (Image image = Image.Load(inputPath))
+        {
+            DicomImage dicomImage = (DicomImage)image;
             dicomImage.Grayscale();
 
-            // Save the result back to DICOM format (preserves original metadata)
-            dicomImage.Save(dir + "sample_grayscale.dcm");
+            var options = new DicomOptions
+            {
+                KeepMetadata = true
+            };
+
+            dicomImage.Save(outputPath, options);
         }
     }
 }

@@ -1,31 +1,46 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input image files to be merged (replace with actual paths)
-        string[] inputPaths = { "image1.jpg", "image2.png", "image3.bmp" };
-        string outputPath = "merged_output.jpg";
+        // Hardcoded input and output paths
+        string inputPath1 = @"C:\Images\input1.png";
+        string inputPath2 = @"C:\Images\input2.png";
+        string outputPath = @"C:\Images\output.png";
 
-        // Collect sizes of all source images
-        List<Size> sizes = new List<Size>();
-        foreach (var path in inputPaths)
+        // Validate input files
+        if (!File.Exists(inputPath1))
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
-            {
-                if (!img.IsCached) img.CacheData();
-                sizes.Add(img.Size);
-            }
+            Console.Error.WriteLine($"File not found: {inputPath1}");
+            return;
+        }
+        if (!File.Exists(inputPath2))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath2}");
+            return;
         }
 
-        // Compute canvas dimensions for a horizontal stitch
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Collect sizes of source images
+        List<Size> sizes = new List<Size>();
+        using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
+        {
+            sizes.Add(img1.Size);
+        }
+        using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+        {
+            sizes.Add(img2.Size);
+        }
+
+        // Calculate canvas dimensions (horizontal stitch)
         int canvasWidth = 0;
         int canvasHeight = 0;
         foreach (var sz in sizes)
@@ -34,41 +49,34 @@ class Program
             if (sz.Height > canvasHeight) canvasHeight = sz.Height;
         }
 
-        // Create a file source for the output image
-        Source outSource = new FileCreateSource(outputPath, false);
-
-        // Configure JPEG options with a memory limit (e.g., 50 MB)
-        JpegOptions jpegOptions = new JpegOptions
+        // Create output source and options with memory limit
+        Source outputSource = new FileCreateSource(outputPath, false);
+        PngOptions pngOptions = new PngOptions
         {
-            Source = outSource,
-            Quality = 90,
-            BufferSizeHint = 50 // memory limit in megabytes
+            Source = outputSource,
+            BufferSizeHint = 50 // limit internal buffers to 50 MB
         };
 
-        // Create the output canvas bound to the file
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        // Create canvas bound to the output file
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
         {
-            // Clear background to white
-            Graphics graphics = new Graphics(canvas);
-            graphics.Clear(Color.White);
-
-            // Paste each source image onto the canvas
             int offsetX = 0;
-            foreach (var path in inputPaths)
+            // Merge first image
+            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    if (!img.IsCached) img.CacheData();
-
-                    Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    // Transfer pixel data directly without loading the whole canvas into memory
-                    canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
-
-                    offsetX += img.Width;
-                }
+                Rectangle bounds = new Rectangle(offsetX, 0, img1.Width, img1.Height);
+                canvas.SaveArgb32Pixels(bounds, img1.LoadArgb32Pixels(img1.Bounds));
+                offsetX += img1.Width;
+            }
+            // Merge second image
+            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+            {
+                Rectangle bounds = new Rectangle(offsetX, 0, img2.Width, img2.Height);
+                canvas.SaveArgb32Pixels(bounds, img2.LoadArgb32Pixels(img2.Bounds));
+                offsetX += img2.Width;
             }
 
-            // Since the canvas is already bound to a file, just call Save()
+            // Save the bound canvas (no path needed)
             canvas.Save();
         }
     }

@@ -1,31 +1,40 @@
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Djvu;          // Namespace for DjvuImage
-using Aspose.Imaging.ImageOptions;             // Required for save options if needed
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main()
     {
-        // Load a DjVu document from a file stream using the provided LoadDocument method
-        using (FileStream inputStream = new FileStream("input.djvu", FileMode.Open, FileAccess.Read))
+        string inputPath = @"c:\temp\input.svg";
+        string outputPath = @"c:\temp\output.svg";
+
+        if (!File.Exists(inputPath))
         {
-            // The static LoadDocument method returns a DjvuImage instance
-            DjvuImage djvu = DjvuImage.LoadDocument(inputStream);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // -------------------- Scaling --------------------
-            // Example: double the size of the image (200% scaling)
-            int scaledWidth  = djvu.Width  * 2;
-            int scaledHeight = djvu.Height * 2;
-            djvu.Resize(scaledWidth, scaledHeight);   // Uses the Resize method from the API
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // -------------------- Rotating --------------------
-            // Rotate the image 45 degrees around its center
-            djvu.Rotate(45f);                         // Uses the Rotate method from the API
+        int width = 600;
+        int height = 400;
 
-            // -------------------- Saving --------------------
-            // Save the transformed image back to disk using the provided Save(string) overload
-            djvu.Save("output.djvu");
+        using (Image image = Image.Create(new SvgOptions(), width, height))
+        {
+            Graphics graphics = new Graphics(image);
+
+            GraphicsPath path = new GraphicsPath();
+            Figure figure = new Figure();
+            figure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 200f, 150f)));
+            figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 100f)));
+            path.AddFigure(figure);
+
+            graphics.DrawPath(new Pen(Color.Blue, 2), path);
+
+            image.Save(outputPath);
         }
     }
 }

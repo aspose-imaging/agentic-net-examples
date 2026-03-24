@@ -1,51 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg; // For SvgResourceKeeperCallback
-using Aspose.Imaging; // For Font, FontStyle, Color, Point
 
 class Program
 {
     static void Main()
     {
-        // Output directory (ensure it exists)
-        string outputDir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.svg";
 
-        // Define SVG canvas size and resolution
-        int width = 400;
-        int height = 200;
-        int dpi = 96;
-
-        // Create an SVG graphics context
-        SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-        // Prepare a font (Arial, 48pt, regular)
-        Font font = new Font("Arial", 48, FontStyle.Regular);
-
-        // Draw a text string – this will be kept as a text element (not converted to shapes)
-        graphics.DrawString(font, "Hello Aspose!", new Point(10, 100), Color.DarkBlue);
-
-        // Finish recording and obtain the SvgImage object
-        using (SvgImage svgImage = graphics.EndRecording())
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure SVG export options
-            SvgOptions saveOptions = new SvgOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure SVG save options to embed text as shapes (fonts become vector shapes)
+            var saveOptions = new SvgOptions
             {
-                // Keep text as <text> elements so fonts can be embedded or referenced
-                TextAsShapes = false,
-
-                // Use the default resource keeper callback which embeds fonts as base64 by default
-                Callback = new SvgResourceKeeperCallback(),
-
-                // No compression – plain SVG file
-                Compress = false
+                TextAsShapes = true
             };
 
-            // Save the SVG file with embedded fonts
-            string outputPath = System.IO.Path.Combine(outputDir, "output.svg");
-            svgImage.Save(outputPath, saveOptions);
+            // Save the SVG with embedded fonts
+            image.Save(outputPath, saveOptions);
         }
     }
 }

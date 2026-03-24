@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -6,29 +7,45 @@ class Program
 {
     static void Main()
     {
-        // Path to the vector file (e.g., CorelDRAW, SVG, etc.)
-        string inputFileName = "test.cdr";
+        // Hardcoded input vector file path
+        string inputPath = "input.cdr";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Directory where extracted images will be saved
+        string outputDir = "extracted_images";
+
+        // Ensure the output directory exists (unconditional as required)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputDir) ?? outputDir);
 
         // Load the vector image using Aspose.Imaging
-        using (Image image = Image.Load(inputFileName))
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast to VectorImage to access vector-specific functionality
+            // Cast to VectorImage to access embedded images
             VectorImage vectorImage = (VectorImage)image;
-
-            // Retrieve all embedded raster images
             EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
 
-            // Export each embedded image as a high‑quality PNG bitmap
-            for (int i = 0; i < embeddedImages.Length; i++)
+            int index = 0;
+            foreach (EmbeddedImage embedded in embeddedImages)
             {
-                string outFileName = $"image{i}.png";
+                // Build output file path for each extracted image
+                string outputPath = Path.Combine(outputDir, $"image{index}.png");
 
-                // Each EmbeddedImage implements IDisposable, so wrap it in using
-                using (EmbeddedImage embedded = embeddedImages[i])
+                // Ensure the directory for this output file exists (unconditional)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Save the embedded raster image as PNG preserving original quality
+                using (embedded)
                 {
-                    // Save the raster image preserving its original quality
-                    embedded.Image.Save(outFileName, new PngOptions());
+                    embedded.Image.Save(outputPath, new PngOptions());
                 }
+
+                index++;
             }
         }
     }

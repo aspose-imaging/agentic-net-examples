@@ -1,35 +1,49 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.j2k";
-        string outputPath = "output.j2k";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jp2";
+        string outputPath = @"C:\Images\output.jp2";
 
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            if (!image.IsCached)
-                image.CacheData();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            var cropRect = new Rectangle(50, 50, image.Width - 100, image.Height - 100);
-            image.Crop(cropRect);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            image.Resize(image.Width / 2, image.Height / 2, ResizeType.NearestNeighbourResample);
+        // Load the JPEG2000 image
+        using (Jpeg2000Image image = (Jpeg2000Image)Image.Load(inputPath))
+        {
+            // Example transformation: resize to half the original dimensions
+            int newWidth = image.Width / 2;
+            int newHeight = image.Height / 2;
+            image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-            image.Rotate(45.0f, true, Color.White);
+            // Example transformation: rotate 90 degrees clockwise
+            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-            var saveOptions = new Jpeg2000Options
+            // Configure compression options
+            Jpeg2000Options options = new Jpeg2000Options
             {
-                Irreversible = true,
-                CompressionRatios = new int[] { 10, 5 },
-                Comments = new string[] { "Processed with Aspose.Imaging" },
-                KeepMetadata = true
+                Irreversible = true,                         // Use irreversible DWT (lossy)
+                Codec = Jpeg2000Codec.J2K,                    // Choose raw J2K codec
+                CompressionRatios = new int[] { 20 },        // Set compression ratio
+                KeepMetadata = true                           // Preserve existing metadata
             };
 
-            image.Save(outputPath, saveOptions);
+            // Save the modified image back to JPEG2000 format
+            image.Save(outputPath, options);
         }
     }
 }

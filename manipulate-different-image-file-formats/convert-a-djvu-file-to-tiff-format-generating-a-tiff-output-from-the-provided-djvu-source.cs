@@ -1,30 +1,52 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input DjVu file path
-        string inputPath = "sample.djvu";
-        // Output TIFF file path
-        string outputPath = "output.tif";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\output.tif";
 
-        // Open the DjVu file stream
-        using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Load DjVu image from the stream
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DjVu document from a file stream
+        using (FileStream stream = File.OpenRead(inputPath))
+        using (DjvuImage djvuImage = new DjvuImage(stream))
+        {
+            // Prepare TIFF saving options (common for all pages)
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
             {
-                // Configure TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                // Save all pages as a multi-page TIFF
-                djvuImage.Save(outputPath, tiffOptions);
+                BitsPerSample = new ushort[] { 8, 8, 8 },
+                Compression = TiffCompressions.Lzw,
+                Photometric = TiffPhotometrics.Rgb,
+                PlanarConfiguration = TiffPlanarConfigs.Contiguous,
+                ByteOrder = TiffByteOrder.LittleEndian
+            };
+
+            // Save each DjVu page as an individual TIFF file
+            foreach (DjvuPage page in djvuImage.Pages)
+            {
+                // Build a distinct file name for each page
+                string pageOutput = Path.Combine(
+                    Path.GetDirectoryName(outputPath),
+                    $"{Path.GetFileNameWithoutExtension(outputPath)}_page{page.PageNumber}.tif");
+
+                // Save the page using the prepared TIFF options
+                page.Save(pageOutput, tiffOptions);
             }
         }
     }

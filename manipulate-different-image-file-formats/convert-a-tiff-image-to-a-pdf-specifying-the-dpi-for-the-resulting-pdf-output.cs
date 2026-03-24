@@ -1,30 +1,30 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths to the input TIFF and output PDF files
+        // Hardcoded input and output paths
         string inputPath = "input.tif";
         string outputPath = "output.pdf";
 
-        // Desired DPI for the PDF
-        double dpiX = 300;
-        double dpiY = 300;
-
-        // Load the TIFF image
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure PDF options with the specified DPI
-            PdfOptions pdfOptions = new PdfOptions
-            {
-                ResolutionSettings = new ResolutionSetting(dpiX, dpiY)
-            };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the image as PDF with the DPI settings
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image and save as PDF
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            var pdfOptions = new PdfOptions();
             image.Save(outputPath, pdfOptions);
         }
     }

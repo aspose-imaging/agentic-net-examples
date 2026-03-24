@@ -1,49 +1,56 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output JPEG file paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPath = @"C:\Images\sample_processed.jpg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the JPEG image
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Cache data for optimal performance
-            if (!image.IsCached)
-                image.CacheData();
-
-            // Adjust image properties
-            image.AdjustBrightness(20);          // Increase brightness
-            image.AdjustContrast(0.2f);          // Increase contrast
-            image.AdjustGamma(1.1f);             // Slight gamma correction
-
-            // Rotate 90 degrees clockwise
-            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-            // Resize to half the original size using high‑quality Lanczos resampling
-            int newWidth = image.Width / 2;
-            int newHeight = image.Height / 2;
-            image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-
-            // Crop 10 pixels from each edge
-            var cropRect = new Rectangle(10, 10, image.Width - 20, image.Height - 20);
-            image.Crop(cropRect);
-
-            // Configure JPEG save options
-            var jpegOptions = new JpegOptions
+            // Cast to JpegImage to access JPEG‑specific features
+            JpegImage jpegImage = image as JpegImage;
+            if (jpegImage != null)
             {
-                Quality = 90,
-                CompressionType = JpegCompressionMode.Baseline
-            };
+                // Rotate the image 90 degrees clockwise
+                jpegImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-            // Save the processed image while preserving JPEG format
-            image.Save(outputPath, jpegOptions);
+                // Add a comment to the JPEG metadata
+                jpegImage.Comment = "Processed with Aspose.Imaging";
+
+                // Prepare JPEG save options (quality 80, progressive compression)
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = 80,
+                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive
+                };
+
+                // Save the processed image while preserving JPEG format
+                jpegImage.Save(outputPath, saveOptions);
+            }
+            else
+            {
+                // Fallback: save any non‑JPEG image as JPEG with default options
+                JpegOptions fallbackOptions = new JpegOptions();
+                image.Save(outputPath, fallbackOptions);
+            }
         }
     }
 }

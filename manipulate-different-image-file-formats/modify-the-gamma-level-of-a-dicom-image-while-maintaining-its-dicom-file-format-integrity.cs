@@ -1,18 +1,41 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
-string inputPath = @"c:\temp\sample.dicom";
-string outputPath = @"c:\temp\sample_gamma.dicom";
-
-// Load the DICOM image
-using (Image image = Image.Load(inputPath))
+namespace DicomGammaAdjustment
 {
-    // Cast to DicomImage to access DICOM‑specific methods
-    DicomImage dicomImage = (DicomImage)image;
+    class Program
+    {
+        static void Main()
+        {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.dicom";
+            string outputPath = @"C:\temp\sample.adjusted.dcm";
 
-    // Apply gamma correction (same value for R, G, B channels)
-    dicomImage.AdjustGamma(2.0f); // Adjust the gamma factor as needed
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-    // Save the image back in DICOM format to preserve file integrity
-    dicomImage.Save(outputPath);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to DicomImage to access DICOM-specific methods
+                DicomImage dicomImage = (DicomImage)image;
+
+                // Apply gamma correction (example gamma value: 2.5)
+                dicomImage.AdjustGamma(2.5f);
+
+                // Save the modified image back to DICOM format, preserving integrity
+                dicomImage.Save(outputPath, new DicomOptions());
+            }
+        }
+    }
 }

@@ -1,67 +1,58 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.BigTiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length < 2)
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.jpg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <input1> <input2> ... <outputBigTiff>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string outputPath = args[args.Length - 1];
-        string[] inputPaths = new string[args.Length - 1];
-        Array.Copy(args, inputPaths, args.Length - 1);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-        foreach (string path in inputPaths)
+        // Load the source image as a raster image
+        using (RasterImage source = (RasterImage)Image.Load(inputPath))
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            // Cache data to avoid repeated I/O during processing
+            if (!source.IsCached) source.CacheData();
+
+            // Configure creation options with a memory limit (BufferSizeHint)
+            JpegOptions createOptions = new JpegOptions
             {
-                if (!img.IsCached) img.CacheData();
-                sizes.Add(img.Size);
-            }
-        }
+                Source = new FileCreateSource(outputPath, false), // binds the output file
+                Quality = 90,
+                BufferSizeHint = 50, // limit internal buffers to 50 MB
+                CompressionType = JpegCompressionMode.Progressive
+            };
 
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (var sz in sizes)
-        {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight) canvasHeight = sz.Height;
-        }
-
-        Source src = new FileCreateSource(outputPath, false);
-        BigTiffOptions options = new BigTiffOptions(TiffExpectedFormat.Default)
-        {
-            Source = src,
-            Photometric = TiffPhotometrics.Rgb,
-            Compression = TiffCompressions.Lzw,
-            BitsPerSample = new ushort[] { 8, 8, 8 }
-        };
-
-        using (BigTiffImage canvas = (BigTiffImage)Image.Create(options, canvasWidth, canvasHeight))
-        {
-            int offsetX = 0;
-            foreach (string path in inputPaths)
+            // Create a new canvas image bound to the output file
+            using (Image canvas = Image.Create(createOptions, source.Width, source.Height))
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    if (!img.IsCached) img.CacheData();
-                    var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
-            }
+                // Perform drawing operations (Graphics, Pen) without using blocks
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.LightGray);
+                Pen pen = new Pen(Color.Red, 5f);
+                graphics.DrawLine(pen, 0, 0, canvas.Width, canvas.Height);
 
-            canvas.Save();
+                // Resize using a low‑memory resample type
+                canvas.Resize(canvas.Width / 2, canvas.Height / 2, ResizeType.NearestNeighbourResample);
+
+                // Save the bound image (no path needed, file already bound)
+                canvas.Save();
+            }
         }
     }
 }

@@ -1,56 +1,58 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class InsertMultipleFramesIntoTiff
+class Program
 {
     static void Main()
     {
-        // Directory where source images are located and where the resulting TIFF will be saved
-        string sourceDir = @"C:\Images\";
-        string outputPath = @"C:\Images\combined.tif";
-
-        // List of source image file names to be added as separate frames
-        string[] sourceFiles = new string[]
+        // Hardcoded input image paths
+        string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.png",
-            "image3.bmp"
+            @"c:\temp\input1.png",
+            @"c:\temp\input2.png",
+            @"c:\temp\input3.png"
         };
 
-        // Collection to hold the created TiffFrame objects
-        List<TiffFrame> tiffFrames = new List<TiffFrame>();
-
-        // Create a TiffOptions instance that will be used for each frame
-        TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-        frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-        frameOptions.ByteOrder = TiffByteOrder.LittleEndian;
-        frameOptions.Compression = TiffCompressions.Lzw;
-        frameOptions.Photometric = TiffPhotometrics.Rgb;
-        frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-        // Load each source image, convert it to a TiffFrame, and add to the collection
-        foreach (string fileName in sourceFiles)
+        // Verify each input file exists
+        foreach (var path in inputPaths)
         {
-            string fullPath = System.IO.Path.Combine(sourceDir, fileName);
-
-            // Load the raster image (any supported format)
-            using (RasterImage raster = (RasterImage)Image.Load(fullPath))
+            if (!File.Exists(path))
             {
-                // Create a TiffFrame from the raster image using the predefined options
-                TiffFrame frame = new TiffFrame(raster, frameOptions);
-                tiffFrames.Add(frame);
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        // Initialize a TiffImage with the array of frames
-        using (TiffImage tiffImage = new TiffImage(tiffFrames.ToArray()))
+        // Hardcoded output TIFF path
+        string outputPath = @"c:\temp\multipage.tif";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the first image and create the initial TIFF image
+        using (RasterImage firstRaster = (RasterImage)Image.Load(inputPaths[0]))
         {
-            // Save the multi‑frame TIFF to the specified path
-            tiffImage.Save(outputPath);
+            // Create a TiffFrame from the first raster image
+            TiffFrame firstFrame = new TiffFrame(firstRaster);
+
+            // Initialize TiffImage with the first frame
+            using (TiffImage tiffImage = new TiffImage(firstFrame))
+            {
+                // Load remaining images and add them as additional frames
+                for (int i = 1; i < inputPaths.Length; i++)
+                {
+                    using (RasterImage raster = (RasterImage)Image.Load(inputPaths[i]))
+                    {
+                        TiffFrame frame = new TiffFrame(raster);
+                        tiffImage.AddFrame(frame);
+                    }
+                }
+
+                // Save the multi‑frame TIFF to the specified output path
+                tiffImage.Save(outputPath);
+            }
         }
     }
 }

@@ -1,53 +1,62 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class BatchTiffExport
+class Program
 {
     static void Main()
     {
-        // Define input image files (any supported format) and output directory
-        string[] inputFiles = new string[]
+        // Hard‑coded collection of source TIFF files (could be any supported format)
+        string[] inputPaths = new string[]
         {
-            @"C:\Images\sample1.jpg",
-            @"C:\Images\sample2.png",
-            @"C:\Images\sample3.bmp"
+            @"C:\Images\Input1.tif",
+            @"C:\Images\Input2.tif",
+            @"C:\Images\Input3.tif"
         };
 
-        string outputDirectory = @"C:\Images\ExportedTiff\";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Prepare common TIFF export options
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+        // Corresponding output paths – same folder, different file name suffix
+        string[] outputPaths = new string[]
         {
-            // Example settings – adjust as needed
-            BitsPerSample = new ushort[] { 8, 8, 8 },                     // 8 bits per color component
-            ByteOrder = TiffByteOrder.LittleEndian,                     // Little‑endian (Intel)
-            Compression = TiffCompressions.Lzw,                         // LZW compression
-            Photometric = TiffPhotometrics.Rgb,                         // RGB color model
-            PlanarConfiguration = TiffPlanarConfigs.Contiguous,        // Single plane storage
-            Predictor = TiffPredictor.Horizontal                        // Predictor for LZW
+            @"C:\Images\Output\Result1.tif",
+            @"C:\Images\Output\Result2.tif",
+            @"C:\Images\Output\Result3.tif"
         };
 
-        foreach (string inputPath in inputFiles)
+        // Iterate over the collection
+        for (int i = 0; i < inputPaths.Length; i++)
         {
-            // Derive output file name with .tif extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
+            string inputPath = inputPaths[i];
+            string outputPath = outputPaths[i];
 
-            // Load the source image
+            // Input file existence check – no exceptions, just return on failure
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists (unconditional call)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Save the image as TIFF using the predefined options
+                // Configure TIFF export options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    // Example settings – can be adjusted as needed
+                    BitsPerSample = new ushort[] { 8, 8, 8 },
+                    ByteOrder = TiffByteOrder.LittleEndian,
+                    Compression = TiffCompressions.Lzw,
+                    Photometric = TiffPhotometrics.Rgb,
+                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
+                };
+
+                // Save the image to the target path with the specified options
                 image.Save(outputPath, tiffOptions);
             }
         }
-
-        Console.WriteLine("Batch TIFF export completed.");
     }
 }

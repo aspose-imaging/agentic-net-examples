@@ -1,39 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.png";
 
-        // Load the image as a RasterImage
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cache image data for better performance
-            if (!image.IsCached)
-                image.CacheData();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Increase brightness by 30 units
-            image.AdjustBrightness(30);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Increase contrast by a factor of 1.2
-            image.AdjustContrast(1.2f);
-
-            // Resize the image to half of its original dimensions
-            int newWidth = image.Width / 2;
-            int newHeight = image.Height / 2;
-            image.Resize(newWidth, newHeight); // Uses default NearestNeighbourResample
-
-            // Rotate the image 90 degrees clockwise
+        // Load the image using Aspose.Imaging.Image.Load (provided rule)
+        using (Image image = Image.Load(inputPath))
+        {
+            // Example generic operation: rotate the image 90 degrees clockwise
             image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-            // Save the processed image as PNG
-            PngOptions options = new PngOptions();
-            image.Save(outputPath, options);
+            // Prepare PNG save options (primary format supported)
+            PngOptions saveOptions = new PngOptions();
+
+            // Save the processed image to the output path (provided rule)
+            image.Save(outputPath, saveOptions);
         }
     }
 }

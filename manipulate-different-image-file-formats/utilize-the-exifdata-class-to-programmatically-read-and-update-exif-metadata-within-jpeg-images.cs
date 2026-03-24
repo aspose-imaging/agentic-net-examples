@@ -2,40 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Exif;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output JPEG file paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPath = @"C:\Images\sample_updated.jpg";
 
-        // Load the JPEG image using Aspose.Imaging
-        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Access the EXIF data container; cast to JpegExifData for JPEG-specific tags
-            Aspose.Imaging.Exif.JpegExifData exif = jpegImage.ExifData as Aspose.Imaging.Exif.JpegExifData;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the JPEG image
+        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        {
+            // Access EXIF data as JpegExifData
+            JpegExifData exif = image.ExifData as JpegExifData;
             if (exif != null)
             {
-                // Display some existing EXIF values
-                Console.WriteLine($"Original Artist: {exif.Artist}");
-                Console.WriteLine($"Original Copyright: {exif.Copyright}");
-                Console.WriteLine($"Original Image Description: {exif.ImageDescription}");
-
-                // Update EXIF metadata
+                // Update desired EXIF tags
                 exif.Artist = "John Doe";
                 exif.Copyright = "© 2026 John Doe";
-                exif.ImageDescription = "Updated description";
+                exif.ImageDescription = "Updated image with new EXIF data";
 
-                // Example: change orientation and auto-rotate if needed
-                // exif.Orientation = Aspose.Imaging.Exif.Orientation.TopLeft;
-                // jpegImage.AutoRotate();
+                // Auto-rotate based on orientation (ignore out-of-range errors)
+                try
+                {
+                    image.AutoRotate();
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // Orientation value is invalid; continue without rotation
+                }
             }
 
             // Save the modified image to the output path
-            jpegImage.Save(outputPath);
+            image.Save(outputPath);
         }
     }
 }

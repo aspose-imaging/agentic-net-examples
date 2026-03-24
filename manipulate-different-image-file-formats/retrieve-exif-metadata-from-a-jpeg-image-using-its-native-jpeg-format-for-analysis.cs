@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Exif;
@@ -7,36 +8,55 @@ class Program
 {
     static void Main()
     {
-        // Path to the JPEG file
-        string jpegPath = @"C:\Temp\sample.jpg";
+        // Hardcoded input path
+        string inputPath = @"C:\temp\sample.jpg";
 
-        // Load the JPEG image using Aspose.Imaging's Image.Load method
-        // Cast the loaded image to JpegImage to access JPEG-specific properties
-        using (JpegImage jpegImage = (JpegImage)Image.Load(jpegPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Retrieve the EXIF data container from the image
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the JPEG image using Aspose.Imaging
+        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+        {
+            // Access the generic EXIF data container
             JpegExifData exifData = jpegImage.ExifData as JpegExifData;
 
-            if (exifData != null)
+            if (exifData == null)
             {
-                // Output some common EXIF tags
-                Console.WriteLine("Camera Manufacturer: {0}", exifData.Make);
-                Console.WriteLine("Camera Model: {0}", exifData.Model);
-                Console.WriteLine("Image Description: {0}", exifData.ImageDescription);
-                Console.WriteLine("Orientation: {0}", exifData.Orientation);
-                Console.WriteLine("Software: {0}", exifData.Software);
-                Console.WriteLine("Date/Time Original: {0}", exifData.DateTimeOriginal);
-                Console.WriteLine("Exposure Time: {0}", exifData.ExposureTime);
-                Console.WriteLine("FNumber (Aperture): {0}", exifData.FNumber);
-                Console.WriteLine("ISO Speed: {0}", exifData.ISOSpeed);
-                Console.WriteLine("Focal Length: {0}", exifData.FocalLength);
-                Console.WriteLine("GPS Latitude: {0}", exifData.GPSLatitude);
-                Console.WriteLine("GPS Longitude: {0}", exifData.GPSLongitude);
+                Console.WriteLine("No EXIF data found in the image.");
+                return;
             }
-            else
-            {
-                Console.WriteLine("No EXIF data found in the JPEG image.");
-            }
+
+            // General EXIF information
+            Console.WriteLine("General EXIF data:");
+            Console.WriteLine($"  EXIF version: {exifData.ExifVersion}");
+            Console.WriteLine($"  Camera serial number: {exifData.BodySerialNumber}");
+            Console.WriteLine($"  Color space: {exifData.ColorSpace}");
+            Console.WriteLine($"  Brightness: {exifData.BrightnessValue}");
+            Console.WriteLine($"  Contrast: {exifData.Contrast}");
+            Console.WriteLine($"  Gamma: {exifData.Gamma}");
+            Console.WriteLine($"  Sharpness: {exifData.Sharpness}");
+            Console.WriteLine($"  Aperture: {exifData.ApertureValue}");
+            Console.WriteLine($"  Exposure mode: {exifData.ExposureMode}");
+            Console.WriteLine($"  Exposure bias: {exifData.ExposureBiasValue}");
+            Console.WriteLine($"  Exposure time: {exifData.ExposureTime}");
+            Console.WriteLine($"  Focal length: {exifData.FocalLength}");
+            Console.WriteLine($"  Lens model: {exifData.LensModel}");
+            Console.WriteLine($"  Shutter speed: {exifData.ShutterSpeedValue}");
+
+            // JPEG‑specific EXIF information
+            Console.WriteLine("JPEG EXIF data:");
+            Console.WriteLine($"  Manufacturer: {exifData.Make}");
+            Console.WriteLine($"  Model: {exifData.Model}");
+            Console.WriteLine($"  Photometric interpretation: {exifData.PhotometricInterpretation}");
+            Console.WriteLine($"  Artist: {exifData.Artist}");
+            Console.WriteLine($"  Copyright: {exifData.Copyright}");
+            Console.WriteLine($"  Image description: {exifData.ImageDescription}");
+            Console.WriteLine($"  Orientation: {exifData.Orientation}");
+            Console.WriteLine($"  Software: {exifData.Software}");
         }
     }
 }

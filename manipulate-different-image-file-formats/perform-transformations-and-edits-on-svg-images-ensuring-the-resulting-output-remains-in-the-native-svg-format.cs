@@ -1,68 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output SVG file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.svg";
-        string outputPath = args.Length > 1 ? args[1] : "output.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = Path.Combine("output", "result.svg");
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the existing SVG image
-        using (Image image = Image.Load(inputPath))
+        using (SvgImage svgImage = new SvgImage(inputPath))
         {
-            SvgImage svgImage = (SvgImage)image;
-
-            // Initialize graphics object for the loaded SVG
-            SvgGraphics2D graphics = new SvgGraphics2D(svgImage);
-
-            // Draw a black rectangle along the borders
-            graphics.DrawRectangle(new Pen(Color.Black, 2), 0, 0, svgImage.Width, svgImage.Height);
-
-            // Fill a semi‑transparent rectangle
-            using (SolidBrush fillBrush = new SolidBrush(Color.FromArgb(128, Color.LightBlue)))
+            // Create a graphics object bound to the loaded SVG
+            using (SvgGraphics2D graphics = new SvgGraphics2D(svgImage))
             {
-                graphics.FillRectangle(new Pen(Color.DarkBlue, 1), fillBrush, 20, 20, svgImage.Width - 40, svgImage.Height - 40);
-            }
+                // Example edit: draw a semi‑transparent red rectangle at (10,10) with size 100x50
+                var pen = new Pen(Color.Black, 2);
+                var brush = new Brushes.SolidBrush(Color.FromArgb(128, 255, 0, 0)); // 50% transparent red
+                graphics.DrawRectangle(pen, 10, 10, 100, 50);
+                graphics.FillRectangle(pen, brush, 10, 10, 100, 50);
 
-            // Draw a diagonal line
-            graphics.DrawLine(new Pen(Color.Red, 3), 0, 0, svgImage.Width, svgImage.Height);
-
-            // Add some text
-            Font textFont = new Font("Arial", 24, FontStyle.Bold);
-            graphics.DrawString(textFont, "Edited SVG", new Point(50, 50), Color.DarkGreen);
-
-            // Create a simple path (triangle) and fill it
-            Figure triangleFigure = new Figure { IsClosed = true };
-            triangleFigure.AddShapes(new Shape[]
-            {
-                new PolygonShape(new PointF[]
+                // Finalize drawing and obtain the modified SVG image
+                using (SvgImage editedImage = graphics.EndRecording())
                 {
-                    new PointF(svgImage.Width / 2, 100),
-                    new PointF(svgImage.Width - 100, svgImage.Height - 100),
-                    new PointF(100, svgImage.Height - 100)
-                })
-            });
-
-            GraphicsPath trianglePath = new GraphicsPath();
-            trianglePath.AddFigure(triangleFigure);
-
-            using (SolidBrush triangleBrush = new SolidBrush(Color.Yellow))
-            {
-                graphics.FillPath(new Pen(Color.Orange, 2), triangleBrush, trianglePath);
-            }
-
-            // Finalize and save the edited SVG
-            using (SvgImage resultImage = graphics.EndRecording())
-            {
-                resultImage.Save(outputPath);
+                    // Save the edited SVG back to disk
+                    editedImage.Save(outputPath);
+                }
             }
         }
     }

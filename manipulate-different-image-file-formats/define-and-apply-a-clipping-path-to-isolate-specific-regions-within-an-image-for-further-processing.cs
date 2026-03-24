@@ -11,40 +11,51 @@ using Aspose.Imaging.Masking.Result;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Define a manual clipping mask
+        GraphicsPath manualMask = new GraphicsPath();
+        Figure figure = new Figure();
+        figure.AddShape(new EllipseShape(new RectangleF(50, 50, 100, 100)));
+        figure.AddShape(new RectangleShape(new RectangleF(200, 200, 150, 80)));
+        manualMask.AddFigure(figure);
+
+        // Prepare export options (PNG with transparency)
+        PngOptions exportOptions = new PngOptions
+        {
+            ColorType = PngColorType.TruecolorWithAlpha,
+            Source = new StreamSource(new MemoryStream())
+        };
+
+        // Set up manual masking arguments
+        ManualMaskingArgs args = new ManualMaskingArgs
+        {
+            Mask = manualMask
+        };
 
         // Load the source image as a RasterImage
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Define a manual clipping path (mask)
-            GraphicsPath manualMask = new GraphicsPath();
-            Figure figure = new Figure();
-            // Example shapes: an ellipse and a rectangle
-            figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 150)));
-            figure.AddShape(new RectangleShape(new RectangleF(100, 200, 120, 80)));
-            manualMask.AddFigure(figure);
-
-            // Set up manual masking arguments
-            ManualMaskingArgs maskingArgs = new ManualMaskingArgs();
-            maskingArgs.Mask = manualMask;
-
-            // Export options for the resulting image (transparent PNG)
-            PngOptions exportOptions = new PngOptions
-            {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            };
-
             // Configure masking options
             MaskingOptions maskingOptions = new MaskingOptions
             {
                 Method = SegmentationMethod.Manual,
                 Decompose = false,
-                Args = maskingArgs,
+                Args = args,
                 BackgroundReplacementColor = Color.Transparent,
                 ExportOptions = exportOptions
             };
@@ -53,10 +64,8 @@ class Program
             ImageMasking masking = new ImageMasking(image);
             using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
             {
-                // The foreground (masked region) is typically at index 1
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                using (Image foreground = maskingResult[1].GetImage())
                 {
-                    // Save the isolated region
                     foreground.Save(outputPath, exportOptions);
                 }
             }

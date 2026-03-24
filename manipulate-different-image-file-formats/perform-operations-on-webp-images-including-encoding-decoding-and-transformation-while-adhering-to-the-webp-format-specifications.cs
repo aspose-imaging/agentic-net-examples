@@ -3,86 +3,94 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths (adjust as needed)
-        string inputWebP = "input.webp";
-        string outputPng = "decoded.png";
-        string outputResizedWebP = "resized.webp";
-        string outputCroppedWebP = "cropped.webp";
-        string outputCreatedWebP = "created.webp";
+        // Hardcoded input and output paths
+        string inputWebP = @"C:\Images\input.webp";
+        string outputPng = @"C:\Images\output.png";
+        string outputResizedWebP = @"C:\Images\resized.webp";
+        string outputAnimatedWebP = @"C:\Images\animated.webp";
 
-        // ------------------------------
-        // Decode: Load WebP and save as PNG
-        // ------------------------------
-        using (WebPImage webP = new WebPImage(inputWebP))
+        // Validate input file existence
+        if (!File.Exists(inputWebP))
         {
+            Console.Error.WriteLine($"File not found: {inputWebP}");
+            return;
+        }
+
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPng));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputResizedWebP));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputAnimatedWebP));
+
+        // 1. Load WebP, resize, and save as PNG
+        using (WebPImage webP = (WebPImage)Image.Load(inputWebP))
+        {
+            // Resize to double size using nearest neighbour resampling
+            webP.Resize(webP.Width * 2, webP.Height * 2, ResizeType.NearestNeighbourResample);
             webP.Save(outputPng, new PngOptions());
         }
 
-        // ------------------------------
-        // Transform: Resize WebP (2x larger) and save
-        // ------------------------------
-        using (WebPImage webPResize = new WebPImage(inputWebP))
-        {
-            int newWidth = webPResize.Width * 2;
-            int newHeight = webPResize.Height * 2;
-            webPResize.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-
-            var resizeOptions = new WebPOptions
-            {
-                Lossless = false,
-                Quality = 80f
-            };
-            webPResize.Save(outputResizedWebP, resizeOptions);
-        }
-
-        // ------------------------------
-        // Transform: Crop a central region and save
-        // ------------------------------
-        using (WebPImage webPCrop = new WebPImage(inputWebP))
-        {
-            if (!webPCrop.IsCached)
-                webPCrop.CacheData();
-
-            // Define a rectangle (e.g., central 50% area)
-            int cropWidth = webPCrop.Width / 2;
-            int cropHeight = webPCrop.Height / 2;
-            int x = (webPCrop.Width - cropWidth) / 2;
-            int y = (webPCrop.Height - cropHeight) / 2;
-            var rect = new Rectangle(x, y, cropWidth, cropHeight);
-
-            webPCrop.Crop(rect);
-
-            var cropOptions = new WebPOptions
-            {
-                Lossless = true,
-                Quality = 100f
-            };
-            webPCrop.Save(outputCroppedWebP, cropOptions);
-        }
-
-        // ------------------------------
-        // Encode: Create a new blank WebP, draw a red rectangle, and save
-        // ------------------------------
-        var createOptions = new WebPOptions
+        // 2. Create a new WebP image from scratch, fill with solid color, and save
+        WebPOptions createOptions = new WebPOptions
         {
             Lossless = true,
             Quality = 100f
         };
         using (WebPImage newWebP = new WebPImage(200, 200, createOptions))
         {
-            // Draw a solid red rectangle covering the whole canvas
+            // Fill the canvas with blue color
             Graphics graphics = new Graphics(newWebP);
-            SolidBrush brush = new SolidBrush(Color.Red);
+            SolidBrush brush = new SolidBrush(Color.Blue);
             graphics.FillRectangle(brush, newWebP.Bounds);
+            // Save the created WebP
+            newWebP.Save(outputResizedWebP);
+        }
 
-            // Save the created WebP image
-            newWebP.Save(outputCreatedWebP);
+        // 3. Create an animated WebP with simple frames
+        WebPOptions animOptions = new WebPOptions
+        {
+            Lossless = true,
+            Quality = 100f,
+            AnimLoopCount = 0, // infinite loop
+            AnimBackgroundColor = (uint)Color.White.ToArgb()
+        };
+        using (WebPImage animatedWebP = new WebPImage(100, 100, animOptions))
+        {
+            SolidBrush redBrush = new SolidBrush(Color.Red);
+            SolidBrush greenBrush = new SolidBrush(Color.Green);
+
+            // Add 5 frames with a moving red circle
+            for (int i = 0; i < 5; i++)
+            {
+                WebPFrameBlock frame = new WebPFrameBlock(100, 100);
+                Graphics g = new Graphics(frame);
+                int radius = 10 + i * 5;
+                int centerX = 50;
+                int centerY = 50;
+                g.FillEllipse(redBrush, new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2));
+                animatedWebP.AddBlock(frame);
+            }
+
+            // Add 5 frames with a moving green circle
+            for (int i = 0; i < 5; i++)
+            {
+                WebPFrameBlock frame = new WebPFrameBlock(100, 100);
+                Graphics g = new Graphics(frame);
+                int radius = 10 + i * 5;
+                int centerX = 50;
+                int centerY = 50;
+                g.FillEllipse(greenBrush, new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2));
+                animatedWebP.AddBlock(frame);
+            }
+
+            // Save the animated WebP
+            animatedWebP.Save(outputAnimatedWebP);
         }
     }
 }

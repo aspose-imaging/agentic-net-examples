@@ -2,36 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
-namespace MetafileProcessing
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\output.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Input EMF file path
-            string inputPath = Path.Combine("C:", "Metafiles", "sample.emf");
-            // Output PNG file path
-            string outputPath = Path.Combine("C:", "Metafiles", "sample_converted.png");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Load EMF image
-            using (Image image = Image.Load(inputPath))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the metafile
+        using (Image image = Image.Load(inputPath))
+        {
+            // Access font information if the image is a MetaImage
+            MetaImage meta = image as MetaImage;
+            if (meta != null)
             {
-                // Configure vector rasterization options
-                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
+                string[] usedFonts = meta.GetUsedFonts();
+                Console.WriteLine("Used fonts:");
+                foreach (string font in usedFonts)
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageSize = image.Size
-                };
+                    Console.WriteLine(font);
+                }
 
-                // Set PNG options with vector rasterization
-                using (PngOptions pngOptions = new PngOptions())
+                string[] missedFonts = meta.GetMissedFonts();
+                Console.WriteLine("Missed fonts:");
+                foreach (string font in missedFonts)
                 {
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
-                    // Save as PNG
-                    image.Save(outputPath, pngOptions);
+                    Console.WriteLine(font);
                 }
             }
+
+            // Convert the metafile to PNG format
+            PngOptions pngOptions = new PngOptions();
+            image.Save(outputPath, pngOptions);
         }
     }
 }

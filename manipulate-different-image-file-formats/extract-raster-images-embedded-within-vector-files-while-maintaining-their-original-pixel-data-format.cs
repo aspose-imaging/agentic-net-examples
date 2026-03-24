@@ -1,44 +1,78 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the vector file that may contain embedded raster images (e.g., .cdr, .svg, .pdf)
-        string inputFile = "test.cdr";
+        string inputPath = "input.cdr";
+        string outputFolder = "ExtractedImages";
 
-        // Load the file using Aspose.Imaging's generic loader
-        using (Image image = Image.Load(inputFile))
+        if (!File.Exists(inputPath))
         {
-            // Cast the loaded image to VectorImage to access vector‑specific members
-            var vectorImage = image as VectorImage;
-            if (vectorImage == null)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(outputFolder);
+
+        using (Image image = Image.Load(inputPath))
+        {
+            VectorImage vectorImage = (VectorImage)image;
+            var embeddedImages = vectorImage.GetEmbeddedImages();
+
+            int i = 0;
+            foreach (EmbeddedImage im in embeddedImages)
             {
-                Console.WriteLine("The provided file is not a supported vector format.");
-                return;
-            }
+                using (im)
+                {
+                    FileFormat format = im.Image.FileFormat;
 
-            // Retrieve all embedded raster images
-            EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
+                    ImageOptionsBase saveOptions;
+                    string extension;
 
-            int index = 0;
-            foreach (EmbeddedImage embedded in embeddedImages)
-            {
-                // Build an output file name that preserves the original image format
-                string extension = "." + embedded.Image.FileFormat.ToString().ToLower();
-                string outputFile = $"image{index}{extension}";
+                    switch (format)
+                    {
+                        case FileFormat.Jpeg:
+                            saveOptions = new JpegOptions();
+                            extension = ".jpg";
+                            break;
+                        case FileFormat.Png:
+                            saveOptions = new PngOptions();
+                            extension = ".png";
+                            break;
+                        case FileFormat.Bmp:
+                            saveOptions = new BmpOptions();
+                            extension = ".bmp";
+                            break;
+                        case FileFormat.Gif:
+                            saveOptions = new GifOptions();
+                            extension = ".gif";
+                            break;
+                        case FileFormat.Tiff:
+                            saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                            extension = ".tiff";
+                            break;
+                        default:
+                            saveOptions = new PngOptions();
+                            extension = ".png";
+                            break;
+                    }
 
-                // Save the embedded raster image using its native format
-                // (Save(string) keeps the original pixel data format)
-                embedded.Image.Save(outputFile);
+                    string outputPath = Path.Combine(outputFolder, $"image{i}{extension}");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    im.Image.Save(outputPath, saveOptions);
+                }
 
-                // Dispose the EmbeddedImage instance as required by the lifecycle rule
-                embedded.Dispose();
-
-                Console.WriteLine($"Extracted embedded image saved to: {outputFile}");
-                index++;
+                i++;
             }
         }
     }

@@ -1,29 +1,36 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Load a TIFF image from disk
-        using (Image image = Image.Load("input.tif"))
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Retrieve the original saving options derived from the loaded file
-            ImageOptionsBase originalOptions = image.GetOriginalOptions();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // If the options are specific to TIFF, cast to TiffOptions to access native metadata
-            if (originalOptions is TiffOptions tiffOptions)
-            {
-                // Example: output some TIFF-specific settings
-                Console.WriteLine($"BitsPerSample: {tiffOptions.BitsPerSample}");
-                Console.WriteLine($"Compression: {tiffOptions.Compression}");
-                Console.WriteLine($"Photometric: {tiffOptions.Photometric}");
-            }
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image using the original options to preserve its original characteristics
-            image.Save("output.tif", originalOptions);
+        // Load the TIFF image
+        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        {
+            // Retrieve the original saving options from the loaded image
+            ImageOptionsBase originalOptions = tiffImage.GetOriginalOptions();
+
+            // Save the image using the original options to preserve metadata and settings
+            tiffImage.Save(outputPath, originalOptions);
         }
     }
 }

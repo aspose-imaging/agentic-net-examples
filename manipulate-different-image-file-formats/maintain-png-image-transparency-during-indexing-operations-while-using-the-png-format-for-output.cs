@@ -1,44 +1,46 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input and output PNG files
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output_indexed.png";
+        string outputPath = "output.png";
 
-        // Load the source image (must contain transparency)
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for palette generation
-            RasterImage raster = (RasterImage)image;
-
-            // Generate an optimal 256‑color palette (preserves transparency)
-            var palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256, PaletteMiningMethod.Histogram);
-
-            // Create a new PNG image with indexed color type from the raster source
-            using (PngImage indexedPng = new PngImage(raster, PngColorType.IndexedColor))
+            // Prepare PNG save options with indexed color and maximum compression
+            PngOptions pngOptions = new PngOptions
             {
-                // Preserve transparency in the indexed PNG
-                indexedPng.HasTransparentColor = true;
-                indexedPng.TransparentColor = Color.Transparent;
+                Progressive = true,
+                ColorType = PngColorType.IndexedColor,
+                CompressionLevel = 9,
+                // Generate a palette that best fits the source image (preserves transparency where possible)
+                Palette = ColorPaletteHelper.GetCloseImagePalette(
+                    (RasterImage)image,
+                    256,
+                    PaletteMiningMethod.Histogram)
+            };
 
-                // Configure PNG save options
-                PngOptions saveOptions = new PngOptions
-                {
-                    CompressionLevel = 9,
-                    ColorType = PngColorType.IndexedColor,
-                    Palette = palette,
-                    Progressive = true
-                };
-
-                // Save the indexed PNG while keeping transparency
-                indexedPng.Save(outputPath, saveOptions);
-            }
+            // Save the image using the specified options
+            image.Save(outputPath, pngOptions);
         }
     }
 }

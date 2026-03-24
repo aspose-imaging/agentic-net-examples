@@ -1,51 +1,49 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input PNG with transparent background
-        string inputPath = "input.png";
-        // Output PNG with background replaced
-        string outputPath = "output.png";
-        // Color to replace transparent pixels (example: solid blue)
-        Aspose.Imaging.Color replaceColor = Aspose.Imaging.Color.Blue;
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the PNG as a raster image
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Get the full image bounds
-            Aspose.Imaging.Rectangle bounds = raster.Bounds;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Load ARGB pixel data
-            int[] pixels = raster.LoadArgb32Pixels(bounds);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Replace fully transparent pixels (alpha == 0) with the specified color
-            int replaceArgb = (0xFF << 24) | (replaceColor.ToArgb() & 0x00FFFFFF);
-            for (int i = 0; i < pixels.Length; i++)
+        // Desired background color (opaque)
+        // Example: solid magenta
+        Color backgroundColor = Color.FromArgb(255, 255, 0, 255);
+
+        // Load the PNG image
+        using (PngImage pngImage = new PngImage(inputPath))
+        {
+            // Iterate over all pixels and replace fully transparent ones with the background color
+            for (int y = 0; y < pngImage.Height; y++)
             {
-                int alpha = (pixels[i] >> 24) & 0xFF;
-                if (alpha == 0)
+                for (int x = 0; x < pngImage.Width; x++)
                 {
-                    pixels[i] = replaceArgb;
+                    Color pixel = pngImage.GetPixel(x, y);
+                    if (pixel.A == 0) // fully transparent
+                    {
+                        pngImage.SetPixel(x, y, backgroundColor);
+                    }
                 }
             }
 
-            // Save the modified pixel data back to the image
-            raster.SaveArgb32Pixels(bounds, pixels);
-
-            // Prepare PNG save options
-            PngOptions pngOptions = new PngOptions
-            {
-                // Ensure the output is written as a PNG file
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            // Save the image with PNG encoding
-            raster.Save(outputPath, pngOptions);
+            // Save the modified image, preserving PNG encoding
+            pngImage.Save(outputPath);
         }
     }
 }

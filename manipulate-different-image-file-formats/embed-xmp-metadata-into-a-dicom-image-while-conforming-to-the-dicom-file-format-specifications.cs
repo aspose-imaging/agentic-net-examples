@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
@@ -10,12 +11,18 @@ class Program
         string inputPath = "input.jpg";
         string outputPath = "output.dcm";
 
-        using (Image rasterImage = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            var dicomOptions = new DicomOptions();
-            rasterImage.Save(outputPath, dicomOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("DICOM image saved.");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Image image = Image.Load(inputPath))
+        {
+            var dicomOptions = new DicomOptions();
+            image.Save(outputPath, dicomOptions);
+        }
     }
 }

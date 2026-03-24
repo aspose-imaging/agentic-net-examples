@@ -1,56 +1,76 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        // Input TIFF file
+        string inputPath = "input\\sample.tif";
+
+        // Output files
+        string resizedPath = "output\\resized.tif";
+        string croppedPath = "output\\cropped.tif";
+        string rotatedPath = "output\\rotated.tif";
+        string jpegPath = "output\\converted.jpg";
+
+        // Verify input exists
+        if (!File.Exists(inputPath))
         {
-            // Input and output file paths
-            string inputPath = "input.tif";
-            string outputTiffPath = "output_resized_cropped_rotated.tif";
-            string outputJpegPath = "output_converted.jpg";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to TiffImage for TIFF‑specific operations
-                TiffImage tiff = (TiffImage)image;
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(resizedPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(croppedPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(rotatedPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(jpegPath));
 
-                // Cache data for better performance
-                if (!tiff.IsCached)
-                    tiff.CacheData();
+        // ---------- Resize ----------
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Resize to 200x200 using nearest neighbour
+            image.Resize(200, 200, ResizeType.NearestNeighbourResample);
 
-                // Resize to 800x600 pixels
-                tiff.Resize(800, 600);
+            // Save resized TIFF
+            var resizeOptions = new TiffOptions(TiffExpectedFormat.Default);
+            image.Save(resizedPath, resizeOptions);
+        }
 
-                // Crop a rectangle (x=100, y=100, width=400, height=300)
-                var cropRect = new Rectangle(100, 100, 400, 300);
-                tiff.Crop(cropRect);
+        // ---------- Crop ----------
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Define crop rectangle (e.g., top-left 100x100)
+            var cropRect = new Rectangle(0, 0, 100, 100);
+            image.Crop(cropRect);
 
-                // Rotate 90 degrees clockwise
-                tiff.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            // Save cropped TIFF
+            var cropOptions = new TiffOptions(TiffExpectedFormat.Default);
+            image.Save(croppedPath, cropOptions);
+        }
 
-                // Save the processed image as TIFF with LZW compression
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    tiffOptions.Compression = TiffCompressions.Lzw;
-                    tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                    tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                    tiff.Save(outputTiffPath, tiffOptions);
-                }
+        // ---------- Rotate ----------
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Rotate 90 degrees clockwise, expand canvas, white background
+            image.Rotate(90f, true, Color.White);
 
-                // Convert and save the same image as JPEG with quality 90
-                using (JpegOptions jpegOptions = new JpegOptions())
-                {
-                    jpegOptions.Quality = 90;
-                    tiff.Save(outputJpegPath, jpegOptions);
-                }
-            }
+            // Save rotated TIFF
+            var rotateOptions = new TiffOptions(TiffExpectedFormat.Default);
+            image.Save(rotatedPath, rotateOptions);
+        }
+
+        // ---------- Convert to JPEG ----------
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            var jpegOptions = new JpegOptions();
+            image.Save(jpegPath, jpegOptions);
         }
     }
 }

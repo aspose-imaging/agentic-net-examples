@@ -1,32 +1,34 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
 
-class RetrieveTiffOriginalOptions
+class Program
 {
     static void Main()
     {
-        // Path to the source TIFF image
-        string inputPath = "input.tif";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.tif";
 
-        // Load the image using Aspose.Imaging
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the loaded image to TiffImage to access TIFF‑specific members
-            TiffImage tiffImage = (TiffImage)image;
+            // Retrieve the original saving options from the loaded image
+            ImageOptionsBase originalOptions = image.GetOriginalOptions();
 
-            // Retrieve the original saving options derived from the source file
-            TiffOptions originalOptions = (TiffOptions)tiffImage.GetOriginalOptions();
-
-            // Access native compression type
-            var compression = originalOptions.Compression;
-
-            // Example: output compression and other relevant settings
-            Console.WriteLine($"Original Compression: {compression}");
-            Console.WriteLine($"Bits Per Sample: {originalOptions.BitsPerSample}");
-            Console.WriteLine($"Photometric: {originalOptions.Photometric}");
-            Console.WriteLine($"Resolution Unit: {originalOptions.ResolutionUnit}");
+            // Save the image using the original options to preserve compression, metadata, etc.
+            image.Save(outputPath, originalOptions);
         }
     }
 }

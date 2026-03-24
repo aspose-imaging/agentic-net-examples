@@ -2,34 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Cmx;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.cmx";
+        string outputPath = @"c:\temp\sample.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            string inputPath = args.Length > 0 ? args[0] : "input.cmx";
-            string outputPath = args.Length > 1 ? args[1] : "output.png";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            using (Image image = Image.Load(inputPath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the CMX image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Set up rasterization options for CMX
+            var rasterOptions = new CmxRasterizationOptions
             {
-                using (PngOptions pngOptions = new PngOptions())
-                {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                    };
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
+                // Optional: set background color, page size, etc.
+                // BackgroundColor = Color.White,
+                // PageWidth = 0, // preserve aspect ratio
+                // PageHeight = 0
+            };
 
-                    image.Save(outputPath, pngOptions);
-                }
-            }
+            // Configure PNG save options with the rasterization settings
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            // Save the rasterized image as PNG
+            image.Save(outputPath, pngOptions);
         }
     }
 }

@@ -1,40 +1,57 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length < 2)
+        // Hardcoded list of input image files (raster or vector formats)
+        string[] inputFiles = new[]
         {
-            Console.WriteLine("Usage: <inputFile> <outputSvg>");
-            return;
-        }
+            @"C:\Images\sample.png",
+            @"C:\Images\vector.wmf",
+            @"C:\Images\example.svgz"
+        };
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-
-        using (Image image = Image.Load(inputPath))
+        foreach (string inputPath in inputFiles)
         {
-            var vectorOptions = new VectorRasterizationOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            var svgOptions = new SvgOptions
+            // Define the output SVG file path (append .svg to the original name)
+            string outputPath = inputPath + ".svg";
+
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image using Aspose.Imaging
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = vectorOptions,
-                TextAsShapes = true,
-                KeepMetadata = true
-            };
+                // Configure rasterization options: use the source image size as page size
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-            image.Save(outputPath, svgOptions);
+                // Configure SVG save options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    KeepMetadata = true,      // Preserve original metadata
+                    TextAsShapes = false,    // Keep text as text (not shapes)
+                    Compress = false         // No compression for plain SVG
+                };
+
+                // Save the image as SVG
+                image.Save(outputPath, svgOptions);
+            }
         }
     }
 }

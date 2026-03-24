@@ -1,33 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class TiffLosslessCompression
+class Program
 {
     static void Main()
     {
-        // Input TIFF file path
-        string inputPath = @"C:\Images\input.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.tif";
+        string outputPath = @"C:\Temp\output_compressed.tif";
 
-        // Output TIFF file path (compressed)
-        string outputPath = @"C:\Images\output_compressed.tif";
-
-        // Load the TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Retrieve the original saving options to preserve original settings (bit depth, etc.)
-            TiffOptions saveOptions = (TiffOptions)tiffImage.GetOriginalOptions();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Set a lossless compression method (LZW)
-            saveOptions.Compression = TiffCompressions.Lzw;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Optionally, enable a predictor for better LZW compression on continuous-tone images
-            saveOptions.Predictor = TiffPredictor.Horizontal;
+        // Load the source TIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure lossless LZW compression for the output TIFF
+            var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
+            {
+                Compression = TiffCompressions.Lzw,
+                // Optional: predictor can improve LZW size for continuous-tone images
+                Predictor = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPredictor.Horizontal
+            };
 
-            // Save the image with the new compression while keeping the TIFF format
-            tiffImage.Save(outputPath, saveOptions);
+            // Save the image with the specified options
+            image.Save(outputPath, saveOptions);
         }
     }
 }

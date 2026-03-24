@@ -1,35 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
-class DicomResizeExample
+class Program
 {
     static void Main()
     {
-        // Input DICOM file path
-        string inputPath = @"c:\temp\sample.dicom";
+        // Hardcoded input and output paths
+        string inputPath = "input.dcm";
+        string outputPath = "output_resized.dcm";
 
-        // Output DICOM file path
-        string outputPath = @"c:\temp\sample_resized.dicom";
-
-        // Desired dimensions
-        int newWidth = 512;
-        int newHeight = 512;
-
-        // Load the DICOM image using the generic Image.Load method
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to DicomImage to access DICOM‑specific functionality
-            DicomImage dicomImage = (DicomImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Resize the image; metadata is retained automatically
-            dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prepare DICOM save options (preserves existing metadata)
-            DicomOptions saveOptions = new DicomOptions();
+        // Load the DICOM image
+        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        {
+            // Desired dimensions (example: 512x512)
+            int newWidth = 512;
+            int newHeight = 512;
 
-            // Save the resized image back to DICOM format
+            // Resize the image while preserving metadata
+            dicomImage.Resize(newWidth, newHeight, ResizeType.BilinearResample);
+
+            // Save the resized image as DICOM, keeping original metadata
+            var saveOptions = new DicomOptions { KeepMetadata = true };
             dicomImage.Save(outputPath, saveOptions);
         }
     }

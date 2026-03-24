@@ -1,35 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Path to the large PNG file to be read.
-        string sourcePath = @"C:\Images\large_input.png";
+        // Hardcoded input and output paths
+        string inputPath = "input\\large_image.png";
+        string outputPath = "output\\large_image_copy.png";
 
-        // Path where the image will be saved after loading (optional, demonstrates preserving fidelity).
-        string destinationPath = @"C:\Images\large_output.png";
-
-        // Load the PNG image using the constructor that accepts a file path.
-        // This follows the provided load rule and ensures the image is opened efficiently.
-        using (PngImage pngImage = new PngImage(sourcePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Example of accessing image properties without fully materializing extra data.
-            int width = pngImage.Width;
-            int height = pngImage.Height;
-            Console.WriteLine($"Loaded PNG: {width}x{height} pixels");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Retrieve the original saving options to preserve all original settings
-            // (bit depth, color type, compression level, etc.).
-            PngOptions originalOptions = (PngOptions)pngImage.GetOriginalOptions();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image using the original options to maintain full fidelity.
-            // This follows the provided save rule.
-            pngImage.Save(destinationPath, originalOptions);
+        // Load the PNG with a memory buffer hint to limit internal memory usage
+        var loadOptions = new LoadOptions { BufferSizeHint = 100 }; // 100 MB buffer hint
+        using (Image image = Image.Load(inputPath, loadOptions))
+        {
+            // Prepare PNG save options to preserve fidelity and metadata
+            var saveOptions = new PngOptions
+            {
+                CompressionLevel = 9,      // Maximum lossless compression
+                KeepMetadata = true        // Preserve original metadata
+            };
+
+            // Save the image to the output path
+            image.Save(outputPath, saveOptions);
         }
     }
 }

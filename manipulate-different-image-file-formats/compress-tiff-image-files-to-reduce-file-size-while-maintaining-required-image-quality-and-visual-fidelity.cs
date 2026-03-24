@@ -4,43 +4,36 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output_compressed.tif";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Expect two arguments: input TIFF path and output TIFF path.
-            if (args.Length < 2)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source TIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure TIFF save options with LZW compression (lossless) and a predictor
+            var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
             {
-                Console.WriteLine("Usage: ImagingNet <input.tif> <output.tif>");
-                return;
-            }
+                Compression = TiffCompressions.Lzw,
+                Predictor = TiffPredictor.Horizontal
+            };
 
-            string inputPath = args[0];
-            string outputPath = args[1];
-
-            // Verify input file exists.
-            if (!File.Exists(inputPath))
-            {
-                Console.WriteLine($"Input file not found: {inputPath}");
-                return;
-            }
-
-            // Load the source TIFF image.
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure TIFF save options with LZW compression to reduce file size.
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    Compression = TiffCompressions.Lzw
-                };
-
-                // Save the image using the configured options.
-                image.Save(outputPath, saveOptions);
-            }
-
-            Console.WriteLine($"Compressed TIFF saved to: {outputPath}");
+            // Save the image using the configured options
+            image.Save(outputPath, saveOptions);
         }
     }
 }

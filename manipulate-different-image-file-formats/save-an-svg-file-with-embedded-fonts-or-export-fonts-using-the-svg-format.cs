@@ -1,46 +1,50 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-class SaveSvgWithEmbeddedFonts
+class Program
 {
     static void Main()
     {
-        // Input WMF (or any vector) file path
-        string inputPath = @"C:\temp\test.wmf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample.cdr.svg";
 
-        // Output SVG file path – fonts will be embedded
-        string outputPath = @"C:\temp\test_with_fonts.svg";
-
-        // Load the vector image using the unified Image.Load method
-        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create SVG save options
-            SvgOptions svgOptions = new SvgOptions();
-
-            // Keep text as text (do NOT convert to shapes) so fonts can be embedded
-            svgOptions.TextAsShapes = false;
-
-            // Assign the default resource keeper callback – it handles font and image resources
-            svgOptions.Callback = new SvgResourceKeeperCallback();
-
-            // Configure rasterization options specific to WMF
-            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
-            {
-                PageSize = wmfImage.Size,                     // Preserve original size
-                BackgroundColor = Color.White,                // Optional background
-                RenderMode = WmfRenderMode.Auto               // Auto-select rendering mode
-            };
-
-            // Attach rasterization options to the SVG options
-            svgOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save the image as SVG with embedded fonts
-            wmfImage.Save(outputPath, svgOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("SVG saved with embedded fonts to: " + outputPath);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare SVG export options
+            var svgOptions = new SvgOptions
+            {
+                // Do not convert text to shapes so fonts can be embedded
+                TextAsShapes = false,
+                // Use the default resource keeper callback to handle fonts and other resources
+                Callback = new SvgResourceKeeperCallback()
+            };
+
+            // If the source is a vector image, set appropriate rasterization options
+            if (image is VectorImage vectorImage)
+            {
+                svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = vectorImage.Size
+                };
+            }
+
+            // Save the image as SVG with embedded fonts
+            image.Save(outputPath, svgOptions);
+        }
     }
 }

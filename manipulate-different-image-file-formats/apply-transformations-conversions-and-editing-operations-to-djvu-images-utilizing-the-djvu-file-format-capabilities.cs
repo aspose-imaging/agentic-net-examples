@@ -1,38 +1,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
-class DjvuProcessingExample
+class Program
 {
     static void Main()
     {
-        // Input and output file paths
-        string inputPath = @"C:\Temp\sample.djvu";
-        string outputPath = @"C:\Temp\sample_processed.png";
+        string inputPath = "input\\sample.djvu";
+        string outputPath = "output\\resized.png";
+        string pageOutputPattern = "output\\page_{0}.png";
 
-        // Load the DjVu document from a file stream using the provided LoadDocument method
-        using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-        using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+        if (!File.Exists(inputPath))
         {
-            // Adjust contrast (range -100 to 100)
-            djvuImage.AdjustContrast(30f);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Adjust brightness (range -255 to 255)
-            djvuImage.AdjustBrightness(20);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Rotate the image by 5 degrees around its center
-            djvuImage.Rotate(5f);
+        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+        {
+            djvuImage.Resize(djvuImage.Width * 2, djvuImage.Height * 2, ResizeType.NearestNeighbourResample);
 
-            // Apply a Gaussian blur filter to the entire image
-            djvuImage.Filter(
-                djvuImage.Bounds,
-                new GaussianBlurFilterOptions(5, 4.0));
+            using (var pngOptions = new PngOptions())
+            {
+                djvuImage.Save(outputPath, pngOptions);
+            }
 
-            // Save the processed image as PNG using the provided Save method and PngOptions
-            djvuImage.Save(outputPath, new PngOptions());
+            for (int i = 0; i < djvuImage.PageCount; i++)
+            {
+                using (RasterImage page = (RasterImage)djvuImage.Pages[i])
+                {
+                    if (!page.IsCached) page.CacheData();
+                    page.Grayscale();
+
+                    string pagePath = string.Format(pageOutputPattern, i + 1);
+                    Directory.CreateDirectory(Path.GetDirectoryName(pagePath));
+
+                    using (var pngOptions = new PngOptions())
+                    {
+                        page.Save(pagePath, pngOptions);
+                    }
+                }
+            }
         }
     }
 }

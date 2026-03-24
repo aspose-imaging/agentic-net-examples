@@ -1,33 +1,42 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output DICOM file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.dcm";
-        string outputPath = args.Length > 1 ? args[1] : "output_resized.dcm";
+        // Hardcoded input and output paths
+        string inputPath = "sample.dcm";
+        string outputPath = "resized_output.dcm";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DICOM image
-        using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Upscale by 2x using NearestNeighbour resampling
-            dicomImage.Resize(dicomImage.Width * 2, dicomImage.Height * 2, ResizeType.NearestNeighbourResample);
+            // Cast to DicomImage to access DICOM‑specific methods
+            DicomImage dicomImage = (DicomImage)image;
 
-            // Downscale by 2x using Bilinear resampling
-            dicomImage.Resize(dicomImage.Width / 2, dicomImage.Height / 2, ResizeType.BilinearResample);
+            // Calculate new dimensions (example: double size)
+            int newWidth = dicomImage.Width * 2;
+            int newHeight = dicomImage.Height * 2;
 
-            // Increase width proportionally (height adjusted automatically) using HighQuality resampling
-            dicomImage.ResizeWidthProportionally(dicomImage.Width * 3, ResizeType.HighQualityResample);
+            // Resize while keeping DICOM compliance
+            dicomImage.Resize(newWidth, newHeight, ResizeType.BilinearResample);
 
-            // Decrease height proportionally (width adjusted automatically) using NearestNeighbour resampling
-            dicomImage.ResizeHeightProportionally(dicomImage.Height / 2, ResizeType.NearestNeighbourResample);
-
-            // Save the resized image back to DICOM format, preserving compliance
-            var dicomOptions = new DicomOptions();
-            dicomImage.Save(outputPath, dicomOptions);
+            // Save back to DICOM format with default options
+            dicomImage.Save(outputPath, new DicomOptions());
         }
     }
 }

@@ -1,44 +1,48 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output BMP file paths
+        // Hardcoded input and output paths
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
 
-        // Load the BMP image as a RasterImage
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load BMP image, perform operations, and save
+        using (BmpImage image = (BmpImage)Image.Load(inputPath))
         {
             // Cache data for better performance
             if (!image.IsCached)
-            {
                 image.CacheData();
-            }
 
-            // Increase brightness by 30 (range -255 to 255)
+            // Resize to 200x200 pixels
+            image.Resize(200, 200);
+
+            // Crop a rectangle (10,10) with size 180x180
+            image.Crop(new Rectangle(10, 10, 180, 180));
+
+            // Increase brightness by 30 units
             image.AdjustBrightness(30);
 
-            // Increase contrast by 20%
-            image.AdjustContrast(1.2f);
+            // Increase contrast by 0.2 (float)
+            image.AdjustContrast(0.2f);
 
-            // Apply gamma correction (value less than 1 darkens the image)
-            image.AdjustGamma(0.9f);
-
-            // Crop a rectangle starting at (50,50) with width=200 and height=150
-            var cropRect = new Rectangle(50, 50, 200, 150);
-            image.Crop(cropRect);
-
-            // Resize the image to 400x300 using the default NearestNeighbourResample
-            image.Resize(400, 300);
-
-            // Save the processed image as BMP
-            BmpOptions bmpOptions = new BmpOptions();
-            image.Save(outputPath, bmpOptions);
+            // Save the processed image
+            image.Save(outputPath);
         }
     }
 }

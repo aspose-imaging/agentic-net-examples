@@ -4,48 +4,56 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output SVG file paths
-        string dir = @"C:\temp\";
-        string inputSvgPath = Path.Combine(dir, "input.svg");
-        string outputSvgPath = Path.Combine(dir, "output.svg");
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.svg";
+        string outputPath = @"C:\Temp\output.svg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the existing SVG image
-        using (Image image = Image.Load(inputSvgPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast the loaded image to SvgImage
+            // Cast to SvgImage
             SvgImage svgImage = (SvgImage)image;
 
-            // Create a SvgGraphics2D object for drawing on the loaded SVG
+            // Create graphics object for modification
             SvgGraphics2D graphics = new SvgGraphics2D(svgImage);
 
-            // Draw a red rectangle outline
-            Pen redPen = new Pen(Color.Red, 2);
-            graphics.DrawRectangle(redPen, 50, 50, 200, 100);
+            // Draw a red rectangle border
+            Pen rectPen = new Pen(Color.Red, 2);
+            graphics.DrawRectangle(rectPen, 10, 10, svgImage.Width - 20, svgImage.Height - 20);
 
-            // Fill the same rectangle with blue color using a SolidBrush
-            using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
+            // Fill a semi-transparent blue rectangle
+            Pen fillPen = new Pen(Color.Blue, 1);
+            SolidBrush fillBrush = new SolidBrush(Color.FromArgb(128, Color.Blue));
+            graphics.FillRectangle(fillPen, fillBrush, 20, 20, svgImage.Width - 40, svgImage.Height - 40);
+
+            // Draw a diagonal green line
+            Pen linePen = new Pen(Color.Green, 3);
+            graphics.DrawLine(linePen, 0, 0, svgImage.Width, svgImage.Height);
+
+            // Add some text
+            Font textFont = new Font("Arial", 36, FontStyle.Regular);
+            graphics.DrawString(textFont, "Modified SVG", new Point(50, 50), Color.Black);
+
+            // Finalize and save the modified SVG
+            using (SvgImage resultImage = graphics.EndRecording())
             {
-                graphics.FillRectangle(redPen, blueBrush, 50, 50, 200, 100);
-            }
-
-            // Draw a green diagonal line across the entire image
-            Pen greenPen = new Pen(Color.Green, 1);
-            graphics.DrawLine(greenPen, 0, 0, svgImage.Width, svgImage.Height);
-
-            // Draw a text string onto the SVG
-            Font font = new Font("Arial", 24, FontStyle.Regular);
-            graphics.DrawString(font, "Modified SVG", new Point(100, 200), Color.Black);
-
-            // Finalize the drawing and obtain the modified SVG image
-            using (SvgImage resultSvg = graphics.EndRecording())
-            {
-                // Save the modified SVG to the output path
-                resultSvg.Save(outputSvgPath);
+                resultImage.Save(outputPath);
             }
         }
     }
