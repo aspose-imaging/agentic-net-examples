@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -9,52 +10,59 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input raster image and output APNG file paths
-        string sourcePath = "not_animated.png";
-        string outputPath = "animated_output.png";
+        // Hardcoded input and output paths
+        string inputPath = "not_animated.png";
+        string outputPath = "raster_animation.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(sourcePath))
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Configure APNG creation options; binding the output file via FileCreateSource
-            ApngOptions apngOptions = new ApngOptions
+            // Configure APNG creation options with bound output source
+            ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 70, // 70 ms per frame
+                DefaultFrameTime = (uint)70, // default frame duration in ms
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create the APNG canvas with the same dimensions as the source image
-            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, sourceImage.Width, sourceImage.Height))
+            // Create the APNG canvas bound to the output file
+            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
-                // Remove the default frame that exists upon creation
+                // Remove the default frame added during creation
                 apngImage.RemoveAllFrames();
 
-                // Add the first frame (original image)
+                // Add the first frame
                 apngImage.AddFrame(sourceImage);
 
-                // Add intermediate frames with varying adjustments
-                int totalFrames = 10;
-                for (int i = 1; i < totalFrames - 1; i++)
+                // Define animation parameters
+                int animationDuration = 1000; // total duration in ms
+                int frameDuration = 70;       // per-frame duration in ms
+                int numOfFrames = animationDuration / frameDuration;
+                int halfFrames = numOfFrames / 2;
+
+                // Add intermediate frames with varying gamma adjustments
+                for (int frameIndex = 1; frameIndex < numOfFrames - 1; ++frameIndex)
                 {
-                    // Append a new frame based on the source image
                     apngImage.AddFrame(sourceImage);
-
-                    // Retrieve the newly added frame
-                    ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-
-                    // Apply varying visual modifications per frame
-                    int brightness = i * 10;            // Incremental brightness
-                    float gamma = 1.0f + i * 0.1f;      // Incremental gamma
-
-                    frame.AdjustBrightness(brightness);
-                    frame.AdjustGamma(gamma);
+                    ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                    float gamma = frameIndex >= halfFrames ? numOfFrames - frameIndex - 1 : frameIndex;
+                    lastFrame.AdjustGamma(gamma);
                 }
 
-                // Add the final frame (original image)
+                // Add the final frame
                 apngImage.AddFrame(sourceImage);
 
-                // Save the APNG; the file is already bound to the output path
+                // Save the bound APNG image
                 apngImage.Save();
             }
         }
