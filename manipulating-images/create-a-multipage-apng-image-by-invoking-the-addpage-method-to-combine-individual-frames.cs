@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -9,47 +10,54 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input frame file paths (replace with actual paths)
-        string[] frameFiles = new string[]
+        // Hardcoded input frame paths
+        string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
+        // Hardcoded output path
+        string outputPath = "output_animation.png";
+
+        // Verify each input file exists
+        foreach (var inputPath in inputPaths)
         {
-            "frame1.png",
-            "frame2.png",
-            "frame3.png"
-        };
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+        }
 
-        // Output APNG file path
-        string outputPath = "output_animation.apng";
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the first frame to obtain canvas size
-        using (RasterImage firstFrame = (RasterImage)Image.Load(frameFiles[0]))
+        // Load first frame to obtain canvas size
+        using (RasterImage firstFrame = (RasterImage)Image.Load(inputPaths[0]))
         {
             int width = firstFrame.Width;
             int height = firstFrame.Height;
 
-            // Configure APNG creation options
+            // Set up APNG creation options
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // default frame duration in ms
+                DefaultFrameTime = 100, // frame duration in ms
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create the APNG image canvas
+            // Create APNG image canvas
             using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
             {
-                // Remove the default empty frame
+                // Remove the default single frame
                 apngImage.RemoveAllFrames();
 
-                // Add each loaded frame as a page
-                foreach (string framePath in frameFiles)
+                // Add each frame to the animation
+                foreach (var path in inputPaths)
                 {
-                    using (RasterImage frame = (RasterImage)Image.Load(framePath))
+                    using (RasterImage frame = (RasterImage)Image.Load(path))
                     {
-                        apngImage.AddPage(frame);
+                        apngImage.AddFrame(frame);
                     }
                 }
 
-                // Save the APNG (output is already bound to the source)
+                // Save the APNG file (output is already bound via FileCreateSource)
                 apngImage.Save();
             }
         }
