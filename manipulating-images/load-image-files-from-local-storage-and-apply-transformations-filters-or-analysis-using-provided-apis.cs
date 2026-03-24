@@ -1,31 +1,44 @@
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Djvu; // Namespace for DjvuImage
-using Aspose.Imaging; // Base namespace for ImageOptionsBase if needed
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 
-class ImageProcessingExample
+class Program
 {
     static void Main()
     {
-        // Input and output file paths
-        string inputPath = @"C:\Images\sample.djvu";
-        string outputPath = @"C:\Images\sample_processed.bmp";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.jpg";
 
-        // Open a file stream for reading the DjVu document
-        using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Load the DjVu image using the provided static LoadDocument method
-            DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream);
-
-            // Apply a series of transformations using the available instance methods
-            djvuImage.AdjustBrightness(30);          // Increase brightness
-            djvuImage.Grayscale();                   // Convert to grayscale
-            djvuImage.Resize(800, 600);              // Resize to 800x600 pixels
-
-            // Save the processed image to a new file using the overridden Save(string) method
-            djvuImage.Save(outputPath);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Image processing completed successfully.");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image
+        using (PngImage image = (PngImage)Image.Load(inputPath))
+        {
+            // Cache data for better performance
+            if (!image.IsCached)
+                image.CacheData();
+
+            // Adjust brightness (+50)
+            image.AdjustBrightness(50);
+
+            // Resize to 800x600 using default resampling
+            image.Resize(800, 600);
+
+            // Save as JPEG with default options
+            var jpegOptions = new JpegOptions();
+            image.Save(outputPath, jpegOptions);
+        }
     }
 }
