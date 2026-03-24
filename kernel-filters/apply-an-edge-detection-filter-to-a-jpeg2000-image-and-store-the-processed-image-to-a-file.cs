@@ -1,21 +1,28 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
-string inputPath = @"C:\Images\sample.jp2";      // Path to the source JPEG2000 image
-string outputPath = @"C:\Images\sample_edge.png"; // Path for the processed image
-
-// Load the JPEG2000 image
-using (Image image = Image.Load(inputPath))
+class Program
 {
-    // Cast to RasterImage to gain access to the Filter method
-    RasterImage rasterImage = (RasterImage)image;
+    static void Main()
+    {
+        string inputPath = @"C:\Images\input.jp2";
+        string outputPath = @"C:\Images\output.jp2";
 
-    // Apply an edge‑enhancing filter (Sharpen filter used as a proxy for edge detection)
-    // Rectangle covering the whole image and SharpenFilterOptions with kernel size 5 and sigma 4.0
-    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image as PNG
-    rasterImage.Save(outputPath, new PngOptions());
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Image image = Image.Load(inputPath))
+        {
+            Jpeg2000Image jpeg2000Image = (Jpeg2000Image)image;
+            jpeg2000Image.Save(outputPath, new Jpeg2000Options());
+        }
+    }
 }
