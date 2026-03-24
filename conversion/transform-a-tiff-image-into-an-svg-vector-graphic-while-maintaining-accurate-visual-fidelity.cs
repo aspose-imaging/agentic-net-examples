@@ -1,35 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
-class TiffToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source TIFF image
-        string inputPath = @"C:\Images\source.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Images\sample.svg";
 
-        // Desired output SVG file path
-        string outputPath = @"C:\Images\converted.svg";
-
-        // Load the TIFF image using Aspose.Imaging's lifecycle method
-        using (Image tiffImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options: set the page size to match the source image dimensions
-            var rasterOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare vector rasterization options matching the source image size
+            var vectorOptions = new SvgRasterizationOptions
             {
-                PageSize = tiffImage.Size
+                PageSize = image.Size
             };
 
-            // Create SVG save options and attach the rasterization settings
+            // Configure SVG export options
             var svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = vectorOptions,
+                // Preserve original metadata if needed
+                KeepMetadata = true
             };
 
-            // Save the loaded TIFF as an SVG vector graphic while preserving visual fidelity
-            tiffImage.Save(outputPath, svgOptions);
+            // Save as SVG
+            image.Save(outputPath, svgOptions);
         }
     }
 }
