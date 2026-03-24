@@ -1,29 +1,43 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png; // for Color definition
+using Aspose.Imaging.FileFormats.Png;
 
-class DeskewToApng
+class Program
 {
     static void Main()
     {
-        // Paths to the source (skewed) image and the destination APNG file
-        string inputFilePath = @"C:\Images\skewed.png";
-        string outputFilePath = @"C:\Images\deskewed.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.apng";
 
-        // Load the image as a RasterImage (required for NormalizeAngle)
-        using (RasterImage image = (RasterImage)Image.Load(inputFilePath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Deskew the image.
-            // resizeProportionally = false (keep original canvas size)
-            // backgroundColor = LightGray (fills empty areas after rotation)
-            image.NormalizeAngle(false, Color.LightGray);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the corrected image as an APNG.
-            // ApngOptions tells Aspose.Imaging to use the APNG format.
-            var apngOptions = new ApngOptions();
-            image.Save(outputFilePath, apngOptions);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image as a RasterImage
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        {
+            // Deskew the image without resizing the canvas; fill empty areas with white
+            sourceImage.NormalizeAngle(false, Color.White);
+
+            // Prepare APNG save options
+            ApngOptions saveOptions = new ApngOptions
+            {
+                // Single-frame animation with a 1‑second frame duration
+                DefaultFrameTime = 1000,
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
+
+            // Save the deskewed image as an APNG file
+            sourceImage.Save(outputPath, saveOptions);
         }
     }
 }
