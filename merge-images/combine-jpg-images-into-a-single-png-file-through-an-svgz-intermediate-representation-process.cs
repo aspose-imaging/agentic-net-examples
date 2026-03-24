@@ -1,90 +1,64 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input JPG files
-        string[] jpgPaths = new string[]
+        string[] inputPaths = new string[]
         {
             "image1.jpg",
             "image2.jpg",
             "image3.jpg"
         };
+        string outputPath = "combined.png";
 
-        // Output intermediate SVGZ and final PNG paths
-        string svgzPath = "combined.svgz";
-        string pngPath = "combined.png";
-
-        // Collect sizes of all JPG images
-        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-        foreach (string path in jpgPaths)
+        foreach (string path in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(path))
             {
-                sizes.Add(new Aspose.Imaging.Size(img.Width, img.Height));
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching
-        int totalWidth = 0;
-        int maxHeight = 0;
-        foreach (Aspose.Imaging.Size sz in sizes)
-        {
-            totalWidth += sz.Width;
-            if (sz.Height > maxHeight) maxHeight = sz.Height;
-        }
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create SVG canvas
-        int dpi = 96;
-        SvgGraphics2D svgGraphics = new SvgGraphics2D(totalWidth, maxHeight, dpi);
-
-        // Draw each JPG onto the SVG canvas
-        int offsetX = 0;
-        foreach (string path in jpgPaths)
+        List<Size> sizes = new List<Size>();
+        foreach (string path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
-                svgGraphics.DrawImage(img, new Aspose.Imaging.Point(offsetX, 0), new Aspose.Imaging.Size(img.Width, img.Height));
-                offsetX += img.Width;
+                sizes.Add(img.Size);
             }
         }
 
-        // Finalize SVG and save as compressed SVGZ
-        using (SvgImage svgImage = svgGraphics.EndRecording())
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
+
+        FileCreateSource src = new FileCreateSource(outputPath, false);
+        PngOptions pngOptions = new PngOptions() { Source = src };
+
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
         {
-            SvgOptions svgOptions = new SvgOptions()
+            int offsetX = 0;
+            foreach (string path in inputPaths)
             {
-                Compress = true
-            };
-            svgImage.Save(svgzPath, svgOptions);
-        }
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
+                }
+            }
 
-        // Load the SVGZ and rasterize to PNG
-        using (Image svgLoaded = Image.Load(svgzPath))
-        {
-            // Configure rasterization options matching the SVG size
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions()
-            {
-                PageWidth = svgLoaded.Width,
-                PageHeight = svgLoaded.Height,
-                BackgroundColor = Aspose.Imaging.Color.White
-            };
-
-            // Configure PNG export
-            PngOptions pngOptions = new PngOptions()
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the final PNG
-            svgLoaded.Save(pngPath, pngOptions);
+            canvas.Save();
         }
     }
 }
