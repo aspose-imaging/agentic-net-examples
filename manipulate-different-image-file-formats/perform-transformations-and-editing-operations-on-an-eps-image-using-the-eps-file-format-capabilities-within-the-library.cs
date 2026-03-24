@@ -2,36 +2,36 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input EPS file path
-        string epsPath = "input.eps";
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
 
-        // Output file paths
-        string pngOutput = "output.png";
-        string pdfOutput = "output.pdf";
-
-        // Load the EPS image and cast to the specific EpsImage type
-        using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(epsPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Resize the EPS image to 800x600 using Lanczos resampling for high quality
-            epsImage.Resize(800, 600, ResizeType.LanczosResample);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Rotate the image 90 degrees and flip it horizontally
-            epsImage.RotateFlip(RotateFlipType.Rotate90FlipX);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load EPS image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Resize the image to 800x600 using Lanczos resampling
+            image.Resize(800, 600, ResizeType.LanczosResample);
+
+            // Rotate the image 90 degrees clockwise without flipping
+            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
             // Save the transformed image as PNG
-            var pngOptions = new PngOptions();
-            epsImage.Save(pngOutput, pngOptions);
-
-            // Save the transformed image as PDF
-            var pdfOptions = new PdfOptions();
-            epsImage.Save(pdfOutput, pdfOptions);
+            image.Save(outputPath, new PngOptions());
         }
     }
 }
