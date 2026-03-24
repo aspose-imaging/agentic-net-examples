@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
@@ -7,35 +8,34 @@ class Program
 {
     static void Main()
     {
-        // Path to the source image (any supported format)
-        string inputPath = @"C:\Images\input.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.psd";
 
-        // Desired output PSD file path
-        string outputPath = @"C:\Images\output.psd";
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PSD saving options to preserve fidelity
+            // Configure PSD save options
             PsdOptions psdOptions = new PsdOptions
             {
-                // Use RAW compression (no compression) to keep original pixel data
-                CompressionMethod = CompressionMethod.Raw,
-
-                // Preserve the original color mode when possible; default to RGB
+                // Example settings – can be adjusted as needed
+                CompressionMethod = CompressionMethod.RLE,
                 ColorMode = ColorModes.Rgb,
-
-                // Standard 8 bits per channel
-                ChannelBitsCount = 8,
-
-                // Set channel count based on presence of alpha channel
-                ChannelsCount = (short)((image is RasterImage raster && raster.HasAlpha) ? 4 : 3),
-
-                // Keep original metadata (EXIF, XMP, etc.)
+                // Preserve original metadata
                 KeepMetadata = true
             };
 
-            // Save the image as a PSD file using the configured options
+            // Save the image as a PSD file
             image.Save(outputPath, psdOptions);
         }
     }
