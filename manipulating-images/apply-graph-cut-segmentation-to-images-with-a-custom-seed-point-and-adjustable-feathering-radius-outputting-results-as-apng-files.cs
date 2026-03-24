@@ -5,73 +5,79 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input image path
+        // Hard‑coded input and output paths
         string inputPath = "input.jpg";
-        // Output APNG path
         string outputPath = "output.apng";
 
-        // Adjustable feathering radius
-        int featheringRadius = 5;
-
-        // Custom seed point for foreground (example coordinates)
-        int seedX = 150;
-        int seedY = 120;
-
-        // Prepare masking arguments with a foreground seed point.
-        // First array = background points (empty), second array = foreground points.
-        AutoMaskingArgs maskingArgs = new AutoMaskingArgs
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            ObjectsPoints = new Point[][]
-            {
-                new Point[] { },                     // No background points
-                new Point[] { new Point(seedX, seedY) } // Foreground seed point
-            }
-        };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Export options for intermediate PNG (used by the masking engine)
-        PngOptions pngExport = new PngOptions
-        {
-            ColorType = PngColorType.TruecolorWithAlpha,
-            Source = new StreamSource(new MemoryStream())
-        };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure GraphCut masking options
-        GraphCutMaskingOptions maskingOptions = new GraphCutMaskingOptions
-        {
-            FeatheringRadius = featheringRadius,
-            Method = SegmentationMethod.GraphCut,
-            Decompose = false,
-            ExportOptions = pngExport,
-            BackgroundReplacementColor = Color.Transparent,
-            Args = maskingArgs
-        };
+        // Temporary file for masking export options
+        string tempExportPath = Path.GetTempFileName();
 
-        // Load the source image as RasterImage
+        // Load source image as RasterImage
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Perform graph cut segmentation
-            using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
+            // Configure GraphCut masking with a custom seed point and feathering radius
+            var maskingOptions = new Aspose.Imaging.Masking.Options.GraphCutMaskingOptions
             {
-                // Retrieve the foreground (object) image
+                FeatheringRadius = 3, // adjustable
+                Method = Aspose.Imaging.Masking.Options.SegmentationMethod.GraphCut,
+                Decompose = false,
+                ExportOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new FileCreateSource(tempExportPath, false)
+                },
+                BackgroundReplacementColor = Color.Transparent,
+                Args = new Aspose.Imaging.Masking.Options.AutoMaskingArgs
+                {
+                    ObjectsPoints = new Point[][]
+                    {
+                        new Point[]
+                        {
+                            // Custom seed point
+                            new Point(100, 100)
+                        }
+                    }
+                }
+            };
+
+            // Perform masking
+            using (Aspose.Imaging.Masking.Result.MaskingResult maskingResult =
+                new Aspose.Imaging.Masking.ImageMasking(sourceImage).Decompose(maskingOptions))
+            {
+                // Retrieve the foreground (masked) image
                 using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
                 {
-                    // Save the result as an animated PNG (APNG)
-                    foreground.Save(outputPath, new ApngOptions
+                    // Save as APNG
+                    var apngOptions = new ApngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
                         DefaultFrameTime = 200, // milliseconds per frame
-                        NumPlays = 0            // 0 = infinite loop
-                    });
+                        NumPlays = 0 // infinite loop
+                    };
+                    foreground.Save(outputPath, apngOptions);
                 }
             }
+        }
+
+        // Clean up temporary export file
+        if (File.Exists(tempExportPath))
+        {
+            File.Delete(tempExportPath);
         }
     }
 }
