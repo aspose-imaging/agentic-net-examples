@@ -1,56 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = "output.bmp";
+        string outputPath = "output\\output.bmp";
 
-        // Image dimensions
-        int width = 400;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        int width = 800;
         int height = 200;
 
-        // Unicode text to render
-        string text = "こんにちは世界 🌍";
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create a BMP image with 24 bits per pixel
-        BmpOptions bmpOptions = new BmpOptions
-        {
-            BitsPerPixel = 24
-        };
-
-        // Create the image using the provided lifecycle method
         using (Image image = Image.Create(bmpOptions, width, height))
         {
-            // Obtain a Graphics object for drawing
             Graphics graphics = new Graphics(image);
-
-            // Enable antialiasing for smoother lines and text
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-            // Set text rendering hint to antialias (high‑quality text)
             graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-
-            // Clear the background to white
             graphics.Clear(Color.White);
 
-            // Define the font (Arial Unicode MS supports many Unicode ranges)
-            Font font = new Font("Arial Unicode MS", 32, FontStyle.Regular);
+            string text = "Hello, 世界 🌍";
+            Font font = new Font("Arial", 48);
 
-            // Define a solid brush for the text color
-            SolidBrush brush = new SolidBrush(Color.Black);
+            using (SolidBrush brush = new SolidBrush())
+            {
+                brush.Color = Color.Black;
+                brush.Opacity = 100;
+                graphics.DrawString(text, font, brush, 50f, 80f);
+            }
 
-            // Draw the Unicode string at the desired location
-            graphics.DrawString(text, font, brush, 10, 50);
-
-            // Save the image using the provided lifecycle method
-            image.Save(outputPath);
+            // Save the image (bound to the file)
+            image.Save();
         }
     }
 }
