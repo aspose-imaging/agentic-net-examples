@@ -1,44 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths (can be passed as arguments)
-        string inputPath = args.Length > 0 ? args[0] : "input.tif";
-        string outputPath = args.Length > 1 ? args[1] : "output.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\Multipage.tif";
+        string outputPath = @"C:\Images\MultipageEdited.tif";
 
-        // Load the image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir ?? ".");
+
+        // Load the multipage image
         using (Image image = Image.Load(inputPath))
         {
-            // Check if the loaded image supports multiple pages
+            // Cast to IMultipageImage to access pages
             if (image is IMultipageImage multipageImage)
             {
-                // Iterate through each page and apply edits
-                foreach (Image page in multipageImage.Pages)
+                // Set a batch operation that will be executed before each page is saved
+                // Here we rotate every page by 90 degrees
+                multipageImage.PageExportingAction = (int index, Image page) =>
                 {
-                    RasterImage raster = (RasterImage)page;
-                    if (!raster.IsCached)
-                        raster.CacheData();
-
-                    // Example edits: increase brightness and rotate slightly
-                    raster.AdjustBrightness(20);                     // brighten
-                    raster.Rotate(5.0f, true, Color.White);          // rotate 5 degrees, resize canvas, white background
-                }
-
-                // Save the modified multipage image as TIFF
-                TiffOptions options = new TiffOptions(TiffExpectedFormat.TiffJpegRgb);
-                image.Save(outputPath, options);
+                    // Rotate the current page
+                    page.Rotate(90);
+                };
             }
-            else
-            {
-                Console.WriteLine("The loaded image is not a multipage image.");
-            }
+
+            // Save the modified image to the output path
+            image.Save(outputPath);
         }
     }
 }
