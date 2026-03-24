@@ -1,16 +1,38 @@
-string dataDir = @"C:\Images\";
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
-// Load the DNG image
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dataDir + "sample.dng"))
+class Program
 {
-    // Cast to DngImage to access format‑specific methods
-    Aspose.Imaging.FileFormats.Dng.DngImage dngImage = (Aspose.Imaging.FileFormats.Dng.DngImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\test.dng";
+        string outputPath = @"c:\temp\test_sharpened.png";
 
-    // Apply a sharpen filter to the whole image (kernel size 5, sigma 4.0)
-    dngImage.Filter(dngImage.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image as PNG
-    dngImage.Save(dataDir + "sample_sharpened.png",
-        new Aspose.Imaging.ImageOptions.PngOptions());
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering functionality
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply a sharpen filter (kernel size 5, sigma 4.0) to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image as PNG
+            rasterImage.Save(outputPath, new PngOptions());
+        }
+    }
 }
