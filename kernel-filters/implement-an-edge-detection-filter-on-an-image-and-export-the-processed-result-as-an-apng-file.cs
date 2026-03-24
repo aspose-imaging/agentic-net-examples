@@ -1,57 +1,58 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output paths (can be overridden via command‑line arguments)
+        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.apng";
 
-        if (args.Length > 0) inputPath = args[0];
-        if (args.Length > 1) outputPath = args[1];
-
-        // Load the source image as a raster image
-        using (RasterImage source = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Edge detection kernel (simple Laplacian)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source image as RasterImage
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        {
+            // Edge detection kernel (Laplacian)
             double[,] kernel = new double[,]
             {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
+                { 0, -1, 0 },
+                { -1, 4, -1 },
+                { 0, -1, 0 }
             };
 
-            // Apply convolution filter with the edge detection kernel
-            var filterOptions = new ConvolutionFilterOptions(kernel);
-            source.Filter(source.Bounds, filterOptions);
+            // Apply convolution filter for edge detection
+            sourceImage.Filter(sourceImage.Bounds, new ConvolutionFilterOptions(kernel));
 
-            // Configure APNG creation options
-            ApngOptions apngOptions = new ApngOptions
+            // Prepare APNG creation options
+            ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 1000, // 1 second per frame
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create an APNG canvas matching the processed image size
-            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, source.Width, source.Height))
+            // Create APNG image, add processed frame, and save
+            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
-                // Remove the default empty frame
-                apng.RemoveAllFrames();
-
-                // Add the processed image as the sole frame
-                apng.AddFrame(source);
-
-                // Save the APNG file
-                apng.Save();
+                apngImage.RemoveAllFrames();
+                apngImage.AddFrame(sourceImage);
+                apngImage.Save();
             }
         }
     }
