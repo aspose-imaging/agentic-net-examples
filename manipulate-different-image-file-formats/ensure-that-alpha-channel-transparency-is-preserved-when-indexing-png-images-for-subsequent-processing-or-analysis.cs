@@ -1,59 +1,57 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats;
+using Aspose.Imaging;
 
-class PreserveAlphaWhenIndexingPng
+class Program
 {
     static void Main()
     {
-        // Path to the source PNG image (may contain alpha channel)
-        string sourceFilePath = @"C:\Images\source.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output_indexed.png";
 
-        // Path where the processed PNG will be saved
-        string outputFilePath = @"C:\Images\output.png";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG image
-        using (Image image = Image.Load(sourceFilePath))
+        using (Image image = Image.Load(inputPath))
         {
             // Cast to PngImage to access PNG‑specific properties
-            PngImage pngImage = (PngImage)image;
-
-            // Determine whether the source image has an alpha channel
-            bool hasAlpha = pngImage.HasAlpha;
-
-            // Prepare PNG save options
-            PngOptions saveOptions = new PngOptions();
-
-            if (hasAlpha)
+            if (image is PngImage pngImage)
             {
-                // Preserve the existing alpha channel by using TruecolorWithAlpha
-                saveOptions.ColorType = PngColorType.TruecolorWithAlpha;
+                // Report whether the source image has an alpha channel
+                Console.WriteLine($"Source PNG has alpha: {pngImage.HasAlpha}");
+
+                // Prepare options for indexed‑color PNG while preserving transparency
+                var pngOptions = new PngOptions
+                {
+                    // Use indexed color type
+                    ColorType = PngColorType.IndexedColor,
+                    // Enable maximum compression (optional)
+                    CompressionLevel = 9,
+                    // Generate a palette that includes transparent entries if needed
+                    Palette = ColorPaletteHelper.GetCloseImagePalette((RasterImage)pngImage, 256, PaletteMiningMethod.Histogram)
+                };
+
+                // Save the image with the specified options
+                image.Save(outputPath, pngOptions);
+                Console.WriteLine($"Indexed PNG saved to: {outputPath}");
             }
             else
             {
-                // No alpha channel – we can safely use indexed color
-                saveOptions.ColorType = PngColorType.IndexedColor;
-
-                // Generate an optimal palette (up to 256 colors) for the image
-                saveOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(
-                    (RasterImage)pngImage, 256, PaletteMiningMethod.Histogram);
-
-                // If the image uses a transparent color (tRNS), preserve it
-                if (pngImage.HasTransparentColor)
-                {
-                    // Set the transparent color on the image before saving
-                    // This ensures the tRNS chunk is written to the indexed PNG
-                    pngImage.HasTransparentColor = true;
-                }
+                Console.Error.WriteLine("The loaded image is not a PNG image.");
             }
-
-            // Save the image with the configured options.
-            // The alpha channel (if present) is retained, and indexed images keep their transparency.
-            image.Save(outputFilePath, saveOptions);
         }
-
-        Console.WriteLine("Image saved with transparency preserved.");
     }
 }
