@@ -1,78 +1,61 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPG files (modify paths as needed)
-        string[] inputFiles = new[]
+        // Hardcoded input JPG files
+        string[] inputPaths = new[]
         {
-            @"C:\Images\img1.jpg",
-            @"C:\Images\img2.jpg",
-            @"C:\Images\img3.jpg"
+            @"C:\Images\photo1.jpg",
+            @"C:\Images\photo2.jpg",
+            @"C:\Images\photo3.jpg"
         };
 
-        // Output combined JPEG path
-        string combinedJpegPath = @"C:\Images\combined.jpg";
+        // Hardcoded output JPEG file
+        string outputPath = @"C:\Images\Combined\combined.jpg";
 
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputFiles)
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load all input images
+        Image[] images = new Image[inputPaths.Length];
+        for (int i = 0; i < inputPaths.Length; i++)
         {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+            images[i] = Image.Load(inputPaths[i]);
         }
 
-        // Create JPEG canvas with desired size
-        Source jpegSource = new FileCreateSource(combinedJpegPath, false);
-        JpegOptions jpegOptions = new JpegOptions { Source = jpegSource, Quality = 90 };
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        // Combine images into a multipage image
+        using (Image combined = Image.Create(images))
         {
-            // Merge images horizontally onto the canvas
-            int offsetX = 0;
-            foreach (string path in inputFiles)
+            // Save the combined image as a single JPEG file
+            JpegOptions jpegOptions = new JpegOptions
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
-            }
-
-            // Save the combined JPEG (bound image)
-            canvas.Save();
-        }
-
-        // Convert the combined JPEG to compressed WMZ format
-        string wmzPath = combinedJpegPath + ".wmz";
-        using (Image img = Image.Load(combinedJpegPath))
-        {
-            var vectorOptions = new WmfRasterizationOptions { PageSize = img.Size };
-            var wmfOptions = new WmfOptions
-            {
-                Compress = true,
-                VectorRasterizationOptions = vectorOptions
+                Quality = 90 // Adjust quality as needed
             };
-            img.Save(wmzPath, wmfOptions);
+            combined.Save(outputPath, jpegOptions);
         }
+
+        // Dispose loaded images (if not already disposed by Image.Create)
+        foreach (var img in images)
+        {
+            img?.Dispose();
+        }
+
+        Console.WriteLine("Images combined successfully.");
     }
 }
