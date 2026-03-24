@@ -7,24 +7,30 @@ class Program
 {
     static void Main()
     {
-        // Path to the WMF file to be instantiated
-        string wmfFilePath = @"C:\Images\sample.wmf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.wmf";
+        string outputPath = @"C:\temp\output.wmf";
 
-        // Load the WMF file using Aspose.Imaging's unified loader
-        using (Image image = Image.Load(wmfFilePath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to a WmfImage for WMF‑specific operations
-            WmfImage wmfImage = image as WmfImage;
-            if (wmfImage == null)
-            {
-                throw new InvalidOperationException("The loaded file is not a WMF image.");
-            }
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Example: retrieve basic properties for further processing
-            int width = wmfImage.Width;
-            int height = wmfImage.Height;
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Additional WMF processing can be performed here using wmfImage
+        // Load the WMF file and obtain a WmfImage instance for further processing
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast the generic Image to a WmfImage
+            WmfImage wmfImage = (WmfImage)image;
+
+            // Example processing could be placed here (e.g., resizing, drawing, etc.)
+
+            // Save the (potentially modified) WMF image to the output path
+            wmfImage.Save(outputPath);
         }
     }
 }
