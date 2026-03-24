@@ -9,55 +9,57 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Paths (replace with actual file locations)
-        string inputVectorPath = "input.svg";
+        // Hardcoded input and output paths
+        string inputPath = "vector.svg"; // placeholder, not used in this example
         string outputPath = "output.png";
 
-        // Canvas size
-        int canvasWidth = 800;
-        int canvasHeight = 800;
-
-        // Create PNG canvas
-        using (PngOptions pngOptions = new PngOptions())
+        // Verify input file existence (if it were used)
+        if (!File.Exists(inputPath))
         {
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-            using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
-            {
-                // Initialize graphics
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-                // Load vector image to obtain its dimensions
-                using (Image vectorImg = Image.Load(inputVectorPath))
-                {
-                    int vectorWidth = vectorImg.Width;
-                    int vectorHeight = vectorImg.Height;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                    // Compute uniform scaling factor to fit the canvas
-                    float scaleX = (float)canvasWidth / vectorWidth;
-                    float scaleY = (float)canvasHeight / vectorHeight;
-                    float scale = Math.Min(scaleX, scaleY);
+        // Create a source bound to the output file
+        Source source = new FileCreateSource(outputPath, false);
 
-                    // Apply scaling transform
-                    graphics.ScaleTransform(scale, scale);
+        // Set up PNG options with the bound source
+        PngOptions pngOptions = new PngOptions { Source = source };
 
-                    // Build a GraphicsPath representing the vector content
-                    GraphicsPath path = new GraphicsPath();
-                    Figure figure = new Figure();
+        // Define canvas size
+        int canvasWidth = 800;
+        int canvasHeight = 600;
 
-                    // Example shapes: rectangle and ellipse matching the vector bounds
-                    figure.AddShape(new RectangleShape(new RectangleF(0f, 0f, vectorWidth, vectorHeight)));
-                    figure.AddShape(new EllipseShape(new RectangleF(0f, 0f, vectorWidth, vectorHeight)));
+        // Create the PNG canvas (bound image)
+        using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
+        {
+            // Initialize graphics for drawing
+            Graphics graphics = new Graphics(canvas);
+            graphics.Clear(Color.White);
 
-                    path.AddFigure(figure);
+            // Build a graphics path with vector shapes
+            GraphicsPath path = new GraphicsPath();
+            Figure figure = new Figure();
 
-                    // Render the path onto the canvas
-                    graphics.DrawPath(new Pen(Color.Blue, 2), path);
-                }
+            // Rectangle shape
+            figure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 300f, 200f)));
+            // Ellipse shape
+            figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 150f)));
+            // Pie shape
+            figure.AddShape(new PieShape(new RectangleF(200f, 200f, 250f, 250f), 0f, 120f));
 
-                // Save the PNG canvas (source is already bound)
-                canvas.Save();
-            }
+            // Add the figure to the path
+            path.AddFigure(figure);
+
+            // Draw the path onto the canvas
+            Pen pen = new Pen(Color.Black, 3);
+            graphics.DrawPath(pen, path);
+
+            // Save the bound image
+            canvas.Save();
         }
     }
 }
