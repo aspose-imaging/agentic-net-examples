@@ -4,63 +4,76 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPG files (replace with actual paths or pass via args)
-        string[] jpgPaths = new string[]
-        {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+        // Hardcoded input JPG files
+        string[] jpgPaths = {
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg"
         };
 
-        // List to hold generated PSD file paths
-        List<string> psdPaths = new List<string>();
+        // Corresponding temporary PSD files
+        string[] psdPaths = {
+            @"C:\Temp\image1.psd",
+            @"C:\Temp\image2.psd"
+        };
+
+        // Hardcoded output PDF file
+        string outputPdf = @"C:\Result\combined.pdf";
 
         // Convert each JPG to PSD
-        foreach (string jpgPath in jpgPaths)
+        for (int i = 0; i < jpgPaths.Length; i++)
         {
-            using (Image jpgImage = Image.Load(jpgPath))
+            string inputPath = jpgPaths[i];
+            string psdPath = psdPaths[i];
+
+            if (!File.Exists(inputPath))
             {
-                string psdPath = Path.ChangeExtension(jpgPath, ".psd");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Set up PSD options with a file source
-                PsdOptions psdOptions = new PsdOptions
-                {
-                    Source = new FileCreateSource(psdPath, false),
-                    ColorMode = ColorModes.Rgb // Use RGB color mode
-                };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(psdPath));
 
-                // Create a blank PSD canvas matching the JPG dimensions
-                using (Image psdImage = Image.Create(psdOptions, jpgImage.Width, jpgImage.Height))
-                {
-                    // Draw the JPG onto the PSD canvas
-                    Graphics graphics = new Graphics(psdImage);
-                    graphics.DrawImage(jpgImage, 0, 0);
+            using (Image jpgImage = Image.Load(inputPath))
+            {
+                // Set up PSD options (default settings)
+                PsdOptions psdOptions = new PsdOptions();
 
-                    // Save the PSD (source is already bound)
-                    psdImage.Save();
-                }
-
-                psdPaths.Add(psdPath);
+                // Save as PSD
+                jpgImage.Save(psdPath, psdOptions);
             }
         }
 
-        // Combine all PSD files into a single PDF document
-        using (Image pdfDocument = Image.Create(psdPaths.ToArray()))
+        // Load all PSD images
+        List<Image> psdImages = new List<Image>();
+        foreach (string psdPath in psdPaths)
         {
-            PdfOptions pdfOptions = new PdfOptions();
-            pdfDocument.Save("CombinedOutput.pdf", pdfOptions);
+            if (!File.Exists(psdPath))
+            {
+                Console.Error.WriteLine($"File not found: {psdPath}");
+                return;
+            }
+
+            Image psdImage = Image.Load(psdPath);
+            psdImages.Add(psdImage);
         }
 
-        // Optional: clean up temporary PSD files
-        // foreach (string psdPath in psdPaths)
-        // {
-        //     File.Delete(psdPath);
-        // }
+        // Create a multipage image from the PSDs and dispose the source images after creation
+        using (Image multipage = Image.Create(psdImages.ToArray(), true))
+        {
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdf));
+
+            // PDF options (default settings)
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the multipage image as a PDF document
+            multipage.Save(outputPdf, pdfOptions);
+        }
     }
 }
