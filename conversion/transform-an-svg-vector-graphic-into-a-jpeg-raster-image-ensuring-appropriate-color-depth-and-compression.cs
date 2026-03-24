@@ -1,40 +1,49 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Svg;
 
-class SvgToJpegConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source SVG file
-        string inputSvgPath = @"C:\Images\source.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\example.svg";
+        string outputPath = @"C:\Images\output.jpg";
 
-        // Desired output JPEG file path
-        string outputJpegPath = @"C:\Images\converted.jpg";
-
-        // Load the SVG image using the unified Image.Load method
-        using (Image svgImage = Image.Load(inputSvgPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options for the SVG.
-            // PageSize is set to the original image size to keep the aspect ratio.
-            var rasterOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Set up rasterization options for the SVG
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = svgImage.Size,
-                // Optional: improve quality with antialiasing
-                SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
+                PageSize = image.Size
             };
 
-            // Set JPEG saving options, including compression quality.
+            // Configure JPEG save options (color depth, compression, quality)
             var jpegOptions = new JpegOptions
             {
-                VectorRasterizationOptions = rasterOptions,
-                Quality = 90 // Adjust 0‑100; higher = better quality, lower = higher compression
+                Quality = 90, // Quality from 1 to 100
+                BitsPerChannel = 8,
+                CompressionType = JpegCompressionMode.Progressive,
+                ColorType = JpegCompressionColorMode.YCbCr,
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the rasterized image as JPEG.
-            svgImage.Save(outputJpegPath, jpegOptions);
+            // Save the rasterized image as JPEG
+            image.Save(outputPath, jpegOptions);
         }
     }
 }
