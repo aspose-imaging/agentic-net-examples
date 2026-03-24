@@ -1,40 +1,71 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Coordinates of the reference pixel and tolerance for the magic wand selection
-        int referenceX = 120;
-        int referenceY = 100;
-        int tolerance = 150;
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the image as a raster image
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image as a raster image
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Create a mask based on the color of the reference pixel, feather it, and apply it
-            MagicWandTool
-                .Select(image, new MagicWandSettings(referenceX, referenceY) { Threshold = tolerance })
-                .GetFeathered(new FeatheringSettings() { Size = 2 })
-                .Apply();
+            // Define the target color to isolate (pure red)
+            int targetR = 255;
+            int targetG = 0;
+            int targetB = 0;
 
-            // Adjust brightness and contrast of the isolated region
-            image.AdjustBrightness(40);          // Increase brightness
-            image.AdjustContrast(0.25f);        // Increase contrast
+            // Get all pixels in ARGB format
+            var bounds = new Rectangle(0, 0, image.Width, image.Height);
+            int[] pixels = image.GetDefaultArgb32Pixels(bounds);
 
-            // Save the processed image with alpha channel support
-            image.Save(outputPath, new PngOptions
+            // Process each pixel: keep if it matches the target color, otherwise make it transparent
+            for (int i = 0; i < pixels.Length; i++)
             {
-                ColorType = PngColorType.TruecolorWithAlpha
-            });
+                int argb = pixels[i];
+                int a = (argb >> 24) & 0xFF;
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >> 8) & 0xFF;
+                int b = argb & 0xFF;
+
+                if (r == targetR && g == targetG && b == targetB)
+                {
+                    // Preserve original pixel (including alpha)
+                    pixels[i] = argb;
+                }
+                else
+                {
+                    // Make pixel fully transparent
+                    pixels[i] = 0;
+                }
+            }
+
+            // Write the modified pixels back to the image
+            image.SaveArgb32Pixels(bounds, pixels);
+
+            // Save the result as PNG with alpha channel
+            var saveOptions = new PngOptions
+            {
+                ColorType = PngColorType.TruecolorWithAlpha,
+                Source = new FileCreateSource(outputPath, false)
+            };
+            image.Save(outputPath, saveOptions);
         }
     }
 }
