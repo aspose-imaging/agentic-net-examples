@@ -1,32 +1,48 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Path to the JPEG image
-        string imagePath = @"c:\temp\sample.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\output.jpg";
 
-        // Load the image using the standard load rule
-        using (Image image = Image.Load(imagePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to JpegImage to access JPEG-specific options
-            JpegImage jpegImage = image as JpegImage;
-            if (jpegImage != null)
-            {
-                // Retrieve the compression quality level from the JPEG options
-                int quality = jpegImage.JpegOptions.Quality;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-                // Output the quality value for analysis
-                Console.WriteLine($"JPEG compression quality: {quality}");
-            }
-            else
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure JPEG save options
+            JpegOptions jpegOptions = new JpegOptions
             {
-                Console.WriteLine("The loaded image is not a JPEG image.");
-            }
+                // Set desired compression quality (1-100)
+                Quality = 85,
+
+                // Optional: set progressive compression
+                CompressionType = JpegCompressionMode.Progressive,
+
+                // Optional: set bits per channel
+                BitsPerChannel = 8
+            };
+
+            // Save the image as JPEG with the specified options
+            image.Save(outputPath, jpegOptions);
+
+            // Output the quality level used for analysis
+            Console.WriteLine($"Image saved to '{outputPath}' with JPEG quality = {jpegOptions.Quality}");
         }
     }
 }
