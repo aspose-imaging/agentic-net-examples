@@ -1,65 +1,67 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
-class CombineJpgToPng
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths of source JPG images
-        string[] jpgFiles = new string[]
-        {
-            @"C:\Images\image1.jpg",
-            @"C:\Images\image2.jpg",
-            @"C:\Images\image3.jpg"
-        };
+        // Hardcoded input JPG files and output PNG file
+        string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+        string outputPath = "output.png";
 
-        // Load all JPG images
-        List<RasterImage> jpgImages = new List<RasterImage>();
-        foreach (string file in jpgFiles)
+        // Verify each input file exists
+        foreach (var path in inputPaths)
         {
-            // Load using the provided load rule
-            Image img = Image.Load(file);
-            // Cast to RasterImage for further processing
-            jpgImages.Add((RasterImage)img);
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
         }
 
-        // Determine combined image size (vertical stacking)
-        int combinedWidth = 0;
-        int combinedHeight = 0;
-        foreach (RasterImage img in jpgImages)
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Collect sizes of all input images
+        List<Size> sizes = new List<Size>();
+        foreach (var path in inputPaths)
         {
-            if (img.Width > combinedWidth)
-                combinedWidth = img.Width;          // use the widest image as width
-            combinedHeight += img.Height;           // sum heights for vertical layout
+            using (RasterImage img = (RasterImage)Image.Load(path))
+            {
+                sizes.Add(img.Size);
+            }
         }
 
-        // Create a blank PNG image with the calculated dimensions using the create rule
-        PngOptions pngOptions = new PngOptions();   // default PNG options
-        Image combinedImage = Image.Create(pngOptions, combinedWidth, combinedHeight);
-        // Cast to PngImage to access PNG‑specific members if needed
-        PngImage pngCanvas = (PngImage)combinedImage;
+        // Calculate canvas dimensions for horizontal stitching
+        int newWidth = sizes.Sum(s => s.Width);
+        int newHeight = sizes.Max(s => s.Height);
 
-        // Paste each JPG onto the PNG canvas at the correct vertical offset
-        int currentY = 0;
-        foreach (RasterImage jpg in jpgImages)
+        // Prepare PNG options with file source
+        Source source = new FileCreateSource(outputPath, false);
+        PngOptions pngOptions = new PngOptions() { Source = source };
+
+        // Create PNG canvas
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
         {
-            // Blend the JPG onto the canvas at (0, currentY) with full opacity (255)
-            // Blend method follows the provided rule: Blend(Point, RasterImage, byte)
-            pngCanvas.Blend(new Aspose.Imaging.Point(0, currentY), jpg, 255);
-            currentY += jpg.Height;
+            int offsetX = 0;
+            // Merge each JPG onto the canvas
+            foreach (var path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
+                }
+            }
+            // Save the combined image (output path already bound via source)
+            canvas.Save();
         }
-
-        // Save the combined image as PNG using the provided save rule
-        string outputPath = @"C:\Images\combined.png";
-        pngCanvas.Save(outputPath, pngOptions);
-
-        // Dispose all images to release resources
-        foreach (RasterImage img in jpgImages)
-            img.Dispose();
-        pngCanvas.Dispose();
     }
 }
