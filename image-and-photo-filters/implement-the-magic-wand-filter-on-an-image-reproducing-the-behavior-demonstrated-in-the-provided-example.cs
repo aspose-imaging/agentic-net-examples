@@ -5,25 +5,34 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Load the image as a RasterImage
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load the raster image
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Create a mask using Magic Wand based on pixel (120,100) with a custom threshold
+            // Create a mask using Magic Wand tool at point (120,100) with a custom threshold
             MagicWandTool
                 .Select(image, new MagicWandSettings(120, 100) { Threshold = 150 })
                 .Apply();
 
-            // Save the resulting image with transparency support
+            // Save the processed image with alpha channel support
             image.Save(outputPath, new PngOptions
             {
                 ColorType = PngColorType.TruecolorWithAlpha
