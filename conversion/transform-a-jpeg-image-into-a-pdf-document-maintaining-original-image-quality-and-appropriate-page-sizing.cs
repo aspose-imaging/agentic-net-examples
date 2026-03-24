@@ -2,31 +2,35 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPEG file path (first argument or default)
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        // Output PDF file path (second argument or default)
-        string outputPath = args.Length > 1 ? args[1] : "output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.pdf";
 
-        // Load the JPEG image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the JPEG image and save as PDF
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare PDF options with page size matching the image dimensions
-            using (PdfOptions pdfOptions = new PdfOptions())
+            PdfOptions pdfOptions = new PdfOptions
             {
-                // Set page size to the image size (width, height)
-                pdfOptions.PageSize = new Size(image.Width, image.Height);
-                // Preserve original image DPI resolution
-                pdfOptions.UseOriginalImageResolution = true;
+                // Preserve original image resolution for quality
+                UseOriginalImageResolution = true
+            };
 
-                // Save the image as a PDF document
-                image.Save(outputPath, pdfOptions);
-            }
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
