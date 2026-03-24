@@ -1,46 +1,40 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input folder containing JPEG files and output PDF path
-        string inputFolder = args.Length > 0 ? args[0] : "InputJpegs";
-        string outputPdfPath = args.Length > 1 ? args[1] : "Combined.pdf";
-
-        // Collect JPEG file paths
-        string[] jpegFiles = Directory.GetFiles(inputFolder, "*.jpg");
-        var loadedImages = new List<Image>();
-
-        // Load each JPEG image
-        foreach (string filePath in jpegFiles)
+        // Hardcoded input JPEG file paths
+        string[] inputPaths = new string[]
         {
-            Image img = Image.Load(filePath);
-            loadedImages.Add(img);
-        }
+            @"C:\Images\photo1.jpg",
+            @"C:\Images\photo2.jpg",
+            @"C:\Images\photo3.jpg"
+        };
 
-        // Create a multipage image (PDF) from the loaded JPEG images
-        using (Image pdfDocument = Image.Create(loadedImages.ToArray()))
+        // Hardcoded output PDF file path
+        string outputPath = @"C:\Images\Combined.pdf";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            PdfOptions pdfOptions = new PdfOptions
+            if (!File.Exists(inputPath))
             {
-                KeepMetadata = true,
-                UseOriginalImageResolution = true
-            };
-
-            pdfDocument.Save(outputPdfPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
         }
 
-        // Dispose the individual JPEG images
-        foreach (Image img in loadedImages)
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a multipage image (PDF) from the JPEG files
+        using (Image pdfImage = Image.Create(inputPaths))
         {
-            img.Dispose();
+            // Save the multipage image as PDF; format is inferred from the .pdf extension
+            pdfImage.Save(outputPath);
         }
     }
 }
