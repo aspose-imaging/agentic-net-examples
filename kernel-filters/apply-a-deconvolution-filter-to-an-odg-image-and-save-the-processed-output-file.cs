@@ -1,48 +1,54 @@
 using System;
-using System.Drawing; // For Rectangle
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
-class DeconvolutionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths for input ODG, temporary rasterized PNG, and final output
-        string inputOdgPath = "sample.odg";
-        string tempPngPath = "temp.png";
-        string outputPath = "sample_deconvolution.png";
+        // Hardcoded input and output paths
+        string inputPath = "sample.odg";
+        string outputPath = "processed.png";
 
-        // Load the ODG image and rasterize it by saving to PNG
-        using (Image odgImage = Image.Load(inputOdgPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Saving as PNG forces rasterization of the vector ODG content
-            odgImage.Save(tempPngPath, new PngOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the rasterized PNG image
-        using (Image rasterImage = Image.Load(tempPngPath))
-        {
-            // Cast to RasterImage to access the Filter method
-            RasterImage raster = (RasterImage)rasterImage;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create deconvolution filter options (Gauss-Wiener filter in this case)
-            // Parameters: radius = 5, sigma = 4.0
-            var deconvOptions = new GaussWienerFilterOptions(5, 4.0)
+        // Load the ODG vector image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to OdgImage (full namespace used to avoid missing using)
+            var odgImage = (Aspose.Imaging.FileFormats.OpenDocument.OdgImage)image;
+
+            // Rasterize ODG to a PNG in memory
+            using (var memoryStream = new MemoryStream())
             {
-                // Optional: set additional properties
-                Grayscale = false,   // Process in RGB mode
-                Brightness = 1.15,   // Default brightness
-                Snr = 0.007           // Default signal‑to‑noise ratio
-            };
+                // Save as PNG (raster format)
+                var pngOptions = new PngOptions();
+                odgImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
 
-            // Apply the filter to the entire image bounds
-            raster.Filter(raster.Bounds, deconvOptions);
+                // Load the rasterized image
+                using (Image rasterImageContainer = Image.Load(memoryStream))
+                {
+                    var rasterImage = (RasterImage)rasterImageContainer;
 
-            // Save the processed image to the desired output file
-            raster.Save(outputPath, new PngOptions());
+                    // Apply a deconvolution filter (Gauss-Wiener) to the entire image
+                    rasterImage.Filter(
+                        rasterImage.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
+
+                    // Save the processed raster image
+                    rasterImage.Save(outputPath, new PngOptions());
+                }
+            }
         }
-
-        Console.WriteLine("Deconvolution filter applied and saved to: " + outputPath);
     }
 }
