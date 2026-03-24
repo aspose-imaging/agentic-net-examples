@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
@@ -8,54 +9,69 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output PSD file path
-        string outputPath = "indexed_output.psd";
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output_indexed.psd";
 
-        // Define image dimensions
-        int width = 200;
-        int height = 200;
-
-        // Create PSD options for indexed color mode with a palette
-        PsdOptions options = new PsdOptions
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Source = new FileCreateSource(outputPath, false),
-            ColorMode = ColorModes.Indexed,
-            CompressionMethod = CompressionMethod.RLE,
-            Version = 6,
-            Palette = new ColorPalette(new Color[]
-            {
-                Color.White,
-                Color.Black,
-                Color.Red,
-                Color.Green,
-                Color.Blue,
-                Color.Yellow,
-                Color.Cyan,
-                Color.Magenta
-            })
-        };
-
-        // Create a new PSD image with the specified options
-        using (Image psdImage = Image.Create(options, width, height))
-        {
-            // Obtain a Graphics object for drawing
-            Graphics graphics = new Graphics(psdImage);
-
-            // Clear background with the first palette color (White)
-            graphics.Clear(Color.White);
-
-            // Draw a diagonal line using the second palette color (Black)
-            Pen blackPen = new Pen(Color.Black, 2);
-            graphics.DrawLine(blackPen, new Point(0, 0), new Point(width, height));
-
-            // Draw a rectangle using the third palette color (Red)
-            Pen redPen = new Pen(Color.Red, 2);
-            graphics.DrawRectangle(redPen, new Rectangle(20, 20, 160, 160));
-
-            // Save the PSD image (source is already bound to the file)
-            psdImage.Save();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Indexed PSD image saved to: " + outputPath);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage for palette generation
+            RasterImage raster = (RasterImage)image;
+
+            // Generate a palette with the closest 256 colors
+            IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
+
+            // Configure PSD options for indexed color mode
+            PsdOptions psdOptions = new PsdOptions
+            {
+                ColorMode = ColorModes.Indexed,
+                ChannelBitsCount = 8,
+                ChannelsCount = 1,
+                Palette = palette
+            };
+
+            // Save the image as an indexed PSD
+            image.Save(outputPath, psdOptions);
+        }
+
+        // Create a new indexed PSD image from scratch
+        string outputPath2 = "output_created_indexed.psd";
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
+
+        // Build a simple grayscale palette (256 shades)
+        Color[] colors = new Color[256];
+        for (int i = 0; i < 256; i++)
+        {
+            colors[i] = Color.FromArgb(255, i, i, i);
+        }
+        IColorPalette simplePalette = new ColorPalette(colors);
+
+        // Set up creation options with indexed mode and the palette
+        PsdOptions createOptions = new PsdOptions
+        {
+            Source = new FileCreateSource(outputPath2, false),
+            ColorMode = ColorModes.Indexed,
+            ChannelBitsCount = 8,
+            ChannelsCount = 1,
+            Palette = simplePalette
+        };
+
+        // Create a 100x100 canvas; the file is already bound via FileCreateSource
+        using (Image canvas = Image.Create(createOptions, 100, 100))
+        {
+            // No drawing needed; just save the bound image
+            canvas.Save();
+        }
     }
 }
