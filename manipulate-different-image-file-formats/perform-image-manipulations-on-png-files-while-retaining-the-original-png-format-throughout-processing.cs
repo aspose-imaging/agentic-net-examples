@@ -1,35 +1,33 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
 
-class PngProcessingExample
+class Program
 {
     static void Main()
     {
-        // Path to the source PNG file.
-        string inputPath = @"C:\Images\source.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
-        // Path where the processed PNG will be saved.
-        string outputPath = @"C:\Images\processed.png";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the PNG image using the constructor that accepts a file path.
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image, apply grayscale, and save it back as PNG
         using (PngImage pngImage = new PngImage(inputPath))
         {
-            // Convert the image to grayscale. The image remains a PNG.
+            // Convert the image to grayscale
             pngImage.Grayscale();
 
-            // Resize the image to 50% of its original dimensions.
-            // The Resize method keeps the image type unchanged.
-            int newWidth = pngImage.Width / 2;
-            int newHeight = pngImage.Height / 2;
-            pngImage.Resize(newWidth, newHeight);
-
-            // Rotate the image 45 degrees around its centre.
-            // Rotation also preserves the PNG format.
-            pngImage.Rotate(45);
-
-            // Save the modified image back to PNG format.
-            // Using Save(string) ensures the file is written as PNG.
+            // Save the processed image preserving PNG format
             pngImage.Save(outputPath);
         }
     }
