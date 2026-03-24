@@ -2,63 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input image path (first argument) or default.
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        // Output directory (second argument) or current directory.
-        string outputDir = args.Length > 1 ? args[1] : Directory.GetCurrentDirectory();
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPathNearest = @"C:\Images\Resized\sample_nearest.jpg";
+        string outputPathBilinear = @"C:\Images\Resized\sample_bilinear.jpg";
+        string outputPathLanczos = @"C:\Images\Resized\sample_lanczos.png";
 
-        // Ensure the output directory exists.
-        if (!Directory.Exists(outputDir))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Directory.CreateDirectory(outputDir);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Define the resize types to demonstrate.
-        ResizeType[] resizeTypes = new ResizeType[]
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPathNearest));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPathBilinear));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPathLanczos));
+
+        // Load the image using Aspose.Imaging
+        using (Image image = Image.Load(inputPath))
         {
-            ResizeType.NearestNeighbourResample,
-            ResizeType.BilinearResample,
-            ResizeType.LanczosResample,
-            ResizeType.CatmullRom,
-            ResizeType.CubicConvolution,
-            ResizeType.AdaptiveResample
-        };
+            // Resize using NearestNeighbourResample
+            image.Resize(image.Width / 2, image.Height / 2, ResizeType.NearestNeighbourResample);
+            image.Save(outputPathNearest, new JpegOptions());
 
-        // Corresponding names for output files.
-        string[] typeNames = new string[]
+            // Reload original image for a fresh operation
+            image.Dispose();
+        }
+
+        // Load again for the next resize operation
+        using (Image image = Image.Load(inputPath))
         {
-            "NearestNeighbour",
-            "Bilinear",
-            "Lanczos",
-            "CatmullRom",
-            "CubicConvolution",
-            "Adaptive"
-        };
+            // Resize using BilinearResample
+            image.Resize(image.Width * 2, image.Height * 2, ResizeType.BilinearResample);
+            image.Save(outputPathBilinear, new JpegOptions());
 
-        // Process each resize type.
-        for (int i = 0; i < resizeTypes.Length; i++)
+            // Reload again for the third resize
+            image.Dispose();
+        }
+
+        // Load again for Lanczos resample and save as PNG
+        using (Image image = Image.Load(inputPath))
         {
-            // Load the original image for each iteration to avoid cumulative resizing.
-            using (Image image = Image.Load(inputPath))
-            {
-                // Example: double the dimensions.
-                int newWidth = image.Width * 2;
-                int newHeight = image.Height * 2;
-
-                // Apply resizing with the specific ResizeType.
-                image.Resize(newWidth, newHeight, resizeTypes[i]);
-
-                // Construct the output file path.
-                string outputPath = Path.Combine(outputDir, $"resized_{typeNames[i]}.png");
-
-                // Save the resized image as PNG.
-                image.Save(outputPath, new PngOptions());
-            }
+            // Resize using LanczosResample
+            image.Resize(800, 600, ResizeType.LanczosResample);
+            image.Save(outputPathLanczos, new PngOptions());
         }
     }
 }
