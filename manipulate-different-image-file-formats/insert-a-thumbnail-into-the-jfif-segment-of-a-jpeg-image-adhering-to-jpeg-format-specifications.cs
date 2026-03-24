@@ -1,40 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input JPEG file path
+        // Hardcoded input, thumbnail, and output paths
         string inputPath = "input.jpg";
-        // Output JPEG file path with thumbnail inserted
-        string outputPath = "output_with_thumbnail.jpg";
+        string thumbnailPath = "thumb.jpg";
+        string outputPath = "output.jpg";
 
-        // Load the JPEG image
+        // Verify input JPEG exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Verify thumbnail image exists
+        if (!File.Exists(thumbnailPath))
+        {
+            Console.Error.WriteLine($"File not found: {thumbnailPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the main JPEG image
         using (JpegImage jpegImage = new JpegImage(inputPath))
         {
-            // Create a thumbnail raster image (100x100 pixels)
-            using (RasterImage thumbnail = (RasterImage)Image.Create(new JpegOptions(), 100, 100))
+            // Load the thumbnail image as a raster image
+            using (RasterImage thumb = (RasterImage)Image.Load(thumbnailPath))
             {
-                // Fill the thumbnail with a solid red color
-                Graphics graphics = new Graphics(thumbnail);
-                SolidBrush brush = new SolidBrush(Color.Red);
-                graphics.FillRectangle(brush, thumbnail.Bounds);
-
-                // Ensure JFIF data container exists
+                // Initialize JFIF segment if necessary and assign the thumbnail
                 if (jpegImage.Jfif == null)
                 {
                     jpegImage.Jfif = new JFIFData();
                 }
+                jpegImage.Jfif.Thumbnail = thumb;
 
-                // Assign the thumbnail to the JFIF segment
-                jpegImage.Jfif.Thumbnail = thumbnail;
-
-                // Save the JPEG image with the new thumbnail
+                // Save the JPEG with the new JFIF thumbnail
                 jpegImage.Save(outputPath);
             }
         }
