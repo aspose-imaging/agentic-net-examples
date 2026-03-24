@@ -1,33 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using System.Drawing; // For Rectangle
 
 class Program
 {
     static void Main()
     {
-        // Define source and destination file paths
-        string sourcePath = @"c:\temp\input.webp";
-        string destinationPath = @"c:\temp\output.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"c:\temp\sample.webp";
+        string outputPath = @"c:\temp\sample.blurred.png";
 
-        // Load the WebP image using the provided load rule
-        using (Image image = Image.Load(sourcePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the loaded image to WebPImage to access WebP-specific methods
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image, apply Gaussian blur, and save as PNG
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to WebPImage to access the Filter method
             WebPImage webpImage = (WebPImage)image;
 
-            // Apply a Gaussian blur filter to the entire image using the provided Filter rule
-            // Radius = 5, Sigma = 4.0 (adjust as needed for desired blur strength)
-            webpImage.Filter(
-                webpImage.Bounds,
-                new GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur to the whole image (radius 5, sigma 4.0)
+            webpImage.Filter(webpImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the processed image to a new file using the provided save rule
-            // Here we save as PNG, but you can use WebPOptions to save as WebP if required
-            webpImage.Save(destinationPath, new PngOptions());
+            // Save the processed image as PNG
+            webpImage.Save(outputPath, new PngOptions());
         }
     }
 }
