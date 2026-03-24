@@ -1,53 +1,51 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output file path and canvas size
-        string outputPath = @"c:\temp\output.bmp";
-        int width = 500;
-        int height = 500;
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Configure BMP options (24 bits per pixel) and set the file source
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a BMP image of size 400x400
         BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas bound to the output file
-        using (Image image = Image.Create(bmpOptions, width, height))
+        using (Image image = Image.Create(bmpOptions, 400, 400))
         {
-            // Initialize graphics for drawing on the image
+            // Initialize graphics for the image
             Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.Wheat); // Fill background
+            graphics.Clear(Color.White);
 
-            // Create a graphics path to hold multiple figures
+            // Build a GraphicsPath with a rectangle and an ellipse
             GraphicsPath path = new GraphicsPath();
+            Figure figure = new Figure();
 
-            // First figure with rectangle, ellipse, and pie shapes
-            Figure figure1 = new Figure();
-            figure1.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-            figure1.AddShape(new EllipseShape(new RectangleF(100f, 200f, 250f, 150f)));
-            figure1.AddShape(new PieShape(new RectangleF(150f, 100f, 200f, 200f), 0f, 120f));
+            // Rectangle shape
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 200f)));
+            // Ellipse shape
+            figure.AddShape(new EllipseShape(new RectangleF(100f, 150f, 200f, 150f)));
 
-            // Second figure with another ellipse and rectangle
-            Figure figure2 = new Figure();
-            figure2.AddShape(new EllipseShape(new RectangleF(300f, 300f, 150f, 100f)));
-            figure2.AddShape(new RectangleShape(new RectangleF(20f, 350f, 100f, 80f)));
+            // Add the figure to the path
+            path.AddFigure(figure);
 
-            // Add both figures to the path
-            path.AddFigures(new[] { figure1, figure2 });
-
-            // Draw the combined path using a black pen
-            Pen pen = new Pen(Color.Black, 2);
+            // Draw the path with a black pen
+            Pen pen = new Pen(Color.Black, 3);
             graphics.DrawPath(pen, path);
 
-            // Save the image (file is already bound to the source)
-            image.Save();
+            // Fill the same path with a semi‑transparent light blue brush
+            SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.LightBlue));
+            graphics.FillPath(brush, path);
+
+            // Save the resulting BMP image
+            image.Save(outputPath);
         }
     }
 }
