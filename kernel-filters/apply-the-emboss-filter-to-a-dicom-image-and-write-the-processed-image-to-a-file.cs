@@ -2,30 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input DICOM file path
+        // Hardcoded input and output paths
         string inputPath = "input.dcm";
-        // Output DICOM file path
-        string outputPath = "output_emboss.dcm";
+        string outputPath = "output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DICOM image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DicomImage to access DICOM-specific methods
-            DicomImage dicomImage = (DicomImage)image;
+            // Cast to DicomImage
+            var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
 
-            // Apply the Emboss filter to the entire image using a predefined kernel
-            dicomImage.Filter(dicomImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            // Apply Emboss filter using a convolution kernel
+            dicomImage.Filter(
+                dicomImage.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-            // Save the processed image back to DICOM format
-            dicomImage.Save(outputPath);
+            // Save the processed image as PNG
+            dicomImage.Save(outputPath, new PngOptions());
         }
     }
 }
