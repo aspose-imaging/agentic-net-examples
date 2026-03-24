@@ -1,45 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class ImageCropper
+class Program
 {
-    // Crops an image to a rectangular region defined by (x, y, width, height)
-    // and saves the result as a PNG file.
-    public static void CropImage(string inputPath, string outputPath,
-                                 int x, int y, int width, int height)
-    {
-        // Load the image from the specified file.
-        using (Image image = Image.Load(inputPath))
-        {
-            // Define the cropping rectangle.
-            Rectangle area = new Rectangle(x, y, width, height);
-
-            // Perform the crop operation.
-            image.Crop(area);
-
-            // Save the cropped image as PNG.
-            image.Save(outputPath, new PngOptions());
-        }
-    }
-
-    // Example usage.
     static void Main()
     {
-        string inputFile = @"c:\temp\sample.png";
-        string outputFile = @"c:\temp\sample.Crop.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.png";
+        string outputPath = @"C:\temp\sample.Crop.png";
 
-        // Crop the central half of the image.
-        using (Image img = Image.Load(inputFile))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            int x = img.Width / 4;
-            int y = img.Height / 4;
-            int w = img.Width / 2;
-            int h = img.Height / 2;
-
-            CropImage(inputFile, outputFile, x, y, w, h);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Cropping completed.");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image, crop a central rectangle, and save as PNG
+        using (Image image = Image.Load(inputPath))
+        {
+            // Define a rectangle that represents the central area of the image
+            var cropArea = new Rectangle(
+                image.Width / 4,          // left offset
+                image.Height / 4,         // top offset
+                image.Width / 2,          // width
+                image.Height / 2);        // height
+
+            // Perform the cropping operation
+            image.Crop(cropArea);
+
+            // Save the cropped image using PNG format
+            image.Save(outputPath, new PngOptions());
+        }
     }
 }
