@@ -1,27 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class GifToWebpConverter
+class Program
 {
     static void Main()
     {
-        // Define input GIF file and output WebP file paths
-        string inputGifPath = @"C:\temp\input.gif";
-        string outputWebpPath = @"C:\temp\output.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.gif";
+        string outputPath = @"c:\temp\output.webp";
 
-        // Load the GIF image (only the active frame will be considered for conversion)
-        using (Image gifImage = Image.Load(inputGifPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure WebP saving options (lossless compression with high quality)
-            WebPOptions webpOptions = new WebPOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the GIF image (could be animated)
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure WebP options (lossy compression with medium quality)
+            var webpOptions = new WebPOptions
             {
-                Lossless = true,
-                Quality = 90f
+                Lossless = false,
+                Quality = 75
             };
 
-            // Save the active frame of the GIF as a WebP image
-            gifImage.Save(outputWebpPath, webpOptions);
+            // Save the first (active) frame of the GIF as a WebP image
+            image.Save(outputPath, webpOptions);
         }
     }
 }
