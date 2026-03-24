@@ -1,31 +1,48 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging;
 
-// Define the folder where the images are located.
-string dataDir = @"c:\temp\";
-
-// Load an existing image (any supported format, e.g., BMP).
-using (Image image = Image.Load(dataDir + "input.bmp"))
+class Program
 {
-    // Create JPEG save options.
-    JpegOptions jpegOptions = new JpegOptions();
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\output.jpg";
 
-    // Set the compression algorithm to Progressive JPEG.
-    jpegOptions.CompressionType = JpegCompressionMode.Progressive;
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Choose the desired color model (e.g., YCbCr – standard JPEG color space).
-    jpegOptions.ColorType = JpegCompressionColorMode.YCbCr;
+        // Ensure output directory exists (unconditional call)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-    // Optional: set image quality (1‑100). Higher value = better quality, larger file.
-    jpegOptions.Quality = 90;
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure JPEG save options
+            JpegOptions saveOptions = new JpegOptions
+            {
+                // Set desired color model (e.g., YCbCr)
+                ColorType = JpegCompressionColorMode.YCbCr,
+                // Set compression algorithm (e.g., Progressive)
+                CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
+                // Optional: set quality (1-100)
+                Quality = 90,
+                // Optional: set bits per channel
+                BitsPerChannel = 8,
+                // Optional: set resolution
+                ResolutionSettings = new ResolutionSetting(96.0, 96.0),
+                ResolutionUnit = ResolutionUnit.Inch
+            };
 
-    // Optional: configure bits per channel and resolution.
-    jpegOptions.BitsPerChannel = 8;
-    jpegOptions.ResolutionSettings = new ResolutionSetting(96.0, 96.0);
-    jpegOptions.ResolutionUnit = ResolutionUnit.Inch;
-
-    // Save the image as JPEG using the configured options.
-    image.Save(dataDir + "output.jpg", jpegOptions);
+            // Save the image as JPEG with the configured options
+            image.Save(outputPath, saveOptions);
+        }
+    }
 }
