@@ -1,35 +1,33 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output file paths
         string inputPath = "input.bmp";
-        string outputPath = "output_edge.bmp";
+        string outputPath = "output.bmp";
 
-        // Load the BMP image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load the BMP image, apply a sharpen (edge detection) filter, and save the result
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering methods
             RasterImage raster = (RasterImage)image;
-
-            // Define a simple edge detection kernel
-            double[,] kernel = new double[,]
-            {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
-
-            // Apply the convolution filter with the edge detection kernel to the whole image
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-            // Save the processed image as BMP
-            raster.Save(outputPath, new BmpOptions());
+            // Apply sharpen filter with kernel size 5 and sigma 4.0
+            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+            raster.Save(outputPath);
         }
     }
 }
