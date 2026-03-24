@@ -1,49 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input PNG file path
-        string inputPath = @"C:\Images\input.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
-        // Output directory
-        string outputDir = @"C:\Images\Processed\";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
         // Ensure the output directory exists
-        System.IO.Directory.CreateDirectory(outputDir);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Apply Median filter
-        using (Image image = Image.Load(inputPath))
+        // Load the PNG image
+        using (PngImage pngImage = new PngImage(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+            // Example visual effect: convert to grayscale
+            pngImage.Grayscale();
 
-            PngOptions saveOptions = new PngOptions();
-            raster.Save(System.IO.Path.Combine(outputDir, "median_filtered.png"), saveOptions);
-        }
+            // Configure PNG save options with a specific filter type
+            PngOptions saveOptions = new PngOptions
+            {
+                // Adaptive filtering chooses the best filter per row (best compression, slower)
+                FilterType = PngFilterType.Adaptive,
+                // Preserve progressive loading flag (optional)
+                Progressive = true,
+                // Keep other defaults (bit depth, color type, etc.)
+            };
 
-        // Apply Gaussian Blur filter
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            PngOptions saveOptions = new PngOptions();
-            raster.Save(System.IO.Path.Combine(outputDir, "gaussian_blur.png"), saveOptions);
-        }
-
-        // Apply Sharpen filter
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-
-            PngOptions saveOptions = new PngOptions();
-            raster.Save(System.IO.Path.Combine(outputDir, "sharpened.png"), saveOptions);
+            // Save the processed image using the configured options
+            pngImage.Save(outputPath, saveOptions);
         }
     }
 }
