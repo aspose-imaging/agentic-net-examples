@@ -1,52 +1,53 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output SVG file paths
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputScaledPath = @"C:\temp\output_scaled.svg";
+        string outputModifiedPath = @"C:\temp\output_modified.svg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputScaledPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputModifiedPath));
 
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to SvgImage for SVG-specific operations
-            SvgImage svg = (SvgImage)image;
+            SvgImage svgImage = (SvgImage)image;
 
-            // Scale the SVG (double its size)
-            int newWidth = svg.Width * 2;
-            int newHeight = svg.Height * 2;
-            svg.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+            // ---------- Scaling ----------
+            int newWidth = svgImage.Width * 2;
+            int newHeight = svgImage.Height * 2;
+            svgImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+            svgImage.BackgroundColor = Color.LightGray; // Background color adjustment
 
-            // Adjust background color
-            svg.BackgroundColor = Color.LightGray;
-            svg.HasBackgroundColor = true;
+            // Save the scaled SVG
+            svgImage.Save(outputScaledPath);
 
-            // Modify elements using SvgGraphics2D
-            SvgGraphics2D graphics = new SvgGraphics2D(svg);
-
-            // Draw a red rectangle border around the image
-            graphics.DrawRectangle(new Pen(Color.Red, 2), 0, 0, svg.Width, svg.Height);
-
-            // Fill a yellow rectangle inside the image
-            graphics.FillRectangle(
-                new Pen(Color.Black, 1),
-                new SolidBrush(Color.Yellow),
-                20, 20,
-                svg.Width - 40,
-                svg.Height - 40);
+            // ---------- Element Modification ----------
+            // Create a graphics object based on the (now scaled) SVG image
+            SvgGraphics2D graphics = new SvgGraphics2D(svgImage);
+            graphics.DrawRectangle(new Pen(Color.Red, 5), 10, 10, newWidth - 20, newHeight - 20);
 
             // Finalize drawing and obtain the modified SVG image
-            using (SvgImage finalSvg = graphics.EndRecording())
+            using (SvgImage modifiedImage = graphics.EndRecording())
             {
                 // Save the modified SVG
-                finalSvg.Save(outputPath);
+                modifiedImage.Save(outputModifiedPath);
             }
         }
     }
