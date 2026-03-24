@@ -1,29 +1,36 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image and apply a directional motion blur using MotionWienerFilterOptions
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage rasterImage = (RasterImage)image;
+            RasterImage raster = (RasterImage)image;
 
-            int kernelSize = 15;
-            double angle = 45.0;
+            // Length = 10, Smooth = 1.0, Angle = 45 degrees
+            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 45.0));
 
-            double[,] motionKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(kernelSize, angle);
-
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(motionKernel);
-
-            rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-            var saveOptions = new PngOptions();
-            rasterImage.Save(outputPath, saveOptions);
+            // Save the processed image
+            raster.Save(outputPath);
         }
     }
 }
