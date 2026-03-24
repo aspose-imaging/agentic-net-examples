@@ -1,28 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class PngToPdfConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source PNG image
-        string pngPath = @"C:\Images\source.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Desired output PDF file path
-        string pdfPath = @"C:\Images\output.pdf";
-
-        // Load the PNG raster image using Aspose.Imaging's lifecycle method
-        using (Image pngImage = Image.Load(pngPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Preserve the original resolution of the PNG image
-            // (Aspose.Imaging retains resolution on save by default,
-            //  but you can explicitly set it if needed.)
-            // pngImage.SetResolution(pngImage.HorizontalResolution, pngImage.VerticalResolution);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the loaded image as a PDF document while keeping fidelity.
-            // PdfOptions is the appropriate save options class for PDF output.
-            pngImage.Save(pdfPath, new PdfOptions());
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure PDF options to preserve original resolution
+            PdfOptions pdfOptions = new PdfOptions
+            {
+                UseOriginalImageResolution = true
+            };
+
+            // Save the image as a PDF document
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
