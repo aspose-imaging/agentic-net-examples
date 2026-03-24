@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Emf.EmfPlus.Objects;
@@ -7,30 +8,46 @@ class Program
 {
     static void Main()
     {
-        // Input EMF file path
-        string inputPath = "input.emf";
-        // Output EMF file path
-        string outputPath = "output.emf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output_blur.emf";
 
-        // Load the EMF image using Aspose.Imaging's unified load method
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to the specific EmfImage type
-            EmfImage emfImage = (EmfImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a blur effect object and configure its properties
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EMF image
+        using (Image img = Image.Load(inputPath))
+        {
+            EmfImage emf = img as EmfImage;
+            if (emf == null)
+            {
+                Console.Error.WriteLine("The loaded file is not an EMF image.");
+                return;
+            }
+
+            // Create a blur effect with desired parameters
             EmfPlusBlurEffect blurEffect = new EmfPlusBlurEffect
             {
-                BlurRadius = 5.0f,   // Radius in pixels (0.0 – 255.0)
-                ExpandEdge = true   // Expand bitmap edges to accommodate the blur
+                BlurRadius = 10f,   // radius in pixels (0.0 – 255.0)
+                ExpandEdge = true   // expand bitmap edges to accommodate blur
             };
 
-            // Add the blur effect to the EMF records collection.
-            // This inserts the effect into the vector drawing stream.
-            emfImage.Records.Add(blurEffect);
+            // Add the blur effect to the image's records collection (if available)
+            var records = emf.Records;
+            if (records != null)
+            {
+                records.Add(blurEffect);
+            }
 
-            // Save the modified EMF image to the specified output file
-            emfImage.Save(outputPath);
+            // Save the processed EMF image
+            emf.Save(outputPath);
         }
     }
 }
