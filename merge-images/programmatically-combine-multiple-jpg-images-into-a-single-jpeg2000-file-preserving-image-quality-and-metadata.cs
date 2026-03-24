@@ -1,71 +1,86 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPEG image paths (modify as needed)
-        List<string> imagePaths = new List<string>
+        // Hardcoded input JPG paths
+        string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
         };
 
-        // Collect widths and heights of all images
-        List<int> widths = new List<int>();
-        List<int> heights = new List<int>();
+        // Hardcoded output JPEG2000 path
+        string outputPath = "combined.jp2";
 
-        foreach (string path in imagePaths)
+        // Validate input files
+        foreach (string path in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(path))
             {
-                widths.Add(img.Width);
-                heights.Add(img.Height);
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        // Calculate canvas size for horizontal stitching
-        int canvasWidth = widths.Sum();
-        int canvasHeight = heights.Max();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Prepare output file and options for JPEG2000
-        string outputPath = "combined_output.j2k";
-        Source outputSource = new FileCreateSource(outputPath, false);
-        Jpeg2000Options jp2Options = new Jpeg2000Options
+        // Collect sizes of all input images
+        List<Size> sizes = new List<Size>();
+        foreach (string path in inputPaths)
         {
-            Source = outputSource,
-            Irreversible = true,          // use lossless wavelet transform
-            KeepMetadata = true           // preserve metadata from source images
+            using (JpegImage img = (JpegImage)Image.Load(path))
+            {
+                sizes.Add(new Size(img.Width, img.Height));
+            }
+        }
+
+        // Calculate canvas dimensions (horizontal concatenation)
+        int totalWidth = 0;
+        int maxHeight = 0;
+        foreach (Size sz in sizes)
+        {
+            totalWidth += sz.Width;
+            if (sz.Height > maxHeight) maxHeight = sz.Height;
+        }
+
+        // Prepare JPEG2000 options (keep metadata, bind to output file)
+        Jpeg2000Options options = new Jpeg2000Options
+        {
+            Source = new FileCreateSource(outputPath, false),
+            KeepMetadata = true,
+            Irreversible = true // use lossless wavelet transform
         };
 
-        // Create a blank canvas bound to the output source
-        using (RasterImage canvas = (RasterImage)Image.Create(jp2Options, canvasWidth, canvasHeight))
+        // Create JPEG2000 canvas
+        using (Jpeg2000Image canvas = new Jpeg2000Image(totalWidth, maxHeight, options))
         {
             int offsetX = 0;
-
-            // Merge each JPEG onto the canvas
-            foreach (string path in imagePaths)
+            foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (JpegImage img = (JpegImage)Image.Load(path))
                 {
+                    // Load pixel data from source image
+                    int[] pixels = img.LoadArgb32Pixels(img.Bounds);
                     // Define destination rectangle on the canvas
                     Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
-
-                    // Copy pixel data
-                    canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
-
-                    // Update horizontal offset
+                    // Paste pixels onto canvas
+                    canvas.SaveArgb32Pixels(destRect, pixels);
                     offsetX += img.Width;
                 }
             }
 
-            // Save the bound canvas (no need to specify path again)
+            // Save the bound JPEG2000 image
             canvas.Save();
         }
     }

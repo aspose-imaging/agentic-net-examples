@@ -1,48 +1,54 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Folder containing source JPG images
-        string inputFolder = @"C:\Images\JpgFrames";
-        // Output GIF file path
-        string outputPath = @"C:\Images\Combined.gif";
+        // Hardcoded input JPG file paths
+        string[] inputPaths = {
+            "image1.jpg",
+            "image2.jpg",
+            "image3.jpg"
+        };
 
-        // Get all JPG files in the folder
-        string[] jpgFiles = Directory.GetFiles(inputFolder, "*.jpg");
-        if (jpgFiles.Length == 0)
-        {
-            Console.WriteLine("No JPG files found in the specified folder.");
-            return;
-        }
+        // Hardcoded output GIF path
+        string outputPath = "merged.gif";
 
-        // Load the first image to create the initial GIF frame
-        using (RasterImage firstFrame = (RasterImage)Image.Load(jpgFiles[0]))
+        // Verify each input file exists
+        foreach (string path in inputPaths)
         {
-            // Create a GIF image using the first frame
-            using (GifImage gif = new GifImage(new GifFrameBlock(firstFrame)))
+            if (!File.Exists(path))
             {
-                // Add remaining JPG images as additional frames
-                foreach (string filePath in jpgFiles.Skip(1))
-                {
-                    using (RasterImage frame = (RasterImage)Image.Load(filePath))
-                    {
-                        gif.AddPage(frame);
-                    }
-                }
-
-                // Save the animated GIF
-                gif.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        Console.WriteLine($"Combined GIF saved to: {outputPath}");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the first image and create the initial GIF frame
+        using (RasterImage firstImg = (RasterImage)Image.Load(inputPaths[0]))
+        {
+            GifFrameBlock firstBlock = new GifFrameBlock(firstImg);
+            using (GifImage gif = new GifImage(firstBlock))
+            {
+                // Add remaining images as additional frames
+                for (int i = 1; i < inputPaths.Length; i++)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
+                    {
+                        gif.AddPage(img);
+                    }
+                }
+
+                // Save the resulting animated GIF
+                gif.Save(outputPath);
+            }
+        }
     }
 }

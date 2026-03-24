@@ -1,66 +1,71 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Expect at least two arguments: input JPG files followed by output DICOM file path
-        if (args.Length < 2)
+        // Hardcoded input JPG paths
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Usage: <input1.jpg> <input2.jpg> ... <output.dcm>");
-            return;
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
+        };
+
+        // Hardcoded output DICOM path
+        string outputPath = "output.dcm";
+
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
         }
 
-        // Last argument is the output DICOM file
-        string outputPath = args[args.Length - 1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Collect input image paths (all arguments except the last one)
-        List<string> inputPaths = new List<string>();
-        for (int i = 0; i < args.Length - 1; i++)
-        {
-            inputPaths.Add(args[i]);
-        }
-
-        // Load the first image to obtain canvas dimensions
+        // Load the first image to determine canvas size
         using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
         {
-            int canvasWidth = firstImage.Width;
-            int canvasHeight = firstImage.Height;
+            int width = firstImage.Width;
+            int height = firstImage.Height;
 
-            // Prepare DICOM options (use 24‑bit RGB to preserve fidelity)
-            DicomOptions dicomOptions = new DicomOptions { ColorType = ColorType.Rgb24Bit };
-
-            // Create a DICOM image canvas
-            using (DicomImage dicom = (DicomImage)Image.Create(dicomOptions, canvasWidth, canvasHeight))
+            // Prepare DICOM creation options with bound source
+            DicomOptions dicomOptions = new DicomOptions
             {
-                // Copy pixels of the first JPG into the first DICOM page
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            // Create DICOM image (first page) with the determined size
+            using (DicomImage dicom = (DicomImage)Image.Create(dicomOptions, width, height))
+            {
+                // Copy pixels of the first JPG onto the first DICOM page
                 int[] firstPixels = firstImage.LoadArgb32Pixels(firstImage.Bounds);
                 dicom.SaveArgb32Pixels(dicom.Bounds, firstPixels);
 
                 // Process remaining JPG images and add them as additional pages
-                for (int i = 1; i < inputPaths.Count; i++)
+                for (int i = 1; i < inputPaths.Length; i++)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
                     {
-                        // Ensure the image size matches the canvas; resize if necessary
-                        if (img.Width != canvasWidth || img.Height != canvasHeight)
-                        {
-                            img.Resize(canvasWidth, canvasHeight, ResizeType.NearestNeighbourResample);
-                        }
-
-                        // Add a new page to the DICOM image and copy pixel data
-                        DicomPage page = dicom.AddPage();
                         int[] pixels = img.LoadArgb32Pixels(img.Bounds);
+                        DicomPage page = dicom.AddPage();
                         page.SaveArgb32Pixels(page.Bounds, pixels);
                     }
                 }
 
-                // Save the multi‑page DICOM file
-                dicom.Save(outputPath, dicomOptions);
+                // Save the bound DICOM image (no path needed, already bound to outputPath)
+                dicom.Save();
             }
         }
     }

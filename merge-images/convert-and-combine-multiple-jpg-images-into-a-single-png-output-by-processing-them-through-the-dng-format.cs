@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
@@ -11,7 +10,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input JPG image paths (modify as needed)
+        // Hardcoded input JPG paths
         string[] inputPaths = new string[]
         {
             "input1.jpg",
@@ -19,35 +18,53 @@ class Program
             "input3.jpg"
         };
 
-        // Output PNG path
-        string outputPath = "combined.png";
+        // Hardcoded output PNG path
+        string outputPath = "output.png";
+
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Collect sizes of all input images
-        List<Size> sizeList = new List<Size>();
+        List<Size> sizes = new List<Size>();
         foreach (string path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
-                sizeList.Add(img.Size);
+                sizes.Add(img.Size);
             }
         }
 
         // Calculate canvas dimensions for horizontal stitching
-        int newWidth = sizeList.Sum(s => s.Width);
-        int newHeight = sizeList.Max(s => s.Height);
-
-        // Create source and PNG options for the output canvas
-        Source outputSource = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = outputSource };
-
-        // Create a PNG canvas with the calculated dimensions
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        foreach (Size sz in sizes)
         {
-            // Merge images horizontally onto the canvas
+            canvasWidth += sz.Width;
+            if (sz.Height > canvasHeight)
+                canvasHeight = sz.Height;
+        }
+
+        // Prepare PNG options with bound output source
+        Source pngSource = new FileCreateSource(outputPath, false);
+        PngOptions pngOptions = new PngOptions() { Source = pngSource };
+
+        // Create canvas image bound to the output file
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+        {
             int offsetX = 0;
-            foreach (string imgPath in inputPaths)
+            foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(imgPath))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
                     Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -55,7 +72,7 @@ class Program
                 }
             }
 
-            // Save the bound canvas (output file is already bound via FileCreateSource)
+            // Save the bound canvas (output file already specified in options)
             canvas.Save();
         }
     }

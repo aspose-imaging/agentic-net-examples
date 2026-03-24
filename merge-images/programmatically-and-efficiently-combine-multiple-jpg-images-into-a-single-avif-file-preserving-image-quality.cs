@@ -1,76 +1,42 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect at least two input JPG paths and one output path
-        if (args.Length < 3)
+        // Hardcoded input JPG file paths
+        string[] inputPaths = new[]
         {
-            Console.WriteLine("Usage: <input1.jpg> <input2.jpg> ... <output.avif>");
-            return;
-        }
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
+        };
 
-        // Last argument is the output file path
-        string outputPath = args[args.Length - 1];
-        string outputExtension = Path.GetExtension(outputPath).ToLowerInvariant();
-
-        // AVIF format is not supported by Aspose.Imaging save options; throw exception as per guidelines
-        if (outputExtension == ".avif")
+        // Verify each input file exists
+        foreach (var inputPath in inputPaths)
         {
-            throw new NotSupportedException("AVIF format is not supported by Aspose.Imaging in this context.");
-        }
-
-        // Collect input image paths
-        var inputPaths = new List<string>();
-        for (int i = 0; i < args.Length - 1; i++)
-        {
-            inputPaths.Add(args[i]);
-        }
-
-        // Load images and collect their sizes
-        var sizes = new List<Size>();
-        foreach (var path in inputPaths)
-        {
-            using (JpegImage img = (JpegImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Calculate canvas size for horizontal stitching
-        int totalWidth = 0;
-        int maxHeight = 0;
-        foreach (var sz in sizes)
-        {
-            totalWidth += sz.Width;
-            if (sz.Height > maxHeight) maxHeight = sz.Height;
-        }
+        // Hardcoded output AVIF file path
+        string outputPath = @"C:\Images\combined.avif";
 
-        // Create a temporary PNG canvas to hold the merged image
-        Source canvasSource = new FileCreateSource(Path.ChangeExtension(outputPath, ".png"), false);
-        PngOptions pngOptions = new PngOptions { Source = canvasSource };
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
-        {
-            int offsetX = 0;
-            foreach (var path in inputPaths)
-            {
-                using (JpegImage img = (JpegImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
-            }
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the merged image in the requested format (fallback to PNG if not AVIF)
-            canvas.Save(outputPath);
+        // Create a multipage image from the JPG files
+        // This uses the built‑in Image.Create(string[]) method (lifecycle rule)
+        using (Image multipageImage = Image.Create(inputPaths))
+        {
+            // Save the combined image as AVIF.
+            // The Save method will infer the format from the file extension.
+            multipageImage.Save(outputPath);
         }
     }
 }

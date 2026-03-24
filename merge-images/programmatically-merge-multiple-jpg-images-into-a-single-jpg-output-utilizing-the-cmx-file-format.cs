@@ -1,69 +1,45 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // args: <cmxPath> <outputJpgPath> <inputJpg1> [<inputJpg2> ...]
-        if (args.Length < 3)
+        // Hard‑coded input JPG files
+        string[] inputPaths = {
+            @"C:\Images\input1.jpg",
+            @"C:\Images\input2.jpg",
+            @"C:\Images\input3.jpg"
+        };
+
+        // Hard‑coded output JPG file
+        string outputPath = @"C:\Images\output\merged.jpg";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            Console.WriteLine("Usage: Program <cmxPath> <outputJpgPath> <inputJpg1> [<inputJpg2> ...]");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
         }
 
-        string cmxPath = args[0];
-        string outputPath = args[1];
-        var inputPaths = new List<string>();
-        for (int i = 2; i < args.Length; i++)
-            inputPaths.Add(args[i]);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load CMX to obtain canvas dimensions
-        using (CmxImage cmx = (CmxImage)Image.Load(cmxPath))
+        // Create a multipage image from the JPG files
+        // Uses the Image.Create(string[]) overload as required by the lifecycle rules
+        using (Image multipageImage = Image.Create(inputPaths))
         {
-            int canvasWidth = cmx.Width;
-            int canvasHeight = cmx.Height;
+            // Prepare JPEG save options (default quality)
+            JpegOptions jpegOptions = new JpegOptions();
 
-            // Collect sizes of input images (optional, shown for pattern compliance)
-            var sizeList = new List<Size>();
-            foreach (string imgPath in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(imgPath))
-                {
-                    sizeList.Add(img.Size);
-                }
-            }
-
-            // Create output source and JPEG options
-            Source outputSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = outputSource,
-                Quality = 90
-            };
-
-            // Create JPEG canvas with dimensions from CMX
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-            {
-                int offsetX = 0;
-                foreach (string imgPath in inputPaths)
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(imgPath))
-                    {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetX += img.Width;
-                    }
-                }
-
-                // Save the bound image (output path already bound via source)
-                canvas.Save();
-            }
+            // Save the combined image as a single JPEG file
+            // The Save(string, ImageOptionsBase) overload follows the prescribed save rule
+            multipageImage.Save(outputPath, jpegOptions);
         }
     }
 }

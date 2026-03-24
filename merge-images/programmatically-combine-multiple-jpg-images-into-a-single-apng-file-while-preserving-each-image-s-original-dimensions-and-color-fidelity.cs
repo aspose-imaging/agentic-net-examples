@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -10,44 +10,51 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Expect at least one output path followed by one or more input JPG paths
-        if (args.Length < 2)
+        // Hardcoded input JPG files
+        string[] inputPaths = new[]
         {
-            Console.WriteLine("Usage: <output.apng> <input1.jpg> [<input2.jpg> ...]");
-            return;
-        }
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
+        };
 
-        string outputPath = args[0];
-        string[] inputPaths = new string[args.Length - 1];
-        Array.Copy(args, 1, inputPaths, 0, inputPaths.Length);
+        // Hardcoded output APNG file
+        string outputPath = "output.apng";
 
-        // Determine canvas size (maximum width and height among all input images)
-        int maxWidth = 0;
-        int maxHeight = 0;
+        // Verify each input file exists
         foreach (string path in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(path))
             {
-                if (img.Width > maxWidth) maxWidth = img.Width;
-                if (img.Height > maxHeight) maxHeight = img.Height;
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        // Set up APNG creation options
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Determine canvas size from the first image (assumes all images share the same dimensions)
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
+        {
+            canvasWidth = first.Width;
+            canvasHeight = first.Height;
+        }
+
+        // Create APNG options with source bound to the output file
         ApngOptions createOptions = new ApngOptions
         {
             Source = new FileCreateSource(outputPath, false),
-            DefaultFrameTime = 100, // default frame duration in milliseconds
             ColorType = PngColorType.TruecolorWithAlpha
         };
 
-        // Create the APNG canvas with the calculated size
-        using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, maxWidth, maxHeight))
+        // Create the APNG canvas and add each JPG as a frame
+        using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, canvasWidth, canvasHeight))
         {
-            // Remove the default empty frame
             apngImage.RemoveAllFrames();
 
-            // Add each JPG image as a frame
             foreach (string path in inputPaths)
             {
                 using (RasterImage frame = (RasterImage)Image.Load(path))
@@ -56,7 +63,7 @@ class Program
                 }
             }
 
-            // Save the bound APNG file
+            // Save the bound APNG image
             apngImage.Save();
         }
     }

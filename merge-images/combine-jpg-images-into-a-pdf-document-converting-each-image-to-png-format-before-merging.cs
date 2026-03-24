@@ -1,71 +1,70 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class JpgToPdfConverter
+class Program
 {
-    // Converts an array of JPG file paths into a single PDF file.
-    // Each JPG is first saved as a PNG (required by the task) and then merged.
-    public static void ConvertJpgsToPdf(string[] jpgFilePaths, string outputPdfPath)
-    {
-        // List to hold temporary PNG file paths
-        var pngFilePaths = new List<string>();
-
-        try
-        {
-            // Step 1: Convert each JPG to PNG and store the PNG path
-            foreach (var jpgPath in jpgFilePaths)
-            {
-                // Load the JPG image
-                using (Image jpgImage = Image.Load(jpgPath))
-                {
-                    // Determine a temporary PNG file name (same folder, same base name)
-                    string pngPath = Path.ChangeExtension(jpgPath, ".png");
-                    // Save the image as PNG using default PNG options
-                    jpgImage.Save(pngPath, new PngOptions());
-                    pngFilePaths.Add(pngPath);
-                }
-            }
-
-            // Step 2: Create a multipage image from the PNG files
-            // Image.Create(string[]) creates a multipage image (e.g., PDF) from the supplied files
-            using (Image pdfImage = Image.Create(pngFilePaths.ToArray()))
-            {
-                // Save the multipage image as PDF. The format is inferred from the file extension.
-                pdfImage.Save(outputPdfPath);
-            }
-        }
-        finally
-        {
-            // Clean up temporary PNG files
-            foreach (var pngPath in pngFilePaths)
-            {
-                if (File.Exists(pngPath))
-                {
-                    try { File.Delete(pngPath); } catch { /* ignore cleanup errors */ }
-                }
-            }
-        }
-    }
-
-    // Example usage
     static void Main()
     {
-        // Array of source JPG files
-        string[] jpgFiles = new string[]
+        // Hardcoded input JPG files
+        string[] inputPaths = new[]
         {
             @"C:\Images\photo1.jpg",
             @"C:\Images\photo2.jpg",
             @"C:\Images\photo3.jpg"
         };
 
-        // Destination PDF file
-        string outputPdf = @"C:\Images\Combined.pdf";
+        // Hardcoded output PDF file
+        string outputPath = @"C:\Images\CombinedOutput.pdf";
 
-        ConvertJpgsToPdf(jpgFiles, outputPdf);
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
+        {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+        }
 
-        Console.WriteLine("PDF created successfully at: " + outputPdf);
+        // Prepare a list to hold PNG images (in memory)
+        List<Image> pngImages = new List<Image>();
+
+        // Convert each JPG to PNG and keep the PNG image in memory
+        foreach (string inputPath in inputPaths)
+        {
+            // Load the JPG image
+            using (Image jpgImage = Image.Load(inputPath))
+            {
+                // Save JPG image to a memory stream as PNG
+                using (MemoryStream pngStream = new MemoryStream())
+                {
+                    var pngOptions = new PngOptions();
+                    jpgImage.Save(pngStream, pngOptions);
+                    pngStream.Position = 0; // Reset stream position for reading
+
+                    // Load the PNG image from the memory stream
+                    Image pngImage = Image.Load(pngStream);
+                    pngImages.Add(pngImage);
+                }
+            }
+        }
+
+        // Create a multipage image from the PNG images, disposing them automatically after use
+        using (Image multipagePdf = Image.Create(pngImages.ToArray(), true))
+        {
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Prepare PDF export options (default settings)
+            var pdfOptions = new PdfOptions();
+
+            // Save the multipage image as a PDF document
+            multipagePdf.Save(outputPath, pdfOptions);
+        }
+
+        // At this point all resources are disposed
     }
 }

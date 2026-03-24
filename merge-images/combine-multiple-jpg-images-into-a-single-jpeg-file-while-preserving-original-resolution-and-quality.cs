@@ -1,6 +1,6 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -9,62 +9,70 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input JPEG file paths
+        // Hardcoded input and output paths
         string[] inputPaths = new string[]
         {
             "input1.jpg",
             "input2.jpg",
             "input3.jpg"
         };
+        string outputPath = "merged_output.jpg";
 
-        // Output JPEG file path
-        string outputPath = "merged.jpg";
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
+        // Verify each input file exists
         foreach (string path in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Collect sizes of all input images
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+        foreach (string path in inputPaths)
+        {
+            using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
             {
                 sizes.Add(img.Size);
             }
         }
 
         // Calculate canvas dimensions for horizontal stitching
-        int newWidth = 0;
-        int newHeight = 0;
+        int canvasWidth = 0;
+        int canvasHeight = 0;
         foreach (var sz in sizes)
         {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight)
-                newHeight = sz.Height;
+            canvasWidth += sz.Width;
+            if (sz.Height > canvasHeight)
+                canvasHeight = sz.Height;
         }
 
-        // Create output source and JPEG options
-        Source src = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions
+        // Create JPEG canvas with bound source
+        FileCreateSource source = new FileCreateSource(outputPath, false);
+        JpegOptions jpegOptions = new JpegOptions()
         {
-            Source = src,
-            Quality = 100 // preserve original quality
+            Source = source,
+            Quality = 100
         };
 
-        // Create a JPEG canvas with the calculated size
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+        using (Aspose.Imaging.FileFormats.Jpeg.JpegImage canvas = (Aspose.Imaging.FileFormats.Jpeg.JpegImage)Aspose.Imaging.Image.Create(jpegOptions, canvasWidth, canvasHeight))
         {
             int offsetX = 0;
             foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                 {
-                    // Define the region on the canvas where the current image will be placed
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    // Copy pixel data from the source image to the canvas
+                    Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                     offsetX += img.Width;
                 }
             }
 
-            // Save the bound canvas (output file is already bound via FileCreateSource)
+            // Save the bound image (no need to pass path again)
             canvas.Save();
         }
     }

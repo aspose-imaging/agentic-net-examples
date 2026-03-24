@@ -1,65 +1,44 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPG image paths
-        string[] inputPaths = new string[]
+        // Hard‑coded input JPG files
+        string[] inputPaths = new[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\input1.jpg",
+            @"C:\Images\input2.jpg",
+            @"C:\Images\input3.jpg"
         };
 
-        // Output PNG path
-        string outputPath = "combined.png";
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
+        // Hard‑coded output PNG file
+        string outputPath = @"C:\Images\combined_output.png";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a multipage image from the JPG files (OTG processing is handled internally)
+        using (Image multipageImage = Image.Create(inputPaths))
         {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight)
-                canvasHeight = sz.Height;
-        }
+            // Prepare PNG save options
+            PngOptions pngOptions = new PngOptions();
 
-        // Prepare PNG options with bound output file
-        Source src = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions { Source = src };
-
-        // Create canvas image bound to the output file
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
-        {
-            int offsetX = 0;
-            foreach (string path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
-            }
-
-            // Save the combined image (file is already bound)
-            canvas.Save();
+            // Save the combined image as a single PNG file
+            multipageImage.Save(outputPath, pngOptions);
         }
     }
 }

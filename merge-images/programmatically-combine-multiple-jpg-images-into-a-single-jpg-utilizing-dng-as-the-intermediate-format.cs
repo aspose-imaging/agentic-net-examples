@@ -1,77 +1,108 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Dng;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Expected arguments: <DngPath> <OutputJpgPath> <JpgPath1> <JpgPath2> ...
-        if (args.Length < 3)
+        // Hardcoded input JPG files
+        string[] inputPaths = new string[]
         {
-            throw new ArgumentException("Usage: <DngPath> <OutputJpgPath> <JpgPath1> [<JpgPath2> ...]");
+            @"C:\Images\img1.jpg",
+            @"C:\Images\img2.jpg",
+            @"C:\Images\img3.jpg"
+        };
+
+        // Hardcoded output JPG file
+        string outputPath = @"C:\Images\combined.jpg";
+
+        // Verify input files exist
+        foreach (string inputPath in inputPaths)
+        {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
         }
 
-        string dngPath = args[0];
-        string outputPath = args[1];
-        string[] jpgPaths = new string[args.Length - 2];
-        Array.Copy(args, 2, jpgPaths, 0, jpgPaths.Length);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DNG image to use its dimensions as part of the canvas size calculation
-        using (DngImage dngImage = (DngImage)Image.Load(dngPath))
+        // Convert each JPG to a temporary DNG file
+        List<string> dngPaths = new List<string>();
+        foreach (string inputPath in inputPaths)
         {
-            // Collect sizes of all images (DNG + JPGs)
-            List<Size> sizeList = new List<Size>();
-            sizeList.Add(dngImage.Size);
+            string tempDngPath = Path.Combine(Path.GetTempPath(),
+                Path.GetFileNameWithoutExtension(inputPath) + ".dng");
 
-            foreach (string jpgPath in jpgPaths)
+            // Ensure temp directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(tempDngPath));
+
+            using (Image jpgImage = Image.Load(inputPath))
             {
-                using (RasterImage img = (RasterImage)Image.Load(jpgPath))
+                // Save as DNG (Aspose infers format from extension)
+                jpgImage.Save(tempDngPath);
+            }
+
+            dngPaths.Add(tempDngPath);
+        }
+
+        // Collect sizes of all DNG images
+        List<Size> sizes = new List<Size>();
+        foreach (string dngPath in dngPaths)
+        {
+            using (Image dngImage = Image.Load(dngPath))
+            {
+                sizes.Add(dngImage.Size);
+            }
+        }
+
+        // Calculate canvas dimensions for horizontal stitching
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        foreach (Size sz in sizes)
+        {
+            canvasWidth += sz.Width;
+            if (sz.Height > canvasHeight)
+                canvasHeight = sz.Height;
+        }
+
+        // Prepare JPEG options for the output canvas
+        Source outSource = new FileCreateSource(outputPath, false);
+        JpegOptions jpegOptions = new JpegOptions()
+        {
+            Source = outSource,
+            Quality = 90
+        };
+
+        // Create the output JPEG canvas and merge images
+        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        {
+            int offsetX = 0;
+            foreach (string dngPath in dngPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(dngPath))
                 {
-                    sizeList.Add(img.Size);
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
                 }
             }
 
-            // Calculate horizontal canvas size (sum widths, max height)
-            int newWidth = 0;
-            int newHeight = 0;
-            foreach (Size sz in sizeList)
-            {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
-            }
+            // Save the bound image (outputPath is already bound via Source)
+            canvas.Save();
+        }
 
-            // Prepare JPEG output options
-            Source fileSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = fileSource,
-                Quality = 90
-            };
-
-            // Create JPEG canvas
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
-            {
-                int offsetX = 0;
-
-                // Draw each JPG onto the canvas horizontally
-                foreach (string jpgPath in jpgPaths)
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(jpgPath))
-                    {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetX += img.Width;
-                    }
-                }
-
-                // Save the bound JPEG image
-                canvas.Save();
-            }
+        // Cleanup temporary DNG files
+        foreach (string dngPath in dngPaths)
+        {
+            try { File.Delete(dngPath); } catch { /* ignore */ }
         }
     }
 }

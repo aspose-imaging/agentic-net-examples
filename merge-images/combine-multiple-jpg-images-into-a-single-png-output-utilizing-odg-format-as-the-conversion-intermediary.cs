@@ -1,68 +1,83 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hard‑coded input JPG files
+        string[] inputPaths = {
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
+        };
+
+        // Hard‑coded output PNG file
+        string outputPath = @"C:\Images\combined.png";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            // Input JPG files (modify paths as needed)
-            string[] inputPaths = new string[]
+            if (!File.Exists(inputPath))
             {
-                "image1.jpg",
-                "image2.jpg",
-                "image3.jpg"
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Temporary folder for ODG intermediary files
+        string tempOdgFolder = Path.Combine(Path.GetTempPath(), "OdgTemp");
+        Directory.CreateDirectory(tempOdgFolder);
+
+        // Convert each JPG to ODG and collect the ODG file paths
+        string[] odgPaths = new string[inputPaths.Length];
+        for (int i = 0; i < inputPaths.Length; i++)
+        {
+            string jpgPath = inputPaths[i];
+            string odgPath = Path.Combine(tempOdgFolder, $"page{i + 1}.odg");
+            odgPaths[i] = odgPath;
+
+            // Load JPG image
+            using (Image jpgImage = Image.Load(jpgPath))
+            {
+                // Save as ODG (extension determines format)
+                jpgImage.Save(odgPath);
+            }
+        }
+
+        // Create a multipage image from the ODG files
+        using (Image multipageImage = Image.Create(odgPaths))
+        {
+            // Prepare PNG save options with ODG rasterization settings
+            PngOptions pngOptions = new PngOptions();
+
+            // ODG rasterization options (background color and page size)
+            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            {
+                BackgroundColor = Color.White,
+                PageSize = multipageImage.Size
             };
 
-            // Output PNG file
-            string outputPath = "combined.png";
+            pngOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Collect sizes of all input images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (string path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    sizes.Add(img.Size);
-                }
-            }
+            // Save the combined image as a single PNG
+            multipageImage.Save(outputPath, pngOptions);
+        }
 
-            // Calculate canvas dimensions for horizontal stitching
-            int totalWidth = 0;
-            int maxHeight = 0;
-            foreach (var sz in sizes)
-            {
-                totalWidth += sz.Width;
-                if (sz.Height > maxHeight) maxHeight = sz.Height;
-            }
-
-            // Create PNG canvas bound to the output file
-            Source src = new FileCreateSource(outputPath, false);
-            using (PngOptions pngOptions = new PngOptions() { Source = src })
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
-            {
-                int offsetX = 0;
-                foreach (string path in inputPaths)
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
-                    {
-                        // Copy pixel data from the source image onto the canvas
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetX += img.Width;
-                    }
-                }
-
-                // Save the bound canvas (no need to pass path again)
-                canvas.Save();
-            }
+        // Optional: clean up temporary ODG files
+        try
+        {
+            Directory.Delete(tempOdgFolder, true);
+        }
+        catch
+        {
+            // Ignored – cleanup failure should not affect the main result
         }
     }
 }

@@ -1,60 +1,52 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // args[0] = output PDF path, remaining args = input JPG paths
-        if (args.Length < 2)
+        // Hardcoded input JPG files
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Usage: Program output.pdf input1.jpg [input2.jpg ...]");
-            return;
-        }
+            @"C:\Images\photo1.jpg",
+            @"C:\Images\photo2.jpg",
+            @"C:\Images\photo3.jpg"
+        };
 
-        string outputPdfPath = args[0];
-        string[] jpgPaths = args.Skip(1).ToArray();
+        // Hardcoded output PDF file
+        string outputPath = @"C:\Output\combined.pdf";
 
-        // Collect sizes of JPG images
-        var sizes = new List<Size>();
-        foreach (var jpgPath in jpgPaths)
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(jpgPath))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Calculate canvas size for vertical stacking
-        int canvasWidth = sizes.Max(s => s.Width);
-        int canvasHeight = sizes.Sum(s => s.Height);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create PDF canvas using a bound JpegImage
-        Source pdfSource = new FileCreateSource(outputPdfPath, false);
-        var jpegOptions = new JpegOptions { Source = pdfSource, Quality = 100 };
-        using (JpegImage pdfCanvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        // Create a multipage image from the JPG files
+        // The overload with 'throwExceptionOnLoadError' set to false prevents exceptions on load errors
+        using (Image multipageImage = Image.Create(inputPaths, false))
         {
-            int offsetY = 0;
-            foreach (var jpgPath in jpgPaths)
+            // Prepare PDF options with WMZ‑style compression (using Flate compression for PDF)
+            var pdfOptions = new PdfOptions
             {
-                using (RasterImage pageImage = (RasterImage)Image.Load(jpgPath))
+                PdfCoreOptions = new PdfCoreOptions
                 {
-                    var bounds = new Rectangle(0, offsetY, pageImage.Width, pageImage.Height);
-                    pdfCanvas.SaveArgb32Pixels(bounds, pageImage.LoadArgb32Pixels(pageImage.Bounds));
-                    offsetY += pageImage.Height;
+                    Compression = PdfImageCompressionOptions.Flate
                 }
-            }
+            };
 
-            // Save the combined image as PDF
-            var pdfOptions = new PdfOptions();
-            pdfCanvas.Save(outputPdfPath, pdfOptions);
+            // Save the multipage image as a single PDF document
+            multipageImage.Save(outputPath, pdfOptions);
         }
     }
 }

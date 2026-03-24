@@ -1,51 +1,85 @@
 using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
-class CombineJpgToPngViaGif
+class Program
 {
     static void Main()
     {
-        // Paths of the source JPG images
-        string[] jpgFiles = new string[]
+        // Hardcoded input JPG paths
+        string[] inputPaths = new[]
         {
-            @"C:\Images\image1.jpg",
-            @"C:\Images\image2.jpg",
-            @"C:\Images\image3.jpg"
+            @"C:\Images\input1.jpg",
+            @"C:\Images\input2.jpg",
+            @"C:\Images\input3.jpg"
         };
 
-        // Load the first JPG to obtain width and height for the GIF canvas
-        using (RasterImage firstJpg = (RasterImage)Image.Load(jpgFiles[0]))
+        // Validate input files
+        foreach (string path in inputPaths)
         {
-            // Prepare GIF creation options (temporary file as the target)
-            var gifCreateOptions = new GifOptions
+            if (!File.Exists(path))
             {
-                Source = new FileCreateSource(@"C:\Temp\intermediate.gif", false)
-            };
-
-            // Create an empty GIF image with the same dimensions as the first JPG
-            using (GifImage gifImage = (GifImage)Image.Create(gifCreateOptions, firstJpg.Width, firstJpg.Height))
-            {
-                // Add the first JPG as the first page of the GIF
-                gifImage.AddPage(firstJpg);
-
-                // Add remaining JPG images as additional pages
-                for (int i = 1; i < jpgFiles.Length; i++)
-                {
-                    using (RasterImage jpg = (RasterImage)Image.Load(jpgFiles[i]))
-                    {
-                        gifImage.AddPage(jpg);
-                    }
-                }
-
-                // Save the GIF as a PNG file.
-                // Only the active (first) frame will be written to PNG, which is the combined result.
-                var pngSaveOptions = new PngOptions();
-                gifImage.Save(@"C:\Output\combined.png", pngSaveOptions);
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
+        }
+
+        // Paths for intermediate GIF and final PNG
+        string gifPath = @"C:\Images\intermediate.gif";
+        string outputPath = @"C:\Images\combined.png";
+
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(gifPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Collect sizes of all input images
+        List<Size> sizes = new List<Size>();
+        foreach (string path in inputPaths)
+        {
+            using (RasterImage img = (RasterImage)Image.Load(path))
+            {
+                sizes.Add(img.Size);
+            }
+        }
+
+        // Calculate canvas dimensions for horizontal stitching
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
+
+        // Create GIF canvas
+        GifOptions gifOptions = new GifOptions
+        {
+            Source = new FileCreateSource(gifPath, false)
+        };
+
+        using (RasterImage canvas = (RasterImage)Image.Create(gifOptions, canvasWidth, canvasHeight))
+        {
+            int offsetX = 0;
+            foreach (string path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
+                }
+            }
+            // Save the bound GIF image
+            canvas.Save();
+        }
+
+        // Load the intermediate GIF and save as PNG
+        using (Image gifImage = Image.Load(gifPath))
+        {
+            PngOptions pngOptions = new PngOptions
+            {
+                Source = new FileCreateSource(outputPath, false)
+            };
+            gifImage.Save(outputPath, pngOptions);
         }
     }
 }

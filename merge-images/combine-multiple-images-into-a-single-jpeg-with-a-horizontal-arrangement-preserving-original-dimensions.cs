@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -9,20 +10,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input image file paths
+        // Hardcoded input and output paths
         string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
         };
+        string outputPath = "merged_output.jpg";
 
-        // Output JPEG file path
-        string outputPath = "output.jpg";
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (var path in inputPaths)
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+        foreach (string path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
@@ -31,39 +43,37 @@ class Program
         }
 
         // Calculate canvas dimensions for horizontal arrangement
-        int newWidth = 0;
-        int newHeight = 0;
+        int totalWidth = 0;
+        int maxHeight = 0;
         foreach (var sz in sizes)
         {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight)
-                newHeight = sz.Height;
+            totalWidth += sz.Width;
+            if (sz.Height > maxHeight) maxHeight = sz.Height;
         }
 
-        // Create file source and JPEG options
-        FileCreateSource source = new FileCreateSource(outputPath, false);
-        JpegOptions options = new JpegOptions()
+        // Prepare JPEG options with bound source
+        Source src = new FileCreateSource(outputPath, false);
+        JpegOptions jpegOptions = new JpegOptions()
         {
-            Source = source,
+            Source = src,
             Quality = 100
         };
 
-        // Create JPEG canvas bound to the output file
-        using (JpegImage canvas = (JpegImage)Image.Create(options, newWidth, newHeight))
+        // Create JPEG canvas
+        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
         {
-            // Merge images horizontally onto the canvas
             int offsetX = 0;
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                     offsetX += img.Width;
                 }
             }
 
-            // Save the bound JPEG image
+            // Save the bound image
             canvas.Save();
         }
     }

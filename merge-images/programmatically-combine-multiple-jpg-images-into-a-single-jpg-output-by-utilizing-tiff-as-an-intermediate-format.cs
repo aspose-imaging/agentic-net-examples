@@ -1,67 +1,112 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string[] inputPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-        string outputJpg = "combined.jpg";
-        string tempTiff = "temp.tif";
-
-        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-        foreach (var path in inputPaths)
+        // Hardcoded input JPG files
+        string[] inputPaths = new string[]
         {
-            using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
-            {
-                sizes.Add(img.Size);
-            }
-        }
-
-        int newWidth = 0;
-        int newHeight = 0;
-        foreach (var sz in sizes)
-        {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight) newHeight = sz.Height;
-        }
-
-        FileCreateSource tiffSource = new FileCreateSource(tempTiff, false);
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-        {
-            Source = tiffSource,
-            Photometric = TiffPhotometrics.Rgb,
-            BitsPerSample = new ushort[] { 8, 8, 8 }
+            @"C:\Images\input1.jpg",
+            @"C:\Images\input2.jpg",
+            @"C:\Images\input3.jpg"
         };
 
-        using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(tiffOptions, newWidth, newHeight))
+        // Hardcoded output JPG file
+        string outputPath = @"C:\Images\output.jpg";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            int offsetX = 0;
-            foreach (var path in inputPaths)
+            if (!File.Exists(inputPath))
             {
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
-                {
-                    Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            canvas.Save();
         }
 
-        using (Aspose.Imaging.Image tiffImage = Aspose.Imaging.Image.Load(tempTiff))
+        // Create a list to hold TIFF frames
+        List<TiffFrame> tiffFrames = new List<TiffFrame>();
+
+        // Load each JPG and convert it to a TIFF frame
+        foreach (string inputPath in inputPaths)
         {
-            JpegOptions jpegOptions = new JpegOptions() { Quality = 90 };
-            tiffImage.Save(outputJpg, jpegOptions);
+            using (Image img = Image.Load(inputPath))
+            {
+                // Cast to RasterImage (base for bitmap formats)
+                RasterImage raster = img as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine($"Unable to process image: {inputPath}");
+                    return;
+                }
+
+                // Create a TIFF frame from the raster image
+                TiffFrame frame = new TiffFrame(raster);
+                tiffFrames.Add(frame);
+            }
         }
 
-        if (File.Exists(tempTiff))
+        // Create a multi‑frame TIFF image from the collected frames
+        using (TiffImage tiffImage = new TiffImage(tiffFrames.ToArray()))
         {
-            File.Delete(tempTiff);
+            // Ensure the directory for the intermediate TIFF exists
+            string tempTiffPath = @"C:\Images\temp_intermediate.tif";
+            Directory.CreateDirectory(Path.GetDirectoryName(tempTiffPath));
+
+            // Save the multi‑page TIFF
+            tiffImage.Save(tempTiffPath);
+        }
+
+        // Load the intermediate TIFF to combine its frames into a single JPEG
+        using (Image tiffImg = Image.Load(@"C:\Images\temp_intermediate.tif"))
+        {
+            TiffImage multiPageTiff = tiffImg as TiffImage;
+            if (multiPageTiff == null)
+            {
+                Console.Error.WriteLine("Failed to load intermediate TIFF as a multi‑page TIFF.");
+                return;
+            }
+
+            // Determine combined image dimensions (horizontal concatenation)
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (TiffFrame frame in multiPageTiff.Frames)
+            {
+                totalWidth += frame.Width;
+                if (frame.Height > maxHeight)
+                    maxHeight = frame.Height;
+            }
+
+            // Prepare JPEG options with a file create source
+            JpegOptions jpegOptions = new JpegOptions();
+            jpegOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create a blank JPEG image with the combined dimensions
+            using (Image combinedImg = Image.Create(jpegOptions, totalWidth, maxHeight))
+            {
+                Graphics graphics = new Graphics(combinedImg);
+                int offsetX = 0;
+
+                // Draw each TIFF frame onto the combined image
+                foreach (TiffFrame frame in multiPageTiff.Frames)
+                {
+                    graphics.DrawImage(frame, offsetX, 0);
+                    offsetX += frame.Width;
+                }
+
+                // Save the final combined JPEG
+                combinedImg.Save();
+            }
         }
     }
 }

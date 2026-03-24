@@ -1,10 +1,9 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Sources;
 
@@ -12,56 +11,85 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input JPEG image paths
-        List<string> imagePaths = new List<string>
+        // Hardcoded input JPEG files and output PDF path
+        string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
         };
+        string outputPath = "output.pdf";
 
-        // Collect sizes of all images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in imagePaths)
+        // Verify input files exist
+        foreach (string path in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(path))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions for vertical stacking
-        int canvasWidth = sizes.Max(s => s.Width);
-        int canvasHeight = sizes.Sum(s => s.Height);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Temporary JPEG canvas file (intermediate bound image)
-        string tempCanvasPath = Path.Combine(Path.GetTempPath(), "tempCanvas.jpg");
-        Source tempSource = new FileCreateSource(tempCanvasPath, true);
-        JpegOptions jpegOptions = new JpegOptions { Source = tempSource, Quality = 100 };
-
-        // Create JPEG canvas
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        // Convert each JPEG to a temporary JPEG2000 file
+        List<string> jp2Paths = new List<string>();
+        int tempIndex = 0;
+        foreach (string jpegPath in inputPaths)
         {
-            int offsetY = 0;
-            foreach (string path in imagePaths)
+            string tempJp2Path = Path.Combine(Path.GetTempPath(), $"temp_{tempIndex}.jp2");
+            using (Image jpegImage = Image.Load(jpegPath))
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                Jpeg2000Options jp2Options = new Jpeg2000Options
                 {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
-                }
+                    Irreversible = true // Use lossless compression
+                };
+                jpegImage.Save(tempJp2Path, jp2Options);
             }
-
-            // Save the canvas as a PDF with JPEG2000 compression (using default PDF options)
-            PdfOptions pdfOptions = new PdfOptions();
-            canvas.Save("output.pdf", pdfOptions);
+            jp2Paths.Add(tempJp2Path);
+            tempIndex++;
         }
 
-        // Cleanup temporary canvas file
-        if (File.Exists(tempCanvasPath))
+        // Load the first JP2 to determine page size
+        using (RasterImage firstImage = (RasterImage)Image.Load(jp2Paths[0]))
         {
-            File.Delete(tempCanvasPath);
+            int pageWidth = firstImage.Width;
+            int pageHeight = firstImage.Height;
+
+            // Create PDF canvas bound to the output file
+            Source pdfSource = new FileCreateSource(outputPath, false);
+            PdfOptions pdfOptions = new PdfOptions
+            {
+                Source = pdfSource
+            };
+            using (RasterImage pdfCanvas = (RasterImage)Image.Create(pdfOptions, pageWidth, pageHeight))
+            {
+                Graphics graphics = new Graphics(pdfCanvas);
+                int offsetY = 0;
+
+                foreach (string jp2Path in jp2Paths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(jp2Path))
+                    {
+                        // Draw the JP2 image onto the PDF canvas
+                        graphics.DrawImage(img, new Rectangle(0, offsetY, img.Width, img.Height));
+                        offsetY += img.Height;
+                    }
+                }
+
+                // Save the bound PDF document
+                pdfCanvas.Save();
+            }
+        }
+
+        // Cleanup temporary JP2 files
+        foreach (string tempPath in jp2Paths)
+        {
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
         }
     }
 }

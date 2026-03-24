@@ -1,26 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPEG image file paths
-        string[] inputFiles = new string[]
+        // Hardcoded input JPG files
+        string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\photo1.jpg",
+            @"C:\Images\photo2.jpg",
+            @"C:\Images\photo3.jpg"
         };
 
-        // Output ODG file path
-        string outputPath = "combined.odg";
-
-        // Create a multipage image from the JPEG files
-        using (Image odgImage = Image.Create(inputFiles))
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            // Save the combined image as ODG
-            odgImage.Save(outputPath);
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+        }
+
+        // Hardcoded output ODG file
+        string outputPath = @"C:\Images\Combined.odg";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a multipage image from the JPG files
+        using (Image multipageImage = Image.Create(inputPaths))
+        {
+            // Save the multipage image as ODG
+            multipageImage.Save(outputPath);
         }
     }
 }

@@ -1,28 +1,42 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Expect at least two arguments: input JPEG files and output JPEG file.
-        if (args.Length < 2)
+        // Hardcoded input JPEG files
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Usage: Program.exe <input1.jpg> <input2.jpg> ... <output.jpg>");
-            return;
+            @"C:\Images\input1.jpg",
+            @"C:\Images\input2.jpg",
+            @"C:\Images\input3.jpg"
+        };
+
+        // Hardcoded output JPEG file
+        string outputPath = @"C:\Images\combined_output.jpg";
+
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
         }
 
-        // Last argument is the output path; the rest are input images.
-        string outputPath = args[args.Length - 1];
-        string[] inputPaths = new string[args.Length - 1];
-        Array.Copy(args, inputPaths, args.Length - 1);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Collect sizes of all input images.
-        List<Size> sizes = new List<Size>();
+        // Collect sizes of all input images
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
         foreach (string path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
@@ -31,34 +45,48 @@ class Program
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching.
-        int newWidth = 0;
-        int newHeight = 0;
-        foreach (Size sz in sizes)
+        // Calculate canvas dimensions for horizontal stitching
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        foreach (var sz in sizes)
         {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight) newHeight = sz.Height;
+            canvasWidth += sz.Width;
+            if (sz.Height > canvasHeight)
+                canvasHeight = sz.Height;
         }
 
-        // Create an unbound BMP canvas.
+        // Temporary BMP file for intermediate canvas
+        string tempBmpPath = Path.Combine(Path.GetTempPath(), "temp_canvas.bmp");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempBmpPath));
+
+        // Create BMP canvas
         BmpOptions bmpOptions = new BmpOptions();
-        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, newWidth, newHeight))
+        bmpOptions.Source = new FileCreateSource(tempBmpPath, false);
+        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, canvasWidth, canvasHeight))
         {
+            // Merge each JPEG onto the canvas horizontally
             int offsetX = 0;
-            // Merge each JPEG onto the canvas.
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                     offsetX += img.Width;
                 }
             }
 
-            // Save the merged canvas as JPEG.
-            JpegOptions jpegOptions = new JpegOptions { Quality = 90 };
+            // Save the merged canvas as JPEG
+            JpegOptions jpegOptions = new JpegOptions();
+            jpegOptions.Source = new FileCreateSource(outputPath, false);
+            jpegOptions.Quality = 90;
             canvas.Save(outputPath, jpegOptions);
+        }
+
+        // Cleanup temporary BMP file
+        if (File.Exists(tempBmpPath))
+        {
+            try { File.Delete(tempBmpPath); } catch { /* ignore cleanup errors */ }
         }
     }
 }

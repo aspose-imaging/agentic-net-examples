@@ -1,49 +1,63 @@
 using System;
-using System.Linq;
+using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.BigTiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length < 2)
+        // Hardcoded input JPG file paths
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Usage: <output_big_tiff_path> <input_jpg_path1> [<input_jpg_path2> ...]");
-            return;
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
+        };
+
+        // Hardcoded output BigTIFF file path
+        string outputPath = @"C:\Images\combined_output.bigtiff";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
+        {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
         }
 
-        string outputPath = args[0];
-        string[] inputPaths = args.Skip(1).ToArray();
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+        // Load each JPG, convert to TiffFrame, and collect frames
+        List<TiffFrame> frames = new List<TiffFrame>();
+        foreach (string inputPath in inputPaths)
         {
-            int canvasWidth = firstImage.Width;
-            int canvasHeight = firstImage.Height;
-
-            BigTiffOptions options = new BigTiffOptions(TiffExpectedFormat.Default)
+            using (Image img = Image.Load(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                KeepMetadata = true
-            };
-
-            using (BigTiffImage bigTiff = (BigTiffImage)Image.Create(options, canvasWidth, canvasHeight))
-            {
-                bigTiff.AddPage(firstImage);
-
-                for (int i = 1; i < inputPaths.Length; i++)
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
-                    {
-                        bigTiff.AddPage(img);
-                    }
-                }
-
-                bigTiff.Save();
+                // Preserve metadata by copying it to the frame later if needed
+                // Create a TiffFrame from the loaded raster image
+                TiffFrame frame = new TiffFrame((RasterImage)img);
+                frames.Add(frame);
+                // Do not dispose the frame here; it will be managed by BigTiffImage
             }
+        }
+
+        // Create a BigTiffImage from the collected frames
+        using (BigTiffImage bigTiff = new BigTiffImage(frames.ToArray()))
+        {
+            // Configure BigTIFF save options
+            BigTiffOptions options = new BigTiffOptions(TiffExpectedFormat.Default);
+            options.KeepMetadata = true; // Preserve original metadata
+
+            // Save the combined image as a BigTIFF file
+            bigTiff.Save(outputPath, options);
         }
     }
 }

@@ -1,6 +1,6 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -10,16 +10,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input JPEG files to be merged (modify paths as needed)
+        // Hardcoded input image paths
         string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
         };
 
-        // Output merged JPEG file
-        string outputPath = "merged.jpg";
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Hardcoded output path
+        string outputPath = @"C:\Images\combined.jpg";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Collect sizes of all input images
         List<Size> sizes = new List<Size>();
@@ -31,19 +44,25 @@ class Program
             }
         }
 
-        // Calculate canvas dimensions for horizontal arrangement
-        int canvasWidth = sizes.Sum(s => s.Width);
-        int canvasHeight = sizes.Max(s => s.Height);
+        // Calculate canvas dimensions for horizontal stitching
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        foreach (Size sz in sizes)
+        {
+            canvasWidth += sz.Width;
+            if (sz.Height > canvasHeight)
+                canvasHeight = sz.Height;
+        }
 
-        // Prepare JPEG creation options with a consistent quality
-        Source source = new FileCreateSource(outputPath, false);
+        // Prepare JPEG creation options with a bound source
+        Source src = new FileCreateSource(outputPath, false);
         JpegOptions jpegOptions = new JpegOptions()
         {
-            Source = source,
-            Quality = 90 // Adjust quality as required (0-100)
+            Source = src,
+            Quality = 90 // consistent quality
         };
 
-        // Create the output JPEG canvas bound to the file
+        // Create the output JPEG canvas
         using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
         {
             int offsetX = 0;
@@ -51,18 +70,15 @@ class Program
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    // Define where the current image will be placed on the canvas
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-
-                    // Copy pixel data onto the canvas
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-
-                    // Update horizontal offset for the next image
+                    // Define destination rectangle on the canvas
+                    Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    // Copy pixel data from source image to canvas
+                    canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
                     offsetX += img.Width;
                 }
             }
 
-            // Since the canvas is bound to a FileCreateSource, simply call Save()
+            // Save the bound image (no need to specify path/options again)
             canvas.Save();
         }
     }

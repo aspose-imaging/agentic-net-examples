@@ -1,55 +1,64 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect at least one output path and one input JPG file.
-        if (args.Length < 2)
+        // Hardcoded input JPG files
+        string[] jpgPaths = new string[]
         {
-            Console.WriteLine("Usage: Program <output.pdf> <input1.jpg> [<input2.jpg> ...]");
-            return;
-        }
+            @"C:\Images\img1.jpg",
+            @"C:\Images\img2.jpg",
+            @"C:\Images\img3.jpg"
+        };
 
-        string outputPdfPath = args[0];
-        var jpgPaths = new List<string>();
-        for (int i = 1; i < args.Length; i++)
-        {
-            jpgPaths.Add(args[i]);
-        }
-
-        // Convert each JPG to WebP and collect the temporary WebP paths.
-        var webpPaths = new List<string>();
+        // Verify each input file exists
         foreach (string jpgPath in jpgPaths)
         {
-            string webpPath = Path.ChangeExtension(jpgPath, ".webp");
-            using (Image jpgImage = Image.Load(jpgPath))
+            if (!File.Exists(jpgPath))
             {
-                // Save as WebP using default options.
-                jpgImage.Save(webpPath, new WebPOptions());
+                Console.Error.WriteLine($"File not found: {jpgPath}");
+                return;
             }
-            webpPaths.Add(webpPath);
         }
 
-        // Create a multipage image from the WebP files.
-        using (Image multiPageImage = Image.Create(webpPaths.ToArray()))
+        // Folder to store intermediate WEBP files
+        string webpFolder = @"C:\Temp\Webp";
+        Directory.CreateDirectory(webpFolder); // ensure folder exists
+
+        // Convert each JPG to WEBP
+        string[] webpPaths = new string[jpgPaths.Length];
+        for (int i = 0; i < jpgPaths.Length; i++)
         {
-            // Save the multipage image as a PDF document.
-            PdfOptions pdfOptions = new PdfOptions();
-            multiPageImage.Save(outputPdfPath, pdfOptions);
+            string jpgPath = jpgPaths[i];
+            string webpPath = Path.Combine(webpFolder, Path.GetFileNameWithoutExtension(jpgPath) + ".webp");
+
+            // Ensure output directory for this file exists
+            Directory.CreateDirectory(Path.GetDirectoryName(webpPath));
+
+            using (Image image = Image.Load(jpgPath))
+            {
+                // Save as WEBP using default options
+                image.Save(webpPath, new WebPOptions());
+            }
+
+            webpPaths[i] = webpPath;
         }
 
-        // Clean up temporary WebP files.
-        foreach (string webpPath in webpPaths)
+        // Create a multipage image from the WEBP files
+        using (Image multipageImage = Image.Create(webpPaths))
         {
-            if (File.Exists(webpPath))
-            {
-                File.Delete(webpPath);
-            }
+            // Output PDF path
+            string pdfPath = @"C:\Output\combined.pdf";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
+            // Save the multipage image as a PDF
+            multipageImage.Save(pdfPath, new PdfOptions());
         }
     }
 }

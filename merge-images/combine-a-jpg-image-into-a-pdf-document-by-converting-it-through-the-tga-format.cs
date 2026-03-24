@@ -2,37 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Tga;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths for source JPG, intermediate TGA, and final PDF
-        string jpgPath = "input.jpg";
-        string tgaPath = "temp.tga";
-        string pdfPath = "output.pdf";
+        // Hardcoded paths
+        string inputJpgPath = "input.jpg";
+        string intermediateTgaPath = "temp.tga";
+        string outputPdfPath = "output.pdf";
 
-        // Load the JPG image
-        using (RasterImage jpgImage = (JpegImage)Image.Load(jpgPath))
+        // Verify input JPG exists
+        if (!File.Exists(inputJpgPath))
         {
-            // Convert and save the JPG as a TGA file using TgaOptions
-            jpgImage.Save(tgaPath, new TgaOptions());
+            Console.Error.WriteLine($"File not found: {inputJpgPath}");
+            return;
         }
 
-        // Load the intermediate TGA image
-        using (RasterImage tgaImage = (TgaImage)Image.Load(tgaPath))
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(intermediateTgaPath) ?? string.Empty);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath) ?? string.Empty);
+
+        // Convert JPG to TGA
+        using (RasterImage jpegImage = (JpegImage)Image.Load(inputJpgPath))
         {
-            // Save the TGA image directly as a PDF document
-            // Aspose.Imaging determines the format from the file extension
-            tgaImage.Save(pdfPath);
+            jpegImage.Save(intermediateTgaPath, new TgaOptions());
         }
 
-        // Clean up the temporary TGA file
-        if (File.Exists(tgaPath))
+        // Verify intermediate TGA exists (optional safety)
+        if (!File.Exists(intermediateTgaPath))
         {
-            File.Delete(tgaPath);
+            Console.Error.WriteLine($"File not found: {intermediateTgaPath}");
+            return;
+        }
+
+        // Convert TGA to PDF
+        using (RasterImage tgaImage = (TgaImage)Image.Load(intermediateTgaPath))
+        {
+            using (PdfOptions pdfOptions = new PdfOptions())
+            {
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                tgaImage.Save(outputPdfPath, pdfOptions);
+            }
         }
     }
 }

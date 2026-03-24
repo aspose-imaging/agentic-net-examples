@@ -1,41 +1,44 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPG image paths
-        string[] jpgPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-        var processedPaths = new List<string>();
-
-        foreach (var jpgPath in jpgPaths)
+        // Hardcoded input JPG files
+        string[] inputPaths = new string[]
         {
-            using (Image img = Image.Load(jpgPath))
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
+        };
+
+        // Verify each input file exists
+        foreach (var inputPath in inputPaths)
+        {
+            if (!File.Exists(inputPath))
             {
-                string dngPath = Path.ChangeExtension(jpgPath, ".dng");
-                try
-                {
-                    // Attempt to save as DNG (will throw NotSupportedException)
-                    img.Save(dngPath);
-                }
-                catch (NotSupportedException)
-                {
-                    // Fallback to original JPG if DNG saving is not supported
-                    dngPath = jpgPath;
-                }
-                processedPaths.Add(dngPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Create a multipage PDF from the processed images
-        using (Image pdf = Image.Create(processedPaths.ToArray()))
+        // Hardcoded output PDF file
+        string outputPath = @"C:\Images\Combined.pdf";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a multipage image from the JPG files (uses Image.Create(string[]))
+        using (Image multipageImage = Image.Create(inputPaths))
         {
-            pdf.Save("output.pdf", new PdfOptions());
+            // Set up PDF export options
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the multipage image as a PDF document
+            multipageImage.Save(outputPath, pdfOptions);
         }
     }
 }

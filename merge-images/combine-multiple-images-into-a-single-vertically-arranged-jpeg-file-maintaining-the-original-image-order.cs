@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
@@ -10,51 +11,69 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Expect at least one input image and an output path
-        if (args.Length < 2)
+        // Hardcoded input image paths (order matters)
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Usage: <input1> <input2> ... <output.jpg>");
-            return;
-        }
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
+        };
 
-        // Last argument is the output JPEG file path
-        string outputPath = args[args.Length - 1];
-        string[] inputPaths = args.Take(args.Length - 1).ToArray();
+        // Hardcoded output path
+        string outputPath = "merged_output.jpg";
 
-        // Collect sizes of all input images
-        List<Size> sizeList = new List<Size>();
-        foreach (string path in inputPaths)
+        // Verify each input file exists
+        foreach (var path in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(path))
             {
-                sizeList.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions for vertical stacking
-        int newWidth = sizeList.Max(s => s.Width);
-        int newHeight = sizeList.Sum(s => s.Height);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create source and JPEG options for the output canvas
-        Source source = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
+        // Collect sizes of all input images
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+        foreach (var path in inputPaths)
+        {
+            using (RasterImage img = (RasterImage)Image.Load(path))
+            {
+                sizes.Add(img.Size);
+            }
+        }
 
-        // Create a JPEG canvas with the calculated size
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+        // Determine canvas dimensions for vertical stacking
+        int canvasWidth = sizes.Max(s => s.Width);
+        int canvasHeight = sizes.Sum(s => s.Height);
+
+        // Prepare JPEG creation options with bound source
+        Source src = new FileCreateSource(outputPath, false);
+        JpegOptions jpegOptions = new JpegOptions()
+        {
+            Source = src,
+            Quality = 90
+        };
+
+        // Create the JPEG canvas
+        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
         {
             int offsetY = 0;
+
             // Merge each image vertically onto the canvas
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                    Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                     offsetY += img.Height;
                 }
             }
 
-            // Save the bound image (source already set in options)
+            // Save the bound image (output path already bound via source)
             canvas.Save();
         }
     }

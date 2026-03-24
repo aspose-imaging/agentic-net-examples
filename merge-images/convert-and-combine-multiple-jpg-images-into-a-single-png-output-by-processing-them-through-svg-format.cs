@@ -1,31 +1,44 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPG files to be combined.
-        string[] inputFiles = new string[]
+        // Input JPG files
+        string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            "C:\\Images\\img1.jpg",
+            "C:\\Images\\img2.jpg",
+            "C:\\Images\\img3.jpg"
         };
 
-        // Output PNG file.
-        string outputFile = "combined.png";
+        // Output PNG file
+        string outputPath = "C:\\Images\\combined.png";
 
-        // Collect sizes of all input images.
-        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-        foreach (string path in inputFiles)
+        // Verify each input file exists
+        foreach (var path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Collect sizes of all input images
+        List<Size> sizes = new List<Size>();
+        foreach (var path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
@@ -33,38 +46,44 @@ class Program
             }
         }
 
-        // Calculate canvas dimensions (horizontal concatenation).
-        int totalWidth = sizes.Sum(s => s.Width);
-        int maxHeight = sizes.Max(s => s.Height);
+        // Calculate canvas dimensions (horizontal concatenation)
+        int totalWidth = 0;
+        int maxHeight = 0;
+        foreach (var sz in sizes)
+        {
+            totalWidth += sz.Width;
+            if (sz.Height > maxHeight) maxHeight = sz.Height;
+        }
 
-        // Create an SVG canvas with the calculated dimensions.
+        // Create SVG canvas
         int dpi = 96;
         SvgGraphics2D svgGraphics = new SvgGraphics2D(totalWidth, maxHeight, dpi);
 
-        // Draw each JPG onto the SVG canvas.
+        // Draw each JPG onto the SVG canvas
         int offsetX = 0;
-        foreach (string path in inputFiles)
+        for (int i = 0; i < inputPaths.Length; i++)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
             {
-                svgGraphics.DrawImage(img, new Aspose.Imaging.Point(offsetX, 0), new Aspose.Imaging.Size(img.Width, img.Height));
+                svgGraphics.DrawImage(img, new Point(offsetX, 0));
                 offsetX += img.Width;
             }
         }
 
-        // Finalize SVG and rasterize to PNG.
+        // Finalize SVG and rasterize to PNG
         using (SvgImage svgImage = svgGraphics.EndRecording())
         {
-            // Configure rasterization options for SVG to PNG conversion.
+            // Set up rasterization options
             SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
             rasterOptions.PageSize = svgImage.Size;
 
-            // Set PNG export options and attach rasterization options.
+            // Configure PNG save options
             PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
             pngOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the combined image as PNG.
-            svgImage.Save(outputFile, pngOptions);
+            // Save the combined image as PNG
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }

@@ -1,59 +1,54 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
-namespace CombineJpgToPngViaDjvu
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hard‑coded input JPG files
+        string[] inputPaths = new string[]
         {
-            if (args.Length < 2)
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
+        };
+
+        // Hard‑coded output PNG file
+        string outputPath = @"C:\Images\combined.png";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
+        {
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine("Usage: CombineJpgToPngViaDjvu <input1.jpg> <input2.jpg> ... <output.png>");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+        }
 
-            string outputPath = args[args.Length - 1];
-            string[] inputJpgPaths = args.Take(args.Length - 1).ToArray();
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            List<Size> pageSizes = new List<Size>();
+        // Load each JPG into an Image instance
+        Image[] images = new Image[inputPaths.Length];
+        for (int i = 0; i < inputPaths.Length; i++)
+        {
+            images[i] = Image.Load(inputPaths[i]);
+        }
 
-            foreach (string jpgPath in inputJpgPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(jpgPath))
-                {
-                    pageSizes.Add(img.Size);
-                }
-            }
+        // Create a multipage image from the loaded JPGs
+        using (Image combined = Image.Create(images))
+        {
+            // Save the combined image as a single PNG file
+            combined.Save(outputPath, new PngOptions());
+        }
 
-            int canvasWidth = pageSizes.Sum(s => s.Width);
-            int canvasHeight = pageSizes.Max(s => s.Height);
-
-            Source pngSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = pngSource };
-
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
-            {
-                int offsetX = 0;
-                foreach (string jpgPath in inputJpgPaths)
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(jpgPath))
-                    {
-                        Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
-                        offsetX += img.Width;
-                    }
-                }
-                canvas.Save();
-            }
-
-            Console.WriteLine($"Combined image saved to: {outputPath}");
+        // Dispose the individual images
+        foreach (var img in images)
+        {
+            img.Dispose();
         }
     }
 }

@@ -1,94 +1,95 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.Sources;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        // Hardcoded input JPG files
+        string[] inputPaths = new string[]
         {
-            // Input JPG files
-            string[] jpgPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
+        };
 
-            // Temporary folder for intermediate TGA files
-            string tempFolder = Path.Combine(Path.GetTempPath(), "TgaTemp");
-            Directory.CreateDirectory(tempFolder);
-
-            // List to hold paths of generated TGA files
-            List<string> tgaPaths = new List<string>();
-
-            // Convert each JPG to TGA
-            foreach (string jpgPath in jpgPaths)
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
             {
-                string tgaPath = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(jpgPath) + ".tga");
-                using (RasterImage jpgImage = (JpegImage)Image.Load(jpgPath))
-                {
-                    jpgImage.Save(tgaPath, new TgaOptions());
-                }
-                tgaPaths.Add(tgaPath);
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
+        }
 
-            // Collect sizes of TGA images
-            List<Size> sizes = new List<Size>();
+        // Folder for intermediate TGA files
+        string tgaFolder = "temp_tga";
+        Directory.CreateDirectory(tgaFolder);
+
+        // Convert each JPG to TGA
+        List<string> tgaPaths = new List<string>();
+        foreach (string jpgPath in inputPaths)
+        {
+            string tgaPath = Path.Combine(tgaFolder, Path.GetFileNameWithoutExtension(jpgPath) + ".tga");
+            using (RasterImage raster = (RasterImage)Image.Load(jpgPath))
+            {
+                raster.Save(tgaPath, new TgaOptions());
+            }
+            tgaPaths.Add(tgaPath);
+        }
+
+        // Verify each intermediate TGA file exists
+        foreach (string path in tgaPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"Intermediate file not found: {path}");
+                return;
+            }
+        }
+
+        // Calculate canvas size for horizontal merge
+        List<Size> sizes = new List<Size>();
+        foreach (string tgaPath in tgaPaths)
+        {
+            using (RasterImage img = (RasterImage)Image.Load(tgaPath))
+            {
+                sizes.Add(img.Size);
+            }
+        }
+
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
+
+        // Output PNG path
+        string outputPath = "output.png";
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Create PNG canvas bound to output file
+        PngOptions pngOptions = new PngOptions
+        {
+            Source = new FileCreateSource(outputPath, false)
+        };
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+        {
+            int offsetX = 0;
             foreach (string tgaPath in tgaPaths)
             {
-                using (RasterImage tgaImage = (RasterImage)Image.Load(tgaPath))
+                using (RasterImage img = (RasterImage)Image.Load(tgaPath))
                 {
-                    sizes.Add(tgaImage.Size);
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
                 }
             }
-
-            // Calculate canvas size for horizontal stitching
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                canvasWidth += sz.Width;
-                if (sz.Height > canvasHeight)
-                    canvasHeight = sz.Height;
-            }
-
-            // Prepare PNG output options
-            string outputPngPath = "combined.png";
-            Source pngSource = new FileCreateSource(outputPngPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = pngSource };
-
-            // Create PNG canvas bound to the output file
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
-            {
-                int offsetX = 0;
-                // Merge each TGA image onto the canvas
-                foreach (string tgaPath in tgaPaths)
-                {
-                    using (RasterImage tgaImage = (RasterImage)Image.Load(tgaPath))
-                    {
-                        Rectangle bounds = new Rectangle(offsetX, 0, tgaImage.Width, tgaImage.Height);
-                        canvas.SaveArgb32Pixels(bounds, tgaImage.LoadArgb32Pixels(tgaImage.Bounds));
-                        offsetX += tgaImage.Width;
-                    }
-                }
-
-                // Save the bound canvas
-                canvas.Save();
-            }
-
-            // Cleanup temporary TGA files
-            foreach (string tgaPath in tgaPaths)
-            {
-                if (File.Exists(tgaPath))
-                    File.Delete(tgaPath);
-            }
-
-            // Remove temporary folder if empty
-            if (Directory.Exists(tempFolder) && Directory.GetFiles(tempFolder).Length == 0)
-                Directory.Delete(tempFolder);
+            // Save the bound canvas
+            canvas.Save();
         }
     }
 }

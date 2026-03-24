@@ -1,65 +1,82 @@
 using System;
-using System.Linq;
+using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect at least one input image and an output path
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Usage: program.exe <input1.jpg> <input2.jpg> ... <output.jpg>");
-            return;
-        }
+            @"C:\temp\img1.jpg",
+            @"C:\temp\img2.jpg",
+            @"C:\temp\img3.jpg"
+        };
+        string outputPath = @"C:\temp\combined.jpg";
 
-        // Last argument is the output file, the rest are input files
-        string outputPath = args[args.Length - 1];
-        string[] inputPaths = args.Take(args.Length - 1).ToArray();
-
-        // Collect sizes of all input images
-        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-        foreach (string path in inputPaths)
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Determine canvas dimensions for vertical stacking
-        int canvasWidth = sizes.Max(s => s.Width);
-        int canvasHeight = sizes.Sum(s => s.Height);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Prepare JPEG options with a file create source bound to the output path
-        Source source = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions()
+        // Load all JPEG images
+        List<JpegImage> loadedImages = new List<JpegImage>();
+        foreach (string inputPath in inputPaths)
         {
-            Source = source,
-            Quality = 100 // maintain original quality
+            // Load image using the JpegImage constructor
+            JpegImage img = new JpegImage(inputPath);
+            loadedImages.Add(img);
+        }
+
+        // Determine the dimensions of the combined image
+        int maxWidth = loadedImages.Max(img => img.Width);
+        int totalHeight = loadedImages.Sum(img => img.Height);
+
+        // Prepare JPEG save options (maintain high quality)
+        JpegOptions jpegOptions = new JpegOptions
+        {
+            Quality = 100
         };
 
-        // Create a JPEG canvas with the calculated dimensions
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        // Create a new blank JPEG image with the calculated size
+        using (JpegImage combinedImage = new JpegImage(jpegOptions, maxWidth, totalHeight))
         {
-            int offsetY = 0;
-            // Draw each image onto the canvas vertically
-            foreach (string path in inputPaths)
+            // Graphics object for drawing onto the combined image
+            Graphics graphics = new Graphics(combinedImage);
+
+            int currentY = 0;
+            foreach (JpegImage img in loadedImages)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
-                }
+                // Draw each image at the current vertical offset
+                graphics.DrawImage(
+                    img,
+                    new Aspose.Imaging.Rectangle(0, currentY, img.Width, img.Height));
+
+                currentY += img.Height;
             }
 
-            // Since the canvas is bound to the output file via FileCreateSource, just call Save()
-            canvas.Save();
+            // Save the combined image to the output path
+            combinedImage.Save(outputPath, jpegOptions);
+        }
+
+        // Dispose loaded source images
+        foreach (JpegImage img in loadedImages)
+        {
+            img.Dispose();
         }
     }
 }

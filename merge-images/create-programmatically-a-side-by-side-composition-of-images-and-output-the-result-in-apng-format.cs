@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
@@ -10,49 +12,74 @@ class Program
 {
     static void Main(string[] args)
     {
-        string[] imagePaths = { "image1.png", "image2.png", "image3.png" };
+        // Hardcoded input and output paths
+        string[] inputPaths = { "input1.png", "input2.png", "input3.png" };
+        string outputPath = "output.apng";
 
-        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-        foreach (var path in imagePaths)
+        // Validate input files
+        foreach (string path in inputPaths)
         {
-            using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Collect sizes of all input images
+        List<Size> sizes = new List<Size>();
+        foreach (string path in inputPaths)
+        {
+            using (RasterImage img = (RasterImage)Image.Load(path))
             {
                 sizes.Add(img.Size);
             }
         }
 
-        int newWidth = sizes.Sum(s => s.Width);
-        int newHeight = sizes.Max(s => s.Height);
+        // Calculate canvas dimensions for horizontal composition
+        int totalWidth = sizes.Sum(s => s.Width);
+        int maxHeight = sizes.Max(s => s.Height);
 
-        FileCreateSource canvasSource = new FileCreateSource("temp_canvas.png", false);
-        PngOptions canvasOptions = new PngOptions { Source = canvasSource };
-        using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(canvasOptions, newWidth, newHeight))
+        // Create a temporary raster canvas to hold the merged image
+        string tempCanvasPath = Path.GetTempFileName();
+        Source tempSource = new FileCreateSource(tempCanvasPath, false);
+        PngOptions tempOptions = new PngOptions { Source = tempSource };
+        using (RasterImage canvas = (RasterImage)Image.Create(tempOptions, totalWidth, maxHeight))
         {
+            // Merge input images side by side onto the canvas
             int offsetX = 0;
-            foreach (var path in imagePaths)
+            foreach (string path in inputPaths)
             {
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    var bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                     offsetX += img.Width;
                 }
             }
 
-            FileCreateSource apngSource = new FileCreateSource("output.apng", false);
+            // Prepare APNG options
+            Source outputSource = new FileCreateSource(outputPath, false);
             ApngOptions apngOptions = new ApngOptions
             {
-                Source = apngSource,
-                DefaultFrameTime = 500,
-                ColorType = PngColorType.TruecolorWithAlpha
+                Source = outputSource,
+                ColorType = PngColorType.TruecolorWithAlpha,
+                DefaultFrameTime = 1000 // 1 second per frame (single frame)
             };
 
-            using (Aspose.Imaging.FileFormats.Apng.ApngImage apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)Aspose.Imaging.Image.Create(apngOptions, newWidth, newHeight))
+            // Create APNG image and add the merged canvas as the sole frame
+            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, totalWidth, maxHeight))
             {
                 apng.RemoveAllFrames();
                 apng.AddFrame(canvas);
                 apng.Save();
             }
         }
+
+        // Cleanup temporary canvas file
+        try { File.Delete(tempCanvasPath); } catch { }
     }
 }
