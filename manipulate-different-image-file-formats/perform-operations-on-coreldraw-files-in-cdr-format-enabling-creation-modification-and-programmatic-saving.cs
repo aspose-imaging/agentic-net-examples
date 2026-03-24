@@ -1,47 +1,53 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
-namespace ProgramNamespace
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hardcoded input and output paths
+        string inputPath = "input.cdr";
+        string outputPath = "output.cdr";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            string cdrPath = "input.cdr";
-            string pngPath = "output.png";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            using (CdrImage cdrImage = (CdrImage)Image.Load(cdrPath))
-            {
-                int width = cdrImage.Width;
-                int height = cdrImage.Height;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(pngPath, false);
+        // Load the CDR file
+        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+        {
+            // Create a Graphics object for drawing
+            Graphics graphics = new Graphics(cdr);
 
-                using (Image canvas = Image.Create(pngOptions, width, height))
-                {
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.White);
+            // Draw a red rectangle
+            graphics.DrawRectangle(
+                new Pen(Color.Red, 5),
+                new Rectangle(100, 100, 300, 200));
 
-                    Pen rectanglePen = new Pen(Color.Blue, 5);
-                    graphics.DrawRectangle(rectanglePen, 50, 50, width - 100, height - 100);
+            // Draw a blue ellipse inside the rectangle
+            graphics.DrawEllipse(
+                new Pen(Color.Blue, 3),
+                new Rectangle(110, 110, 280, 180));
 
-                    Pen linePen = new Pen(Color.Red, 3);
-                    graphics.DrawLine(linePen, 0, 0, width, height);
+            // Draw a string at the bottom
+            graphics.DrawString(
+                "Modified with Aspose.Imaging",
+                new Font("Arial", 24, FontStyle.Bold),
+                new SolidBrush(Color.Green),
+                new Point(120, 300));
 
-                    Font font = new Font("Arial", 24, FontStyle.Regular);
-                    using (SolidBrush blackBrush = new SolidBrush(Color.Black))
-                    {
-                        graphics.DrawString("Modified CDR Canvas", font, blackBrush, width - 250, height - 40);
-                    }
-
-                    canvas.Save();
-                }
-            }
+            // Save the modified CDR file
+            cdr.Save(outputPath);
         }
     }
 }
