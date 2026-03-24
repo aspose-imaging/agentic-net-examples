@@ -2,31 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input SVG file path
-        string inputPath = "input.svg";
-        // Output PNG file path
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options to preserve transparency
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-            rasterOptions.PageSize = image.Size;
-            rasterOptions.BackgroundColor = Color.Transparent; // keep alpha channel
+            // Configure rasterization options for SVG
+            var rasterizationOptions = new SvgRasterizationOptions
+            {
+                // Preserve original size
+                PageSize = image.Size,
+                // Keep background transparent
+                BackgroundColor = Color.Transparent
+            };
 
-            // Set PNG save options with the rasterization settings
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.VectorRasterizationOptions = rasterOptions;
+            // Set up PNG save options with the rasterization settings
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterizationOptions
+            };
 
-            // Save the rasterized image as PNG preserving alpha channel
+            // Save as PNG preserving alpha channel
             image.Save(outputPath, pngOptions);
         }
     }
