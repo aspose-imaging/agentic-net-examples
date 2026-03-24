@@ -1,30 +1,55 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "rotated_output.png";
+        string outputPath = "output.apng";
 
-        // Rotation angle in degrees
-        float angle = 45f;
-
-        // Load the image as a raster image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Ensure image data is cached for better performance
-            if (!image.IsCached)
-                image.CacheData();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Rotate the image around its center, resize canvas proportionally, and fill background with white
-            image.Rotate(angle, true, Color.White);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the rotated image as an APNG file
-            image.Save(outputPath, new ApngOptions());
+        // Load the source image as a raster image
+        using (RasterImage source = (RasterImage)Image.Load(inputPath))
+        {
+            // Cache data for better performance
+            if (!source.IsCached) source.CacheData();
+
+            // Set up APNG creation options with output binding
+            ApngOptions createOptions = new ApngOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
+
+            // Create an APNG image canvas
+            using (ApngImage apng = (ApngImage)Image.Create(createOptions, source.Width, source.Height))
+            {
+                // Remove default frame and add the source as the first frame
+                apng.RemoveAllFrames();
+                apng.AddFrame(source);
+
+                // Rotate the image 90 degrees clockwise, resize proportionally, transparent background
+                apng.Rotate(90f, true, Color.Transparent);
+
+                // Save the APNG (output path already bound via FileCreateSource)
+                apng.Save();
+            }
         }
     }
 }
