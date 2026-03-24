@@ -1,26 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
-class ConfigurePngResolution
+class Program
 {
     static void Main()
     {
-        // Path to the folder containing the source image
-        string dir = @"C:\temp\";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.png";
+        string outputPath = @"C:\temp\sample_resolved.png";
 
-        // Load an existing PNG image
-        using (Image image = Image.Load(dir + "sample.png"))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create PNG save options
-            PngOptions pngOptions = new PngOptions();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Set desired horizontal and vertical DPI (e.g., 300 DPI)
-            pngOptions.ResolutionSettings = new ResolutionSetting(300.0, 300.0);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image with the specified DPI
-            image.Save(dir + "sample_300dpi.png", pngOptions);
+        // Define the desired DPI values
+        double dpiX = 300.0; // horizontal resolution
+        double dpiY = 300.0; // vertical resolution
+
+        // Configure PNG save options with the specified resolution
+        PngOptions saveOptions = new PngOptions
+        {
+            ResolutionSettings = new ResolutionSetting(dpiX, dpiY)
+        };
+
+        // Load the source image and save it with the new resolution settings
+        using (Image image = Image.Load(inputPath))
+        {
+            image.Save(outputPath, saveOptions);
         }
     }
 }
