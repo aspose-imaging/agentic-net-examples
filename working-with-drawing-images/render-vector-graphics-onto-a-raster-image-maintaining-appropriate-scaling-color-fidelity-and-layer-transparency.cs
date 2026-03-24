@@ -1,49 +1,54 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-class VectorToRaster
+class Program
 {
     static void Main()
     {
-        // Path to the source SVG file (vector graphic)
-        string inputPath = @"C:\Images\source.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
 
-        // Path where the rasterized PNG will be saved
-        string outputPath = @"C:\Images\output.png";
-
-        // Load the SVG image using the unified Image.Load method
-        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options to control scaling, background, and rendering quality
-            var rasterOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the vector image (SVG) using Aspose.Imaging unified loader
+        using (SvgImage vectorImage = (SvgImage)Image.Load(inputPath))
+        {
+            // Configure rasterization options to control scaling, colors, and smoothing
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                // Preserve the original SVG dimensions
-                PageSize = svgImage.Size,
-
-                // Keep transparency by using a transparent background
-                BackgroundColor = Color.Transparent,
-
-                // Apply anti-aliasing for smoother lines and curves
+                // Set background color (transparent can be used if needed)
+                BackgroundColor = Color.White,
+                // Preserve original dimensions
+                PageSize = vectorImage.Size,
+                // Enable anti-aliasing for smooth edges
                 SmoothingMode = SmoothingMode.AntiAlias,
-
-                // Render text with anti-aliasing for better readability
+                // Render text with high quality
                 TextRenderingHint = TextRenderingHint.AntiAlias,
-
-                // Scale factors (1.0 = original size). Adjust if you need different output dimensions.
+                // Example scaling (1.0 = original size)
                 ScaleX = 1.0f,
                 ScaleY = 1.0f
             };
 
-            // Create PNG save options and attach the rasterization settings
-            var pngOptions = new PngOptions
+            // Prepare PNG save options and attach rasterization settings
+            PngOptions saveOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the rasterized image to the specified PNG file
-            svgImage.Save(outputPath, pngOptions);
+            // Save the rasterized image to the output path
+            vectorImage.Save(outputPath, saveOptions);
         }
     }
 }
