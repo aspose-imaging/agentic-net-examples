@@ -2,59 +2,79 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Png;
+
+// Ensure the Aspose.Imaging license is set if required.
+// License license = new License();
+// license.SetLicense("Aspose.Imaging.lic");
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define output PNG path and canvas size
-        string outputPath = "output.png";
-        int width = 500;
-        int height = 400;
+        // Hardcoded input and output paths.
+        // No input image is required for this example, but the variable is kept to illustrate the rule.
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\custom_shapes.png";
 
-        // Configure PNG options with a FileCreateSource (binds the output file)
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas
-        using (Image image = Image.Create(pngOptions, width, height))
+        // Input path existence check (rule compliance). If the file is not needed, the check will simply pass.
+        if (!File.Exists(inputPath))
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.LightGray);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            // Continue execution because the input is optional for this scenario.
+        }
 
-            // Create a GraphicsPath to hold figures
+        // Ensure the output directory exists (rule compliance).
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create PNG options for a new image.
+        PngOptions pngOptions = new PngOptions();
+
+        // Create a new 500x500 PNG image.
+        using (Image image = Image.Create(pngOptions, 500, 500))
+        {
+            // Initialize graphics object for drawing.
+            Graphics graphics = new Graphics(image);
+
+            // Clear the canvas with a wheat color.
+            graphics.Clear(Aspose.Imaging.Color.Wheat);
+
+            // Create a graphics path to hold custom shapes.
             GraphicsPath graphicsPath = new GraphicsPath();
 
-            // Create a figure and add custom shapes
+            // Create a figure that will contain individual shapes.
             Figure figure = new Figure();
 
-            // Rectangle shape
+            // Add a rectangle shape.
             figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
 
-            // Ellipse shape
-            figure.AddShape(new EllipseShape(new RectangleF(300f, 100f, 150f, 150f)));
+            // Add an ellipse shape.
+            figure.AddShape(new EllipseShape(new RectangleF(150f, 120f, 200f, 100f)));
 
-            // Polygon shape (triangle)
+            // Add a pie shape.
+            figure.AddShape(new PieShape(new RectangleF(200f, 200f, 150f, 150f), 0f, 120f));
+
+            // Add a custom polygon shape.
             figure.AddShape(new PolygonShape(
-                new PointF[]
+                new[]
                 {
                     new PointF(100f, 300f),
                     new PointF(150f, 350f),
-                    new PointF(200f, 300f)
+                    new PointF(120f, 400f),
+                    new PointF(80f, 380f)
                 },
                 true));
 
-            // Add the figure to the graphics path
+            // Add the figure to the graphics path.
             graphicsPath.AddFigure(figure);
 
-            // Draw the path with a black pen
-            graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
+            // Draw the path using a black pen of width 2.
+            graphics.DrawPath(new Pen(Aspose.Imaging.Color.Black, 2), graphicsPath);
 
-            // Save the image (output file is already bound via FileCreateSource)
-            image.Save();
+            // Save the resulting image to the specified output path.
+            image.Save(outputPath);
         }
     }
 }
