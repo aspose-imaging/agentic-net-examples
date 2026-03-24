@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
@@ -7,25 +8,33 @@ class Program
 {
     static void Main()
     {
-        // Define the folder where the source WebP and the resulting GIF will be stored.
-        string dir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = "c:\\temp\\input.webp";
+        string outputPath = "c:\\temp\\output.gif";
 
-        // Load the WebP image from file using the WebPImage constructor (load rule).
-        using (WebPImage webPImage = new WebPImage(dir + "test.webp"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Prepare GIF export options.
-            // DoPaletteCorrection builds an optimal palette for the GIF.
-            // Interlaced enables progressive rendering of the GIF.
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // Configure GIF saving options
             GifOptions gifOptions = new GifOptions
             {
-                DoPaletteCorrection = true,
-                Interlaced = true,
-                // Optional: set color resolution (bits per color - 1). 7 means 8 bits per color.
-                ColorResolution = 7
+                DoPaletteCorrection = true // improve palette quality
             };
 
-            // Save the active frame of the WebP image as a GIF file (save rule).
-            webPImage.Save(dir + "test.output.gif", gifOptions);
+            // Save the image as GIF
+            webPImage.Save(outputPath, gifOptions);
         }
+
+        Console.WriteLine("WebP image successfully converted to GIF.");
     }
 }
