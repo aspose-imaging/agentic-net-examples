@@ -5,28 +5,42 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Determine input and output file paths (defaults provided)
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output_lossy.gif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output_lossy.gif";
 
-        // Load the source image (any supported format)
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
             // Configure GIF options for lossy compression
             GifOptions gifOptions = new GifOptions
             {
-                // Recommended value for a good balance between size and quality
+                // Recommended value for good visual quality
                 MaxDiff = 80,
-                // Improves visual quality by optimizing the palette
+                // Improve palette selection
                 DoPaletteCorrection = true,
-                // Interlacing is optional; set to false for smaller size
-                Interlaced = false
+                // Set color resolution (bits per primary color minus 1)
+                ColorResolution = 7,
+                // Optional: interlaced GIF
+                Interlaced = true
             };
 
-            // Save the image as a lossy GIF using the configured options
+            // Save the image as a lossy GIF
             image.Save(outputPath, gifOptions);
         }
+
+        Console.WriteLine("Lossy GIF compression completed.");
     }
 }
