@@ -1,55 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
-class SvgToPngConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input SVG file path
-        string inputSvgPath = @"C:\Images\input.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        // Output PNG file path
-        string outputPngPath = @"C:\Images\output.png";
-
-        // Open the SVG file as a stream and load it into a SvgImage instance
-        using (Stream svgStream = File.OpenRead(inputSvgPath))
-        using (SvgImage svgImage = new SvgImage(svgStream))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options – these control how the vector SVG is rasterized
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization options for SVG
             var rasterOptions = new SvgRasterizationOptions
             {
-                // Preserve the original SVG dimensions
-                PageSize = svgImage.Size,
-
-                // Optional: set a white background to avoid transparency issues
-                BackgroundColor = Color.White,
-
-                // Preserve visual fidelity
-                SmoothingMode = SmoothingMode.None,
-                TextRenderingHint = TextRenderingHint.AntiAlias
+                PageSize = image.Size // Preserve original dimensions
             };
 
-            // Configure PNG save options
+            // Set PNG export options and attach rasterization options
             var pngOptions = new PngOptions
             {
-                // Attach the rasterization options so the SVG is rendered to raster before saving
-                VectorRasterizationOptions = rasterOptions,
-
-                // Preserve full color depth and alpha channel
-                ColorType = PngColorType.TruecolorWithAlpha,
-                BitDepth = 8,
-
-                // Use maximum compression while keeping progressive loading
-                CompressionLevel = 9,
-                Progressive = true
+                VectorRasterizationOptions = rasterOptions
             };
 
             // Save the rasterized image as PNG
-            svgImage.Save(outputPngPath, pngOptions);
+            image.Save(outputPath, pngOptions);
         }
     }
 }
