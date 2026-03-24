@@ -1,7 +1,7 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
@@ -9,31 +9,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path
-        string outputPath = "output.bmp";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Create a source bound to the output file
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a file source bound to the output path
         Source source = new FileCreateSource(outputPath, false);
 
-        // Set up BMP creation options with the bound source
-        BmpOptions options = new BmpOptions
-        {
-            Source = source
-        };
+        // Set up BMP options with the source
+        BmpOptions options = new BmpOptions() { Source = source };
 
         // Define canvas size
         int width = 200;
         int height = 200;
 
-        // Create the BMP image canvas
-        using (Image canvas = Image.Create(options, width, height))
+        // Create a BMP canvas bound to the file source
+        using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
         {
-            // Fill the canvas with a solid red color
+            // Fill the canvas with red color
             Graphics graphics = new Graphics(canvas);
             SolidBrush brush = new SolidBrush(Color.Red);
             graphics.FillRectangle(brush, canvas.Bounds);
 
-            // Save the bound image (no path needed)
+            // Save the bound image
             canvas.Save();
         }
     }
