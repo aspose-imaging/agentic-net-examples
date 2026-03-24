@@ -1,23 +1,35 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPEG image paths
+        // Hardcoded input JPEG files
         string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
         };
+
+        // Hardcoded output PNG file
+        string outputPath = "output.png";
+
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
 
         // Collect sizes of all input images
         List<Size> sizes = new List<Size>();
@@ -30,28 +42,18 @@ class Program
         }
 
         // Calculate canvas dimensions for horizontal stitching
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
-        {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight)
-                canvasHeight = sz.Height;
-        }
+        int totalWidth = sizes.Sum(s => s.Width);
+        int maxHeight = sizes.Max(s => s.Height);
 
-        // Output PNG path
-        string outputPath = "combined.png";
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file source for the output PNG
-        Source outputSource = new FileCreateSource(outputPath, false);
-        // Configure PNG options
-        PngOptions pngOptions = new PngOptions { Source = outputSource };
-
-        // Create the canvas image bound to the output file
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+        // Create PNG canvas bound to the output file
+        Source src = new FileCreateSource(outputPath, false);
+        PngOptions pngOptions = new PngOptions() { Source = src };
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
         {
             int offsetX = 0;
-            // Merge each JPEG onto the canvas
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
@@ -62,7 +64,7 @@ class Program
                 }
             }
 
-            // Save the bound canvas (output file is already bound via FileCreateSource)
+            // Save the bound canvas (no need to specify path/options)
             canvas.Save();
         }
     }
