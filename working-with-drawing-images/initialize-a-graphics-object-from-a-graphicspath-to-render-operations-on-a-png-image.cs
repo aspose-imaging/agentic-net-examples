@@ -3,49 +3,46 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Png;
 
-// Define output file path
-string outputPath = "output.png";
-
-// Create a stream for the output file
-using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+class Program
 {
-    // Set PNG options and associate the stream as the source
-    PngOptions pngOptions = new PngOptions
+    static void Main()
     {
-        Source = new StreamSource(stream)
-    };
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
-    // Create a new PNG image with desired dimensions
-    using (Image image = Image.Create(pngOptions, 400, 400))
-    {
-        // Initialize Graphics object for drawing on the image
-        Graphics graphics = new Graphics(image);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Clear the canvas with a white background
-        graphics.Clear(Color.White);
+        // Create a file stream for the output PNG
+        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        {
+            // Set up PNG options with the stream as source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new StreamSource(stream);
 
-        // Create a GraphicsPath to hold drawing figures
-        GraphicsPath graphicsPath = new GraphicsPath();
+            // Create a new PNG image of size 500x500
+            using (Image image = Image.Create(pngOptions, 500, 500))
+            {
+                // Initialize Graphics object for drawing on the image
+                Graphics graphics = new Graphics(image);
 
-        // Build a figure containing a rectangle and an ellipse
-        Figure figure = new Figure();
-        figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 300f)));
-        figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
+                // Clear the background with a wheat color
+                graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-        // Add the figure to the graphics path
-        graphicsPath.AddFigure(figure);
+                // Build a GraphicsPath containing a rectangle figure
+                GraphicsPath graphicsPath = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
+                graphicsPath.AddFigure(figure);
 
-        // Define a pen for stroking the path
-        Pen pen = new Pen(Color.Blue, 3);
+                // Draw the path using a black pen of width 5
+                graphics.DrawPath(new Pen(Aspose.Imaging.Color.Black, 5), graphicsPath);
 
-        // Render the path onto the image
-        graphics.DrawPath(pen, graphicsPath);
-
-        // Save all changes to the PNG file
-        image.Save();
+                // Save all changes to the PNG file
+                image.Save();
+            }
+        }
     }
 }
