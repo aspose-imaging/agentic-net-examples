@@ -1,37 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input image and output APNG
-        string inputPath = "input.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
         string outputPath = "output.apng";
 
-        // Load the source image as a raster image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load image as RasterImage, apply emboss filter, and save as APNG
         using (RasterImage raster = (RasterImage)Image.Load(inputPath))
         {
-            // Apply emboss filter using the predefined 3x3 emboss kernel
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            // Apply emboss filter using convolution kernel
+            raster.Filter(
+                raster.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-            // Prepare APNG options (single-frame animation)
-            ApngOptions apngOptions = new ApngOptions
-            {
-                // Set default frame duration (milliseconds)
-                DefaultFrameTime = 100,
-                // Ensure the PNG color type supports alpha channel
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            // Save the filtered raster image as an APNG file
-            raster.Save(outputPath, apngOptions);
+            // Save the filtered image as an APNG file
+            raster.Save(outputPath, new ApngOptions());
         }
     }
 }
