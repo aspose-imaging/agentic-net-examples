@@ -1,40 +1,61 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats;
 using Aspose.Imaging.ImageOptions;
 
-class DitheringExample
+class Program
 {
     static void Main()
     {
-        // Path to the source image
+        // Hardcoded input and output paths
         string inputPath = @"c:\temp\sample.png";
-        // Directory where the dithered images will be saved
-        string outputDir = @"c:\temp\";
+        string outputPathThreshold = @"c:\temp\sample.ThresholdDithering4.png";
+        string outputPathFloyd = @"c:\temp\sample.FloydSteinbergDithering1.png";
 
-        // ---------- Threshold Dithering (4‑bit palette) ----------
-        // Load the image, cast to RasterImage to access Dither method
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
-
-            // Perform threshold dithering using a 4‑bit palette (16 colors)
-            raster.Dither(DitheringMethod.ThresholdDithering, 4);
-
-            // Save the result as PNG
-            raster.Save(System.IO.Path.Combine(outputDir, "sample_ThresholdDithering4.png"));
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // ---------- Floyd‑Steinberg Dithering (1‑bit palette) ----------
-        // Reload the original image to avoid cumulative effects
+        // Perform Threshold Dithering with 4-bit palette
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage to access Dither method
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Perform Floyd‑Steinberg dithering using a 1‑bit palette (black & white)
-            raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+            // Apply threshold dithering (4 bits = 16 colors)
+            rasterImage.Dither(DitheringMethod.ThresholdDithering, 4);
 
-            // Save the result as PNG
-            raster.Save(System.IO.Path.Combine(outputDir, "sample_FloydSteinbergDithering1.png"));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathThreshold));
+
+            // Save the result
+            rasterImage.Save(outputPathThreshold);
+        }
+
+        // Verify input file again (optional, same file)
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Perform Floyd‑Steinberg Dithering with 1-bit palette (black & white)
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply Floyd‑Steinberg dithering (1 bit = 2 colors)
+            rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathFloyd));
+
+            // Save the result
+            rasterImage.Save(outputPathFloyd);
         }
     }
 }
