@@ -1,20 +1,30 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.BigTiff;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
-string inputPath = @"C:\Images\input.bigtiff";
-string outputPath = @"C:\Images\output.bigtiff";
-
-using (Image image = Image.Load(inputPath))
+class Program
 {
-    // Cast the loaded image to BigTiffImage to access TIFF-specific functionality
-    BigTiffImage bigTiff = (BigTiffImage)image;
+    static void Main()
+    {
+        string inputPath = "input.tif";
+        string outputPath = "output.jpg";
 
-    // Apply a Gaussian blur filter to the entire image
-    // Radius = 5, Sigma = 4.0 (adjust as needed)
-    bigTiff.Filter(bigTiff.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image to a new file
-    bigTiff.Save(outputPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage raster = (RasterImage)image;
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            var saveOptions = new JpegOptions();
+            raster.Save(outputPath, saveOptions);
+        }
+    }
 }
