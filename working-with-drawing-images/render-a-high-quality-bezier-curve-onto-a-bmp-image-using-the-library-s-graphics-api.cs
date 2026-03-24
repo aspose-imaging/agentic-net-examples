@@ -8,30 +8,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        int width = 800;
-        int height = 600;
-        string outputPath = "bezier_curve.bmp";
+        string outputPath = "output/output.bmp";
 
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+        int width = 500;
+        int height = 500;
+
+        using (Image image = Image.Create(bmpOptions, width, height))
         {
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new StreamSource(stream);
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.White);
+            graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            using (Image image = Image.Create(bmpOptions, width, height))
-            {
-                Graphics graphics = new Graphics(image);
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                graphics.Clear(Color.White);
+            Pen pen = new Pen(Color.Blue, 3);
 
-                Pen pen = new Pen(Color.Blue, 3);
-                graphics.DrawBezier(pen,
-                    new Point(100, 500),
-                    new Point(200, 100),
-                    new Point(600, 100),
-                    new Point(700, 500));
+            graphics.DrawBezier(
+                pen,
+                new Point(50, 400),
+                new Point(150, 100),
+                new Point(350, 100),
+                new Point(450, 400)
+            );
 
-                image.Save();
-            }
+            image.Save();
         }
     }
 }
