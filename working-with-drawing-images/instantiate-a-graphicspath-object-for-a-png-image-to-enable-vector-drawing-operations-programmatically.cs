@@ -1,37 +1,44 @@
+using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Tiff.PathResources;
 
-// Create a file stream for the output PNG image
-using (FileStream stream = new FileStream(@"output.png", FileMode.Create))
+class Program
 {
-    // Set up PNG options and associate the stream as the source
-    PngOptions pngOptions = new PngOptions();
-    pngOptions.Source = new StreamSource(stream);
-
-    // Create a new PNG image with desired dimensions (e.g., 500x500)
-    using (Image image = Image.Create(pngOptions, 500, 500))
+    static void Main(string[] args)
     {
-        // Initialize Graphics object to draw on the image surface
-        Graphics graphics = new Graphics(image);
-        graphics.Clear(Color.Wheat); // Optional: clear background
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
-        // Instantiate an empty GraphicsPath for vector drawing
-        GraphicsPath graphicsPath = new GraphicsPath();
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Example: add a simple rectangle figure to the path
-        Figure figure = new Figure();
-        figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-        graphicsPath.AddFigure(figure);
+        // Create PNG options (default settings)
+        PngOptions pngOptions = new PngOptions();
 
-        // Draw the path using a black pen
-        graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
+        // Create a new PNG image with specified dimensions
+        using (Image image = Image.Create(pngOptions, 500, 500))
+        {
+            // Initialize Graphics (do NOT wrap in using)
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.White);
 
-        // Save the PNG image (writes to the stream)
-        image.Save();
+            // Instantiate a GraphicsPath
+            GraphicsPath graphicsPath = new GraphicsPath();
+
+            // Create a Figure and add a RectangleShape to it
+            Figure figure = new Figure();
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+
+            // Add the Figure to the GraphicsPath
+            graphicsPath.AddFigure(figure);
+
+            // Draw the path onto the image using a Pen
+            graphics.DrawPath(new Pen(Color.Blue, 3), graphicsPath);
+
+            // Save the image to the output file
+            image.Save(outputPath, pngOptions);
+        }
     }
 }
