@@ -1,35 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input EPS file path (default or from command line)
-        string inputPath = args.Length > 0 ? args[0] : "input.eps";
-        // Output raster image path (default or from command line)
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EPS image
         using (var image = (EpsImage)Image.Load(inputPath))
         {
-            // Set rasterization options to define output size
+            // Configure rasterization options (e.g., desired page size)
             var rasterOptions = new EpsRasterizationOptions
             {
-                PageWidth = image.Width,   // preserve original width
-                PageHeight = image.Height  // preserve original height
+                PageWidth = 800,   // Width in pixels
+                PageHeight = 600   // Height in pixels
             };
 
-            // Configure PNG options with the vector rasterization settings
+            // Set up PNG save options with the rasterization settings
             var pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the EPS as a raster PNG image
+            // Save the rasterized image to the target format
             image.Save(outputPath, pngOptions);
         }
     }
