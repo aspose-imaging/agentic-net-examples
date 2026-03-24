@@ -1,38 +1,36 @@
 using System;
 using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input DJVU file path
-        string inputPath = "input.djvu";
-        // Output PNG file path
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.djvu";
+        string outputPath = @"C:\Images\sample.EdgeDetected.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DJVU image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DjvuImage to access DJVU-specific methods
             DjvuImage djvuImage = (DjvuImage)image;
 
-            // Define an edge detection kernel
-            double[,] edgeKernel = new double[,]
-            {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
-
-            // Create convolution filter options with the custom kernel
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel);
-
-            // Apply the filter to the entire image
-            djvuImage.Filter(djvuImage.Bounds, filterOptions);
+            // Apply a sharpen filter (acts as edge detection) to the entire image
+            djvuImage.Filter(djvuImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
             // Save the processed image as PNG
             djvuImage.Save(outputPath, new PngOptions());
