@@ -1,49 +1,51 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Configure BMP options (24‑bit color)
+        // Hardcoded output path
+        string outputPath = @"C:\temp\polygon.bmp";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure BMP options with a file create source
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource("output.bmp", false);
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create a 400x400 BMP image
+        // Create a 400x400 BMP canvas
         using (Image image = Image.Create(bmpOptions, 400, 400))
         {
-            // Obtain a Graphics object for drawing
+            // Initialize Graphics for drawing
             Graphics graphics = new Graphics(image);
 
-            // Clear the canvas with a background color
-            graphics.Clear(Color.Wheat);
+            // Clear background to white
+            graphics.Clear(Color.White);
 
-            // Define pixel‑aligned polygon vertices
+            // Define polygon vertices
             Point[] polygonPoints = new Point[]
             {
-                new Point(50, 300),
-                new Point(200, 50),
-                new Point(350, 300)
+                new Point(100, 50),
+                new Point(300, 50),
+                new Point(350, 200),
+                new Point(200, 350),
+                new Point(50, 200)
             };
 
-            // Create a solid brush (fully opaque blue)
-            SolidBrush brush = new SolidBrush();
-            brush.Color = Color.Blue;
-            brush.Opacity = 100;
+            // Fill the polygon with a solid blue brush
+            using (SolidBrush brush = new SolidBrush(Color.Blue))
+            {
+                graphics.FillPolygon(brush, polygonPoints);
+            }
 
-            // Fill the polygon with the solid brush
-            graphics.FillPolygon(brush, polygonPoints);
-
-            // Optionally draw the polygon outline
-            Pen pen = new Pen(Color.Black, 2);
-            graphics.DrawPolygon(pen, polygonPoints);
-
-            // Persist the image to disk
+            // Save the bound image (no need to specify path again)
             image.Save();
         }
     }
