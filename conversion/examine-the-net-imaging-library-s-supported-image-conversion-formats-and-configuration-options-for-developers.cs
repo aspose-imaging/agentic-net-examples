@@ -2,46 +2,68 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+namespace AsposeImagingDemo
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Input image path (replace with an actual file path)
-        string inputPath = "input.jpg";
-
-        // Output directory (ensure it exists)
-        string outputDir = "output";
-        Directory.CreateDirectory(outputDir);
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
+        static void Main()
         {
-            // Save as BMP using default options
-            string bmpPath = Path.Combine(outputDir, "output.bmp");
-            image.Save(bmpPath, new BmpOptions());
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.gif";
+            string outputJpeg = @"C:\temp\output.jpg";
+            string outputPng = @"C:\temp\output.png";
+            string outputBmp = @"C:\temp\output.bmp";
 
-            // Save as JPEG using default options
-            string jpegPath = Path.Combine(outputDir, "output.jpg");
-            image.Save(jpegPath, new JpegOptions());
-
-            // Save as PNG using default options
-            string pngPath = Path.Combine(outputDir, "output.png");
-            image.Save(pngPath, new PngOptions());
-
-            // Save as TIFF using default options (specify expected format)
-            string tiffPath = Path.Combine(outputDir, "output.tif");
-            image.Save(tiffPath, new TiffOptions(TiffExpectedFormat.Default));
-
-            // Save as PDF using default options
-            string pdfPath = Path.Combine(outputDir, "output.pdf");
-            var pdfOptions = new PdfOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo()
-            };
-            image.Save(pdfPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputJpeg));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPng));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputBmp));
+
+            // Display registered image creation formats
+            var registeredFormats = ImageCreatorsRegistry.RegisteredFormats;
+            Console.WriteLine($"Registered image creation formats: {registeredFormats}");
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // JPEG conversion
+                var jpegOptions = new JpegOptions { Quality = 80 };
+                bool canSaveJpeg = image.CanSave(jpegOptions);
+                Console.WriteLine($"Can save to JPEG: {canSaveJpeg}");
+                if (canSaveJpeg)
+                {
+                    image.Save(outputJpeg, jpegOptions);
+                    Console.WriteLine($"Saved JPEG to {outputJpeg}");
+                }
+
+                // PNG conversion
+                var pngOptions = new PngOptions();
+                bool canSavePng = image.CanSave(pngOptions);
+                Console.WriteLine($"Can save to PNG: {canSavePng}");
+                if (canSavePng)
+                {
+                    image.Save(outputPng, pngOptions);
+                    Console.WriteLine($"Saved PNG to {outputPng}");
+                }
+
+                // BMP conversion
+                var bmpOptions = new BmpOptions();
+                bool canSaveBmp = image.CanSave(bmpOptions);
+                Console.WriteLine($"Can save to BMP: {canSaveBmp}");
+                if (canSaveBmp)
+                {
+                    image.Save(outputBmp, bmpOptions);
+                    Console.WriteLine($"Saved BMP to {outputBmp}");
+                }
+            }
         }
     }
 }
