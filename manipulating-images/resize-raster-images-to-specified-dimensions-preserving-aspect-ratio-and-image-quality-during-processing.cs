@@ -1,69 +1,68 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length != 4)
+        // Hard‑coded input files
+        string[] inputFiles = new[]
         {
-            Console.WriteLine("Usage: <inputPath> <outputPath> <targetWidth> <targetHeight>");
-            return;
-        }
+            @"C:\Images\photo1.jpg",
+            @"C:\Images\photo2.tif"
+        };
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-        if (!int.TryParse(args[2], out int targetWidth) || targetWidth <= 0 ||
-            !int.TryParse(args[3], out int targetHeight) || targetHeight <= 0)
+        // Desired maximum dimensions (preserve aspect ratio)
+        const int maxWidth = 800;
+        const int maxHeight = 600;
+
+        // Hard‑coded output directory
+        string outputDir = @"C:\Resized";
+
+        foreach (string inputPath in inputFiles)
         {
-            Console.WriteLine("Invalid target dimensions.");
-            return;
-        }
-
-        using (Image image = Image.Load(inputPath))
-        {
-            double widthScale = (double)targetWidth / image.Width;
-            double heightScale = (double)targetHeight / image.Height;
-            double scale = Math.Min(widthScale, heightScale);
-
-            int newWidth = Math.Max(1, (int)(image.Width * scale));
-            int newHeight = Math.Max(1, (int)(image.Height * scale));
-
-            image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-
-            ImageOptionsBase saveOptions;
-            string ext = Path.GetExtension(outputPath).ToLowerInvariant();
-            switch (ext)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                case ".jpg":
-                case ".jpeg":
-                    saveOptions = new JpegOptions();
-                    break;
-                case ".png":
-                    saveOptions = new PngOptions();
-                    break;
-                case ".bmp":
-                    saveOptions = new BmpOptions();
-                    break;
-                case ".tif":
-                case ".tiff":
-                    saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    break;
-                case ".gif":
-                    saveOptions = new GifOptions();
-                    break;
-                case ".webp":
-                    saveOptions = new WebPOptions();
-                    break;
-                default:
-                    saveOptions = new JpegOptions();
-                    break;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            image.Save(outputPath, saveOptions);
+            // Build output path
+            string outputPath = Path.Combine(
+                outputDir,
+                Path.GetFileNameWithoutExtension(inputPath) + "_resized" + Path.GetExtension(inputPath));
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Calculate scaling factor to preserve aspect ratio
+                double widthRatio = (double)maxWidth / image.Width;
+                double heightRatio = (double)maxHeight / image.Height;
+                double scale = Math.Min(1.0, Math.Min(widthRatio, heightRatio)); // only downscale
+
+                int newWidth = (int)Math.Round(image.Width * scale);
+                int newHeight = (int)Math.Round(image.Height * scale);
+
+                // Perform proportional resize with high‑quality resampling
+                if (image is TiffImage tiff)
+                {
+                    tiff.ResizeProportional(newWidth, newHeight, ResizeType.LanczosResample);
+                }
+                else
+                {
+                    image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+                }
+
+                // Save the resized image (format inferred from file extension)
+                image.Save(outputPath);
+            }
         }
     }
 }
