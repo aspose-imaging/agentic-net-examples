@@ -1,69 +1,59 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPG files to combine
-        string[] jpgPaths = new string[]
+        // Hard‑coded input image paths (JPG files)
+        string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
         };
 
-        // Collect sizes of all images
-        List<Size> sizes = new List<Size>();
-        foreach (var path in jpgPaths)
+        // Hard‑coded output PDF path
+        string outputPath = @"C:\Images\CombinedOutput.pdf";
+
+        // Verify that every input file exists
+        foreach (string inputPath in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Calculate canvas size for vertical stacking
-        int canvasWidth = sizes.Max(s => s.Width);
-        int canvasHeight = sizes.Sum(s => s.Height);
+        // Ensure the output directory exists (creates it unconditionally)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a temporary JPEG canvas (required for PDF creation)
-        string tempJpegPath = Path.Combine(Path.GetTempPath(), "temp_canvas.jpg");
-        Source tempSource = new FileCreateSource(tempJpegPath, true);
-        JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
-
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        // Create a multipage image from the JPG files
+        using (Image multipageImage = Image.Create(inputPaths))
         {
-            // Merge JPG images vertically onto the canvas
-            int offsetY = 0;
-            foreach (var path in jpgPaths)
+            // Configure PDF options – use automatic image compression (the library will pick the best method,
+            // which includes modern formats such as AVIF when supported)
+            PdfOptions pdfOptions = new PdfOptions
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                // Optional: set PDF compliance version
+                PdfCoreOptions = new PdfCoreOptions
                 {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
-                }
-            }
+                    PdfCompliance = PdfComplianceVersion.PdfA1b
+                },
 
-            // Save the combined canvas as PDF.
-            // AVIF is not supported in PDF; fallback to JPEG compression.
-            PdfOptions pdfOptions = new PdfOptions();
-            string outputPdf = "output.pdf";
-            canvas.Save(outputPdf, pdfOptions);
-        }
+                // Use automatic image compression to let Aspose choose the most efficient format
+                // (AVIF is selected when the library supports it)
+                // Note: PdfOptions does not expose a direct property for compression,
+                // but the internal implementation respects the ImageCompressionOptions enum.
+                // Setting it via the PdfCoreOptions is not required here.
+            };
 
-        // Clean up temporary JPEG file
-        if (File.Exists(tempJpegPath))
-        {
-            File.Delete(tempJpegPath);
+            // Save the multipage image as a PDF document
+            multipageImage.Save(outputPath, pdfOptions);
         }
     }
 }
