@@ -1,43 +1,63 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        int width = 500;
-        int height = 500;
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the input image to obtain its dimensions
+        using (Aspose.Imaging.Image inputImage = Aspose.Imaging.Image.Load(inputPath))
+        {
+            int width = inputImage.Width;
+            int height = inputImage.Height;
+
+            // Create a new PNG image with the same dimensions
             PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Image image = Image.Create(pngOptions, width, height))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, width, height))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
+                // Define a graphics path with a rectangle and an ellipse
+                Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+
+                // Rectangle shape
+                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 200f, 150f)));
+                // Ellipse shape
+                figure.AddShape(new Aspose.Imaging.Shapes.EllipseShape(new Aspose.Imaging.RectangleF(300f, 100f, 150f, 150f)));
+
+                // Add the figure to the path
                 path.AddFigure(figure);
 
-                Pen pen = new Pen(Color.Black, 2);
-
-                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
+                // Fill the path with a solid blue brush
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
                 {
                     graphics.FillPath(brush, path);
                 }
 
-                graphics.DrawPath(pen, path);
-
+                // Save the image (output is already bound to the file)
                 image.Save();
             }
         }
