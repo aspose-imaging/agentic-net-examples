@@ -1,32 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for the source JPEG and the result JPEG
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.jpg";
 
-        // Load the existing JPEG image
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize Graphics for drawing on the image
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the JPEG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Create a Graphics instance for drawing
             Graphics graphics = new Graphics(image);
 
-            // Define the bounding rectangle for the ellipse
-            int ellipseX = image.Width / 4;
-            int ellipseY = image.Height / 4;
-            int ellipseWidth = image.Width / 2;
-            int ellipseHeight = image.Height / 2;
+            // Define pen styling (red color, 5-pixel width)
+            Pen pen = new Pen(Color.Red, 5);
 
-            // Create a Pen with desired color and thickness
-            Pen pen = new Pen(Color.Blue, 5);
+            // Define ellipse bounds
+            RectangleF ellipseRect = new RectangleF(50f, 50f, 200f, 150f);
 
             // Draw the ellipse onto the image
-            graphics.DrawEllipse(pen, ellipseX, ellipseY, ellipseWidth, ellipseHeight);
+            graphics.DrawEllipse(pen, ellipseRect);
 
             // Save the modified image, preserving JPEG format
             image.Save(outputPath);
