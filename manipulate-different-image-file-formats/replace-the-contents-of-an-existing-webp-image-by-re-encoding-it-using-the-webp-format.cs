@@ -1,34 +1,33 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
-class ReencodeWebP
+class Program
 {
     static void Main()
     {
-        // Path to the existing WebP image
-        string inputPath = @"C:\Images\original.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.webp";
 
-        // Path where the re‑encoded WebP image will be saved
-        string outputPath = @"C:\Images\reencoded.webp";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the existing WebP image using the dedicated constructor
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the existing WebP image
         using (WebPImage webPImage = new WebPImage(inputPath))
         {
-            // Optional: clear any existing animation blocks to ensure a fresh encoding
-            webPImage.ClearBlocks();
-
-            // Configure WebP save options (adjust as needed)
-            WebPOptions saveOptions = new WebPOptions
-            {
-                // Example: use lossy compression with a quality factor of 80
-                Lossless = false,
-                Quality = 80f
-            };
-
-            // Re‑encode and save the image in WebP format
-            webPImage.Save(outputPath, saveOptions);
+            // Re-encode and save using default WebP options
+            var options = new WebPOptions();
+            webPImage.Save(outputPath, options);
         }
     }
 }
