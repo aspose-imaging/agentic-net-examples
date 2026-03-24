@@ -1,27 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input DJVU file path (first argument or default)
-        string inputPath = args.Length > 0 ? args[0] : "sample.djvu";
-        // Output PNG file path (second argument or default)
-        string outputPath = args.Length > 1 ? args[1] : "sample_blur.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\sample.GaussianBlur.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DJVU image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DjvuImage to access DJVU-specific methods
+            // Cast to DjvuImage to access DJVU-specific functionality
             DjvuImage djvuImage = (DjvuImage)image;
 
-            // Apply Gaussian blur to the entire image (radius 5, sigma 4.0)
-            djvuImage.Filter(
-                djvuImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur filter to the entire image
+            // Radius = 5, Sigma = 4.0 (adjust as needed)
+            djvuImage.Filter(djvuImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
             // Save the processed image as PNG
             djvuImage.Save(outputPath, new PngOptions());
