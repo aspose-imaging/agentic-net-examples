@@ -5,26 +5,36 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input BMP file path
-        string inputPath = "input.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Output PDF file path
-        string outputPath = "output.pdf";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options to keep original metadata and resolution
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Configure PDF export options
+            PdfOptions pdfOptions = new PdfOptions
             {
-                pdfOptions.KeepMetadata = true;
-                pdfOptions.UseOriginalImageResolution = true;
+                // Preserve original metadata
+                KeepMetadata = true,
+                // Preserve original DPI resolution
+                UseOriginalImageResolution = true
+            };
 
-                // Save the image as PDF preserving fidelity and metadata
-                image.Save(outputPath, pdfOptions);
-            }
+            // Save the image as PDF
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
