@@ -1,56 +1,59 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output TIFF file path
-        string outputPath = "customShape.tif";
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
 
-        // Configure TIFF options and bind the output file
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a 500x500 TIFF image
-        using (Image image = Image.Create(tiffOptions, 500, 500))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.Wheat);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Build a custom shape using GraphicsPath
-            GraphicsPath graphicsPath = new GraphicsPath();
-            Figure figure = new Figure();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Rectangle shape
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+        // Load the TIFF image
+        using (var image = (TiffImage)Image.Load(inputPath))
+        {
+            // Create graphics object for drawing
+            var graphics = new Graphics(image);
 
-            // Ellipse shape
-            figure.AddShape(new EllipseShape(new RectangleF(100f, 200f, 250f, 150f)));
-
-            // Polygon shape (triangle)
-            figure.AddShape(new PolygonShape(new PointF[]
+            // Define a custom polygon shape (star-like)
+            var points = new[]
             {
-                new PointF(300f, 300f),
-                new PointF(350f, 320f),
-                new PointF(340f, 380f)
-            }, true));
+                new PointF(100f, 50f),
+                new PointF(150f, 150f),
+                new PointF(50f, 100f),
+                new PointF(150f, 100f),
+                new PointF(50f, 150f)
+            };
 
-            // Add the figure to the path
+            // Create a figure and add the polygon shape
+            var figure = new Figure();
+            figure.AddShape(new PolygonShape(points, true));
+
+            // Build the graphics path and add the figure
+            var graphicsPath = new GraphicsPath();
             graphicsPath.AddFigure(figure);
 
-            // Draw the path with a blue pen
-            Pen pen = new Pen(Color.Blue, 5);
-            graphics.DrawPath(pen, graphicsPath);
+            // Draw the path onto the image
+            graphics.DrawPath(new Pen(Color.Blue, 3), graphicsPath);
 
-            // Save the image (output is already bound to the file)
-            image.Save();
+            // Save the modified image to the output path
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            image.Save(outputPath, tiffOptions);
         }
     }
 }
