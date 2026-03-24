@@ -1,29 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class ImageFormatConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source image (any supported format, e.g., PNG)
-        string sourcePath = @"C:\Images\sample.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.png";
 
-        // Desired output path with the new format extension (e.g., JPEG)
-        string destinationPath = @"C:\Images\sample_converted.jpg";
-
-        // Load the image using Aspose.Imaging's factory method
-        using (Image image = Image.Load(sourcePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create JPEG save options (you can customize quality, compression, etc.)
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                // Example: set the compression quality to 90 (range 0-100)
-                Quality = 90
-            };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the loaded image to the new format using the specified options
-            image.Save(destinationPath, jpegOptions);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PNG save options (default settings)
+            PngOptions saveOptions = new PngOptions();
+
+            // Optional: verify that the image can be saved with these options
+            if (!image.CanSave(saveOptions))
+            {
+                Console.Error.WriteLine("The image cannot be saved in the requested format.");
+                return;
+            }
+
+            // Save the image to the output path
+            image.Save(outputPath, saveOptions);
         }
 
         Console.WriteLine("Image conversion completed successfully.");
