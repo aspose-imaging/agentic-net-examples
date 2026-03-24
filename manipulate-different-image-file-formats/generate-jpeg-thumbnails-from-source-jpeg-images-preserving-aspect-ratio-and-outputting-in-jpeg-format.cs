@@ -2,63 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories
-        string inputDir = "InputImages";
-        string outputDir = "Thumbnails";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output_thumbnail.jpg";
 
-        // Desired maximum thumbnail dimensions
-        int maxWidth = 150;
-        int maxHeight = 150;
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDir))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Directory.CreateDirectory(outputDir);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Process each JPEG file in the input directory
-        foreach (string inputPath in Directory.GetFiles(inputDir, "*.jpg"))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source JPEG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Load the source image as a RasterImage
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            // Define maximum thumbnail dimensions
+            int maxWidth = 150;
+            int maxHeight = 150;
+
+            // Calculate scaling factor to preserve aspect ratio
+            double scale = Math.Min((double)maxWidth / image.Width, (double)maxHeight / image.Height);
+            if (scale > 1) scale = 1; // Do not upscale smaller images
+
+            int thumbWidth = (int)(image.Width * scale);
+            int thumbHeight = (int)(image.Height * scale);
+
+            // Resize the image to thumbnail size
+            image.Resize(thumbWidth, thumbHeight);
+
+            // Set JPEG save options (e.g., quality)
+            JpegOptions jpegOptions = new JpegOptions
             {
-                // Cache data for better performance
-                if (!image.IsCached)
-                {
-                    image.CacheData();
-                }
+                Quality = 80
+            };
 
-                // Calculate scaling factor to preserve aspect ratio
-                double widthScale = (double)maxWidth / image.Width;
-                double heightScale = (double)maxHeight / image.Height;
-                double scale = Math.Min(widthScale, heightScale);
-                // Do not upscale images smaller than the target size
-                scale = Math.Min(1.0, scale);
-
-                int thumbWidth = Math.Max(1, (int)(image.Width * scale));
-                int thumbHeight = Math.Max(1, (int)(image.Height * scale));
-
-                // Resize the image to thumbnail dimensions
-                image.Resize(thumbWidth, thumbHeight);
-
-                // Prepare JPEG save options
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 75 // Adjust quality as needed
-                };
-
-                // Build output file path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + "_thumb.jpg");
-
-                // Save the thumbnail as JPEG
-                image.Save(outputPath, jpegOptions);
-            }
+            // Save the thumbnail as JPEG
+            image.Save(outputPath, jpegOptions);
         }
     }
 }
