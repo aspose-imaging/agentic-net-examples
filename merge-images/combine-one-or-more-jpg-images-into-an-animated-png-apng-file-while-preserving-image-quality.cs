@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -10,59 +10,63 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Expect at least two arguments: input JPG files followed by output APNG file path
-        if (args.Length < 2)
+        // Hardcoded input JPG files
+        string[] inputPaths = new[]
         {
-            Console.WriteLine("Usage: <input1.jpg> <input2.jpg> ... <output.apng>");
-            return;
-        }
+            "input\\image1.jpg",
+            "input\\image2.jpg",
+            "input\\image3.jpg"
+        };
 
-        // Last argument is the output file, the rest are input images
-        string outputPath = args[args.Length - 1];
-        var inputPaths = new List<string>();
-        for (int i = 0; i < args.Length - 1; i++)
+        // Verify each input file exists
+        foreach (string path in inputPaths)
         {
-            inputPaths.Add(args[i]);
-        }
-
-        // Load the first image to obtain canvas dimensions
-        using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
-        {
-            int canvasWidth = firstImage.Width;
-            int canvasHeight = firstImage.Height;
-
-            // Configure APNG creation options
-            ApngOptions createOptions = new ApngOptions
+            if (!File.Exists(path))
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // default frame duration in milliseconds
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            // Create the APNG canvas bound to the output file
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, canvasWidth, canvasHeight))
-            {
-                // Remove the default empty frame
-                apngImage.RemoveAllFrames();
-
-                // Add each JPG image as a frame
-                foreach (string path in inputPaths)
-                {
-                    using (RasterImage frame = (RasterImage)Image.Load(path))
-                    {
-                        // Ensure frame size matches canvas; resize if necessary
-                        if (frame.Width != canvasWidth || frame.Height != canvasHeight)
-                        {
-                            frame.Resize(canvasWidth, canvasHeight, ResizeType.NearestNeighbourResample);
-                        }
-
-                        apngImage.AddFrame(frame);
-                    }
-                }
-
-                // Save the animated PNG (output is already bound to the source)
-                apngImage.Save();
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
+        }
+
+        // Hardcoded output APNG file
+        string outputPath = "output\\animation.apng";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load first image to obtain canvas size
+        int canvasWidth, canvasHeight;
+        using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
+        {
+            canvasWidth = first.Width;
+            canvasHeight = first.Height;
+        }
+
+        // Create APNG options
+        ApngOptions apngOptions = new ApngOptions
+        {
+            Source = new FileCreateSource(outputPath, false),
+            ColorType = PngColorType.TruecolorWithAlpha,
+            DefaultFrameTime = 100 // default frame duration in milliseconds
+        };
+
+        // Create APNG canvas bound to the output file
+        using (ApngImage apng = (ApngImage)Image.Create(apngOptions, canvasWidth, canvasHeight))
+        {
+            // Remove the default empty frame
+            apng.RemoveAllFrames();
+
+            // Add each JPG as a frame
+            foreach (string path in inputPaths)
+            {
+                using (RasterImage frame = (RasterImage)Image.Load(path))
+                {
+                    apng.AddFrame(frame);
+                }
+            }
+
+            // Save the animated PNG (bound image, so just call Save())
+            apng.Save();
         }
     }
 }
