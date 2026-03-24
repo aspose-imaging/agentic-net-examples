@@ -8,19 +8,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"output.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Set up PNG options with a FileCreateSource bound to the output file
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Create a new image (500x500) and obtain a Graphics instance bound to it
+        using (Image image = Image.Create(pngOptions, 500, 500))
         {
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            Graphics graphics = new Graphics(image);
 
-            using (Image image = Image.Create(pngOptions, 500, 500))
-            {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-                image.Save();
-            }
+            // Clear the canvas with a wheat color
+            graphics.Clear(Color.Wheat);
+
+            // Draw a simple black line
+            graphics.DrawLine(new Pen(Color.Black, 2), new Point(50, 50), new Point(450, 450));
+
+            // Save changes (output file is already bound via FileCreateSource)
+            image.Save();
         }
     }
 }
