@@ -1,75 +1,54 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string tiffPath = "input.tif";
-        string jpegPath = "output.jpg";
-        string webpPath = "output.webp";
-        string mergedPath = "merged.jpg";
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputPath = "output.png";
 
-        // Load TIFF image, adjust, resize, rotate and save as JPEG
-        using (TiffImage tiff = (TiffImage)Image.Load(tiffPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            if (!tiff.IsCached) tiff.CacheData();
-
-            // Adjust brightness and contrast
-            tiff.AdjustBrightness(30);          // Increase brightness
-            tiff.AdjustContrast(0.2f);          // Increase contrast
-
-            // Resize to 800x600
-            tiff.Resize(800, 600);
-
-            // Rotate 45 degrees, resize canvas proportionally, fill empty area with white
-            tiff.Rotate(45f, true, Color.White);
-
-            // Save as JPEG with quality 90
-            JpegOptions jpegOpts = new JpegOptions { Quality = 90 };
-            tiff.Save(jpegPath, jpegOpts);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the saved JPEG and convert to WebP
-        using (JpegImage jpeg = (JpegImage)Image.Load(jpegPath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image
+        using (TiffImage image = (TiffImage)Image.Load(inputPath))
         {
-            if (!jpeg.IsCached) jpeg.CacheData();
+            // Cache data for better performance
+            if (!image.IsCached)
+                image.CacheData();
 
-            WebPOptions webpOpts = new WebPOptions();
-            jpeg.Save(webpPath, webpOpts);
-        }
+            // Adjust brightness (+30) and contrast (+0.2)
+            image.AdjustBrightness(30);
+            image.AdjustContrast(0.2f);
 
-        // Load both images again for merging side by side
-        using (TiffImage tiff = (TiffImage)Image.Load(tiffPath))
-        using (JpegImage jpeg = (JpegImage)Image.Load(jpegPath))
-        {
-            if (!tiff.IsCached) tiff.CacheData();
-            if (!jpeg.IsCached) jpeg.CacheData();
+            // Rotate 45 degrees with white background, resizing canvas proportionally
+            image.Rotate(45f, true, Color.White);
 
-            int canvasWidth = tiff.Width + jpeg.Width;
-            int canvasHeight = Math.Max(tiff.Height, jpeg.Height);
+            // Crop 10 pixels from each side
+            Rectangle cropRect = new Rectangle(10, 10, image.Width - 20, image.Height - 20);
+            image.Crop(cropRect);
 
-            // Create output canvas bound to a file
-            Source canvasSource = new FileCreateSource(mergedPath, false);
-            JpegOptions canvasOpts = new JpegOptions { Source = canvasSource, Quality = 80 };
-            using (JpegImage canvas = (JpegImage)Image.Create(canvasOpts, canvasWidth, canvasHeight))
+            // Resize to 800x600 using high-quality Lanczos resampling
+            image.Resize(800, 600, ResizeType.LanczosResample);
+
+            // Save as PNG
+            using (PngOptions options = new PngOptions())
             {
-                // Draw first image at (0,0)
-                Rectangle rect1 = new Rectangle(0, 0, tiff.Width, tiff.Height);
-                canvas.SaveArgb32Pixels(rect1, tiff.LoadArgb32Pixels(tiff.Bounds));
-
-                // Draw second image next to the first
-                Rectangle rect2 = new Rectangle(tiff.Width, 0, jpeg.Width, jpeg.Height);
-                canvas.SaveArgb32Pixels(rect2, jpeg.LoadArgb32Pixels(jpeg.Bounds));
-
-                // Persist the canvas to the file
-                canvas.Save();
+                image.Save(outputPath, options);
             }
         }
     }
