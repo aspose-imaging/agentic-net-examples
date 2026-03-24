@@ -1,40 +1,48 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect: input file path, output file path, rotation angle in degrees
-        if (args.Length < 3)
+        // Hard‑coded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output\\rotated.jpg";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <inputPath> <outputPath> <angle>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-        if (!float.TryParse(args[2], out float angle))
-        {
-            Console.WriteLine("Invalid rotation angle.");
-            return;
-        }
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            // Perform rotation only if the image supports arbitrary angle rotation
-            if (image is RasterCachedImage rasterImage)
+            // Desired rotation angle (degrees, clockwise)
+            float angle = 45f;
+
+            // Rotate while preserving metadata.
+            // If the image is a raster image we can control background and resizing.
+            if (image is RasterImage raster)
             {
-                // Rotate around the center, resize canvas proportionally, fill empty areas with white
-                rasterImage.Rotate(angle, true, Color.White);
-                // Save preserving original format and metadata
-                rasterImage.Save(outputPath);
+                // Resize proportionally so the whole rotated image fits,
+                // use white as background for any empty areas.
+                raster.Rotate(angle, true, Aspose.Imaging.Color.White);
             }
             else
             {
-                Console.WriteLine("The loaded image format does not support arbitrary angle rotation.");
+                // Fallback to simple rotation for non‑raster formats.
+                image.Rotate(angle);
             }
+
+            // Save the rotated image
+            image.Save(outputPath);
         }
     }
 }
