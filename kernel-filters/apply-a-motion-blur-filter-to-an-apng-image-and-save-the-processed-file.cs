@@ -1,32 +1,43 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
         string outputPath = "output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the APNG image
         using (Image image = Image.Load(inputPath))
         {
+            // Cast to ApngImage for frame access
             ApngImage apng = (ApngImage)image;
 
-            // Apply motion blur (motion wiener) filter to each frame
-            for (int i = 0; i < apng.PageCount; i++)
+            // Apply motion Wiener filter to each frame
+            foreach (var page in apng.Pages)
             {
-                // Each page is a frame; cast to RasterImage for filtering
-                var frame = (RasterImage)apng.Pages[i];
-                // Apply motion wiener filter (used here as motion blur)
-                frame.Filter(frame.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
+                // Each page is an ApngFrame, which can be treated as RasterImage
+                var frame = (RasterImage)page;
+                frame.Filter(frame.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
             }
 
-            // Save the processed APNG image
+            // Save the processed APNG
             apng.Save(outputPath, new ApngOptions());
         }
     }
