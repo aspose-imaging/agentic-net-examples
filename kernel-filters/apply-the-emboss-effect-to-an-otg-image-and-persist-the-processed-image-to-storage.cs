@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -8,38 +9,41 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input OTG, temporary PNG, and final output
-        string inputPath = "input.otg";
-        string tempPngPath = "temp.png";
-        string outputPath = "output.png";
+        // Hardcoded paths
+        string inputPath = "input\\sample.otg";
+        string tempPath = "temp\\temp.png";
+        string outputPath = "output\\embossed.png";
 
-        // Load the OTG image and rasterize it to a PNG file
-        using (Image otgImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Set up rasterization options for OTG
-            OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
-            {
-                PageSize = otgImage.Size
-            };
-
-            // Configure PNG save options with the rasterization settings
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the rasterized image to a temporary PNG file
-            otgImage.Save(tempPngPath, pngOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the rasterized PNG as a RasterImage
-        using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
-        {
-            // Apply the Emboss effect using a predefined convolution kernel
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+        // Ensure directories for temporary and output files exist
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image to the desired output path
-            raster.Save(outputPath);
+        // Load OTG image and rasterize to a temporary PNG
+        using (Image otgImage = Image.Load(inputPath))
+        {
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = new OtgRasterizationOptions
+                {
+                    PageSize = otgImage.Size
+                }
+            };
+            otgImage.Save(tempPath, pngOptions);
+        }
+
+        // Load the rasterized PNG, apply emboss filter, and save the result
+        using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+        {
+            // Apply emboss effect using a predefined convolution kernel
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            raster.Save(outputPath, new PngOptions());
         }
     }
 }
