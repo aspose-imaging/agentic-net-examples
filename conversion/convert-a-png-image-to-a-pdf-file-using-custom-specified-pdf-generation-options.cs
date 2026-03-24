@@ -6,40 +6,37 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input PNG and output PDF file paths
-        string inputPath = "input.png";
-        string outputPath = "output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.png";
+        string outputPath = @"C:\Images\sample.pdf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
             // Configure PDF export options
-            using (PdfOptions pdfOptions = new PdfOptions())
+            var pdfOptions = new PdfOptions
             {
-                // Set page size (A4 in points)
-                pdfOptions.PageSize = new Size(595, 842);
-
-                // Preserve original image metadata
-                pdfOptions.KeepMetadata = true;
-
-                // Set PDF/A-1b compliance
-                pdfOptions.PdfCoreOptions = new PdfCoreOptions
+                // Example: set PDF/A-1b compliance via PdfCoreOptions
+                PdfCoreOptions = new PdfCoreOptions
                 {
                     PdfCompliance = PdfComplianceVersion.PdfA1b
-                };
+                }
+            };
 
-                // Add basic document information
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
-                {
-                    Title = "Converted PDF",
-                    Author = "Aspose.Imaging"
-                };
-
-                // Save the image as a PDF using the custom options
-                image.Save(outputPath, pdfOptions);
-            }
+            // Save the image as a PDF using the configured options
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
