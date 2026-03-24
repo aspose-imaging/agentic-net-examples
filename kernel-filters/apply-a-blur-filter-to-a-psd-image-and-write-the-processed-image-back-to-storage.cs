@@ -2,29 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths (use arguments if provided)
-        string inputPath = args.Length > 0 ? args[0] : "input.psd";
-        string outputPath = args.Length > 1 ? args[1] : "output.psd";
+        // Hardcoded input and output file paths
+        string inputPath = "input.psd";
+        string outputPath = "output.psd";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the PSD image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering capabilities
+            // Cast to RasterImage for filtering
             RasterImage raster = (RasterImage)image;
 
-            // Apply a Gaussian blur filter (radius: 5, sigma: 4.0) to the entire image
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
             // Prepare PSD save options (default settings)
             PsdOptions saveOptions = new PsdOptions();
 
-            // Save the processed image back to PSD format
-            raster.Save(outputPath, saveOptions);
+            // Save the processed image back as PSD
+            image.Save(outputPath, saveOptions);
         }
     }
 }
