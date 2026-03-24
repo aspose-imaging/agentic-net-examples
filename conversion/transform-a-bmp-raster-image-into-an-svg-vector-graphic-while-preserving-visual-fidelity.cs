@@ -1,42 +1,43 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
-class BmpToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Input BMP file path
-        string inputBmpPath = @"C:\Temp\sample.bmp";
-        // Output SVG file path
-        string outputSvgPath = @"C:\Temp\sample_converted.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\sample.svg";
 
-        // Load the BMP image using Aspose.Imaging's generic loader
-        using (Image bmpImage = Image.Load(inputBmpPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage to access drawing capabilities
-            RasterImage raster = (RasterImage)bmpImage;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create an SVG graphics context with the same dimensions as the BMP
-            // DPI is set to 96 (standard screen resolution)
-            SvgGraphics2D svgGraphics = new SvgGraphics2D(raster.Width, raster.Height, 96);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Draw the raster BMP onto the SVG canvas.
-            // The image is placed at (0,0) and scaled to its original size.
-            svgGraphics.DrawImage(raster, new Point(0, 0), new Size(raster.Width, raster.Height));
-
-            // Finalize recording and obtain the resulting SvgImage
-            using (SvgImage svgImage = svgGraphics.EndRecording())
+        // Load the BMP raster image
+        using (Image bmpImage = Image.Load(inputPath))
+        {
+            // Configure SVG rasterization options to match the source size
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                // Prepare SVG save options (default settings are sufficient)
-                SvgOptions svgOptions = new SvgOptions();
+                PageSize = bmpImage.Size
+            };
 
-                // Save the SVG vector graphic to the specified file
-                svgImage.Save(outputSvgPath, svgOptions);
-            }
+            // Set up SVG save options with the rasterization settings
+            var svgOptions = new SvgOptions
+            {
+                VectorRasterizationOptions = rasterizationOptions
+            };
+
+            // Save the image as an SVG file
+            bmpImage.Save(outputPath, svgOptions);
         }
     }
 }
