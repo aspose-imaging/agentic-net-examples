@@ -1,30 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.BigTiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.BigTiff;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source BIGTIFF image
-        string inputPath = @"C:\Images\source_big.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.bigtiff";
+        string outputPath = @"C:\Images\output.bigtiff";
 
-        // Path where the processed image will be saved
-        string outputPath = @"C:\Images\processed_big.tif";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the BIGTIFF image
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BigTIFF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to a BigTiffImage to access TIFF‑specific functionality
-            BigTiffImage bigTiff = (BigTiffImage)image;
+            // Cast to BigTiffImage to access TIFF-specific methods
+            var bigTiff = (BigTiffImage)image;
 
-            // Apply a motion blur (motion Wiener) filter to the entire image.
-            // Parameters: length (kernel size), sigma (smoothness), angle (direction in degrees)
-            var motionOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
-            bigTiff.Filter(bigTiff.Bounds, motionOptions);
+            // Apply a motion Wiener filter to the entire image
+            // Parameters: length = 10, smooth = 1.0, angle = 90.0 degrees
+            bigTiff.Filter(bigTiff.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
 
-            // Save the filtered image back to storage
+            // Save the processed image
             bigTiff.Save(outputPath);
         }
     }
