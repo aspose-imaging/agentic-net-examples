@@ -1,29 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Wmf;
 
-class EmfToWmfConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source EMF file
-        string inputFile = @"C:\Images\source.emf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.wmf";
 
-        // Path for the generated WMF file
-        string outputFile = @"C:\Images\converted.wmf";
-
-        // Load the EMF image using the unified Image.Load method
-        using (Image image = Image.Load(inputFile))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Prepare rasterization options for WMF output.
-            // PageSize is set to the original image size to preserve dimensions.
-            var rasterizationOptions = new WmfRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EMF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure WMF rasterization options using the source image size
+            var rasterOptions = new WmfRasterizationOptions
             {
                 PageSize = image.Size
             };
 
-            // Save the loaded image as WMF using WmfOptions.
-            image.Save(outputFile, new WmfOptions { VectorRasterizationOptions = rasterizationOptions });
+            // Set up WMF save options with the rasterization options
+            var wmfOptions = new WmfOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            // Save the image as WMF
+            image.Save(outputPath, wmfOptions);
         }
     }
 }
