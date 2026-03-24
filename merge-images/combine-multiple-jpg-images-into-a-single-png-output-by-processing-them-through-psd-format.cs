@@ -1,57 +1,71 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        List<string> jpgPaths = new List<string>
+        // Hardcoded input JPG files
+        string[] inputPaths = new[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\input1.jpg",
+            @"C:\Images\input2.jpg",
+            @"C:\Images\input3.jpg"
         };
 
-        List<Size> sizes = new List<Size>();
-        foreach (string path in jpgPaths)
+        // Hardcoded output PNG file
+        string outputPath = @"C:\Images\combined_output.png";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
+        // Load all JPG images into a list
+        List<Image> loadedImages = new List<Image>();
+        foreach (string inputPath in inputPaths)
         {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight)
-                canvasHeight = sz.Height;
+            // Load image using Aspose.Imaging.Image.Load
+            Image img = Image.Load(inputPath);
+            loadedImages.Add(img);
         }
 
-        PsdOptions psdOptions = new PsdOptions();
-        using (RasterImage canvas = (RasterImage)Image.Create(psdOptions, canvasWidth, canvasHeight))
-        {
-            int offsetX = 0;
-            foreach (string path in jpgPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
-            }
+        // Create a multipage image (PSD) from the loaded images
+        // Using the Create(Image[]) overload
+        Image[] imagesArray = loadedImages.ToArray();
+        Image psdImage = Image.Create(imagesArray);
 
-            PngOptions pngOptions = new PngOptions
-            {
-                Source = new FileCreateSource("output.png", false)
-            };
-            canvas.Save("output.png", pngOptions);
+        // Save the intermediate PSD file
+        string tempPsdPath = @"C:\Images\temp_combined.psd";
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPsdPath));
+        var psdOptions = new PsdOptions();
+        psdImage.Save(tempPsdPath, psdOptions);
+
+        // Dispose the temporary PSD image (the source images are still needed for final step)
+        psdImage.Dispose();
+
+        // Load the saved PSD and export it to PNG
+        using (Image psdLoaded = Image.Load(tempPsdPath))
+        {
+            // Ensure the final output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Save as PNG using default PngOptions
+            psdLoaded.Save(outputPath, new PngOptions());
+        }
+
+        // Dispose all loaded JPG images
+        foreach (var img in loadedImages)
+        {
+            img.Dispose();
         }
     }
 }
