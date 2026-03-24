@@ -1,15 +1,31 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
- // Load a multi‑page image (e.g., TIFF, GIF, etc.). The pages are loaded in their original order.
-using (Image multiPageImage = Image.Load("input.tif"))
+class Program
 {
-    // Configure APNG options. DefaultFrameTime sets the duration of each frame (in milliseconds).
-    var apngOptions = new ApngOptions
+    static void Main()
     {
-        DefaultFrameTime = 100 // 100 ms per frame; adjust as needed.
-    };
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputPath = "output.apng.png";
 
-    // Save the image as an Animated PNG. The Save method preserves the page order automatically.
-    multiPageImage.Save("output.png", apngOptions);
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load the multi‑page image (e.g., TIFF, PDF, etc.)
+        using (Image image = Image.Load(inputPath))
+        {
+            // Export to APNG preserving frame order
+            image.Save(outputPath, new ApngOptions());
+        }
+    }
 }
