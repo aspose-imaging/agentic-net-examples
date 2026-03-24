@@ -2,36 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input EPS, temporary raster PNG, and final output
-        string epsPath = "input.eps";
-        string tempPngPath = "temp.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.eps";
+        string outputPath = @"C:\Images\sample_gaussian_blur.png";
 
-        // Load the EPS image and rasterize it to a PNG file using default rasterization options
-        using (Image epsImage = Image.Load(epsPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            epsImage.Save(tempPngPath, new PngOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the rasterized PNG as a RasterImage, apply Gaussian blur, and save the result
-        using (Image image = Image.Load(tempPngPath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EPS image
+        using (Image image = Image.Load(inputPath))
         {
+            // Cast to RasterImage to apply raster filters
             RasterImage rasterImage = (RasterImage)image;
-            rasterImage.Filter(rasterImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-            rasterImage.Save(outputPath, new PngOptions());
-        }
 
-        // Clean up the temporary PNG file
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+            // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the processed image as PNG
+            rasterImage.Save(outputPath, new PngOptions());
         }
     }
 }
