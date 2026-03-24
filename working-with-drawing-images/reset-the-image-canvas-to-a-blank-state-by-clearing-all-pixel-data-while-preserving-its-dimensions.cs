@@ -1,27 +1,32 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Load the existing image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            // Create a Graphics object for the image
-            Graphics graphics = new Graphics(image);
-
-            // Clear the canvas to white while preserving dimensions
-            graphics.Clear(Color.White);
-
-            // Save the cleared image
-            image.Save(outputPath);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Canvas has been reset and saved to: " + outputPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        Source source = new FileCreateSource(outputPath, false);
+        PngOptions options = new PngOptions() { Source = source };
+
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.White);
+            image.Save(outputPath, options);
+        }
     }
 }
