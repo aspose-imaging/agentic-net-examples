@@ -2,39 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect input BMP path and output PDF path
-        if (args.Length < 2)
-        {
-            Console.WriteLine("Usage: <exe> <inputBmpPath> <outputPdfPath>");
-            return;
-        }
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
-            Console.WriteLine($"Input file not found: {inputPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options to preserve metadata
-            PdfOptions pdfOptions = new PdfOptions
+            // Configure PDF export options
+            var pdfOptions = new PdfOptions
             {
-                KeepMetadata = true,
-                PdfDocumentInfo = new PdfDocumentInfo()
+                // Preserve original metadata in the PDF
+                KeepMetadata = true
+                // Additional metadata (e.g., PdfDocumentInfo) can be set here if required
             };
 
-            // Save the image as PDF
+            // Save the image as a PDF document
             image.Save(outputPath, pdfOptions);
         }
     }
