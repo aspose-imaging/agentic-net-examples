@@ -1,39 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input arguments: inputPath outputPath seedX seedY featheringRadius
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
 
-        int seedX = args.Length > 2 && int.TryParse(args[2], out int sx) ? sx : 100;
-        int seedY = args.Length > 3 && int.TryParse(args[3], out int sy) ? sy : 100;
-        int featheringRadius = args.Length > 4 && int.TryParse(args[4], out int fr) ? fr : 3;
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Seed point for segmentation and feathering radius (configurable)
+        int seedX = 100;
+        int seedY = 100;
+        int featherRadius = 5;
+
+        // Load the source image as a RasterImage
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Temporary file for ExportOptions source
-            string tempPath = Path.Combine(Path.GetTempPath(), "mask_temp.png");
-
+            // Configure GraphCut masking options
             var options = new GraphCutMaskingOptions
             {
-                FeatheringRadius = featheringRadius,
+                FeatheringRadius = featherRadius,
                 Method = SegmentationMethod.GraphCut,
                 Decompose = false,
                 ExportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(tempPath)
+                    Source = new StreamSource(new MemoryStream())
                 },
                 BackgroundReplacementColor = Color.Transparent,
                 Args = new AutoMaskingArgs
@@ -45,17 +55,16 @@ class Program
                 }
             };
 
-            using (MaskingResult maskingResult = new ImageMasking(image).Decompose(options))
+            // Perform segmentation
+            using (MaskingResult results = new ImageMasking(image).Decompose(options))
             {
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                // Retrieve the foreground (masked object) image
+                using (RasterImage resultImage = (RasterImage)results[1].GetImage())
                 {
-                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    // Save the result as PNG
+                    resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
-
-            // Clean up temporary file
-            if (File.Exists(tempPath))
-                File.Delete(tempPath);
         }
     }
 }
