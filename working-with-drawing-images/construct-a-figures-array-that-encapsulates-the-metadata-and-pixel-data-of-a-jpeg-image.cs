@@ -1,72 +1,58 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Exif;
+using System.Text.Json;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-// Define a container that holds both metadata and raw image bytes.
-public class Figure
+namespace AsposeImagingExample
 {
-    // EXIF metadata container.
-    public JpegExifData Exif { get; set; }
-
-    // JFIF segment data.
-    public JFIFData Jfif { get; set; }
-
-    // Raw JPEG byte array (includes pixel data and embedded metadata).
-    public byte[] ImageBytes { get; set; }
-}
-
-public class Program
-{
-    public static void Main()
+    // Represents metadata and pixel data of a JPEG image.
+    public class Figure
     {
-        // Path to the source JPEG file.
-        string jpegPath = @"C:\temp\sample.jpg";
+        public string FileName { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public string Comment { get; set; }
+        public byte[] ImageData { get; set; }
+    }
 
-        // Collection that will store the resulting Figure objects.
-        List<Figure> figures = new List<Figure>();
-
-        // Load the JPEG image using the constructor that accepts a file path.
-        using (JpegImage jpegImage = new JpegImage(jpegPath))
+    class Program
+    {
+        static void Main()
         {
-            // Retrieve EXIF metadata.
-            JpegExifData exifData = jpegImage.ExifData;
+            // Hardcoded input and output paths.
+            string inputPath = @"C:\temp\sample.jpg";
+            string outputPath = @"C:\temp\figures.json";
 
-            // Retrieve JFIF segment data.
-            JFIFData jfifData = jpegImage.Jfif;
-
-            // Save the image into a memory stream to obtain the raw byte representation.
-            byte[] imageBytes;
-            using (MemoryStream ms = new MemoryStream())
+            // Verify input file exists.
+            if (!File.Exists(inputPath))
             {
-                // The Save method follows the lifecycle rule; it writes the image to the stream.
-                jpegImage.Save(ms);
-                imageBytes = ms.ToArray();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Populate a Figure instance with the gathered information.
-            Figure figure = new Figure
+            // Ensure output directory exists.
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image.
+            using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                Exif = exifData,
-                Jfif = jfifData,
-                ImageBytes = imageBytes
-            };
+                // Gather metadata.
+                var figure = new Figure
+                {
+                    FileName = Path.GetFileName(inputPath),
+                    Width = jpegImage.Width,
+                    Height = jpegImage.Height,
+                    Comment = jpegImage.Comment,
+                    ImageData = File.ReadAllBytes(inputPath) // Raw JPEG bytes.
+                };
 
-            // Add the Figure to the collection.
-            figures.Add(figure);
-        }
+                // Encapsulate into an array.
+                Figure[] figures = new[] { figure };
 
-        // Convert the list to an array as required.
-        Figure[] figuresArray = figures.ToArray();
-
-        // Example usage: output the size of the first figure's byte array.
-        if (figuresArray.Length > 0)
-        {
-            Console.WriteLine($"First figure byte size: {figuresArray[0].ImageBytes.Length}");
+                // Serialize the array to JSON and write to the output file.
+                string json = JsonSerializer.Serialize(figures, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(outputPath, json);
+            }
         }
     }
 }
