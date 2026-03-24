@@ -1,51 +1,59 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Output file path
-        string outputPath = "ellipse_output.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
-        // Create PNG options and assign a file create source
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a new image with desired dimensions (width: 400, height: 300)
-        using (Image image = Image.Create(pngOptions, 400, 300))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize graphics object for drawing on the image
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the existing image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Create a Graphics object for drawing
             Graphics graphics = new Graphics(image);
 
-            // Clear the canvas with a light gray background
-            graphics.Clear(Color.LightGray);
-
             // Define ellipse position and size
-            int ellipseX = 50;      // X-coordinate of upper‑left corner
-            int ellipseY = 40;      // Y-coordinate of upper‑left corner
-            int ellipseWidth = 300; // Width of bounding rectangle
-            int ellipseHeight = 200; // Height of bounding rectangle
+            float x = 100f;      // X-coordinate of upper‑left corner
+            float y = 80f;       // Y-coordinate of upper‑left corner
+            float width = 300f;  // Width of the bounding rectangle
+            float height = 200f; // Height of the bounding rectangle
+            RectangleF ellipseRect = new RectangleF(x, y, width, height);
 
-            // Create a pen for the ellipse outline (red color, 3‑pixel thickness)
-            Pen outlinePen = new Pen(Color.Red, 3);
+            // Create a pen for the ellipse outline
+            Pen outlinePen = new Pen(Aspose.Imaging.Color.Blue, 5);
 
-            // Draw the ellipse outline
-            graphics.DrawEllipse(outlinePen, ellipseX, ellipseY, ellipseWidth, ellipseHeight);
-
-            // Create a solid brush for filling the ellipse (semi‑transparent blue)
-            SolidBrush fillBrush = new SolidBrush();
-            fillBrush.Color = Color.Blue;
-            fillBrush.Opacity = 120; // Opacity range: 0‑255
+            // Create a solid brush for filling the ellipse
+            SolidBrush fillBrush = new SolidBrush
+            {
+                Color = Aspose.Imaging.Color.Red,
+                Opacity = 100 // Fully opaque (0‑100)
+            };
 
             // Fill the interior of the ellipse
-            graphics.FillEllipse(fillBrush, ellipseX, ellipseY, ellipseWidth, ellipseHeight);
+            graphics.FillEllipse(fillBrush, ellipseRect);
 
-            // Save the image to the specified file
-            image.Save();
+            // Draw the ellipse outline
+            graphics.DrawEllipse(outlinePen, ellipseRect);
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the modified image
+            image.Save(outputPath);
         }
     }
 }
