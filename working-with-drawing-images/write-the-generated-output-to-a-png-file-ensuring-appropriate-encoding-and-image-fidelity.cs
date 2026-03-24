@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
@@ -8,40 +9,41 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = "output.png";
+        // Output PNG file path (hard‑coded)
+        string outputPath = @"C:\temp\output.png";
 
-        // Configure PNG encoding options
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure PNG options
         PngOptions pngOptions = new PngOptions
         {
-            CompressionLevel = 9,                     // Maximum compression (0-9)
-            Progressive = true,                       // Enable progressive loading
-            ColorType = PngColorType.TruecolorWithAlpha, // Preserve alpha channel
-            BitDepth = 8                               // 8 bits per channel
+            // Use truecolor with alpha for full fidelity
+            ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
+            // Maximum compression (optional)
+            CompressionLevel = 9,
+            // Enable progressive loading (optional)
+            Progressive = true
         };
 
-        // Define image dimensions
-        int width = 200;
-        int height = 200;
-
-        // Create a new PNG image canvas
-        using (PngImage pngImage = new PngImage(width, height))
+        // Create a PNG image with the specified options and size
+        using (PngImage pngImage = new PngImage(pngOptions, 200, 200))
         {
-            // Create a semi‑transparent linear gradient brush
-            using (LinearGradientBrush gradientBrush = new LinearGradientBrush(
+            // Create a graphics object for drawing
+            Graphics graphics = new Graphics(pngImage);
+
+            // Create a linear gradient brush from blue to transparent
+            using (LinearGradientBrush brush = new LinearGradientBrush(
                 new Point(0, 0),
                 new Point(pngImage.Width, pngImage.Height),
                 Color.Blue,
                 Color.Transparent))
             {
-                // Obtain a graphics object for drawing
-                Graphics graphics = new Graphics(pngImage);
-
                 // Fill the entire image with the gradient
-                graphics.FillRectangle(gradientBrush, pngImage.Bounds);
+                graphics.FillRectangle(brush, pngImage.Bounds);
             }
 
-            // Save the image with the specified PNG options
+            // Save the image to the specified file using the same options
             pngImage.Save(outputPath, pngOptions);
         }
     }
