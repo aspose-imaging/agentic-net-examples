@@ -1,41 +1,46 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output JPEG file paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.jpg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the JPEG image
-        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Initialize Graphics for the loaded image
-            Graphics graphics = new Graphics(jpegImage);
+            // Create a Graphics instance for the image
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Create a GraphicsPath that covers the entire image area
-            GraphicsPath path = new GraphicsPath();
+            // Build a GraphicsPath that covers the entire canvas
+            Aspose.Imaging.GraphicsPath graphicsPath = new Aspose.Imaging.GraphicsPath();
+            Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+            figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(0f, 0f, image.Width, image.Height)));
+            graphicsPath.AddFigure(figure);
 
-            // Create a Figure and add a rectangle shape matching the image bounds
-            Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(0f, 0f, jpegImage.Width, jpegImage.Height)));
+            // Fill the path with white to clear the canvas
+            using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.White))
+            {
+                graphics.FillPath(brush, graphicsPath);
+            }
 
-            // Add the Figure to the GraphicsPath
-            path.AddFigure(figure);
-
-            // Fill the path with white color to clear the canvas
-            SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.White);
-            graphics.FillPath(brush, path);
-
-            // Save the cleared image to the output file
-            jpegImage.Save(outputPath);
+            // Save the cleared image
+            image.Save(outputPath);
         }
     }
 }
