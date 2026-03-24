@@ -1,32 +1,82 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Folder containing the source JPG images
-        string inputFolder = "input_images";
-        // Destination DjVu file
-        string outputPath = "output.djvu";
-
-        // Retrieve all JPG files from the input folder
-        string[] jpgFiles = Directory.GetFiles(inputFolder, "*.jpg");
-
-        if (jpgFiles.Length == 0)
+        // Hardcoded input JPEG files
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("No JPG files found in the specified folder.");
-            return;
+            @"C:\Images\page1.jpg",
+            @"C:\Images\page2.jpg",
+            @"C:\Images\page3.jpg"
+        };
+
+        // Hardcoded output JPEG file
+        string outputPath = @"C:\Images\combined.jpg";
+
+        // Validate input files
+        foreach (var inputPath in inputPaths)
+        {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
         }
 
-        // Create a multipage image from the JPG files
-        using (Image djvuImage = Image.Create(jpgFiles))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load all JPEG images and collect their sizes
+        List<RasterImage> images = new List<RasterImage>();
+        List<Size> sizes = new List<Size>();
+
+        foreach (var path in inputPaths)
         {
-            // Save the multipage image as a DjVu document
-            djvuImage.Save(outputPath);
+            RasterImage img = (RasterImage)Image.Load(path);
+            images.Add(img);
+            sizes.Add(new Size(img.Width, img.Height));
         }
 
-        Console.WriteLine($"DjVu file created successfully at: {outputPath}");
+        // Calculate canvas size for horizontal stitching
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
+
+        // Create JPEG options with a file source
+        Source source = new FileCreateSource(outputPath, false);
+        JpegOptions jpegOptions = new JpegOptions()
+        {
+            Source = source,
+            Quality = 100
+        };
+
+        // Create a JPEG canvas
+        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+        {
+            int offsetX = 0;
+            foreach (var img in images)
+            {
+                Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                offsetX += img.Width;
+            }
+
+            // Save the bound image
+            canvas.Save();
+        }
+
+        // Cleanup loaded images
+        foreach (var img in images)
+        {
+            img.Dispose();
+        }
     }
 }
