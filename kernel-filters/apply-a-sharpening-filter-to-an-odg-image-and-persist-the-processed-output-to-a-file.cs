@@ -1,36 +1,70 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Input ODG file path
+        // Hardcoded input and output paths
         string inputPath = @"C:\temp\sample.odg";
-
-        // Output ODG file path
         string outputPath = @"C:\temp\sample_sharpened.odg";
 
-        // Load the ODG image using the unified Image.Load method
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the loaded image to OdgImage to access ODG‑specific members
-            OdgImage odgImage = (OdgImage)image;
+            // Attempt to treat the loaded image as a raster image
+            RasterImage raster = image as RasterImage;
 
-            // Each page of an ODG file is a raster image; apply the sharpen filter to every page
-            foreach (Image page in odgImage.Pages)
+            if (raster != null)
             {
-                // Cast the page to RasterImage to use the Filter method
-                RasterImage rasterPage = (RasterImage)page;
-
-                // Apply a sharpen filter with kernel size 5 and sigma 4.0 to the whole page
-                rasterPage.Filter(rasterPage.Bounds, new SharpenFilterOptions(5, 4.0));
+                // Apply sharpen filter directly to the raster image
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+                raster.Save(outputPath);
             }
+            else
+            {
+                // ODG is a vector format; rasterize it first, then apply the filter
+                var rasterizationOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
+                };
 
-            // Save the processed ODG image to the specified output file
-            odgImage.Save(outputPath);
+                var pngSaveOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Temporary raster file path
+                string tempRasterPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+
+                // Save vector image as raster PNG
+                image.Save(tempRasterPath, pngSaveOptions);
+
+                // Load the temporary raster image, apply filter, and save final result
+                using (RasterImage tempRaster = (RasterImage)Image.Load(tempRasterPath))
+                {
+                    tempRaster.Filter(tempRaster.Bounds, new SharpenFilterOptions(5, 4.0));
+                    tempRaster.Save(outputPath);
+                }
+
+                // Clean up temporary file
+                File.Delete(tempRasterPath);
+            }
         }
     }
 }
