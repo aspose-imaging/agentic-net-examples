@@ -1,23 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source BMP image
-        string bmpPath = @"C:\Images\source.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Desired output PDF file path
-        string pdfPath = @"C:\Images\output.pdf";
-
-        // Load the BMP image using the provided Image.Load method
-        using (Image bmpImage = Image.Load(bmpPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Save the loaded image as a PDF document.
-            // PdfOptions ensures the image is embedded as a single page with original fidelity.
-            bmpImage.Save(pdfPath, new PdfOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure PDF export options
+            var pdfOptions = new PdfOptions
+            {
+                // Preserve original DPI
+                UseOriginalImageResolution = true,
+                // Set page size to match the image dimensions
+                PageSize = new Size(image.Width, image.Height)
+            };
+
+            // Save as a single‑page PDF
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
