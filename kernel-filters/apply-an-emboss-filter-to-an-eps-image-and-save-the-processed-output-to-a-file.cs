@@ -1,44 +1,56 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input EPS file path
-        string epsPath = "input.eps";
-        // Temporary rasterized PNG path
-        string tempPngPath = "temp.png";
-        // Final output path after applying emboss filter
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
         string outputPath = "output.png";
 
-        // Load EPS image and rasterize it to PNG
-        using (Image epsImage = Image.Load(epsPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options (use original dimensions)
-            var rasterOptions = new EpsRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Temporary raster file path
+        string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+
+        // Load EPS image and rasterize to temporary PNG
+        using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+        {
+            var rasterOptions = new Aspose.Imaging.ImageOptions.EpsRasterizationOptions
             {
                 PageWidth = epsImage.Width,
                 PageHeight = epsImage.Height
             };
 
-            // Save rasterized version to a temporary PNG file
-            epsImage.Save(tempPngPath, new PngOptions { VectorRasterizationOptions = rasterOptions });
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            epsImage.Save(tempPath, pngOptions);
         }
 
-        // Load the rasterized PNG as a RasterImage
-        using (Image img = Image.Load(tempPngPath))
+        // Load the rasterized image, apply emboss filter, and save final output
+        using (var image = Image.Load(tempPath))
         {
-            RasterImage raster = (RasterImage)img;
+            var raster = (RasterImage)image;
 
-            // Apply emboss filter using a predefined convolution kernel
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            var embossKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
+            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
 
-            // Save the processed image
+            raster.Filter(raster.Bounds, filterOptions);
             raster.Save(outputPath, new PngOptions());
         }
     }
