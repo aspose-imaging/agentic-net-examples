@@ -1,50 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // args[0] - input image path
-        // args[1] - output APNG path
-        // args[2] - desired width (int)
-        if (args.Length < 3)
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output\\resized.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <inputPath> <outputPath> <targetWidth>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-        int targetWidth = int.Parse(args[2]);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Load the source image
+        using (Image srcImage = Image.Load(inputPath))
         {
-            // Calculate new height to maintain aspect ratio
-            int newHeight = (int)((double)sourceImage.Height * targetWidth / sourceImage.Width);
+            // Desired width while preserving aspect ratio
+            int targetWidth = 800;
+            int newHeight = (int)((double)targetWidth / srcImage.Width * srcImage.Height);
 
-            // Resize using specified ResizeType
-            sourceImage.Resize(targetWidth, newHeight, ResizeType.LanczosResample);
+            // Resize using a high‑quality resample method
+            srcImage.Resize(targetWidth, newHeight, ResizeType.HighQualityResample);
 
-            // Prepare APNG creation options
-            ApngOptions createOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                ColorType = PngColorType.TruecolorWithAlpha,
-                DefaultFrameTime = 500 // 500 ms per frame
-            };
-
-            // Create APNG image and add the resized frame
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
-            {
-                apngImage.RemoveAllFrames();
-                apngImage.AddFrame(sourceImage);
-                apngImage.Save();
-            }
+            // Save the resized image as APNG
+            var apngOptions = new ApngOptions();
+            srcImage.Save(outputPath, apngOptions);
         }
     }
 }
