@@ -1,43 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Expect input and output file paths as arguments
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <inputImagePath> <outputImagePath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image
+        // Load image and apply blur box kernel filter
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for filtering
-            RasterImage rasterImage = (RasterImage)image;
+            RasterImage raster = (RasterImage)image;
 
-            // Define blur box kernel size (odd positive integer)
-            int kernelSize = 5;
+            // Create a box blur kernel of size 5
+            double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5);
+            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-            // Obtain the blur box kernel matrix
-            double[,] kernel = ConvolutionFilter.GetBlurBox(kernelSize);
+            // Apply the filter to the entire image
+            raster.Filter(raster.Bounds, filterOptions);
 
-            // Create filter options with the kernel
-            var filterOptions = new ConvolutionFilterOptions(kernel);
-
-            // Apply the blur box filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-            // Save the processed image
-            rasterImage.Save(outputPath);
+            // Save the result as PNG
+            var pngOptions = new PngOptions();
+            raster.Save(outputPath, pngOptions);
         }
     }
 }
