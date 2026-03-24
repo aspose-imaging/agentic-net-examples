@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -10,23 +11,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Animation parameters
-        const int AnimationDuration = 1000; // total duration in ms
-        const int FrameDuration = 70;       // each frame duration in ms
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output\\animation.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load("not_animated.png"))
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Apply a Gaussian blur filter to transform the pixel data
+            // Apply a Gaussian blur filter to the image
             sourceImage.Filter(
                 sourceImage.Bounds,
-                new GaussianBlurFilterOptions(5, 4.0));
+                new GaussianBlurFilterOptions { Radius = 5 });
 
             // Set up APNG creation options
             ApngOptions createOptions = new ApngOptions
             {
-                Source = new FileCreateSource("raster_animation.png", false),
-                DefaultFrameTime = (uint)FrameDuration,
+                Source = new FileCreateSource(outputPath, false),
+                DefaultFrameTime = 100, // frame duration in milliseconds
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
@@ -36,28 +47,16 @@ class Program
                 sourceImage.Width,
                 sourceImage.Height))
             {
-                // Remove the default empty frame
+                // Remove the default single frame
                 apngImage.RemoveAllFrames();
 
-                int numOfFrames = AnimationDuration / FrameDuration;
-                int halfFrames = numOfFrames / 2;
-
-                // Add the first frame
-                apngImage.AddFrame(sourceImage);
-
-                // Add intermediate frames with gamma adjustment
-                for (int i = 1; i < numOfFrames - 1; ++i)
+                // Add multiple frames using the filtered image
+                for (int i = 0; i < 3; i++)
                 {
                     apngImage.AddFrame(sourceImage);
-                    ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                    float gamma = i >= halfFrames ? numOfFrames - i - 1 : i;
-                    lastFrame.AdjustGamma(gamma);
                 }
 
-                // Add the final frame
-                apngImage.AddFrame(sourceImage);
-
-                // Save the animated PNG
+                // Save the APNG file
                 apngImage.Save();
             }
         }
