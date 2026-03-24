@@ -1,39 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Path to the existing image
-        string inputPath = "input.jpg";
-        // Path for the output image
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output.png";
 
-        // Load the image as a RasterImage
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize Graphics for drawing on the image
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the existing image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Create a Graphics instance for drawing
             Graphics graphics = new Graphics(image);
 
-            // Arc parameters
-            int centerX = 150;      // X-coordinate of the arc center
-            int centerY = 100;      // Y-coordinate of the arc center
-            int radius = 80;        // Radius of the arc
-            int startAngle = 30;    // Starting angle in degrees
-            int sweepAngle = 120;   // Sweep angle in degrees
-
-            // Calculate the bounding rectangle of the arc
-            int rectX = centerX - radius;
-            int rectY = centerY - radius;
-            int rectWidth = radius * 2;
-            int rectHeight = radius * 2;
-
-            // Create a pen for drawing the arc
-            Pen pen = new Pen(Color.Blue, 3);
+            // Define the arc parameters
+            // Example: center at (150,150), radius 100 => bounding rectangle (50,50,200,200)
+            // Start angle 0 degrees, sweep angle 180 degrees
+            Pen pen = new Pen(Color.Red, 3);
+            Rectangle rect = new Rectangle(50, 50, 200, 200);
+            float startAngle = 0f;
+            float sweepAngle = 180f;
 
             // Draw the arc onto the image
-            graphics.DrawArc(pen, rectX, rectY, rectWidth, rectHeight, startAngle, sweepAngle);
+            graphics.DrawArc(pen, rect, startAngle, sweepAngle);
 
             // Save the modified image
             image.Save(outputPath);
