@@ -1,28 +1,34 @@
-using Aspose.Imaging;
+using System;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input WebP file and output PNG file paths
         string inputPath = "input.webp";
-        string outputPath = "output_emboss.png";
+        string outputPath = "output_emboss.webp";
 
-        // Load the WebP image
-        using (Image image = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            // Cast to WebPImage to access WebP-specific methods
-            WebPImage webpImage = (WebPImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply the emboss filter to the entire image
-            webpImage.Filter(webpImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image as PNG
-            webpImage.Save(outputPath, new PngOptions());
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            Aspose.Imaging.FileFormats.Webp.WebPImage webpImage = (Aspose.Imaging.FileFormats.Webp.WebPImage)image;
+
+            var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+
+            webpImage.Filter(webpImage.Bounds, embossOptions);
+
+            var saveOptions = new WebPOptions();
+            webpImage.Save(outputPath, saveOptions);
         }
     }
 }
