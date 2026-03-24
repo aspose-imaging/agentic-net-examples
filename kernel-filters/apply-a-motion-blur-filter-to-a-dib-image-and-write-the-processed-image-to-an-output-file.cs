@@ -1,27 +1,42 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input DIB (BMP) image path
-        string inputPath = "input.dib";
-        // Output image path (PNG format)
-        string outputPath = "output.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.dib";
+        string outputPath = @"C:\Images\output_motion_blur.dib";
 
-        // Load the image and cast to RasterImage for filtering
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DIB image
         using (Image image = Image.Load(inputPath))
         {
+            // Cast to RasterImage to enable filtering
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply motion blur filter: length=10, smooth=1.0, angle=45 degrees
-            rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(10, 1.0, 45.0));
+            // Motion blur parameters: length (kernel size), smooth (smoothing factor), angle (degrees)
+            int length = 10;
+            double smooth = 1.0;
+            double angle = 45.0;
 
-            // Save the processed image as PNG
-            rasterImage.Save(outputPath, new PngOptions());
+            // Apply the motion blur filter to the entire image
+            rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(length, smooth, angle));
+
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }
