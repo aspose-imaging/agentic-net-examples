@@ -1,25 +1,41 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Input JPG files
-        string[] jpgFiles = new string[]
+        string[] inputPaths = new[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\img1.jpg",
+            @"C:\Images\img2.jpg",
+            @"C:\Images\img3.jpg"
         };
 
-        // Collect sizes of all input images
+        // Validate input files
+        foreach (var path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Output PNG path
+        string pngOutputPath = @"C:\Images\combined.png";
+        Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
+
+        // Collect image sizes
         List<Size> sizes = new List<Size>();
-        foreach (string path in jpgFiles)
+        foreach (var path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
@@ -27,26 +43,17 @@ class Program
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
-        {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight)
-                canvasHeight = sz.Height;
-        }
-
-        // Prepare PNG output
-        string pngPath = Path.Combine(Directory.GetCurrentDirectory(), "combined.png");
-        Source pngSource = new FileCreateSource(pngPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = pngSource };
+        // Calculate canvas dimensions (horizontal layout)
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
 
         // Create PNG canvas and merge images
+        Source pngSource = new FileCreateSource(pngOutputPath, false);
+        PngOptions pngOptions = new PngOptions { Source = pngSource };
         using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
         {
             int offsetX = 0;
-            foreach (string path in jpgFiles)
+            foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -55,21 +62,32 @@ class Program
                     offsetX += img.Width;
                 }
             }
-            // Save the bound PNG image
+            // Save the PNG image (bound to source)
             canvas.Save();
         }
 
-        // Convert the PNG to compressed EMZ (EMF with compression)
-        string emzPath = Path.Combine(Directory.GetCurrentDirectory(), "combined.emz");
-        using (Image pngImage = Image.Load(pngPath))
+        // Load the created PNG for embedding
+        using (RasterImage pngImage = (RasterImage)Image.Load(pngOutputPath))
         {
-            Source emzSource = new FileCreateSource(emzPath, false);
-            EmfOptions emfOptions = new EmfOptions()
+            // Output EMZ path
+            string emzOutputPath = @"C:\Images\combined.emz";
+            Directory.CreateDirectory(Path.GetDirectoryName(emzOutputPath));
+
+            // Create EMF canvas
+            using (EmfImage emfCanvas = new EmfImage(canvasWidth, canvasHeight))
             {
-                Source = emzSource,
-                Compress = true
-            };
-            pngImage.Save(emzPath, emfOptions);
+                // Draw the PNG onto the EMF canvas
+                Graphics graphics = new Graphics(emfCanvas);
+                graphics.DrawImage(pngImage, new Rectangle(0, 0, pngImage.Width, pngImage.Height));
+
+                // Save as compressed EMF (EMZ)
+                EmfOptions emfOptions = new EmfOptions
+                {
+                    Compress = true,
+                    Source = new FileCreateSource(emzOutputPath, false)
+                };
+                emfCanvas.Save(emzOutputPath, emfOptions);
+            }
         }
     }
 }
