@@ -9,39 +9,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length < 2)
+        string inputPath = "input.svg";
+        string outputPath = "output/output.tif";
+
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <input.svg> <output.tif> [compression]");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-
-        TiffCompressions compression = TiffCompressions.None;
-        if (args.Length >= 3 && Enum.TryParse<TiffCompressions>(args[2], true, out var parsedCompression))
-        {
-            compression = parsedCompression;
-        }
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         using (Image image = Image.Load(inputPath))
         {
-            VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+            var rasterOptions = new VectorRasterizationOptions
             {
-                PageSize = image.Size,
-                BackgroundColor = Color.White
+                BackgroundColor = Color.White,
+                PageWidth = image.Width,
+                PageHeight = image.Height
             };
 
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            using (var tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
             {
-                VectorRasterizationOptions = rasterOptions,
-                Compression = compression,
-                Photometric = TiffPhotometrics.Rgb,
-                BitsPerSample = new ushort[] { 8, 8, 8 },
-                PlanarConfiguration = TiffPlanarConfigs.Contiguous
-            };
+                tiffOptions.Compression = TiffCompressions.Lzw;
+                tiffOptions.VectorRasterizationOptions = rasterOptions;
 
-            image.Save(outputPath, tiffOptions);
+                image.Save(outputPath, tiffOptions);
+            }
         }
     }
 }
