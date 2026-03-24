@@ -1,75 +1,77 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length < 2)
+        // Hardcoded input JPG files
+        string[] jpgFiles =
         {
-            Console.WriteLine("Usage: Program <input1.jpg> <input2.jpg> ... <output.pdf>");
+            @"C:\Images\photo1.jpg",
+            @"C:\Images\photo2.jpg",
+            @"C:\Images\photo3.jpg"
+        };
+
+        // List to hold paths of intermediate EMZ files
+        List<string> emzFiles = new List<string>();
+
+        foreach (string jpgPath in jpgFiles)
+        {
+            // Verify input file exists
+            if (!File.Exists(jpgPath))
+            {
+                Console.Error.WriteLine($"File not found: {jpgPath}");
+                return;
+            }
+
+            // Determine EMZ output path (same folder, .emz extension)
+            string emzPath = Path.ChangeExtension(jpgPath, ".emz");
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(emzPath));
+
+            // Load JPG image
+            using (Image jpgImage = Image.Load(jpgPath))
+            {
+                // Prepare vector rasterization options matching the source image size
+                var vectorOptions = new EmfRasterizationOptions
+                {
+                    PageSize = jpgImage.Size
+                };
+
+                // Save as compressed EMF (EMZ) format
+                jpgImage.Save(emzPath, new EmfOptions
+                {
+                    VectorRasterizationOptions = vectorOptions,
+                    Compress = true
+                });
+            }
+
+            emzFiles.Add(emzPath);
+        }
+
+        // Verify we have at least one EMZ file to merge
+        if (emzFiles.Count == 0)
+        {
+            Console.Error.WriteLine("No images were processed.");
             return;
         }
 
-        // Separate input JPG paths and output PDF path
-        int imageCount = args.Length - 1;
-        string[] jpgPaths = new string[imageCount];
-        Array.Copy(args, jpgPaths, imageCount);
-        string outputPdfPath = args[args.Length - 1];
-
-        // Lists to hold temporary EMZ paths and their sizes
-        List<string> emzPaths = new List<string>();
-        List<Size> sizes = new List<Size>();
-
-        // Convert each JPG to EMZ (compressed EMF) and record size
-        foreach (string jpgPath in jpgPaths)
+        // Create a multipage image from the EMZ files
+        using (Image multipage = Image.Create(emzFiles.ToArray()))
         {
-            using (Image img = Image.Load(jpgPath))
-            {
-                var vectorOptions = new EmfRasterizationOptions { PageSize = img.Size };
-                string emzPath = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(jpgPath) + ".emz");
-                img.Save(emzPath, new EmfOptions { VectorRasterizationOptions = vectorOptions, Compress = true });
-                emzPaths.Add(emzPath);
-                sizes.Add(img.Size);
-            }
-        }
+            // Define output PDF path
+            string outputPdf = @"C:\Output\CombinedImages.pdf";
 
-        // Calculate canvas size for vertical stacking
-        int canvasWidth = sizes.Max(s => s.Width);
-        int canvasHeight = sizes.Sum(s => s.Height);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdf));
 
-        // Create an unbound JPEG canvas (will be saved as PDF)
-        var jpegOptions = new JpegOptions { Quality = 100 };
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-        {
-            int offsetY = 0;
-            for (int i = 0; i < emzPaths.Count; i++)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(emzPaths[i]))
-                {
-                    var bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
-                }
-            }
-
-            // Save the merged canvas as a PDF document
-            var pdfOptions = new PdfOptions();
-            canvas.Save(outputPdfPath, pdfOptions);
-        }
-
-        // Cleanup temporary EMZ files
-        foreach (string emzPath in emzPaths)
-        {
-            try { File.Delete(emzPath); } catch { }
+            // Save the multipage image as a PDF document
+            multipage.Save(outputPdf, new PdfOptions());
         }
     }
 }
