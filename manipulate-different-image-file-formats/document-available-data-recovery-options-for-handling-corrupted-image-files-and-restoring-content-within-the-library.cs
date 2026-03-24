@@ -2,59 +2,82 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Png; // For PNG saving options
+using Aspose.Imaging.CoreExceptions;
 
-namespace ImagingNet
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\corrupted.jpg";
+        string outputPath = @"C:\Images\output\recovered.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Path to the potentially corrupted image file
-            string inputPath = "corrupted_image.webp";
-            // Path where the recovered image will be saved
-            string outputPath = "recovered_image.png";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Load the image as a generic Image and cast to RasterImage for pixel-level operations
-            using (Image img = Image.Load(inputPath))
+        // Ensure the output directory exists (creates it unconditionally)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Example 1: No data recovery (default behavior)
+        LoadAndSaveImage(inputPath, outputPath, DataRecoveryMode.None, "none");
+
+        // Example 2: Consistent recovery – recovers data as long as the file format remains intact
+        LoadAndSaveImage(inputPath, outputPath, DataRecoveryMode.ConsistentRecover, "consistent");
+
+        // Example 3: Maximal recovery – attempts to recover all data even if the format is severely corrupted
+        LoadAndSaveImage(inputPath, outputPath, DataRecoveryMode.MaximalRecover, "maximal");
+    }
+
+    /// <summary>
+    /// Loads an image using the specified data recovery mode and saves it to the output path.
+    /// </summary>
+    /// <param name="inputPath">Path to the potentially corrupted image file.</param>
+    /// <param name="outputPath">Base output path (file name will be suffixed with the mode).</param>
+    /// <param name="mode">DataRecoveryMode to apply during loading.</param>
+    /// <param name="modeSuffix">Suffix added to the output file name to distinguish the mode.</param>
+    private static void LoadAndSaveImage(string inputPath, string outputPath, DataRecoveryMode mode, string modeSuffix)
+    {
+        // Configure load options with the desired recovery mode
+        var loadOptions = new LoadOptions
+        {
+            DataRecoveryMode = mode
+        };
+
+        try
+        {
+            // Load the image using the configured options
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Ensure the loaded image supports raster operations
-                if (img is RasterImage raster)
+                // Prepare a PNG save options instance (could be any format)
+                var saveOptions = new PngOptions
                 {
-                    // Cache all image data to avoid further stream reads (useful for corrupted sources)
-                    raster.CacheData();
+                    // You can customize PNG options here if needed
+                };
 
-                    // Option 1: Automatic brightness and contrast correction
-                    raster.AutoBrightnessContrast();
+                // Build a distinct output file name for each mode
+                string modeSpecificOutput = Path.Combine(
+                    Path.GetDirectoryName(outputPath),
+                    $"{Path.GetFileNameWithoutExtension(outputPath)}_{modeSuffix}{Path.GetExtension(outputPath)}");
 
-                    // Option 2: Histogram normalization to stretch pixel intensity range
-                    raster.NormalizeHistogram();
-
-                    // Option 3: Convert to grayscale – often helps when color channels are damaged
-                    raster.Grayscale();
-
-                    // Option 4: Attempt to preserve original format settings when saving
-                    ImageOptionsBase originalOptions = raster.GetOriginalOptions();
-
-                    // If original options are not suitable for the target format, fall back to PNG options
-                    PngOptions pngOptions = new PngOptions();
-                    // Preserve original DPI if available
-                    if (originalOptions is ImageOptionsBase opts && opts.Source != null)
-                    {
-                        // Example of copying resolution (if needed)
-                        // Note: SetResolution is a RasterImage method; here we keep it simple
-                    }
-
-                    // Save the recovered image using PNG format (widely supported)
-                    raster.Save(outputPath, pngOptions);
-                }
-                else
-                {
-                    Console.WriteLine("The loaded image does not support raster operations.");
-                }
+                // Save the image
+                image.Save(modeSpecificOutput, saveOptions);
+                Console.WriteLine($"Saved image with {mode} recovery to: {modeSpecificOutput}");
             }
-
-            Console.WriteLine("Recovery process completed.");
+        }
+        catch (ImageSaveException ex)
+        {
+            // Handle any errors that occur during saving
+            Console.Error.WriteLine($"Failed to save image with {mode} recovery: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            // General exception handling for loading failures or other issues
+            Console.Error.WriteLine($"Error processing image with {mode} recovery: {ex.Message}");
         }
     }
 }
