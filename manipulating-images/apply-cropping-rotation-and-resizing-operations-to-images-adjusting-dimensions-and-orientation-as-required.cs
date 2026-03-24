@@ -1,45 +1,45 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.jpg";
         string outputPath = "output.jpg";
 
-        // Cropping rectangle parameters
-        int cropX = 100;
-        int cropY = 50;
-        int cropWidth = 400;
-        int cropHeight = 300;
-
-        // Rotation angle (in degrees)
-        float rotationAngle = 45f;
-
-        // Desired size after resizing
-        int newWidth = 200;
-        int newHeight = 150;
-
-        // Load the image as a raster image, apply operations, and save
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Ensure image data is cached for performance
-            if (!image.IsCached)
-                image.CacheData();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Crop the image
-            image.Crop(new Rectangle(cropX, cropY, cropWidth, cropHeight));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Rotate the image around its center, expanding canvas and filling background with white
-            image.Rotate(rotationAngle, true, Color.White);
+        // Load image, cast to RasterImage for pixel operations
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-            // Resize the image
-            image.Resize(newWidth, newHeight);
+            // Cache data for better performance
+            if (!raster.IsCached)
+                raster.CacheData();
+
+            // Crop to a rectangle (x=100, y=100, width=400, height=300)
+            var cropRect = new Aspose.Imaging.Rectangle(100, 100, 400, 300);
+            raster.Crop(cropRect);
+
+            // Rotate 45 degrees around the center
+            raster.Rotate(45f);
+
+            // Resize to 800x600 using default nearest‑neighbour resampling
+            raster.Resize(800, 600);
 
             // Save the processed image
-            image.Save(outputPath);
+            raster.Save(outputPath);
         }
     }
 }
