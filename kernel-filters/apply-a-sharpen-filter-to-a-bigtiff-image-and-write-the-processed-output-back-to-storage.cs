@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -8,26 +9,35 @@ class Program
 {
     static void Main()
     {
-        // Path to the source BigTIFF image
-        string inputPath = @"C:\Images\source.bigtiff";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.tif";
 
-        // Path where the processed image will be saved
-        string outputPath = @"C:\Images\sharpened.bigtiff";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the image using Aspose.Imaging's load method
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BigTIFF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the loaded image to BigTiffImage to access TIFF-specific functionality
-            BigTiffImage bigTiff = (BigTiffImage)image;
+            // Cast to BigTiffImage
+            BigTiffImage bigTiff = image as BigTiffImage;
+            if (bigTiff == null)
+            {
+                Console.Error.WriteLine("Loaded image is not a BigTIFF image.");
+                return;
+            }
 
-            // Apply a sharpen filter to the entire image.
-            // SharpenFilterOptions takes kernel size (int) and sigma (double).
-            bigTiff.Filter(
-                bigTiff.Bounds,                                   // Rectangle covering the whole image
-                new SharpenFilterOptions(5, 4.0)                 // Kernel size = 5, Sigma = 4.0
-            );
+            // Apply sharpen filter to the whole image
+            bigTiff.Filter(bigTiff.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image back to storage using the built‑in Save method
+            // Save the processed image
             bigTiff.Save(outputPath);
         }
     }
