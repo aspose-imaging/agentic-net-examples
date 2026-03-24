@@ -1,37 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source EMF file
-        string inputPath = @"C:\Temp\input.emf";
+        // Hardcoded input and output paths
+        string inputPath = "input.emf";
+        string outputPath = "output_cropped.emf";
 
-        // Path where the cropped EMF will be saved
-        string outputPath = @"C:\Temp\output_cropped.emf";
-
-        // Load the EMF image using the unified Image.Load method
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to EmfImage to access vector‑specific functionality
-            EmfImage emfImage = (EmfImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Define a rectangle that represents the area to keep.
-            // Example: keep the central half of the image.
-            int cropX = emfImage.Width / 4;
-            int cropY = emfImage.Height / 4;
-            int cropWidth = emfImage.Width / 2;
-            int cropHeight = emfImage.Height / 2;
-            var cropArea = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Crop the image. The operation preserves the vector data.
-            emfImage.Crop(cropArea);
+        // Load the EMF image, crop, and save
+        using (EmfImage emf = (EmfImage)Image.Load(inputPath))
+        {
+            // Define the crop rectangle (example: top-left quarter of the image)
+            int cropX = 0;
+            int cropY = 0;
+            int cropWidth = emf.Width / 2;
+            int cropHeight = emf.Height / 2;
+            Rectangle cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
 
-            // Save the cropped image back to EMF format, retaining its vector properties.
-            emfImage.Save(outputPath);
+            // Perform cropping
+            emf.Crop(cropRect);
+
+            // Save the cropped EMF preserving vector properties
+            emf.Save(outputPath);
         }
     }
 }
