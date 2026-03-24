@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -7,58 +8,69 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input animated image path and output APNG path
-        string inputPath = "input_animation.webp";
-        string outputPath = "output_resized.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.webp";
+        string outputPath = "output.apng";
 
-        // Desired dimensions for each frame
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Desired dimensions for resizing
         int targetWidth = 200;
         int targetHeight = 200;
 
-        // Load the source image (may contain multiple frames)
+        // Load the source image (may be animated)
         using (Image sourceImage = Image.Load(inputPath))
         {
-            // Configure APNG creation options
+            // Prepare APNG creation options
             ApngOptions apngOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // 100 ms per frame
-                ColorType = PngColorType.TruecolorWithAlpha
+                ColorType = PngColorType.TruecolorWithAlpha,
+                DefaultFrameTime = 100 // default frame duration in ms
             };
 
-            // Create an APNG canvas with the target size
-            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, targetWidth, targetHeight))
+            // Create APNG canvas bound to the output file
+            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, targetWidth, targetHeight))
             {
-                apngImage.RemoveAllFrames();
+                // Remove the default empty frame
+                apng.RemoveAllFrames();
 
-                // If the source image is multipage (animated), process each frame
+                // Check if the source image is multipage (animated)
                 if (sourceImage is IMultipageImage multipage)
                 {
-                    foreach (var page in multipage.Pages)
+                    foreach (Image page in multipage.Pages)
                     {
                         using (RasterImage frame = (RasterImage)page)
                         {
                             if (!frame.IsCached) frame.CacheData();
-                            frame.Resize(targetWidth, targetHeight, ResizeType.LanczosResample);
-                            apngImage.AddFrame(frame);
+                            frame.Resize(targetWidth, targetHeight);
+                            apng.AddFrame(frame);
                         }
                     }
                 }
                 else
                 {
-                    // Single-frame image handling
+                    // Single-frame image
                     using (RasterImage frame = (RasterImage)sourceImage)
                     {
                         if (!frame.IsCached) frame.CacheData();
-                        frame.Resize(targetWidth, targetHeight, ResizeType.LanczosResample);
-                        apngImage.AddFrame(frame);
+                        frame.Resize(targetWidth, targetHeight);
+                        apng.AddFrame(frame);
                     }
                 }
 
-                // Save the resulting APNG
-                apngImage.Save();
+                // Save the APNG (output path already bound)
+                apng.Save();
             }
         }
     }
