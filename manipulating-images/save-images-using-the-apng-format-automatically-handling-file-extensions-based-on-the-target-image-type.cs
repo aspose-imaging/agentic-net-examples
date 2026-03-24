@@ -7,19 +7,35 @@ class Program
 {
     static void Main()
     {
-        // Path to the source image (can be any supported format)
-        string sourcePath = "input.webp";
+        // Hardcoded input and output paths
+        string inputPath = "input.webp";
+        string outputPath = "output.webp.png";
 
-        // Load the image using Aspose.Imaging's lifecycle rule
-        using (Image image = Image.Load(sourcePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Generate the output file name by replacing the original extension with .png
-            // APNG files are stored with a .png extension
-            string outputPath = Path.ChangeExtension(sourcePath, ".png");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the loaded image as an APNG using default options
-            // The ApngOptions class inherits from PngOptions and configures the file as an animated PNG
-            image.Save(outputPath, new ApngOptions());
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare APNG save options (default settings)
+            ApngOptions apngOptions = new ApngOptions();
+
+            // Optional: verify that the image can be saved with these options
+            if (!image.CanSave(apngOptions))
+            {
+                Console.Error.WriteLine("The loaded image cannot be saved as APNG with the provided options.");
+                return;
+            }
+
+            // Save the image as APNG
+            image.Save(outputPath, apngOptions);
         }
     }
 }
