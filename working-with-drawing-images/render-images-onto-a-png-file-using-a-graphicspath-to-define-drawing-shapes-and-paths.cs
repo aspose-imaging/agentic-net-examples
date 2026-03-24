@@ -3,58 +3,44 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define output path
-        string outputPath = @"C:\temp\GraphicsPathOutput.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
-        // Create a FileStream for the PNG file
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Set up PNG options with a FileCreateSource bound to the output file
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Create a new PNG image with the specified dimensions
+        using (Image image = Image.Create(pngOptions, 500, 500))
         {
-            // Initialize PNG options and associate the stream as the source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            // Initialize graphics for drawing on the image
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.Wheat);
 
-            // Create a new PNG image with desired dimensions (500x500)
-            using (Image image = Image.Create(pngOptions, 500, 500))
-            {
-                // Initialize Graphics object for drawing on the image
-                Graphics graphics = new Graphics(image);
+            // Build a graphics path containing a rectangle, ellipse, and pie shape
+            GraphicsPath path = new GraphicsPath();
+            Figure figure = new Figure();
 
-                // Clear the background with a light color
-                graphics.Clear(Color.Wheat);
+            figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 300f, 300f)));
+            figure.AddShape(new EllipseShape(new RectangleF(50f, 50f, 300f, 300f)));
+            figure.AddShape(new PieShape(new RectangleF(new PointF(250f, 250f), new SizeF(200f, 200f)), 0f, 45f));
 
-                // Create a GraphicsPath to hold figures (shapes)
-                GraphicsPath graphicsPath = new GraphicsPath();
+            path.AddFigure(figure);
 
-                // Create a Figure and add various shapes to it
-                Figure figure = new Figure();
+            // Draw the constructed path with a black pen
+            graphics.DrawPath(new Pen(Color.Black, 2), path);
 
-                // Rectangle shape
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-
-                // Ellipse shape
-                figure.AddShape(new EllipseShape(new RectangleF(100f, 200f, 250f, 150f)));
-
-                // Pie shape
-                figure.AddShape(new PieShape(new RectangleF(new PointF(150f, 100f), new SizeF(200f, 200f)), 0f, 120f));
-
-                // Add the figure to the graphics path
-                graphicsPath.AddFigure(figure);
-
-                // Draw the path using a black pen with thickness 3
-                graphics.DrawPath(new Pen(Color.Black, 3), graphicsPath);
-
-                // Save all changes to the PNG file
-                image.Save();
-            }
+            // Save the image (file is already bound via FileCreateSource)
+            image.Save();
         }
-
-        Console.WriteLine("Image created successfully.");
     }
 }
