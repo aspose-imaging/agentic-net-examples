@@ -8,44 +8,25 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.odg";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
 
-        using (Image odgImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            var rasterizationOptions = new VectorRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = odgImage.Size
-            };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var memoryStream = new MemoryStream())
-            {
-                odgImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0;
-
-                using (Image rasterImageContainer = Image.Load(memoryStream))
-                {
-                    RasterImage rasterImage = (RasterImage)rasterImageContainer;
-
-                    double[,] edgeKernel = new double[,]
-                    {
-                        { -1, -1, -1 },
-                        { -1,  8, -1 },
-                        { -1, -1, -1 }
-                    };
-
-                    var convolutionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel);
-                    rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
-
-                    rasterImage.Save(outputPath);
-                }
-            }
+        // Load the image and save as PNG
+        using (Image image = Image.Load(inputPath))
+        {
+            var saveOptions = new PngOptions();
+            image.Save(outputPath, saveOptions);
         }
     }
 }
