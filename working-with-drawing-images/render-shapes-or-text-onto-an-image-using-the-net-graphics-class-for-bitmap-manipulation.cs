@@ -3,46 +3,60 @@ using System.IO;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"output.png";
+        // Define output path
+        string outputPath = @"C:\temp\output.png";
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a file stream for the output image
         using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
+            // Set up PNG options with the stream as source
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new StreamSource(stream);
 
+            // Create a new image with desired dimensions
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
             {
+                // Initialize graphics for drawing
                 Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
+                // Clear background
                 graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-                Aspose.Imaging.Pen linePen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
-                graphics.DrawLine(linePen,
-                    new Aspose.Imaging.Point(50, 50),
-                    new Aspose.Imaging.Point(450, 450));
+                // Draw a line
+                graphics.DrawLine(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2),
+                                  new Aspose.Imaging.Point(50, 50),
+                                  new Aspose.Imaging.Point(450, 50));
 
-                Aspose.Imaging.Pen rectPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 2);
-                graphics.DrawRectangle(rectPen,
-                    new Aspose.Imaging.Rectangle(100, 100, 300, 200));
+                // Draw a rectangle
+                graphics.DrawRectangle(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 3),
+                                       new Aspose.Imaging.Rectangle(100, 100, 300, 200));
 
-                Aspose.Imaging.Pen ellipsePen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2);
-                graphics.DrawEllipse(ellipsePen,
-                    new Aspose.Imaging.Rectangle(100, 100, 300, 200));
+                // Draw an ellipse
+                graphics.DrawEllipse(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2),
+                                     new Aspose.Imaging.Rectangle(150, 150, 200, 100));
 
-                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Purple))
+                // Prepare a solid brush for text
+                using (SolidBrush brush = new SolidBrush())
                 {
+                    brush.Color = Aspose.Imaging.Color.Purple;
                     brush.Opacity = 100;
-                    Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
-                    graphics.DrawString("Aspose.Imaging Demo", font, brush,
-                        new Aspose.Imaging.PointF(120, 320));
+
+                    // Draw a text string
+                    graphics.DrawString("Hello Aspose.Imaging",
+                                        new Aspose.Imaging.Font("Arial", 24),
+                                        brush,
+                                        new Aspose.Imaging.PointF(120, 320));
                 }
 
+                // Save changes to the bound stream
                 image.Save();
             }
         }
