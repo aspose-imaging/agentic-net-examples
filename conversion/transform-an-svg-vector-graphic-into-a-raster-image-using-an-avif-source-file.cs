@@ -2,45 +2,61 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for the source AVIF image, the SVG vector graphic, and the output raster image.
-        string avifPath = "input.avif";
-        string svgPath = "input.svg";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string avifInputPath = @"C:\Images\source.avif";
+        string svgInputPath = @"C:\Images\vector.svg";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the AVIF image to obtain its dimensions.
-        using (Image avifImage = Image.Load(avifPath))
+        // Verify AVIF source file exists
+        if (!File.Exists(avifInputPath))
         {
-            // Retrieve the size (width and height) of the AVIF image.
-            var size = avifImage.Size;
+            Console.Error.WriteLine($"File not found: {avifInputPath}");
+            return;
+        }
 
-            // Load the SVG image from a file stream.
-            using (Stream svgStream = File.OpenRead(svgPath))
-            using (Aspose.Imaging.FileFormats.Svg.SvgImage svgImage = new Aspose.Imaging.FileFormats.Svg.SvgImage(svgStream))
+        // Verify SVG source file exists
+        if (!File.Exists(svgInputPath))
+        {
+            Console.Error.WriteLine($"File not found: {svgInputPath}");
+            return;
+        }
+
+        // Load AVIF image to obtain its dimensions (used for rasterization size)
+        int targetWidth;
+        int targetHeight;
+        using (Image avifImage = Image.Load(avifInputPath))
+        {
+            targetWidth = avifImage.Width;
+            targetHeight = avifImage.Height;
+        }
+
+        // Load SVG from file stream
+        using (Stream svgStream = File.OpenRead(svgInputPath))
+        using (SvgImage svgImage = new SvgImage(svgStream))
+        {
+            // Set up rasterization options using dimensions from the AVIF image
+            var rasterOptions = new SvgRasterizationOptions
             {
-                // Configure rasterization options to match the AVIF image size.
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = size,
-                    // Optional: set background color, smoothing, etc., if needed.
-                    // BackgroundColor = Aspose.Imaging.Color.White,
-                    // SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    // TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
-                };
+                PageSize = new Size(targetWidth, targetHeight)
+            };
 
-                // Set PNG save options and attach the rasterization options.
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+            // Configure PNG save options with the rasterization settings
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-                // Rasterize the SVG and save it as a PNG image.
-                svgImage.Save(outputPath, pngOptions);
-            }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the rasterized SVG as a PNG file
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }
