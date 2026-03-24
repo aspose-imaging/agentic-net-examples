@@ -1,32 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.ImageOptions;
 
-class DenoiseApng
+class Program
 {
     static void Main()
     {
-        // Define input and output paths
-        string dataDir = @"c:\temp\";
-        string inputPath = Path.Combine(dataDir, "input.apng");
-        string outputPath = Path.Combine(dataDir, "output_denoised.png");
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.apng";
+        string outputPath = @"C:\Images\output_denoised.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the APNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to ApngImage to access raster operations
-            ApngImage apng = (ApngImage)image;
+            // Cast to ApngImage to access frames
+            ApngImage apngImage = (ApngImage)image;
 
-            // Apply a median filter (kernel size = 5) to reduce impulsive noise
-            apng.Filter(apng.Bounds, new MedianFilterOptions(5));
+            // Apply filters to each frame
+            foreach (ApngFrame frame in apngImage.Pages)
+            {
+                // Each frame can be treated as a RasterImage
+                RasterImage raster = (RasterImage)frame;
 
-            // Apply a Gauss‑Wiener filter (radius = 5, sigma = 4.0) for further denoising
-            apng.Filter(apng.Bounds, new GaussWienerFilterOptions(5, 4.0));
+                // Apply median filter (kernel size 5)
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-            // Save the processed image (PNG format)
-            apng.Save(outputPath);
+                // Apply Gauss-Wiener filter (radius 5, smooth value 4.0)
+                raster.Filter(raster.Bounds, new GaussWienerFilterOptions(5, 4.0));
+            }
+
+            // Save the processed APNG image
+            apngImage.Save(outputPath);
         }
     }
 }
