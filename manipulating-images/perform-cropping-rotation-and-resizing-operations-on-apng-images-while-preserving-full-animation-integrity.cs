@@ -1,53 +1,59 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
-        string outputPath = "output.apng";
+        string outputPath = "output/output.apng";
 
-        // Cropping rectangle parameters
-        int cropX = 10;
-        int cropY = 10;
-        int cropWidth = 200;
-        int cropHeight = 150;
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Rotation angle in degrees
-        float rotationAngle = 45f;
-
-        // New size for resizing
-        int newWidth = 300;
-        int newHeight = 200;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the APNG image
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
         {
-            // Cache data for better performance
-            if (!apng.IsCached)
-                apng.CacheData();
+            // Define transformation parameters
+            int cropLeft = 10;
+            int cropTop = 10;
+            int cropRight = 10;
+            int cropBottom = 10;
+            float rotateAngle = 45f; // degrees
+            int newWidth = apngImage.Width / 2;
+            int newHeight = apngImage.Height / 2;
 
-            // Process each frame
-            foreach (var page in apng.Pages)
+            // Process each frame preserving animation
+            foreach (var page in apngImage.Pages)
             {
-                var frame = (ApngFrame)page;
+                // Each page is an ApngFrame
+                ApngFrame frame = (ApngFrame)page;
 
                 // Crop the frame
-                frame.Crop(new Rectangle(cropX, cropY, cropWidth, cropHeight));
+                frame.Crop(cropLeft, cropRight, cropTop, cropBottom);
 
-                // Rotate the frame (background color set to white)
-                frame.Rotate(rotationAngle, true, Color.White);
+                // Rotate the frame (use transparent background)
+                frame.Rotate(rotateAngle, true, Color.Transparent);
 
                 // Resize the frame
-                frame.Resize(newWidth, newHeight);
+                frame.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
             }
 
-            // Save the transformed APNG preserving animation
-            apng.Save(outputPath);
+            // Save the transformed APNG
+            apngImage.Save(outputPath, new ApngOptions());
         }
     }
 }
