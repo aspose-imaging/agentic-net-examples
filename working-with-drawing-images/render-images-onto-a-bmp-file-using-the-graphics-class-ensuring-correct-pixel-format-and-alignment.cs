@@ -1,50 +1,72 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output.bmp";
-        int width = 400;
-        int height = 300;
+        // Hardcoded input and output paths
+        string inputPath1 = @"C:\temp\img1.png";
+        string inputPath2 = @"C:\temp\img2.png";
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Create a file-bound source for the BMP image
-        Source src = new FileCreateSource(outputPath, false);
-        BmpOptions bmpOptions = new BmpOptions()
+        // Validate input files
+        if (!File.Exists(inputPath1))
         {
-            Source = src,
-            BitsPerPixel = 24 // 24‑bit BMP
-        };
-
-        // Create the canvas image
-        using (Image canvas = Image.Create(bmpOptions, width, height))
+            Console.Error.WriteLine($"File not found: {inputPath1}");
+            return;
+        }
+        if (!File.Exists(inputPath2))
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
+            Console.Error.WriteLine($"File not found: {inputPath2}");
+            return;
+        }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Collect sizes of input images
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+        using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
+        {
+            sizes.Add(new Aspose.Imaging.Size(img1.Width, img1.Height));
+        }
+        using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+        {
+            sizes.Add(new Aspose.Imaging.Size(img2.Width, img2.Height));
+        }
+
+        // Calculate canvas dimensions (horizontal layout)
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
+
+        // Create BMP canvas with bound output file
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
+        bmpOptions.BitsPerPixel = 24;
+
+        using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, canvasWidth, canvasHeight))
+        {
             // Clear background
-            graphics.Clear(Color.LightGray);
+            Graphics graphics = new Graphics(canvas);
+            graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Draw a red rectangle
-            Pen redPen = new Pen(Color.Red, 3);
-            graphics.DrawRectangle(redPen, new Rectangle(50, 50, 200, 150));
-
-            // Fill a blue ellipse
-            using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
+            // Draw each image onto the canvas
+            int offsetX = 0;
+            foreach (string path in new[] { inputPath1, inputPath2 })
             {
-                graphics.FillEllipse(blueBrush, new Rectangle(100, 80, 150, 100));
-            }
-
-            // Draw a text string
-            Font font = new Font("Arial", 24);
-            using (SolidBrush blackBrush = new SolidBrush(Color.Black))
-            {
-                graphics.DrawString("Aspose.Imaging BMP", font, blackBrush, new PointF(60, 220));
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    graphics.DrawImage(img, destRect);
+                    offsetX += img.Width;
+                }
             }
 
             // Save the bound BMP image
