@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -6,51 +7,55 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect three arguments: vector image path, raster image path, output image path
-        if (args.Length < 3)
+        // Hardcoded input and output paths
+        string vectorPath = @"C:\Images\vector.svg";
+        string rasterPath = @"C:\Images\raster.png";
+        string outputPath = @"C:\Images\output.png";
+
+        // Verify input files exist
+        if (!File.Exists(vectorPath))
         {
-            Console.WriteLine("Usage: <vectorImagePath> <rasterImagePath> <outputImagePath>");
+            Console.Error.WriteLine($"File not found: {vectorPath}");
+            return;
+        }
+        if (!File.Exists(rasterPath))
+        {
+            Console.Error.WriteLine($"File not found: {rasterPath}");
             return;
         }
 
-        string vectorPath = args[0];
-        string rasterPath = args[1];
-        string outputPath = args[2];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load vector image to obtain its bounds (width and height)
-        int boundWidth, boundHeight;
+        // Load vector image to obtain its bounds
         using (Image vectorImage = Image.Load(vectorPath))
         {
-            boundWidth = vectorImage.Width;
-            boundHeight = vectorImage.Height;
-        }
+            // Define the region based on vector image size
+            Rectangle region = new Rectangle(0, 0, vectorImage.Width, vectorImage.Height);
 
-        // Load raster image
-        using (RasterImage rasterImage = (RasterImage)Image.Load(rasterPath))
-        {
-            // Create output file source
-            Source outputSource = new FileCreateSource(outputPath, false);
-
-            // Set PNG options with the source
-            PngOptions pngOptions = new PngOptions { Source = outputSource };
-
-            // Create a canvas matching the vector image bounds
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, boundWidth, boundHeight))
+            // Load raster image
+            using (RasterImage rasterImage = (RasterImage)Image.Load(rasterPath))
             {
-                // Create graphics for drawing onto the canvas
-                Graphics graphics = new Graphics(canvas);
+                // Create PNG options with bound source
+                Source src = new FileCreateSource(outputPath, false);
+                PngOptions pngOptions = new PngOptions { Source = src };
 
-                // Define source and destination rectangles (top-left corner at 0,0)
-                Rectangle srcRect = new Rectangle(0, 0, Math.Min(rasterImage.Width, boundWidth), Math.Min(rasterImage.Height, boundHeight));
-                Rectangle destRect = new Rectangle(0, 0, srcRect.Width, srcRect.Height);
+                // Create canvas matching raster dimensions
+                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, rasterImage.Width, rasterImage.Height))
+                {
+                    // Ensure the region fits within the raster image
+                    Rectangle intersect = Rectangle.Intersect(region, rasterImage.Bounds);
+                    if (intersect.Width > 0 && intersect.Height > 0)
+                    {
+                        // Copy the defined region from raster to canvas
+                        canvas.SaveArgb32Pixels(intersect, rasterImage.LoadArgb32Pixels(intersect));
+                    }
 
-                // Draw the specified region of the raster image onto the canvas
-                graphics.DrawImage(rasterImage, destRect, srcRect, GraphicsUnit.Pixel);
-
-                // Save the bound canvas (output file is already bound via FileCreateSource)
-                canvas.Save();
+                    // Save the resulting image
+                    canvas.Save();
+                }
             }
         }
     }
