@@ -1,63 +1,78 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.FileFormats.Wmf.Graphics;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPG files (replace with actual paths)
-        string[] jpgPaths = new string[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-        // Output PDF file
-        string outputPdf = "combined.pdf";
-
-        // Collect sizes of all JPG images
-        List<Size> sizes = new List<Size>();
-        foreach (var path in jpgPaths)
+        // Hardcoded input JPG files
+        string[] inputFiles = new[]
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
+        };
+
+        // Hardcoded output PDF file
+        string outputPdf = @"C:\Images\combined.pdf";
+
+        // Verify each input file exists
+        foreach (var inputPath in inputFiles)
+        {
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions for horizontal layout
-        int totalWidth = 0;
-        int maxHeight = 0;
-        foreach (var sz in sizes)
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPdf));
+
+        // List to hold WMF images
+        List<Image> wmfImages = new List<Image>();
+
+        // Convert each JPG to WMF and store in memory
+        foreach (var jpgPath in inputFiles)
         {
-            totalWidth += sz.Width;
-            if (sz.Height > maxHeight) maxHeight = sz.Height;
-        }
-
-        // DPI for WMF recording
-        int dpi = 96;
-
-        // Create WMF recorder graphics with calculated canvas size
-        Rectangle canvasRect = new Rectangle(0, 0, totalWidth, maxHeight);
-        WmfRecorderGraphics2D graphics = new WmfRecorderGraphics2D(canvasRect, dpi);
-
-        // Draw each JPG onto the WMF canvas side by side
-        int offsetX = 0;
-        foreach (var path in jpgPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            // Load JPG image
+            using (Image jpgImage = Image.Load(jpgPath))
             {
-                Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
-                Rectangle srcRect = new Rectangle(0, 0, img.Width, img.Height);
-                graphics.DrawImage(img, destRect, srcRect, GraphicsUnit.Pixel);
-                offsetX += img.Width;
+                // Prepare WMF rasterization options matching the source size
+                var wmfRasterOptions = new WmfRasterizationOptions
+                {
+                    PageSize = jpgImage.Size
+                };
+
+                // Save JPG as WMF into a memory stream
+                using (var ms = new MemoryStream())
+                {
+                    jpgImage.Save(ms, new WmfOptions { VectorRasterizationOptions = wmfRasterOptions });
+                    ms.Position = 0; // Reset stream for reading
+
+                    // Load the WMF image from the memory stream
+                    Image wmfImage = Image.Load(ms);
+                    wmfImages.Add(wmfImage);
+                }
             }
         }
 
-        // Finalize WMF image and save as PDF
-        using (WmfImage wmfImage = graphics.EndRecording())
+        // Create a multipage image from the WMF images
+        Image[] wmfArray = wmfImages.ToArray();
+        using (Image pdfImage = Image.Create(wmfArray))
         {
-            wmfImage.Save(outputPdf, new PdfOptions());
+            // Save the multipage image as a PDF document
+            pdfImage.Save(outputPdf, new PdfOptions());
+        }
+
+        // Dispose all WMF images
+        foreach (var img in wmfImages)
+        {
+            img.Dispose();
         }
     }
 }
