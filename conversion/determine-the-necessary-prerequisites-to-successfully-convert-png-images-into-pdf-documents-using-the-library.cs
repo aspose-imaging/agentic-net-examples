@@ -3,35 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-namespace ImageConversion
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.pdf";
+
+        // Verify that the input PNG file exists
+        if (!File.Exists(inputPath))
         {
-            // Input PNG file path and output PDF file path
-            string inputPath = "input.png";
-            string outputPath = "output.pdf";
-
-            // Verify that the input PNG file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.WriteLine($"Input file not found: {inputPath}");
-                return;
-            }
-
-            // Load the PNG image using Aspose.Imaging
-            using (Image image = Image.Load(inputPath))
-            {
-                // Create PDF options; additional settings (e.g., page size, resolution) can be configured here
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    // Save the loaded image as a PDF document
-                    image.Save(outputPath, pdfOptions);
-                }
-            }
-
-            Console.WriteLine("PNG to PDF conversion completed successfully.");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
+
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image using Aspose.Imaging
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PDF export options
+            var pdfOptions = new PdfOptions
+            {
+                // Example: set PDF/A‑1b compliance (optional)
+                // PdfCoreOptions = new Aspose.Imaging.FileFormats.Pdf.PdfCoreOptions
+                // {
+                //     PdfCompliance = Aspose.Imaging.FileFormats.Pdf.PdfComplianceVersion.PdfA1b
+                // }
+            };
+
+            // Save the image as a PDF document
+            image.Save(outputPath, pdfOptions);
+        }
+
+        Console.WriteLine("Conversion completed successfully.");
     }
 }
