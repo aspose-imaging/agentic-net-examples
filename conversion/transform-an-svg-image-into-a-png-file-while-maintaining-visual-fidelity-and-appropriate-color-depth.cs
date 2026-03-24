@@ -1,41 +1,42 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging;
 
-// Path to the source SVG file
-string inputSvgPath = @"C:\Images\source.svg";
-// Path where the PNG will be saved
-string outputPngPath = @"C:\Images\converted.png";
-
-// Open the SVG file as a stream and load it into a SvgImage instance
-using (FileStream svgStream = File.OpenRead(inputSvgPath))
-using (SvgImage svgImage = new SvgImage(svgStream))
+class Program
 {
-    // Configure rasterization options to preserve the original dimensions and quality
-    var rasterOptions = new SvgRasterizationOptions
+    static void Main(string[] args)
     {
-        // Use the original SVG size for the rasterized image
-        PageSize = svgImage.Size,
-        // Optional: set a white background to avoid transparency issues
-        BackgroundColor = Color.White,
-        // High‑quality text rendering
-        TextRenderingHint = TextRenderingHint.AntiAliasGridFit,
-        // High‑quality smoothing for vector shapes
-        SmoothingMode = SmoothingMode.HighQuality
-    };
+        // Hardcoded input and output file paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-    // Configure PNG save options, setting a standard 8‑bit depth for good color fidelity
-    var pngOptions = new PngOptions
-    {
-        BitDepth = 8,
-        VectorRasterizationOptions = rasterOptions
-    };
+        // Verify that the input SVG file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the rasterized image as PNG
-    svgImage.Save(outputPngPath, pngOptions);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PNG export options
+            PngOptions pngOptions = new PngOptions();
+
+            // Configure vector rasterization to render the SVG correctly
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            {
+                // Set the page size to match the original SVG dimensions
+                PageSize = image.Size
+            };
+            pngOptions.VectorRasterizationOptions = rasterOptions;
+
+            // Save the rendered image as PNG
+            image.Save(outputPath, pngOptions);
+        }
+    }
 }
