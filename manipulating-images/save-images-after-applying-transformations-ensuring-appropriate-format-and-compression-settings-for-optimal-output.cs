@@ -2,51 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Jpeg;
 
-class ImageProcessingExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Directory containing the source image and where output files will be written
-        string dir = @"C:\temp\";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.jpg";
 
-        // Load the source image (BMP in this example)
-        using (Image image = Image.Load(Path.Combine(dir, "sample.bmp")))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Apply a rotation transformation (90 degrees clockwise)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image, apply a rotation, and save with JPEG options
+        using (Image image = Image.Load(inputPath))
+        {
+            // Rotate the image 90 degrees clockwise
             image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-            // -------------------------------------------------
-            // Save the transformed image as JPEG with moderate compression
-            // -------------------------------------------------
-            JpegOptions jpegOptions = new JpegOptions
+            // Configure JPEG save options for optimal quality/compression
+            var jpegOptions = new JpegOptions
             {
-                Quality = 75 // Adjust quality to balance size and visual fidelity
+                Quality = 85, // Quality range 1-100
+                CompressionType = JpegCompressionMode.Progressive
             };
-            image.Save(Path.Combine(dir, "output_quality75.jpg"), jpegOptions);
 
-            // -------------------------------------------------
-            // Save the same image as PNG (lossless format)
-            // -------------------------------------------------
-            PngOptions pngOptions = new PngOptions(); // Default PNG options are lossless
-            image.Save(Path.Combine(dir, "output.png"), pngOptions);
-
-            // -------------------------------------------------
-            // Save the image as a 1‑bit monochrome BMP
-            // -------------------------------------------------
-            // Convert the image to black‑white using Otsu binarization
-            BmpImage bmpImage = (BmpImage)image;
-            bmpImage.BinarizeOtsu();
-
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                // Use a palette that contains only black and white
-                Palette = ColorPaletteHelper.CreateMonochrome(),
-                // Allocate only 1 bit per pixel for monochrome data
-                BitsPerPixel = 1
-            };
-            image.Save(Path.Combine(dir, "output_monochrome.bmp"), bmpOptions);
+            // Save the transformed image
+            image.Save(outputPath, jpegOptions);
         }
     }
 }
