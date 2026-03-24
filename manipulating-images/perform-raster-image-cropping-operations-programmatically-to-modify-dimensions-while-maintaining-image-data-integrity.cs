@@ -1,46 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats;
 
-// Define the directory containing the source image
-string dir = @"c:\temp\";
-
-// ---------------------------------------------------------------------
-// Example 1: Crop a raster image using a Rectangle (central area)
-// ---------------------------------------------------------------------
-using (Image image = Image.Load(dir + "sample.png"))
+class Program
 {
-    // Cast to RasterImage to access Width and Height properties
-    RasterImage raster = (RasterImage)image;
+    static void Main(string[] args)
+    {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output_cropped.jpg";
 
-    // Create a rectangle that represents the central half of the image
-    Rectangle centralArea = new Rectangle(
-        raster.Width / 4,          // X coordinate (left)
-        raster.Height / 4,         // Y coordinate (top)
-        raster.Width / 2,          // Width
-        raster.Height / 2);        // Height
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Perform the cropping operation
-    raster.Crop(centralArea);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-    // Save the cropped image (same format as original)
-    raster.Save(dir + "sample.Crop.png");
-}
+        // Load the image as a raster image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Cache data for better performance (optional)
+            if (!image.IsCached)
+                image.CacheData();
 
-// ---------------------------------------------------------------------
-// Example 2: Crop a raster image using shift values (10% margins)
-// ---------------------------------------------------------------------
-using (Image image = Image.Load(dir + "sample.png"))
-{
-    RasterImage raster = (RasterImage)image;
+            // Define a rectangle that represents the central half of the image
+            Rectangle cropArea = new Rectangle(
+                image.Width / 4,
+                image.Height / 4,
+                image.Width / 2,
+                image.Height / 2);
 
-    // Calculate 10% of the dimensions to use as margins
-    int horizontalMargin = raster.Width / 10;
-    int verticalMargin   = raster.Height / 10;
+            // Perform cropping using the rectangle
+            image.Crop(cropArea);
 
-    // Crop by specifying left, right, top, and bottom shifts
-    raster.Crop(horizontalMargin, horizontalMargin, verticalMargin, verticalMargin);
-
-    // Save the result
-    raster.Save(dir + "sample.CropShift.png");
+            // Save the cropped image
+            image.Save(outputPath);
+        }
+    }
 }
