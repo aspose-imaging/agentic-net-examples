@@ -1,57 +1,57 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
 
-// Create a PNG image of size 600x600
-using (FileStream stream = new FileStream(@"output.png", FileMode.Create))
+class Program
 {
-    // Set PNG options and associate the stream as the source
-    PngOptions pngOptions = new PngOptions();
-    pngOptions.Source = new StreamSource(stream);
-
-    // Create the image
-    using (Image image = Image.Create(pngOptions, 600, 600))
+    static void Main()
     {
-        // Initialize graphics object for drawing
-        Graphics graphics = new Graphics(image);
-        graphics.Clear(Color.Wheat);
+        // Hardcoded output path
+        string outputPath = @"c:\temp\output.png";
 
-        // Prepare figures with various shapes
-        Figure rectFigure = new Figure();
-        rectFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        Figure ellipseFigure = new Figure();
-        ellipseFigure.AddShape(new EllipseShape(new RectangleF(300f, 50f, 200f, 150f)));
+        // Set up PNG options with a file create source
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
 
-        Figure pieFigure = new Figure();
-        pieFigure.AddShape(new PieShape(new RectangleF(150f, 250f, 300f, 200f), 0f, 120f));
+        // Create a new PNG image (500x500)
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
+        {
+            // Initialize graphics for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+            graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-        Figure arcFigure = new Figure();
-        arcFigure.AddShape(new ArcShape(new RectangleF(50f, 400f, 200f, 150f), 45f, 180f));
+            // Create a graphics path and a figure
+            Aspose.Imaging.GraphicsPath graphicsPath = new Aspose.Imaging.GraphicsPath();
+            Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-        Figure polygonFigure = new Figure();
-        polygonFigure.AddShape(new PolygonShape(
-            new[]
-            {
-                new PointF(400f, 400f),
-                new PointF(500f, 450f),
-                new PointF(450f, 550f),
-                new PointF(350f, 500f)
-            }, true));
+            // Add a rectangle shape
+            figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(10f, 10f, 300f, 300f)));
 
-        // Add all figures to a GraphicsPath via an array
-        GraphicsPath path = new GraphicsPath();
-        path.AddFigures(new[] { rectFigure, ellipseFigure, pieFigure, arcFigure, polygonFigure });
+            // Add an ellipse shape
+            figure.AddShape(new EllipseShape(new Aspose.Imaging.RectangleF(50f, 50f, 300f, 300f)));
 
-        // Draw the path using a black pen
-        graphics.DrawPath(new Pen(Color.Black, 2), path);
+            // Add a pie shape
+            figure.AddShape(new PieShape(
+                new Aspose.Imaging.RectangleF(
+                    new Aspose.Imaging.PointF(250f, 250f),
+                    new Aspose.Imaging.SizeF(200f, 200f)),
+                0f,
+                45f));
 
-        // Save the image (writes to the stream)
-        image.Save();
+            // Add the figure to the graphics path
+            graphicsPath.AddFigure(figure);
+
+            // Draw the path onto the image
+            graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicsPath);
+
+            // Save the image (source is already bound to the file)
+            image.Save();
+        }
     }
 }
