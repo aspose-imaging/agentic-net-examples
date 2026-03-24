@@ -1,15 +1,36 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-// Path to the source APNG file
-string inputPath = "input.apng";
-
-// Path where the resulting PNG will be saved
-string outputPath = "output.png";
-
-// Load the APNG image (only the default/first frame will be used for PNG)
-using (Image image = Image.Load(inputPath))
+class Program
 {
-    // Save as PNG preserving the original quality
-    image.Save(outputPath, new PngOptions());
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Save the first frame as a static PNG preserving quality
+            var pngOptions = new PngOptions
+            {
+                // Default options preserve image quality; customize if needed
+            };
+
+            image.Save(outputPath, pngOptions);
+        }
+    }
 }
