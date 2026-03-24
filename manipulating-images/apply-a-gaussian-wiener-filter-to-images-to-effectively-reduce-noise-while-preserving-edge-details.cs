@@ -1,29 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using System.Drawing;
 
-class GaussWienerFilterExample
+class Program
 {
     static void Main()
     {
-        // Path to the folder containing the source image.
-        string dataDir = @"c:\temp\";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.GaussWienerFilter.png";
 
-        // Load the noisy image.
-        using (Image image = Image.Load(dataDir + "noisy.png"))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage to gain access to the Filter method.
-            RasterImage rasterImage = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a Gauss‑Wiener filter.
-            // Radius = 5, Sigma (smooth value) = 4.0
-            rasterImage.Filter(
-                rasterImage.Bounds,
-                new GaussWienerFilterOptions(5, 4.0));
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the filtered image. The filter reduces noise while preserving edges.
-            rasterImage.Save(dataDir + "denoised.png");
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access the Filter method
+            RasterImage raster = (RasterImage)image;
+
+            // Create Gauss-Wiener filter options (size = 5, sigma = 4.0)
+            var filterOptions = new GaussWienerFilterOptions(5, 4.0);
+
+            // Apply the filter to the entire image
+            raster.Filter(raster.Bounds, filterOptions);
+
+            // Save the filtered image
+            raster.Save(outputPath);
         }
     }
 }
