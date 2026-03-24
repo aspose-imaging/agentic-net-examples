@@ -2,84 +2,36 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect two arguments: input CDR file path and output image file path.
-        if (args.Length != 2)
+        // Hardcoded input and output file paths
+        string inputPath = "sample.cdr";
+        string outputPath = "sample.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <input.cdr> <output.[jpg|png|bmp|gif|tif|pdf|webp]>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-        string ext = Path.GetExtension(outputPath).ToLowerInvariant();
+        // Ensure the output directory exists (creates it if necessary)
+        string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+        Directory.CreateDirectory(outputDir);
 
-        // Load the CDR file.
-        using (Image image = Image.Load(inputPath))
+        // Load the CDR image using Aspose.Imaging
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath, new CdrLoadOptions()))
         {
-            switch (ext)
-            {
-                case ".jpg":
-                case ".jpeg":
-                    using (JpegOptions options = new JpegOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
-                    break;
+            // Define PNG save options (default options are sufficient for basic conversion)
+            PngOptions pngOptions = new PngOptions();
 
-                case ".png":
-                    using (PngOptions options = new PngOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
-                    break;
-
-                case ".bmp":
-                    using (BmpOptions options = new BmpOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
-                    break;
-
-                case ".gif":
-                    using (GifOptions options = new GifOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
-                    break;
-
-                case ".tif":
-                case ".tiff":
-                    using (TiffOptions options = new TiffOptions(TiffExpectedFormat.Default))
-                    {
-                        image.Save(outputPath, options);
-                    }
-                    break;
-
-                case ".pdf":
-                    using (PdfOptions options = new PdfOptions())
-                    {
-                        options.PdfDocumentInfo = new PdfDocumentInfo();
-                        image.Save(outputPath, options);
-                    }
-                    break;
-
-                case ".webp":
-                    using (WebPOptions options = new WebPOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
-                    break;
-
-                default:
-                    throw new NotSupportedException($"The output format '{ext}' is not supported.");
-            }
+            // Save the image to the desired format
+            cdrImage.Save(outputPath, pngOptions);
         }
     }
 }
