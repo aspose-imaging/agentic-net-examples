@@ -1,45 +1,63 @@
 using System;
+using System.IO;
+using System.Reflection;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source WebP file (replace with an actual file path)
-        string inputPath = "input.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output.webp";
 
-        // Load the WebP image using Aspose.Imaging's Load method (lifecycle rule)
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to WebPImage to access WebP‑specific options
-            WebPImage webpImage = image as WebPImage;
-            if (webpImage == null)
+            // Create WebP options instance
+            var webpOptions = new WebPOptions();
+
+            // Example: set lossless compression and quality
+            webpOptions.Lossless = true;
+            webpOptions.Quality = 80f;
+
+            // Save the image as WebP using the configured options
+            image.Save(outputPath, webpOptions);
+        }
+
+        // Enumerate available WebPOptions configuration properties
+        Console.WriteLine("Available WebPOptions configuration properties:");
+        PropertyInfo[] properties = typeof(WebPOptions).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        foreach (PropertyInfo prop in properties)
+        {
+            // Retrieve the property name and its type
+            string name = prop.Name;
+            string typeName = prop.PropertyType.Name;
+
+            // Attempt to get the default value by creating a fresh instance
+            object defaultValue = null;
+            try
             {
-                Console.WriteLine("The loaded file is not a WebP image.");
-                return;
+                var defaultInstance = new WebPOptions();
+                defaultValue = prop.GetValue(defaultInstance);
+            }
+            catch
+            {
+                // Ignore any property that cannot be read
             }
 
-            // Retrieve the WebPOptions associated with the image
-            WebPOptions options = webpImage.Options;
-
-            // Enumerate and display all configurable input options
-            Console.WriteLine("Available WebP Input Configuration Options:");
-            Console.WriteLine($"AnimBackgroundColor : {options.AnimBackgroundColor}");
-            Console.WriteLine($"AnimLoopCount       : {options.AnimLoopCount}");
-            Console.WriteLine($"BufferSizeHint      : {options.BufferSizeHint}");
-            Console.WriteLine($"FullFrame           : {options.FullFrame}");
-            Console.WriteLine($"KeepMetadata        : {options.KeepMetadata}");
-            Console.WriteLine($"Lossless            : {options.Lossless}");
-            Console.WriteLine($"Quality             : {options.Quality}");
-            Console.WriteLine($"Source              : {options.Source}");
-            Console.WriteLine($"VectorRasterizationOptions : {options.VectorRasterizationOptions}");
-            Console.WriteLine($"ResolutionSettings  : {options.ResolutionSettings}");
-            Console.WriteLine($"MultiPageOptions    : {options.MultiPageOptions}");
-            Console.WriteLine($"Palette             : {options.Palette}");
-            Console.WriteLine($"ProgressEventHandler: {options.ProgressEventHandler}");
-            Console.WriteLine($"XmpData             : {options.XmpData}");
+            Console.WriteLine($"- {name} ({typeName}) Default: {defaultValue ?? "N/A"}");
         }
     }
 }
