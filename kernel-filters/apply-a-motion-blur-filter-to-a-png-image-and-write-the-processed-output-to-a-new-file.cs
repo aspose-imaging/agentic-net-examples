@@ -1,33 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
-using System.Drawing;
 
-class MotionBlurExample
+class Program
 {
     static void Main()
     {
-        // Input PNG file path
-        string inputPath = @"C:\temp\input.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-        // Output PNG file path
-        string outputPath = @"C:\temp\output_motion_blur.png";
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the image using Aspose.Imaging's Image.Load (lifecycle rule)
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering capabilities
+            // Cast to RasterImage to access filtering methods
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a motion blur (motion wiener) filter to the whole image.
-            // Parameters: length = 10, sigma = 1.0, angle = 0 degrees.
-            rasterImage.Filter(
-                rasterImage.Bounds,
-                new MotionWienerFilterOptions(10, 1.0, 0.0));
+            // Apply a motion blur effect using MotionWienerFilterOptions
+            // Parameters: length = 10, smooth = 1.0, angle = 0 degrees
+            rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(10, 1.0, 0.0));
 
-            // Save the processed image as PNG (lifecycle rule)
-            rasterImage.Save(outputPath, new PngOptions());
+            // Save the processed image to the output path
+            rasterImage.Save(outputPath);
         }
     }
 }
