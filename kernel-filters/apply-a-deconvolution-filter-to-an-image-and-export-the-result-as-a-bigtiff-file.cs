@@ -1,34 +1,36 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.BigTiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source TIFF image
-        string inputPath = "input.tif";
+        string inputPath = "input.jpg";
+        string outputPath = "output.tif";
 
-        // Path where the resulting BIGTIFF image will be saved
-        string outputPath = "output.bigtiff";
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the source image using the standard load rule
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the loaded image to TiffImage to access the Filter method
-            TiffImage tiffImage = (TiffImage)image;
+            RasterImage raster = (RasterImage)image;
 
-            // Apply a deconvolution filter (Gauss-Wiener) to the entire image
-            // Radius = 5, Sigma = 4.0 are typical parameters; adjust as needed
-            tiffImage.Filter(tiffImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
+            var sharpenOptions = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions();
+            raster.Filter(raster.Bounds, sharpenOptions);
 
-            // Create a BigTiffImage from the filtered TIFF frames
-            BigTiffImage bigTiff = new BigTiffImage(tiffImage.Frames);
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.Compression = TiffCompressions.AdobeDeflate;
 
-            // Save the result as a BIGTIFF file using the standard save rule
-            bigTiff.Save(outputPath);
+            raster.Save(outputPath, tiffOptions);
         }
     }
 }
