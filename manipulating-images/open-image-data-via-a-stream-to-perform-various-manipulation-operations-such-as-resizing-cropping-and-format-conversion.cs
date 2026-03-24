@@ -1,40 +1,86 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input image path (PNG) and output image path (JPEG)
-        string inputPath = "input.png";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string resizedOutputPath = @"C:\temp\output_resized.png";
+        string croppedOutputPath = @"C:\temp\output_cropped.png";
 
-        // Open the input image via a file stream
-        using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Load the image from the stream
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputStream))
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Prepare PNG save options (used for both resized and cropped images)
+        var pngOptions = new PngOptions();
+
+        // ---------- Resize operation ----------
+        using (FileStream inputStream = File.OpenRead(inputPath))
+        {
+            // Ensure the stream contains a loadable image
+            if (!Image.CanLoad(inputStream))
             {
-                // Ensure the image data is cached for better performance
-                if (!image.IsCached)
-                    image.CacheData();
+                Console.Error.WriteLine($"Cannot load image from stream: {inputPath}");
+                return;
+            }
 
-                // Resize the image to half of its original dimensions
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
-                image.Resize(newWidth, newHeight);
+            // Load image from stream
+            using (Image image = Image.Load(inputStream))
+            {
+                // Resize to 800x600 using default resampling
+                image.Resize(800, 600);
 
-                // Define a rectangle to crop the central area of the resized image
-                int cropX = newWidth / 4;
-                int cropY = newHeight / 4;
-                int cropWidth = newWidth / 2;
-                int cropHeight = newHeight / 2;
-                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(cropX, cropY, cropWidth, cropHeight);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(resizedOutputPath));
+
+                // Save resized image to file via stream
+                using (FileStream outStream = File.Open(resizedOutputPath, FileMode.Create))
+                {
+                    image.Save(outStream, pngOptions);
+                }
+            }
+        }
+
+        // ---------- Crop operation ----------
+        using (FileStream inputStream = File.OpenRead(inputPath))
+        {
+            // Ensure the stream contains a loadable image
+            if (!Image.CanLoad(inputStream))
+            {
+                Console.Error.WriteLine($"Cannot load image from stream: {inputPath}");
+                return;
+            }
+
+            // Load image from stream
+            using (Image image = Image.Load(inputStream))
+            {
+                // Define central crop rectangle (half width and height)
+                var cropRect = new Rectangle(
+                    image.Width / 4,
+                    image.Height / 4,
+                    image.Width / 2,
+                    image.Height / 2);
+
+                // Perform cropping
                 image.Crop(cropRect);
 
-                // Save the processed image as JPEG using default options
-                image.Save(outputPath, new JpegOptions());
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(croppedOutputPath));
+
+                // Save cropped image to file via stream
+                using (FileStream outStream = File.Open(croppedOutputPath, FileMode.Create))
+                {
+                    image.Save(outStream, pngOptions);
+                }
             }
         }
     }
