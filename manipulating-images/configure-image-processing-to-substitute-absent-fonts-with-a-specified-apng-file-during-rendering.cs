@@ -11,61 +11,97 @@ class Program
 {
     static void Main(string[] args)
     {
-        string vectorPath = "input.svg";
-        string outputApngPath = "output.apng";
+        // Hardcoded paths
+        string inputVectorPath = "input.svg";
         string fontFolderPath = "fonts";
+        string placeholderApngPath = "placeholder.apng";
+        string outputApngPath = "output.apng";
+        string tempRasterPath = "temp.png";
 
+        // Validate input files
+        if (!File.Exists(inputVectorPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputVectorPath}");
+            return;
+        }
+        if (!File.Exists(placeholderApngPath))
+        {
+            Console.Error.WriteLine($"File not found: {placeholderApngPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputApngPath));
+
+        // Load vector image with custom fonts
         var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource((object[] fontArgs) =>
-        {
-            string fontsPath = fontArgs.Length > 0 ? fontArgs[0]?.ToString() : string.Empty;
-            var fontList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-            if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+        loadOptions.AddCustomFontSource(
+            args =>
             {
-                foreach (var file in Directory.GetFiles(fontsPath))
+                var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (args.Length > 0)
                 {
-                    byte[] data = File.ReadAllBytes(file);
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    fontList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
-                }
-            }
-            return fontList.ToArray();
-        }, fontFolderPath);
-
-        using (Image vectorImage = Image.Load(vectorPath, loadOptions))
-        {
-            var vectorRasterOpts = new VectorRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageWidth = vectorImage.Width,
-                PageHeight = vectorImage.Height,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
-
-            using (var memoryStream = new MemoryStream())
-            {
-                var pngOpts = new PngOptions { VectorRasterizationOptions = vectorRasterOpts };
-                vectorImage.Save(memoryStream, pngOpts);
-                memoryStream.Position = 0;
-
-                using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
-                {
-                    var apngOpts = new ApngOptions
+                    string fontsPath = args[0]?.ToString() ?? string.Empty;
+                    if (Directory.Exists(fontsPath))
                     {
-                        Source = new FileCreateSource(outputApngPath, false),
-                        DefaultFrameTime = 100,
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
-
-                    using (ApngImage apng = (ApngImage)Image.Create(apngOpts, raster.Width, raster.Height))
-                    {
-                        apng.RemoveAllFrames();
-                        apng.AddFrame(raster);
-                        apng.Save();
+                        foreach (var fontFile in Directory.GetFiles(fontsPath))
+                        {
+                            string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                            byte[] fontBytes = File.ReadAllBytes(fontFile);
+                            fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                        }
                     }
                 }
+                return fonts.ToArray();
+            },
+            fontFolderPath);
+
+        using (Image vectorImage = Image.Load(inputVectorPath, loadOptions))
+        {
+            // Prepare vector rasterization options
+            var vectorRasterOpts = new VectorRasterizationOptions
+            {
+                BackgroundColor = Aspose.Imaging.Color.White,
+                PageWidth = vectorImage.Width,
+                PageHeight = vectorImage.Height,
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = Aspose.Imaging.SmoothingMode.None
+            };
+
+            // Rasterize vector image to a temporary PNG
+            var pngCreateOptions = new PngOptions
+            {
+                Source = new FileCreateSource(tempRasterPath, false),
+                VectorRasterizationOptions = vectorRasterOpts
+            };
+            vectorImage.Save(tempRasterPath, pngCreateOptions);
+        }
+
+        // Load rasterized vector frame and placeholder APNG frame
+        using (RasterImage rasterFrame = (RasterImage)Image.Load(tempRasterPath))
+        using (RasterImage placeholderFrame = (RasterImage)Image.Load(placeholderApngPath))
+        {
+            // Create APNG image
+            var apngCreateOptions = new ApngOptions
+            {
+                Source = new FileCreateSource(outputApngPath, false),
+                DefaultFrameTime = 500,
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
+
+            using (ApngImage apngImage = (ApngImage)Image.Create(apngCreateOptions, rasterFrame.Width, rasterFrame.Height))
+            {
+                apngImage.RemoveAllFrames();
+                apngImage.AddFrame(rasterFrame);
+                apngImage.AddFrame(placeholderFrame);
+                apngImage.Save();
             }
+        }
+
+        // Clean up temporary raster file
+        if (File.Exists(tempRasterPath))
+        {
+            File.Delete(tempRasterPath);
         }
     }
 }
