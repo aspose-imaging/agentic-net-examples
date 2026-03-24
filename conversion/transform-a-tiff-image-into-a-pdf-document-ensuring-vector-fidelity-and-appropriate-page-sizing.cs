@@ -1,28 +1,40 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = args.Length > 0 ? args[0] : "input.tif";
-        string outputPath = args.Length > 1 ? args[1] : "output.pdf";
+        string inputPath = "input\\sample.tif";
+        string outputPath = "output\\sample.pdf";
 
-        using (Image image = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            RasterImage raster = image as RasterImage;
-            double hRes = raster != null ? raster.HorizontalResolution : 96;
-            double vRes = raster != null ? raster.VerticalResolution : 96;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            using (PdfOptions pdfOptions = new PdfOptions())
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            var pdfOptions = new PdfOptions();
+
+            if (image is Aspose.Imaging.VectorImage)
             {
-                pdfOptions.ResolutionSettings = new ResolutionSetting(hRes, vRes);
-                image.Save(outputPath, pdfOptions);
+                var vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                };
+                pdfOptions.VectorRasterizationOptions = vectorOptions;
             }
+
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
