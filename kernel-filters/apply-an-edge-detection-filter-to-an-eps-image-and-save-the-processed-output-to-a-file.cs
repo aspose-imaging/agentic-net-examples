@@ -2,59 +2,63 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input EPS, temporary raster PNG, and final output
-        string epsPath = "input.eps";
-        string tempPngPath = "temp.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
         string outputPath = "output.png";
+        string tempPngPath = "temp.png";
 
-        // Load the EPS image
-        using (EpsImage epsImage = (EpsImage)Image.Load(epsPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Prepare rasterization options to convert EPS to PNG
-            var rasterOptions = new PngOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load EPS and rasterize to a temporary PNG
+        using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+        {
+            var rasterOptions = new EpsRasterizationOptions
             {
-                VectorRasterizationOptions = new EpsRasterizationOptions
-                {
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height
-                }
+                PageWidth = epsImage.Width,
+                PageHeight = epsImage.Height
             };
 
-            // Save EPS as a raster PNG (temporary file)
-            epsImage.Save(tempPngPath, rasterOptions);
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            epsImage.Save(tempPngPath, pngOptions);
         }
 
         // Load the rasterized PNG as a RasterImage
-        using (RasterImage rasterImage = (RasterImage)Image.Load(tempPngPath))
+        using (var image = Image.Load(tempPngPath))
         {
-            // Define a simple edge detection kernel (Laplacian)
-            double[,] edgeKernel = new double[,]
+            var raster = (RasterImage)image;
+
+            // Edge detection kernel (3x3)
+            double[,] kernel = new double[,]
             {
                 { -1, -1, -1 },
                 { -1,  8, -1 },
                 { -1, -1, -1 }
             };
 
-            // Create convolution filter options with the kernel
-            var convOptions = new ConvolutionFilterOptions(edgeKernel);
-
-            // Apply the edge detection filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, convOptions);
-
-            // Save the processed image to the desired output format (PNG)
-            rasterImage.Save(outputPath, new PngOptions());
+            var filterOptions = new ConvolutionFilterOptions(kernel);
+            raster.Filter(raster.Bounds, filterOptions);
+            raster.Save(outputPath);
         }
 
-        // Optionally delete the temporary raster file
+        // Clean up temporary file
         if (File.Exists(tempPngPath))
         {
             File.Delete(tempPngPath);
