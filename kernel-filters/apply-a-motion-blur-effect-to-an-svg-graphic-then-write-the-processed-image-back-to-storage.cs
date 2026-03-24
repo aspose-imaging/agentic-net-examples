@@ -1,50 +1,59 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main()
     {
-        string inputSvgPath = args.Length > 0 ? args[0] : "input.svg";
-        string tempPngPath = Path.Combine(Path.GetDirectoryName(inputSvgPath) ?? "", "temp_raster.png");
-        string outputPath = Path.Combine(Path.GetDirectoryName(inputSvgPath) ?? "", "output.png");
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        using (Image svgImage = Image.Load(inputSvgPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Set up rasterization options for SVG
+            var rasterOptions = new SvgRasterizationOptions
             {
-                BackgroundColor = Color.White,
-                PageWidth = svgImage.Width,
-                PageHeight = svgImage.Height
+                PageSize = svgImage.Size,
+                BackgroundColor = Aspose.Imaging.Color.White
             };
 
-            PngOptions pngOptions = new PngOptions
+            // PNG save options with rasterization settings
+            var pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            svgImage.Save(tempPngPath, pngOptions);
-        }
+            // Rasterize SVG to a PNG in memory
+            using (var memoryStream = new MemoryStream())
+            {
+                svgImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
 
-        using (Image rasterImageContainer = Image.Load(tempPngPath))
-        {
-            RasterImage rasterImage = (RasterImage)rasterImageContainer;
+                // Load the rasterized image
+                using (Aspose.Imaging.Image rasterImg = Aspose.Imaging.Image.Load(memoryStream))
+                {
+                    var raster = (Aspose.Imaging.RasterImage)rasterImg;
 
-            rasterImage.Filter(rasterImage.Bounds,
-                new MotionWienerFilterOptions(10, 1.0, 90.0));
+                    // Apply motion blur (motion wiener) filter
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
 
-            PngOptions outOptions = new PngOptions();
-            rasterImage.Save(outputPath, outOptions);
-        }
-
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+                    // Save the processed image
+                    raster.Save(outputPath);
+                }
+            }
         }
     }
 }
