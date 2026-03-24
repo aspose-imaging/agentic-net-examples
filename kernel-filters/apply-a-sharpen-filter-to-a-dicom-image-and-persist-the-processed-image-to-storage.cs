@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -8,24 +10,30 @@ class Program
 {
     static void Main()
     {
-        // Path to the source DICOM file
+        // Hardcoded input and output paths
         string inputPath = @"c:\temp\sample.dicom";
+        string outputPath = @"c:\temp\sample_sharpened.dcm";
 
-        // Path where the sharpened image will be saved
-        string outputPath = @"c:\temp\sample.Sharpened.png";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the DICOM image from storage
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DICOM image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to DicomImage to access DICOM-specific functionality
             DicomImage dicomImage = (DicomImage)image;
 
-            // Apply a sharpen filter to the entire image.
-            // SharpenFilterOptions takes kernel size and sigma as parameters.
+            // Apply sharpen filter to the whole image
             dicomImage.Filter(dicomImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image in PNG format
-            dicomImage.Save(outputPath, new PngOptions());
+            // Save the processed image back as DICOM
+            dicomImage.SaveAll(outputPath, new DicomOptions());
         }
     }
 }
