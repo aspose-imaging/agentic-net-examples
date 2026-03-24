@@ -1,31 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg; // Example format, adjust as needed
+using Aspose.Imaging.FileFormats;
 using Aspose.Imaging.ImageOptions;
 
-class ImageCorrectionExample
+class Program
 {
     static void Main()
     {
-        // Paths to the source and destination images
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.png";
+        string outputPath = @"C:\temp\sample.corrected.png";
 
-        // Load the image using Aspose.Imaging's built‑in load method
-        // The Load method returns an Image object; cast to RasterImage to access adjustment methods
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Increase contrast (value range: -100 to 100)
-            image.AdjustContrast(30f); // +30 makes details stand out
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Increase brightness (integer value, typical range: -255 to 255)
-            image.AdjustBrightness(20); // +20 brightens the image
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Adjust color balance via gamma correction per channel
-            // Values >1 brighten the channel, <1 darken it
-            image.AdjustGamma(1.1f, 1.0f, 0.9f); // Slightly boost Red, keep Green, reduce Blue
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Adjust contrast and brightness using RasterImage methods
+            if (image is RasterImage rasterImage)
+            {
+                rasterImage.AdjustContrast(30f);      // Increase contrast (range -100 to 100)
+                rasterImage.AdjustBrightness(20);    // Increase brightness (range -255 to 255)
+            }
 
-            // Save the processed image using Aspose.Imaging's save method
+            // Perform automatic brightness/contrast/color normalization if supported
+            if (image is RasterCachedImage cachedImage)
+            {
+                cachedImage.AutoBrightnessContrast(); // Enhances contrast, brightness, and color balance
+            }
+
+            // Save the processed image
             image.Save(outputPath);
         }
     }
