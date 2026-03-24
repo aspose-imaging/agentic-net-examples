@@ -1,25 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
-class WebPToGifConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source lossless WebP image
-        string inputPath = @"C:\Images\source_lossless.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input_lossless.webp";
+        string outputPath = @"C:\Images\output.gif";
 
-        // Desired output path for the GIF image
-        string outputPath = @"C:\Images\converted.gif";
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the WebP image using the dedicated constructor
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image (lossless)
         using (WebPImage webPImage = new WebPImage(inputPath))
         {
-            // Save the image as GIF.
-            // The Save(string) overload infers the format from the file extension,
-            // preserving the visual content of the active frame.
-            webPImage.Save(outputPath);
+            // Configure GIF options to preserve visual quality
+            GifOptions gifOptions = new GifOptions
+            {
+                DoPaletteCorrection = true, // Build optimal palette
+                Interlaced = false,         // Standard GIF
+                ColorResolution = 7         // Maximum color depth (8 bits per pixel)
+            };
+
+            // Save as GIF
+            webPImage.Save(outputPath, gifOptions);
         }
 
         Console.WriteLine("Conversion completed successfully.");
