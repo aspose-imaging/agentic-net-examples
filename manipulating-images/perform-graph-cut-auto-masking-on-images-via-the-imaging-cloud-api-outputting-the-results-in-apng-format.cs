@@ -1,39 +1,42 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths are taken from command‑line arguments.
-        // args[0] – source image path, args[1] – destination APNG path.
-        if (args.Length < 2)
+        // Hard‑coded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: ImageMaskingApng <inputImage> <outputApng>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image as a RasterImage.
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Load source image as RasterImage
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Configure auto‑masking with GraphCut algorithm.
+            // Configure GraphCut auto‑masking options
             var maskingOptions = new AutoMaskingGraphCutOptions
             {
                 CalculateDefaultStrokes = true,
-                FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
+                FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                 Method = SegmentationMethod.GraphCut,
                 Decompose = false,
-                // Export options are required but we use a StreamSource to avoid temporary files.
                 ExportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
@@ -42,17 +45,15 @@ class Program
                 BackgroundReplacementColor = Color.Transparent
             };
 
-            // Perform the masking operation.
-            using (MaskingResult result = new ImageMasking(sourceImage).Decompose(maskingOptions))
-            // Retrieve the foreground (object) image – index 1 holds the foreground.
-            using (RasterImage foreground = (RasterImage)result[1].GetImage())
+            // Perform masking; results[1] holds the foreground object
+            using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
+            using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
             {
-                // Save the foreground as an animated PNG (APNG).
                 foreground.Save(outputPath, new ApngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = 200, // milliseconds per frame
-                    NumPlays = 0             // 0 = infinite loop
+                    DefaultFrameTime = 200,
+                    NumPlays = 0 // infinite loop
                 });
             }
         }
