@@ -4,77 +4,80 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input JPEG image paths
+        // Hardcoded input JPEG image paths
         string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\images\img1.jpg",
+            @"C:\images\img2.jpg",
+            @"C:\images\img3.jpg"
         };
 
-        // Output PNG path
-        string outputPath = "combined.png";
+        // Hardcoded output PNG path
+        string outputPath = @"C:\images\merged.png";
 
-        // Lists to hold processed images and their sizes
-        List<RasterImage> processedImages = new List<RasterImage>();
-        List<Size> sizeList = new List<Size>();
-
-        // Convert each JPEG to JPEG2000 in memory and collect sizes
+        // Verify each input file exists
         foreach (string path in inputPaths)
         {
-            using (RasterImage jpegImage = (RasterImage)Image.Load(path))
+            if (!File.Exists(path))
             {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    // Save JPEG image as JPEG2000 into the memory stream
-                    Jpeg2000Options jp2Options = new Jpeg2000Options();
-                    jpegImage.Save(ms, jp2Options);
-                    ms.Position = 0;
-
-                    // Load the JPEG2000 image back as a raster image
-                    RasterImage jp2Image = (RasterImage)Image.Load(ms);
-                    processedImages.Add(jp2Image);
-                    sizeList.Add(jp2Image.Size);
-                }
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
             }
         }
 
-        // Calculate canvas size for horizontal merge
-        int newWidth = 0;
-        int newHeight = 0;
-        foreach (Size sz in sizeList)
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Determine canvas size (horizontal stitching)
+        int totalWidth = 0;
+        int maxHeight = 0;
+        foreach (string path in inputPaths)
         {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight) newHeight = sz.Height;
+            using (RasterImage img = (RasterImage)Image.Load(path))
+            {
+                totalWidth += img.Width;
+                if (img.Height > maxHeight)
+                    maxHeight = img.Height;
+            }
         }
 
-        // Create PNG canvas bound to the output file
-        Source outputSource = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = outputSource };
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
+        // Create PNG options with bound output source
+        Source fileSource = new FileCreateSource(outputPath, false);
+        PngOptions pngOptions = new PngOptions() { Source = fileSource };
+
+        // Create a blank canvas for the merged image
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
         {
             int offsetX = 0;
-            foreach (RasterImage img in processedImages)
+
+            // Process each JPEG image
+            foreach (string path in inputPaths)
             {
-                Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                offsetX += img.Width;
+                // Load JPEG as raster image
+                using (RasterImage jpegImg = (RasterImage)Image.Load(path))
+                {
+                    // Convert to JPEG2000 intermediate (encodes using JPEG2000)
+                    using (Jpeg2000Image jp2Img = new Jpeg2000Image(jpegImg))
+                    {
+                        // Copy pixels from the JPEG2000 image onto the canvas
+                        Rectangle bounds = new Rectangle(offsetX, 0, jp2Img.Width, jp2Img.Height);
+                        canvas.SaveArgb32Pixels(bounds, jp2Img.LoadArgb32Pixels(jp2Img.Bounds));
+
+                        // Update horizontal offset
+                        offsetX += jp2Img.Width;
+                    }
+                }
             }
 
-            // Save the bound canvas
+            // Save the bound canvas to the output PNG file
             canvas.Save();
-        }
-
-        // Dispose intermediate images
-        foreach (RasterImage img in processedImages)
-        {
-            img.Dispose();
         }
     }
 }
