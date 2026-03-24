@@ -1,31 +1,53 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 
-class DeconvolutionExample
+class Program
 {
     static void Main()
     {
-        // Input CMX image path
+        // Hardcoded input and output paths
         string inputPath = "input.cmx";
-        // Output image path (PNG format)
         string outputPath = "output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir ?? ".");
 
         // Load the CMX image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access the Filter method
-            RasterImage rasterImage = (RasterImage)image;
+            // Attempt to treat the loaded image as a raster image for filtering
+            RasterImage rasterImage = image as RasterImage;
 
-            // Apply a Gauss‑Wiener deconvolution filter to the whole image
-            // Parameters: radius = 5, sigma = 4.0 (adjust as needed)
-            rasterImage.Filter(
-                rasterImage.Bounds,
-                new GaussWienerFilterOptions(5, 4.0));
+            // If the image is not raster (CMX is vector), render it to a temporary raster format
+            if (rasterImage == null)
+            {
+                string tempPath = Path.Combine(Path.GetTempPath(), "temp.png");
+                image.Save(tempPath);
+                using (Image tempImg = Image.Load(tempPath))
+                {
+                    rasterImage = tempImg as RasterImage;
+                }
+                // Clean up the temporary file
+                File.Delete(tempPath);
+            }
 
-            // Save the processed image
-            rasterImage.Save(outputPath, new PngOptions());
+            // Apply a Gauss‑Wiener deconvolution filter if we have a raster image
+            if (rasterImage != null)
+            {
+                rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
+                rasterImage.Save(outputPath);
+            }
         }
     }
 }
