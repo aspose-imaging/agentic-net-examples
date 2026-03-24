@@ -1,24 +1,31 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source image (any supported format)
-        string sourcePath = "source.png";
+        // Hardcoded input and output paths
+        string inputPath = @"input.png";
+        string outputPath = @"output.apng";
 
-        // Path where the APNG file will be saved
-        string outputPath = "result.apng";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source image
-        using (Image image = Image.Load(sourcePath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Save the image as an APNG file.
-            // DefaultFrameTime sets the duration of each frame in milliseconds.
-            image.Save(outputPath, new ApngOptions { DefaultFrameTime = 500 });
+            // Save as APNG using default options
+            image.Save(outputPath, new ApngOptions());
         }
     }
 }
