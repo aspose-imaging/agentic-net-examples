@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -6,19 +7,28 @@ class Program
 {
     static void Main()
     {
-        // Path to the source APNG file
-        string inputApngPath = "input.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output\\result.pdf";
 
-        // Desired output PDF file path
-        string outputPdfPath = "output.pdf";
-
-        // Load the APNG image using the provided Image.Load method
-        using (Image apngImage = Image.Load(inputApngPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Save the loaded image as PDF.
-            // PdfOptions is the appropriate save options class for PDF format.
-            // This uses the Image.Save(string, ImageOptionsBase) rule.
-            apngImage.Save(outputPdfPath, new PdfOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PDF export options
+            var pdfOptions = new PdfOptions();
+
+            // Save the image as PDF while preserving fidelity
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
