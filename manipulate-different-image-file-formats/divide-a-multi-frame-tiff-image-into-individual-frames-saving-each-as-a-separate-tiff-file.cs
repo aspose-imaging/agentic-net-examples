@@ -2,38 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Path to the multi‑frame TIFF file
-        string sourcePath = "input.tif";
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputDirectory = "output_frames";
 
-        // Directory where individual frames will be saved
-        string outputDir = "output_frames";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Ensure the output directory exists
-        if (!Directory.Exists(outputDir))
-            Directory.CreateDirectory(outputDir);
+        // Ensure the output directory exists (Directory.CreateDirectory handles null safely)
+        Directory.CreateDirectory(outputDirectory);
 
         // Load the multi‑frame TIFF image
-        using (TiffImage multiPage = (TiffImage)Image.Load(sourcePath))
+        using (TiffImage multiFrameImage = (TiffImage)Image.Load(inputPath))
         {
-            // Retrieve all frames from the image
-            TiffFrame[] frames = multiPage.Frames;
-
-            // Iterate through each frame and save it as a separate TIFF file
-            for (int i = 0; i < frames.Length; i++)
+            // Iterate over each frame in the source image
+            for (int i = 0; i < multiFrameImage.Frames.Length; i++)
             {
-                // Create a new TiffImage that contains only the current frame
-                using (TiffImage singleFrameImage = new TiffImage(frames[i]))
-                {
-                    // Build the output file name (e.g., frame_1.tif, frame_2.tif, ...)
-                    string outPath = Path.Combine(outputDir, $"frame_{i + 1}.tif");
+                // Build the output file path for the current frame
+                string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.tif");
 
-                    // Save the single‑frame TIFF image
-                    singleFrameImage.Save(outPath);
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Create a new TiffImage containing only the current frame
+                // The frame is cast to RasterImage to use the appropriate constructor
+                using (TiffImage singleFrameImage = new TiffImage(new TiffFrame((RasterImage)multiFrameImage.Frames[i])))
+                {
+                    // Save the single‑frame TIFF
+                    singleFrameImage.Save(outputPath);
                 }
             }
         }
