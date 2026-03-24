@@ -1,37 +1,45 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input SVG file path
-        string inputPath = "input.svg";
-        // Output PNG file path
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.svg";
+        string outputPath = @"C:\Temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
         {
-            // Cast the loaded image to SvgImage
-            SvgImage svgImage = (SvgImage)image;
-
-            // Configure rasterization options for high-fidelity rendering
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Configure rasterization options
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
             {
+                // Use the original SVG size as page size
                 PageSize = svgImage.Size,
+                // Optional: set background color, smoothing, etc.
                 BackgroundColor = Color.White,
                 SmoothingMode = SmoothingMode.AntiAlias,
                 TextRenderingHint = TextRenderingHint.AntiAlias
             };
 
-            // Set up PNG save options and attach rasterization options
+            // Configure PNG save options and attach rasterization options
             PngOptions pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
             // Save the rasterized image as PNG
