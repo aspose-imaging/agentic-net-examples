@@ -1,24 +1,39 @@
 using System;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using System.IO;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.jpg";
-        string outputPath = "output_motion_blur.jpg";
+        string outputPath = "output.jpg";
 
-        // Load the image as a raster image
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a motion blur (motion wiener) filter:
-            // Length = 15, smooth factor = 1.0, angle = 45 degrees
-            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(15, 1.0, 45.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image and apply motion blur filter
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+
+            // Define motion blur parameters
+            int size = 15;          // kernel size (must be odd)
+            double angle = 45.0;    // blur angle in degrees
+
+            // Create convolution filter options with motion blur kernel
+            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(size, angle));
+
+            // Apply the filter to the entire image
+            raster.Filter(raster.Bounds, filterOptions);
 
             // Save the processed image
             raster.Save(outputPath);
