@@ -2,57 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.FileManagement;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class LoadTiffExample
+class Program
 {
     static void Main()
     {
-        // Path to the source TIFF file
-        string inputPath = "input.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.tif";
+        string outputPath = @"C:\Temp\output.tif";
 
-        // -----------------------------------------------------------------
-        // Load TIFF using the TiffFrame constructor that accepts a file path
-        // -----------------------------------------------------------------
-        TiffFrame fileFrame = new TiffFrame(inputPath);
-
-        // Create a TiffImage from the loaded frame
-        using (TiffImage tiffFromFile = new TiffImage(fileFrame))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Example: read image dimensions
-            int width = tiffFromFile.Width;
-            int height = tiffFromFile.Height;
-            Console.WriteLine($"Loaded from file – Width: {width}, Height: {height}");
-
-            // Save a copy to verify that the image was loaded correctly
-            tiffFromFile.Save("copy_from_file.tif");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // -----------------------------------------------------------------
-        // Load TIFF from a stream using native TIFF stream handling
-        // -----------------------------------------------------------------
-        using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load TIFF from file using TiffFrame constructor
+        TiffFrame frame = new TiffFrame(inputPath);
+        using (TiffImage tiffImage = new TiffImage(frame))
         {
-            // Wrap the .NET stream into Aspose.Imaging's StreamContainer
-            StreamContainer container = new StreamContainer(stream);
+            // Save the loaded image to the output path
+            tiffImage.Save(outputPath);
+        }
 
-            // Obtain a TiffStreamReader for the stream (LittleEndian used as example)
-            TiffStreamReader reader = TiffStreamFactory.GetTiffReader(container, TiffByteOrder.LittleEndian);
-
-            // The reader can be used for low‑level TIFF operations.
-            // For high‑level image handling, create a TiffFrame directly from the stream.
+        // Load TIFF from a stream
+        using (FileStream stream = File.OpenRead(inputPath))
+        {
             TiffFrame streamFrame = new TiffFrame(stream);
-
-            using (TiffImage tiffFromStream = new TiffImage(streamFrame))
+            using (TiffImage streamImage = new TiffImage(streamFrame))
             {
-                // Example: read image dimensions
-                int width = tiffFromStream.Width;
-                int height = tiffFromStream.Height;
-                Console.WriteLine($"Loaded from stream – Width: {width}, Height: {height}");
-
-                // Save a copy to verify that the image was loaded correctly
-                tiffFromStream.Save("copy_from_stream.tif");
+                string streamOutputPath = @"C:\Temp\output_from_stream.tif";
+                Directory.CreateDirectory(Path.GetDirectoryName(streamOutputPath));
+                streamImage.Save(streamOutputPath);
             }
         }
     }
