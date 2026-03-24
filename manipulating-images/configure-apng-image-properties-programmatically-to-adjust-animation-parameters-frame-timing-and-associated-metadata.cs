@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -8,38 +10,46 @@ class Program
 {
     static void Main(string[] args)
     {
-        const string inputPath = "input.png";
-        const string outputPath = "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output_animation.png";
 
-        const int animationDuration = 1000; // total animation duration in ms
-        const int frameDuration = 100; // base frame duration in ms
-
-        using (RasterImage source = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            ApngOptions options = new ApngOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source raster image
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        {
+            // Configure APNG creation options
+            ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = (uint)frameDuration,
+                DefaultFrameTime = 200,               // Default frame duration (ms)
+                NumPlays = 5,                         // Number of animation loops (0 = infinite)
                 ColorType = PngColorType.TruecolorWithAlpha,
-                NumPlays = 0 // infinite looping by default
+                KeepMetadata = true                   // Preserve source metadata
             };
 
-            using (ApngImage apng = (ApngImage)Image.Create(options, source.Width, source.Height))
+            // Create APNG image bound to the output file
+            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
-                apng.DefaultFrameTime = (uint)frameDuration;
-                apng.NumPlays = 3; // play the animation three times
+                // Remove the automatically added first frame
+                apngImage.RemoveAllFrames();
 
-                apng.RemoveAllFrames();
+                // Add frames with specific timings
+                apngImage.AddFrame(sourceImage, createOptions.DefaultFrameTime); // Frame 1 using default time
+                apngImage.AddFrame(sourceImage, 500);                            // Frame 2 with 500 ms
+                apngImage.AddFrame(sourceImage, 1000);                           // Frame 3 with 1000 ms
 
-                int frameCount = animationDuration / frameDuration;
-
-                for (int i = 0; i < frameCount; i++)
-                {
-                    uint customTime = (i % 2 == 0) ? (uint)frameDuration : (uint)(frameDuration * 2);
-                    apng.AddFrame(source, customTime);
-                }
-
-                apng.Save();
+                // Save the APNG (output path already bound via FileCreateSource)
+                apngImage.Save();
             }
         }
     }
