@@ -1,68 +1,51 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Load a PNG image, convert to grayscale, and save as JPEG
-        using (RasterImage raster = (RasterImage)Image.Load("input.png"))
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.png";
+        string createdImagePath = @"C:\temp\newImage.bmp";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            raster.Grayscale();
-            raster.Save("output_grayscale.jpg", new JpegOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Create a new PNG canvas, draw a line, and save
-        PngOptions canvasOptions = new PngOptions
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(createdImagePath));
+
+        // Load an existing image, perform a simple operation, and save as PNG
+        using (Image image = Image.Load(inputPath))
         {
-            Source = new FileCreateSource("canvas.png", false)
+            // Example operation: rotate the image 90 degrees clockwise
+            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+            // Save the processed image using PNG options
+            var pngOptions = new PngOptions();
+            image.Save(outputPath, pngOptions);
+        }
+
+        // Create a new BMP image from scratch and save it
+        var bmpOptions = new BmpOptions
+        {
+            BitsPerPixel = 24,
+            Source = new FileCreateSource(createdImagePath, false)
         };
-        using (Image canvas = Image.Create(canvasOptions, 400, 300))
+
+        using (Image newImage = Image.Create(bmpOptions, 200, 200))
         {
-            Graphics graphics = new Graphics(canvas);
-            graphics.Clear(Color.White);
-            Pen pen = new Pen(Color.Blue, 3);
-            graphics.DrawLine(pen, new Point(50, 50), new Point(350, 250));
-            canvas.Save(); // Save to the bound source
-        }
-
-        // Create an animated APNG from a single raster image
-        using (RasterImage source = (RasterImage)Image.Load("input.png"))
-        {
-            ApngOptions apngCreateOptions = new ApngOptions
-            {
-                Source = new FileCreateSource("animation.apng", false),
-                DefaultFrameTime = 100, // 100 ms per frame
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            using (ApngImage apng = (ApngImage)Image.Create(apngCreateOptions, source.Width, source.Height))
-            {
-                apng.RemoveAllFrames(); // Remove the default single frame
-
-                int totalFrames = 5;
-                for (int i = 0; i < totalFrames; i++)
-                {
-                    apng.AddFrame(source);
-                    ApngFrame frame = (ApngFrame)apng.Pages[apng.PageCount - 1];
-                    frame.AdjustGamma(i); // Simple variation per frame
-                }
-
-                apng.Save(); // Save the APNG to the bound source
-            }
-        }
-
-        // Load an image and export it to TIFF format
-        using (Image img = Image.Load("input.png"))
-        {
-            TiffOptions tiffOpts = new TiffOptions(TiffExpectedFormat.Default);
-            img.Save("output.tiff", tiffOpts);
+            // No additional processing; just save the newly created image
+            newImage.Save();
         }
     }
 }
