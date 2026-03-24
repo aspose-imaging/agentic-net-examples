@@ -9,27 +9,37 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = args.Length > 0 ? args[0] : Path.Combine(Environment.CurrentDirectory, "input.cdr");
-        string outputPath = args.Length > 1 ? args[1] : Path.Combine(Environment.CurrentDirectory, "output.psd");
+        string inputPath = "input.cdr";
+        string outputPath = "output/output.psd";
 
-        using (Image image = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            CdrImage cdrImage = image as CdrImage;
-            if (cdrImage == null)
-                throw new InvalidOperationException("The provided file is not a valid CDR image.");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+        {
             PsdOptions psdOptions = new PsdOptions
             {
                 CompressionMethod = CompressionMethod.RLE,
-                ColorMode = ColorModes.Rgb,
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    PageWidth = cdrImage.Width,
-                    PageHeight = cdrImage.Height
-                }
+                ColorMode = ColorModes.Rgb
             };
 
-            cdrImage.Save(outputPath, psdOptions);
+            if (cdr is VectorImage)
+            {
+                psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    PageWidth = cdr.Width,
+                    PageHeight = cdr.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+            }
+
+            cdr.Save(outputPath, psdOptions);
         }
     }
 }
