@@ -3,35 +3,49 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for the source JPEG, thumbnail JPEG, and output JPEG
-        string sourcePath = "source.jpg";
-        string thumbnailPath = "thumbnail.jpg";
-        string outputPath = "output.jpg";
+        // Hardcoded input, thumbnail, and output paths
+        string inputPath = "input.jpg";
+        string thumbnailPath = "thumb.jpg";
+        string outputPath = "output/output.jpg";
 
-        // Load the source JPEG image
-        using (JpegImage jpegImage = new JpegImage(sourcePath))
+        // Verify input files exist
+        if (!File.Exists(inputPath))
         {
-            // Load the thumbnail image as a RasterImage
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+        if (!File.Exists(thumbnailPath))
+        {
+            Console.Error.WriteLine($"File not found: {thumbnailPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the main JPEG image
+        using (JpegImage jpegImage = new JpegImage(inputPath))
+        {
+            // Load the thumbnail image as a raster image
             using (RasterImage thumbRaster = (RasterImage)Image.Load(thumbnailPath))
             {
-                // Assign the thumbnail to the EXIF data (will be JPEG‑encoded automatically)
+                // Embed the thumbnail into the EXIF segment
                 jpegImage.ExifData.Thumbnail = thumbRaster;
+
+                // Configure JPEG save options (optional settings)
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = 90 // Example quality setting
+                };
+
+                // Save the JPEG with the embedded thumbnail
+                jpegImage.Save(outputPath, saveOptions);
             }
-
-            // Prepare JPEG save options (keep existing metadata)
-            JpegOptions saveOptions = new JpegOptions
-            {
-                KeepMetadata = true
-            };
-
-            // Save the image with the embedded thumbnail
-            jpegImage.Save(outputPath, saveOptions);
         }
     }
 }
