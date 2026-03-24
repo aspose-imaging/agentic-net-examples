@@ -1,61 +1,40 @@
 using System;
-using System.Drawing; // For Rectangle
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using System.Drawing;
 
-class GaussWienerToApng
+class Program
 {
     static void Main()
     {
-        // Input image path (any supported format)
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.png";
+        string outputPath = @"C:\Images\result.apng";
 
-        // Output APNG path
-        string outputPath = @"C:\Images\sample_processed.apng";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the image using Aspose.Imaging's generic loader
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare the Gauss‑Wiener filter options (radius = 5, sigma = 4.0)
-            var filterOptions = new GaussWienerFilterOptions(5, 4.0);
+            // Cast to RasterImage to access Filter method
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Apply the filter to the whole image.
-            // Different image types expose the Filter method; we try each known type.
-            if (image is RasterImage raster)
-            {
-                raster.Filter(raster.Bounds, filterOptions);
-            }
-            else if (image is GifImage gif)
-            {
-                gif.Filter(gif.Bounds, filterOptions);
-            }
-            else if (image is WebPImage webp)
-            {
-                webp.Filter(webp.Bounds, filterOptions);
-            }
-            else if (image is DjvuImage djvu)
-            {
-                djvu.Filter(djvu.Bounds, filterOptions);
-            }
-            else if (image is TiffImage tiff)
-            {
-                tiff.Filter(tiff.Bounds, filterOptions);
-            }
-            else
-            {
-                // If the image type does not support Filter, throw an informative exception.
-                throw new NotSupportedException("The loaded image type does not support filtering.");
-            }
+            // Apply Gauss‑Wiener filter to the whole image (radius 5, sigma 4.0)
+            rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
 
-            // Save the processed image as APNG.
-            // Aspose.Imaging infers the format from the file extension.
-            image.Save(outputPath);
+            // Save as APNG (animated PNG) using PngOptions
+            // The file will be saved with .apng extension; Aspose.Imaging treats it as a PNG container.
+            rasterImage.Save(outputPath, new PngOptions());
         }
     }
 }
