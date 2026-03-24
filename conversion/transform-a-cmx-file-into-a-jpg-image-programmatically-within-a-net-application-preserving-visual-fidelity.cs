@@ -1,32 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageLoadOptions; // for CmxLoadOptions
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = args.Length > 0 ? args[0] : "input.cmx";
-        string outputPath = args.Length > 1 ? args[1] : "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\sample.jpg";
 
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            using (JpegOptions jpegOptions = new JpegOptions())
-            {
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-                jpegOptions.VectorRasterizationOptions = vectorOptions;
-                jpegOptions.Quality = 90;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                image.Save(outputPath, jpegOptions);
-            }
+        // Load the CMX image with default load options
+        var loadOptions = new CmxLoadOptions();
+        using (CmxImage image = (CmxImage)Image.Load(inputPath, loadOptions))
+        {
+            // Prepare JPEG save options (default quality)
+            var jpegOptions = new JpegOptions();
+
+            // Save the rasterized image as JPEG
+            image.Save(outputPath, jpegOptions);
         }
     }
 }
