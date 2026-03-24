@@ -9,9 +9,19 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source PNG image
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
@@ -19,22 +29,22 @@ class Program
             int width = sourceImage.Width;
             int height = sourceImage.Height;
 
-            // Prepare output source and PNG options (transparent canvas)
-            Source outSource = new FileCreateSource(outputPath, false);
+            // Prepare PNG options with a bound file source
+            Source fileSource = new FileCreateSource(outputPath, false);
             PngOptions pngOptions = new PngOptions
             {
-                Source = outSource,
+                Source = fileSource,
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create a new blank PNG canvas with the same dimensions
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
+            // Create a new PNG canvas bound to the output file
+            using (PngImage canvas = (PngImage)Image.Create(pngOptions, width, height))
             {
-                // Fill the entire canvas with fully transparent pixels (ARGB = 0)
-                int[] transparentPixels = new int[width * height]; // default zeros are transparent
-                canvas.SaveArgb32Pixels(new Rectangle(0, 0, width, height), transparentPixels);
+                // Clear the canvas to a fully transparent background
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.Transparent);
 
-                // Save the transparent canvas to the output file
+                // Save the canvas (output path already bound)
                 canvas.Save();
             }
         }
