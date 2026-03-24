@@ -1,42 +1,46 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string bmpPath = "input.bmp";
-        string outputPath = "output.emf";
+        // Hardcoded input BMP file path
+        string inputPath = @"C:\temp\sample.bmp";
+        // Hardcoded output SVG file path
+        string outputPath = @"C:\temp\output.svg";
 
-        int canvasWidth = 800;
-        int canvasHeight = 600;
-
-        int canvasWidthMm = (int)(canvasWidth / 100f);
-        int canvasHeightMm = (int)(canvasHeight / 100f);
-
-        Rectangle frame = new Rectangle(0, 0, canvasWidth, canvasHeight);
-
-        EmfRecorderGraphics2D graphics = new EmfRecorderGraphics2D(
-            frame,
-            new Size(canvasWidth, canvasHeight),
-            new Size(canvasWidthMm, canvasHeightMm));
-
-        using (RasterImage bmpImage = (RasterImage)Image.Load(bmpPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            int margin = 50;
-            Rectangle destRect = new Rectangle(margin, margin, canvasWidth - 2 * margin, canvasHeight - 2 * margin);
-            Rectangle srcRect = new Rectangle(0, 0, bmpImage.Width, bmpImage.Height);
-
-            graphics.DrawImage(bmpImage, destRect, srcRect, GraphicsUnit.Pixel);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        graphics.DrawRectangle(new Pen(Color.Blue, 2), 0, 0, canvasWidth, canvasHeight);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (EmfImage emfImage = graphics.EndRecording())
+        // Load BMP raster image
+        using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
         {
-            emfImage.Save(outputPath);
+            // Use BMP dimensions for the SVG canvas
+            int canvasWidth = bmp.Width;
+            int canvasHeight = bmp.Height;
+            int dpi = 96; // Standard screen DPI
+
+            // Create SVG graphics context (fully qualified because the namespace is not in the allowed using list)
+            var svgGraphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(canvasWidth, canvasHeight, dpi);
+
+            // Draw the BMP onto the SVG canvas, scaling to fit the canvas exactly
+            svgGraphics.DrawImage(bmp, new Point(0, 0), new Size(canvasWidth, canvasHeight));
+
+            // Finalize SVG image and save
+            using (SvgImage svgImage = svgGraphics.EndRecording())
+            {
+                svgImage.Save(outputPath);
+            }
         }
     }
 }
