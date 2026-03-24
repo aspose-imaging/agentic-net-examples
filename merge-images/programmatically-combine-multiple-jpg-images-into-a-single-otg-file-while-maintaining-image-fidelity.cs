@@ -1,70 +1,40 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect at least one output path and one input JPG path
-        if (args.Length < 2)
-            return;
-
-        string outputPath = args[0];
-        List<string> inputPaths = new List<string>(args);
-        inputPaths.RemoveAt(0);
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
+        // Hardcoded input JPG files
+        string[] inputPaths = new string[]
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
-            {
-                sizes.Add(img.Size);
-            }
-        }
-
-        // Calculate canvas dimensions (horizontal stitching)
-        int newWidth = 0;
-        int newHeight = 0;
-        foreach (Size sz in sizes)
-        {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight)
-                newHeight = sz.Height;
-        }
-
-        // Prepare output source and JPEG options with OTG rasterization
-        Source source = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions
-        {
-            Source = source,
-            Quality = 100,
-            VectorRasterizationOptions = new OtgRasterizationOptions
-            {
-                PageSize = new Size(newWidth, newHeight)
-            }
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
         };
 
-        // Create canvas bound to the output file
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            int offsetX = 0;
-            foreach (string path in inputPaths)
+            if (!File.Exists(inputPath))
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+        }
 
-            // Save the combined image as OTG (output file is already bound)
-            canvas.Save();
+        // Hardcoded output OTG file
+        string outputPath = @"C:\Combined\combined.otg";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a multipage image from the JPG files
+        using (Image multipageImage = Image.Create(inputPaths))
+        {
+            // Save the multipage image as an OTG file
+            multipageImage.Save(outputPath);
         }
     }
 }
