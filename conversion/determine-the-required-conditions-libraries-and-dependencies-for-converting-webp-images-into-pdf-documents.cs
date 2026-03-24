@@ -1,40 +1,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Required conditions:
-        // - Input file must be a valid WebP image.
-        // - Output path must be writable.
-        // Required libraries/dependencies:
-        // - Aspose.Imaging (core library)
-        // - Aspose.Imaging.ImageOptions (for PdfOptions)
-        // - Aspose.Imaging.FileFormats.Webp (implicitly required for WebP support, loaded via Image.Load)
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\sample.webp";
+        string outputPath = @"C:\Output\sample.pdf";
 
-        string inputPath = "input.webp";
-        string outputPath = "output.pdf";
-
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
-            Console.WriteLine($"Input file not found: {inputPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the WebP image. Image.Load automatically selects the appropriate format handler.
-        using (Image image = Image.Load(inputPath))
-        {
-            // Create PDF options. PdfOptions implements IDisposable, so wrap in using.
-            using (PdfOptions pdfOptions = new PdfOptions())
-            {
-                // Save the loaded image as a PDF document.
-                image.Save(outputPath, pdfOptions);
-            }
-        }
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        Console.WriteLine("WebP to PDF conversion completed successfully.");
+        // Load the WebP image and save it as PDF
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // PDF options can be customized if needed
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the image to PDF
+            webPImage.Save(outputPath, pdfOptions);
+        }
     }
 }
