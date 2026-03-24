@@ -1,15 +1,31 @@
-// Path to the source TIFF file
-string tiffPath = @"C:\Temp\source.tif";
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-// Path where the resulting PDF will be saved
-string pdfPath = @"C:\Temp\result.pdf";
-
-// Load the TIFF image using Aspose.Imaging's load rule
-using (Aspose.Imaging.Image tiffImage = Aspose.Imaging.Image.Load(tiffPath))
+class Program
 {
-    // Create PDF save options (default options are sufficient for a simple conversion)
-    Aspose.Imaging.ImageOptions.PdfOptions pdfOptions = new Aspose.Imaging.ImageOptions.PdfOptions();
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Images\output.pdf";
 
-    // Save the loaded image as a PDF using Aspose.Imaging's save rule
-    tiffImage.Save(pdfPath, pdfOptions);
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image and save it as PDF
+        using (Image image = Image.Load(inputPath))
+        {
+            // Save using default PDF options
+            image.Save(outputPath, new PdfOptions());
+        }
+    }
 }
