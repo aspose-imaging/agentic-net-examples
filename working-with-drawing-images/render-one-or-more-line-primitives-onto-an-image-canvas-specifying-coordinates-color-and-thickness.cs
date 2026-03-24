@@ -3,47 +3,40 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = "output.png";
+        // Output file path (hardcoded)
+        string outputPath = @"C:\temp\output.png";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Create a file stream for the output image
         using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
-            // Configure PNG options and associate the stream as the source
+            // Set PNG options with the stream as the source
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new StreamSource(stream);
 
-            // Create a 400x400 raster image
-            using (Image image = Image.Create(pngOptions, 400, 400))
+            // Create a 500x500 PNG image
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                // Initialize the Graphics object for drawing
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Optional: clear the canvas with a white background
-                graphics.Clear(Color.White);
+                // Draw first line (red, thickness 5)
+                graphics.DrawLine(new Pen(Color.Red, 5), new Point(50, 50), new Point(450, 50));
 
-                // Define pens with specific colors and thicknesses
-                Pen redPen   = new Pen(Color.Red,   3); // 3-pixel wide red line
-                Pen bluePen  = new Pen(Color.Blue,  5); // 5-pixel wide blue line
-                Pen greenPen = new Pen(Color.Green, 2); // 2-pixel wide green line
+                // Draw second line (green, thickness 3)
+                graphics.DrawLine(new Pen(Color.Green, 3), new Point(50, 100), new Point(450, 300));
 
-                // Draw multiple line primitives
-                // Line 1: horizontal red line
-                graphics.DrawLine(redPen, 50, 50, 350, 50);
+                // Draw third line (blue, thickness 2)
+                graphics.DrawLine(new Pen(Color.Blue, 2), new Point(50, 150), new Point(450, 450));
 
-                // Line 2: diagonal blue line
-                graphics.DrawLine(bluePen, 50, 100, 350, 200);
-
-                // Line 3: diagonal green line
-                graphics.DrawLine(greenPen, 50, 150, 350, 350);
-
-                // Persist changes to the image
+                // Save the image (stream is already bound)
                 image.Save();
             }
         }
