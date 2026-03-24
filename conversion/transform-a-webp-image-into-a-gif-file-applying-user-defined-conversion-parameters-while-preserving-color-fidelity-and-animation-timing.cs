@@ -1,42 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
-class WebPToGifConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input WebP file (can be static or animated)
-        string inputWebPPath = @"C:\Images\input.webp";
+        // Hardcoded input and output paths
+        string inputPath = "input.webp";
+        string outputPath = "output.gif";
 
-        // Output GIF file path
-        string outputGifPath = @"C:\Images\output.gif";
-
-        // Load the WebP image using the dedicated constructor (load rule)
-        using (WebPImage webpImage = new WebPImage(inputWebPPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // ------------------------------------------------------------
-            // User‑defined conversion parameters
-            // ------------------------------------------------------------
-            // Example: preserve original animation timing by copying frame delays
-            // (Aspose.Imaging automatically copies frame timing when saving to GIF
-            //  if the source image implements IMultipageImage.)
-            // Additional GIF‑specific options can be set here.
-            GifOptions gifOptions = new GifOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image (animated or static)
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure GIF options (e.g., infinite loop)
+            var gifOptions = new GifOptions
             {
-                // Preserve the original color palette depth (default is 8‑bit)
-                // ColorDepth = 8, // Uncomment if you need to enforce a specific depth
-
-                // Preserve animation loop count if the source is animated
-                // LoopCount = 0, // 0 means infinite looping; set as needed
-
-                // You can also control dithering, transparency, etc., here.
+                LoopsCount = 0 // 0 means infinite looping
             };
 
-            // Save the image as GIF using the Save(string, ImageOptionsBase) method (save rule)
-            // This operation keeps color fidelity and animation timing.
-            webpImage.Save(outputGifPath, gifOptions);
+            // Save as GIF preserving animation timing and colors
+            image.Save(outputPath, gifOptions);
         }
     }
 }
