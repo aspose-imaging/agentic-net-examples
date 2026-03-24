@@ -1,30 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input and output WebP files
+        // Hardcoded input and output paths
         string inputPath = "input.webp";
-        string outputPath = "output_sharpened.webp";
+        string outputPath = "output\\processed.png";
 
-        // Load the WebP image
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to WebPImage to access WebP-specific methods
-            WebPImage webpImage = (WebPImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a sharpen filter to the entire image
-            // Kernel size = 5, Sigma = 4.0
-            webpImage.Filter(
-                webpImage.Bounds,
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image, apply Sharpen filter, and save as PNG
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // Apply sharpen filter with kernel size 5 and sigma 4.0
+            webPImage.Filter(
+                webPImage.Bounds,
                 new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image as a new WebP file
-            webpImage.Save(outputPath, new WebPOptions());
+            // Save the processed image
+            webPImage.Save(outputPath, new PngOptions());
         }
     }
 }
