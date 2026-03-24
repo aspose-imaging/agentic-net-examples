@@ -9,30 +9,35 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input DICOM file path
+        // Hardcoded input and output paths
         string inputPath = "input.dcm";
-        // Output DICOM file path
-        string outputPath = "output_compressed.dcm";
+        string outputPath = "output.dcm";
 
-        // Load the DICOM image
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cache image data for better performance
-            if (!dicomImage.IsCached)
-                dicomImage.CacheData();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Adjust brightness (+30)
-            dicomImage.AdjustBrightness(30);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Resize to half of original size using nearest neighbour resampling
-            int newWidth = dicomImage.Width / 2;
-            int newHeight = dicomImage.Height / 2;
-            dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+        // Load DICOM image
+        using (Image image = Image.Load(inputPath))
+        {
+            DicomImage dicom = (DicomImage)image;
 
-            // Configure DICOM save options with grayscale color type and JPEG compression
+            // Adjust brightness
+            dicom.AdjustBrightness(30);
+
+            // Resize (double size) using nearest neighbour resampling
+            dicom.Resize(dicom.Width * 2, dicom.Height * 2, ResizeType.NearestNeighbourResample);
+
+            // Configure DICOM save options with JPEG compression and RGB24 color type
             var options = new DicomOptions
             {
-                ColorType = ColorType.Grayscale8Bit,
+                ColorType = ColorType.Rgb24Bit,
                 Compression = new Compression
                 {
                     Type = CompressionType.Jpeg,
@@ -45,8 +50,8 @@ class Program
                 }
             };
 
-            // Save the modified image as DICOM with the specified options
-            dicomImage.Save(outputPath, options);
+            // Save the modified DICOM image
+            dicom.Save(outputPath, options);
         }
     }
 }
