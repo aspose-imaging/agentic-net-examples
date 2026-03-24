@@ -1,27 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Ico;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Ico;
 
 class Program
 {
     static void Main()
     {
-        // Paths for the source ICO image and the processed result
-        string inputPath = "input.ico";
-        string outputPath = "output.ico";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.ico";
+        string outputPath = @"C:\Images\sample_sharpened.ico";
 
-        // Load the ICO image using Aspose.Imaging
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the ICO image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to IcoImage to access ICO‑specific functionality
+            // Cast to IcoImage to access raster operations
             IcoImage ico = (IcoImage)image;
 
-            // Apply a sharpen filter to the entire image area
-            // Kernel size = 5, sigma = 4.0 (as in the documentation example)
+            // Apply sharpen filter to the whole image
             ico.Filter(ico.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image to a new file
+            // Save the processed image
             ico.Save(outputPath);
         }
     }
