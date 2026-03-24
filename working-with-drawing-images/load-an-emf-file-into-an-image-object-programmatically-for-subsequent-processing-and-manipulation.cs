@@ -1,34 +1,50 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Path to the EMF file to be loaded
-        string emfFilePath = @"C:\Images\sample.emf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.emf";
+        string outputPath = @"C:\temp\output.emf";
 
-        // Load the EMF file using the unified Image.Load method
-        using (Image image = Image.Load(emfFilePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the loaded Image to EmfImage for EMF‑specific operations
-            EmfImage emfImage = (EmfImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Optional: cache data to ensure all records are loaded
-            emfImage.CacheData();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Example: access basic properties for further processing
-            Console.WriteLine($"Width: {emfImage.Width}");
-            Console.WriteLine($"Height: {emfImage.Height}");
+        // Load the EMF image
+        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        {
+            // Obtain a graphics object that contains all records from the loaded EMF
+            EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
 
-            // At this point, emfImage can be manipulated (resize, rotate, etc.)
-            // Example: resize the image to 200x200 pixels
-            emfImage.Resize(200, 200);
+            // Example manipulation: draw a watermark text on the image
+            float fontSize = 48f;
+            graphics.DrawString(
+                "WATERMARK",
+                new Font("Arial", fontSize),
+                Color.LightPink,
+                0,
+                0);
 
-            // Save the modified image if needed (demonstrates usage of Save)
-            string outputPath = @"C:\Images\sample_resized.emf";
-            emfImage.Save(outputPath);
+            // Finalize recording to get a new EMF image with the modifications
+            using (EmfImage modifiedEmf = graphics.EndRecording())
+            {
+                // Save the modified EMF image
+                modifiedEmf.Save(outputPath);
+            }
         }
     }
 }
