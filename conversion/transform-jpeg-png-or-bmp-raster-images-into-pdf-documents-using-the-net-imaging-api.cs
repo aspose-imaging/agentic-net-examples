@@ -3,27 +3,62 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class ImageToPdfConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // List of raster image files to be converted (JPEG, PNG, BMP)
-        string[] imageFiles = { "sample.jpg", "sample.png", "sample.bmp" };
+        // JPEG to PDF
+        string jpegInputPath = "input.jpg";
+        string jpegOutputPath = Path.Combine("output", "input_from_jpeg.pdf");
 
-        foreach (string imagePath in imageFiles)
+        if (!File.Exists(jpegInputPath))
         {
-            // Load the raster image using Aspose.Imaging's lifecycle method
-            using (Image rasterImage = Image.Load(imagePath))
-            {
-                // Prepare PDF save options (default options are sufficient for basic conversion)
-                PdfOptions pdfOptions = new PdfOptions();
+            Console.Error.WriteLine($"File not found: {jpegInputPath}");
+            return;
+        }
 
-                // Define the output PDF file name (same base name, .pdf extension)
-                string pdfPath = Path.ChangeExtension(imagePath, ".pdf");
+        Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
 
-                // Save the loaded image as a PDF document using the save lifecycle method
-                rasterImage.Save(pdfPath, pdfOptions);
-            }
+        using (Image jpegImage = Image.Load(jpegInputPath))
+        {
+            var pdfOptions = new PdfOptions();
+            jpegImage.Save(jpegOutputPath, pdfOptions);
+        }
+
+        // PNG to PDF
+        string pngInputPath = "input.png";
+        string pngOutputPath = Path.Combine("output", "input_from_png.pdf");
+
+        if (!File.Exists(pngInputPath))
+        {
+            Console.Error.WriteLine($"File not found: {pngInputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
+
+        using (Image pngImage = Image.Load(pngInputPath))
+        {
+            var pdfOptions = new PdfOptions();
+            pngImage.Save(pngOutputPath, pdfOptions);
+        }
+
+        // BMP to PDF
+        string bmpInputPath = "input.bmp";
+        string bmpOutputPath = Path.Combine("output", "input_from_bmp.pdf");
+
+        if (!File.Exists(bmpInputPath))
+        {
+            Console.Error.WriteLine($"File not found: {bmpInputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(bmpOutputPath));
+
+        using (Image bmpImage = Image.Load(bmpInputPath))
+        {
+            var pdfOptions = new PdfOptions();
+            bmpImage.Save(bmpOutputPath, pdfOptions);
         }
     }
 }
