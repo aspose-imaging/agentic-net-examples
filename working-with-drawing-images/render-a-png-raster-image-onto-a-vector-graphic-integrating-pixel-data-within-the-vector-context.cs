@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
@@ -7,27 +8,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input PNG and output SVG
-        string inputPngPath = "input.png";
-        string outputSvgPath = "output.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.svg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG raster image
-        using (RasterImage raster = (RasterImage)Image.Load(inputPngPath))
+        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
         {
-            // Create an SVG canvas with the same dimensions as the PNG
-            int width = raster.Width;
-            int height = raster.Height;
-            int dpi = 96; // Standard screen DPI
+            // Create an SVG graphics canvas with the same dimensions as the raster image
+            SvgGraphics2D graphics = new SvgGraphics2D(raster.Width, raster.Height, 96);
 
-            SvgGraphics2D svgGraphics = new SvgGraphics2D(width, height, dpi);
+            // Draw the raster image onto the SVG canvas at the origin (0,0)
+            graphics.DrawImage(raster, new Point(0, 0));
 
-            // Draw the raster image onto the SVG at the origin (0,0) with its original size
-            svgGraphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
-
-            // Finalize the SVG image and save it to file
-            using (SvgImage svgImage = svgGraphics.EndRecording())
+            // Finalize the SVG image and save it
+            using (SvgImage svgImage = graphics.EndRecording())
             {
-                svgImage.Save(outputSvgPath);
+                svgImage.Save(outputPath);
             }
         }
     }
