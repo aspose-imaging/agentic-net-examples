@@ -1,24 +1,27 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Specify the path to the image file to be loaded
-        string imagePath = @"C:\temp\sample.bmp";
+        // Hardcoded input path
+        string inputPath = @"C:\temp\sample.bmp";
 
-        // Load the image into memory using Aspose.Imaging's static Load method
-        // The using statement ensures the image resources are released after processing
-        using (Image image = Image.Load(imagePath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // The image is now initialized and ready for further processing
-            // Example: retrieve basic properties
-            int width = image.Width;
-            int height = image.Height;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Placeholder for additional image processing logic
-            // ...
+        // Load the image into memory using Aspose.Imaging
+        using (Image image = Image.Load(inputPath))
+        {
+            // Image is now ready for further processing
+            Console.WriteLine($"Image loaded successfully. Width: {image.Width}, Height: {image.Height}");
+            // Additional image operations can be performed here
         }
     }
 }
