@@ -1,32 +1,35 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class TiffToJpegConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source TIFF image
-        string tiffPath = @"C:\Images\source.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.jpg";
 
-        // Desired path for the output JPEG image
-        string jpegPath = @"C:\Images\converted.jpg";
-
-        // Load the TIFF image using Aspose.Imaging's built‑in load method
-        using (Image tiffImage = Image.Load(tiffPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure JPEG export options
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                // Preserve original metadata (EXIF, XMP, etc.)
-                KeepMetadata = true,
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-                // Set the quality level (0‑100). Adjust as needed.
-                Quality = 90
-            };
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image as JPEG using the configured options
-            tiffImage.Save(jpegPath, jpegOptions);
+        // Load the TIFF image
+        using (Image tiffImage = Image.Load(inputPath))
+        {
+            // Metadata is retained within the Image instance.
+            // Create JPEG options (default quality, can be adjusted if needed)
+            JpegOptions jpegOptions = new JpegOptions();
+
+            // Save the image as JPEG, preserving metadata automatically
+            tiffImage.Save(outputPath, jpegOptions);
         }
     }
 }
