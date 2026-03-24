@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
@@ -7,39 +8,37 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input SVG file path and output TIFF file path.
-        string inputSvgPath = "input.svg";
-        string outputTiffPath = "output.tif";
+        // Hardcoded input and output file paths
+        string inputPath = "input.svg";
+        string outputPath = "output.tiff";
 
-        // Load the SVG image using Aspose.Imaging.
-        using (Image svgImage = Image.Load(inputSvgPath))
+        // Verify that the input SVG file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options for the SVG.
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization to match the SVG's original size
+            var rasterOptions = new SvgRasterizationOptions
             {
-                // Preserve the original SVG dimensions.
-                PageSize = svgImage.Size,
-                // Set a white background to maintain color fidelity.
-                BackgroundColor = Color.White,
-                // Enable anti-aliasing for smoother edges.
-                SmoothingMode = SmoothingMode.AntiAlias,
-                // Render text with anti-aliasing.
-                TextRenderingHint = TextRenderingHint.AntiAlias
+                PageSize = image.Size
             };
 
-            // Configure TIFF save options.
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            // Set up TIFF save options with default format and the rasterization options
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
             {
-                // Use LZW compression for good size/quality balance.
-                Compression = TiffCompressions.Lzw,
-                // Set desired resolution (DPI) for the rasterized output.
-                ResolutionSettings = new ResolutionSetting(300, 300),
-                // Attach the rasterization options to the TIFF export.
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the rasterized image as a TIFF file.
-            svgImage.Save(outputTiffPath, tiffOptions);
+            // Save the rasterized image as a TIFF file
+            image.Save(outputPath, tiffOptions);
         }
     }
 }
