@@ -1,57 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 
-class EmfToVectorConverter
+class Program
 {
-    /// <summary>
-    /// Converts an EMF metafile to an SVG image while rendering all text as vector shapes.
-    /// </summary>
-    /// <param name="inputEmfPath">Full path to the source EMF file.</param>
-    /// <param name="outputSvgPath">Full path where the resulting SVG will be saved.</param>
-    public static void ConvertEmfToSvg(string inputEmfPath, string outputSvgPath)
-    {
-        // Load the EMF image using the unified Image.Load method.
-        using (EmfImage emfImage = (EmfImage)Image.Load(inputEmfPath))
-        {
-            // Prepare SVG save options.
-            SvgOptions svgOptions = new SvgOptions
-            {
-                // Ensure that all text elements are converted to vector shapes.
-                TextAsShapes = true
-            };
-
-            // Configure rasterization options for the EMF source.
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-            {
-                // Use the original EMF size as the page size.
-                PageSize = emfImage.Size,
-
-                // Optional: set a background color (transparent by default).
-                BackgroundColor = Color.Transparent,
-
-                // Render mode set to Auto to handle embedded EMF/WMF correctly.
-                RenderMode = EmfRenderMode.Auto
-            };
-
-            // Attach rasterization options to the SVG options.
-            svgOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save the EMF as an SVG file with the specified options.
-            emfImage.Save(outputSvgPath, svgOptions);
-        }
-    }
-
-    // Example usage.
     static void Main()
     {
-        string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\sample_converted.svg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\input.emf";
+        string outputPath = @"C:\Temp\output.svg";
 
-        ConvertEmfToSvg(inputPath, outputPath);
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        Console.WriteLine("Conversion completed.");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EMF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization options based on the source image size
+            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+            {
+                PageSize = image.Size
+            };
+
+            // Set up SVG save options: export text as vector shapes
+            SvgOptions saveOptions = new SvgOptions
+            {
+                TextAsShapes = true,
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            // Save the image as SVG with text converted to shapes
+            image.Save(outputPath, saveOptions);
+        }
     }
 }
