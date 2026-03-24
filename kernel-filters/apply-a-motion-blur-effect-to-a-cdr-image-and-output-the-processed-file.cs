@@ -1,45 +1,57 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input CDR and output image
-        string inputCdrPath = "input.cdr";
-        string outputPngPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.cdr";
+        string outputPath = "output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the CDR vector image
-        using (Image cdrImage = Image.Load(inputCdrPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            CdrImage cdr = (CdrImage)cdrImage;
+            var cdrImage = (Aspose.Imaging.FileFormats.Cdr.CdrImage)image;
 
-            // Rasterize the CDR image to a memory stream in PNG format
-            using (MemoryStream rasterStream = new MemoryStream())
+            // Rasterize CDR to a PNG in memory
+            using (var memoryStream = new MemoryStream())
             {
-                PngOptions pngOptions = new PngOptions();
-                cdr.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0; // Reset stream for reading
-
-                // Load the rasterized image as a RasterImage
-                using (Image rasterImage = Image.Load(rasterStream))
+                var pngOptions = new PngOptions
                 {
-                    RasterImage raster = (RasterImage)rasterImage;
-
-                    // Apply motion blur (motion wiener) filter to the entire image
-                    // Parameters: length = 10, smooth = 1.0, angle = 90 degrees
-                    raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
-
-                    // Save the processed raster image to the output file
-                    using (FileStream outStream = new FileStream(outputPngPath, FileMode.Create, FileAccess.Write))
+                    VectorRasterizationOptions = new CdrRasterizationOptions
                     {
-                        raster.Save(outStream, new PngOptions());
+                        PageWidth = cdrImage.Width,
+                        PageHeight = cdrImage.Height
                     }
+                };
+                cdrImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
+
+                // Load the rasterized image
+                using (Aspose.Imaging.Image rasterImageContainer = Aspose.Imaging.Image.Load(memoryStream))
+                {
+                    var rasterImage = (Aspose.Imaging.RasterImage)rasterImageContainer;
+
+                    // Apply motion wiener (motion blur) filter
+                    rasterImage.Filter(
+                        rasterImage.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
+
+                    // Save the processed image
+                    rasterImage.Save(outputPath, new PngOptions());
                 }
             }
         }
