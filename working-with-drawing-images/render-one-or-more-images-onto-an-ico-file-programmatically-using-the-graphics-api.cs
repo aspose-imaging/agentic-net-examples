@@ -3,54 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Ico;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output ICO file path
-        string outputIcoPath = "output.ico";
+        // Hard‑coded input image paths
+        string[] inputPaths = { @"C:\Images\icon16.png", @"C:\Images\icon32.png", @"C:\Images\icon64.png" };
+        // Hard‑coded output ICO path
+        string outputPath = @"C:\Images\myIcon.ico";
 
-        // Desired icon size (e.g., 256x256)
-        int iconSize = 256;
-
-        // Create an in‑memory stream to hold the temporary PNG canvas
-        using (MemoryStream tempStream = new MemoryStream())
+        // Verify each input file exists
+        foreach (var inputPath in inputPaths)
         {
-            // Source for the PNG canvas (bound to the stream)
-            Source canvasSource = new StreamSource(tempStream);
-
-            // PNG options for the canvas
-            PngOptions pngOptions = new PngOptions() { Source = canvasSource };
-
-            // Create a raster canvas of the required size
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, iconSize, iconSize))
+            if (!File.Exists(inputPath))
             {
-                // Draw on the canvas using Graphics
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+        }
 
-                // Example drawing: a blue ellipse
-                Pen bluePen = new Pen(Color.Blue, 5);
-                graphics.DrawEllipse(bluePen, new Rectangle(20, 20, iconSize - 40, iconSize - 40));
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the canvas (required because it is bound to a stream)
-                canvas.Save();
+        // Create default ICO options (32‑bit PNG frames)
+        var icoOptions = new IcoOptions();
 
-                // Prepare ICO creation options (default 32‑bit PNG)
-                IcoOptions icoOptions = new IcoOptions();
-
-                // Create the ICO image
-                using (IcoImage icoImage = new IcoImage(iconSize, iconSize, icoOptions))
+        // Create an empty ICO image with a base size (e.g., 256x256)
+        using (var icoImage = new IcoImage(256, 256, icoOptions))
+        {
+            // Load each source image and add it as a page to the ICO
+            foreach (var inputPath in inputPaths)
+            {
+                using (Image srcImage = Image.Load(inputPath))
                 {
-                    // Add the drawn raster image as a page/frame
-                    icoImage.AddPage(canvas);
-
-                    // Save the final ICO file
-                    icoImage.Save(outputIcoPath);
+                    // Add the image using default IcoOptions (converted to 32‑bit PNG)
+                    icoImage.AddPage(srcImage);
                 }
             }
+
+            // Save the assembled ICO file
+            icoImage.Save(outputPath);
         }
     }
 }
