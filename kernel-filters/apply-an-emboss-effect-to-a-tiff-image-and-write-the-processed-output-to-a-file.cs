@@ -1,27 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = "input.tif";
-        string outputPath = "output_emboss.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output_embossed.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the TIFF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to TiffImage to access TIFF-specific methods
+            // Cast to TiffImage
             TiffImage tiffImage = (TiffImage)image;
 
-            // Apply an emboss effect using a predefined convolution kernel
+            // Apply emboss effect using a convolution filter
             tiffImage.Filter(tiffImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-            // Save the processed image as a new TIFF file
+            // Save the processed image
             tiffImage.Save(outputPath);
         }
     }
