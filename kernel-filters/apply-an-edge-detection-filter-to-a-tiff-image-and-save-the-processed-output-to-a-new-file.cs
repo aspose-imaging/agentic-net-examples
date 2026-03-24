@@ -1,29 +1,43 @@
 using System;
+using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
-class EdgeDetectionExample
+namespace EdgeDetectionExample
 {
-    static void Main()
+    class Program
     {
-        // Define input and output file paths
-        string inputPath = @"C:\temp\sample.tif";
-        string outputPath = @"C:\temp\sample.EdgeDetection.png";
-
-        // Load the TIFF image
-        using (Image image = Image.Load(inputPath))
+        static void Main()
         {
-            // Cast the generic Image to a TiffImage to access TIFF‑specific methods
-            TiffImage tiffImage = (TiffImage)image;
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\input.tif";
+            string outputPath = @"C:\Images\output.png";
 
-            // Apply a sharpen filter (commonly used for edge‑enhancement) to the whole image.
-            // The SharpenFilterOptions constructor takes kernel size and sigma.
-            tiffImage.Filter(tiffImage.Bounds, new SharpenFilterOptions(5, 4.0));
+            // Verify that the input file exists; report and exit if not found
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the processed image to a new file (PNG format in this example)
-            tiffImage.Save(outputPath, new PngOptions());
+            // Ensure the output directory exists (creates it unconditionally)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image, apply an edge‑like sharpen filter, and save the result
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast the generic Image to a TiffImage to access the Filter method
+                TiffImage tiffImage = (TiffImage)image;
+
+                // Apply a sharpen filter to the whole image (acts as an edge detector)
+                tiffImage.Filter(tiffImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                // Save the processed image as PNG
+                tiffImage.Save(outputPath, new PngOptions());
+            }
         }
     }
 }
