@@ -2,69 +2,62 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
         string outputPath = @"C:\temp\output.png";
 
-        // Create a file stream for the output image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Set PNG options and bind the stream as the source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a 500x500 image using the options
-            using (Image image = Image.Create(pngOptions, 500, 500))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the input image as a raster image
+        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        {
+            // Create a Graphics object for drawing
+            Graphics graphics = new Graphics(raster);
+
+            // Clear the surface with a light color
+            graphics.Clear(Color.Wheat);
+
+            // Draw a red line
+            graphics.DrawLine(new Pen(Color.Red, 3), new Point(50, 50), new Point(200, 50));
+
+            // Draw a blue rectangle
+            graphics.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle(60, 80, 150, 100));
+
+            // Fill an ellipse with a semi‑transparent green brush
+            using (SolidBrush ellipseBrush = new SolidBrush())
             {
-                // Initialize Graphics for drawing on the image
-                Graphics graphics = new Graphics(image);
-
-                // Clear the canvas with a wheat background
-                graphics.Clear(Color.Wheat);
-
-                // Draw various primitive shapes
-                graphics.DrawArc(new Pen(Color.Black, 2), new Rectangle(200, 200, 100, 200), 0, 300);
-                graphics.DrawBezier(new Pen(Color.Blue, 2),
-                    new Point(250, 100), new Point(300, 30), new Point(450, 100), new Point(235, 25));
-                graphics.DrawCurve(new Pen(Color.Green, 2), new[]
-                {
-                    new Point(100, 200), new Point(100, 350), new Point(200, 450)
-                });
-                graphics.DrawEllipse(new Pen(Color.Yellow, 2), new Rectangle(300, 300, 100, 100));
-                graphics.DrawLine(new Pen(Color.Violet, 2), new Point(100, 100), new Point(200, 200));
-                graphics.DrawPie(new Pen(Color.Silver, 2),
-                    new Rectangle(new Point(200, 20), new Size(200, 200)), 0, 45);
-                graphics.DrawPolygon(new Pen(Color.Red, 2), new[]
-                {
-                    new Point(20, 100), new Point(20, 200), new Point(220, 20)
-                });
-                graphics.DrawRectangle(new Pen(Color.Orange, 2),
-                    new Rectangle(new Point(250, 250), new Size(100, 100)));
-
-                // Use a solid brush to draw text
-                using (SolidBrush brush = new SolidBrush())
-                {
-                    brush.Color = Color.Purple;
-                    brush.Opacity = 1.0f; // Fully opaque
-
-                    Font font = new Font("Times New Roman", 16);
-                    graphics.DrawString(
-                        "This image is created by Aspose.Imaging API",
-                        font,
-                        brush,
-                        new PointF(50, 400));
-                }
-
-                // Save the image (the stream is already bound, so just call Save)
-                image.Save();
+                ellipseBrush.Color = Color.Green;
+                ellipseBrush.Opacity = 0.5f;
+                graphics.FillEllipse(ellipseBrush, new Rectangle(80, 200, 120, 80));
             }
+
+            // Draw a string using a solid purple brush
+            using (SolidBrush textBrush = new SolidBrush())
+            {
+                textBrush.Color = Color.Purple;
+                textBrush.Opacity = 1.0f;
+                Font font = new Font("Arial", 24);
+                graphics.DrawString("Aspose.Imaging Demo", font, textBrush, new PointF(70, 320));
+            }
+
+            // Save the modified image as PNG
+            PngOptions pngOptions = new PngOptions();
+            raster.Save(outputPath, pngOptions);
         }
     }
 }
