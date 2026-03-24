@@ -10,38 +10,52 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
         string outputPath = "output.tif";
 
-        // Configure TIFF options
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };                     // 8 bits per channel
-        tiffOptions.ByteOrder = TiffByteOrder.LittleEndian;                     // Intel byte order
-        tiffOptions.Compression = TiffCompressions.Lzw;                         // LZW compression
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;                         // RGB color model
-        tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;        // Single plane
-        tiffOptions.Predictor = TiffPredictor.Horizontal;                      // Predictor for LZW
-
-        // Create a new TIFF image with the specified options
-        using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 200, 200))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Set resolution (DPI)
-            tiffImage.HorizontalResolution = 300;
-            tiffImage.VerticalResolution = 300;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a linear gradient brush
-            LinearGradientBrush gradientBrush = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(tiffImage.Width, tiffImage.Height),
-                Color.Blue,
-                Color.Yellow);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Draw the gradient onto the image
-            Graphics graphics = new Graphics(tiffImage);
-            graphics.FillRectangle(gradientBrush, tiffImage.Bounds);
+        // Load the source image to obtain dimensions
+        using (Image sourceImage = Image.Load(inputPath))
+        {
+            int width = sourceImage.Width;
+            int height = sourceImage.Height;
 
-            // Save the TIFF image to disk
-            tiffImage.Save(outputPath);
+            // Configure TIFF options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            tiffOptions.Compression = TiffCompressions.Lzw;
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+            tiffOptions.ByteOrder = TiffByteOrder.LittleEndian;
+            tiffOptions.Xresolution = new TiffRational(300); // 300 DPI horizontal
+            tiffOptions.Yresolution = new TiffRational(300); // 300 DPI vertical
+
+            // Create a new TIFF image with the specified options
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
+            {
+                // Draw a gradient background
+                LinearGradientBrush gradientBrush = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(width, height),
+                    Color.Blue,
+                    Color.Yellow);
+
+                Graphics graphics = new Graphics(tiffImage);
+                graphics.FillRectangle(gradientBrush, tiffImage.Bounds);
+
+                // Save the TIFF image to the output path
+                tiffImage.Save(outputPath);
+            }
         }
     }
 }
