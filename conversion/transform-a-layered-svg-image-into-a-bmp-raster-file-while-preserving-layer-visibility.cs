@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -8,21 +9,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.bmp";
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.bmp";
 
-        using (Image image = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            Source source = new FileCreateSource(outputPath, false);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Image svgImage = Image.Load(inputPath))
+        {
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            {
+                PageWidth = svgImage.Width,
+                PageHeight = svgImage.Height,
+                BackgroundColor = Color.White
+            };
+
             BmpOptions bmpOptions = new BmpOptions
             {
-                Source = source,
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                }
+                Source = new FileCreateSource(outputPath, false),
+                VectorRasterizationOptions = rasterOptions
             };
-            image.Save(outputPath, bmpOptions);
+
+            svgImage.Save(outputPath, bmpOptions);
         }
     }
 }
