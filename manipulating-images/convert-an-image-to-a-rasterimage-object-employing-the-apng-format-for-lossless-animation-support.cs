@@ -2,42 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input raster image and output APNG file paths
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output.apng";
+        string outputPath = "output_animation.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source image as a RasterImage
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
             // Configure APNG creation options
-            ApngOptions options = new ApngOptions
+            ApngOptions createOptions = new ApngOptions
             {
-                // Bind the output file to the creation source
                 Source = new FileCreateSource(outputPath, false),
-                // Set default frame duration (in milliseconds)
-                DefaultFrameTime = 100,
-                // Use truecolor with alpha for lossless animation
+                DefaultFrameTime = 100, // default frame duration in milliseconds
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create an APNG image with the same dimensions as the source raster image
-            using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+            // Create the APNG image bound to the output file
+            using (Aspose.Imaging.FileFormats.Apng.ApngImage apngImage =
+                (Aspose.Imaging.FileFormats.Apng.ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
-                // Remove the automatically added initial frame
+                // Remove the default single frame
                 apngImage.RemoveAllFrames();
 
-                // Add the source image as the sole frame of the animation
+                // Add the source image as the first (and only) frame
                 apngImage.AddFrame(sourceImage);
 
-                // Save the APNG; the output file is already bound via FileCreateSource
+                // Save the APNG animation (output is already bound via FileCreateSource)
                 apngImage.Save();
             }
         }
