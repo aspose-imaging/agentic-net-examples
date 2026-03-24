@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
@@ -6,24 +7,32 @@ class Program
 {
     static void Main()
     {
-        // Paths for input and output images
-        string inputPath = @"C:\temp\sample.png";
-        string outputPath = @"C:\temp\sample.GaussianBlur.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"c:\temp\sample.png";
+        string outputPath = @"c:\temp\sample.GaussianBlur.png";
 
-        // Load the image from disk
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image, apply Gaussian blur, and save the result
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to gain access to the Filter method
+            // Cast to RasterImage to access filtering capabilities
             RasterImage rasterImage = (RasterImage)image;
 
-            // Define Gaussian blur parameters
-            int kernelSize = 5;      // Must be a positive odd integer
-            double sigma = 4.0;      // Positive non‑zero sigma value
+            // Apply Gaussian blur with kernel size 5 and sigma 4.0 to the whole image
+            rasterImage.Filter(
+                rasterImage.Bounds,
+                new GaussianBlurFilterOptions(5, 4.0));
 
-            // Apply Gaussian blur to the entire image area
-            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(kernelSize, sigma));
-
-            // Save the blurred image back to disk
+            // Save the processed image
             rasterImage.Save(outputPath);
         }
     }
