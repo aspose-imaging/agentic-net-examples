@@ -1,49 +1,58 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input SVG file path and desired output PNG path
-        string inputSvgPath = "input.svg";
-        string outputPngPath = "output.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
 
-        // Desired dimensions for the resulting PNG bitmap
-        int targetWidth = 800;
-        int targetHeight = 600;
-
-        // Load the SVG image using Aspose.Imaging.Image.Load
-        using (Image svgImage = Image.Load(inputSvgPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Ensure the loaded image is a vector image
-            if (!(svgImage is VectorImage))
-                throw new InvalidOperationException("The provided file is not a vector image.");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Calculate uniform scaling factor to fit the SVG within the target dimensions while preserving aspect ratio
-            float scaleX = (float)targetWidth / svgImage.Width;
-            float scaleY = (float)targetHeight / svgImage.Height;
-            float uniformScale = Math.Min(scaleX, scaleY);
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Configure rasterization options for SVG rendering
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+        // Load the SVG image
+        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+        {
+            // Configure rasterization options to preserve fidelity
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
             {
-                ScaleX = uniformScale,
-                ScaleY = uniformScale,
+                // Use a neutral background; change if needed
+                BackgroundColor = Color.White,
+
+                // Preserve original size; can be changed for scaling
+                PageSize = svgImage.Size,
+
+                // Apply anti-aliasing for smooth edges
                 SmoothingMode = SmoothingMode.AntiAlias,
+
+                // Render text with high quality
                 TextRenderingHint = TextRenderingHint.AntiAlias,
-                BackgroundColor = Color.White
+
+                // Scale factors (1.0 = original size). Adjust to resize while keeping aspect ratio.
+                ScaleX = 1.0f,
+                ScaleY = 1.0f
             };
 
-            // Set up PNG export options and attach the rasterization settings
-            PngOptions pngOptions = new PngOptions
+            // Set up PNG save options and attach the rasterization settings
+            PngOptions saveOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the rasterized PNG image to the specified path
-            svgImage.Save(outputPngPath, pngOptions);
+            // Save the rasterized PNG
+            svgImage.Save(outputPath, saveOptions);
         }
     }
 }
