@@ -1,36 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageOptions;
 
-class SvgResizeExample
+class Program
 {
     static void Main()
     {
-        // Path to the source SVG file
-        string inputPath = @"C:\Images\source.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.svg";
 
-        // Path where the resized SVG will be saved
-        string outputPath = @"C:\Images\resized.svg";
-
-        // Desired dimensions (the aspect ratio will be preserved by the Resize method)
-        int newWidth = 300;
-        int newHeight = 300;
-
-        // Load the SVG image using the standard Image.Load method (lifecycle rule)
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to SvgImage to access SVG‑specific functionality
-            SvgImage svgImage = (SvgImage)image;
-
-            // Resize while preserving aspect ratio.
-            // ResizeType.LanczosResample provides high‑quality resampling; any ResizeType can be used.
-            svgImage.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-
-            // Save the resized SVG (lifecycle rule)
-            svgImage.Save(outputPath);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("SVG image resized and saved to: " + outputPath);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+        {
+            // Desired width for the resized image
+            int targetWidth = 200;
+
+            // Calculate height to preserve aspect ratio
+            double scale = (double)targetWidth / svgImage.Width;
+            int targetHeight = (int)Math.Round(svgImage.Height * scale);
+
+            // Resize while maintaining aspect ratio
+            svgImage.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+
+            // Save the resized SVG
+            svgImage.Save(outputPath);
+        }
     }
 }

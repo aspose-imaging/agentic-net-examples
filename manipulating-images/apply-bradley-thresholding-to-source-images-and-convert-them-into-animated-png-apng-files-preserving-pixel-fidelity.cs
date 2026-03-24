@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -12,66 +10,71 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input folder containing source images
-        string inputFolder = "input_images";
-        // Output APNG file path
-        string outputPath = "output_animation.apng";
+        // Hardcoded input image paths
+        string[] inputPaths = {
+            "input1.png",
+            "input2.png",
+            "input3.png"
+        };
 
-        // Collect supported image files from the input folder
-        string[] supportedExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff" };
-        List<string> imageFiles = Directory.GetFiles(inputFolder)
-            .Where(f => supportedExtensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase))
-            .ToList();
+        // Hardcoded output APNG path
+        string outputPath = "output/animated_output.png";
 
-        if (imageFiles.Count == 0)
+        // Verify each input file exists
+        foreach (var inputPath in inputPaths)
         {
-            Console.WriteLine("No supported images found in the input folder.");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
         }
 
-        // Load the first image to determine canvas size
-        using (RasterImage firstImage = (RasterImage)Image.Load(imageFiles[0]))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the first image to obtain canvas size
+        using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
         {
-            // Apply Bradley thresholding to preserve pixel fidelity
-            firstImage.BinarizeBradley(0.15, 8);
+            // Apply Bradley thresholding to the first image (preserve for first frame)
+            firstImage.BinarizeBradley(0.15, 15);
 
-            int canvasWidth = firstImage.Width;
-            int canvasHeight = firstImage.Height;
-
-            // Configure APNG creation options
+            // Set up APNG creation options
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100U, // 100 ms per frame
+                DefaultFrameTime = 100, // 100 ms per frame
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create the APNG image canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, canvasWidth, canvasHeight))
+            // Create the APNG canvas
+            using (ApngImage apngImage = (ApngImage)Image.Create(
+                createOptions,
+                firstImage.Width,
+                firstImage.Height))
             {
-                // Ensure the image starts with an empty frame collection
+                // Remove the default empty frame
                 apngImage.RemoveAllFrames();
 
                 // Add the processed first frame
                 apngImage.AddFrame(firstImage);
 
-                // Process and add remaining frames
-                for (int i = 1; i < imageFiles.Count; i++)
+                // Process remaining images
+                for (int i = 1; i < inputPaths.Length; i++)
                 {
-                    using (RasterImage frame = (RasterImage)Image.Load(imageFiles[i]))
+                    using (RasterImage frame = (RasterImage)Image.Load(inputPaths[i]))
                     {
-                        // Apply the same Bradley thresholding
-                        frame.BinarizeBradley(0.15, 8);
-                        // Add the frame to the animation
+                        // Apply Bradley thresholding
+                        frame.BinarizeBradley(0.15, 15);
+
+                        // Add the binarized frame to the animation
                         apngImage.AddFrame(frame);
                     }
                 }
 
-                // Save the animated PNG
+                // Save the APNG file (output path already bound via FileCreateSource)
                 apngImage.Save();
             }
         }
-
-        Console.WriteLine($"Animated PNG saved to: {outputPath}");
     }
 }

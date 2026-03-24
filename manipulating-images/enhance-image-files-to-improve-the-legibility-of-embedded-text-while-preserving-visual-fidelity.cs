@@ -1,41 +1,46 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Expect input and output file paths as arguments
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <inputPath> <outputPath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image
-        using (Image image = Image.Load(inputPath))
+        // Load the image and process it
+        using (var image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Cast to RasterImage for pixel operations
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage for pixel-level operations
+            var raster = (Aspose.Imaging.RasterImage)image;
 
-            // Ensure image data is cached
+            // Cache data if not already cached
             if (!raster.IsCached)
                 raster.CacheData();
 
-            // Enhance legibility: auto brightness/contrast
+            // Enhance legibility: auto brightness/contrast, slight contrast boost, brightness boost, histogram normalization
             raster.AutoBrightnessContrast();
+            raster.AdjustContrast(0.2f);      // increase contrast slightly
+            raster.AdjustBrightness(10);     // brighten a bit
+            raster.NormalizeHistogram();     // stretch histogram for better contrast
 
-            // Normalize histogram to use full dynamic range
-            raster.NormalizeHistogram();
+            // Preserve original format options
+            var saveOptions = image.GetOriginalOptions();
 
-            // Slightly increase contrast for clearer text
-            raster.AdjustContrast(0.2f);
-
-            // Save the enhanced image, preserving original format
-            image.Save(outputPath);
+            // Save the enhanced image
+            image.Save(outputPath, saveOptions);
         }
     }
 }

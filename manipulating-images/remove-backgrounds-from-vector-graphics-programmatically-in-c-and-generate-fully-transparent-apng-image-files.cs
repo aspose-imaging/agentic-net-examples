@@ -1,53 +1,71 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source vector graphic (e.g., SVG, EMF, WMF)
-        string inputPath = @"C:\Images\source.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.apng";
 
-        // Desired output path for the fully‑transparent APNG
-        string outputPath = @"C:\Images\result.apng";
-
-        // Load the vector image using Aspose.Imaging's generic loader
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Ensure the loaded image is a vector type
-            if (image is VectorImage vectorImage)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir ?? string.Empty);
+
+        // Load the vector image
+        using (VectorImage vectorImage = (VectorImage)Image.Load(inputPath))
+        {
+            // Remove background from the vector image
+            vectorImage.RemoveBackground();
+
+            // Rasterize the vector image to a PNG in memory
+            using (var memoryStream = new MemoryStream())
             {
-                // Remove the background – this makes the background transparent
-                vectorImage.RemoveBackground();
-
-                // Configure rasterization options for converting the vector to raster
-                var rasterOptions = new SvgRasterizationOptions
+                var pngOptions = new PngOptions
                 {
-                    // Keep the original dimensions of the vector image
-                    PageSize = image.Size,
-
-                    // Explicitly set a transparent background for the rasterized result
-                    BackgroundColor = Color.Transparent
-                };
-
-                // Set up APNG save options, linking the rasterization options
-                var apngOptions = new ApngOptions
-                {
-                    // Use the rasterization settings defined above
-                    VectorRasterizationOptions = rasterOptions,
-
-                    // Preserve the alpha channel (required for transparency)
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
+                vectorImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
 
-                // Save the processed image as a transparent APNG file
-                image.Save(outputPath, apngOptions);
-            }
-            else
-            {
-                throw new InvalidOperationException("The loaded file is not a supported vector image.");
+                // Load the rasterized image
+                using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
+                {
+                    // Prepare APNG creation options
+                    var apngOptions = new ApngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        DefaultFrameTime = 500, // 500 ms per frame
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+
+                    // Create the APNG image
+                    using (ApngImage apngImage = (ApngImage)Image.Create(
+                        apngOptions,
+                        rasterImage.Width,
+                        rasterImage.Height))
+                    {
+                        // Remove the default frame and add our rasterized frame
+                        apngImage.RemoveAllFrames();
+                        apngImage.AddFrame(rasterImage);
+
+                        // Save the APNG file
+                        apngImage.Save();
+                    }
+                }
             }
         }
     }

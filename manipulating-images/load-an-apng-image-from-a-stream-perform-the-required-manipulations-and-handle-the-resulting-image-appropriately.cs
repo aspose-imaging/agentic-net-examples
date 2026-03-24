@@ -1,26 +1,44 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Path to the input APNG file
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
-        // Path to the output APNG file after manipulation
         string outputPath = "output.apng";
 
-        // Load the APNG image from a file stream
-        using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-        using (ApngImage apngImage = (ApngImage)Image.Load(inputStream))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Example manipulation: adjust gamma
-            apngImage.AdjustGamma(1.2f);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the manipulated APNG image to a file
-            apngImage.Save(outputPath);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load APNG image from a file stream
+        using (FileStream inputStream = File.OpenRead(inputPath))
+        {
+            Image image = Image.Load(inputStream);
+            using (image)
+            {
+                // Cast to ApngImage to access APNG‑specific members (if needed)
+                ApngImage apng = image as ApngImage;
+                if (apng != null)
+                {
+                    // Example manipulation: set default frame time to 100 ms
+                    apng.DefaultFrameTime = 100;
+                }
+
+                // Save the image as APNG using default options
+                image.Save(outputPath, new ApngOptions());
+            }
         }
     }
 }

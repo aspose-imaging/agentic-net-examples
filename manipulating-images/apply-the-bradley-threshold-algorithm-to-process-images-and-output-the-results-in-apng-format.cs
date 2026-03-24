@@ -1,51 +1,42 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect input image path as first argument and output APNG path as second argument
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.png";
+        string outputPath = @"c:\temp\sample.BinarizeBradley5_10x10.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <inputImagePath> <outputApngPath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image as a raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Load the image
+        using (Image image = Image.Load(inputPath))
         {
-            // Apply Bradley adaptive thresholding
-            double brightnessDifference = 5.0; // typical value
-            int windowSize = 10;               // 10x10 window
-            sourceImage.BinarizeBradley(brightnessDifference, windowSize);
-
-            // Prepare APNG creation options
-            ApngOptions createOptions = new ApngOptions
+            // Cast to RasterImage to access BinarizeBradley
+            if (image is RasterImage rasterImage)
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 1000, // 1 second per frame (single frame)
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+                // Apply Bradley adaptive thresholding (brightnessDifference = 5, windowSize = 10)
+                rasterImage.BinarizeBradley(5, 10);
 
-            // Create APNG image with the same dimensions as the processed source
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                // Save the processed image as APNG
+                var apngOptions = new ApngOptions();
+                rasterImage.Save(outputPath, apngOptions);
+            }
+            else
             {
-                // Ensure no default frame remains
-                apngImage.RemoveAllFrames();
-
-                // Add the processed raster image as the sole frame
-                apngImage.AddFrame(sourceImage);
-
-                // Save the APNG to the specified output path
-                apngImage.Save();
+                Console.Error.WriteLine("The loaded image does not support raster operations.");
             }
         }
     }

@@ -1,44 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect input vector file path and output APNG file path as arguments
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\vector_input.svg";
+        string outputPath = @"C:\Images\output_apng.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <inputVectorPath> <outputApngPath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the vector image
+        // Load the image (vector or raster)
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to VectorImage and remove background if possible
-            var vectorImage = image as VectorImage;
-            if (vectorImage != null)
+            // If the loaded image is a vector image, remove its background
+            if (image is VectorImage vectorImage)
             {
-                vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                vectorImage.RemoveBackground();
             }
 
-            // Configure APNG options with transparent background and vector rasterization
-            var apngOptions = new ApngOptions
-            {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.Transparent,
-                    PageSize = image.Size
-                }
-            };
-
-            // Save the result as an APNG file
+            // Save the result as an APNG file (single‑frame animation)
+            var apngOptions = new ApngOptions();
             image.Save(outputPath, apngOptions);
         }
     }

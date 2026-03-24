@@ -1,29 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = args.Length > 0 ? args[0] : "input.apng";
-        string outputPath = args.Length > 1 ? args[1] : "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output.apng";
 
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            for (int i = 0; i < apng.PageCount; i++)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the APNG image
+        using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
+        {
+            // Example: adjust default frame time for any new frames
+            apngImage.DefaultFrameTime = 80; // 80 ms
+
+            // Iterate over existing frames and modify them
+            for (int i = 0; i < apngImage.PageCount; i++)
             {
-                ApngFrame frame = (ApngFrame)apng.Pages[i];
-                frame.FrameTime = 100;
-                frame.AdjustGamma(1.2f);
+                // Each page is an ApngFrame
+                ApngFrame frame = (ApngFrame)apngImage.Pages[i];
+
+                // Example adjustment: modify gamma based on frame index
+                float gamma = (i % 2 == 0) ? 1.2f : 0.8f;
+                frame.AdjustGamma(gamma);
             }
 
-            using (RasterImage newFrame = (RasterImage)Image.Load("new_frame.png"))
-            {
-                apng.AddFrame(newFrame);
-            }
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            apng.Save(outputPath);
+            // Save the modified APNG
+            apngImage.Save(outputPath);
         }
     }
 }

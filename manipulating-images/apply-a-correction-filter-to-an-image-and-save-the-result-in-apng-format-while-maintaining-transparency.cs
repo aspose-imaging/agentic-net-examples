@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -10,41 +11,41 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Expect input and output file paths as arguments
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <inputImagePath> <outputApngPath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image as a raster image (preserves transparency)
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Load the source image as a raster image
+        using (RasterImage source = (RasterImage)Image.Load(inputPath))
         {
             // Apply a correction filter (sharpen) to the entire image
-            sourceImage.Filter(sourceImage.Bounds, new SharpenFilterOptions());
+            var filterOptions = new SharpenFilterOptions();
+            source.Filter(source.Bounds, filterOptions);
 
-            // Prepare APNG creation options, ensuring alpha channel is kept
-            ApngOptions createOptions = new ApngOptions
+            // Set up APNG creation options, preserving transparency
+            var apngOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // duration of the single frame in ms
-                ColorType = PngColorType.TruecolorWithAlpha
+                ColorType = PngColorType.TruecolorWithAlpha,
+                DefaultFrameTime = 1000 // 1 second per frame (single-frame animation)
             };
 
-            // Create an APNG image with the same dimensions as the source
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+            // Create the APNG image and add the filtered frame
+            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, source.Width, source.Height))
             {
-                // Remove any default frame
-                apngImage.RemoveAllFrames();
-
-                // Add the filtered image as the sole frame
-                apngImage.AddFrame(sourceImage);
-
-                // Save the APNG file
-                apngImage.Save();
+                apng.RemoveAllFrames();          // Remove default frame
+                apng.AddFrame(source);           // Add the filtered image as the only frame
+                apng.Save();                     // Save the APNG file
             }
         }
     }

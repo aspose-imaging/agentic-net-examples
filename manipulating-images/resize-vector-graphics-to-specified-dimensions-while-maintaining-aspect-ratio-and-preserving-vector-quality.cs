@@ -1,32 +1,47 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input SVG file path
-        string inputPath = "input.svg";
-        // Output SVG file path
-        string outputPath = "output_resized.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Desired dimensions (width and height)
-        int targetWidth = 800;
-        int targetHeight = 600;
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Desired maximum dimensions
+        const int maxWidth = 800;
+        const int maxHeight = 600;
 
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to SvgImage to access vector-specific methods
-            SvgImage svgImage = (SvgImage)image;
+            // Compute new size while preserving aspect ratio
+            double widthRatio = (double)maxWidth / image.Width;
+            double heightRatio = (double)maxHeight / image.Height;
+            double scale = Math.Min(widthRatio, heightRatio);
 
-            // Resize while preserving aspect ratio
-            svgImage.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+            int newWidth = (int)(image.Width * scale);
+            int newHeight = (int)(image.Height * scale);
 
-            // Save the resized image as SVG to preserve vector quality
-            svgImage.Save(outputPath, new SvgOptions());
+            // Resize using a high‑quality resampling method
+            image.Resize(newWidth, newHeight, ResizeType.BilinearResample);
+
+            // Save the resized vector image (preserves vector quality)
+            image.Save(outputPath);
         }
     }
 }

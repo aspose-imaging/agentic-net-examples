@@ -1,22 +1,43 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input multipage image (e.g., TIFF, GIF, WebP, etc.)
-        string inputPath = "input.tif";
+        string inputPath = "input.cdr";
+        string outputPath = "output.tif";
 
-        // Output path for the converted multipage format (APNG in this example)
-        string outputPath = "output.apng";
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the source image
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         using (Image image = Image.Load(inputPath))
         {
-            // Export all pages/frames to APNG while preserving fidelity
-            image.Save(outputPath, new ApngOptions());
+            var exportOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+            if (image is VectorImage)
+            {
+                var vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+                exportOptions.VectorRasterizationOptions = vectorOptions;
+            }
+
+            image.Save(outputPath, exportOptions);
         }
     }
 }

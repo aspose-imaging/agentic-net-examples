@@ -1,52 +1,55 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Resize and crop a WebP image, then save as JPEG
-        string inputWebp = "input.webp";
-        string outputJpeg = "output_resized_cropped.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string resizedOutputPath = @"C:\Images\output_resized.png";
+        string croppedOutputPath = @"C:\Images\output_cropped.jpg";
 
-        using (WebPImage webp = (WebPImage)Image.Load(inputWebp))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Resize to half of original dimensions
-            webp.Resize(webp.Width / 2, webp.Height / 2);
-
-            // Crop a rectangle leaving a 10‑pixel border
-            var cropRect = new Rectangle(10, 10, webp.Width - 20, webp.Height - 20);
-            webp.Crop(cropRect);
-
-            // Save with JPEG options
-            var jpegOptions = new JpegOptions { Quality = 80 };
-            webp.Save(outputJpeg, jpegOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Convert a PNG image to TIFF without changing dimensions
-        string inputPng = "input.png";
-        string outputTiff = "output.tiff";
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(resizedOutputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(croppedOutputPath));
 
-        using (Image png = Image.Load(inputPng))
+        // ---------- Resize operation ----------
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            png.Save(outputTiff, tiffOptions);
-        }
+            // Optional: cache data for better performance on raster images
+            if (!image.IsCached) image.CacheData();
 
-        // Resize a GIF image using Lanczos resampling and save as PNG
-        string inputGif = "input.gif";
-        string outputGifPng = "output_resized.png";
+            // Resize to 800x600 using default NearestNeighbourResample
+            image.Resize(800, 600);
 
-        using (Image gif = Image.Load(inputGif))
-        {
-            // Double the size with high‑quality Lanczos resampling
-            gif.Resize(gif.Width * 2, gif.Height * 2, ResizeType.LanczosResample);
-
+            // Save as PNG
             var pngOptions = new PngOptions();
-            gif.Save(outputGifPng, pngOptions);
+            image.Save(resizedOutputPath, pngOptions);
+        }
+
+        // ---------- Crop operation ----------
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            if (!image.IsCached) image.CacheData();
+
+            // Define crop rectangle (x, y, width, height)
+            var cropRect = new Aspose.Imaging.Rectangle(100, 100, 400, 300);
+            image.Crop(cropRect);
+
+            // Save as JPEG
+            var jpegOptions = new JpegOptions();
+            image.Save(croppedOutputPath, jpegOptions);
         }
     }
 }

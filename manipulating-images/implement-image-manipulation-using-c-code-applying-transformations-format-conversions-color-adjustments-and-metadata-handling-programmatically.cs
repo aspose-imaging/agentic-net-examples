@@ -2,65 +2,69 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input image, overlay image, and output directory (fallback defaults)
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string overlayPath = args.Length > 1 ? args[1] : "overlay.png";
-        string outputDir = args.Length > 2 ? args[2] : "output";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPngPath = "output/output.png";
+        string outputTiffPath = "output/output_cmyk.tif";
+        string outputJpegPath = "output/output_quality.jpg";
 
-        Directory.CreateDirectory(outputDir);
-
-        // Load the base image as a raster image
-        using (RasterImage baseImage = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            if (!baseImage.IsCached) baseImage.CacheData();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply brightness, contrast, gamma adjustments and convert to grayscale
-            baseImage.AdjustBrightness(20);
-            baseImage.AdjustContrast(0.5f);
-            baseImage.AdjustGamma(1.2f);
-            baseImage.Grayscale();
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPngPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputJpegPath));
+
+        // Load the image as a raster image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Cache data for better performance
+            if (!image.IsCached)
+                image.CacheData();
+
+            // Adjust brightness (+30), contrast (+0.2), and gamma (1.1)
+            image.AdjustBrightness(30);
+            image.AdjustContrast(0.2f);
+            image.AdjustGamma(1.1f);
+
+            // Convert to grayscale
+            image.Grayscale();
 
             // Rotate 45 degrees, expand canvas, fill background with white
-            baseImage.Rotate(45f, true, Color.White);
+            image.Rotate(45f, true, Color.White);
 
-            // Resize to half of the original dimensions
-            int newWidth = baseImage.Width / 2;
-            int newHeight = baseImage.Height / 2;
-            baseImage.Resize(newWidth, newHeight);
+            // Resize to 800x600
+            image.Resize(800, 600);
 
-            // Save as JPEG with quality 80
-            string jpegPath = Path.Combine(outputDir, "result.jpg");
-            var jpegOptions = new JpegOptions { Quality = 80 };
-            baseImage.Save(jpegPath, jpegOptions);
+            // Crop a rectangle (x=100, y=100, width=400, height=300)
+            var cropRect = new Rectangle(100, 100, 400, 300);
+            image.Crop(cropRect);
+
+            // Remove all metadata
+            image.RemoveMetadata();
 
             // Save as PNG
-            string pngPath = Path.Combine(outputDir, "result.png");
-            baseImage.Save(pngPath, new PngOptions());
+            var pngOptions = new PngOptions();
+            image.Save(outputPngPath, pngOptions);
 
-            // Remove metadata and save as BMP
-            baseImage.RemoveMetadata();
-            string bmpPath = Path.Combine(outputDir, "result.bmp");
-            baseImage.Save(bmpPath, new BmpOptions());
+            // Save as CMYK TIFF (LZW compression)
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwCmyk);
+            image.Save(outputTiffPath, tiffOptions);
 
-            // Load overlay image and blend it onto the base image at (0,0) with 50% opacity
-            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
-            {
-                if (!overlay.IsCached) overlay.CacheData();
-                baseImage.Blend(new Point(0, 0), overlay, 128);
-            }
-
-            // Save the blended result as GIF
-            string gifPath = Path.Combine(outputDir, "blended.gif");
-            baseImage.Save(gifPath, new GifOptions());
+            // Save as JPEG with quality 80
+            var jpegOptions = new JpegOptions { Quality = 80 };
+            image.Save(outputJpegPath, jpegOptions);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -6,31 +7,25 @@ class Program
 {
     static void Main()
     {
-        // Path to the source animated image (e.g., GIF, WebP, multi‑page TIFF)
-        string sourcePath = "input_animation.gif";
+        // Hardcoded input and output paths
+        string inputPath = "input.webp";
+        string outputPath = "output.apng";
 
-        // Desired output path for the APNG file
-        string outputPath = "output_animation.apng";
-
-        // Load the source image – this preserves all frames and transparency
-        using (Image sourceImage = Image.Load(sourcePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure APNG specific options.
-            // DefaultFrameTime can be set to override frame duration,
-            // NumPlays = 0 means infinite looping (default behavior).
-            var apngOptions = new ApngOptions
-            {
-                // Example: set a uniform frame duration of 100 ms
-                // DefaultFrameTime = 100,
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-                // Example: limit the animation to 5 loops
-                // NumPlays = 5
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Save the loaded image directly to APNG format.
-            // Aspose.Imaging handles the conversion, preserving animation frames
-            // and any alpha channel (transparency) present in the source.
-            sourceImage.Save(outputPath, apngOptions);
+        // Load the source image (can be animated, e.g., WebP, GIF, multi-page TIFF)
+        using (Image sourceImage = Image.Load(inputPath))
+        {
+            // Save as APNG preserving frames and transparency
+            sourceImage.Save(outputPath, new ApngOptions());
         }
     }
 }

@@ -1,30 +1,45 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output file paths
-        string inputPath = Path.Combine(Directory.GetCurrentDirectory(), "sample.png");
-        string medianOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "sample.median.png");
-        string wienerOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "sample.wiener.png");
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.png";
+        string outputMedianPath = @"C:\Images\output.median.png";
+        string outputWienerPath = @"C:\Images\output.wiener.png";
 
-        // Apply Median filter
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-            raster.Save(medianOutputPath);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Apply Gauss-Wiener filter
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputMedianPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputWienerPath));
+
+        // Apply Median filter
+        using (Image image = Image.Load(inputPath))
         {
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
-            raster.Save(wienerOutputPath);
+            RasterImage rasterImage = (RasterImage)image;
+            var medianOptions = new MedianFilterOptions(5); // rectangle size = 5
+            rasterImage.Filter(rasterImage.Bounds, medianOptions);
+            rasterImage.Save(outputMedianPath);
+        }
+
+        // Apply Gauss-Wiener filter (Wiener filter)
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage rasterImage = (RasterImage)image;
+            var wienerOptions = new GaussWienerFilterOptions(5, 4.0); // radius = 5, sigma = 4.0
+            rasterImage.Filter(rasterImage.Bounds, wienerOptions);
+            rasterImage.Save(outputWienerPath);
         }
     }
 }

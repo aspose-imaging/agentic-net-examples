@@ -1,23 +1,33 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png; // Example format namespace
-using Aspose.Imaging.ImageOptions;
 
-class RotateFlipExample
+class Program
 {
     static void Main()
     {
-        // Load an existing image from disk (replace with your actual file path)
-        using (Image image = Image.Load("input.png"))
-        {
-            // Apply rotation of 90 degrees and horizontal flip
-            // RotateFlipType combines rotation and flip operations
-            image.RotateFlip(RotateFlipType.Rotate90FlipX);
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\sample_rotated.bmp";
 
-            // Save the transformed image to a new file (replace with desired output path)
-            image.Save("output.png");
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Image rotation and flip completed.");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image, apply rotation/flip, and save the result
+        using (Image image = Image.Load(inputPath))
+        {
+            // Rotate 90 degrees clockwise and flip horizontally
+            image.RotateFlip(RotateFlipType.Rotate90FlipX);
+
+            // Save the transformed image to the output path
+            image.Save(outputPath);
+        }
     }
 }

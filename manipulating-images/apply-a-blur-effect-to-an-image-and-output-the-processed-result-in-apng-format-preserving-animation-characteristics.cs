@@ -1,50 +1,97 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = args.Length > 0 ? args[0] : "input_image.png";
-        string outputPath = args.Length > 1 ? args[1] : "output_animation.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.apng";
 
-        using (Image sourceImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            ApngOptions apngOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100,
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, sourceImage.Width, sourceImage.Height))
-            {
-                apng.RemoveAllFrames();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                if (sourceImage is IMultipageImage multipage)
+        // Load the source image (could be animated)
+        using (Image image = Image.Load(inputPath))
+        {
+            // Check if the image has multiple pages (animation)
+            if (image is IMultipageImage multipage)
+            {
+                // Use the dimensions of the first frame for the APNG canvas
+                using (RasterImage firstFrame = (RasterImage)multipage.Pages[0])
                 {
-                    foreach (Image page in multipage.Pages)
+                    int width = firstFrame.Width;
+                    int height = firstFrame.Height;
+
+                    // Prepare APNG creation options
+                    ApngOptions createOptions = new ApngOptions
                     {
-                        RasterImage raster = (RasterImage)page;
-                        var blurOptions = new GaussianBlurFilterOptions { Radius = 5 };
-                        raster.Filter(raster.Bounds, blurOptions);
-                        apng.AddFrame(raster);
+                        Source = new FileCreateSource(outputPath, false),
+                        DefaultFrameTime = 100, // 100 ms per frame
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+
+                    // Create the APNG image
+                    using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+                    {
+                        apngImage.RemoveAllFrames();
+
+                        // Process each frame: apply blur and add to APNG
+                        foreach (var page in multipage.Pages)
+                        {
+                            using (RasterImage raster = (RasterImage)page)
+                            {
+                                // Apply Gaussian blur filter
+                                raster.Filter(raster.Bounds,
+                                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
+
+                                apngImage.AddFrame(raster);
+                            }
+                        }
+
+                        // Save the animated PNG
+                        apngImage.Save();
                     }
                 }
-                else
+            }
+            else
+            {
+                // Single-frame image handling
+                using (RasterImage raster = (RasterImage)image)
                 {
-                    RasterImage raster = (RasterImage)sourceImage;
-                    var blurOptions = new GaussianBlurFilterOptions { Radius = 5 };
-                    raster.Filter(raster.Bounds, blurOptions);
-                    apng.AddFrame(raster);
-                }
+                    // Apply Gaussian blur filter
+                    raster.Filter(raster.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
 
-                apng.Save();
+                    // Prepare APNG creation options
+                    ApngOptions createOptions = new ApngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        DefaultFrameTime = 100,
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+
+                    // Create the APNG image
+                    using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, raster.Width, raster.Height))
+                    {
+                        apngImage.RemoveAllFrames();
+                        apngImage.AddFrame(raster);
+                        apngImage.Save();
+                    }
+                }
             }
         }
     }

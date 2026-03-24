@@ -1,54 +1,51 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf; // Example vector format
+using Aspose.Imaging.FileFormats.Svg; // Example vector format
 
-class VectorCropDemo
+class Program
 {
     static void Main()
     {
-        string dir = @"C:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\sample_cropped.emf";
 
-        // Crop an SVG image and save it back as SVG
-        using (Image img = Image.Load(dir + "sample.svg"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            SvgImage svg = (SvgImage)img;
-            // Define a central rectangle (half the width and height)
-            var rect = new Rectangle(svg.Width / 4, svg.Height / 4, svg.Width / 2, svg.Height / 2);
-            svg.Crop(rect);
-            // Save the cropped SVG preserving vector data
-            svg.Save(dir + "sample_cropped.svg", new SvgOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Crop an EMF image and save it back as EMF
-        using (Image img = Image.Load(dir + "sample.emf"))
-        {
-            EmfImage emf = (EmfImage)img;
-            var rect = new Rectangle(emf.Width / 4, emf.Height / 4, emf.Width / 2, emf.Height / 2);
-            emf.Crop(rect);
-            emf.Save(dir + "sample_cropped.emf", new EmfOptions());
-        }
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Crop a WMF image and save it back as WMF
-        using (Image img = Image.Load(dir + "sample.wmf"))
+        // Load the image
+        using (Image image = Image.Load(inputPath))
         {
-            WmfImage wmf = (WmfImage)img;
-            var rect = new Rectangle(wmf.Width / 4, wmf.Height / 4, wmf.Width / 2, wmf.Height / 2);
-            wmf.Crop(rect);
-            wmf.Save(dir + "sample_cropped.wmf", new WmfOptions());
-        }
+            // Process only vector images
+            if (image is VectorImage vectorImage)
+            {
+                // Define a central cropping rectangle (50% of original size)
+                int left = vectorImage.Width / 4;
+                int top = vectorImage.Height / 4;
+                int width = vectorImage.Width / 2;
+                int height = vectorImage.Height / 2;
 
-        // Crop a DJVU image (vector‑like) and save the result as PNG
-        using (Image img = Image.Load(dir + "sample.djvu"))
-        {
-            DjvuImage djvu = (DjvuImage)img;
-            var rect = new Rectangle(djvu.Width / 4, djvu.Height / 4, djvu.Width / 2, djvu.Height / 2);
-            djvu.Crop(rect);
-            // Saving as PNG after cropping; the vector content is rasterized at save time
-            djvu.Save(dir + "sample_cropped.png", new PngOptions());
+                var cropArea = new Aspose.Imaging.Rectangle(left, top, width, height);
+
+                // Perform cropping while preserving vector fidelity
+                vectorImage.Crop(cropArea);
+
+                // Save the cropped vector image
+                vectorImage.Save(outputPath);
+            }
+            else
+            {
+                Console.Error.WriteLine("The loaded image is not a vector image.");
+            }
         }
     }
 }

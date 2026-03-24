@@ -1,28 +1,39 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.jpg";
         string outputPath = "output.png";
-        string tempMaskPath = Path.Combine(Path.GetTempPath(), "tempMask.png");
 
-        // Load the source image as a RasterImage
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source image as RasterImage
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Configure auto masking options with GraphCut
-            AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
+            // Temporary file for export options source
+            string tempExportPath = Path.GetTempFileName();
+
+            // Configure AutoMaskingGraphCutOptions
+            var options = new AutoMaskingGraphCutOptions
             {
                 CalculateDefaultStrokes = true,
                 FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
@@ -31,27 +42,27 @@ public class Program
                 ExportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(tempMaskPath)
+                    Source = new FileCreateSource(tempExportPath, false)
                 },
                 BackgroundReplacementColor = Color.Transparent
             };
 
-            // Perform the masking operation
+            // Perform masking
             using (MaskingResult maskingResult = new ImageMasking(image).Decompose(options))
             {
-                // Retrieve the foreground (masked) image
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                // Retrieve foreground image (index 1)
+                using (RasterImage resultImage = (RasterImage)maskingResult[1].GetImage())
                 {
-                    // Save the result with transparent background
-                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    // Save result as PNG with proper options
+                    resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
-        }
 
-        // Clean up temporary mask file
-        if (File.Exists(tempMaskPath))
-        {
-            File.Delete(tempMaskPath);
+            // Clean up temporary export file
+            if (File.Exists(tempExportPath))
+            {
+                File.Delete(tempExportPath);
+            }
         }
     }
 }

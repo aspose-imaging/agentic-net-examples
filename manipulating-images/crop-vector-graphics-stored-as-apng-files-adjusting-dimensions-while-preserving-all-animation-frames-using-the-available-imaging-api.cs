@@ -1,22 +1,41 @@
+using System;
+using System.IO;
 using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Apng;
 
-string inputPath = "input.apng";
-string outputPath = "output_cropped.apng";
-
-using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+class Program
 {
-    // Define how many pixels to remove from each side.
-    int leftShift = 10;   // pixels to cut from the left
-    int rightShift = 10;  // pixels to cut from the right
-    int topShift = 10;    // pixels to cut from the top
-    int bottomShift = 10; // pixels to cut from the bottom
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output_cropped.apng";
 
-    // Crop all frames of the APNG. The Crop method works on the whole image
-    // and automatically applies the operation to each animation frame.
-    apng.Crop(leftShift, rightShift, topShift, bottomShift);
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the cropped animation, preserving all frames.
-    apng.Save(outputPath);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
+        using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
+        {
+            // Define cropping parameters (left, right, top, bottom shifts)
+            int leftShift = 10;
+            int rightShift = 10;
+            int topShift = 10;
+            int bottomShift = 10;
+
+            // Crop all frames of the APNG image
+            apngImage.Crop(leftShift, rightShift, topShift, bottomShift);
+
+            // Save the cropped APNG preserving animation frames
+            apngImage.Save(outputPath);
+        }
+    }
 }

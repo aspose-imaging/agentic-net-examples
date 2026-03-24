@@ -1,40 +1,32 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Directory containing the source APNG file
-        string dir = @"c:\temp\";
-        string sourcePath = System.IO.Path.Combine(dir, "sample.apng");
+        string inputPath = "input.apng";
+        string outputPath = "output\\resized.apng";
 
-        // ---------- Upscale (duplicate) ----------
-        // Load the APNG image
-        using (ApngImage image = (ApngImage)Image.Load(sourcePath))
+        if (!File.Exists(inputPath))
         {
-            // Double the width while preserving aspect ratio.
-            // Using NearestNeighbourResample as the duplicate resize mode.
-            image.ResizeWidthProportionally(image.Width * 2, ResizeType.NearestNeighbourResample);
-
-            // Save the upscaled image
-            string upscaledPath = System.IO.Path.Combine(dir, "sample_upscaled.apng");
-            image.Save(upscaledPath);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // ---------- Downscale (duplicate) ----------
-        // Load the original APNG image again
-        using (ApngImage image = (ApngImage)Image.Load(sourcePath))
-        {
-            // Halve the width while preserving aspect ratio.
-            // Using NearestNeighbourResample as the duplicate resize mode.
-            image.ResizeWidthProportionally(image.Width / 2, ResizeType.NearestNeighbourResample);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the downscaled image
-            string downscaledPath = System.IO.Path.Combine(dir, "sample_downscaled.apng");
-            image.Save(downscaledPath);
+        using (Aspose.Imaging.FileFormats.Apng.ApngImage apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)Image.Load(inputPath))
+        {
+            int newWidth = apng.Width * 2;
+            int newHeight = apng.Height * 2;
+
+            apng.ResizeWidthProportionally(newWidth);
+            apng.ResizeHeightProportionally(newHeight);
+
+            apng.Save(outputPath, new ApngOptions());
         }
     }
 }

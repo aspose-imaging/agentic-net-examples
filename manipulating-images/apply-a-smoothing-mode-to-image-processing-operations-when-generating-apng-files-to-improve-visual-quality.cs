@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -9,15 +10,24 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input raster image path
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        // Output APNG file path
         string outputPath = "output.apng";
 
-        // Load the source raster image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source raster image
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Apply bilateral smoothing filter to improve visual quality
+            // Apply smoothing filter to improve visual quality
             sourceImage.Filter(
                 sourceImage.Bounds,
                 new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5));
@@ -26,27 +36,41 @@ class Program
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 70, // frame duration in milliseconds
+                DefaultFrameTime = 70, // milliseconds per frame
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create APNG image with the same dimensions as the source
+            // Create APNG image bound to the output file
             using (ApngImage apngImage = (ApngImage)Image.Create(
                 createOptions,
                 sourceImage.Width,
                 sourceImage.Height))
             {
-                // Remove the default frame
+                // Remove default frame
                 apngImage.RemoveAllFrames();
 
-                // Add multiple frames using the filtered source image
-                int frameCount = 5;
-                for (int i = 0; i < frameCount; i++)
+                // Define animation parameters
+                const int animationDuration = 1000; // total duration in ms
+                const int frameDuration = 70;       // per-frame duration in ms
+                int numOfFrames = animationDuration / frameDuration;
+                int halfFrames = numOfFrames / 2;
+
+                // Add first frame
+                apngImage.AddFrame(sourceImage);
+
+                // Add intermediate frames with gamma adjustment for visual effect
+                for (int frameIndex = 1; frameIndex < numOfFrames - 1; ++frameIndex)
                 {
                     apngImage.AddFrame(sourceImage);
+                    ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                    float gamma = frameIndex >= halfFrames ? numOfFrames - frameIndex - 1 : frameIndex;
+                    lastFrame.AdjustGamma(gamma);
                 }
 
-                // Save the APNG file
+                // Add last frame
+                apngImage.AddFrame(sourceImage);
+
+                // Save the APNG (output is already bound via FileCreateSource)
                 apngImage.Save();
             }
         }

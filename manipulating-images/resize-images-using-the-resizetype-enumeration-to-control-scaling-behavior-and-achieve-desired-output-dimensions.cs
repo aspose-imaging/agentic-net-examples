@@ -1,62 +1,36 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp; // Optional, for WebP support
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
     static void Main()
     {
-        // Input image path
+        // Hardcoded input and output file paths
         string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
-        // Output directory (will be created if it doesn't exist)
-        string outputDir = "output";
-        Directory.CreateDirectory(outputDir);
-
-        // ------------------------------------------------------------
-        // Example 1: Downscale using NearestNeighbourResample
-        // ------------------------------------------------------------
-        using (Image image = Image.Load(inputPath)) // Load rule
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Resize to half the original dimensions
-            image.Resize(image.Width / 2, image.Height / 2, ResizeType.NearestNeighbourResample);
-            // Save the resized image (save rule)
-            image.Save(Path.Combine(outputDir, "downsample_nearest.jpg"));
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // ------------------------------------------------------------
-        // Example 2: Upscale using BilinearResample
-        // ------------------------------------------------------------
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image using Aspose.Imaging
         using (Image image = Image.Load(inputPath))
         {
-            // Resize to double the original dimensions
-            image.Resize(image.Width * 2, image.Height * 2, ResizeType.BilinearResample);
-            image.Save(Path.Combine(outputDir, "upsample_bilinear.jpg"));
-        }
+            // Resize the image to half its original dimensions using Bilinear resampling
+            int newWidth = image.Width / 2;
+            int newHeight = image.Height / 2;
+            image.Resize(newWidth, newHeight, ResizeType.BilinearResample);
 
-        // ------------------------------------------------------------
-        // Example 3: Advanced resizing with ImageResizeSettings
-        // ------------------------------------------------------------
-        using (Image image = Image.Load(inputPath))
-        {
-            var resizeSettings = new ImageResizeSettings
-            {
-                // Choose a high‑quality resampling algorithm
-                Mode = ResizeType.LanczosResample,
-                // Small rectangular filter for better edge handling
-                FilterType = ImageFilterType.SmallRectangular,
-                // Color comparison method for quantization
-                ColorCompareMethod = ColorCompareMethod.Euclidian,
-                // Popularity quantization for palette reduction
-                ColorQuantizationMethod = ColorQuantizationMethod.Popularity
-            };
-
-            // Resize to one third of the original size using the settings above
-            image.Resize(image.Width / 3, image.Height / 3, resizeSettings);
-            // Save as PNG to preserve quality
-            image.Save(Path.Combine(outputDir, "downsample_advanced.png"), new PngOptions());
+            // Save the resized image to the output path
+            image.Save(outputPath);
         }
     }
 }

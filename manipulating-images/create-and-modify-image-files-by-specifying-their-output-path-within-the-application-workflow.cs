@@ -1,58 +1,49 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input image files to be merged
-        string[] inputFiles = new string[]
-        {
-            "input1.png",
-            "input2.png"
-        };
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.png";
+        string newImagePath = @"C:\temp\newImage.bmp";
 
-        // Output merged image path
-        string outputFile = "merged_output.png";
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputFiles)
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
-            {
-                sizes.Add(img.Size);
-            }
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Calculate canvas dimensions for horizontal merge
-        int canvasWidth = sizes.Sum(s => s.Width);
-        int canvasHeight = sizes.Max(s => s.Height);
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(newImagePath));
 
-        // Create a bound PNG canvas with a FileCreateSource
-        Source source = new FileCreateSource(outputFile, false);
-        PngOptions pngOptions = new PngOptions { Source = source };
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+        // Load existing image, rotate it, and save as PNG
+        using (Image image = Image.Load(inputPath))
         {
-            // Merge each image onto the canvas
-            int offsetX = 0;
-            foreach (string path in inputFiles)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
-            }
+            image.RotateFlip(RotateFlipType.Rotate180FlipX);
+            PngOptions pngOptions = new PngOptions();
+            image.Save(outputPath, pngOptions);
+        }
 
-            // Save the bound image (no need to pass path again)
-            canvas.Save();
+        // Create a new BMP image using FileCreateSource and save it
+        BmpOptions bmpOptions = new BmpOptions
+        {
+            BitsPerPixel = 24,
+            Source = new FileCreateSource(newImagePath, false) // non‑temporal file, will be saved to disk
+        };
+
+        using (Image newImage = Image.Create(bmpOptions, 200, 200))
+        {
+            // Example processing: fill with a solid color (optional)
+            // newImage.Save(); // Save using the source path defined in bmpOptions
+            newImage.Save(); // Saves to newImagePath as defined by the FileCreateSource
         }
     }
 }

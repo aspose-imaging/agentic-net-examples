@@ -1,60 +1,101 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.CustomFontHandler;
 
 class Program
 {
+    // Hardcoded input and output paths
+    private const string InputPath = "input.emf";
+    private const string OutputPath = "output.png";
+    // Folder that contains the replacement fonts
+    private const string FontsFolder = "fonts";
+
     static void Main()
     {
-        // Input folder containing WMF/EMF files
-        string inputFolder = @"C:\Images";
-        // Output folder for rendered PNGs
-        string outputFolder = @"C:\Processed";
-        Directory.CreateDirectory(outputFolder);
-
-        // Configure Aspose.Imaging to use a known fonts folder (e.g., Windows fonts)
-        string systemFonts = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts));
-        FontSettings.SetFontsFolder(systemFonts);
-        FontSettings.UpdateFonts();
-
-        // Set a default fallback font that will be used when a required font is missing
-        FontSettings.DefaultFontName = "Arial";
-
-        // Process each WMF or EMF file in the input folder
-        foreach (string filePath in Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly))
+        // Verify input file exists
+        if (!File.Exists(InputPath))
         {
-            string ext = Path.GetExtension(filePath).ToLowerInvariant();
-            if (ext != ".wmf" && ext != ".emf")
-                continue; // Skip non‑metafile files
+            Console.Error.WriteLine($"File not found: {InputPath}");
+            return;
+        }
 
-            // Load the metafile using Aspose.Imaging (lifecycle: load)
-            using (Image image = Image.Load(filePath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
+
+        // Preserve original font folders to restore later
+        string[] originalFontFolders = FontSettings.GetFontsFolders();
+
+        try
+        {
+            // Point Aspose.Imaging to the folder with replacement fonts
+            FontSettings.SetFontsFolder(FontsFolder);
+            // Update internal cache so the new fonts are recognized
+            FontSettings.UpdateFonts();
+
+            // Load the EMF/WMF image with a custom font source (optional, demonstrates alternative approach)
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource(GetFontSource, FontsFolder);
+
+            using (Image image = Image.Load(InputPath, loadOptions))
             {
-                // Cast to MetaImage to retrieve font information
-                MetaImage meta = image as MetaImage;
-                if (meta != null)
+                // If the image is a vector format, we can inspect used/missed fonts
+                if (image is MetaImage metaImage)
                 {
-                    // Get the list of fonts that were referenced but not found
-                    string[] missedFonts = meta.GetMissedFonts();
-                    if (missedFonts.Length > 0)
-                    {
-                        Console.WriteLine($"File: {Path.GetFileName(filePath)} – missing fonts:");
-                        foreach (string font in missedFonts)
-                            Console.WriteLine($"  {font}");
-                    }
+                    string[] usedFonts = metaImage.GetUsedFonts();
+                    string[] missedFonts = metaImage.GetMissedFonts();
+
+                    Console.WriteLine("Used fonts:");
+                    foreach (var f in usedFonts) Console.WriteLine($"  {f}");
+
+                    Console.WriteLine("Missed fonts (should be resolved by custom source):");
+                    foreach (var f in missedFonts) Console.WriteLine($"  {f}");
                 }
 
-                // Render the metafile to a raster format (PNG) after font substitution
-                var pngOptions = new PngOptions();
-                string outputPath = Path.Combine(outputFolder,
-                    Path.GetFileNameWithoutExtension(filePath) + ".png");
+                // Convert the vector image to a raster format (PNG) using vector rasterization options
+                var rasterizationOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
 
-                // Save the rendered image (lifecycle: save)
-                image.Save(outputPath, pngOptions);
-                Console.WriteLine($"Rendered image saved to: {outputPath}");
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the rasterized image
+                image.Save(OutputPath, pngOptions);
             }
         }
+        finally
+        {
+            // Restore original font folders
+            FontSettings.SetFontsFolders(originalFontFolders, true);
+        }
+    }
+
+    // Custom font source that reads all font files from the specified folder
+    private static CustomFontData[] GetFontSource(params object[] args)
+    {
+        string fontsPath = args.Length > 0 ? args[0]?.ToString() ?? string.Empty : string.Empty;
+        var fontDataList = new System.Collections.Generic.List<CustomFontData>();
+
+        if (Directory.Exists(fontsPath))
+        {
+            foreach (var fontFile in Directory.GetFiles(fontsPath))
+            {
+                string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                byte[] fontBytes = File.ReadAllBytes(fontFile);
+                fontDataList.Add(new CustomFontData(fontName, fontBytes));
+            }
+        }
+
+        return fontDataList.ToArray();
     }
 }

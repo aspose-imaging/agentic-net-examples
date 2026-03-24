@@ -1,54 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input raster image and output APNG file
+        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.apng";
 
-        // Desired dimensions after resizing
-        int newWidth = 200;
-        int newHeight = 200;
-
-        // Load the source image as a raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Resize using Lanczos resampling (high‑quality)
-            sourceImage.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Set up APNG creation options
-            ApngOptions createOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // 100 ms per frame
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create an APNG canvas bound to the output file
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
-            {
-                // Remove the default single frame
-                apngImage.RemoveAllFrames();
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Determine new dimensions (e.g., reduce size by 50%)
+            int newWidth = image.Width / 2;
+            int newHeight = image.Height / 2;
 
-                // Add multiple frames (e.g., 5) with slight gamma adjustments
-                int frameCount = 5;
-                for (int i = 0; i < frameCount; i++)
-                {
-                    apngImage.AddFrame(sourceImage);
-                    ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                    frame.AdjustGamma(i); // simple variation per frame
-                }
+            // Resize using a specific ResizeType (e.g., CatmullRom)
+            image.Resize(newWidth, newHeight, ResizeType.CatmullRom);
 
-                // Save the APNG; the file is already bound via FileCreateSource
-                apngImage.Save();
-            }
+            // Save the resized image as an APNG file
+            var apngOptions = new ApngOptions();
+            image.Save(outputPath, apngOptions);
         }
     }
 }

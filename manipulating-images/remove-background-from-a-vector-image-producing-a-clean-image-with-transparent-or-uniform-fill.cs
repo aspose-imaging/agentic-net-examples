@@ -6,28 +6,38 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = args.Length > 0 ? args[0] : "input.svg";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image (vector or other supported format)
         using (Image image = Image.Load(inputPath))
         {
-            var pngOptions = new PngOptions
-            {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.Transparent,
-                    PageSize = image.Size
-                }
-            };
-
+            // If the loaded image is a vector image, remove its background
             if (image is VectorImage vectorImage)
             {
-                vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                vectorImage.RemoveBackground();
             }
 
+            // Prepare PNG options to preserve transparency
+            var pngOptions = new PngOptions
+            {
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
+
+            // Save the processed image
             image.Save(outputPath, pngOptions);
         }
     }

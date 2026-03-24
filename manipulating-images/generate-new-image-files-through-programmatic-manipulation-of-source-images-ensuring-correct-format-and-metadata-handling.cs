@@ -1,64 +1,38 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string[] inputPaths = new string[]
-        {
-            "image1.tif",
-            "image2.tif",
-            "image3.tif"
-        };
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.png";
 
-        string outputPath = "merged_big.tif";
-
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
-            {
-                sizes.Add(img.Size);
-            }
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
         {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight) canvasHeight = sz.Height;
-        }
+            // Example processing: rotate the image 90 degrees clockwise
+            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-        Source fileSource = new FileCreateSource(outputPath, false);
-        BigTiffOptions tiffOptions = new BigTiffOptions(TiffExpectedFormat.Default)
-        {
-            Source = fileSource
-        };
+            // Prepare PNG save options (default options are sufficient here)
+            PngOptions pngOptions = new PngOptions();
 
-        using (TiffImage canvas = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
-        {
-            int offsetX = 0;
-            foreach (string path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    if (!img.IsCached) img.CacheData();
-
-                    Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
-
-                    offsetX += img.Width;
-                }
-            }
-
-            canvas.Save();
+            // Save the processed image to the output path
+            image.Save(outputPath, pngOptions);
         }
     }
 }

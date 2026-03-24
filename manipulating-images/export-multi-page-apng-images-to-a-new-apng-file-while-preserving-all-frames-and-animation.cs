@@ -1,23 +1,30 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length != 2)
+        // Hardcoded input and output paths
+        string inputPath = "input_multi.tif";
+        string outputPath = "output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <source_apng> <destination_apng>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string sourcePath = args[0];
-        string destinationPath = args[1];
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(sourcePath))
+        // Load the multi‑page image and save it as an APNG preserving all frames
+        using (Image image = Image.Load(inputPath))
         {
-            image.Save(destinationPath, new ApngOptions());
+            image.Save(outputPath, new ApngOptions());
         }
     }
 }

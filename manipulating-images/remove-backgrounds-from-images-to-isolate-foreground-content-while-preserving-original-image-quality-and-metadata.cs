@@ -1,53 +1,96 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input raster image path
-        string inputPath = "input.jpg";
-        // Output path for the foreground with transparent background
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
 
-        // Export options for the resulting PNG (transparent background)
-        var exportOptions = new PngOptions
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            ColorType = PngColorType.TruecolorWithAlpha,
-            Source = new StreamSource(new MemoryStream())
-        };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Masking options: GraphCut algorithm, transparent background
-        var maskingOptions = new MaskingOptions
+        // Load the source image
+        using (Image loadedImage = Image.Load(inputPath))
         {
-            Method = SegmentationMethod.GraphCut,
-            Decompose = false,
-            Args = new AutoMaskingArgs(),
-            BackgroundReplacementColor = Aspose.Imaging.Color.Transparent,
-            ExportOptions = exportOptions
-        };
-
-        // Load the source image as a RasterImage
-        using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Create ImageMasking instance
-            var masking = new ImageMasking(image);
-
-            // Perform masking
-            using (MaskingResult result = masking.Decompose(maskingOptions))
+            // Ensure the image is a raster image for masking operations
+            if (loadedImage is RasterImage rasterImage)
             {
-                // Get the foreground image (object) from the result
-                using (Aspose.Imaging.RasterImage foreground = (Aspose.Imaging.RasterImage)result[1].GetImage())
+                // Prepare export options for the final image (preserve quality and alpha)
+                var exportOptions = new PngOptions
                 {
-                    // Save the foreground with transparent background
-                    foreground.Save(outputPath, exportOptions);
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new StreamSource(new MemoryStream())
+                };
+
+                // Prepare masking arguments (default auto-masking)
+                var autoMaskArgs = new AutoMaskingArgs();
+
+                // Configure masking options: use GraphCut, transparent background, no decomposition
+                var maskingOptions = new MaskingOptions
+                {
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    Args = autoMaskArgs,
+                    BackgroundReplacementColor = Aspose.Imaging.Color.Transparent,
+                    ExportOptions = exportOptions
+                };
+
+                // Create ImageMasking instance
+                var imageMasking = new ImageMasking(rasterImage);
+
+                // Perform masking to obtain the foreground mask
+                using (var maskingResult = imageMasking.Decompose(maskingOptions))
+                {
+                    // The second object (index 1) typically represents the foreground mask
+                    using (RasterImage foregroundMask = maskingResult[1].GetMask())
+                    {
+                        // Resize mask to original image dimensions (if needed)
+                        foregroundMask.Resize(rasterImage.Width, rasterImage.Height, ResizeType.NearestNeighbourResample);
+
+                        // Reload original image to apply the mask (preserves original metadata)
+                        using (RasterImage original = (RasterImage)Image.Load(inputPath))
+                        {
+                            // Apply the mask, making background transparent
+                            ImageMasking.ApplyMask(original, foregroundMask, maskingOptions);
+
+                            // Ensure output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save the processed image
+                            original.Save(outputPath, exportOptions);
+                        }
+                    }
                 }
+            }
+            else if (loadedImage is VectorImage vectorImage)
+            {
+                // For vector images, use the built‑in RemoveBackground method
+                vectorImage.RemoveBackground();
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the vector image (preserving metadata)
+                vectorImage.Save(outputPath);
+            }
+            else
+            {
+                // Unsupported image type; simply copy the original to the output location
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                File.Copy(inputPath, outputPath, overwrite: true);
             }
         }
     }

@@ -1,33 +1,51 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-class EnhanceTextClarityToApng
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input raster image (e.g., scanned document with text)
+        // Hardcoded input and output paths
         string inputPath = "input.png";
+        string outputPath = "output/result.apng";
 
-        // Output animated PNG file
-        string outputPath = "output.apng";
-
-        // Load the source image as an ApngImage (Aspose.Imaging automatically detects format)
-        using (ApngImage image = (ApngImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Enhance overall readability:
-            // 1. Apply automatic brightness/contrast normalization.
-            image.AutoBrightnessContrast();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // 2. Slightly increase contrast to make text edges sharper.
-            //    The value > 1.0f boosts contrast; adjust as needed.
-            image.AdjustContrast(1.2f);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image as an APNG.
-            // Default ApngOptions are sufficient for a single‑frame APNG.
-            var apngOptions = new ApngOptions();
-            image.Save(outputPath, apngOptions);
+        // Load the source image
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        {
+            // Enhance text clarity: adjust brightness and contrast
+            sourceImage.AdjustBrightness(30);          // increase brightness
+            sourceImage.AdjustContrast(20f);           // increase contrast
+
+            // Set up APNG creation options
+            ApngOptions createOptions = new ApngOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                DefaultFrameTime = 100, // frame duration in milliseconds
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
+
+            // Create APNG canvas and add the processed frame
+            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+            {
+                apngImage.RemoveAllFrames();          // clear default frame
+                apngImage.AddFrame(sourceImage);       // add the enhanced image as the sole frame
+                apngImage.Save();                      // save to the bound output file
+            }
         }
     }
 }

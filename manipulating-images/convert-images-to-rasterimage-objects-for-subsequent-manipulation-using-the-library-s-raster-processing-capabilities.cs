@@ -1,28 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths (provide via command line or use defaults)
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Load the image (any supported format) and cast to RasterImage for raster operations
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Cache pixel data for faster subsequent processing
-            if (!raster.IsCached)
-                raster.CacheData();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Example raster manipulation can be performed here, e.g., raster.Grayscale();
+        // Load the source image
+        using (Image sourceImage = Image.Load(inputPath))
+        {
+            // Cast to RasterImage for raster processing
+            RasterImage rasterImage = sourceImage as RasterImage;
+            if (rasterImage == null)
+            {
+                Console.Error.WriteLine("The loaded image is not a raster image.");
+                return;
+            }
 
-            // Save the raster image (preserves original format unless further options are applied)
-            raster.Save(outputPath);
+            // Convert the RasterImage to a BMP image
+            using (BmpImage bmpImage = new BmpImage(rasterImage))
+            {
+                // Save the BMP image to the output path
+                bmpImage.Save(outputPath);
+            }
         }
     }
 }

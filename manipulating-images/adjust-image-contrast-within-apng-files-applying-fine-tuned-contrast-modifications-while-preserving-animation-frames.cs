@@ -1,28 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source APNG file
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
+        string outputPath = "output_contrast.apng";
 
-        // Path where the adjusted APNG will be saved
-        string outputPath = "output.apng";
-
-        // Desired contrast adjustment (range: -100 to 100)
-        float contrast = 30f;
-
-        // Load the APNG image (all frames are loaded automatically)
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Apply the contrast adjustment to the entire animation
-            apng.AdjustContrast(contrast);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the modified APNG, preserving all original frames
-            apng.Save(outputPath);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to ApngImage to access APNG-specific methods
+            ApngImage apngImage = (ApngImage)image;
+
+            // Adjust contrast for the entire animation (range: -100 to 100)
+            apngImage.AdjustContrast(30f);
+
+            // Save the modified APNG, preserving all frames
+            apngImage.Save(outputPath, new ApngOptions());
         }
     }
 }

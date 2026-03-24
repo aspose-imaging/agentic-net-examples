@@ -4,24 +4,37 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.apng";
 
-        // Load the source image as a raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure auto‑masking options (GraphCut with default strokes)
-            var maskingOptions = new Aspose.Imaging.Masking.Options.AutoMaskingGraphCutOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Configure masking options for transparent background
+            var maskingOptions = new AutoMaskingGraphCutOptions
             {
                 CalculateDefaultStrokes = true,
-                FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
-                Method = Aspose.Imaging.Masking.Options.SegmentationMethod.GraphCut,
+                FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                Method = SegmentationMethod.GraphCut,
                 Decompose = false,
                 ExportOptions = new PngOptions
                 {
@@ -32,13 +45,12 @@ class Program
             };
 
             // Perform masking
-            var masking = new Aspose.Imaging.Masking.ImageMasking(sourceImage);
-            using (Aspose.Imaging.Masking.Result.MaskingResult results = masking.Decompose(maskingOptions))
+            using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
             {
-                // Retrieve the foreground (masked object) image
+                // Get the foreground (object) image
                 using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    // Save the result as an animated PNG (single‑frame APNG)
+                    // Save as animated PNG with transparency
                     foreground.Save(outputPath, new ApngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha

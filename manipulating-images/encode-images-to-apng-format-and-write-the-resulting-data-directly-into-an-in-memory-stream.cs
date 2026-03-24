@@ -3,31 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class ApngInMemoryExample
+class Program
 {
     static void Main()
     {
-        // Load a source image (single or multi‑page) from disk
-        using (Image sourceImage = Image.Load("source.png"))
+        // Hardcoded input image path
+        string inputPath = @"C:\Images\source.webp";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure APNG options – e.g., set default frame duration to 200 ms
-            var apngOptions = new ApngOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the source image (can be single‑frame or multi‑frame)
+        using (Image sourceImage = Image.Load(inputPath))
+        {
+            // Configure APNG options (default frame time = 200 ms, infinite looping)
+            ApngOptions apngOptions = new ApngOptions
             {
                 DefaultFrameTime = 200 // milliseconds
+                // NumPlays defaults to 0 (infinite)
             };
 
-            // Prepare an in‑memory stream to receive the encoded APNG data
-            using (var memoryStream = new MemoryStream())
+            // Create an in‑memory stream to hold the APNG data
+            using (MemoryStream apngStream = new MemoryStream())
             {
-                // Save the image to the stream using the APNG options
-                sourceImage.Save(memoryStream, apngOptions);
+                // Save the image as APNG into the memory stream
+                sourceImage.Save(apngStream, apngOptions);
 
-                // At this point the stream contains the APNG bytes.
-                // Optionally, retrieve the byte array for further processing.
-                byte[] apngData = memoryStream.ToArray();
+                // Optionally, reset the stream position for further processing
+                apngStream.Position = 0;
 
-                // Example: write the APNG data to a file (for verification)
-                File.WriteAllBytes("output.apng", apngData);
+                // Example: output the size of the generated APNG data
+                Console.WriteLine($"APNG data size: {apngStream.Length} bytes");
             }
         }
     }

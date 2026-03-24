@@ -2,40 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source image file
-        string sourcePath = @"C:\temp\sample.bmp";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output/output.png";
 
-        // Load the image from disk
-        using (Image image = Image.Load(sourcePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Resize the image to the desired dimensions (e.g., 200x200)
-            image.Resize(200, 200);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a simple filter – binarization using Otsu's method.
-            // This demonstrates a transformation; replace with other filters as needed.
-            if (image is BmpImage bmpImage)
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage for processing
+            RasterImage raster = (RasterImage)image;
+
+            // Resize the image
+            raster.Resize(200, 200, ResizeType.NearestNeighbourResample);
+
+            // Apply a median filter
+            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+            // Save processed image to a memory stream (PNG format)
+            using (MemoryStream ms = new MemoryStream())
             {
-                bmpImage.BinarizeOtsu();
+                raster.Save(ms, new PngOptions());
+                Console.WriteLine($"Image saved to memory stream, length: {ms.Length}");
             }
 
-            // Set up PNG save options to convert the image format to PNG
-            PngOptions pngOptions = new PngOptions();
-
-            // Save the processed image into a memory stream
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                image.Save(memoryStream, pngOptions);
-
-                // The memory stream now contains the PNG data.
-                // Example usage: output the size of the resulting image.
-                Console.WriteLine($"Processed image size (bytes): {memoryStream.Length}");
-            }
+            // Also save the processed image to a file
+            raster.Save(outputPath, new PngOptions());
         }
     }
 }

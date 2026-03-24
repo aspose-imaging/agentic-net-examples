@@ -1,39 +1,51 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source APNG file
-        string inputPath = @"C:\Images\input.apng";
+        // Hardcoded input and output paths
+        string inputPath = @"input.apng";
+        string outputPath = @"output.apng";
 
-        // Path where the manipulated APNG will be saved
-        string outputPath = @"C:\Images\output.apng";
-
-        // Load the APNG image from the file system
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Iterate through all frames (pages) of the animation
-            foreach (var page in apng.Pages)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to ApngImage to access frame collection
+            if (image is ApngImage apngImage)
             {
-                // Each page is an ApngFrame; cast it to access frame-specific methods
-                ApngFrame frame = (ApngFrame)page;
+                // Iterate over each frame and apply a grayscale transformation
+                for (int i = 0; i < apngImage.PageCount; i++)
+                {
+                    // Each page is a RasterImage; cast and manipulate
+                    using (RasterImage frame = (RasterImage)apngImage.Pages[i])
+                    {
+                        frame.Grayscale();
+                    }
+                }
 
-                // Example manipulation: increase brightness by 30 units
-                frame.AdjustBrightness(30);
-
-                // Example manipulation: convert the frame to grayscale
-                frame.Grayscale();
+                // Save the modified APNG using default options
+                apngImage.Save(outputPath, new ApngOptions());
             }
-
-            // Example manipulation on the whole animation: resize to 200x200 pixels
-            apng.Resize(200, 200);
-
-            // Save the modified APNG back to the file system
-            apng.Save(outputPath);
+            else
+            {
+                Console.Error.WriteLine("The loaded image is not an APNG file.");
+            }
         }
     }
 }

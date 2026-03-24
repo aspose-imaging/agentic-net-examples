@@ -1,33 +1,51 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\test.svg";
+        string outputPath = @"c:\temp\test.output.png";
 
-        // Load the image as a raster image
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create bilateral smoothing filter options with a kernel size of 5
-            var filterOptions = new BilateralSmoothingFilterOptions(5);
-            // Adjust additional properties if needed
-            filterOptions.ColorFactor = 1.0;
-            filterOptions.SpatialFactor = 1.0;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Apply the smoothing filter to the entire image
-            raster.Filter(raster.Bounds, filterOptions);
+        // Load the SVG image
+        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+        {
+            // Configure rasterization options with smoothing mode
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+            {
+                // Set background color (optional)
+                BackgroundColor = Color.White,
+                // Use the original SVG size
+                PageSize = svgImage.Size,
+                // Apply anti-aliasing to reduce visual artifacts
+                SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                // Optional: improve text rendering
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
+            };
 
-            // Save the processed image as PNG
-            var pngOptions = new PngOptions();
-            raster.Save(outputPath, pngOptions);
+            // Set PNG save options and attach rasterization options
+            PngOptions saveOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterizationOptions
+            };
+
+            // Save the rasterized image
+            svgImage.Save(outputPath, saveOptions);
         }
     }
 }

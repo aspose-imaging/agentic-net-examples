@@ -1,51 +1,59 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Wmf; // Example for WMF images, can be omitted for other formats
+using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageResizingDemo
 {
-    static void Main()
+    class Program
     {
-        // Directory containing the source image and where the resized images will be saved
-        string dataDir = @"C:\temp\";
-
-        // ------------------------------
-        // Scale up by 2 using NearestNeighbourResample
-        // ------------------------------
-        using (Image image = Image.Load(dataDir + "sample.png"))
+        static void Main()
         {
-            // Resize to double the original dimensions
-            image.Resize(image.Width * 2, image.Height * 2, ResizeType.NearestNeighbourResample);
-            // Save the resized image
-            image.Save(dataDir + "sample_up_nearest.png");
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
 
-        // ------------------------------
-        // Scale down by 2 using NearestNeighbourResample
-        // ------------------------------
-        using (Image image = Image.Load(dataDir + "sample.png"))
-        {
-            // Resize to half the original dimensions
-            image.Resize(image.Width / 2, image.Height / 2, ResizeType.NearestNeighbourResample);
-            image.Save(dataDir + "sample_down_nearest.png");
-        }
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // ------------------------------
-        // Scale up by 2 using BilinearResample
-        // ------------------------------
-        using (Image image = Image.Load(dataDir + "sample.png"))
-        {
-            image.Resize(image.Width * 2, image.Height * 2, ResizeType.BilinearResample);
-            image.Save(dataDir + "sample_up_bilinear.png");
-        }
+            // Define output directory and file names
+            string outputDir = "output";
+            string outputPathLanczos = Path.Combine(outputDir, "resized_lanczos.jpg");
+            string outputPathBilinear = Path.Combine(outputDir, "resized_bilinear.jpg");
+            string outputPathAdaptive = Path.Combine(outputDir, "resized_adaptive.jpg");
 
-        // ------------------------------
-        // Scale down by 2 using BilinearResample
-        // ------------------------------
-        using (Image image = Image.Load(dataDir + "sample.png"))
-        {
-            image.Resize(image.Width / 2, image.Height / 2, ResizeType.BilinearResample);
-            image.Save(dataDir + "sample_down_bilinear.png");
+            // Ensure output directory exists before each save
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathLanczos));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathBilinear));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathAdaptive));
+
+            // Load the image once and perform multiple resize operations
+            using (Image image = Image.Load(inputPath))
+            {
+                // Resize using LanczosResample (high quality)
+                image.Resize(image.Width * 2, image.Height * 2, ResizeType.LanczosResample);
+                image.Save(outputPathLanczos, new JpegOptions());
+
+                // Reset to original size by reloading (or you could clone before each resize)
+                image.Dispose();
+                using (Image imageBilinear = Image.Load(inputPath))
+                {
+                    // Resize using BilinearResample (balanced quality/performance)
+                    imageBilinear.Resize(imageBilinear.Width / 2, imageBilinear.Height / 2, ResizeType.BilinearResample);
+                    imageBilinear.Save(outputPathBilinear, new JpegOptions());
+                }
+
+                // Reload again for the third operation
+                using (Image imageAdaptive = Image.Load(inputPath))
+                {
+                    // Resize using AdaptiveResample (advanced algorithm)
+                    imageAdaptive.Resize(imageAdaptive.Width, imageAdaptive.Height, ResizeType.AdaptiveResample);
+                    imageAdaptive.Save(outputPathAdaptive, new JpegOptions());
+                }
+            }
         }
     }
 }

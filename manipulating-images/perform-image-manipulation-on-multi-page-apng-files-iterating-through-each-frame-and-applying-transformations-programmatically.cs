@@ -1,36 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source multi‑page APNG file
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
-
-        // Path where the transformed APNG will be saved
         string outputPath = "output.apng";
 
-        // Load the APNG image using the provided load rule
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load the APNG image
         using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
         {
-            // Iterate through each frame (page) of the APNG
+            // Iterate through each frame and apply a transformation
             for (int i = 0; i < apngImage.PageCount; i++)
             {
-                // Cast the generic Image page to ApngFrame to access frame‑specific methods
+                // Get the current frame
                 ApngFrame frame = (ApngFrame)apngImage.Pages[i];
 
-                // Example transformation 1: increase brightness by 20 units
-                frame.AdjustBrightness(20);
-
-                // Example transformation 2: apply a gamma correction that varies per frame
-                float gamma = 1.0f + i * 0.1f; // gradually increase gamma
+                // Example transformation: adjust gamma based on frame index
+                // Even frames get a darker gamma, odd frames get a lighter gamma
+                float gamma = (i % 2 == 0) ? 0.5f : 2.0f;
                 frame.AdjustGamma(gamma);
             }
 
-            // Save the modified APNG using the provided save rule
-            apngImage.Save(outputPath);
+            // Save the modified APNG image
+            apngImage.Save(outputPath, new ApngOptions());
         }
     }
 }

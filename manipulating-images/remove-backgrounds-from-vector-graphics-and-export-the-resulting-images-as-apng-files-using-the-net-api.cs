@@ -1,44 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect input vector file path and output APNG file path as arguments
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\vector_input.svg";
+        string outputPath = @"C:\Images\output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <inputVectorPath> <outputApngPath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the vector image
         using (Image image = Image.Load(inputPath))
         {
-            // Remove background if the image is a vector type
+            // Remove background if the image supports it
             if (image is VectorImage vectorImage)
             {
-                vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                vectorImage.RemoveBackground();
             }
 
-            // Configure APNG options with transparent background and proper rasterization settings
-            var apngOptions = new ApngOptions
-            {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.Transparent,
-                    PageSize = image.Size
-                }
-            };
-
-            // Save the result as an APNG file
-            image.Save(outputPath, apngOptions);
+            // Save as APNG (single-frame animation)
+            image.Save(outputPath, new ApngOptions());
         }
     }
 }

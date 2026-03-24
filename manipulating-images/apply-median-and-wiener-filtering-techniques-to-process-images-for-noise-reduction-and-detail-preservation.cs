@@ -1,48 +1,53 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Directory containing the source image
-        string dir = @"c:\temp\";
-        string inputPath = System.IO.Path.Combine(dir, "sample.png");
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.png";
+        string medianOutputPath = @"C:\Images\output_median.png";
+        string wienerOutputPath = @"C:\Images\output_wiener.png";
 
-        // -------------------------------------------------
-        // 1. Apply Median filter for basic noise reduction
-        // -------------------------------------------------
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage to access the Filter method
-            RasterImage raster = (RasterImage)image;
-
-            // Median filter with a kernel size of 5 (odd size recommended)
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-
-            // Save the result
-            string medianPath = System.IO.Path.Combine(dir, "sample.MedianFilter.png");
-            raster.Save(medianPath, new PngOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // -------------------------------------------------
-        // 2. Apply Gauss‑Wiener filter for advanced denoising
-        //    while preserving image details
-        // -------------------------------------------------
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(medianOutputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(wienerOutputPath));
+
+        // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage to access filtering methods
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Gauss‑Wiener filter with radius 5 and sigma 4.0
-            // This filter performs deconvolution to reduce noise and retain edges
-            raster.Filter(raster.Bounds, new GaussWienerFilterOptions(5, 4.0));
+            // ---------- Median Filter ----------
+            // Apply a median filter with a kernel size of 5 to the whole image
+            var medianOptions = new MedianFilterOptions(5);
+            rasterImage.Filter(rasterImage.Bounds, medianOptions);
+            // Save the median‑filtered image
+            rasterImage.Save(medianOutputPath);
+        }
 
-            // Save the result
-            string wienerPath = System.IO.Path.Combine(dir, "sample.GaussWienerFilter.png");
-            raster.Save(wienerPath, new PngOptions());
+        // Reload the original image for the Wiener filter (to avoid cumulative effects)
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage rasterImage = (RasterImage)image;
+
+            // ---------- Gauss‑Wiener Filter ----------
+            // Apply a Gauss‑Wiener filter with radius 5 and sigma 4.0
+            var wienerOptions = new GaussWienerFilterOptions(5, 4.0);
+            rasterImage.Filter(rasterImage.Bounds, wienerOptions);
+            // Save the Wiener‑filtered image
+            rasterImage.Save(wienerOutputPath);
         }
     }
 }

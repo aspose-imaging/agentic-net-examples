@@ -1,20 +1,31 @@
 using System;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats;
+using System.IO;
 
-// Input and output file paths
-string inputFilePath = @"C:\Images\skewed.png";
-string outputFilePath = @"C:\Images\deskewed.png";
-
-// Load the image as a RasterImage (covers PNG, JPEG, TIFF, etc.)
-using (RasterImage image = (RasterImage)Image.Load(inputFilePath))
+class Program
 {
-    // Deskew the image.
-    // Parameters:
-    //   resizeProportionally = false  -> keep original canvas size
-    //   backgroundColor = Color.LightGray -> fill empty areas after rotation
-    image.NormalizeAngle(false, Color.LightGray);
+    static void Main()
+    {
+        // Hardcoded input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-    // Save the corrected image
-    image.Save(outputFilePath);
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image as a RasterImage and apply deskew (NormalizeAngle)
+        using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Deskew without resizing the canvas, using LightGray as background color
+            image.NormalizeAngle(false, Aspose.Imaging.Color.LightGray);
+            // Save the corrected image
+            image.Save(outputPath);
+        }
+    }
 }

@@ -1,51 +1,68 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging;
 
-// Input SVG file path
-string inputPath = @"C:\Images\input.svg";
-// Output SVG file path
-string outputPath = @"C:\Images\output.svg";
-
-// Desired dimensions for the cropped SVG (preserve aspect ratio)
-int targetWidth = 200;
-int targetHeight = 100;
-
-using (SvgImage svgImage = new SvgImage(inputPath))
+class Program
 {
-    // Original dimensions
-    int originalWidth = svgImage.Width;
-    int originalHeight = svgImage.Height;
-
-    // Compute aspect ratios
-    double originalRatio = (double)originalWidth / originalHeight;
-    double targetRatio = (double)targetWidth / targetHeight;
-
-    // Determine cropping rectangle to match target aspect ratio
-    int cropX = 0, cropY = 0, cropWidth = originalWidth, cropHeight = originalHeight;
-
-    if (originalRatio > targetRatio)
+    static void Main(string[] args)
     {
-        // Image is wider than target: crop width
-        cropWidth = (int)(originalHeight * targetRatio);
-        cropX = (originalWidth - cropWidth) / 2;
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.svg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Desired dimensions after cropping/resizing
+        int targetWidth = 800;
+        int targetHeight = 600;
+
+        // Load SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            SvgImage svg = (SvgImage)image;
+
+            // Original dimensions
+            int origWidth = svg.Width;
+            int origHeight = svg.Height;
+
+            // Compute aspect ratios
+            double origAspect = (double)origWidth / origHeight;
+            double targetAspect = (double)targetWidth / targetHeight;
+
+            // Determine crop rectangle to match target aspect ratio
+            Aspose.Imaging.Rectangle cropRect;
+            if (origAspect > targetAspect)
+            {
+                // Image is wider than target – crop width
+                int newWidth = (int)(origHeight * targetAspect);
+                int left = (origWidth - newWidth) / 2;
+                cropRect = new Aspose.Imaging.Rectangle(left, 0, newWidth, origHeight);
+            }
+            else
+            {
+                // Image is taller than target – crop height
+                int newHeight = (int)(origWidth / targetAspect);
+                int top = (origHeight - newHeight) / 2;
+                cropRect = new Aspose.Imaging.Rectangle(0, top, origWidth, newHeight);
+            }
+
+            // Perform cropping
+            svg.Crop(cropRect);
+
+            // Resize to exact target dimensions while preserving aspect ratio
+            svg.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+
+            // Save the resulting SVG
+            svg.Save(outputPath);
+        }
     }
-    else if (originalRatio < targetRatio)
-    {
-        // Image is taller than target: crop height
-        cropHeight = (int)(originalWidth / targetRatio);
-        cropY = (originalHeight - cropHeight) / 2;
-    }
-    // If ratios are equal, no cropping needed (full image)
-
-    // Create rectangle for cropping
-    Rectangle cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
-
-    // Perform the crop operation
-    svgImage.Crop(cropRect);
-
-    // Save the cropped SVG, preserving vector fidelity
-    svgImage.Save(outputPath);
 }

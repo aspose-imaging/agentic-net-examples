@@ -2,42 +2,78 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.apng";
 
-        // Load the source image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create and apply a custom mask using MagicWand
-            MagicWandTool
-                .Select(image, new MagicWandSettings(100, 100))
-                .Union(new MagicWandSettings(200, 200))
-                .Invert()
-                .Subtract(new MagicWandSettings(150, 150) { Threshold = 50 })
-                .Subtract(new RectangleMask(0, 0, 800, 150))
-                .Subtract(new RectangleMask(0, 380, 600, 220))
-                .Subtract(new RectangleMask(930, 520, 110, 40))
-                .Subtract(new RectangleMask(1370, 400, 120, 200))
-                .GetFeathered(new FeatheringSettings() { Size = 3 })
-                .Apply();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the masked image as an animated PNG (APNG) preserving transparency
-            image.Save(outputPath, new ApngOptions
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source image as RasterImage
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        {
+            // Define a manual mask using graphics path and shapes
+            GraphicsPath manualMask = new GraphicsPath();
+            Figure figure = new Figure();
+            figure.AddShape(new EllipseShape(new RectangleF(50, 50, 100, 100)));
+            figure.AddShape(new RectangleShape(new RectangleF(200, 200, 150, 150)));
+            manualMask.AddFigure(figure);
+
+            // Prepare manual masking arguments
+            ManualMaskingArgs maskArgs = new ManualMaskingArgs
+            {
+                Mask = manualMask
+            };
+
+            // Export options for the masking operation (in‑memory PNG)
+            PngOptions exportOptions = new PngOptions
             {
                 ColorType = PngColorType.TruecolorWithAlpha,
-                DefaultFrameTime = 200,
-                NumPlays = 0 // infinite loop
-            });
+                Source = new StreamSource(new MemoryStream())
+            };
+
+            // Configure masking options
+            MaskingOptions maskingOptions = new MaskingOptions
+            {
+                Method = SegmentationMethod.Manual,
+                Decompose = false,
+                Args = maskArgs,
+                BackgroundReplacementColor = Color.Transparent,
+                ExportOptions = exportOptions
+            };
+
+            // Perform masking
+            using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
+            {
+                // Retrieve the foreground image (masked object)
+                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                {
+                    // Save the result as APNG preserving transparency
+                    foreground.Save(outputPath, new ApngOptions
+                    {
+                        DefaultFrameTime = 200, // milliseconds per frame
+                        NumPlays = 0             // infinite loop
+                    });
+                }
+            }
         }
     }
 }

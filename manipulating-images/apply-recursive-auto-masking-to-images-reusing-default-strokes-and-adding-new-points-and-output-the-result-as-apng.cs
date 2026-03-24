@@ -3,27 +3,38 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output paths
+        // Hardcoded input and output paths
         string inputPath = "input.jpg";
         string outputPath = "output.apng";
 
-        // Load the source image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // First pass: auto masking with default strokes
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source image as RasterImage
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // First pass: calculate default strokes automatically
             AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
             {
                 CalculateDefaultStrokes = true,
-                FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
+                FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                 Method = SegmentationMethod.GraphCut,
                 Decompose = false,
                 ExportOptions = new PngOptions
@@ -34,39 +45,36 @@ class Program
                 BackgroundReplacementColor = Color.Transparent
             };
 
-            // Perform the first decomposition
-            using (MaskingResult firstResult = new ImageMasking(sourceImage).Decompose(options))
+            // Perform initial decomposition to populate default strokes
+            using (MaskingResult _ = new ImageMasking(image).Decompose(options))
             {
-                // Obtain the foreground image (object)
-                using (RasterImage foreground = (RasterImage)firstResult[1].GetImage())
-                {
-                    // Second pass: reuse options, add new points, skip default stroke calculation
-                    options.CalculateDefaultStrokes = false;
-                    options.Args = new AutoMaskingArgs
-                    {
-                        ObjectsPoints = new Point[][]
-                        {
-                            new Point[] { new Point(50, 50) } // example additional point
-                        }
-                    };
+                // No further action needed; default strokes are now stored in 'options'
+            }
 
-                    // Reload the source image for the second pass
-                    using (RasterImage sourceForSecondPass = (RasterImage)Image.Load(inputPath))
+            // Add new foreground points (example points)
+            options.Args = new AutoMaskingArgs
+            {
+                ObjectsPoints = new Point[][]
+                {
+                    new Point[] { new Point(100, 100), new Point(150, 100) }
+                }
+            };
+            // Reuse previously calculated strokes
+            options.CalculateDefaultStrokes = false;
+
+            // Second pass: apply new points together with default strokes
+            using (MaskingResult finalResult = new ImageMasking(image).Decompose(options))
+            {
+                // Retrieve the foreground segment (index 1)
+                using (RasterImage foreground = (RasterImage)finalResult[1].GetImage())
+                {
+                    // Save the foreground as an animated PNG (APNG)
+                    ApngOptions apngOptions = new ApngOptions
                     {
-                        using (MaskingResult secondResult = new ImageMasking(sourceForSecondPass).Decompose(options))
-                        {
-                            using (RasterImage finalForeground = (RasterImage)secondResult[1].GetImage())
-                            {
-                                // Save the final result as an animated PNG (APNG)
-                                finalForeground.Save(outputPath, new ApngOptions
-                                {
-                                    ColorType = PngColorType.TruecolorWithAlpha,
-                                    DefaultFrameTime = 200,
-                                    NumPlays = 0 // infinite loop
-                                });
-                            }
-                        }
-                    }
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    foreground.Save(outputPath, apngOptions);
                 }
             }
         }

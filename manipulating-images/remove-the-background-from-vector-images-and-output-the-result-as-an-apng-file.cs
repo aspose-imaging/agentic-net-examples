@@ -1,41 +1,44 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input vector image (e.g., SVG) and output APNG file paths
         string inputPath = "input.svg";
         string outputPath = "output.apng";
 
-        // Load the vector image
-        using (Image image = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            // Cast to VectorImage to access background removal
-            var vectorImage = (VectorImage)image;
-            // Remove the background from the vector image
-            vectorImage.RemoveBackground();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Define rasterization options for converting vector to raster
-            var rasterOptions = new SvgRasterizationOptions
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            var vectorImage = image as Aspose.Imaging.VectorImage;
+            if (vectorImage != null)
             {
-                // Use the original size of the vector image
-                PageSize = vectorImage.Size
-            };
+                vectorImage.RemoveBackground(new Aspose.Imaging.RemoveBackgroundSettings());
+            }
 
-            // Configure APNG saving options, including rasterization settings
             var apngOptions = new ApngOptions
             {
-                VectorRasterizationOptions = rasterOptions,
-                // Ensure the output supports alpha channel
-                ColorType = PngColorType.TruecolorWithAlpha
+                Source = new FileCreateSource(outputPath, false),
+                ColorType = PngColorType.TruecolorWithAlpha,
+                VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.Transparent,
+                    PageSize = image.Size
+                }
             };
 
-            // Save the processed image as an APNG file
             image.Save(outputPath, apngOptions);
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -9,10 +10,19 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input raster image path (any supported format)
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        // Output APNG file path
-        string outputPath = "output.apng";
+        string outputPath = "output/output.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source image as a RasterImage
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
@@ -21,15 +31,12 @@ class Program
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // frame duration in milliseconds
+                DefaultFrameTime = 100, // default frame duration in milliseconds
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create an APNG image with the same dimensions as the source
-            using (ApngImage apngImage = (ApngImage)Image.Create(
-                createOptions,
-                sourceImage.Width,
-                sourceImage.Height))
+            // Create an APNG image bound to the output file
+            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
                 // Remove the default empty frame
                 apngImage.RemoveAllFrames();
@@ -37,7 +44,7 @@ class Program
                 // Add the source image as the first (and only) frame
                 apngImage.AddFrame(sourceImage);
 
-                // Save the APNG file (the output file is already bound via FileCreateSource)
+                // Save the APNG image (output path already bound via FileCreateSource)
                 apngImage.Save();
             }
         }
