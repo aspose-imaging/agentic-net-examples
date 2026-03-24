@@ -2,51 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
-        // Define image dimensions
-        int width = 800;
-        int height = 200;
-
-        // Create PNG options and bind to a file stream
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create the image canvas
-            using (Image image = Image.Create(pngOptions, width, height))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the existing PNG image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Create graphics for drawing
+            Graphics graphics = new Graphics(image);
+
+            // Prepare brush and font for text rendering
+            using (SolidBrush brush = new SolidBrush())
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                brush.Color = Color.Yellow;
+                brush.Opacity = 100;
 
-                // Clear background
-                graphics.Clear(Color.White);
+                Font font = new Font("Arial", 48);
 
-                // Prepare brush and font for text
-                using (SolidBrush brush = new SolidBrush())
-                {
-                    brush.Color = Color.DarkBlue;
-                    brush.Opacity = 100;
-
-                    Font font = new Font("Arial", 48);
-
-                    // Draw the specified text
-                    string text = "Sample Text Rendered with Aspose.Imaging";
-                    graphics.DrawString(text, font, brush, new PointF(20, 80));
-                }
-
-                // Save changes (stream is already bound)
-                image.Save();
+                // Draw the specified text onto the image
+                graphics.DrawString("Sample Text", font, brush, new PointF(50, 50));
             }
+
+            // Save the modified image as PNG
+            PngOptions options = new PngOptions();
+            image.Save(outputPath, options);
         }
     }
 }
