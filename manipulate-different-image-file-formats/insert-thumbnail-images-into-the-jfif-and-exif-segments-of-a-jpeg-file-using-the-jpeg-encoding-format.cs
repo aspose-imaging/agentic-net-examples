@@ -1,39 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for source JPEG, thumbnail image, and output JPEG
-        string sourceJpegPath = "source.jpg";
-        string thumbnailPath = "thumb.png";
-        string outputJpegPath = "output.jpg";
+        // Hardcoded input, thumbnail, and output paths
+        string inputPath = @"c:\temp\input.jpg";
+        string thumbnailPath = @"c:\temp\thumb.jpg";
+        string outputPath = @"c:\temp\output.jpg";
 
-        // Load the thumbnail image as a raster image
-        using (RasterImage thumbnail = (RasterImage)Image.Load(thumbnailPath))
+        // Verify input JPEG exists
+        if (!File.Exists(inputPath))
         {
-            // Load the source JPEG image
-            using (JpegImage jpegImage = new JpegImage(sourceJpegPath))
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Verify thumbnail image exists
+        if (!File.Exists(thumbnailPath))
+        {
+            Console.Error.WriteLine($"File not found: {thumbnailPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source JPEG image
+        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+        {
+            // Load the thumbnail image as a raster image
+            using (RasterImage thumb = (RasterImage)Image.Load(thumbnailPath))
             {
-                // Ensure JFIF segment exists and assign the thumbnail
-                jpegImage.Jfif = new JFIFData();
-                jpegImage.Jfif.Thumbnail = thumbnail;
+                // Insert thumbnail into EXIF segment
+                jpegImage.ExifData.Thumbnail = thumb;
 
-                // Ensure EXIF data exists and assign the thumbnail
-                if (jpegImage.ExifData == null)
+                // Ensure JFIF container is instantiated
+                if (jpegImage.Jfif == null)
                 {
-                    jpegImage.ExifData = new JpegExifData();
+                    jpegImage.Jfif = new JFIFData();
                 }
-                jpegImage.ExifData.Thumbnail = thumbnail;
 
-                // Save the modified JPEG image
-                jpegImage.Save(outputJpegPath);
+                // Insert thumbnail into JFIF segment
+                jpegImage.Jfif.Thumbnail = thumb;
             }
+
+            // Save the modified JPEG with the thumbnail embedded
+            jpegImage.Save(outputPath);
         }
     }
 }
