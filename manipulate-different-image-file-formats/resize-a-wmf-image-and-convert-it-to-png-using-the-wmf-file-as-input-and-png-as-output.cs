@@ -1,33 +1,42 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main()
     {
-        // Input WMF file path
-        string inputFile = @"C:\Images\sample.wmf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.wmf";
+        string outputPath = @"C:\Images\sample_resized.png";
 
-        // Output PNG file path
-        string outputFile = @"C:\Images\sample_resized.png";
-
-        // Desired dimensions (example: half of original size)
-        using (Image image = Image.Load(inputFile))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the loaded image to WmfImage to access WMF‑specific methods
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WMF image, resize it, and save as PNG
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to WmfImage to access WMF-specific functionality
             WmfImage wmfImage = (WmfImage)image;
 
-            // Calculate new width and height (here we scale down by 50%)
+            // Example: resize to half of the original dimensions
             int newWidth = wmfImage.Width / 2;
             int newHeight = wmfImage.Height / 2;
 
-            // Resize the WMF image using NearestNeighbour resampling
-            wmfImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+            // Perform the resize operation
+            wmfImage.Resize(newWidth, newHeight);
 
-            // Save the resized image as PNG using the built‑in PngOptions
-            wmfImage.Save(outputFile, new PngOptions());
+            // Save the resized image as PNG
+            wmfImage.Save(outputPath, new PngOptions());
         }
     }
 }
