@@ -9,76 +9,35 @@ class Program
 {
     static void Main()
     {
-        // Path to the source SVG file
-        string inputPath = @"C:\Images\sample.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\test.svg";
+        string outputPath = @"c:\temp\test.output.png";
 
-        // Desired path for the rasterized output (PNG)
-        string outputPath = @"C:\Images\output.png";
-
-        // ------------------------------------------------------------
-        // 1. Verify that the input SVG file exists
-        // ------------------------------------------------------------
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
-            Console.WriteLine($"Error: Input file not found -> {inputPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // ------------------------------------------------------------
-        // 2. Ensure the output directory exists
-        // ------------------------------------------------------------
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!Directory.Exists(outputDir))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load SVG image from file stream
+        using (Stream stream = File.OpenRead(inputPath))
+        using (SvgImage svgImage = new SvgImage(stream))
         {
-            Directory.CreateDirectory(outputDir);
-        }
+            // Set rasterization options (default values can be used)
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
 
-        // ------------------------------------------------------------
-        // 3. Load the SVG image using the unified loader
-        // ------------------------------------------------------------
-        using (Image image = Image.Load(inputPath))
-        {
-            // --------------------------------------------------------
-            // 4. Confirm that the loaded image is a vector image (SVG)
-            // --------------------------------------------------------
-            if (!(image is VectorImage))
-            {
-                Console.WriteLine("Error: Loaded image is not a vector image (SVG).");
-                return;
-            }
-
-            // --------------------------------------------------------
-            // 5. Configure rasterization options
-            // --------------------------------------------------------
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-            {
-                // Optional: set a background color (default is white)
-                BackgroundColor = Color.White,
-
-                // Preserve the original SVG dimensions
-                PageSize = image.Size,
-
-                // Enable antialiasing for smoother lines and curves
-                SmoothingMode = SmoothingMode.AntiAlias,
-
-                // Render text with antialiasing
-                TextRenderingHint = TextRenderingHint.AntiAlias
-            };
-
-            // --------------------------------------------------------
-            // 6. Prepare PNG save options and attach rasterization settings
-            // --------------------------------------------------------
+            // Configure PNG save options and attach rasterization options
             PngOptions pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // --------------------------------------------------------
-            // 7. Save the rasterized image to the target file
-            // --------------------------------------------------------
-            image.Save(outputPath, pngOptions);
+            // Save rasterized image to PNG file
+            svgImage.Save(outputPath, pngOptions);
         }
-
-        Console.WriteLine("SVG to raster conversion completed successfully.");
     }
 }
