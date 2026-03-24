@@ -1,32 +1,46 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Load the source image as a raster image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image as a raster image
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Create a mask selecting a region similar to the color at (120, 100) with a threshold of 150
-            var mask = MagicWandTool.Select(image, new MagicWandSettings(120, 100) { Threshold = 150 });
+            // Create a mask selecting a region similar to the color at (120,100) with a threshold
+            ImageBitMask mask = MagicWandTool.Select(image, new MagicWandSettings(120, 100) { Threshold = 150 });
 
-            // Load all pixels of the image
-            var pixels = image.LoadPixels(image.Bounds);
+            // Load pixel data
+            Color[] pixels = image.LoadPixels(image.Bounds);
 
-            // Define the fill color (red with full opacity)
-            var fillColor = Color.FromArgb(255, 255, 0, 0);
+            // Desired fill color
+            Color fillColor = Color.Red;
 
-            // Replace pixels inside the selected mask with the fill color
-            for (int y = 0; y < image.Height; y++)
+            // Iterate over the mask bounds and replace opaque mask pixels with the fill color
+            Rectangle maskBounds = mask.Bounds;
+            for (int y = maskBounds.Y; y < maskBounds.Y + maskBounds.Height; y++)
             {
-                for (int x = 0; x < image.Width; x++)
+                for (int x = maskBounds.X; x < maskBounds.X + maskBounds.Width; x++)
                 {
                     if (mask.IsOpaque(x, y))
                     {
@@ -36,15 +50,11 @@ class Program
                 }
             }
 
-            // Save the modified pixels back to the image
+            // Save modified pixels back to the image
             image.SavePixels(image.Bounds, pixels);
 
-            // Save the result as PNG with alpha channel
-            var pngOptions = new PngOptions
-            {
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-            image.Save(outputPath, pngOptions);
+            // Save the resulting image
+            image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
         }
     }
 }
