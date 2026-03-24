@@ -1,43 +1,36 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
-class SvgToPngConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Directory containing the SVG file and where the PNG will be saved
-        string dir = @"c:\temp\";
+        string inputPath = "sample.svg";
+        string outputPath = "sample.png";
 
-        // Full paths for input SVG and output PNG
-        string inputSvgPath = Path.Combine(dir, "sample.svg");
-        string outputPngPath = Path.Combine(dir, "sample.png");
-
-        // Load the SVG image from a file stream
-        using (Stream svgStream = File.OpenRead(inputSvgPath))
-        using (SvgImage svgImage = new SvgImage(svgStream))
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options – you can set page size, background, etc.
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-            {
-                // Preserve the original SVG dimensions
-                PageSize = svgImage.Size,
-                // Optional: set background color if needed
-                // BackgroundColor = Color.White
-            };
-
-            // Create PNG save options and attach the rasterization settings
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Save the rasterized image as PNG
-            svgImage.Save(outputPngPath, pngOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("SVG has been successfully converted to PNG.");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Image image = Image.Load(inputPath))
+        {
+            var vectorOptions = new VectorRasterizationOptions
+            {
+                BackgroundColor = Color.White,
+                PageWidth = image.Width,
+                PageHeight = image.Height
+            };
+
+            using (var pngOptions = new PngOptions { VectorRasterizationOptions = vectorOptions })
+            {
+                image.Save(outputPath, pngOptions);
+            }
+        }
     }
 }
