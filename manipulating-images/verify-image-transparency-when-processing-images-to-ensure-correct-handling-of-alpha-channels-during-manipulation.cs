@@ -1,78 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.png";
+        string outputPath = @"C:\Temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <inputImagePath> <outputImagePath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
-
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Load the image
+        using (Image image = Image.Load(inputPath))
         {
-            bool hasTransparency = HasTransparency(image);
-            Console.WriteLine($"Image '{Path.GetFileName(inputPath)}' has transparency: {hasTransparency}");
+            // Check for alpha channel using the common RasterImage property
+            bool hasAlpha = false;
+            if (image is RasterImage raster)
+            {
+                hasAlpha = raster.HasAlpha;
+                Console.WriteLine($"RasterImage.HasAlpha: {hasAlpha}");
+            }
 
-            string ext = Path.GetExtension(outputPath).ToUpperInvariant();
-            Source fileSource = new FileCreateSource(outputPath, false);
+            // Additional PNG‑specific checks
+            if (image is PngImage png)
+            {
+                Console.WriteLine($"PngImage.HasAlpha: {png.HasAlpha}");
+                Console.WriteLine($"PngImage.HasTransparentColor: {png.HasTransparentColor}");
 
-            if (ext == ".PNG")
-            {
-                var pngOptions = new PngOptions { Source = fileSource };
-                image.Save(outputPath, pngOptions);
+                // Example manipulation: set a transparent color if the image lacks alpha
+                if (!png.HasAlpha && !png.HasTransparentColor)
+                {
+                    png.TransparentColor = Color.Red;
+                    png.HasTransparentColor = true;
+                    Console.WriteLine("Transparent color set to Red.");
+                }
             }
-            else if (ext == ".JPG" || ext == ".JPEG")
-            {
-                var jpegOptions = new JpegOptions { Source = fileSource, Quality = 100 };
-                image.Save(outputPath, jpegOptions);
-            }
-            else if (ext == ".BMP")
-            {
-                var bmpOptions = new BmpOptions { Source = fileSource };
-                image.Save(outputPath, bmpOptions);
-            }
-            else if (ext == ".GIF")
-            {
-                var gifOptions = new GifOptions { Source = fileSource };
-                image.Save(outputPath, gifOptions);
-            }
-            else if (ext == ".TIFF")
-            {
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = fileSource };
-                image.Save(outputPath, tiffOptions);
-            }
-            else if (ext == ".WEBP")
-            {
-                var webpOptions = new WebPOptions { Source = fileSource };
-                image.Save(outputPath, webpOptions);
-            }
-            else
-            {
-                var fallbackOptions = new JpegOptions { Source = fileSource, Quality = 100 };
-                image.Save(outputPath, fallbackOptions);
-            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the (potentially modified) image
+            image.Save(outputPath);
+            Console.WriteLine($"Image saved to {outputPath}");
         }
-    }
-
-    private static bool HasTransparency(RasterImage img)
-    {
-        int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-        foreach (int pixel in pixels)
-        {
-            int alpha = (pixel >> 24) & 0xFF;
-            if (alpha < 255)
-                return true;
-        }
-        return false;
     }
 }
