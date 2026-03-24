@@ -1,29 +1,32 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 
-class TiffToPdfConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source TIFF file
-        string tiffPath = "input.tif";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        // Desired output PDF file path
-        string pdfPath = "output.pdf";
-
-        // Load the TIFF image (raster image) from file
-        using (Image image = Image.Load(tiffPath))
+        // Verify that the input TIFF exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to TiffImage to access TIFF‑specific members if needed
-            TiffImage tiffImage = image as TiffImage;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Prepare PDF save options – default options preserve the original raster data
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF raster image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Save the image as PDF while preserving original fidelity
             PdfOptions pdfOptions = new PdfOptions();
-
-            // Save the loaded TIFF image as a PDF document while keeping original fidelity
-            tiffImage.Save(pdfPath, pdfOptions);
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
