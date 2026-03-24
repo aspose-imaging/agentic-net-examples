@@ -1,28 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class ApplyApngFilter
+class Program
 {
     static void Main()
     {
-        // Path to the folder containing the APNG image.
-        string dataDir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output\\filtered.apng";
 
-        // Load the APNG image from file.
-        using (Image image = Image.Load(dataDir + "sample.apng"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to ApngImage to access the Filter method.
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to ApngImage to access APNG-specific functionality
             ApngImage apngImage = (ApngImage)image;
 
-            // Apply a median filter with a rectangle size of 5 to the entire image.
-            // The Filter method takes a rectangle defining the area to process
-            // and a FilterOptionsBase derived object specifying the filter type.
-            apngImage.Filter(apngImage.Bounds, new MedianFilterOptions(5));
+            // Apply a Gaussian blur filter to the entire image
+            apngImage.Filter(
+                apngImage.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the filtered image back to disk (keeping the APNG format).
-            apngImage.Save(dataDir + "sample.filtered.apng");
+            // Save the filtered APNG image
+            apngImage.Save(outputPath);
         }
     }
 }
