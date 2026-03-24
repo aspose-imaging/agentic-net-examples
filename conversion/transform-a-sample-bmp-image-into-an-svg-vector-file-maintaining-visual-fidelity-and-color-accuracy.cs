@@ -1,40 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging;
 
-// Path to the source BMP file
-string inputBmpPath = @"C:\Images\sample.bmp";
-// Desired path for the resulting SVG file
-string outputSvgPath = @"C:\Images\sample_converted.svg";
-
-// Load the BMP image using the unified Image.Load method
-using (RasterImage bmpImage = (RasterImage)Image.Load(inputBmpPath))
+class Program
 {
-    // Retrieve dimensions of the BMP to create a matching SVG canvas
-    int width = bmpImage.Width;
-    int height = bmpImage.Height;
-    int dpi = 96; // Standard screen DPI
-
-    // Create an SVG graphics context with the same size as the BMP
-    SvgGraphics2D svgGraphics = new SvgGraphics2D(width, height, dpi);
-
-    // Draw the entire BMP onto the SVG canvas; this embeds the raster data as an <image> element
-    svgGraphics.DrawImage(bmpImage, new Point(0, 0), new Size(width, height));
-
-    // Finalize recording and obtain the SvgImage instance
-    using (SvgImage svgImage = svgGraphics.EndRecording())
+    static void Main()
     {
-        // Prepare SVG save options – keep full color fidelity and avoid compression
-        SvgOptions saveOptions = new SvgOptions
-        {
-            Compress = false,          // No compression to preserve exact data
-            TextAsShapes = false       // Text handling not needed for raster image
-        };
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\sample.svg";
 
-        // Save the SVG file to the specified location
-        svgImage.Save(outputSvgPath, saveOptions);
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization options for SVG output
+            VectorRasterizationOptions vectorRasterizationOptions = new SvgRasterizationOptions
+            {
+                PageSize = image.Size
+            };
+
+            // Save the image as SVG using the configured options
+            image.Save(outputPath, new SvgOptions
+            {
+                VectorRasterizationOptions = vectorRasterizationOptions
+            });
+        }
     }
 }
