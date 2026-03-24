@@ -6,31 +6,48 @@ using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output DICOM file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.dcm";
-        string outputPath = args.Length > 1 ? args[1] : "output_resized.dcm";
+        // Hardcoded input and output file paths
+        string inputPath = "input.dcm";
+        string outputPath = "output_resized.dcm";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the DICOM image
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Define new dimensions (example: 50% reduction)
+            // Cast to DicomImage for DICOM-specific operations
+            DicomImage dicomImage = image as DicomImage;
+            if (dicomImage == null)
+            {
+                Console.Error.WriteLine("The loaded file is not a DICOM image.");
+                return;
+            }
+
+            // Define new dimensions (example: reduce size by 50%)
             int newWidth = dicomImage.Width / 2;
             int newHeight = dicomImage.Height / 2;
 
-            // Resize using nearest neighbour resampling
-            dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+            // Resize the image using Bilinear resampling
+            dicomImage.Resize(newWidth, newHeight, ResizeType.BilinearResample);
 
-            // Prepare DICOM save options, preserving original metadata
-            DicomOptions options = new DicomOptions
+            // Prepare DICOM save options and preserve original metadata
+            var saveOptions = new DicomOptions
             {
                 KeepMetadata = true
-                // Additional metadata can be set via options.XmpData if needed
             };
 
             // Save the resized image back to DICOM format
-            dicomImage.Save(outputPath, options);
+            dicomImage.Save(outputPath, saveOptions);
         }
     }
 }
