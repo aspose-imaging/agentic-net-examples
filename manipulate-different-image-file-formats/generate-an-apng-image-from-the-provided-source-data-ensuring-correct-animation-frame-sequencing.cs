@@ -1,60 +1,69 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input raster image path (single-frame source)
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        // Output APNG file path
-        string outputPath = "output.apng";
+        string outputPath = "output_animation.png";
 
-        // Animation timing settings
-        const int animationDuration = 1000; // total animation duration in milliseconds
-        const int frameDuration = 70;       // duration of each frame in milliseconds
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the source image as a RasterImage
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source raster image
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Set up options for creating the APNG
+            // Animation parameters
+            const int AnimationDuration = 1000; // total duration in ms
+            const int FrameDuration = 70;       // each frame duration in ms
+
+            // Configure APNG creation options
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = (uint)frameDuration,
+                DefaultFrameTime = (uint)FrameDuration,
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create an APNG image with the same dimensions as the source
+            // Create the APNG canvas bound to the output file
             using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
-                // Remove the default frame that exists after creation
-                apngImage.RemoveAllFrames();
+                int numOfFrames = AnimationDuration / FrameDuration;
+                int numOfFrames2 = numOfFrames / 2;
 
-                // Determine the number of frames based on total duration and per-frame duration
-                int numOfFrames = animationDuration / frameDuration;
-                int halfFrames = numOfFrames / 2;
+                // Remove the default empty frame
+                apngImage.RemoveAllFrames();
 
                 // Add the first frame
                 apngImage.AddFrame(sourceImage);
 
-                // Add intermediate frames, adjusting gamma for visual effect
-                for (int i = 1; i < numOfFrames - 1; ++i)
+                // Add intermediate frames with gamma adjustments
+                for (int frameIndex = 1; frameIndex < numOfFrames - 1; ++frameIndex)
                 {
                     apngImage.AddFrame(sourceImage);
                     ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                    float gamma = i >= halfFrames ? numOfFrames - i - 1 : i;
+                    float gamma = frameIndex >= numOfFrames2 ? numOfFrames - frameIndex - 1 : frameIndex;
                     lastFrame.AdjustGamma(gamma);
                 }
 
-                // Add the final frame
+                // Add the last frame
                 apngImage.AddFrame(sourceImage);
 
-                // Save the composed APNG to the specified output path
+                // Save the APNG (output is already bound)
                 apngImage.Save();
             }
         }
