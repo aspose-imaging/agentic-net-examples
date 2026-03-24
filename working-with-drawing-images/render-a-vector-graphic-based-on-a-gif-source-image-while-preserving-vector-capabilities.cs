@@ -1,39 +1,46 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
-class GifToSvgConverter
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source GIF image
-        string gifPath = @"C:\Temp\source.gif";
+        // Hardcoded input GIF path and output SVG path
+        string inputPath = @"C:\temp\input.gif";
+        string outputPath = @"C:\temp\output.svg";
 
-        // Path where the resulting SVG will be saved
-        string svgPath = @"C:\Temp\result.svg";
-
-        // Load the GIF image using Aspose.Imaging
-        using (Image gifImage = Image.Load(gifPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Prepare SVG rasterization options.
-            // PageSize is set to the original image size to keep dimensions unchanged.
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = gifImage.Size,
-                BackgroundColor = Color.White // optional background
-            };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Configure SVG save options and attach the rasterization options.
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                Compress = false // keep SVG uncompressed for readability
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the GIF as an SVG file. The raster image will be embedded,
-            // preserving the ability to treat the result as a vector graphic.
-            gifImage.Save(svgPath, svgOptions);
+        // Load the GIF as a raster image
+        using (RasterImage gifImage = (RasterImage)Image.Load(inputPath))
+        {
+            int width = gifImage.Width;
+            int height = gifImage.Height;
+            int dpi = 96; // Standard screen DPI
+
+            // Create an SVG graphics canvas with the same dimensions as the GIF
+            SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+
+            // Draw the raster GIF onto the SVG canvas
+            graphics.DrawImage(gifImage, new Point(0, 0));
+
+            // Finalize the SVG image
+            using (SvgImage svgImage = graphics.EndRecording())
+            {
+                // Save the SVG file
+                svgImage.Save(outputPath);
+            }
         }
     }
 }
