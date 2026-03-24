@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
@@ -12,49 +13,56 @@ class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length < 2)
+        string inputPath = "input.gif";
+        string outputPath = "output.apng";
+
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <inputImagePath> <outputApngPath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        using (RasterImage source = (RasterImage)Image.Load(inputPath))
         {
-            // Export options for the masking step (transparent PNG in memory)
-            PngOptions maskExportOptions = new PngOptions
+            var maskingOptions = new MaskingOptions
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            };
-
-            // Configure GraphCut masking with automatic strokes and feathering
-            AutoMaskingGraphCutOptions maskingOptions = new AutoMaskingGraphCutOptions
-            {
-                CalculateDefaultStrokes = true,
-                FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
                 Method = SegmentationMethod.GraphCut,
                 Decompose = false,
-                ExportOptions = maskExportOptions,
-                BackgroundReplacementColor = Color.Transparent
-            };
-
-            // Perform background removal
-            using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
-            using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
-            {
-                // Save the processed image as a transparent APNG
-                ApngOptions apngSaveOptions = new ApngOptions
+                BackgroundReplacementColor = Color.Transparent,
+                ExportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = 100,
-                    NumPlays = 0,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    Source = new StreamSource(new MemoryStream())
+                }
+            };
 
-                foreground.Save(outputPath, apngSaveOptions);
+            using (MaskingResult maskResult = new ImageMasking(source).Decompose(maskingOptions))
+            {
+                using (RasterImage mask = (RasterImage)maskResult[1].GetMask())
+                {
+                    if (mask.Width != source.Width || mask.Height != source.Height)
+                    {
+                        mask.Resize(source.Width, source.Height, ResizeType.NearestNeighbourResample);
+                    }
+
+                    ImageMasking.ApplyMask(source, mask, maskingOptions);
+                }
+            }
+
+            var apngOptions = new ApngOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                ColorType = PngColorType.TruecolorWithAlpha,
+                DefaultFrameTime = 100
+            };
+
+            using (ApngImage apng = (ApngImage)Image.Create(apngOptions, source.Width, source.Height))
+            {
+                apng.RemoveAllFrames();
+                apng.AddFrame(source);
+                apng.Save();
             }
         }
     }
