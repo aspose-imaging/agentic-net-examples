@@ -1,44 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Apng;
 
-class RemoveBackgroundAndSaveApng
+class Program
 {
     static void Main()
     {
-        // Input SVG (or any vector format supported by Aspose.Imaging)
-        string inputPath = @"C:\Images\input.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.apng";
 
-        // Output APNG file – transparency will be preserved after background removal
-        string outputPath = @"C:\Images\output.apng";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the vector image using the generic Image.Load method (lifecycle rule)
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the vector image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to VectorImage to access vector‑specific functionality
-            VectorImage vectorImage = (VectorImage)image;
-
-            // Remove the background – this method is provided by the VectorImage class
-            vectorImage.RemoveBackground();
-
-            // Prepare rasterization options for converting the vector image to raster frames
-            // (required because APNG is a raster format)
-            var rasterizationOptions = new SvgRasterizationOptions
+            // Remove background if the image is a vector type
+            if (image is VectorImage vectorImg)
             {
-                // Use the original vector size; you can change this if scaling is needed
-                PageSize = vectorImage.Size
-            };
+                vectorImg.RemoveBackground();
+            }
 
-            // Create APNG save options and attach the rasterization settings
-            var apngOptions = new ApngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Save the processed image as an APNG (lifecycle rule – Save with options)
-            vectorImage.Save(outputPath, apngOptions);
+            // Save the result as an APNG preserving transparency
+            image.Save(outputPath, new ApngOptions());
         }
     }
 }
