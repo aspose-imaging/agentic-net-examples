@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
@@ -9,24 +10,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input\\image.png";
+        string outputPath = "output\\result.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the image
         using (var image = Image.Load(inputPath))
         {
-            // Cast to the specific format type (PNG in this example)
+            // Cast to specific format (PNG in this example)
             var pngImage = (PngImage)image;
 
-            // Create a mask defining the watermark region
+            // Define the mask region (example ellipse)
             var mask = new GraphicsPath();
             var figure = new Figure();
-            // Example ellipse mask; adjust coordinates as needed
-            figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
+            figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
             mask.AddFigure(figure);
 
-            // Configure watermark removal options (Telea algorithm)
+            // Choose Telea algorithm for watermark removal
             var options = new TeleaWatermarkOptions(mask);
 
             // Perform watermark removal
