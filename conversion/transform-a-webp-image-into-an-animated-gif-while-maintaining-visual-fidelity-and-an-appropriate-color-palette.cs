@@ -1,44 +1,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input WebP file path (animated)
-        string inputPath = args.Length > 0 ? args[0] : "input.webp";
-        // Output animated GIF file path
-        string outputPath = args.Length > 1 ? args[1] : "output.gif";
+        // Hardcoded input and output paths
+        string inputPath = "C:\\temp\\input.webp";
+        string outputPath = "C:\\temp\\output.gif";
 
-        // Load the animated WebP image
-        using (WebPImage webpImage = new WebPImage(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure GIF options
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image (supports animation)
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // Prepare GIF options (default preserves frames and palette)
             GifOptions gifOptions = new GifOptions();
-            gifOptions.LoopsCount = 0; // infinite loop
-            gifOptions.Source = new FileCreateSource(outputPath, false);
-            // Create a GIF canvas with the same dimensions as the WebP image
-            using (GifImage gifImage = (GifImage)Image.Create(gifOptions, webpImage.Width, webpImage.Height))
-            {
-                // Iterate through each frame of the WebP animation
-                foreach (var frame in webpImage.Pages)
-                {
-                    // Each frame is a raster image; cast it accordingly
-                    RasterImage rasterFrame = (RasterImage)frame;
-                    // Create a GIF frame block from the raster frame
-                    GifFrameBlock gifFrame = new GifFrameBlock(rasterFrame);
-                    // Add the frame to the GIF image
-                    gifImage.AddBlock(gifFrame);
-                }
-                // Save the animated GIF
-                gifImage.Save();
-            }
+
+            // Save as animated GIF
+            webPImage.Save(outputPath, gifOptions);
         }
     }
 }

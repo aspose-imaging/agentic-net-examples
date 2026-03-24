@@ -2,35 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input SVG file path (first argument or default)
-        string inputPath = args.Length > 0 ? args[0] : "input.svg";
-        // Output BMP file path (second argument or default)
-        string outputPath = args.Length > 1 ? args[1] : "output.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.bmp";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options to preserve visual fidelity
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Configure rasterization to match the SVG's original size
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = image.Size,
-                BackgroundColor = Color.White,
-                SmoothingMode = SmoothingMode.AntiAlias,
-                TextRenderingHint = TextRenderingHint.AntiAlias
+                PageSize = image.Size
             };
 
-            // Set BMP export options with the rasterization settings
-            BmpOptions bmpOptions = new BmpOptions
+            // Set BMP save options with the rasterization settings
+            var bmpOptions = new BmpOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the rendered image as BMP
+            // Save the rasterized image as BMP
             image.Save(outputPath, bmpOptions);
         }
     }

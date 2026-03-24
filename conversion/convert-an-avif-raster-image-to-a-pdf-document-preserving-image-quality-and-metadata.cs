@@ -5,24 +5,34 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input AVIF file path
+        // Hardcoded input and output paths
         string inputPath = "input.avif";
-        // Output PDF file path
         string outputPath = "output.pdf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the AVIF image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options to keep original metadata
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Configure PDF export options
+            var pdfOptions = new PdfOptions
             {
-                pdfOptions.KeepMetadata = true;
+                KeepMetadata = true,                 // Preserve original metadata
+                UseOriginalImageResolution = true   // Keep original DPI
+            };
 
-                // Save the image as a PDF document preserving quality and metadata
-                image.Save(outputPath, pdfOptions);
-            }
+            // Save the image as a PDF document
+            image.Save(outputPath, pdfOptions);
         }
     }
 }

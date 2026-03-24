@@ -5,21 +5,28 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input BMP file (with alpha channel) and output PDF file paths
+        // Hard‑coded input and output file paths
         string inputPath = "input.bmp";
         string outputPath = "output.pdf";
 
-        // Load the BMP image
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP image (which may contain an alpha channel)
         using (Image image = Image.Load(inputPath))
         {
-            // Create PDF options
-            using (PdfOptions pdfOptions = new PdfOptions())
-            {
-                // Save the image as PDF while preserving transparency
-                image.Save(outputPath, pdfOptions);
-            }
+            // Save the image as a PDF while preserving transparency.
+            // PdfOptions uses the default settings which keep the alpha channel.
+            image.Save(outputPath, new PdfOptions());
         }
     }
 }

@@ -3,53 +3,54 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string bigTiffPath = "input.tif";
-        string intermediateSvgPath = "intermediate.svg";
-        string outputRasterPath = "output.png";
+        // Hardcoded paths
+        string inputPath = @"C:\Images\source.bigtiff";
+        string tempSvgPath = @"C:\Images\temp.svg";
+        string outputPath = @"C:\Images\output.png";
 
-        using (Image bigTiffImage = Image.Load(bigTiffPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            using (SvgOptions svgExportOptions = new SvgOptions())
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure directories for temporary SVG and final output exist
+        Directory.CreateDirectory(Path.GetDirectoryName(tempSvgPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BIGTIFF image and export it to SVG
+        using (Image bigTiff = Image.Load(inputPath))
+        {
+            var svgOptions = new SvgOptions
             {
-                SvgRasterizationOptions svgRaster = new SvgRasterizationOptions
+                // Configure rasterization options for the SVG export
+                VectorRasterizationOptions = new SvgRasterizationOptions
                 {
-                    PageWidth = bigTiffImage.Width,
-                    PageHeight = bigTiffImage.Height,
-                    BackgroundColor = Color.White,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-                svgExportOptions.VectorRasterizationOptions = svgRaster;
-                bigTiffImage.Save(intermediateSvgPath, svgExportOptions);
-            }
-        }
-
-        using (Image svgImage = Image.Load(intermediateSvgPath))
-        {
-            SvgRasterizationOptions svgRasterOptions = new SvgRasterizationOptions
-            {
-                PageWidth = svgImage.Width,
-                PageHeight = svgImage.Height,
-                BackgroundColor = Color.White,
-                SmoothingMode = SmoothingMode.AntiAlias,
-                TextRenderingHint = TextRenderingHint.AntiAlias
+                    PageSize = bigTiff.Size,
+                    BackgroundColor = Color.White
+                }
             };
-            using (PngOptions pngSaveOptions = new PngOptions())
-            {
-                pngSaveOptions.VectorRasterizationOptions = svgRasterOptions;
-                svgImage.Save(outputRasterPath, pngSaveOptions);
-            }
+            bigTiff.Save(tempSvgPath, svgOptions);
         }
 
-        if (File.Exists(intermediateSvgPath))
+        // Load the generated SVG and rasterize it to a PNG raster image
+        using (SvgImage svgImage = new SvgImage(tempSvgPath))
         {
-            File.Delete(intermediateSvgPath);
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
+                }
+            };
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }

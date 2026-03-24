@@ -1,38 +1,62 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageOptions; // PdfOptions and PdfImageCompressionOptions are here
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Input directory containing BMP files and output PDF file path
-        string inputDirectory = @"C:\Images\BmpInput";
-        string outputPdfPath = @"C:\Images\output.pdf";
-
-        // Retrieve all BMP files from the input directory
-        string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
-
-        if (bmpFiles.Length == 0)
+        // Hardcoded input BMP file paths
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("No BMP files found in the specified directory.");
-            return;
+            @"C:\Images\page1.bmp",
+            @"C:\Images\page2.bmp",
+            @"C:\Images\page3.bmp"
+        };
+
+        // Hardcoded output PDF file path
+        string outputPath = @"C:\Output\combined.pdf";
+
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
+        {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
         }
 
-        // Create a multipage image where each BMP file becomes a page
-        using (Image multipageImage = Image.Create(bmpFiles))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load BMP images into a list
+        List<Image> sourceImages = new List<Image>();
+        foreach (string inputPath in inputPaths)
         {
-            // Configure PDF save options
+            Image img = Image.Load(inputPath);
+            sourceImages.Add(img);
+        }
+
+        // Create a multipage image from the loaded BMPs
+        using (Image pdfImage = Image.Create(sourceImages.ToArray()))
+        {
+            // Configure PDF save options (optional compression)
             PdfOptions pdfOptions = new PdfOptions();
+            // Uncomment the following line to set a specific compression option
+            // pdfOptions.ImageCompression = PdfImageCompressionOptions.Auto;
 
-            // Optional: set image compression for the PDF pages
-            // pdfOptions.Compression = PdfImageCompressionOptions.Flate;
-
-            // Save the multipage image as a PDF document
-            multipageImage.Save(outputPdfPath, pdfOptions);
+            // Save the multipage PDF
+            pdfImage.Save(outputPath, pdfOptions);
         }
 
-        Console.WriteLine("PDF document created successfully at: " + outputPdfPath);
+        // Dispose source images
+        foreach (Image img in sourceImages)
+        {
+            img.Dispose();
+        }
     }
 }

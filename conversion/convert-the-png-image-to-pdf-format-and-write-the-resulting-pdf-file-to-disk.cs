@@ -3,25 +3,32 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class PngToPdfConverter
+class Program
 {
     static void Main()
     {
-        // Define input PNG file and output PDF file paths
-        string dir = @"c:\temp\";
-        string inputPath = Path.Combine(dir, "sample.png");
-        string outputPath = Path.Combine(dir, "sample.pdf");
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Load the PNG image from disk
-        using (Image image = Image.Load(inputPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create PDF export options (default settings)
-            PdfOptions pdfOptions = new PdfOptions();
-
-            // Save the loaded image as a PDF document
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Conversion completed: " + outputPath);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PDF export options
+            var pdfOptions = new PdfOptions();
+
+            // Save the image as a PDF file
+            image.Save(outputPath, pdfOptions);
+        }
     }
 }

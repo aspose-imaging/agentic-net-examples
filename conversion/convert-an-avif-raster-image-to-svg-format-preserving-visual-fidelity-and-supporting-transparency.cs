@@ -1,39 +1,46 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class AvifToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source AVIF image
-        string inputFile = @"C:\Images\sample.avif";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.avif";
+        string outputPath = @"C:\Images\sample.svg";
 
-        // Desired output SVG file path
-        string outputFile = @"C:\Images\sample.svg";
-
-        // Load the AVIF image using Aspose.Imaging's generic Image loader.
-        // The loader automatically creates an AvifImage instance internally.
-        using (Image avifImage = Image.Load(inputFile))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options for SVG output.
-            // PageSize is set to the original image size to preserve dimensions.
-            var rasterizationOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the AVIF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare rasterization options for SVG conversion
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = avifImage.Size
-                // No background color is set, so transparency is retained.
+                // Use the original image size as the page size
+                PageSize = image.Size
             };
 
-            // Create SVG save options and attach the rasterization settings.
-            var svgOptions = new SvgOptions
+            // Configure SVG save options
+            SvgOptions svgOptions = new SvgOptions
             {
                 VectorRasterizationOptions = rasterizationOptions,
-                // KeepMetadata = true; // optional: preserve original metadata
-                // Compress = false;   // optional: do not compress the SVG output
+                // Preserve transparency (default behavior)
+                // TextAsShapes left as default (false) to keep text as text when possible
             };
 
-            // Save the loaded AVIF image as an SVG file, preserving visual fidelity and transparency.
-            avifImage.Save(outputFile, svgOptions);
+            // Save the image as SVG
+            image.Save(outputPath, svgOptions);
         }
     }
 }

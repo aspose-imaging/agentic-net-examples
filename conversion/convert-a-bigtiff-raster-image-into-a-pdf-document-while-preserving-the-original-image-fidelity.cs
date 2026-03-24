@@ -1,27 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.BigTiff;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source BIGTIFF file
-        string inputPath = "input.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\bigimage.tif";
+        string outputPath = @"C:\Images\bigimage.pdf";
 
-        // Desired output PDF file path
-        string outputPath = "output.pdf";
-
-        // Load the BIGTIFF image using Aspose.Imaging's Image.Load method.
-        // The returned object is cast to BigTiffImage to access BIGTIFF‑specific members if needed.
-        using (BigTiffImage bigTiff = (BigTiffImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create PDF save options. Default settings preserve the original raster fidelity.
-            PdfOptions pdfOptions = new PdfOptions();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the BIGTIFF image as a PDF document.
-            bigTiff.Save(outputPath, pdfOptions);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BigTIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PDF export options
+            var pdfOptions = new PdfOptions
+            {
+                // Preserve original image resolution
+                UseOriginalImageResolution = true,
+                // Keep original metadata if any
+                KeepMetadata = true
+            };
+
+            // Save the image as PDF
+            image.Save(outputPath, pdfOptions);
         }
     }
 }

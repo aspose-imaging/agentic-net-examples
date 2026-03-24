@@ -1,45 +1,52 @@
 using System;
-using System.Collections.Generic;
-using Aspose.Imaging.ImageOptions;
+using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        var pngParameters = new List<string>
-        {
-            nameof(PngOptions.BitDepth),
-            nameof(PngOptions.BufferSizeHint),
-            nameof(PngOptions.ColorType),
-            nameof(PngOptions.FilterType),
-            nameof(PngOptions.FullFrame),
-            nameof(PngOptions.KeepMetadata),
-            nameof(PngOptions.MultiPageOptions),
-            nameof(PngOptions.Palette),
-            nameof(PngOptions.PngCompressionLevel),
-            nameof(PngOptions.Progressive),
-            nameof(PngOptions.ResolutionSettings),
-            nameof(PngOptions.Source),
-            nameof(PngOptions.VectorRasterizationOptions),
-            nameof(PngOptions.XmpData),
-            nameof(PngOptions.ExifData),
-            nameof(PngOptions.ProgressEventHandler)
-        };
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.png";
+        string outputPath = @"c:\temp\output.png";
 
-        Console.WriteLine("PNG conversion input parameters:");
-        foreach (var param in pngParameters)
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("- " + param);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        using (var options = new PngOptions())
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image
+        using (PngImage pngImage = new PngImage(inputPath))
         {
-            options.BitDepth = 8;
-            options.ColorType = PngColorType.TruecolorWithAlpha;
-            options.PngCompressionLevel = PngCompressionLevel.ZipLevel9;
-            options.Progressive = true;
-            options.FilterType = PngFilterType.Sub;
+            // Basic image dimensions
+            Console.WriteLine($"Width: {pngImage.Width}");
+            Console.WriteLine($"Height: {pngImage.Height}");
+
+            // Retrieve original PNG options (preserves original settings)
+            ImageOptionsBase baseOptions = pngImage.GetOriginalOptions();
+            if (baseOptions is PngOptions pngOptions)
+            {
+                // Enumerate relevant PNG input parameters
+                Console.WriteLine($"BitDepth: {pngOptions.BitDepth}");
+                Console.WriteLine($"ColorType: {pngOptions.ColorType}");
+                Console.WriteLine($"CompressionLevel: {pngOptions.PngCompressionLevel}");
+                Console.WriteLine($"FilterType: {pngOptions.FilterType}");
+                Console.WriteLine($"Progressive: {pngOptions.Progressive}");
+            }
+            else
+            {
+                Console.WriteLine("Unable to retrieve PNG-specific options.");
+            }
+
+            // Save a copy to demonstrate the save workflow
+            pngImage.Save(outputPath);
         }
     }
 }

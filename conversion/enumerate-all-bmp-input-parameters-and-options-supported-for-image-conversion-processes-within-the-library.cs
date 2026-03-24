@@ -1,72 +1,67 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // BMP Options (BmpOptions) supported properties
-        List<string> bmpOptionsProperties = new List<string>
-        {
-            "BitsPerPixel (int) – Image bits per pixel count.",
-            "BufferSizeHint (int) – Maximum allowed size for internal buffers.",
-            "Compression (BitmapCompression) – Compression type (e.g., Bitfields, Rgb, Rle8).",
-            "Disposed (bool) – Indicates whether the instance is disposed (read‑only).",
-            "ExifData (IExifData) – EXIF metadata container.",
-            "FullFrame (bool) – Indicates full‑frame processing.",
-            "KeepMetadata (bool) – Preserve original metadata on export.",
-            "MultiPageOptions (MultiPageOptions) – Options for multi‑page export.",
-            "Palette (IColorPalette) – Color palette for palettized images.",
-            "ProgressEventHandler (ProgressEventHandler) – Progress callback.",
-            "ResolutionSettings (ResolutionSetting) – Horizontal and vertical DPI.",
-            "Source (Source) – Destination source for image creation (e.g., FileCreateSource).",
-            "VectorRasterizationOptions (VectorRasterizationOptions) – Rasterization settings for vector sources.",
-            "XmpData (IXmpData) – XMP metadata container."
-        };
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\bmp_parameters.txt";
 
-        // BMP Options constructors
-        List<string> bmpOptionsConstructors = new List<string>
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            "BmpOptions() – Default constructor.",
-            "BmpOptions(BmpOptions) – Copy constructor."
-        };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // BmpImage constructors (input parameters)
-        List<string> bmpImageConstructors = new List<string>
-        {
-            "BmpImage(RasterImage) – Create from existing RasterImage.",
-            "BmpImage(Stream) – Load from a stream (default 24‑bpp, no compression).",
-            "BmpImage(string) – Load from file path (default 24‑bpp, no compression).",
-            "BmpImage(int width, int height) – Create blank image with specified size (default 24‑bpp).",
-            "BmpImage(int width, int height, ushort bitsPerPixel, IColorPalette palette) – Create with custom depth and palette.",
-            "BmpImage(RasterImage rasterImage, ushort bitsPerPixel, BitmapCompression compression, double hRes, double vRes) – From RasterImage with explicit settings.",
-            "BmpImage(Stream stream, ushort bitsPerPixel, BitmapCompression compression, double hRes, double vRes) – From stream with explicit settings.",
-            "BmpImage(string path, ushort bitsPerPixel, BitmapCompression compression, double hRes, double vRes) – From file with explicit settings.",
-            "BmpImage(int width, int height, ushort bitsPerPixel, IColorPalette palette, BitmapCompression compression, double hRes, double vRes) – Full custom constructor."
-        };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        Console.WriteLine("=== BMP Conversion Input Parameters and Options ===");
-        Console.WriteLine();
-        Console.WriteLine("BmpOptions Properties:");
-        foreach (var prop in bmpOptionsProperties)
+        // Load the BMP image (or any image) to demonstrate conversion options
+        using (Image image = Image.Load(inputPath))
         {
-            Console.WriteLine("- " + prop);
+            // Create BmpOptions instance to list supported parameters
+            BmpOptions options = new BmpOptions();
+
+            // Example values for demonstration purposes
+            options.BitsPerPixel = 24;                                   // Bits per pixel
+            options.Compression = BitmapCompression.Rgb;                 // Compression type
+            options.ResolutionSettings = new ResolutionSetting(96.0, 96.0); // DPI settings
+            options.Source = new FileCreateSource(outputPath, false);    // Output source
+            // Palette, KeepMetadata, FullFrame, etc., remain at defaults
+
+            // Collect information about each supported option
+            var lines = new List<string>();
+            lines.Add("Supported BMP conversion parameters and options:");
+            lines.Add($"BitsPerPixel (int): {options.BitsPerPixel}");
+            lines.Add($"Compression (BitmapCompression): {options.Compression}");
+            lines.Add($"ResolutionSettings: Horizontal={options.ResolutionSettings?.HorizontalResolution} DPI, Vertical={options.ResolutionSettings?.VerticalResolution} DPI");
+            lines.Add($"Source: {options.Source?.ToString()}");
+            lines.Add($"Palette: {(options.Palette != null ? "Defined" : "null")}");
+            lines.Add($"KeepMetadata (bool): {options.KeepMetadata}");
+            lines.Add($"FullFrame (bool): {options.FullFrame}");
+            lines.Add($"BufferSizeHint (int): {options.BufferSizeHint}");
+            lines.Add($"MultiPageOptions: {(options.MultiPageOptions != null ? "Defined" : "null")}");
+            lines.Add($"VectorRasterizationOptions: {(options.VectorRasterizationOptions != null ? "Defined" : "null")}");
+            lines.Add($"ExifData: {(options.ExifData != null ? "Defined" : "null")}");
+            lines.Add($"XmpData: {(options.XmpData != null ? "Defined" : "null")}");
+            lines.Add($"ProgressEventHandler: {(options.ProgressEventHandler != null ? "Defined" : "null")}");
+
+            // Write the enumeration to the output file
+            File.WriteAllLines(outputPath, lines);
+
+            // Also display the information on the console
+            foreach (var line in lines)
+            {
+                Console.WriteLine(line);
+            }
         }
-        Console.WriteLine();
-        Console.WriteLine("BmpOptions Constructors:");
-        foreach (var ctor in bmpOptionsConstructors)
-        {
-            Console.WriteLine("- " + ctor);
-        }
-        Console.WriteLine();
-        Console.WriteLine("BmpImage Constructors (input parameters):");
-        foreach (var ctor in bmpImageConstructors)
-        {
-            Console.WriteLine("- " + ctor);
-        }
-        Console.WriteLine();
-        Console.WriteLine("=== End of Enumeration ===");
     }
 }

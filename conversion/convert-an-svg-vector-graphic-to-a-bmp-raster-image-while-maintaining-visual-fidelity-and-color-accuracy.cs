@@ -1,43 +1,53 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Bmp;
 
-namespace SvgToBmpConversion
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.bmp";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Expect input SVG path as first argument and output BMP path as second argument.
-            if (args.Length < 2)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Cast to SvgImage to access vector-specific properties
+            SvgImage svgImage = image as SvgImage;
+            if (svgImage == null)
             {
-                Console.WriteLine("Usage: SvgToBmpConversion <input.svg> <output.bmp>");
+                Console.Error.WriteLine("The provided file is not a valid SVG image.");
                 return;
             }
 
-            string inputPath = args[0];
-            string outputPath = args[1];
-
-            // Load the SVG image using Aspose.Imaging.Image.Load.
-            using (Image image = Image.Load(inputPath))
+            // Configure rasterization options to preserve visual fidelity
+            var rasterOptions = new SvgRasterizationOptions
             {
-                // Configure rasterization options to preserve the original size.
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
+                PageSize = svgImage.Size,
+                BackgroundColor = Aspose.Imaging.Color.White
+            };
 
-                // Set BMP save options and attach the rasterization options.
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+            // Set BMP save options and attach rasterization options
+            var bmpOptions = new BmpOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-                // Save the rasterized image as BMP.
-                image.Save(outputPath, bmpOptions);
-            }
+            // Save the rasterized image as BMP
+            svgImage.Save(outputPath, bmpOptions);
         }
     }
 }

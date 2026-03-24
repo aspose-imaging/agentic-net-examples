@@ -1,43 +1,47 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input SVG file path and output BMP file path
-        string inputSvgPath = "input.svg";
-        string outputBmpPath = "output.bmp";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.bmp";
 
-        // Load the SVG image using the unified Image.Load method
-        using (Image svgImage = Image.Load(inputSvgPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure BMP save options
-            BmpOptions bmpOptions = new BmpOptions();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Set high resolution (e.g., 300 DPI) to preserve detail
-            bmpOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure vector rasterization options for the SVG
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure high‑quality rasterization options
             SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                // Preserve original size
-                PageSize = svgImage.Size,
-                // Optional: increase scale for higher pixel density
-                ScaleX = 2.0f,
-                ScaleY = 2.0f,
-                // High-quality rendering settings
+                PageSize = image.Size,
+                BackgroundColor = Color.White,
                 SmoothingMode = SmoothingMode.AntiAlias,
-                TextRenderingHint = TextRenderingHint.AntiAlias,
-                BackgroundColor = Color.White
+                TextRenderingHint = TextRenderingHint.AntiAlias
             };
 
-            // Assign rasterization options to BMP options
-            bmpOptions.VectorRasterizationOptions = rasterOptions;
+            // Set BMP save options with high resolution
+            BmpOptions bmpOptions = new BmpOptions
+            {
+                VectorRasterizationOptions = rasterOptions,
+                ResolutionSettings = new ResolutionSetting(300, 300) // 300 DPI for high fidelity
+            };
 
-            // Save the rendered image as a high‑resolution BMP
-            svgImage.Save(outputBmpPath, bmpOptions);
+            // Save the rendered BMP
+            image.Save(outputPath, bmpOptions);
         }
     }
 }

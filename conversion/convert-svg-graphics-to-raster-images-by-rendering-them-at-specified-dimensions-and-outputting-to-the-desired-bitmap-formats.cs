@@ -3,65 +3,50 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length < 4)
+        // Hardcoded input and output paths
+        string inputPath = "input\\sample.svg";
+        string outputPath = "output\\sample.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <inputSvgPath> <outputImagePath> <width> <height>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputSvgPath = args[0];
-        string outputImagePath = args[1];
-        int targetWidth = int.Parse(args[2]);
-        int targetHeight = int.Parse(args[3]);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        string ext = Path.GetExtension(outputImagePath).ToLowerInvariant();
-
-        using (Image image = Image.Load(inputSvgPath))
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
         {
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-            rasterOptions.PageSize = new SizeF(targetWidth, targetHeight);
-            rasterOptions.BackgroundColor = Color.White;
+            // Cast to SvgImage for rasterization
+            SvgImage svgImage = (SvgImage)image;
 
-            if (ext == ".png")
+            // Desired raster dimensions
+            int targetWidth = 800;
+            int targetHeight = 600;
+
+            // Configure rasterization options
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                var options = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                image.Save(outputImagePath, options);
-            }
-            else if (ext == ".jpg" || ext == ".jpeg")
+                PageSize = new SizeF(targetWidth, targetHeight),
+                BackgroundColor = Color.White
+            };
+
+            // Set PNG save options with the rasterization settings
+            PngOptions pngOptions = new PngOptions
             {
-                var options = new JpegOptions { VectorRasterizationOptions = rasterOptions };
-                image.Save(outputImagePath, options);
-            }
-            else if (ext == ".bmp")
-            {
-                var options = new BmpOptions { VectorRasterizationOptions = rasterOptions };
-                image.Save(outputImagePath, options);
-            }
-            else if (ext == ".gif")
-            {
-                var options = new GifOptions { VectorRasterizationOptions = rasterOptions };
-                image.Save(outputImagePath, options);
-            }
-            else if (ext == ".webp")
-            {
-                var options = new WebPOptions { VectorRasterizationOptions = rasterOptions };
-                image.Save(outputImagePath, options);
-            }
-            else if (ext == ".tif" || ext == ".tiff")
-            {
-                var options = new TiffOptions(TiffExpectedFormat.Default) { VectorRasterizationOptions = rasterOptions };
-                image.Save(outputImagePath, options);
-            }
-            else
-            {
-                throw new NotSupportedException($"Unsupported output format: {ext}");
-            }
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            // Save the rasterized image
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }

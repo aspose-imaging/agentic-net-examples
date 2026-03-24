@@ -1,37 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
-class PngToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source PNG file
-        string inputPngPath = @"C:\Images\source.png";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Desired output SVG file path
-        string outputSvgPath = @"C:\Images\converted.svg";
-
-        // Load the PNG image into an Aspose.Imaging.Image object
-        using (Image pngImage = Image.Load(inputPngPath))
+        // Verify that the input PNG exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options – the SVG will have the same page size as the PNG
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization options for SVG output
             var rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = pngImage.Size
+                // Preserve the original image size in the SVG
+                PageSize = image.Size
             };
 
-            // Create SVG save options and attach the rasterization settings
-            var svgSaveOptions = new SvgOptions
+            // Set up SVG save options with the rasterization settings
+            var svgOptions = new SvgOptions
             {
                 VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the image as SVG while preserving visual fidelity
-            pngImage.Save(outputSvgPath, svgSaveOptions);
+            // Save the image as SVG (raster data will be embedded)
+            image.Save(outputPath, svgOptions);
         }
-
-        Console.WriteLine("Conversion completed successfully.");
     }
 }

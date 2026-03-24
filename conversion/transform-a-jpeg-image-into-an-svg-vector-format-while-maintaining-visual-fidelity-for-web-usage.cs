@@ -1,35 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class JpegToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source JPEG image
-        string jpegPath = @"C:\Images\source.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPath = @"C:\Images\sample.svg";
 
-        // Desired output SVG file path
-        string svgPath = @"C:\Images\converted.svg";
-
-        // Load the JPEG image using Aspose.Imaging's Load method
-        using (Image image = Image.Load(jpegPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options: set the page size to match the original image dimensions
-            var rasterOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the JPEG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Set up SVG rasterization options to preserve the original size
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
                 PageSize = image.Size
             };
 
-            // Create SVG save options, assign rasterization options, and disable compression for plain SVG
-            var svgOptions = new SvgOptions
+            // Configure SVG save options
+            SvgOptions svgOptions = new SvgOptions
             {
                 VectorRasterizationOptions = rasterOptions,
-                Compress = false // set true if you need compressed SVGZ output
+                KeepMetadata = true // retain metadata for fidelity
             };
 
-            // Save the image as SVG using the configured options
-            image.Save(svgPath, svgOptions);
+            // Save the image as SVG
+            image.Save(outputPath, svgOptions);
         }
     }
 }

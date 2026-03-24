@@ -5,21 +5,32 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input PNG file path (default if not provided)
-        string inputPath = args.Length > 0 ? args[0] : "sample.png";
-        // Output PDF file path (default if not provided)
-        string outputPath = args.Length > 1 ? args[1] : "output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Load the PNG image into an Aspose.Imaging Image object
+        // Verify that the input PNG file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Initialize PDF export options
-            PdfOptions pdfOptions = new PdfOptions();
+            // Prepare PDF export options
+            var pdfOptions = new PdfOptions();
 
-            // Save the loaded image as a PDF document
+            // Save the image as a PDF document
             image.Save(outputPath, pdfOptions);
         }
+
+        Console.WriteLine("Conversion completed successfully.");
     }
 }

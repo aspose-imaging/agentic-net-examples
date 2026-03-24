@@ -1,10 +1,35 @@
-// Define the folder containing the source WebP image and the output PDF
-string dir = @"c:\temp\";
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
-// Load the WebP image from file using the WebPImage constructor
-using (Aspose.Imaging.FileFormats.Webp.WebPImage webPImage = new Aspose.Imaging.FileFormats.Webp.WebPImage(dir + "test.webp"))
+class Program
 {
-    // Save the loaded image directly to PDF format.
-    // PdfOptions ensures the image is embedded in the PDF with its original fidelity.
-    webPImage.Save(dir + "test.pdf", new Aspose.Imaging.ImageOptions.PdfOptions());
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = "C:\\temp\\input.webp";
+        string outputPath = "C:\\temp\\output.pdf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image using the provided constructor
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // Create PDF options (default settings)
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the image as a PDF document
+            webPImage.Save(outputPath, pdfOptions);
+        }
+    }
 }

@@ -2,26 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input PNG file (with transparency) and output PDF file paths.
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output.pdf";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.pdf";
 
-        // Load the PNG image. Aspose.Imaging preserves the alpha channel automatically.
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PNG image (which may contain an alpha channel)
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options. Preserve the original image resolution.
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Prepare PDF save options – default options preserve transparency
+            var pdfOptions = new PdfOptions
             {
-                pdfOptions.UseOriginalImageResolution = true;
+                // Optional: set PDF compliance if required
+                PdfCoreOptions = new PdfCoreOptions
+                {
+                    PdfCompliance = PdfComplianceVersion.PdfA1b
+                }
+            };
 
-                // Save the image as a PDF while keeping the transparency.
-                image.Save(outputPath, pdfOptions);
-            }
+            // Save the image as a PDF, keeping the alpha channel intact
+            image.Save(outputPath, pdfOptions);
         }
     }
 }

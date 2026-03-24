@@ -1,34 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class BigTiffToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source BIGTIFF image
-        string inputPath = @"C:\Images\source_big.tif";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\input.tif";   // BigTIFF source
+        string outputPath = @"C:\Images\output.svg"; // Desired SVG result
 
-        // Desired output SVG file path
-        string outputPath = @"C:\Images\converted.svg";
-
-        // Load the BIGTIFF image (Aspose.Imaging automatically creates a BigTiffImage instance)
-        using (Image bigTiff = Image.Load(inputPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure vector rasterization options – page size matches the source image dimensions
-            var vectorOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists (creates it if missing)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BigTIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization options – use the original image size as the page size
+            var vectorRasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = bigTiff.Size
+                PageSize = image.Size
             };
 
-            // Create SVG save options and attach the rasterization settings
+            // Set up SVG save options
             var svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = vectorOptions
+                VectorRasterizationOptions = vectorRasterizationOptions,
+                KeepMetadata = true   // preserve metadata if present
             };
 
-            // Save the raster image as an SVG vector representation
-            bigTiff.Save(outputPath, svgOptions);
+            // Save the image as SVG, converting raster data to vector representation
+            image.Save(outputPath, svgOptions);
         }
     }
 }

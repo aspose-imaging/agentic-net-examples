@@ -1,38 +1,41 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input WebP file path
+        // Hardcoded input and output paths
         string inputPath = "input.webp";
-        // Output PDF file path
         string outputPath = "output.pdf";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         // Load the WebP image
-        using (Image image = Image.Load(inputPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
             // Configure PDF options
-            PdfOptions pdfOptions = new PdfOptions();
-
-            // Set custom page size (A4 in points)
-            pdfOptions.PageSize = new Aspose.Imaging.Size(595, 842);
-
-            // Preserve original image metadata in the PDF
-            pdfOptions.KeepMetadata = true;
-
-            // Set PDF document metadata
-            pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+            using (var pdfOptions = new PdfOptions
             {
-                Author = "Your Name",
-                Title = "WebP to PDF conversion"
-            };
-
-            // Save the image as PDF with the specified options
-            image.Save(outputPath, pdfOptions);
+                // Set custom page size (A4 in points)
+                PageSize = new Aspose.Imaging.SizeF(595f, 842f),
+                // Preserve metadata from the source image
+                KeepMetadata = true
+                // Additional compression settings can be configured via PdfCoreOptions if needed
+            })
+            {
+                // Save as PDF with the specified options
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

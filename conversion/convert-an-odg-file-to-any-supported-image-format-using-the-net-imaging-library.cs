@@ -1,37 +1,35 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
-class OdgConversion
+class Program
 {
     static void Main()
     {
-        // Path to the source ODG file
-        string inputFile = @"C:\Images\sample.odg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\output.png";
 
-        // Desired output image path (PNG in this example)
-        string outputFile = @"C:\Images\sample_converted.png";
-
-        // Load the ODG image using the unified Image.Load method
-        using (Image image = Image.Load(inputFile))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options for vector ODG content
-            var rasterOptions = new OdgRasterizationOptions
-            {
-                // Set a background color for the rasterized image
-                BackgroundColor = Color.White,
-                // Preserve the original page size
-                PageSize = image.Size
-            };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create PNG save options and attach the rasterization settings
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the ODG as a PNG image
-            image.Save(outputFile, pngOptions);
+        // Load the ODG image and save it as PNG
+        using (Image image = Image.Load(inputPath))
+        {
+            // Use PNG options for the target format
+            var pngOptions = new PngOptions();
+
+            // Save the image to the specified output path
+            image.Save(outputPath, pngOptions);
         }
     }
 }

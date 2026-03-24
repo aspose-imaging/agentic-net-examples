@@ -1,95 +1,43 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats;
 
-namespace AsposeImagingSupportedFormats
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        // Hardcoded input path (not used for actual loading in this example)
+        string inputPath = @"C:\temp\input.placeholder";
+
+        // Verify that the input file exists; if not, write an error and exit.
+        if (!File.Exists(inputPath))
         {
-            // List of raster image formats that Aspose.Imaging can load (input formats).
-            // This list is based on the formats for which Aspose.Imaging provides dedicated image classes
-            // and corresponding ImageOptions (e.g., BmpOptions, JpegOptions, PngOptions, etc.).
-            // Note: The library may support additional formats via plugins or future updates.
-            var rasterInputFormats = new List<string>
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Hardcoded output path (not used for actual saving in this example)
+        string outputPath = @"C:\temp\output.placeholder";
+
+        // Ensure the output directory exists before any potential save operation.
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Retrieve the registered image loading formats (raster input formats).
+        FileFormat registeredFormats = ImageLoadersRegistry.RegisteredFormats;
+
+        Console.WriteLine("Supported raster image input formats (Aspose.Imaging):");
+        // Enumerate all defined flags in the FileFormat enum.
+        foreach (FileFormat format in Enum.GetValues(typeof(FileFormat)))
+        {
+            // Skip the 'Unknown' and 'Custom' entries.
+            if (format == FileFormat.Unknown || format == FileFormat.Custom)
+                continue;
+
+            // Check if the current flag is present in the registered formats.
+            if ((registeredFormats & format) == format)
             {
-                // Bitmap formats
-                "BMP",   // Windows Bitmap
-                "DIB",   // Device Independent Bitmap (same as BMP)
-
-                // JPEG formats
-                "JPG",
-                "JPEG",
-                "JPE",
-                "JPF",
-                "JPM",
-                "JP2",   // JPEG 2000
-                "J2K",
-                "J2C",
-                "JXR",   // JPEG XR
-
-                // PNG format
-                "PNG",
-
-                // TIFF formats
-                "TIFF",
-                "TIF",
-
-                // GIF format
-                "GIF",
-
-                // ICO format
-                "ICO",
-
-                // Windows Metafile formats (raster representation)
-                "EMF",
-                "WMF",
-
-                // Photoshop format
-                "PSD",
-
-                // DICOM medical imaging format
-                "DICOM",
-                "DCM",
-
-                // DjVu document format
-                "DJVU",
-                "DJV",
-
-                // WebP format
-                "WEBP",
-
-                // APNG (Animated PNG) format
-                "APNG",
-
-                // HEIF / HEIC formats (High Efficiency Image File)
-                "HEIF",
-                "HEIC",
-
-                // OpenEXR format (high dynamic range)
-                "EXR",
-
-                // HDR (Radiance) format
-                "HDR",
-
-                // PCX format
-                "PCX",
-
-                // PNM family (PBM, PGM, PPM)
-                "PBM",
-                "PGM",
-                "PPM",
-                "PNM",
-
-                // SVG is vector; omitted from raster list
-                // Additional formats may be added in newer library versions
-            };
-
-            Console.WriteLine("Aspose.Imaging (v2) supported raster image input formats:");
-            foreach (var fmt in rasterInputFormats)
-            {
-                Console.WriteLine($"- {fmt}");
+                Console.WriteLine($"- {format}");
             }
         }
     }

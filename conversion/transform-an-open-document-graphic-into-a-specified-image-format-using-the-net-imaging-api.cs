@@ -1,48 +1,34 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Input ODG file path
-        string inputFile = @"C:\temp\sample.odg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\sample.odg";
+        string outputPath = @"C:\Temp\sample.png";
 
-        // Desired output files
-        string outputPng = @"C:\temp\sample.png";
-        string outputPdf = @"C:\temp\sample.pdf";
-
-        // Load the ODG image using the unified Image.Load method
-        using (Image image = Image.Load(inputFile))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options common to both output formats
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
-            {
-                // Set a white background for the rasterized image
-                BackgroundColor = Color.White,
-                // Use the original image size as the page size
-                PageSize = image.Size
-            };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // ---------- Save as PNG ----------
-            PngOptions pngOptions = new PngOptions
-            {
-                // Attach the rasterization options so the vector ODG is rasterized correctly
-                VectorRasterizationOptions = rasterOptions
-            };
-            // Save the image to PNG format
-            image.Save(outputPng, pngOptions);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // ---------- Save as PDF ----------
-            PdfOptions pdfOptions = new PdfOptions
-            {
-                // Reuse the same rasterization settings for PDF output
-                VectorRasterizationOptions = rasterOptions
-            };
-            // Save the image to PDF format
-            image.Save(outputPdf, pdfOptions);
+        // Load the ODG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Define PNG save options (default settings)
+            PngOptions pngOptions = new PngOptions();
+
+            // Save the image in PNG format
+            image.Save(outputPath, pngOptions);
         }
     }
 }

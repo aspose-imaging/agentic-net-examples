@@ -3,40 +3,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class OtgConverter
+class Program
 {
-    // Converts an OTG file to the format defined by the provided save options.
-    public static void ConvertOtgTo(string inputPath, string outputPath, ImageOptionsBase saveOptions)
+    static void Main()
     {
-        // Load the OTG image using Aspose.Imaging's load method.
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.otg";
+        string outputPath = @"C:\Images\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare rasterization options for vector content.
-            var otgRasterizationOptions = new OtgRasterizationOptions
+            // Prepare rasterization options for OTG conversion
+            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
             {
-                // Preserve the original page size.
+                // Preserve original page size
                 PageSize = image.Size
             };
 
-            // Attach the rasterization options to the save options.
-            saveOptions.VectorRasterizationOptions = otgRasterizationOptions;
+            // Set up PNG save options and attach rasterization options
+            PngOptions pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = otgRasterizationOptions
+            };
 
-            // Save the image in the desired format.
-            image.Save(outputPath, saveOptions);
+            // Save the converted image
+            image.Save(outputPath, pngOptions);
         }
-    }
-
-    static void Main()
-    {
-        string dir = @"c:\aspose.imaging\";
-        string inputFile = Path.Combine(dir, "sample.otg");
-
-        // Convert OTG to PNG.
-        var pngOptions = new PngOptions();
-        ConvertOtgTo(inputFile, Path.Combine(dir, "sample.png"), pngOptions);
-
-        // Convert OTG to PDF.
-        var pdfOptions = new PdfOptions();
-        ConvertOtgTo(inputFile, Path.Combine(dir, "sample.pdf"), pdfOptions);
     }
 }

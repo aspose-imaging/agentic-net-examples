@@ -1,33 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Path to the source CMX file
-        string inputCmxPath = "input.cmx";
-        // Desired output TIFF file path
-        string outputTiffPath = "output.tif";
+        // Hardcoded input and output paths
+        string inputPath = "input.cmx";
+        string outputPath = "output\\output.tif";
 
-        // Load the CMX vector image
-        using (CmxImage cmx = (CmxImage)Image.Load(inputCmxPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure TIFF save options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            // Bind the output file to the options
-            tiffOptions.Source = new FileCreateSource(outputTiffPath, false);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create a raster TIFF image with the same dimensions as the CMX canvas
-            using (Image tiffImage = Image.Create(tiffOptions, cmx.Width, cmx.Height))
-            {
-                // Since the output file is already bound via FileCreateSource, just call Save()
-                tiffImage.Save();
-            }
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the CMX image
+        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+        {
+            // Configure TIFF save options (default format)
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+            // Save the image as TIFF
+            cmxImage.Save(outputPath, tiffOptions);
         }
     }
 }

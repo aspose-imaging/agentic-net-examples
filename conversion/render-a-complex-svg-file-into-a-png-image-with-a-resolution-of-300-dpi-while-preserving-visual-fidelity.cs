@@ -1,42 +1,50 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
-namespace RenderingSvgToPng
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\input\complex.svg";
+        string outputPath = @"C:\output\rendered.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Path to the source SVG file
-            string inputSvgPath = "input.svg";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Desired output PNG file path
-            string outputPngPath = "output.png";
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image using Aspose.Imaging.Image.Load
-            using (Image image = Image.Load(inputSvgPath))
+        // Load SVG image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            SvgImage svgImage = (SvgImage)image;
+
+            // Configure rasterization options
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                // Cast the generic Image to SvgImage for SVG-specific properties
-                SvgImage svgImage = (SvgImage)image;
+                PageSize = svgImage.Size,
+                BackgroundColor = Aspose.Imaging.Color.White,
+                SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
+            };
 
-                // Configure rasterization options to control how the SVG is rasterized
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;                 // Preserve original dimensions
-                rasterOptions.BackgroundColor = Color.White;            // Set background to white
-                rasterOptions.SmoothingMode = SmoothingMode.AntiAlias; // Enable antialiasing for smooth edges
-                rasterOptions.TextRenderingHint = TextRenderingHint.AntiAlias; // High‑quality text rendering
+            // Configure PNG export options with 300 DPI resolution
+            PngOptions pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions,
+                ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300)
+            };
 
-                // Configure PNG export options and set the target resolution to 300 DPI
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-                pngOptions.ResolutionSettings = new ResolutionSetting(300, 300); // 300 DPI horizontal & vertical
-
-                // Save the rasterized image as PNG
-                svgImage.Save(outputPngPath, pngOptions);
-            }
+            // Save rendered PNG
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }

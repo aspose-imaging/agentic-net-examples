@@ -1,37 +1,46 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class TiffToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source TIFF raster image
-        string inputFile = @"C:\Images\source.tif";
+        // Hardcoded input and output file paths
+        string inputPath = "input.tif";
+        string outputPath = "output.svg";
 
-        // Desired path for the resulting SVG vector graphic
-        string outputFile = @"C:\Images\result.svg";
-
-        // Load the TIFF image using Aspose.Imaging's unified loader
-        using (Image tiffImage = Image.Load(inputFile))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options: set the page size to match the source image dimensions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization options for SVG output
             var rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = tiffImage.Size,
-                // Optional: define background color if needed
-                // BackgroundColor = Color.White
+                PageSize = image.Size,
+                // Optional: improve fidelity settings
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = Aspose.Imaging.SmoothingMode.None
             };
 
-            // Prepare SVG save options and attach the rasterization settings
-            var svgSaveOptions = new SvgOptions
+            // Set up SVG save options with the rasterization options
+            var svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = rasterizationOptions,
-                // Render all text as vector shapes to preserve fidelity
-                TextAsShapes = true
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the image as SVG using the configured options
-            tiffImage.Save(outputFile, svgSaveOptions);
+            // Save the image as SVG
+            image.Save(outputPath, svgOptions);
         }
     }
 }

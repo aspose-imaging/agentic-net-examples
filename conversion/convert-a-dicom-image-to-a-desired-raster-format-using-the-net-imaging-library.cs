@@ -5,19 +5,27 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Path to the source DICOM file.
+        // Hardcoded input and output file paths
         string inputPath = "input.dcm";
-
-        // Desired output raster file path (PNG format in this example).
         string outputPath = "output.png";
 
-        // Load the DICOM image.
-        using (Image image = Image.Load(inputPath))
+        // Verify that the input DICOM file exists
+        if (!File.Exists(inputPath))
         {
-            // Convert and save the image to the raster format.
-            image.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DICOM image using Aspose.Imaging
+        using (Image dicomImage = Image.Load(inputPath))
+        {
+            // Convert and save the image to PNG format
+            dicomImage.Save(outputPath, new PngOptions());
         }
     }
 }

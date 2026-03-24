@@ -1,21 +1,32 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input WebP file path
-        string inputPath = "input.webp";
-        // Output GIF file path
-        string outputPath = "output.gif";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.webp";
+        string outputPath = @"c:\temp\output.gif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WebP image
-        using (Image image = Image.Load(inputPath))
+        using (WebPImage webPImage = new WebPImage(inputPath))
         {
-            // Save the image as GIF using default options
-            image.Save(outputPath, new GifOptions());
+            // Save as GIF using default GIF options
+            webPImage.Save(outputPath, new GifOptions());
         }
     }
 }

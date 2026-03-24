@@ -1,21 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+namespace WebPToPdfExample
 {
-    static void Main(string[] args)
+    class Program
     {
-        string inputPath = "sample.webp";
-        string outputPath = "sample.pdf";
-
-        using (Image image = Image.Load(inputPath))
+        static void Main()
         {
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.webp";
+            string outputPath = @"c:\temp\sample.pdf";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WebP image
+            using (WebPImage webPImage = new WebPImage(inputPath))
+            {
+                // Save the image as PDF, preserving fidelity
+                webPImage.Save(outputPath, new PdfOptions());
+            }
+
+            Console.WriteLine("Conversion completed successfully.");
         }
     }
 }

@@ -3,37 +3,44 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class RasterToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Input raster image path (e.g., PNG, JPEG, BMP)
-        string inputPath = @"C:\Images\sample.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output/output.svg";
 
-        // Output SVG file path
-        string outputPath = @"C:\Images\sample_converted.svg";
-
-        // Load the raster image using Aspose.Imaging's unified loader
-        using (Image rasterImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Prepare rasterization options: set the page size to match the source image dimensions
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the raster image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure vector rasterization options (page size matches source image)
+            var vectorOptions = new SvgRasterizationOptions
             {
-                PageSize = rasterImage.Size
+                PageSize = image.Size
             };
 
-            // Configure SVG save options and attach the rasterization settings
-            SvgOptions saveOptions = new SvgOptions
+            // Set up SVG save options
+            var svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = rasterizationOptions,
-                // Optional: render text as shapes for better compatibility
+                VectorRasterizationOptions = vectorOptions,
+                // Optional settings
+                Compress = false,
                 TextAsShapes = true
             };
 
-            // Save the image as SVG using the configured options
-            rasterImage.Save(outputPath, saveOptions);
+            // Save the image as SVG
+            image.Save(outputPath, svgOptions);
         }
-
-        Console.WriteLine("Raster image successfully converted to SVG.");
     }
 }

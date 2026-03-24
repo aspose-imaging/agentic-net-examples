@@ -2,34 +2,55 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input CDR file path (first argument or default)
-        string inputPath = args.Length > 0 ? args[0] : "input.cdr";
-        // Output PDF file path (second argument or default)
-        string outputPath = args.Length > 1 ? args[1] : "output.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample.pdf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Prepare PDF export options
+        PdfOptions pdfOptions = new PdfOptions
+        {
+            // Preserve original metadata in the PDF
+            KeepMetadata = true,
+            // No specific multipage options – export all pages
+            MultiPageOptions = null
+        };
+
+        // Configure vector rasterization to keep vector quality
+        CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+        {
+            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+            SmoothingMode = Aspose.Imaging.SmoothingMode.None
+        };
 
         // Load the CDR image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF export options
-            PdfOptions pdfOptions = new PdfOptions
+            // If the loaded image is a vector image, set page size based on the source dimensions
+            if (image is VectorImage)
             {
-                // Preserve original metadata
-                KeepMetadata = true,
-                // Set vector rasterization options to retain vector quality
-                VectorRasterizationOptions = new CdrRasterizationOptions
-                {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    Positioning = PositioningTypes.DefinedByDocument
-                }
-            };
+                rasterOptions.PageWidth = image.Width;
+                rasterOptions.PageHeight = image.Height;
+            }
 
-            // Save the image as PDF with the specified options
+            pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+            // Save the image as PDF preserving vector data and metadata
             image.Save(outputPath, pdfOptions);
         }
     }

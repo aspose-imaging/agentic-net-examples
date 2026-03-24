@@ -1,29 +1,38 @@
 using System;
-using Aspose.Imaging.FileFormats.Bmp;          // BmpImage class
-using Aspose.Imaging;                         // Base Image class (for disposal)
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-class BmpToPdfConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source BMP file
-        string bmpPath = "input.bmp";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Desired output PDF file path
-        string pdfPath = "output.pdf";
-
-        // Load the BMP image using the BmpImage constructor (lifecycle rule)
-        using (BmpImage bmpImage = new BmpImage(bmpPath))
+        // Verify that the input BMP file exists
+        if (!File.Exists(inputPath))
         {
-            // The image is loaded with its original dimensions and resolution,
-            // ensuring fidelity when it is placed on a PDF page.
-
-            // Save the image as PDF. The Save(string) overload determines the
-            // output format from the file extension, so providing a ".pdf"
-            // extension creates a PDF document with a page sized to the image.
-            bmpImage.Save(pdfPath);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Conversion completed: BMP -> PDF");
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PDF export options
+            var pdfOptions = new PdfOptions
+            {
+                // Set the PDF page size to match the image dimensions for 1:1 fidelity
+                PageSize = new Size(image.Width, image.Height)
+            };
+
+            // Save the image as a PDF document
+            image.Save(outputPath, pdfOptions);
+        }
     }
 }
