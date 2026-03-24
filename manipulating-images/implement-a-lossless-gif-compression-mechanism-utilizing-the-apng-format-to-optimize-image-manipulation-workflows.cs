@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -6,18 +7,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input GIF file (animated or static)
-        string inputGifPath = "input.gif";
-        // Output APNG file (lossless PNG based animation)
-        string outputApngPath = "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.png";
 
-        // Load the GIF image
-        using (Image gifImage = Image.Load(inputGifPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Save as APNG using default options (lossless compression)
-            gifImage.Save(outputApngPath, new ApngOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Conversion completed: GIF -> APNG (lossless).");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the GIF image
+        using (Image gifImage = Image.Load(inputPath))
+        {
+            // Configure APNG options (lossless by default)
+            using (ApngOptions apngOptions = new ApngOptions())
+            {
+                // Save as APNG (PNG with animation support)
+                gifImage.Save(outputPath, apngOptions);
+            }
+        }
     }
 }
