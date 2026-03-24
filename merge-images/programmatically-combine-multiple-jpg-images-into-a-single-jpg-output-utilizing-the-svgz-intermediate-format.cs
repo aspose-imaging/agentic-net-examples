@@ -4,25 +4,37 @@ using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length < 2)
+        // Input JPG files
+        string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+        // Intermediate SVGZ file
+        string intermediateSvgzPath = "intermediate.svgz";
+        // Final JPEG output
+        string outputPath = "output.jpg";
+
+        // Validate input files
+        foreach (var path in inputPaths)
         {
-            Console.WriteLine("Usage: Program.exe <input1.jpg> <input2.jpg> ... <output.jpg>");
-            return;
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
         }
 
-        // Last argument is the output JPEG path
-        string outputPath = args[args.Length - 1];
-        // All preceding arguments are input JPEG paths
-        string[] inputPaths = args.Take(args.Length - 1).ToArray();
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(intermediateSvgzPath));
 
         // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
         foreach (var path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
@@ -31,14 +43,16 @@ class Program
             }
         }
 
-        // Calculate canvas size for horizontal stitching
+        // Calculate canvas dimensions (horizontal stitching)
         int newWidth = sizes.Sum(s => s.Width);
         int newHeight = sizes.Max(s => s.Height);
 
-        // Create an unbound raster canvas
-        JpegOptions canvasOptions = new JpegOptions();
-        using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, newWidth, newHeight))
+        // Create a temporary PNG canvas bound to a file
+        Source pngSource = new FileCreateSource("temp_canvas.png", false);
+        PngOptions pngOptions = new PngOptions() { Source = pngSource };
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
         {
+            // Draw each JPG onto the canvas side by side
             int offsetX = 0;
             foreach (var path in inputPaths)
             {
@@ -50,17 +64,21 @@ class Program
                 }
             }
 
-            // Save intermediate SVGZ using compression
-            string intermediatePath = Path.ChangeExtension(outputPath, ".svgz");
-            SvgOptions svgOptions = new SvgOptions { Compress = true };
-            canvas.Save(intermediatePath, svgOptions);
+            // Save the canvas as compressed SVGZ
+            SvgRasterizationOptions svgRasterOptions = new SvgRasterizationOptions() { PageSize = canvas.Size };
+            SvgOptions svgOptions = new SvgOptions()
+            {
+                VectorRasterizationOptions = svgRasterOptions,
+                Compress = true
+            };
+            canvas.Save(intermediateSvgzPath, svgOptions);
         }
 
-        // Load the SVGZ and rasterize to final JPEG
-        using (Image svgImage = Image.Load(Path.ChangeExtension(outputPath, ".svgz")))
+        // Load the SVGZ and export to final JPEG
+        using (Image svgzImage = Image.Load(intermediateSvgzPath))
         {
-            JpegOptions finalOptions = new JpegOptions { Quality = 90 };
-            svgImage.Save(outputPath, finalOptions);
+            JpegOptions jpegOptions = new JpegOptions() { Quality = 90 };
+            svgzImage.Save(outputPath, jpegOptions);
         }
     }
 }
