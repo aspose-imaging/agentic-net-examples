@@ -2,34 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.tga";
-        string outputPath = args.Length > 1 ? args[1] : "output.tga";
+        // Hardcoded input and output paths
+        string inputPath = "input.tga";
+        string outputPath = "output.tga";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the TGA image as a raster image
-        using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Define a simple edge detection kernel (Laplacian)
-            double[,] edgeKernel = new double[,]
+            // Define a simple edge detection kernel
+            double[,] kernel = new double[,]
             {
                 { -1, -1, -1 },
                 { -1,  8, -1 },
                 { -1, -1, -1 }
             };
 
-            // Create convolution filter options with the custom kernel
-            var convolutionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel);
-
-            // Apply the edge detection filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
+            // Apply convolution filter with the edge detection kernel
+            var filterOptions = new ConvolutionFilterOptions(kernel);
+            image.Filter(image.Bounds, filterOptions);
 
             // Save the processed image as TGA
-            rasterImage.Save(outputPath, new TgaOptions());
+            image.Save(outputPath, new TgaOptions());
         }
     }
 }
