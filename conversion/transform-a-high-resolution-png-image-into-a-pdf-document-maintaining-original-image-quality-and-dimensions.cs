@@ -2,33 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect two arguments: input PNG path and output PDF path
-        if (args.Length < 2)
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.pdf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <input_png_path> <output_pdf_path>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the high‑resolution PNG image
+        // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options to preserve original image resolution
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Prepare PDF export options
+            PdfOptions pdfOptions = new PdfOptions
             {
-                pdfOptions.UseOriginalImageResolution = true;
+                // Preserve the original image resolution and dimensions
+                UseOriginalImageResolution = true
+            };
 
-                // Save the image as a PDF document with the same dimensions and quality
-                image.Save(outputPath, pdfOptions);
-            }
+            // Save the image as a PDF document
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
