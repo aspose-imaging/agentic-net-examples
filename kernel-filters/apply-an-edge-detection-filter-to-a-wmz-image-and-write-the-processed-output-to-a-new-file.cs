@@ -3,25 +3,36 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input WMZ file path
-        string inputPath = "input.wmz";
-        // Temporary rasterized PNG path
-        string tempPngPath = "temp.png";
-        // Output file path (raster image with edge detection)
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.wmz";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the WMZ image and rasterize it to PNG
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Temporary raster file path
+        string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+
+        // Rasterize the WMZ (vector) image to PNG
         using (Image vectorImage = Image.Load(inputPath))
         {
             var rasterizationOptions = new WmfRasterizationOptions
             {
                 PageSize = vectorImage.Size,
-                BackgroundColor = Aspose.Imaging.Color.White
+                BackgroundColor = Color.White
             };
 
             var pngOptions = new PngOptions
@@ -29,30 +40,21 @@ class Program
                 VectorRasterizationOptions = rasterizationOptions
             };
 
-            vectorImage.Save(tempPngPath, pngOptions);
+            vectorImage.Save(tempPath, pngOptions);
         }
 
-        // Load the rasterized PNG, apply edge detection, and save the result
-        using (Image rasterImageContainer = Image.Load(tempPngPath))
+        // Apply edge detection (sharpen) filter to the rasterized image
+        using (Image rasterImage = Image.Load(tempPath))
         {
-            var rasterImage = (RasterImage)rasterImageContainer;
-
-            // Edge detection kernel (3x3)
-            double[,] kernel = new double[,]
-            {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
-
-            rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
-            rasterImage.Save(outputPath);
+            RasterImage raster = (RasterImage)rasterImage;
+            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+            raster.Save(outputPath, new PngOptions());
         }
 
-        // Clean up temporary file
-        if (File.Exists(tempPngPath))
+        // Optionally delete the temporary file
+        if (File.Exists(tempPath))
         {
-            File.Delete(tempPngPath);
+            File.Delete(tempPath);
         }
     }
 }
