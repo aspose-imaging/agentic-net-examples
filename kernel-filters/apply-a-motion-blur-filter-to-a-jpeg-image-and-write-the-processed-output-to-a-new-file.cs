@@ -1,32 +1,31 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output.jpg";
+        string inputPath = "input.jpg";
+        string outputPath = "output\\output.jpg";
 
-        // Load the JPEG image
-        using (Image image = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply motion wiener filter (length, smooth, angle)
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set JPEG save options
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Quality = 90
-            };
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-            // Save the processed image
-            image.Save(outputPath, jpegOptions);
+            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0);
+            raster.Filter(raster.Bounds, filterOptions);
+
+            var jpegOptions = new JpegOptions();
+            raster.Save(outputPath, jpegOptions);
         }
     }
 }
