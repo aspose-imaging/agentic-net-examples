@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Ico;
@@ -7,37 +8,62 @@ class Program
 {
     static void Main()
     {
-        // Paths of the source JPG images
-        string[] jpgFiles = new string[]
+        // Hard‑coded input JPG files
+        string[] inputPaths = new[]
         {
-            "image16x16.jpg",
-            "image32x32.jpg",
-            "image48x48.jpg",
-            "image64x64.jpg",
-            "image128x128.jpg",
-            "image256x256.jpg"
+            @"C:\Images\icon1.jpg",
+            @"C:\Images\icon2.jpg",
+            @"C:\Images\icon3.jpg"
         };
 
-        // Create ICO options – default is PNG format with 32 bits per pixel (high quality)
-        IcoOptions icoOptions = new IcoOptions();
+        // Hard‑coded output ICO file
+        string outputPath = @"C:\Images\combined.ico";
 
-        // Initialize an empty ICO image. Width and height are placeholders; individual pages can have different sizes.
-        using (IcoImage ico = new IcoImage(256, 256, icoOptions))
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            // Add each JPG as a separate page (frame) in the ICO file
-            foreach (string jpgPath in jpgFiles)
+            if (!File.Exists(inputPath))
             {
-                // Load the JPG image as a raster image
-                using (RasterImage raster = (RasterImage)Image.Load(jpgPath))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        IcoImage icoImage = null;
+        try
+        {
+            // Load the first image to obtain width/height for the ICO canvas
+            using (Image firstImg = Image.Load(inputPaths[0]))
+            {
+                // Create default ICO options (32‑bit PNG frames)
+                IcoOptions icoOptions = new IcoOptions();
+
+                // Initialise the ICO image with the size of the first frame
+                icoImage = new IcoImage(firstImg.Width, firstImg.Height, icoOptions);
+
+                // Add the first image as a page
+                icoImage.AddPage(firstImg);
+            }
+
+            // Process remaining images and add them as additional pages
+            for (int i = 1; i < inputPaths.Length; i++)
+            {
+                using (Image img = Image.Load(inputPaths[i]))
                 {
-                    // Add the raster image to the ICO container.
-                    // The AddPage method converts the image to a 32‑bit PNG internally, preserving quality.
-                    ico.AddPage(raster);
+                    icoImage.AddPage(img);
                 }
             }
 
             // Save the combined ICO file
-            ico.Save("combined.ico");
+            icoImage.Save(outputPath);
+        }
+        finally
+        {
+            // Ensure the ICO image is disposed even if an error occurs
+            icoImage?.Dispose();
         }
     }
 }
