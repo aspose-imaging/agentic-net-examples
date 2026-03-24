@@ -2,44 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths (adjust as needed)
-        string inputJpgPath = "input.jpg";
-        string tempGifPath = "temp.gif";
-        string outputPdfPath = "output.pdf";
+        // Hard‑coded paths
+        string inputJpgPath = @"C:\temp\input.jpg";
+        string tempGifPath = @"C:\temp\temp.gif";
+        string outputPdfPath = @"C:\temp\output.pdf";
 
-        // Load the JPG image
-        using (RasterImage jpgImage = (RasterImage)Image.Load(inputJpgPath))
+        // Verify input file exists
+        if (!File.Exists(inputJpgPath))
         {
-            // Prepare GIF creation options with a file source
-            GifOptions gifOptions = new GifOptions
-            {
-                Source = new FileCreateSource(tempGifPath, false)
-            };
-
-            // Create a GIF canvas matching the JPG dimensions
-            using (GifImage gifCanvas = (GifImage)Image.Create(gifOptions, jpgImage.Width, jpgImage.Height))
-            {
-                // Copy pixel data from JPG to GIF
-                gifCanvas.SaveArgb32Pixels(
-                    new Rectangle(0, 0, jpgImage.Width, jpgImage.Height),
-                    jpgImage.LoadArgb32Pixels(jpgImage.Bounds));
-
-                // Save the GIF (bound to the file source)
-                gifCanvas.Save();
-            }
+            Console.Error.WriteLine($"File not found: {inputJpgPath}");
+            return;
         }
 
-        // Load the generated GIF and save it as a PDF
-        using (Image gifImage = Image.Load(tempGifPath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+
+        // Load the JPEG image
+        using (Image jpgImage = Image.Load(inputJpgPath))
         {
-            gifImage.Save(outputPdfPath, new PdfOptions());
+            // Convert and save as GIF
+            jpgImage.Save(tempGifPath);
+        }
+
+        // Create a multipage image from the GIF (single page in this case)
+        using (Image gifMultipage = Image.Create(new string[] { tempGifPath }))
+        {
+            // Prepare PDF export options
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the multipage image as a PDF document
+            gifMultipage.Save(outputPdfPath, pdfOptions);
         }
     }
 }
