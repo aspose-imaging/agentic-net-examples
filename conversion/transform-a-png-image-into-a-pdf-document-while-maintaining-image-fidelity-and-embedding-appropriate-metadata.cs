@@ -2,41 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input PNG file path
-        string inputPath = "input.png";
-        // Output PDF file path
-        string outputPath = "output.pdf";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.pdf";
+
+        // Verify that the input PNG exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
             // Configure PDF export options
-            using (PdfOptions pdfOptions = new PdfOptions())
+            var pdfOptions = new PdfOptions
             {
-                // Preserve original image metadata
-                pdfOptions.KeepMetadata = true;
+                // Preserve original metadata (EXIF, XMP, etc.)
+                KeepMetadata = true,
+                // Use the original image resolution for the PDF page
+                UseOriginalImageResolution = true
+            };
 
-                // Embed document-level metadata
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo()
-                {
-                    Title = "Converted PDF",
-                    Author = "Aspose.Imaging",
-                    Subject = "PNG to PDF conversion",
-                    Keywords = "PNG, PDF, conversion, Aspose.Imaging"
-                };
-
-                // Use the original image resolution in the PDF
-                pdfOptions.UseOriginalImageResolution = true;
-
-                // Save the image as a PDF document
-                image.Save(outputPath, pdfOptions);
-            }
+            // Save the image as a PDF document
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
