@@ -5,25 +5,29 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Determine input and output file paths.
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.jpg";
+        string outputPath = @"C:\temp\sample.pdf";
 
-        // Load the JPEG image.
+        // Verify that the input JPEG file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the JPEG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF export options.
-            PdfOptions pdfOptions = new PdfOptions
-            {
-                // Preserve original metadata if present.
-                KeepMetadata = true,
-                // Use the original image resolution for the PDF page.
-                UseOriginalImageResolution = true
-            };
+            // Prepare PDF save options
+            var pdfOptions = new PdfOptions();
 
-            // Save the image as a PDF document.
+            // Save the image as a PDF document, embedding the raster data
             image.Save(outputPath, pdfOptions);
         }
     }
