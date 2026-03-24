@@ -1,43 +1,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input SVG file path
-        string inputPath = "input.svg";
-        // Output PNG file path
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        using (SvgImage svgImage = new SvgImage(inputPath))
         {
-            // Cast to VectorImage to access vector-specific methods
-            var vectorImage = image as VectorImage;
-            if (vectorImage != null)
-            {
-                // Remove background using default settings
-                vectorImage.RemoveBackground(new RemoveBackgroundSettings());
-            }
+            // Remove any background, making it transparent
+            svgImage.RemoveBackground();
 
-            // Configure PNG options with transparency and rasterization settings
-            var pngOptions = new PngOptions
+            // Set up rasterization options for PNG output
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.Transparent,
-                    PageSize = image.Size
-                }
+                // Preserve original size
+                PageSize = svgImage.Size,
+                // Ensure background is transparent
+                BackgroundColor = Aspose.Imaging.Color.Transparent
             };
 
-            // Save the result as PNG preserving transparency
-            image.Save(outputPath, pngOptions);
+            // Configure PNG save options with the rasterization settings
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterizationOptions
+            };
+
+            // Save the rasterized PNG image
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }
