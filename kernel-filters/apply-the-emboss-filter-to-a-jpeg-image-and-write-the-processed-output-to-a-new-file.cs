@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -6,27 +7,34 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths (use arguments if provided)
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output_emboss.jpg";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
-        // Load the JPEG image as a raster image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the JPEG image
         using (Image image = Image.Load(inputPath))
         {
+            // Cast to RasterImage for filtering
             RasterImage raster = (RasterImage)image;
 
-            // Create an emboss filter using the predefined convolution kernel
-            double[,] embossKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
+            // Apply Emboss filter using predefined kernel
+            var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
 
-            // Apply the emboss filter to the entire image
-            raster.Filter(raster.Bounds, filterOptions);
+            raster.Filter(raster.Bounds, embossOptions);
 
             // Save the processed image as JPEG
-            var jpegOptions = new JpegOptions
-            {
-                Quality = 90 // optional quality setting
-            };
+            var jpegOptions = new JpegOptions();
             raster.Save(outputPath, jpegOptions);
         }
     }
