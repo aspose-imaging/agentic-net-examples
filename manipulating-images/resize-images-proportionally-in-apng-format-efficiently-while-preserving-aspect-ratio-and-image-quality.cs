@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
@@ -7,24 +8,31 @@ class Program
 {
     static void Main()
     {
-        // Path to the source APNG file
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
-
-        // Path where the resized APNG will be saved
         string outputPath = "output_resized.apng";
 
-        // Desired new width (height will be adjusted automatically to keep aspect ratio)
-        int newWidth = 300;
-
-        // Load the APNG image using Aspose.Imaging's load rule
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Proportionally resize the width; height is calculated internally to preserve aspect ratio
-            // ResizeType.NearestNeighbourResample provides a fast, quality-preserving resize
-            apng.ResizeWidthProportionally(newWidth, ResizeType.NearestNeighbourResample);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the resized image using Aspose.Imaging's save rule
-            apng.Save(outputPath);
+        // Load the APNG image
+        using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
+        {
+            // Determine new width (e.g., reduce size by 50%)
+            int newWidth = apngImage.Width / 2;
+
+            // Resize proportionally using a high‑quality resampling method
+            apngImage.ResizeWidthProportionally(newWidth, ResizeType.BilinearResample);
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the resized APNG image
+            apngImage.Save(outputPath);
         }
     }
 }
