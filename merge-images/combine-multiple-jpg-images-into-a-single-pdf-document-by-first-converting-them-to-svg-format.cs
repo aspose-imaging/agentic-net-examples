@@ -1,75 +1,86 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
-class JpgToPdfViaSvg
+class Program
 {
     static void Main()
     {
-        // Input JPG files
-        string[] jpgFiles = new[]
+        // Hard‑coded input JPG files
+        string[] jpgInputs = new[]
         {
             @"C:\Images\image1.jpg",
             @"C:\Images\image2.jpg",
             @"C:\Images\image3.jpg"
         };
 
-        // Folder for temporary SVG files
-        string tempSvgFolder = Path.Combine(Path.GetTempPath(), "JpgToSvgTemp");
+        // Hard‑coded output PDF file
+        string outputPdfPath = @"C:\Images\CombinedOutput.pdf";
+
+        // Verify each JPG exists
+        foreach (var inputPath in jpgInputs)
+        {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+
+        // Temporary folder for SVG files
+        string tempSvgFolder = Path.Combine(Path.GetTempPath(), "AsposeSvgTemp");
         Directory.CreateDirectory(tempSvgFolder);
 
-        // List to hold generated SVG file paths
-        List<string> svgFiles = new List<string>();
-
         // Convert each JPG to SVG
-        foreach (string jpgPath in jpgFiles)
+        string[] svgPaths = new string[jpgInputs.Length];
+        for (int i = 0; i < jpgInputs.Length; i++)
         {
-            // Load JPG image
+            string jpgPath = jpgInputs[i];
+            string svgPath = Path.Combine(tempSvgFolder, $"page{i + 1}.svg");
+            svgPaths[i] = svgPath;
+
             using (Image jpgImage = Image.Load(jpgPath))
             {
-                // Prepare rasterization options (page size matches the source image)
-                VectorRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Prepare rasterization options matching the source image size
+                var rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = jpgImage.Size
                 };
 
-                // Define SVG save options
-                SvgOptions svgOptions = new SvgOptions
+                // Save as SVG using the rasterization options
+                var svgOptions = new SvgOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Determine SVG output path
-                string svgPath = Path.Combine(tempSvgFolder,
-                    Path.GetFileNameWithoutExtension(jpgPath) + ".svg");
-
-                // Save as SVG
+                // Ensure the directory for the SVG exists (already created above)
                 jpgImage.Save(svgPath, svgOptions);
-
-                // Store the SVG path for later PDF creation
-                svgFiles.Add(svgPath);
             }
         }
 
-        // Create a multipage image from the SVG files
-        using (Image multiPageImage = Image.Create(svgFiles.ToArray()))
+        // Create a multipage image from the generated SVG files
+        using (Image multipageImage = Image.Create(svgPaths))
         {
-            // Output PDF path
-            string pdfOutputPath = @"C:\Images\CombinedOutput.pdf";
+            // Prepare PDF options (default settings are sufficient)
+            var pdfOptions = new PdfOptions();
 
-            // Save the multipage image as PDF.
-            // Aspose.Imaging infers the format from the file extension.
-            multiPageImage.Save(pdfOutputPath);
+            // Save the multipage image as a single PDF document
+            multipageImage.Save(outputPdfPath, pdfOptions);
         }
 
-        // Optional: clean up temporary SVG files
-        foreach (string svgPath in svgFiles)
+        // Cleanup temporary SVG files (optional)
+        try
         {
-            File.Delete(svgPath);
+            Directory.Delete(tempSvgFolder, true);
         }
-
-        Directory.Delete(tempSvgFolder, true);
+        catch
+        {
+            // Ignored – cleanup failure should not affect the main result
+        }
     }
 }
