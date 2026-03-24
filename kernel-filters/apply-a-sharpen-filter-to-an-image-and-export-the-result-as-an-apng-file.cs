@@ -1,25 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input and output files
-        string inputPath = "input.png";
-        string outputPath = "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = "sample.png";
+        string outputPath = "result.apng";
 
-        // Load the source image as a raster image
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Apply a sharpen filter (kernel size 5, sigma 4.0) to the entire image
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to use filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply a sharpen filter (kernel size 5, sigma 4.0)
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
             // Save the processed image as an APNG file
-            raster.Save(outputPath, new ApngOptions());
-
-            Console.WriteLine("Sharpen filter applied and saved as APNG.");
+            rasterImage.Save(outputPath, new ApngOptions());
         }
     }
 }
