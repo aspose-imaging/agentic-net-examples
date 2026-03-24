@@ -13,15 +13,29 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hard‑coded input and output paths
         string inputPath = "input.jpg";
         string outputPath = "output.png";
         string tempFile = Path.Combine(Path.GetTempPath(), "mask_temp.png");
 
-        List<AssumedObjectData> assumedObjects = new List<AssumedObjectData>();
-        assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load source image
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
+            // Prepare assumed objects for more accurate segmentation
+            List<AssumedObjectData> assumedObjects = new List<AssumedObjectData>();
+            assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)));
+
+            // Configure GraphCut auto‑masking options
             AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
             {
                 AssumedObjects = assumedObjects,
@@ -37,17 +51,17 @@ class Program
                 BackgroundReplacementColor = Color.Transparent
             };
 
-            MaskingResult results = new ImageMasking(image).Decompose(options);
-
+            // Perform masking and obtain the foreground segment
+            using (MaskingResult results = new ImageMasking(image).Decompose(options))
             using (RasterImage foreground = (RasterImage)results[1].GetImage())
             {
+                // Save the masked foreground image
                 foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
             }
         }
 
+        // Clean up temporary file used for ExportOptions
         if (File.Exists(tempFile))
-        {
             File.Delete(tempFile);
-        }
     }
 }
