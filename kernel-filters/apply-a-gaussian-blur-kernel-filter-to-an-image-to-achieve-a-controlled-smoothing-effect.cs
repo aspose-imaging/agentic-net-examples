@@ -1,32 +1,40 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
 
-class GaussianBlurExample
+class Program
 {
     static void Main()
     {
-        // Define input and output file paths
-        string inputPath = @"C:\temp\sample.png";
-        string outputPath = @"C:\temp\sample.GaussianBlur.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"c:\temp\sample.png";
+        string outputPath = @"c:\temp\sample.GaussianBlur.png";
 
-        // Load the image using Aspose.Imaging
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image, apply Gaussian blur, and save the result
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access the Filter method
+            // Cast to RasterImage to access filtering capabilities
             RasterImage rasterImage = (RasterImage)image;
 
-            // Create Gaussian blur filter options:
-            // size = 5 (kernel size), sigma = 4.0 (smoothing factor)
-            var gaussianOptions = new GaussianBlurFilterOptions(5, 4.0);
+            // Apply Gaussian blur with kernel size 5 and sigma 4.0 to the whole image
+            rasterImage.Filter(
+                rasterImage.Bounds,
+                new GaussianBlurFilterOptions(5, 4.0)
+            );
 
-            // Apply the filter to the entire image bounds
-            rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
-
-            // Save the processed image as PNG
-            rasterImage.Save(outputPath, new PngOptions());
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }
