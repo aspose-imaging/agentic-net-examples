@@ -1,34 +1,71 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf; // EMZ is handled as EMF image format
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Emf;
 
-class DeconvolutionExample
+class Program
 {
     static void Main()
     {
-        // Path to the source EMZ image
-        string inputPath = @"C:\Images\sample.emz";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.emz";
+        string outputPath = @"C:\temp\output.png";
 
-        // Path for the processed output image
-        string outputPath = @"C:\Images\sample_deconvolved.png";
-
-        // Load the EMZ image
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage to access the Filter method
-            RasterImage rasterImage = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a Gauss-Wiener deconvolution filter to the entire image
-            // Parameters: radius = 5, sigma = 4.0 (adjust as needed)
-            rasterImage.Filter(
-                rasterImage.Bounds,
-                new GaussWienerFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Temporary rasterized PNG path
+        string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
+        // Load the EMZ (vector) image and rasterize to PNG
+        using (Image vectorImage = Image.Load(inputPath))
+        {
+            var vectorOptions = new EmfRasterizationOptions
+            {
+                PageSize = vectorImage.Size,
+                BackgroundColor = Color.White
+            };
+
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = vectorOptions
+            };
+
+            vectorImage.Save(tempPngPath, pngOptions);
+        }
+
+        // Load the rasterized PNG, apply deconvolution filter, and save the result
+        using (Image rasterImageContainer = Image.Load(tempPngPath))
+        {
+            var rasterImage = (RasterImage)rasterImageContainer;
+
+            // Apply a motion deconvolution filter (MotionWienerFilterOptions)
+            var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0);
+            rasterImage.Filter(rasterImage.Bounds, deconvOptions);
 
             // Save the processed image as PNG
-            rasterImage.Save(outputPath, new PngOptions());
+            var outOptions = new PngOptions();
+            rasterImage.Save(outputPath, outOptions);
+        }
+
+        // Optionally delete the temporary file
+        try
+        {
+            File.Delete(tempPngPath);
+        }
+        catch
+        {
+            // Ignore any errors during cleanup
         }
     }
 }
