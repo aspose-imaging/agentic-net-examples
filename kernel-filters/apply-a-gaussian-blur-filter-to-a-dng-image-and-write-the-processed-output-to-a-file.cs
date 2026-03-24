@@ -1,18 +1,39 @@
-// Path to the folder containing the DNG file
-string dir = @"c:\temp\";
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
-// Load the DNG image
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dir + "sample.dng"))
+class Program
 {
-    // Cast the generic Image to DngImage to access DNG‑specific members
-    Aspose.Imaging.FileFormats.Dng.DngImage dngImage = (Aspose.Imaging.FileFormats.Dng.DngImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.dng";
+        string outputPath = @"c:\temp\output.png";
 
-    // Apply a Gaussian blur filter to the whole image.
-    // Radius = 5, Sigma = 4.0 (adjust as needed)
-    dngImage.Filter(
-        dngImage.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image. Here we export to PNG, but any supported format can be used.
-    dngImage.Save(dir + "sample.GaussianBlur.png", new Aspose.Imaging.ImageOptions.PngOptions());
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DNG image with default load options
+        using (Image image = Image.Load(inputPath, new DngLoadOptions()))
+        {
+            // Cast to RasterImage to apply filters
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply Gaussian blur filter (size = 5, sigma = 4.0) to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the processed image as PNG
+            rasterImage.Save(outputPath, new PngOptions());
+        }
+    }
 }
