@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
@@ -7,39 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Prerequisites for converting SVG to BMP using Aspose.Imaging:
+        // Prerequisites:
+        // - .NET (any recent version, e.g., .NET 6.0 or later)
+        // - Aspose.Imaging for .NET library (install via NuGet: Aspose.Imaging)
+        // - A valid Aspose.Imaging license (optional for full features, otherwise evaluation mode)
 
-        // 1. Install the Aspose.Imaging for .NET library via NuGet:
-        //    Install-Package Aspose.Imaging
-        //    This library provides SvgImage, BmpImage, SvgOptions, BmpOptions, etc.
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.svg";
+        string outputPath = @"C:\Images\output.bmp";
 
-        // 2. .NET runtime (e.g., .NET 6, .NET 7, or .NET Framework 4.6+).
-        //    The library targets multiple .NET versions.
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // 3. For BMP output you need:
-        //    - Aspose.Imaging.ImageOptions.BmpOptions (to specify bits per pixel, compression, etc.)
-        //    - Aspose.Imaging.FileFormats.Bmp.BmpImage (the target raster format).
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // 4. For SVG input you need:
-        //    - Aspose.Imaging.FileFormats.Svg.SvgImage (to load the SVG file)
-        //    - Aspose.Imaging.ImageOptions.SvgRasterizationOptions (to define rasterization size, DPI, etc.)
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization options based on the SVG size
+            var rasterOptions = new SvgRasterizationOptions
+            {
+                PageSize = image.Size
+            };
 
-        // 5. Supported features during conversion:
-        //    - Vector rasterization with custom page size and DPI.
-        //    - Background color handling (BackgroundColor property).
-        //    - Compression options for BMP (BmpOptions.Compression).
-        //    - Resolution settings (BmpOptions.ResolutionSettings).
-        //    - Metadata preservation (KeepMetadata property).
+            // Configure BMP save options (e.g., 24 bits per pixel)
+            var bmpOptions = new BmpOptions
+            {
+                BitsPerPixel = 24,
+                VectorRasterizationOptions = rasterOptions
+            };
 
-        // 6. No additional native dependencies are required; Aspose.Imaging is a self‑contained managed library.
-
-        // 7. Licensing:
-        //    - Use a valid Aspose.Imaging license file or evaluation mode.
-
-        Console.WriteLine("Prerequisites for converting SVG to BMP using Aspose.Imaging:");
-        Console.WriteLine("- Aspose.Imaging for .NET (NuGet package)");
-        Console.WriteLine("- .NET runtime (e.g., .NET 6, .NET 7)");
-        Console.WriteLine("- Optional: System.Drawing.Common if you need GDI+ bitmap manipulation");
-        Console.WriteLine("- Supported features: vector rasterization, background color, compression, resolution settings, metadata handling");
+            // Save the image as BMP
+            image.Save(outputPath, bmpOptions);
+        }
     }
 }
