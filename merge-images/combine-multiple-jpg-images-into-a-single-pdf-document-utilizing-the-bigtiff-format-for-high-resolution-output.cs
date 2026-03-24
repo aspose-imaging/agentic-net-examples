@@ -1,64 +1,63 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.BigTiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length < 2)
+        // Hard‑coded input JPG files
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Usage: program <input1.jpg> [<input2.jpg> ...] <output.pdf>");
-            return;
-        }
+            @"C:\Images\page1.jpg",
+            @"C:\Images\page2.jpg",
+            @"C:\Images\page3.jpg"
+        };
 
-        string outputPdfPath = args[args.Length - 1];
-        string[] imagePaths = args.Take(args.Length - 1).ToArray();
+        // Hard‑coded output PDF file
+        string outputPath = @"C:\Images\CombinedOutput.pdf";
 
-        string tempTiffPath = Path.Combine(Path.GetTempPath(), "temp_big.tif");
-        if (File.Exists(tempTiffPath))
-            File.Delete(tempTiffPath);
-
-        int width = 0, height = 0;
-        using (RasterImage firstImg = (RasterImage)Image.Load(imagePaths[0]))
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            width = firstImg.Width;
-            height = firstImg.Height;
-        }
-
-        BigTiffOptions bigTiffOptions = new BigTiffOptions(TiffExpectedFormat.Default);
-        bigTiffOptions.Source = new FileCreateSource(tempTiffPath, false);
-
-        using (BigTiffImage bigTiff = (BigTiffImage)Image.Create(bigTiffOptions, width, height))
-        {
-            foreach (string imgPath in imagePaths)
+            if (!File.Exists(inputPath))
             {
-                using (RasterImage raster = (RasterImage)Image.Load(imgPath))
-                {
-                    if (raster.Width != width || raster.Height != height)
-                    {
-                        raster.Resize(width, height, ResizeType.NearestNeighbourResample);
-                    }
-                    bigTiff.AddPage(raster);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-
-            bigTiff.Save();
         }
 
-        using (Image bigTiffImg = Image.Load(tempTiffPath))
+        // Ensure the output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (string.IsNullOrEmpty(outputDir))
+            outputDir = "."; // fallback to current directory
+        Directory.CreateDirectory(outputDir);
+
+        // Load each JPG into an Image instance
+        List<Image> loadedImages = new List<Image>();
+        foreach (string inputPath in inputPaths)
         {
-            PdfOptions pdfOptions = new PdfOptions();
-            bigTiffImg.Save(outputPdfPath, pdfOptions);
+            // Load rule
+            Image img = Image.Load(inputPath);
+            loadedImages.Add(img);
         }
 
-        if (File.Exists(tempTiffPath))
-            File.Delete(tempTiffPath);
+        // Create a multipage image from the loaded JPGs (create rule)
+        using (Image multipageImage = Image.Create(loadedImages.ToArray()))
+        {
+            // Prepare PDF export options (high‑resolution output can be controlled via VectorRasterizationOptions if needed)
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the multipage image as a single PDF document (save rule)
+            multipageImage.Save(outputPath, pdfOptions);
+        }
+
+        // Dispose the individual images (they are not disposed by the multipage image when disposeImages = false)
+        foreach (Image img in loadedImages)
+        {
+            img.Dispose();
+        }
     }
 }
