@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -9,35 +9,44 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input folder containing source images
-        string inputFolder = args.Length > 0 ? args[0] : "InputImages";
-        // Output APNG file path
-        string outputPath = args.Length > 1 ? args[1] : "output_animation.apng";
+        // Hardcoded input directory containing source images
+        string inputDirectory = @"C:\Images\Input";
+        // Hardcoded output file path for the animated image
+        string outputPath = @"C:\Images\Output\animation.png";
 
-        // Collect image file paths (supported formats) and sort to preserve order
-        var imageFiles = new List<string>();
-        foreach (var file in Directory.GetFiles(inputFolder))
+        // Verify that the input directory exists and contains files
+        if (!Directory.Exists(inputDirectory))
         {
-            string ext = Path.GetExtension(file).ToLowerInvariant();
-            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tif" || ext == ".tiff")
-                imageFiles.Add(file);
-        }
-        imageFiles.Sort();
-
-        if (imageFiles.Count == 0)
-        {
-            Console.WriteLine("No source images found.");
+            Console.Error.WriteLine($"Directory not found: {inputDirectory}");
             return;
         }
 
-        // Load the first image to obtain canvas size
-        using (RasterImage firstImage = (RasterImage)Image.Load(imageFiles[0]))
-        {
-            int width = firstImage.Width;
-            int height = firstImage.Height;
+        // Get all image files in the directory, ordered alphabetically to preserve frame order
+        string[] imageFiles = Directory.GetFiles(inputDirectory)
+                                       .OrderBy(f => f)
+                                       .ToArray();
 
+        if (imageFiles.Length == 0)
+        {
+            Console.Error.WriteLine($"No image files found in: {inputDirectory}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the first image to obtain width and height
+        string firstFile = imageFiles[0];
+        if (!File.Exists(firstFile))
+        {
+            Console.Error.WriteLine($"File not found: {firstFile}");
+            return;
+        }
+
+        using (RasterImage firstImage = (RasterImage)Image.Load(firstFile))
+        {
             // Configure APNG creation options
             ApngOptions createOptions = new ApngOptions
             {
@@ -46,27 +55,33 @@ class Program
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Create APNG image with the specified size
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+            // Create the APNG image with the dimensions of the first frame
+            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, firstImage.Width, firstImage.Height))
             {
-                // Remove the default empty frame
+                // Remove the default single frame that exists after creation
                 apngImage.RemoveAllFrames();
 
-                // Add each source image as a frame
-                foreach (string filePath in imageFiles)
+                // Add the first frame
+                apngImage.AddFrame(firstImage);
+
+                // Add remaining frames preserving order
+                for (int i = 1; i < imageFiles.Length; i++)
                 {
+                    string filePath = imageFiles[i];
+                    if (!File.Exists(filePath))
+                    {
+                        Console.Error.WriteLine($"File not found: {filePath}");
+                        return;
+                    }
+
                     using (RasterImage frame = (RasterImage)Image.Load(filePath))
                     {
-                        // Ensure frame size matches canvas; resize if necessary
-                        if (frame.Width != width || frame.Height != height)
-                        {
-                            frame.Resize(width, height, ResizeType.NearestNeighbourResample);
-                        }
+                        // Append the frame; it will use the default frame time set in options
                         apngImage.AddFrame(frame);
                     }
                 }
 
-                // Save the animated PNG (output is already bound to the source)
+                // Save the animated image to the specified output path
                 apngImage.Save();
             }
         }
