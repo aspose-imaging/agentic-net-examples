@@ -8,65 +8,66 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string[] vectorFiles = new string[]
-        {
+        // Hardcoded input vector image paths
+        string[] inputPaths = {
             "vector1.svg",
             "vector2.svg",
             "vector3.svg"
         };
 
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Hardcoded output APNG path
         string outputPath = "output.apng";
 
-        Source fileSource = new FileCreateSource(outputPath, false);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        ApngOptions apngCreateOptions = new ApngOptions
+        // Determine canvas size from the first image
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
         {
-            Source = fileSource,
-            DefaultFrameTime = 100,
+            canvasWidth = first.Width;
+            canvasHeight = first.Height;
+        }
+
+        // Create APNG options with bound output source
+        Source source = new FileCreateSource(outputPath, false);
+        ApngOptions apngOptions = new ApngOptions
+        {
+            Source = source,
+            DefaultFrameTime = 100, // 100 ms per frame
             ColorType = PngColorType.TruecolorWithAlpha
         };
 
-        using (Image firstVector = Image.Load(vectorFiles[0]))
+        // Create APNG canvas
+        using (ApngImage apng = (ApngImage)Image.Create(apngOptions, canvasWidth, canvasHeight))
         {
-            using (MemoryStream ms = new MemoryStream())
+            // Remove the default empty frame
+            apng.RemoveAllFrames();
+
+            // Add each vector image as a frame
+            foreach (string path in inputPaths)
             {
-                PngOptions pngOpts = new PngOptions();
-                firstVector.Save(ms, pngOpts);
-                ms.Position = 0;
-
-                using (RasterImage firstRaster = (RasterImage)Image.Load(ms))
+                using (RasterImage frame = (RasterImage)Image.Load(path))
                 {
-                    int canvasWidth = firstRaster.Width;
-                    int canvasHeight = firstRaster.Height;
-
-                    using (ApngImage apng = (ApngImage)Image.Create(apngCreateOptions, canvasWidth, canvasHeight))
-                    {
-                        apng.RemoveAllFrames();
-                        apng.AddFrame(firstRaster);
-
-                        for (int i = 1; i < vectorFiles.Length; i++)
-                        {
-                            using (Image vectorImg = Image.Load(vectorFiles[i]))
-                            {
-                                using (MemoryStream msFrame = new MemoryStream())
-                                {
-                                    vectorImg.Save(msFrame, pngOpts);
-                                    msFrame.Position = 0;
-
-                                    using (RasterImage rasterFrame = (RasterImage)Image.Load(msFrame))
-                                    {
-                                        apng.AddFrame(rasterFrame);
-                                    }
-                                }
-                            }
-                        }
-
-                        apng.Save();
-                    }
+                    apng.AddFrame(frame);
                 }
             }
+
+            // Save the bound APNG image
+            apng.Save();
         }
     }
 }
