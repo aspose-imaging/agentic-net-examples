@@ -1,7 +1,7 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,14 +10,20 @@ class Program
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
 
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
             Graphics graphics = new Graphics(image);
-            graphics.Clear(Aspose.Imaging.Color.White);
+            graphics.Clear(Color.White);
 
             BmpOptions options = new BmpOptions();
-            options.Source = new FileCreateSource(outputPath, false);
-
             image.Save(outputPath, options);
         }
     }
