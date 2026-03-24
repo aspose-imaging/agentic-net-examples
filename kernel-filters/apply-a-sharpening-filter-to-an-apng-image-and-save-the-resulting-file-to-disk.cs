@@ -1,24 +1,42 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Load the existing APNG image from disk
-        using (Image image = Image.Load("input.apng"))
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output\\output_sharpened.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to ApngImage to access APNG‑specific members
-            ApngImage apng = (ApngImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a sharpening filter to the whole image.
-            // SharpenFilterOptions(int size, double sigma) – size must be odd, sigma > 0.
-            apng.Filter(apng.Bounds, new SharpenFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed APNG image to a new file
-            apng.Save("output_sharpened.apng");
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to ApngImage (full namespace to avoid extra using)
+            var apngImage = (Aspose.Imaging.FileFormats.Apng.ApngImage)image;
+
+            // Apply sharpening filter to each frame
+            foreach (var page in apngImage.Pages)
+            {
+                var frame = (Aspose.Imaging.FileFormats.Apng.ApngFrame)page;
+                var raster = (RasterImage)frame;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+            }
+
+            // Save the modified APNG
+            apngImage.Save(outputPath, new ApngOptions());
         }
     }
 }
