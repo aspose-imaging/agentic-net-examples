@@ -2,43 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect input SVG path and output PNG path as command‑line arguments.
-        if (args.Length < 2)
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.svg";
+        string outputPath = @"C:\Images\output\sample.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: program <input.svg> <output.png>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image using the unified Image.Load method.
+        // Load the SVG image (vector image) using Aspose.Imaging
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options for the vector image.
-            var rasterOptions = new SvgRasterizationOptions
+            // Prepare rasterization options for SVG
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
             {
-                // Preserve original dimensions.
+                // Preserve original size
                 PageSize = image.Size,
-                // Optional: improve visual quality.
+                // Optional: set background color, smoothing, etc.
+                BackgroundColor = Color.Transparent,
                 SmoothingMode = SmoothingMode.AntiAlias,
                 TextRenderingHint = TextRenderingHint.AntiAlias
             };
 
-            // Set up PNG export options and attach the rasterization options.
-            var pngOptions = new PngOptions
+            // Prepare PNG save options and attach rasterization settings
+            PngOptions pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the rasterized PNG, preserving transparency.
+            // Save the rasterized image as PNG
             image.Save(outputPath, pngOptions);
         }
     }
