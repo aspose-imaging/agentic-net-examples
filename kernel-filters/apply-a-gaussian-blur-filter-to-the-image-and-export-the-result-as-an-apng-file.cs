@@ -1,26 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input raster image path
-        string inputPath = "input.png";
-        // Output APNG file path
-        string outputPath = "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.png";
+        string outputPath = @"C:\Images\sample_blur.apng";
 
-        // Load the image as a RasterImage
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Apply Gaussian blur with radius 5 and sigma 4.0 to the entire image
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur with kernel size 5 and sigma 4.0 to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
             // Save the processed image as an APNG file
-            raster.Save(outputPath, new ApngOptions());
+            rasterImage.Save(outputPath, new ApngOptions());
         }
     }
 }
