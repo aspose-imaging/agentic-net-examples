@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -8,63 +9,72 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths to the source JPG images
-        string[] imagePaths = new string[]
-        {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
-        };
+        // Hardcoded input JPG files
+        string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
+        // Hardcoded output DICOM and PDF files
+        string dicomPath = "combined.dcm";
+        string pdfPath = "combined.pdf";
 
-        // Output PDF file path
-        string outputPdfPath = "combined.pdf";
-
-        // Load the first image to determine canvas size
-        int canvasWidth;
-        int canvasHeight;
-        using (RasterImage firstImage = (RasterImage)Image.Load(imagePaths[0]))
+        // Verify each input file exists
+        foreach (string path in inputPaths)
         {
-            canvasWidth = firstImage.Width;
-            canvasHeight = firstImage.Height;
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
         }
 
-        // Create a DICOM multi‑page image canvas (in memory)
-        using (DicomImage dicomCanvas = (DicomImage)Image.Create(new DicomOptions(), canvasWidth, canvasHeight))
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(dicomPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
+        // Collect sizes of all input images
+        List<Size> sizes = new List<Size>();
+        foreach (string path in inputPaths)
         {
-            bool isFirstPage = true;
-
-            foreach (string path in imagePaths)
+            using (RasterImage img = (RasterImage)Image.Load(path))
             {
-                using (RasterImage raster = (RasterImage)Image.Load(path))
+                sizes.Add(img.Size);
+            }
+        }
+
+        // Determine canvas dimensions (vertical stacking)
+        int canvasWidth = 0;
+        int canvasHeight = 0;
+        foreach (Size sz in sizes)
+        {
+            if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+            canvasHeight += sz.Height;
+        }
+
+        // Create DICOM canvas with the calculated size
+        var dicomOptions = new DicomOptions { Source = new FileCreateSource(dicomPath, false) };
+        using (DicomImage canvas = (DicomImage)Image.Create(dicomOptions, canvasWidth, canvasHeight))
+        {
+            int offsetY = 0;
+            foreach (string path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    // Ensure each image matches the canvas size
-                    if (raster.Width != canvasWidth || raster.Height != canvasHeight)
-                    {
-                        raster.Resize(canvasWidth, canvasHeight, ResizeType.NearestNeighbourResample);
-                    }
-
-                    // Load pixel data
-                    int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-
-                    if (isFirstPage)
-                    {
-                        // First page already exists in the canvas
-                        dicomCanvas.SaveArgb32Pixels(dicomCanvas.Bounds, pixels);
-                        isFirstPage = false;
-                    }
-                    else
-                    {
-                        // Add a new page and set its pixel data
-                        DicomPage page = dicomCanvas.AddPage();
-                        page.SaveArgb32Pixels(page.Bounds, pixels);
-                    }
+                    // Define destination rectangle on the canvas
+                    Rectangle destRect = new Rectangle(0, offsetY, img.Width, img.Height);
+                    // Copy pixel data from source image to canvas
+                    canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
+                    offsetY += img.Height;
                 }
             }
+            // Save the bound DICOM image (source already set)
+            canvas.Save();
+        }
 
-            // Save the multi‑page DICOM image as a PDF document
-            dicomCanvas.Save(outputPdfPath, new PdfOptions());
+        // Load the created DICOM image and save it as PDF
+        using (DicomImage dicom = (DicomImage)Image.Load(dicomPath))
+        {
+            var pdfOptions = new PdfOptions();
+            dicom.Save(pdfPath, pdfOptions);
         }
     }
 }
