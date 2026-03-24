@@ -1,49 +1,55 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
 
-class ExportFramesToTiff
+class Program
 {
     static void Main()
     {
-        // Path to the source multi‑frame image (any supported format)
-        string sourcePath = @"C:\Images\multiframe_input.tif";
+        // Hardcoded input and output locations
+        string inputPath = "sample.tif";
+        string outputDirectory = "frames";
 
-        // Load the source image
-        using (Image sourceImage = Image.Load(sourcePath))
+        // Verify input file existence
+        if (!File.Exists(inputPath))
         {
-            // Ensure the image supports multiple pages/frames
-            if (sourceImage is IMultipageImage multipage && multipage.PageCount > 0)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDirectory);
+
+        // Load the source image (could be multi‑page)
+        using (Image image = Image.Load(inputPath))
+        {
+            // Determine if the image supports multiple pages/frames
+            var multipage = image as IMultipageImage;
+            int frameCount = multipage != null ? multipage.PageCount : 1;
+
+            for (int i = 0; i < frameCount; i++)
             {
-                // Iterate through each frame/page
-                for (int i = 0; i < multipage.PageCount; i++)
+                // Retrieve the current page/frame as a raster image
+                Image pageImage = multipage != null ? multipage.Pages[i] : image;
+
+                // Create a TIFF frame from the raster image
+                using (TiffFrame tiffFrame = new TiffFrame((RasterImage)pageImage))
                 {
-                    // Retrieve the current page as a RasterImage
-                    using (RasterImage page = multipage.Pages[i] as RasterImage)
+                    // Wrap the frame in a TIFF image container
+                    using (TiffImage tiffImage = new TiffImage(tiffFrame))
                     {
-                        // Create a TIFF frame from the raster page
-                        TiffFrame tiffFrame = new TiffFrame(page);
+                        // Build the output file path for this frame
+                        string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.tif");
 
-                        // Wrap the frame in a TiffImage
-                        using (TiffImage tiffImage = new TiffImage(tiffFrame))
-                        {
-                            // Build the output file name (e.g., frame_0.tif, frame_1.tif, ...)
-                            string outputPath = $@"C:\Images\frame_{i}.tif";
+                        // Ensure the directory for the output file exists (already created above)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                            // Save the single‑frame TIFF image
-                            tiffImage.Save(outputPath);
-                        }
-
-                        // The TiffImage disposes the frame automatically,
-                        // but we can explicitly dispose the frame if desired:
-                        // tiffFrame.Dispose();
+                        // Save the single‑frame TIFF image
+                        tiffImage.Save(outputPath);
                     }
                 }
-            }
-            else
-            {
-                Console.WriteLine("The loaded image does not contain multiple frames.");
             }
         }
     }
