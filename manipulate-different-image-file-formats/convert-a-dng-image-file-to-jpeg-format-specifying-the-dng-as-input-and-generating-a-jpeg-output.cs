@@ -1,26 +1,35 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dng;
 using Aspose.Imaging.ImageOptions;
 
-class DngToJpegConverter
+class Program
 {
     static void Main()
     {
-        // Path to the folder containing the DNG file
-        string dir = @"C:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\test.dng";
+        string outputPath = @"c:\temp\test.jpg";
 
-        // Load the DNG image using Aspose.Imaging.Image.Load
-        using (Image image = Image.Load(dir + "input.dng"))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to a DngImage to access DNG-specific functionality
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to DngImage to access DNG-specific functionality
             DngImage dngImage = (DngImage)image;
 
-            // Define JPEG save options (default options are sufficient for a basic conversion)
-            JpegOptions jpegOptions = new JpegOptions();
-
-            // Save the DNG image as a JPEG file
-            dngImage.Save(dir + "output.jpg", jpegOptions);
+            // Save the image as JPEG with default options
+            dngImage.Save(outputPath, new JpegOptions());
         }
     }
 }
