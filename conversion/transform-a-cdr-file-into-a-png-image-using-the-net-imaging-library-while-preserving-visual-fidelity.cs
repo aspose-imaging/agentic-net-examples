@@ -1,46 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input CDR file path
-        string inputCdrPath = @"C:\Images\sample.cdr";
+        string inputPath = "input\\sample.cdr";
+        string outputPath = "output\\sample.png";
 
-        // Output PNG file path
-        string outputPngPath = @"C:\Images\sample.png";
-
-        // Load the CDR document
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputCdrPath))
+        if (!File.Exists(inputPath))
         {
-            // Cache the whole document to avoid repeated I/O
-            cdrImage.CacheData();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Get the first page (adjust index if you need a different page)
-            CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Cache the page data for faster processing
-            page.CacheData();
-
-            // Configure PNG save options with rasterization settings to keep visual fidelity
-            PngOptions pngOptions = new PngOptions
+        using (Image image = Image.Load(inputPath))
+        {
+            using (var pngOptions = new PngOptions())
             {
-                // Rasterize the vector page using its original dimensions
-                VectorRasterizationOptions = new CdrRasterizationOptions
+                if (image is VectorImage)
                 {
-                    PageWidth = page.Width,
-                    PageHeight = page.Height,
-                    // Optional: set smoothing mode, text rendering hint, etc., to match the source
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+                    pngOptions.VectorRasterizationOptions = vectorOptions;
                 }
-            };
 
-            // Save the page as a PNG image
-            page.Save(outputPngPath, pngOptions);
+                image.Save(outputPath, pngOptions);
+            }
         }
     }
 }
