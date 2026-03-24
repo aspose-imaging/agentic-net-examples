@@ -1,17 +1,40 @@
-// Define the directory containing the source image and where the result will be saved
-string dataDir = @"c:\temp\";
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-// Load the source image (any supported raster format, e.g., PNG)
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dataDir + "sample.png"))
+class Program
 {
-    // Cast the loaded image to RasterImage to access filtering capabilities
-    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.png";
+        string outputPath = @"c:\temp\sample.SharpenFilter.png";
 
-    // Apply a sharpen filter with a kernel size of 5 and sigma of 4.0 to the entire image
-    rasterImage.Filter(
-        rasterImage.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image as PNG
-    rasterImage.Save(dataDir + "sample.SharpenFilter.png");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply sharpen filter with kernel size 5 and sigma 4.0 to the whole image
+            rasterImage.Filter(
+                rasterImage.Bounds,
+                new SharpenFilterOptions(5, 4.0)
+            );
+
+            // Save the processed image
+            rasterImage.Save(outputPath);
+        }
+    }
 }
