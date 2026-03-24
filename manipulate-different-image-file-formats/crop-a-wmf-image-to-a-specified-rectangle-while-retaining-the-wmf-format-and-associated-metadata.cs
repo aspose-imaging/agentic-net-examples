@@ -1,36 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace WmfCropExample
 {
-    static void Main()
+    class Program
     {
-        // Path to the source WMF file
-        string inputPath = @"C:\Images\source.wmf";
-
-        // Path where the cropped WMF will be saved
-        string outputPath = @"C:\Images\cropped.wmf";
-
-        // Load the WMF image using Aspose.Imaging's unified loader
-        using (Image image = Image.Load(inputPath))
+        static void Main()
         {
-            // Cast to WmfImage to access WMF‑specific functionality
-            WmfImage wmfImage = (WmfImage)image;
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.wmf";
+            string outputPath = @"C:\Images\output_cropped.wmf";
 
-            // Define the rectangle to crop (example: central half of the image)
-            int x = wmfImage.Width / 4;
-            int y = wmfImage.Height / 4;
-            int width = wmfImage.Width / 2;
-            int height = wmfImage.Height / 2;
-            Rectangle cropArea = new Rectangle(x, y, width, height);
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Crop the image; metadata remains attached to the image object
-            wmfImage.Crop(cropArea);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the cropped image back to WMF format, preserving metadata
-            wmfImage.Save(outputPath, new WmfOptions());
+            // Load the WMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to WmfImage to access WMF-specific methods
+                WmfImage wmfImage = (WmfImage)image;
+
+                // Define the rectangle to crop (x, y, width, height)
+                // Adjust these values as needed for the desired crop area
+                Rectangle cropArea = new Rectangle(50, 50, 200, 200);
+
+                // Perform the crop operation
+                wmfImage.Crop(cropArea);
+
+                // Save the cropped image, preserving WMF format and metadata
+                wmfImage.Save(outputPath);
+            }
         }
     }
 }
