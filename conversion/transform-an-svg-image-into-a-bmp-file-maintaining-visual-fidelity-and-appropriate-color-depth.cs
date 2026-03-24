@@ -1,38 +1,45 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input SVG file path (first argument) and output BMP file path (second argument)
-        string inputPath = args.Length > 0 ? args[0] : "input.svg";
-        string outputPath = args.Length > 1 ? args[1] : "output.bmp";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.svg";
+        string outputPath = @"C:\Images\output.bmp";
 
-        // Load the SVG image using the unified Image.Load method
+        // Verify that the input SVG file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare BMP save options with desired color depth
-            using (BmpOptions bmpOptions = new BmpOptions())
+            // Prepare rasterization options matching the source size
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                // Set bits per pixel (24 for true color without alpha)
-                bmpOptions.BitsPerPixel = 24;
+                PageSize = image.Size
+            };
 
-                // Configure vector rasterization to preserve visual fidelity
-                // SvgRasterizationOptions derives from VectorRasterizationOptions
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                {
-                    // Use the original SVG size as the page size
-                    PageSize = image.Size
-                };
+            // Configure BMP save options (24 bits per pixel for good color fidelity)
+            var bmpOptions = new BmpOptions
+            {
+                BitsPerPixel = 24,
+                VectorRasterizationOptions = rasterizationOptions
+            };
 
-                // Assign rasterization options to BMP options
-                bmpOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the rasterized image as BMP
-                image.Save(outputPath, bmpOptions);
-            }
+            // Save the rasterized image as BMP
+            image.Save(outputPath, bmpOptions);
         }
     }
 }
