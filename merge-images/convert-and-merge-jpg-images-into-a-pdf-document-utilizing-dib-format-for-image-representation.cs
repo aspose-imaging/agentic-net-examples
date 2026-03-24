@@ -1,52 +1,44 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths of the source JPG images
-        string[] jpgPaths = new string[]
+        // Hardcoded input JPG files
+        string[] inputPaths = new[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\image1.jpg",
+            @"C:\Images\image2.jpg",
+            @"C:\Images\image3.jpg"
         };
 
-        // Determine the size of the horizontal canvas
-        int totalWidth = 0;
-        int maxHeight = 0;
-        foreach (string path in jpgPaths)
+        // Verify each input file exists
+        foreach (var inputPath in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                totalWidth += img.Width;
-                if (img.Height > maxHeight)
-                    maxHeight = img.Height;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Create an in‑memory BMP canvas (DIB representation)
-        BmpOptions bmpOptions = new BmpOptions();
-        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, totalWidth, maxHeight))
-        {
-            // Merge the JPG images side by side onto the canvas
-            int offsetX = 0;
-            foreach (string path in jpgPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
-            }
+        // Hardcoded output PDF file
+        string outputPath = @"C:\Images\merged.pdf";
 
-            // Save the merged canvas as a PDF document
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Create a multipage image from the JPG files
+        using (Image multipageImage = Image.Create(inputPaths))
+        {
+            // Set PDF export options (default options are sufficient)
             PdfOptions pdfOptions = new PdfOptions();
-            canvas.Save("merged.pdf", pdfOptions);
+
+            // Save the multipage image as a PDF document
+            multipageImage.Save(outputPath, pdfOptions);
         }
     }
 }
