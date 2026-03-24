@@ -1,67 +1,61 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main()
     {
-        // Paths to the source and destination TIFF files
-        string inputPath = @"C:\Temp\input.tif";
-        string outputPath = @"C:\Temp\output.tif";
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the existing TIFF image
-        using (Image image = Image.Load(inputPath))
+        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
         {
-            // Cast the loaded image to TiffImage to access TIFF‑specific functionality
-            TiffImage tiffImage = image as TiffImage;
-            if (tiffImage == null)
-                throw new InvalidOperationException("The loaded file is not a TIFF image.");
+            // Adjust brightness
+            tiffImage.AdjustBrightness(30);
 
-            // -----------------------------------------------------------------
-            // Perform a series of image processing operations on the active frame
-            // -----------------------------------------------------------------
+            // Resize the image using nearest neighbour resampling
+            tiffImage.Resize(200, 200, ResizeType.NearestNeighbourResample);
 
-            // Increase brightness by 20 units
-            tiffImage.ActiveFrame.AdjustBrightness(20);
+            // Create a new frame with gradient fill
+            TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+            frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            frameOptions.Photometric = TiffPhotometrics.Rgb;
+            frameOptions.Compression = TiffCompressions.Lzw;
+            frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
 
-            // Increase contrast by a factor of 1.2
-            tiffImage.ActiveFrame.AdjustContrast(1.2f);
+            TiffFrame newFrame = new TiffFrame(frameOptions, 200, 200);
 
-            // Convert the active frame to grayscale
-            tiffImage.ActiveFrame.Grayscale();
+            // Fill the new frame with a blue‑yellow gradient
+            Graphics graphics = new Graphics(newFrame);
+            LinearGradientBrush brush = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(newFrame.Width, newFrame.Height),
+                Color.Blue,
+                Color.Yellow);
+            graphics.FillRectangle(brush, newFrame.Bounds);
 
-            // Resize the active frame to 800x600 pixels (default NearestNeighbourResample)
-            tiffImage.ActiveFrame.Resize(800, 600);
-
-            // -----------------------------------------------------------------
-            // Create a new grayscale frame from the processed active frame
-            // -----------------------------------------------------------------
-
-            // Define options for the new frame – 8‑bit grayscale (MinIsBlack photometric)
-            TiffOptions newFrameOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                Photometric = TiffPhotometrics.MinIsBlack,
-                BitsPerSample = new ushort[] { 8 }
-            };
-
-            // Create the new frame while preserving pixel data
-            TiffFrame newFrame = TiffFrame.CreateFrameFrom(tiffImage.ActiveFrame, newFrameOptions);
-
-            // Add the newly created frame to the multi‑page TIFF image
+            // Add the new frame to the TIFF image
             tiffImage.AddFrame(newFrame);
 
-            // -----------------------------------------------------------------
-            // Adjust image resolution (e.g., set to 300 DPI for both axes)
-            // -----------------------------------------------------------------
-            tiffImage.SetResolution(300, 300);
-
-            // -----------------------------------------------------------------
-            // Save the modified TIFF image to the specified output path
-            // -----------------------------------------------------------------
+            // Save the modified TIFF image
             tiffImage.Save(outputPath);
         }
     }
