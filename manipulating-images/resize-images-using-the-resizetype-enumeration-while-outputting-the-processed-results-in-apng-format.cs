@@ -1,33 +1,34 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 
-class ResizeToApng
+class Program
 {
     static void Main()
     {
-        // Input image path (any supported format)
-        string inputPath = @"C:\Images\sample.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.apng";
 
-        // Output APNG image path
-        string outputPath = @"C:\Images\sample_resized.apng";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Desired dimensions
-        int newWidth = 800;
-        int newHeight = 600;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image using Aspose.Imaging
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Resize the image using a specific ResizeType (e.g., BilinearResample)
-            image.Resize(newWidth, newHeight, ResizeType.BilinearResample);
+            // Resize the image using a specific ResizeType
+            image.Resize(800, 600, ResizeType.HighQualityResample);
 
-            // Prepare APNG save options
-            var apngOptions = new ApngOptions();
-
-            // Save the resized image in APNG format
-            image.Save(outputPath, apngOptions);
+            // Save the resized image as APNG
+            image.Save(outputPath, new ApngOptions());
         }
     }
 }
