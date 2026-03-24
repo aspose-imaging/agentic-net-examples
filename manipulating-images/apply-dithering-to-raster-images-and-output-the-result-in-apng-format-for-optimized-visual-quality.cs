@@ -1,30 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 
-class DitherToApng
+class Program
 {
     static void Main()
     {
-        // Paths for input raster image and output APNG file
+        // Hardcoded input and output paths
         string inputPath = @"c:\temp\sample.png";
         string outputPath = @"c:\temp\sample_dithered.apng";
 
-        // Load the raster image using the library's load rule
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access the Dither method
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage to access Dither method
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Apply Floyd‑Steinberg dithering with an 8‑bit palette (256 colors)
-            raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
+            // Apply Floyd‑Steinberg dithering with a 4‑bit palette
+            rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 4);
 
-            // Prepare APNG save options (no custom settings required for default behavior)
-            ApngOptions apngOptions = new ApngOptions();
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image as an APNG using the library's save rule
-            raster.Save(outputPath, apngOptions);
+            // Save the dithered image as an APNG file
+            rasterImage.Save(outputPath, new ApngOptions());
         }
     }
 }
