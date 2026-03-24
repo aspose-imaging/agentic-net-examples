@@ -1,26 +1,40 @@
 using System;
-using Aspose.Imaging.ImageOptions;
+using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths (use defaults if not provided)
-        string inputPath = args.Length > 0 ? args[0] : "input.webp";
-        string outputPath = args.Length > 1 ? args[1] : "output.webp";
+        // Hardcoded input and output paths
+        string inputPath = "c:\\temp\\input.webp";
+        string outputPath = "c:\\temp\\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WebP image
-        using (WebPImage webpImage = new WebPImage(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Apply a motion blur (motion Wiener) filter to the entire image
-            // Parameters: length = 10, smooth = 1.0, angle = 45 degrees
-            webpImage.Filter(
-                webpImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 45.0));
+            // Cast to WebPImage to access the Filter method
+            WebPImage webpImage = (WebPImage)image;
 
-            // Save the processed image back to WebP format
-            webpImage.Save(outputPath, new WebPOptions());
+            // Apply a motion blur (motion wiener) filter to the entire image
+            var filterOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
+            webpImage.Filter(webpImage.Bounds, filterOptions);
+
+            // Save the processed image as PNG
+            webpImage.Save(outputPath, new PngOptions());
         }
     }
 }
