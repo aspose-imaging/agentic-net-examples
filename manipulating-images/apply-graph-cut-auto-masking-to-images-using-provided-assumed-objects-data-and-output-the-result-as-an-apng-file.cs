@@ -11,19 +11,33 @@ using Aspose.Imaging.Masking.Result;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output.apng";
+        // Hard‑coded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.apng";
 
-        string tempPng = Path.Combine(Path.GetTempPath(), "mask_temp.png");
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Prepare assumed objects for auto‑masking
+        var assumedObjects = new List<AssumedObjectData>();
+        assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)));
+
+        // Temporary file for internal export options
+        string tempExportPath = Path.GetTempFileName();
+
+        // Load source image and perform graph‑cut auto‑masking
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            List<AssumedObjectData> assumedObjects = new List<AssumedObjectData>();
-            assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)));
-
-            AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
+            var maskingOptions = new AutoMaskingGraphCutOptions
             {
                 AssumedObjects = assumedObjects,
                 CalculateDefaultStrokes = true,
@@ -33,26 +47,30 @@ class Program
                 ExportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(tempPng, false)
+                    Source = new FileCreateSource(tempExportPath, false)
                 },
                 BackgroundReplacementColor = Color.Transparent
             };
 
-            using (MaskingResult maskingResult = new ImageMasking(image).Decompose(options))
-            using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+            // Execute masking
+            using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
             {
-                foreground.Save(outputPath, new ApngOptions
+                // Retrieve foreground (masked object) image
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = 200,
-                    NumPlays = 0
-                });
+                    // Save result as APNG
+                    foreground.Save(outputPath, new ApngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    });
+                }
             }
         }
 
-        if (File.Exists(tempPng))
+        // Clean up temporary export file
+        if (File.Exists(tempExportPath))
         {
-            File.Delete(tempPng);
+            File.Delete(tempExportPath);
         }
     }
 }
