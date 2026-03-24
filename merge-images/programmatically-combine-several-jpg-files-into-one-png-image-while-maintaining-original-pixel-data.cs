@@ -1,72 +1,84 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Expect input JPG file paths as arguments, last argument is output PNG path
-        if (args.Length < 2)
+        // Hardcoded input JPG file paths
+        string[] inputPaths = new string[]
         {
-            Console.WriteLine("Usage: <input1.jpg> <input2.jpg> ... <output.png>");
-            return;
-        }
+            @"C:\temp\img1.jpg",
+            @"C:\temp\img2.jpg",
+            @"C:\temp\img3.jpg"
+        };
 
-        // Separate input and output paths
-        string outputPath = args[args.Length - 1];
-        string[] inputPaths = new string[args.Length - 1];
-        Array.Copy(args, inputPaths, args.Length - 1);
+        // Hardcoded output PNG file path
+        string outputPath = @"C:\temp\combined.png";
 
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions (horizontal concatenation)
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
-        {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight)
-                canvasHeight = sz.Height;
-        }
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Prepare PNG creation options with bound output file
-        Source src = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = src };
-
-        // Create canvas and merge images side by side
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+        // Load all input images
+        List<Image> images = new List<Image>();
+        try
         {
-            int offsetX = 0;
-            foreach (string path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                Image img = Image.Load(inputPath);
+                images.Add(img);
+            }
+
+            // Determine combined image dimensions (horizontal concatenation)
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (Image img in images)
+            {
+                totalWidth += img.Width;
+                if (img.Height > maxHeight)
+                    maxHeight = img.Height;
+            }
+
+            // Create a new PNG image with the calculated dimensions
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Image combined = Image.Create(pngOptions, totalWidth, maxHeight))
+            {
+                // Draw each source image onto the combined canvas
+                Graphics graphics = new Graphics(combined);
+                int offsetX = 0;
+                foreach (Image img in images)
                 {
-                    // Load pixel data from source image
-                    int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-                    // Define destination rectangle on the canvas
-                    Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    // Paste pixels onto canvas
-                    canvas.SaveArgb32Pixels(destRect, pixels);
+                    graphics.DrawImage(img, offsetX, 0);
                     offsetX += img.Width;
                 }
+
+                // Save the combined image (output path already set in options)
+                combined.Save();
             }
-
-            // Save the bound canvas (no need to specify path again)
-            canvas.Save();
         }
-
-        Console.WriteLine($"Combined image saved to {outputPath}");
+        finally
+        {
+            // Dispose all loaded images
+            foreach (Image img in images)
+            {
+                img.Dispose();
+            }
+        }
     }
 }
