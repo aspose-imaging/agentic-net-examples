@@ -1,41 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Input raster image (any supported format)
-        string inputPath = @"C:\Temp\input.png";
-        // Desired SVG output path
-        string outputPath = @"C:\Temp\output.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Load the source image using the unified Image.Load method
-        using (Image sourceImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Example transformation: resize while preserving aspect ratio
-            // (optional – remove if no transformation is needed)
-            int targetWidth = 800;
-            int targetHeight = 600;
-            sourceImage.Resize(targetWidth, targetHeight, ResizeType.LanczosResample);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Prepare SVG saving options
-            SvgOptions svgOptions = new SvgOptions();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure vector rasterization options to match the transformed image size
-            // This ensures the SVG retains visual fidelity and remains fully scalable.
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+        // Load the source image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure vector rasterization options to preserve size and fidelity
+            var vectorOptions = new SvgRasterizationOptions
             {
-                PageSize = sourceImage.Size,          // Set page size to the image dimensions
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
+                PageSize = image.Size
             };
-            svgOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the transformed image as SVG using the Save method that accepts ImageOptionsBase
-            sourceImage.Save(outputPath, svgOptions);
+            // Save the image as SVG using the configured options
+            image.Save(outputPath, new SvgOptions { VectorRasterizationOptions = vectorOptions });
         }
     }
 }
