@@ -1,17 +1,39 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.FileFormats.Wmf.Graphics;
 
-string sourcePath = @"C:\Images\sample.wmf";
-
-// Load the WMF image using the unified Image.Load method
-using (WmfImage wmfImage = (WmfImage)Image.Load(sourcePath))
+class Program
 {
-    // Cache the image data so that all records are available for processing
-    wmfImage.CacheData();
+    static void Main()
+    {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.wmf";
+        string outputPath = @"C:\Images\output.wmf";
 
-    // Obtain a recorder instance for the loaded WMF image (optional, for further manipulation)
-    WmfRecorderGraphics2D recorder = WmfRecorderGraphics2D.FromWmfImage(wmfImage);
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // At this point 'wmfImage' and 'recorder' are ready for further processing
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WMF image using Aspose.Imaging unified loader
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to WmfImage for WMF‑specific operations
+            WmfImage wmfImage = (WmfImage)image;
+
+            // Example processing: retrieve image size (you can add more processing here)
+            int width = wmfImage.Width;
+            int height = wmfImage.Height;
+            Console.WriteLine($"Loaded WMF image: {width}x{height} pixels");
+
+            // Save the image back to a file (could be the same format or another supported format)
+            wmfImage.Save(outputPath);
+        }
+    }
 }
