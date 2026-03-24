@@ -1,66 +1,71 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input image path (modify as needed)
-        string inputPath = "input.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
 
-        // Output directory (modify as needed)
-        string outputDir = "output";
+        // Output paths for different filter results
+        string outputSharpenPath = @"C:\temp\output_sharpen.png";
+        string outputGaussianPath = @"C:\temp\output_gaussian.png";
+        string outputMedianPath = @"C:\temp\output_median.png";
 
-        // Ensure output directory exists
-        System.IO.Directory.CreateDirectory(outputDir);
-
-        // Sharpen filter
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-            raster.Save(System.IO.Path.Combine(outputDir, "sharpen.png"), new PngOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Gauss-Wiener filter
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputSharpenPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputGaussianPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputMedianPath));
+
+        // Load the image once and reuse for each filter
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
-            raster.Save(System.IO.Path.Combine(outputDir, "gausswiener.png"), new PngOptions());
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
+
+            // ---------- Sharpen Filter ----------
+            // Apply a sharpen filter with kernel size 5 and sigma 4.0
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+            rasterImage.Save(outputSharpenPath);
+
+            // Reload original image for next filter to avoid cumulative effects
+            rasterImage.Dispose();
         }
 
-        // Median filter
+        // Reload original image for Gaussian blur
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-            raster.Save(System.IO.Path.Combine(outputDir, "median.png"), new PngOptions());
+            RasterImage rasterImage = (RasterImage)image;
+
+            // ---------- Gaussian Blur Filter ----------
+            // Apply a Gaussian blur with radius 5 and sigma 4.0
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            rasterImage.Save(outputGaussianPath);
+
+            rasterImage.Dispose();
         }
 
-        // Bilateral smoothing filter
+        // Reload original image for Median filter
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5));
-            raster.Save(System.IO.Path.Combine(outputDir, "bilateral.png"), new PngOptions());
-        }
+            RasterImage rasterImage = (RasterImage)image;
 
-        // Gaussian blur filter
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-            raster.Save(System.IO.Path.Combine(outputDir, "gaussianblur.png"), new PngOptions());
-        }
+            // ---------- Median Filter ----------
+            // Apply a median filter with rectangle size 5
+            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+            rasterImage.Save(outputMedianPath);
 
-        // Motion Wiener filter
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
-            raster.Save(System.IO.Path.Combine(outputDir, "motionwiener.png"), new PngOptions());
+            rasterImage.Dispose();
         }
     }
 }

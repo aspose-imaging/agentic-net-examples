@@ -1,47 +1,49 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
-        string outputPath = "output.apng";
+        string outputPath = "output.png";
 
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            ApngOptions createOptions = new ApngOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load the APNG image
+        using (var image = Image.Load(inputPath))
+        {
+            // Cast to APNG image and then to RasterImage for watermark removal
+            var apngImage = (ApngImage)image;
+            var raster = (RasterImage)apngImage;
+
+            // Define the mask region (example ellipse)
+            var mask = new GraphicsPath();
+            var figure = new Figure();
+            figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 100)));
+            mask.AddFigure(figure);
+
+            // Create Telea watermark removal options with the mask
+            var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+
+            // Perform watermark removal
+            using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = apng.DefaultFrameTime,
-                NumPlays = apng.NumPlays
-            };
-
-            using (ApngImage resultApng = (ApngImage)Image.Create(createOptions, apng.Width, apng.Height))
-            {
-                resultApng.RemoveAllFrames();
-
-                foreach (var page in apng.Pages)
-                {
-                    RasterImage frame = (RasterImage)page;
-
-                    var mask = new GraphicsPath();
-                    var figure = new Figure();
-                    figure.AddShape(new RectangleShape(new RectangleF(0, 0, frame.Width, frame.Height)));
-                    mask.AddFigure(figure);
-
-                    var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-                    RasterImage cleaned = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(frame, options);
-
-                    resultApng.AddFrame(cleaned);
-                    cleaned.Dispose();
-                }
-
-                resultApng.Save();
+                // Save the resulting image as APNG
+                result.Save(outputPath, new ApngOptions());
             }
         }
     }

@@ -1,36 +1,47 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-        // Define the watermark mask (example ellipse)
-        var mask = new GraphicsPath();
-        var figure = new Figure();
-        // Example coordinates: ellipse covering region (350,170) to (570,400)
-        figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
-        mask.AddFigure(figure);
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Create watermark removal options using the Telea algorithm
-        var options = new TeleaWatermarkOptions(mask);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image, remove the watermark, and save the result
+        // Load the image
         using (var image = Image.Load(inputPath))
         {
-            var raster = (RasterImage)image;
-            using (var result = WatermarkRemover.PaintOver(raster, options))
-            {
-                result.Save(outputPath);
-            }
+            // Cast to specific format (PNG in this example)
+            var pngImage = (PngImage)image;
+
+            // Create mask using GraphicsPath
+            var mask = new GraphicsPath();
+            var figure = new Figure();
+            figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
+            mask.AddFigure(figure);
+
+            // Initialize watermark removal options (Telea algorithm)
+            var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+
+            // Perform watermark removal
+            var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
+
+            // Save the processed image
+            result.Save(outputPath);
         }
     }
 }

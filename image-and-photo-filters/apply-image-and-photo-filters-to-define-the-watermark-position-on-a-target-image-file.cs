@@ -1,48 +1,50 @@
 using System;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using System.IO;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output.png";
+        string outputPath = "output\\result.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the image
-        using (var image = Image.Load(inputPath))
+        using (var image = Aspose.Imaging.Image.Load(inputPath))
         {
+            // Cast to specific PNG image type
             var pngImage = (PngImage)image;
-            var raster = (RasterImage)pngImage;
 
-            // Apply a Gaussian blur filter to the entire image
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            // Apply a Gaussian blur filter to the raster data
+            var raster = (Aspose.Imaging.RasterImage)pngImage;
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-            // Define the watermark position using a rectangular mask
-            var mask = new GraphicsPath();
-            var figure = new Figure();
-            // Example coordinates for the watermark region
-            float x = 100;
-            float y = 50;
-            float width = 200;
-            float height = 100;
-            figure.AddShape(new RectangleShape(new RectangleF(x, y, width, height)));
+            // Define the watermark mask (ellipse shape)
+            var mask = new Aspose.Imaging.GraphicsPath();
+            var figure = new Aspose.Imaging.Figure();
+            figure.AddShape(new EllipseShape(new Aspose.Imaging.RectangleF(350, 170, 570 - 350, 400 - 170)));
             mask.AddFigure(figure);
 
-            // Create watermark options (using Telea algorithm)
-            var options = new TeleaWatermarkOptions(mask);
+            // Create watermark removal options (Telea algorithm)
+            var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
-            // Process the watermark region
-            var result = WatermarkRemover.PaintOver(pngImage, options);
+            // Perform watermark removal
+            var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
 
             // Save the resulting image
-            result.Save(outputPath, new PngOptions());
+            result.Save(outputPath);
         }
     }
 }

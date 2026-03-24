@@ -1,40 +1,43 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length == 0)
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output_sharpened.jpg";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <inputImagePath> [outputImagePath]");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args.Length > 1 ? args[1] : System.IO.Path.ChangeExtension(inputPath, ".processed.png");
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Load the image using Aspose.Imaging
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
-
-            if (!raster.IsCached)
-                raster.CacheData();
-
-            raster.AdjustBrightness(30);
-            raster.AdjustContrast(0.2f);
-            raster.AdjustGamma(1.1f);
-
-            var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
-            raster.Filter(raster.Bounds, blurOptions);
-
-            using (var pngOptions = new PngOptions())
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage raster = image as RasterImage;
+            if (raster == null)
             {
-                image.Save(outputPath, pngOptions);
+                Console.Error.WriteLine("Loaded image is not a raster image.");
+                return;
             }
-        }
 
-        Console.WriteLine($"Processed image saved to: {outputPath}");
+            // Apply a sharpen filter (kernel size 5, sigma 4.0) to the whole image
+            var sharpenOptions = new SharpenFilterOptions(5, 4.0);
+            raster.Filter(raster.Bounds, sharpenOptions);
+
+            // Save the processed image to the output path
+            raster.Save(outputPath);
+        }
     }
 }

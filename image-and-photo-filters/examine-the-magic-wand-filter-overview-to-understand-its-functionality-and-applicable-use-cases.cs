@@ -2,42 +2,65 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.FileFormats.Png;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Input and output image paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Simple magic wand usage: select region based on pixel (120,100) with custom threshold.
+        string simpleInput = "input_simple.png";
+        string simpleOutput = "output_simple.png";
 
-        // Load the source image as a RasterImage
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        if (!File.Exists(simpleInput))
         {
-            // Build a mask using MagicWandTool:
-            // - Start from a seed point (120,100) with a custom threshold
-            // - Union with another seed point to enlarge the selection
-            // - Invert to select the opposite region
-            // - Subtract a rectangular area from the mask
-            // - Feather the edges for smooth transition
-            // - Apply the mask to the image
+            Console.Error.WriteLine($"File not found: {simpleInput}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(simpleOutput));
+
+        using (RasterImage image = (RasterImage)Image.Load(simpleInput))
+        {
+            // Create mask and apply it directly to the image.
             MagicWandTool
                 .Select(image, new MagicWandSettings(120, 100) { Threshold = 150 })
-                .Union(new MagicWandSettings(416, 387))
-                .Invert()
-                .Subtract(new RectangleMask(0, 0, 800, 150))
-                .GetFeathered(new FeatheringSettings() { Size = 3 })
                 .Apply();
 
-            // Save the processed image with PNG options preserving alpha channel
-            var pngOptions = new PngOptions
-            {
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-            image.Save(outputPath, pngOptions);
+            // Save result with alpha channel support.
+            image.Save(simpleOutput, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+        }
+
+        // Advanced magic wand usage: combine selections, invert, subtract rectangles, feather edges.
+        string advancedInput = "input_advanced.png";
+        string advancedOutput = "output_advanced.png";
+
+        if (!File.Exists(advancedInput))
+        {
+            Console.Error.WriteLine($"File not found: {advancedInput}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(advancedOutput));
+
+        using (RasterImage image = (RasterImage)Image.Load(advancedInput))
+        {
+            MagicWandTool
+                .Select(image, new MagicWandSettings(845, 128))
+                .Union(new MagicWandSettings(416, 387))
+                .Invert()
+                .Subtract(new MagicWandSettings(1482, 346) { Threshold = 69 })
+                .Subtract(new RectangleMask(0, 0, 800, 150))
+                .Subtract(new RectangleMask(0, 380, 600, 220))
+                .Subtract(new RectangleMask(930, 520, 110, 40))
+                .Subtract(new RectangleMask(1370, 400, 120, 200))
+                .GetFeathered(new FeatheringSettings { Size = 3 })
+                .Apply();
+
+            // Save the processed image.
+            image.Save(advancedOutput, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
         }
     }
 }

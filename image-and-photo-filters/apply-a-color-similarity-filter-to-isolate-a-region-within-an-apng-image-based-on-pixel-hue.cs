@@ -2,31 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.MagicWand;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.apng";
-        string outputPath = "output.apng";
+        string inputPath = @"C:\Images\input.apng";
+        string outputPath = @"C:\Images\output.apng";
 
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            int x = image.Width / 2;
-            int y = image.Height / 2;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            var wandSettings = new MagicWandSettings(x, y);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            MagicWandTool.Select(image, wandSettings)
-                         .Apply();
-
-            var saveOptions = new ApngOptions
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        {
+            var pngExport = new PngOptions
             {
+                ColorType = PngColorType.TruecolorWithAlpha,
                 Source = new StreamSource(new MemoryStream())
             };
-            image.Save(outputPath, saveOptions);
+
+            var maskingOptions = new AutoMaskingGraphCutOptions
+            {
+                CalculateDefaultStrokes = true,
+                FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
+                Method = SegmentationMethod.GraphCut,
+                Decompose = false,
+                ExportOptions = pngExport,
+                BackgroundReplacementColor = Color.Transparent
+            };
+
+            var masking = new ImageMasking(sourceImage);
+            using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+            using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+            {
+                var apngSaveOptions = new ApngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    DefaultFrameTime = 100,
+                    NumPlays = 0
+                };
+                foreground.Save(outputPath, apngSaveOptions);
+            }
         }
     }
 }

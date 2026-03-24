@@ -1,36 +1,42 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
-// Load the raster image
-string inputPath = "input.png";
-using (RasterImage image = (RasterImage)Image.Load(inputPath))
+class Program
 {
-    // Define the reference point for the magic wand selection (example: pixel at (150, 80))
-    int referenceX = 150;
-    int referenceY = 80;
-
-    // Configure magic wand settings:
-    // - Threshold determines color similarity tolerance.
-    // - ContiguousMode = true ensures only connected pixels are selected.
-    var settings = new MagicWandSettings(referenceX, referenceY)
+    static void Main(string[] args)
     {
-        Threshold = 120,
-        ContiguousMode = true
-    };
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-    // Create a mask based on the settings and apply it to the image.
-    MagicWandTool
-        .Select(image, settings)   // generate mask
-        .Apply();                  // apply mask (makes selected area transparent)
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the resulting image with alpha channel preserved.
-    string outputPath = "output.png";
-    image.Save(outputPath, new PngOptions
-    {
-        ColorType = PngColorType.TruecolorWithAlpha
-    });
+        // Ensure output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(string.IsNullOrEmpty(outputDir) ? "." : outputDir);
+
+        // Load the image, apply Magic Wand selection, and save the result
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Select region based on color similarity at point (120, 100) with a custom threshold
+            MagicWandTool
+                .Select(image, new MagicWandSettings(120, 100) { Threshold = 150 })
+                .Apply();
+
+            // Save the modified image as PNG with alpha channel support
+            image.Save(outputPath, new PngOptions
+            {
+                ColorType = PngColorType.TruecolorWithAlpha
+            });
+        }
+    }
 }

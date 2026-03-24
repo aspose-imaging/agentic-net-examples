@@ -1,35 +1,54 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string backgroundPath = "background.jpg";
-        string overlayPath = "overlay.png";
-        string outputPath = "blended.png";
+        // Hardcoded input and output paths
+        string baseImagePath = "base.png";
+        string overlayImagePath = "overlay.png";
+        string outputPath = "output.png";
 
-        using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
-        using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+        // Validate input files
+        if (!File.Exists(baseImagePath))
         {
+            Console.Error.WriteLine($"File not found: {baseImagePath}");
+            return;
+        }
+        if (!File.Exists(overlayImagePath))
+        {
+            Console.Error.WriteLine($"File not found: {overlayImagePath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load images
+        using (Image baseImage = Image.Load(baseImagePath))
+        using (Image overlayImage = Image.Load(overlayImagePath))
+        {
+            RasterImage baseRaster = (RasterImage)baseImage;
+            RasterImage overlayRaster = (RasterImage)overlayImage;
+
+            // Configure alpha blending filter options
             var blendOptions = new ImageBlendingFilterOptions
             {
-                Image = overlay,
+                Image = overlayRaster,
                 Opacity = 0.5f,
-                Position = new Point(100, 100),
-                BlendingMode = BlendingMode.Multiply
+                Position = new Point(0, 0),
+                BlendingMode = BlendingMode.Normal
             };
 
-            background.Filter(background.Bounds, blendOptions);
+            // Apply the blending filter
+            baseRaster.Filter(baseRaster.Bounds, blendOptions);
 
-            var pngOptions = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
-            background.Save(outputPath, pngOptions);
+            // Save the result
+            baseRaster.Save(outputPath, new PngOptions());
         }
     }
 }

@@ -1,34 +1,43 @@
 using System;
+using System.IO;
 
-namespace AsposeImagingFilterSummary
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        // Hardcoded input image path (required by the safety rules)
+        string inputPath = @"c:\temp\sample.png";
+
+        // Hardcoded output text file path for the filter summary
+        string outputPath = @"c:\temp\filter_summary.txt";
+
+        // Verify that the input image exists; do not throw exceptions
+        if (!File.Exists(inputPath))
         {
-            // Median filter: reduces noise by replacing each pixel with the median value
-            // of its neighboring pixels within the specified kernel size.
-            Console.WriteLine("Median Filter: Smooths image while preserving edges by using the median of surrounding pixels.");
-
-            // Bilateral smoothing filter: smooths colors while preserving edges,
-            // considering both spatial proximity and color similarity.
-            Console.WriteLine("Bilateral Smoothing Filter: Reduces noise while keeping edges sharp by weighting pixels based on distance and color difference.");
-
-            // Gaussian blur filter: applies a Gaussian function to blur the image,
-            // creating a soft, out-of-focus effect.
-            Console.WriteLine("Gaussian Blur Filter: Produces a uniform blur using a Gaussian kernel, softening details and reducing high-frequency noise.");
-
-            // Gauss-Wiener filter: combines Gaussian blur with Wiener deconvolution,
-            // aiming to reduce noise while preserving details.
-            Console.WriteLine("Gauss-Wiener Filter: Denoises image with adaptive smoothing, balancing blur and detail preservation.");
-
-            // Motion Wiener filter: reduces motion blur and noise by applying a Wiener filter
-            // oriented along a specified motion direction.
-            Console.WriteLine("Motion Wiener Filter: Mitigates motion blur and noise using directional Wiener filtering based on length and angle.");
-
-            // Sharpen filter: enhances edges by emphasizing differences between neighboring pixels,
-            // making the image appear clearer and more detailed.
-            Console.WriteLine("Sharpen Filter: Increases contrast of edges to make details stand out, counteracting blur.");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
+
+        // Ensure the output directory exists before saving the summary
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Build a concise description for each filter
+        string summary =
+            "Median Filter: Replaces each pixel with the median value of its surrounding neighborhood, reducing salt‑and‑pepper noise while preserving edges.\n" +
+            "Bilateral Smoothing Filter: Smooths colors while keeping edges sharp by considering both spatial proximity and color similarity.\n" +
+            "Gaussian Blur Filter: Applies a Gaussian kernel to blur the image, producing a soft, out‑of‑focus effect; larger radius/sigma increase blur.\n" +
+            "Gauss‑Wiener Filter: Performs adaptive smoothing based on local variance, reducing noise while preserving details better than simple blur.\n" +
+            "Motion Wiener Filter: Simulates motion blur along a specified angle and length, then applies Wiener de‑convolution to reduce noise.\n" +
+            "Sharpen Filter: Enhances edges by emphasizing high‑frequency components; larger kernel/sigma increase contrast around edges.\n" +
+            "ImageFilterType Enum:\n" +
+            "  None – No filtering applied.\n" +
+            "  BigRectangular – Uses a larger rectangular kernel for smoothing.\n" +
+            "  SmallRectangular – Uses a smaller rectangular kernel for subtle smoothing.\n";
+
+        // Write the summary to the output file
+        File.WriteAllText(outputPath, summary);
+
+        // Also output to console for immediate feedback
+        Console.WriteLine("Filter summary written to: " + outputPath);
     }
 }

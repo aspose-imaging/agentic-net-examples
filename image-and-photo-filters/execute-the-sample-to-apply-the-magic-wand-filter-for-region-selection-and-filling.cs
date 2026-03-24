@@ -1,39 +1,49 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.FileFormats.Png;
 
-class MagicWandExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputFilePath = "input.png";
-        string outputFilePath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-        // Load the raster image
-        using (RasterImage image = (RasterImage)Image.Load(inputFilePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create a mask using Magic Wand tool.
-            // The reference point is (120, 100) and the tolerance threshold is set to 150.
-            ImageBitMask mask = MagicWandTool.Select(
-                image,
-                new MagicWandSettings(120, 100) { Threshold = 150 }
-            );
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply the mask to the image (makes the selected region transparent).
-            mask.Apply();
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the resulting image with an alpha channel (Truecolor with Alpha).
-            image.Save(
-                outputFilePath,
-                new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                }
-            );
+        // Load the image and apply a complex Magic Wand mask
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            MagicWandTool
+                .Select(image, new MagicWandSettings(845, 128))
+                .Union(new MagicWandSettings(416, 387))
+                .Invert()
+                .Subtract(new MagicWandSettings(1482, 346) { Threshold = 69 })
+                .Subtract(new RectangleMask(0, 0, 800, 150))
+                .Subtract(new RectangleMask(0, 380, 600, 220))
+                .Subtract(new RectangleMask(930, 520, 110, 40))
+                .Subtract(new RectangleMask(1370, 400, 120, 200))
+                .GetFeathered(new FeatheringSettings() { Size = 3 })
+                .Apply();
+
+            // Save the result with transparency support
+            image.Save(outputPath, new PngOptions
+            {
+                ColorType = PngColorType.TruecolorWithAlpha
+            });
         }
     }
 }

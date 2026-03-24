@@ -1,42 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Expect input and output file paths as arguments
-        if (args.Length < 2)
+        string inputPath = "input.png";
+        string outputPath = "output\\result.png";
+
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <inputImagePath> <outputImagePath>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image
         using (var image = Image.Load(inputPath))
         {
-            // Cast to RasterImage as required by WatermarkRemover
-            var raster = (RasterImage)image;
+            var pngImage = (PngImage)image;
 
-            // Define a mask region (example ellipse)
             var mask = new GraphicsPath();
             var figure = new Figure();
-            // Adjust coordinates as needed to cover the watermark area
-            figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 50)));
+            figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
             mask.AddFigure(figure);
 
-            // Create watermark removal options using the Telea algorithm
-            var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+            var options = new TeleaWatermarkOptions(mask);
 
-            // Perform watermark removal
-            using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
+            using (var result = WatermarkRemover.PaintOver(pngImage, options))
             {
-                // Save the cleaned image
                 result.Save(outputPath);
             }
         }

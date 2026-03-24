@@ -1,40 +1,47 @@
+using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
 
-        int referenceX = 120;
-        int referenceY = 100;
-        int tolerance = 150;
-
-        Aspose.Imaging.Color fillColor = Aspose.Imaging.Color.Red;
-        Aspose.Imaging.Color borderColor = Aspose.Imaging.Color.Blue;
-
-        using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            ImageBitMask mask = MagicWandTool.Select(image, new MagicWandSettings(referenceX, referenceY) { Threshold = tolerance });
-            mask.Apply();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-            graphics.Clear(fillColor);
-            Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(borderColor);
-            graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(0, 0, image.Width - 1, image.Height - 1));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var saveOptions = new PngOptions
+        // Load the source image as a raster image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Configure Magic Wand settings
+            var wandSettings = new MagicWandSettings(120, 100)
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
+                Threshold = 150 // tolerance
             };
-            image.Save(outputPath, saveOptions);
+
+            // Create mask and apply it to the image
+            MagicWandTool
+                .Select(image, wandSettings)
+                .Apply();
+
+            // Save the result with transparency preserved
+            image.Save(outputPath, new PngOptions
+            {
+                ColorType = PngColorType.TruecolorWithAlpha
+            });
         }
     }
 }

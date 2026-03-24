@@ -1,31 +1,60 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.MagicWand;
 
-class MagicWandApngExample
+class Program
 {
     static void Main()
     {
-        // Paths to the input and output APNG files
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
         string outputPath = "output.apng";
 
-        // Load the APNG image; cast to RasterImage for MagicWand processing
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            RasterImage raster = apng; // APNG derives from RasterImage
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Define Magic Wand settings:
-            // Reference point (50,30) and a tolerance threshold of 100
-            var wandSettings = new MagicWandSettings(50, 30) { Threshold = 100 };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Create a mask based on the settings and apply it to the image
-            MagicWandTool.Select(raster, wandSettings).Apply();
+        // Load the image (APNG or single-frame raster)
+        using (Image image = Image.Load(inputPath))
+        {
+            // If the loaded image is an APNG (multi-frame)
+            if (image is ApngImage apngImage)
+            {
+                // Apply Magic Wand mask to each frame
+                foreach (var page in apngImage.Pages)
+                {
+                    // Each page is a RasterImage
+                    var frame = (RasterImage)page;
 
-            // Save the modified APNG back to disk
-            apng.Save(outputPath);
+                    // Create mask based on a reference point (50,50) with a threshold of 100
+                    MagicWandTool
+                        .Select(frame, new MagicWandSettings(50, 50) { Threshold = 100 })
+                        .Apply();
+                }
+
+                // Save the modified APNG
+                apngImage.Save(outputPath, new ApngOptions());
+            }
+            // If the loaded image is a single-frame raster image
+            else if (image is RasterImage rasterImage)
+            {
+                // Apply Magic Wand mask to the raster image
+                MagicWandTool
+                    .Select(rasterImage, new MagicWandSettings(50, 50) { Threshold = 100 })
+                    .Apply();
+
+                // Save the result as an APNG (single-frame)
+                rasterImage.Save(outputPath, new ApngOptions());
+            }
         }
     }
 }

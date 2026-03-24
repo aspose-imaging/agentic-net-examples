@@ -1,41 +1,58 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Expect three arguments: base image path, overlay image path, output image path
-        if (args.Length < 3)
+        // Hardcoded input, overlay, and output paths
+        string inputPath = "input.jpg";
+        string overlayPath = "overlay.png";
+        string outputPath = "output.png";
+
+        // Validate input files
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <baseImage> <overlayImage> <outputImage>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+        if (!File.Exists(overlayPath))
+        {
+            Console.Error.WriteLine($"File not found: {overlayPath}");
             return;
         }
 
-        string basePath = args[0];
-        string overlayPath = args[1];
-        string outputPath = args[2];
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the base image
-        using (RasterImage baseImage = (RasterImage)Image.Load(basePath))
+        // Load background image
+        using (RasterImage background = (RasterImage)Image.Load(inputPath))
         {
-            // Load the overlay image
-            using (RasterImage overlayImage = (RasterImage)Image.Load(overlayPath))
+            // Load overlay image
+            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
             {
-                // Configure blending options
-                var blendOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ImageBlendingFilterOptions
+                // Configure blending filter options
+                ImageBlendingFilterOptions blendOptions = new ImageBlendingFilterOptions
                 {
-                    Image = overlayImage,          // Overlay image
-                    Opacity = 128,                // 0-255 (50% opacity)
-                    Position = new Point(0, 0)    // Top-left corner
+                    Image = overlay,
+                    Opacity = 128, // 50% opacity
+                    BlendingMode = BlendingMode.Normal
                 };
 
-                // Apply the blending filter to the entire base image
-                baseImage.Filter(baseImage.Bounds, blendOptions);
-
-                // Save the blended result
-                baseImage.Save(outputPath);
+                // Apply blending filter to the entire background image
+                background.Filter(background.Bounds, blendOptions);
             }
+
+            // Prepare PNG save options with bound source
+            Source outputSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions { Source = outputSource };
+
+            // Save the blended image
+            background.Save(outputPath, pngOptions);
         }
     }
 }

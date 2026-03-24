@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
@@ -11,30 +10,37 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.png";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input\\watermarked.png";
+        string outputPath = "output\\cleaned.png";
 
-        // Load the image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image and remove the watermark
         using (var image = Image.Load(inputPath))
         {
-            // Cast to specific format (PNG in this example)
             var pngImage = (PngImage)image;
 
-            // Define the watermark mask (example ellipse)
+            // Define the mask region (example ellipse)
             var mask = new GraphicsPath();
             var figure = new Figure();
-            // Adjust the rectangle values to cover the watermark area
-            figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 50)));
+            figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
             mask.AddFigure(figure);
 
-            // Use Telea algorithm for inpainting
+            // Use Telea algorithm for watermark removal
             var options = new TeleaWatermarkOptions(mask);
 
-            // Remove the watermark
+            // Perform removal
             using (var result = WatermarkRemover.PaintOver(pngImage, options))
             {
-                // Save the cleaned image
                 result.Save(outputPath);
             }
         }

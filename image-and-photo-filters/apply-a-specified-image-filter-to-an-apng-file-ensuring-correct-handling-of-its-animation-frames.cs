@@ -1,36 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class ApplyFilterToApng
+class Program
 {
     static void Main()
     {
-        // Paths to the source APNG and the result file
-        string sourcePath = "input.apng";
-        string resultPath = "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output_filtered.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the APNG image
-        using (Image image = Image.Load(sourcePath))
+        using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
         {
-            // Cast to ApngImage to access animation frames
-            ApngImage apng = (ApngImage)image;
-
-            // Define the filter you want to apply (example: Gaussian blur)
-            var filterOptions = new GaussianBlurFilterOptions(5, 4.0);
-
-            // Apply the filter to every frame in the animation
-            foreach (ApngFrame frame in apng.Pages)
+            // Apply a simple gamma adjustment to each frame as an example filter
+            foreach (var page in apngImage.Pages)
             {
-                // Apply filter to the whole frame rectangle
-                frame.Filter(frame.Bounds, filterOptions);
+                ApngFrame frame = (ApngFrame)page;
+                // AdjustGamma takes a float factor; 1.0 = no change
+                frame.AdjustGamma(1.2f);
             }
 
-            // Save the modified APNG (using default APNG options)
-            apng.Save(resultPath, new ApngOptions());
+            // Save the modified APNG using default options
+            apngImage.Save(outputPath, new ApngOptions());
         }
     }
 }

@@ -1,33 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.ImageOptions;
 
-class ApplyFilterToApng
+class Program
 {
     static void Main()
     {
-        // Load the existing APNG file
-        using (Image image = Image.Load("input.apng"))
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output_filtered.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to ApngImage to access frame collection
-            ApngImage apng = (ApngImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Define the rectangle covering the whole frame
-            var fullRect = new System.Drawing.Rectangle(0, 0, apng.Width, apng.Height);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Iterate over each frame (page) and apply a grayscale filter
-            // The Grayscale method is applied to the whole image, but we can also use Filter with specific options.
-            // Here we use the built‑in Grayscale method for simplicity.
-            foreach (var page in apng.Pages)
+        // Load the APNG image
+        using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
+        {
+            // Apply a simple gamma adjustment to each frame
+            // This modifies pixel data while preserving animation timing and order
+            for (int i = 0; i < apngImage.PageCount; i++)
             {
-                // Each page is an ApngFrame which derives from RasterCachedImage,
-                // so we can call Grayscale directly.
-                ((ApngFrame)page).Grayscale();
+                ApngFrame frame = (ApngFrame)apngImage.Pages[i];
+                // AdjustGamma takes a float; values >1 increase brightness, <1 darken
+                frame.AdjustGamma(1.2f);
             }
 
-            // Save the modified APNG, preserving animation frames and timing
-            apng.Save("output_filtered.apng");
+            // Save the modified APNG to the output path
+            apngImage.Save(outputPath);
         }
     }
 }

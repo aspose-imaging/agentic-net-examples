@@ -1,78 +1,73 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-        string outputFormat = "JPG";
-        Aspose.Imaging.Color overlayColor = Aspose.Imaging.Color.FromArgb(255, 0, 0, 255);
-        byte opacity = 128;
+        string outputPath = "output/output.png";
 
-        using (Aspose.Imaging.RasterImage source = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            using (MemoryStream overlayStream = new MemoryStream())
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (RasterImage source = (RasterImage)Image.Load(inputPath))
+        {
+            PngOptions overlayOptions = new PngOptions();
+            using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, source.Width, source.Height))
             {
-                Aspose.Imaging.Sources.StreamSource overlaySource = new StreamSource(overlayStream);
-                PngOptions overlayOptions = new PngOptions() { Source = overlaySource };
+                int opacity = 128;
+                int red = 255, green = 0, blue = 0;
+                int argb = (opacity << 24) | (red << 16) | (green << 8) | blue;
 
-                using (Aspose.Imaging.RasterImage overlay = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(overlayOptions, source.Width, source.Height))
+                int[] pixels = new int[source.Width * source.Height];
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    int pixelCount = source.Width * source.Height;
-                    int[] pixels = new int[pixelCount];
-                    int argb = overlayColor.ToArgb();
-                    for (int i = 0; i < pixelCount; i++)
-                        pixels[i] = argb;
-
-                    overlay.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, source.Width, source.Height), pixels);
-                    source.Blend(new Aspose.Imaging.Point(0, 0), overlay, opacity);
+                    pixels[i] = argb;
                 }
+
+                overlay.SaveArgb32Pixels(new Rectangle(0, 0, overlay.Width, overlay.Height), pixels);
+                source.Blend(new Point(0, 0), overlay, 255);
             }
 
-            Aspose.Imaging.Sources.FileCreateSource outSource = new FileCreateSource(outputPath, false);
-
-            switch (outputFormat.ToUpperInvariant())
+            ImageOptionsBase saveOptions;
+            string ext = Path.GetExtension(outputPath).ToUpperInvariant();
+            switch (ext)
             {
-                case "JPG":
-                case "JPEG":
-                    var jpegOptions = new JpegOptions() { Source = outSource, Quality = 90 };
-                    source.Save(outputPath, jpegOptions);
+                case ".JPG":
+                case ".JPEG":
+                    saveOptions = new JpegOptions { Quality = 90 };
                     break;
-                case "PNG":
-                    var pngOptions = new PngOptions() { Source = outSource };
-                    source.Save(outputPath, pngOptions);
+                case ".PNG":
+                    saveOptions = new PngOptions();
                     break;
-                case "BMP":
-                    var bmpOptions = new BmpOptions() { Source = outSource };
-                    source.Save(outputPath, bmpOptions);
+                case ".BMP":
+                    saveOptions = new BmpOptions();
                     break;
-                case "TIFF":
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = outSource };
-                    source.Save(outputPath, tiffOptions);
+                case ".TIFF":
+                case ".TIF":
+                    saveOptions = new TiffOptions(TiffExpectedFormat.Default);
                     break;
-                case "GIF":
-                    var gifOptions = new GifOptions() { Source = outSource };
-                    source.Save(outputPath, gifOptions);
+                case ".GIF":
+                    saveOptions = new GifOptions();
                     break;
-                case "WEBP":
-                    var webpOptions = new WebPOptions() { Source = outSource };
-                    source.Save(outputPath, webpOptions);
-                    break;
-                case "PDF":
-                    var pdfOptions = new PdfOptions();
-                    source.Save(outputPath, pdfOptions);
+                case ".WEBP":
+                    saveOptions = new WebPOptions();
                     break;
                 default:
-                    var defaultOptions = new JpegOptions() { Source = outSource, Quality = 90 };
-                    source.Save(outputPath, defaultOptions);
+                    saveOptions = new PngOptions();
                     break;
             }
+
+            source.Save(outputPath, saveOptions);
         }
     }
 }

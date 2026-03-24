@@ -1,47 +1,45 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input APNG file path
         string inputPath = "input.apng";
-        // Output APNG file path
-        string outputPath = "blended_output.apng";
+        string outputPath = "output/output.apng";
 
-        // Desired blend color (e.g., semi‑transparent red)
-        Aspose.Imaging.Color blendColor = Aspose.Imaging.Color.FromArgb(128, 255, 0, 0);
-        // Opacity of the overlay (0‑255)
-        byte opacity = 128; // 50% opacity
-
-        // Load the source APNG image
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            // Create an overlay raster image of the same size filled with the blend color
-            PngOptions overlayOptions = new PngOptions();
-            using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, apng.Width, apng.Height))
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (ApngImage apng = (ApngImage)Aspose.Imaging.Image.Load(inputPath))
+        {
+            int width = apng.Width;
+            int height = apng.Height;
+
+            BmpOptions bmpOptions = new BmpOptions();
+            string overlayPath = Path.Combine(Path.GetTempPath(), "overlay.bmp");
+            bmpOptions.Source = new FileCreateSource(overlayPath, false);
+
+            using (Aspose.Imaging.RasterImage overlay = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(bmpOptions, width, height))
             {
-                // Fill the overlay with the chosen color
-                Graphics graphics = new Graphics(overlay);
-                graphics.Clear(blendColor);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(overlay);
+                Aspose.Imaging.Color overlayColor = Aspose.Imaging.Color.FromArgb(255, 255, 0, 0);
+                graphics.Clear(overlayColor);
 
-                // Prepare blending filter options
-                ImageBlendingFilterOptions blendOptions = new ImageBlendingFilterOptions
+                foreach (ApngFrame frame in apng.Pages)
                 {
-                    Image = overlay,
-                    Opacity = opacity,
-                    Position = new Point(0, 0)
-                };
-
-                // Apply the blending filter to the entire APNG image
-                apng.Filter(apng.Bounds, blendOptions);
+                    ((Aspose.Imaging.RasterImage)frame).Blend(new Aspose.Imaging.Point(0, 0), overlay, 128);
+                }
             }
 
-            // Save the blended APNG image
             apng.Save(outputPath, new ApngOptions());
         }
     }

@@ -1,33 +1,50 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths to the background, overlay, and output images
+        // Hardcoded input and output paths
         string backgroundPath = "background.png";
         string overlayPath = "overlay.png";
-        string outputPath = "blended.png";
+        string outputPath = "output.png";
 
-        // Load background and overlay images as RasterImage instances
+        // Verify input files exist
+        if (!File.Exists(backgroundPath))
+        {
+            Console.Error.WriteLine($"File not found: {backgroundPath}");
+            return;
+        }
+        if (!File.Exists(overlayPath))
+        {
+            Console.Error.WriteLine($"File not found: {overlayPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load background and overlay images
         using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
         using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
         {
-            // Define opacity (0-255). 128 = 50% opacity.
-            byte opacity = 128;
+            // Configure blending filter options
+            var blendOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ImageBlendingFilterOptions
+            {
+                Image = overlay,
+                Opacity = 0.5f, // 50% opacity
+                BlendingMode = Aspose.Imaging.ImageFilters.FilterOptions.BlendingMode.Normal
+            };
 
-            // Blend the overlay onto the background at the top-left corner
-            background.Blend(new Point(0, 0), overlay, opacity);
+            // Apply blending filter to the background image
+            background.Filter(background.Bounds, blendOptions);
 
-            // Prepare PNG save options with a file source
-            Source outSource = new FileCreateSource(outputPath, false);
-            PngOptions options = new PngOptions() { Source = outSource };
-
-            // Save the blended image
-            background.Save(outputPath, options);
+            // Save the result as PNG
+            PngOptions pngOptions = new PngOptions();
+            background.Save(outputPath, pngOptions);
         }
     }
 }

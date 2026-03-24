@@ -1,47 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
         string inputPath = "input.apng";
         string outputPath = "output.apng";
 
-        // Load the APNG image
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            // Define the watermark mask (example ellipse)
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        using (Image image = Image.Load(inputPath))
+        {
+            ApngImage apngImage = (ApngImage)image;
+
             var mask = new GraphicsPath();
             var figure = new Figure();
             figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 100)));
             mask.AddFigure(figure);
 
-            // Use Telea algorithm for watermark removal
-            var options = new TeleaWatermarkOptions(mask);
+            var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
-            // Process each frame
-            for (int i = 0; i < apng.PageCount; i++)
+            using (RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(apngImage, options))
             {
-                // Get the current frame as a raster image
-                var frame = (RasterImage)apng.Pages[i];
-
-                // Remove watermark from the frame
-                RasterImage cleanedFrame = WatermarkRemover.PaintOver(frame, options);
-
-                // Replace the original frame with the cleaned one
-                apng.RemoveFrameAt(i);
-                apng.InsertFrame(i, cleanedFrame);
+                result.Save(outputPath, new ApngOptions());
             }
-
-            // Save the processed APNG
-            apng.Save(outputPath);
         }
     }
 }

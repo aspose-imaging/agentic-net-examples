@@ -1,33 +1,44 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = "input.apng";
-        string outputPath = "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input_animation.apng";
+        string outputPath = @"C:\Images\output_animation_filtered.apng";
 
-        // Load the existing APNG image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the APNG image
         using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
         {
-            // Iterate through each frame and apply a Gaussian blur filter
+            // Iterate over each frame and apply a filter (example: gamma adjustment)
             for (int i = 0; i < apngImage.PageCount; i++)
             {
+                // Cast the page to ApngFrame
                 ApngFrame frame = (ApngFrame)apngImage.Pages[i];
 
-                // Create filter options (Gaussian blur with radius 5 and sigma 4.0)
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
-
-                // Apply the filter to the entire frame
-                frame.Filter(frame.Bounds, filterOptions);
+                // Example filter: adjust gamma based on frame index
+                // This can be replaced with any other filter logic as needed
+                float gamma = 1.0f + (i % 5) * 0.1f; // Vary gamma slightly per frame
+                frame.AdjustGamma(gamma);
             }
 
-            // Save the modified APNG image preserving animation
-            apngImage.Save(outputPath, new ApngOptions());
+            // Save the modified APNG while preserving animation settings
+            apngImage.Save(outputPath);
         }
     }
 }
