@@ -1,44 +1,39 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output_edge.png";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Define a simple edge detection kernel (Laplacian)
-            double[,] kernel = new double[,]
-            {
-                { 0, -1, 0 },
-                { -1, 4, -1 },
-                { 0, -1, 0 }
-            };
+            // Apply a sharpen filter as a simple edge detection approximation
+            // Kernel size 5, sigma 4.0 (adjust as needed for stronger edges)
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Apply the convolution filter with the edge detection kernel
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-            // Prepare PNG save options (optional settings)
-            PngOptions pngOptions = new PngOptions
-            {
-                CompressionLevel = 6,
-                FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive
-            };
-
-            // Save the processed image to a new PNG file
-            image.Save(outputPath, pngOptions);
+            // Save the processed image as PNG
+            rasterImage.Save(outputPath);
         }
     }
 }
