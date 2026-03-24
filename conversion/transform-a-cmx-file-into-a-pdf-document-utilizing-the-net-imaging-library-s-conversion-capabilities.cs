@@ -1,42 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
 
-class CmxToPdfConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source CMX file
-        string inputCmxPath = @"C:\Temp\sample.cmx";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        // Desired output PDF file path
-        string outputPdfPath = @"C:\Temp\sample.pdf";
-
-        // Load the CMX image using Aspose.Imaging unified loader
-        using (Image cmxImage = Image.Load(inputCmxPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Prepare PDF save options
-            PdfOptions pdfOptions = new PdfOptions();
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Configure rasterization options specific for CMX format
-            CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the CMX image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare PDF save options with CMX rasterization settings
+            var pdfOptions = new PdfOptions
             {
-                // Render text as single-bit per pixel for crisp output
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-
-                // No smoothing to preserve original vector quality
-                SmoothingMode = SmoothingMode.None,
-
-                // Positioning defined by the document itself
-                Positioning = PositioningTypes.DefinedByDocument
+                VectorRasterizationOptions = new CmxRasterizationOptions()
             };
 
-            // Assign rasterization options to the PDF options
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save the loaded CMX image as a PDF document
-            cmxImage.Save(outputPdfPath, pdfOptions);
+            // Save as PDF
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
