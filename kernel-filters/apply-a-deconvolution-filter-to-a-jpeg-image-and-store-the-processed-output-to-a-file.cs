@@ -1,14 +1,25 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input JPEG and output processed image
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = "c:\\temp\\sample.jpg";
+        string outputPath = "c:\\temp\\sample.deconvolved.jpg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the JPEG image
         using (Image image = Image.Load(inputPath))
@@ -16,15 +27,12 @@ class Program
             // Cast to RasterImage to access filtering capabilities
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a Gauss‑Wiener deconvolution filter (radius = 5, sigma = 4.0)
-            rasterImage.Filter(rasterImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
+            // Apply a Gauss-Wiener deconvolution filter to the whole image
+            // Parameters: radius = 5, sigma = 4.0 (adjust as needed)
+            rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
 
-            // Configure JPEG save options (default settings)
-            JpegOptions jpegOptions = new JpegOptions();
-
-            // Save the processed image to the specified output path
-            rasterImage.Save(outputPath, jpegOptions);
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }

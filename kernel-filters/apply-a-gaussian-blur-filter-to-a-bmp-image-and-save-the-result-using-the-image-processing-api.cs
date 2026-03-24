@@ -1,28 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input BMP file path
+        // Hardcoded input and output file paths
         string inputPath = "input.bmp";
-        // Output BMP file path
         string outputPath = "output.bmp";
 
-        // Load the BMP image as a raster image
+        // Check that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists (handles cases where the path has no directory)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+        // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
+            // Cast to RasterImage to use filtering capabilities
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply Gaussian blur with radius 5 and sigma 4.0 to the entire image
-            rasterImage.Filter(rasterImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur with kernel size 5 and sigma 4.0 to the whole image
+            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+            rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
-            // Save the result as BMP
-            BmpOptions bmpOptions = new BmpOptions();
-            rasterImage.Save(outputPath, bmpOptions);
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }

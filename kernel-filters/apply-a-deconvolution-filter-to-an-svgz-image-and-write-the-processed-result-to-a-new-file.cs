@@ -3,50 +3,68 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input SVGZ file path
-        string inputFile = Path.Combine("D:", "Compressed", "example.svgz");
-        // Output raster image path (PNG format)
-        string outputFile = Path.Combine("D:", "Compressed", "example_deconvolved.png");
+        string inputPath = @"C:\Images\input.svgz";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the SVGZ image as a vector image
-        using (Image vectorImage = Image.Load(inputFile))
+        if (!File.Exists(inputPath))
         {
-            // Rasterize the vector image to PNG in a memory stream
-            using (MemoryStream rasterStream = new MemoryStream())
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        string tempRasterPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath));
+
+        using (Image vectorImage = Image.Load(inputPath))
+        {
+            var rasterOptions = new VectorRasterizationOptions
             {
-                // Set up rasterization options for SVG
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = vectorImage.Size
-                };
+                PageWidth = vectorImage.Width,
+                PageHeight = vectorImage.Height,
+                BackgroundColor = Color.White
+            };
 
-                // PNG save options with the rasterization settings
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-                // Save rasterized image to the memory stream
-                vectorImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0;
+            vectorImage.Save(tempRasterPath, pngOptions);
+        }
 
-                // Load the rasterized image as a RasterImage
-                using (Image rasterImageBase = Image.Load(rasterStream))
-                {
-                    RasterImage rasterImage = (RasterImage)rasterImageBase;
+        using (Image rasterImageContainer = Image.Load(tempRasterPath))
+        {
+            var rasterImage = (RasterImage)rasterImageContainer;
 
-                    // Apply a deconvolution filter (Motion Wiener) to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(5, 1.0, 45.0));
+            double[,] kernel = new double[,]
+            {
+                { 0, -1, 0 },
+                { -1, 5, -1 },
+                { 0, -1, 0 }
+            };
 
-                    // Save the processed raster image to the output file
-                    rasterImage.Save(outputFile, new PngOptions());
-                }
+            rasterImage.Filter(rasterImage.Bounds, new DeconvolutionFilterOptions(kernel));
+
+            var finalOptions = new PngOptions();
+            rasterImage.Save(outputPath, finalOptions);
+        }
+
+        if (File.Exists(tempRasterPath))
+        {
+            try
+            {
+                File.Delete(tempRasterPath);
+            }
+            catch
+            {
+                // Ignore cleanup errors
             }
         }
     }

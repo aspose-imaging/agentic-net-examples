@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -8,22 +9,31 @@ class Program
 {
     static void Main()
     {
-        // Input and output file paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.webp";
+        string outputPath = @"c:\temp\output.png";
 
-        // Load the WebP image using the constructor that accepts a file path
-        using (WebPImage webpImage = new WebPImage(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Apply Gaussian blur to the entire image.
-            // Radius = 5, Sigma = 4.0 (adjust as needed)
-            webpImage.Filter(
-                webpImage.Bounds,
-                new GaussianBlurFilterOptions(5, 4.0));
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Save the processed image to a new WebP file.
-            // Using default WebPOptions; customize if required.
-            webpImage.Save(outputPath, new WebPOptions());
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to WebPImage to access Filter method
+            WebPImage webpImage = (WebPImage)image;
+
+            // Apply Gaussian blur to the whole image
+            webpImage.Filter(webpImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the processed image as PNG
+            webpImage.Save(outputPath, new PngOptions());
         }
     }
 }

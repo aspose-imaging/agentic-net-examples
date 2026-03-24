@@ -2,44 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.apng";
 
-        // Load the source image as a raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Apply Gaussian blur filter (radius 5, sigma 4.0) to the entire image
-            sourceImage.Filter(sourceImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Set up APNG creation options
-            ApngOptions apngOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // frame duration in milliseconds
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create an APNG canvas with the same dimensions as the source image
-            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, sourceImage.Width, sourceImage.Height))
-            {
-                // Remove the default frame that exists upon creation
-                apngImage.RemoveAllFrames();
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering
+            RasterImage raster = (RasterImage)image;
 
-                // Add the blurred image as a single frame
-                apngImage.AddFrame(sourceImage);
+            // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the APNG file (output is already bound via FileCreateSource)
-                apngImage.Save();
-            }
+            // Save the processed image as an APNG file
+            raster.Save(outputPath, new ApngOptions());
         }
     }
 }

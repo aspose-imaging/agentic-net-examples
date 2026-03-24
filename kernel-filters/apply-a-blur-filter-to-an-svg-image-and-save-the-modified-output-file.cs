@@ -1,46 +1,63 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Paths for the original SVG, an intermediate raster image, and the final blurred output
-        string svgPath = @"C:\temp\input.svg";
-        string intermediatePng = @"C:\temp\intermediate.png";
-        string blurredPng = @"C:\temp\output_blurred.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output\\blurred.png";
 
-        // Load the SVG image
-        using (Image svgImage = Image.Load(svgPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Set up rasterization options to convert SVG to raster format (PNG)
-            var rasterizationOptions = new SvgRasterizationOptions
-            {
-                PageSize = svgImage.Size // use original SVG size
-            };
-
-            var pngSaveOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Save the rasterized version to a temporary PNG file
-            svgImage.Save(intermediatePng, pngSaveOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the rasterized PNG image
-        using (Image rasterImage = Image.Load(intermediatePng))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access the Filter method
-            var raster = (RasterImage)rasterImage;
+            // Cast to SvgImage
+            SvgImage svgImage = (SvgImage)image;
 
-            // Apply Gaussian blur filter (radius = 5, sigma = 4.0) to the whole image
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            // Set up rasterization options for PNG output
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            {
+                PageSize = svgImage.Size
+            };
+            PngOptions pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-            // Save the blurred image
-            raster.Save(blurredPng, new PngOptions());
+            // Rasterize SVG to a memory stream
+            using (MemoryStream ms = new MemoryStream())
+            {
+                svgImage.Save(ms, pngOptions);
+                ms.Position = 0;
+
+                // Load the rasterized image
+                using (Image rasterImageContainer = Image.Load(ms))
+                {
+                    RasterImage rasterImage = (RasterImage)rasterImageContainer;
+
+                    // Apply Gaussian blur filter
+                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                    // Save the blurred image as PNG
+                    rasterImage.Save(outputPath);
+                }
+            }
         }
     }
 }

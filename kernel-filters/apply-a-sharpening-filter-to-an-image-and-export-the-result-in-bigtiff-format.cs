@@ -1,35 +1,42 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.BigTiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class SharpenAndSaveBigTiff
+class Program
 {
     static void Main()
     {
-        // Path to the folder containing the source image
-        string dataDir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.tif";
 
-        // Load the source TIFF image
-        using (Image image = Image.Load(dataDir + "sample.tif"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to TiffImage to gain access to TIFF‑specific members
-            TiffImage tiffImage = (TiffImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a sharpen filter to the whole image.
-            // Kernel size = 5, sigma = 4.0 (as shown in the documentation examples)
-            tiffImage.Filter(
-                tiffImage.Bounds,
-                new SharpenFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a BigTiffImage from the frames of the filtered TIFF image.
-            // The constructor that accepts a TiffFrame[] is used as required by the rules.
-            BigTiffImage bigTiff = new BigTiffImage(tiffImage.Frames);
+        // Load the image, apply sharpening, and save as BigTIFF
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage raster = (RasterImage)image;
 
-            // Save the result as a BigTIFF file.
-            // The Save(string) overload is the prescribed lifecycle method.
-            bigTiff.Save(dataDir + "sample_sharpened.bigtiff");
+            // Apply sharpen filter to the whole image
+            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Prepare BigTIFF save options
+            var bigTiffOptions = new BigTiffOptions(TiffExpectedFormat.Default);
+
+            // Save the processed image in BigTIFF format
+            raster.Save(outputPath, bigTiffOptions);
         }
     }
 }

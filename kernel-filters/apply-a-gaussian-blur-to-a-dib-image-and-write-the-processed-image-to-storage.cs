@@ -1,17 +1,38 @@
-// Path to the folder that contains the source DIB image and where the result will be saved
-string dataDir = @"c:\temp\";
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats;
 
-// Load the DIB image, apply a Gaussian blur filter, and save the processed image
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dataDir + "sample.dib"))
+class Program
 {
-    // Cast to RasterImage to gain access to the Filter method
-    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output_gaussian.bmp";
 
-    // Apply Gaussian blur with a kernel size of 5 and sigma of 4.0 to the whole image
-    rasterImage.Filter(
-        rasterImage.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the blurred image back to disk (format inferred from the file extension)
-    rasterImage.Save(dataDir + "sample.GaussianBlur.dib");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image, apply Gaussian blur, and save the result
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply Gaussian blur with kernel size 5 and sigma 4.0 to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the processed image
+            rasterImage.Save(outputPath);
+        }
+    }
 }

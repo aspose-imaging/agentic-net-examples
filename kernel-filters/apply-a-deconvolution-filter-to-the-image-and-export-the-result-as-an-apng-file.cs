@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -9,38 +10,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input raster image path
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        // Output APNG file path
-        string outputPath = "output.apng";
+        string outputPath = "output/result.apng";
 
-        // Load the raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Apply a motion deconvolution filter (MotionWienerFilterOptions)
-            var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0);
-            sourceImage.Filter(sourceImage.Bounds, deconvOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Set up APNG creation options
-            using (ApngOptions apngCreateOptions = new ApngOptions
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image as a raster image
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage raster = (RasterImage)image;
+
+            // Apply a Gauss-Wiener deconvolution filter to the entire image
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
+
+            // Prepare APNG creation options
+            ApngOptions apngOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
                 DefaultFrameTime = 100, // frame duration in milliseconds
                 ColorType = PngColorType.TruecolorWithAlpha
-            })
+            };
+
+            // Create the APNG image canvas
+            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, raster.Width, raster.Height))
             {
-                // Create the APNG image canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngCreateOptions, sourceImage.Width, sourceImage.Height))
-                {
-                    // Ensure no default frame remains
-                    apngImage.RemoveAllFrames();
+                // Remove the default empty frame
+                apngImage.RemoveAllFrames();
 
-                    // Add the filtered image as a single frame
-                    apngImage.AddFrame(sourceImage);
+                // Add the processed raster image as the sole frame
+                apngImage.AddFrame(raster);
 
-                    // Save the APNG (output is already bound to the source)
-                    apngImage.Save();
-                }
+                // Save the APNG file
+                apngImage.Save();
             }
         }
     }

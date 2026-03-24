@@ -1,32 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Path to the source TGA image
-        string inputPath = @"C:\Images\sample.tga";
+        // Hardcoded input and output paths
+        string inputPath = "input.tga";
+        string outputPath = "output.tga";
 
-        // Path for the processed image (can be the same as input to overwrite)
-        string outputPath = @"C:\Images\sample_blurred.tga";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        // Load the TGA image using Aspose.Imaging's Image.Load method
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load the TGA image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the generic Image to TgaImage to access TGA‑specific members
-            TgaImage tgaImage = (TgaImage)image;
+            // Cast to RasterImage for filtering
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a Gaussian blur filter to the whole image.
-            // Radius = 5, Sigma = 4.0 – adjust these values as needed.
-            tgaImage.Filter(
-                tgaImage.Bounds,
-                new GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur filter to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the processed image, preserving the original TGA format.
-            tgaImage.Save(outputPath);
+            // Save the processed image preserving TGA format
+            rasterImage.Save(outputPath, new TgaOptions());
         }
     }
 }

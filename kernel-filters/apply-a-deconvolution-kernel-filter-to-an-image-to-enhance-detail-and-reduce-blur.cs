@@ -1,24 +1,41 @@
 using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output file paths
-        string inputPath = args.Length > 0 ? args[0] : "input.jpg";
-        string outputPath = args.Length > 1 ? args[1] : "output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output_MotionWiener.png";
 
-        // Load the image as a raster image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply Gauss-Wiener deconvolution filter to enhance details and reduce blur
-            // Parameters: radius = 5, sigma = 4.0 (adjust as needed)
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Create a motion Wiener deconvolution filter
+            // Parameters: length (kernel size), sigma (smoothing), angle (degrees)
+            var deconvOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
+
+            // Apply the filter to the whole image
+            rasterImage.Filter(rasterImage.Bounds, deconvOptions);
 
             // Save the processed image
-            raster.Save(outputPath);
+            rasterImage.Save(outputPath);
         }
     }
 }

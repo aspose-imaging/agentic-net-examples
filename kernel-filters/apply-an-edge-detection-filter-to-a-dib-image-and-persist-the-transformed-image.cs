@@ -1,37 +1,36 @@
 using System;
-using System.Drawing; // For Rectangle
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
-class EdgeDetectionExample
+class Program
 {
     static void Main()
     {
-        // Path to the source DIB (BMP) image
-        string sourcePath = @"C:\Temp\sample.dib";
+        // Hardcoded input and output paths
+        string inputPath = "input.dib";
+        string outputPath = "output\\output.png";
 
-        // Path where the processed image will be saved
-        string outputPath = @"C:\Temp\sample.EdgeDetected.png";
-
-        // Load the image using Aspose.Imaging's load rule
-        using (Image image = Image.Load(sourcePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Most raster formats (including DIB) derive from RasterImage,
-            // so we can safely cast to RasterImage to access the Filter method.
-            RasterImage raster = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply an edge‑enhancing filter.
-            // Aspose.Imaging does not have a dedicated EdgeDetection filter,
-            // but the Sharpen filter highlights edges effectively.
-            raster.Filter(
-                raster.Bounds,                         // Apply to the whole image
-                new SharpenFilterOptions(5, 4.0)      // Kernel size 5, sigma 4.0
-            );
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the transformed image using the save rule.
-            // PNG is chosen for lossless output.
-            raster.Save(outputPath, new PngOptions());
+        // Load the DIB image as a raster image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        {
+            // Apply a sharpen filter (used here for edge detection)
+            image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+            // Save the transformed image as PNG
+            PngOptions options = new PngOptions();
+            image.Save(outputPath, options);
         }
     }
 }

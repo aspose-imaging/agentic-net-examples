@@ -2,48 +2,56 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input SVGZ file path and output PNG file path are passed as arguments.
-        string inputPath = args.Length > 0 ? args[0] : "input.svgz";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svgz";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the compressed SVG (SVGZ) image.
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVGZ image
         using (Image vectorImage = Image.Load(inputPath))
         {
-            // Set up rasterization options to convert the vector image to a raster format.
-            var rasterizationOptions = new SvgRasterizationOptions
+            // Prepare rasterization options for SVG
+            var rasterOptions = new SvgRasterizationOptions
             {
                 PageSize = vectorImage.Size
             };
 
-            // Configure PNG save options with the rasterization settings.
-            var pngSaveOptions = new PngOptions
+            // Save the vector image to a memory stream as PNG (rasterized)
+            using (var ms = new MemoryStream())
             {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Rasterize the SVGZ to a PNG stored in memory.
-            using (var memoryStream = new MemoryStream())
-            {
-                vectorImage.Save(memoryStream, pngSaveOptions);
-                memoryStream.Position = 0;
-
-                // Load the rasterized image from the memory stream.
-                using (Image rasterImage = Image.Load(memoryStream))
+                var pngSaveOptions = new PngOptions
                 {
-                    var raster = (RasterImage)rasterImage;
+                    VectorRasterizationOptions = rasterOptions
+                };
+                vectorImage.Save(ms, pngSaveOptions);
+                ms.Position = 0;
 
-                    // Apply the emboss filter using a predefined convolution kernel.
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                // Load the rasterized PNG as a RasterImage
+                using (Image rasterImageWrapper = Image.Load(ms))
+                {
+                    var rasterImage = (RasterImage)rasterImageWrapper;
 
-                    // Save the processed image to the specified output file.
-                    raster.Save(outputPath, new PngOptions());
+                    // Apply emboss filter using convolution kernel
+                    var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                    rasterImage.Filter(rasterImage.Bounds, embossOptions);
+
+                    // Save the processed image to the output path
+                    rasterImage.Save(outputPath, new PngOptions());
                 }
             }
         }

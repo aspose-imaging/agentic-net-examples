@@ -1,33 +1,57 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class DeconvolutionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input WMF file path
-        string inputPath = @"C:\Temp\sample.wmf";
-        // Output PNG file path
-        string outputPath = @"C:\Temp\sample.Deconvolution.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.wmf";
+        string outputPath = @"C:\temp\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WMF image
-        using (Image image = Image.Load(inputPath))
+        using (Image wmfImage = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access the Filter method
-            RasterImage rasterImage = (RasterImage)image;
+            // Prepare vector rasterization options for converting WMF to raster
+            var rasterOptions = new WmfRasterizationOptions
+            {
+                PageSize = wmfImage.Size,
+                BackgroundColor = Color.White
+            };
 
-            // Create deconvolution filter options (Gauss-Wiener is a deconvolution filter)
-            // Parameters: radius = 5, sigma = 4.0 (adjust as needed)
-            var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
+            // Convert WMF to a raster image in memory (PNG format)
+            using (var memoryStream = new MemoryStream())
+            {
+                var pngSaveOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                wmfImage.Save(memoryStream, pngSaveOptions);
+                memoryStream.Position = 0;
 
-            // Apply the filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, deconvOptions);
+                // Load the rasterized image
+                using (Image rasterImageContainer = Image.Load(memoryStream))
+                {
+                    var rasterImage = (RasterImage)rasterImageContainer;
 
-            // Save the processed image as PNG
-            rasterImage.Save(outputPath, new PngOptions());
+                    // Apply a motion deconvolution filter
+                    var deconvOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
+                    rasterImage.Filter(rasterImage.Bounds, deconvOptions);
+
+                    // Save the processed raster image
+                    rasterImage.Save(outputPath, new PngOptions());
+                }
+            }
         }
     }
 }

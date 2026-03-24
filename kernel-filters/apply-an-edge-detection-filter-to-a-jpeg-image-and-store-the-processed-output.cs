@@ -1,29 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
-namespace ImageProcessingDemo
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.jpg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Paths for input JPEG and output image
-            string inputPath = "input.jpg";
-            string outputPath = "output_sharpened.jpg";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage raster = (RasterImage)image;
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Apply a sharpen filter (edge detection) to the whole image
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+        // Load the JPEG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
 
-                // Save the processed image
-                raster.Save(outputPath);
-            }
+            // Apply an edge detection-like filter (using Sharpen as a placeholder)
+            // Adjust kernel size and sigma as needed for stronger edge emphasis
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }

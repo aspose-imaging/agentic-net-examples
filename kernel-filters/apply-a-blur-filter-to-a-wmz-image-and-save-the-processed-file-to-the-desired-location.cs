@@ -3,44 +3,49 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length < 2)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.wmz";
+        string outputPath = @"C:\Images\output.wmz";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.WriteLine("Usage: <program> <input.wmz> <output.png>");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string inputPath = args[0];
-        string outputPath = args[1];
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image vectorImage = Image.Load(inputPath))
+        // Load the WMZ image, apply Gaussian blur, and save as compressed WMZ
+        using (Image image = Image.Load(inputPath))
         {
-            var rasterOptions = new VectorRasterizationOptions
+            // Cast to RasterImage to apply filter
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Set up rasterization options for WMF/WMZ output
+            var rasterizationOptions = new WmfRasterizationOptions
             {
-                BackgroundColor = Aspose.Imaging.Color.White,
-                PageWidth = vectorImage.Width,
-                PageHeight = vectorImage.Height
+                PageSize = rasterImage.Size
             };
 
-            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath) ?? "", "temp_raster.png");
-
-            vectorImage.Save(tempPngPath, new PngOptions { VectorRasterizationOptions = rasterOptions });
-
-            using (RasterImage rasterImage = (RasterImage)Image.Load(tempPngPath))
+            // Configure WMF options with compression (WMZ)
+            var wmfOptions = new WmfOptions
             {
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-                rasterImage.Save(outputPath, new PngOptions());
-            }
+                VectorRasterizationOptions = rasterizationOptions,
+                Compress = true
+            };
 
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
-            }
+            // Save the processed image as WMZ
+            rasterImage.Save(outputPath, wmfOptions);
         }
     }
 }

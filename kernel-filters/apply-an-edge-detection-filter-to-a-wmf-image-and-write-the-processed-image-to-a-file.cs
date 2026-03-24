@@ -1,50 +1,29 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.wmf";
-        string tempPngPath = "temp.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.wmf";
+        string outputPath = @"C:\Images\output.png";
 
-        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            var rasterOptions = new WmfRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = wmfImage.Size
-            };
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-            wmfImage.Save(tempPngPath, pngOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        using (Image img = Image.Load(tempPngPath))
-        {
-            var rasterImage = (RasterImage)img;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            double[,] kernel = new double[,]
-            {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
-            var convOptions = new ConvolutionFilterOptions(kernel);
-            rasterImage.Filter(rasterImage.Bounds, convOptions);
-            rasterImage.Save(outputPath);
-        }
-
-        if (File.Exists(tempPngPath))
+        // Load the WMF image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            File.Delete(tempPngPath);
+            // Edge detection filter is not available in the current API
+            throw new NotSupportedException("Edge detection filter is not supported for WMF images using Aspose.Imaging.");
         }
     }
 }

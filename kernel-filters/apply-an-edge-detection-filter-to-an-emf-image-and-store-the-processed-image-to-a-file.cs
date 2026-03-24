@@ -3,47 +3,71 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Temp\input.emf";
-        string tempPngPath = Path.Combine(Path.GetDirectoryName(inputPath), "temp.png");
-        string outputPath = Path.Combine(Path.GetDirectoryName(inputPath), "output_edge.png");
+        // Hardcoded input and output paths
+        string inputPath = "input.emf";
+        string outputPath = "output.png";
 
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            EmfImage emfImage = (EmfImage)image;
-            var rasterOptions = new VectorRasterizationOptions
-            {
-                BackgroundColor = Aspose.Imaging.Color.White,
-                PageWidth = emfImage.Width,
-                PageHeight = emfImage.Height
-            };
-            emfImage.Save(tempPngPath, new PngOptions { VectorRasterizationOptions = rasterOptions });
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        using (Image rasterImageContainer = Image.Load(tempPngPath))
-        {
-            RasterImage rasterImage = (RasterImage)rasterImageContainer;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            double[,] kernel = new double[,]
+        // Load the EMF image
+        using (Image emfImageBase = Image.Load(inputPath))
+        {
+            EmfImage emfImage = (EmfImage)emfImageBase;
+
+            // Set up rasterization options to convert EMF to raster
+            var rasterOptions = new EmfRasterizationOptions
             {
-                { -1, 0, 1 },
-                { -2, 0, 2 },
-                { -1, 0, 1 }
+                PageSize = emfImage.Size,
+                BackgroundColor = Color.White
             };
 
-            rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
+            // Use PNG options with the rasterization settings
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-            rasterImage.Save(outputPath, new PngOptions());
-        }
+            // Rasterize EMF into a memory stream
+            using (var ms = new MemoryStream())
+            {
+                emfImage.Save(ms, pngOptions);
+                ms.Position = 0;
 
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+                // Load the rasterized image
+                using (Image rasterImageBase = Image.Load(ms))
+                {
+                    RasterImage rasterImage = (RasterImage)rasterImageBase;
+
+                    // Edge detection kernel
+                    double[,] kernel = new double[,]
+                    {
+                        { -1, -1, -1 },
+                        { -1,  8, -1 },
+                        { -1, -1, -1 }
+                    };
+
+                    // Apply convolution filter with the edge detection kernel
+                    var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                    rasterImage.Filter(rasterImage.Bounds, convOptions);
+
+                    // Save the processed image as PNG
+                    rasterImage.Save(outputPath, new PngOptions());
+                }
+            }
         }
     }
 }

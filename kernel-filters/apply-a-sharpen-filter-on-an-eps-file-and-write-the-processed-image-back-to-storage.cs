@@ -7,42 +7,55 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input EPS file path
-        string inputPath = args.Length > 0 ? args[0] : "input.eps";
-        // Output raster image path (PNG format)
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
+        string tempPath = "temp.png";
 
-        // Load the EPS image
-        using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Prepare rasterization options to convert EPS to raster (PNG)
-            var rasterOptions = new PngOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPath) ?? ".");
+
+        // Load EPS image and rasterize to a temporary PNG
+        using (Image epsImage = Image.Load(inputPath))
+        {
+            // Cast to EpsImage (full namespace to avoid extra using)
+            var eps = (Aspose.Imaging.FileFormats.Eps.EpsImage)epsImage;
+
+            // Set up rasterization options (preserve aspect ratio)
+            var rasterOptions = new EpsRasterizationOptions
             {
-                VectorRasterizationOptions = new EpsRasterizationOptions
-                {
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height
-                }
+                PageWidth = 0,
+                PageHeight = 0
             };
 
-            // Rasterize EPS into a memory stream
-            using (var memoryStream = new MemoryStream())
+            // Save rasterized PNG to temporary file
+            var pngOptions = new PngOptions
             {
-                epsImage.Save(memoryStream, rasterOptions);
-                memoryStream.Position = 0;
+                VectorRasterizationOptions = rasterOptions
+            };
+            eps.Save(tempPath, pngOptions);
+        }
 
-                // Load the rasterized image as RasterImage
-                using (var rasterImage = (RasterImage)Image.Load(memoryStream))
-                {
-                    // Apply sharpen filter to the entire image
-                    rasterImage.Filter(
-                        rasterImage.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+        // Load the rasterized PNG as a RasterImage
+        using (Image rasterImg = Image.Load(tempPath))
+        {
+            var raster = (RasterImage)rasterImg;
 
-                    // Save the processed image
-                    rasterImage.Save(outputPath, new PngOptions());
-                }
-            }
+            // Apply sharpen filter (kernel size 5, sigma 4.0)
+            raster.Filter(raster.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image to the final output path
+            var outOptions = new PngOptions();
+            raster.Save(outputPath, outOptions);
         }
     }
 }

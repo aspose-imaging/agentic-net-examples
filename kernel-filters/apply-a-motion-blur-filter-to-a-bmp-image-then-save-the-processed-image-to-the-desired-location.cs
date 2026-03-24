@@ -1,32 +1,37 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class MotionBlurExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the source BMP image
-        string inputPath = @"C:\Images\source.bmp";
+        // Hardcoded input and output paths
+        string inputPath = "input\\source.bmp";
+        string outputPath = "output\\processed.bmp";
 
-        // Path where the processed image will be saved
-        string outputPath = @"C:\Images\source_motionblur.bmp";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the BMP image
-        using (Image image = Image.Load(inputPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Cast to RasterImage to gain access to the Filter method
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage for filtering
+            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-            // Create a MotionWienerFilterOptions instance.
-            // Length = 10, Smooth = 1.0, Angle = 0 degrees (horizontal motion blur)
-            var motionBlurOptions = new MotionWienerFilterOptions(10, 1.0, 0.0);
+            // Apply Motion Wiener filter (length, smooth, angle)
+            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
 
-            // Apply the filter to the entire image bounds
-            raster.Filter(raster.Bounds, motionBlurOptions);
-
-            // Save the processed image to the desired location
-            raster.Save(outputPath);
+            // Save the processed image as BMP
+            raster.Save(outputPath, new BmpOptions());
         }
     }
 }

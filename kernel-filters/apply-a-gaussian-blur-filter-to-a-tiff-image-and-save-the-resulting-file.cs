@@ -1,31 +1,38 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
-        // Paths for the source TIFF and the output image
-        string inputPath = @"C:\Temp\sample.tif";
-        string outputPath = @"C:\Temp\sample.GaussianBlur.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.tif";
+        string outputPath = @"C:\temp\sample.GaussianBlur.tif";
 
-        // Load the TIFF image
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image, apply Gaussian blur, and save the result
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to TiffImage to access TIFF‑specific methods
+            // Cast to TiffImage to access the Filter method
             TiffImage tiffImage = (TiffImage)image;
 
-            // Apply Gaussian blur to the whole image (radius = 5, sigma = 4.0)
-            tiffImage.Filter(
-                tiffImage.Bounds,
-                new GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+            tiffImage.Filter(tiffImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the processed image (here as PNG, but any supported format can be used)
-            tiffImage.Save(outputPath, new PngOptions());
+            // Save the processed image
+            tiffImage.Save(outputPath);
         }
     }
 }

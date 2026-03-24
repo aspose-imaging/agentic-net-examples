@@ -1,20 +1,37 @@
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using System.Drawing;
 
-string inputPath = "input.psd";   // Path to the source PSD file
-string outputPath = "output.psd"; // Path where the processed PSD will be saved
-
-// Load the PSD image
-using (Image image = Image.Load(inputPath))
+class Program
 {
-    // Cast to RasterImage to access raster-specific operations
-    RasterImage rasterImage = (RasterImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.psd";
+        string outputPath = @"C:\Images\output.psd";
 
-    // Apply a sharpen filter to the entire image.
-    // Parameters: kernel size = 5, sigma = 4.0
-    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image back to storage
-    rasterImage.Save(outputPath);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the PSD image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to enable filtering operations
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply a sharpen filter with kernel size 5 and sigma 4.0 to the entire image
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image back to PSD format
+            rasterImage.Save(outputPath);
+        }
+    }
 }

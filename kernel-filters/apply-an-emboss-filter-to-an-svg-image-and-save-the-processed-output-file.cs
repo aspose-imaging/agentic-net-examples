@@ -4,47 +4,60 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input SVG file path
-        string inputSvgPath = "input.svg";
-        // Temporary rasterized PNG path
-        string tempPngPath = "temp.png";
-        // Output file path after emboss filter
-        string outputPath = "output_emboss.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output_emboss.png";
 
-        // Load the SVG image and rasterize it to a PNG file
-        using (Image svgImage = Image.Load(inputSvgPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Set up PNG save options with vector rasterization
-            PngOptions pngOptions = new PngOptions();
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Image svgImage = Image.Load(inputPath))
+        {
+            // Prepare rasterization options for SVG
+            var rasterOptions = new SvgRasterizationOptions
             {
-                PageSize = svgImage.Size
+                PageSize = ((SvgImage)svgImage).Size
             };
-            pngOptions.VectorRasterizationOptions = rasterizationOptions;
 
-            // Save the rasterized PNG to a temporary file
-            svgImage.Save(tempPngPath, pngOptions);
-        }
+            // Set up PNG save options with the rasterization options
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-        // Load the rasterized PNG as a RasterImage to apply the emboss filter
-        using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
-        {
-            // Apply the emboss convolution filter
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+            // Rasterize SVG to PNG in memory
+            using (var memoryStream = new MemoryStream())
+            {
+                svgImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
 
-            // Save the filtered image to the final output file
-            raster.Save(outputPath);
-        }
+                // Load the rasterized PNG as a RasterImage
+                using (Image rasterImageContainer = Image.Load(memoryStream))
+                {
+                    var rasterImage = (RasterImage)rasterImageContainer;
 
-        // Clean up the temporary PNG file
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+                    // Apply emboss filter using convolution kernel
+                    rasterImage.Filter(rasterImage.Bounds,
+                        new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+                    // Save the processed image to the output path
+                    rasterImage.Save(outputPath);
+                }
+            }
         }
     }
 }

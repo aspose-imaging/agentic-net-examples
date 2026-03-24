@@ -1,29 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class MotionBlurTiff
+class Program
 {
     static void Main()
     {
-        // Define input and output file paths
-        string inputPath = @"c:\temp\sample.tif";
-        string outputPath = @"c:\temp\sample.MotionWienerFilter.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output_motionblur.tif";
 
-        // Load the TIFF image using Aspose.Imaging's Image.Load method
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast the loaded image to TiffImage to access TIFF-specific functionality
+            // Cast to TiffImage to access the Filter method
             TiffImage tiffImage = (TiffImage)image;
 
-            // Apply a motion blur (motion wiener) filter to the entire image.
+            // Apply a motion blur (using MotionWiener filter as an example)
             // Parameters: length = 10, smooth = 1.0, angle = 90.0 degrees
-            tiffImage.Filter(
-                tiffImage.Bounds,
-                new MotionWienerFilterOptions(10, 1.0, 90.0));
+            tiffImage.Filter(tiffImage.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
 
-            // Save the processed image to the specified output file
+            // Save the processed image
             tiffImage.Save(outputPath);
         }
     }

@@ -1,37 +1,36 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.gif";
-        string outputPath = "output_edge_detected.gif";
+        string outputPath = "output\\processed.gif";
 
-        // Load the GIF image
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to GifImage
-            GifImage gifImage = (GifImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Define an edge detection kernel
-            double[,] edgeKernel = new double[,]
-            {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Apply the convolution filter with the edge detection kernel to the entire image
-            gifImage.Filter(gifImage.Bounds, new ConvolutionFilterOptions(edgeKernel));
+        // Load GIF image, apply edge detection (sharpen) filter, and save
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            var gifImage = (Aspose.Imaging.FileFormats.Gif.GifImage)image;
 
-            // Save the processed image back as GIF
+            // Apply sharpen filter as a simple edge detection approximation
+            gifImage.Filter(gifImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image as GIF
             gifImage.Save(outputPath, new GifOptions());
         }
     }

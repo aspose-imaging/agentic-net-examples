@@ -1,30 +1,43 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.BigTiff;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.tif";
 
-        using (BigTiffImage bigTiff = (BigTiffImage)Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            var deconvOptions = new DeconvolutionFilterOptions(ConvolutionFilter.GetGaussian(5, 4.0));
-            bigTiff.Filter(bigTiff.Bounds, deconvOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the TIFF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to TiffImage to access filtering functionality
+            TiffImage tiffImage = (TiffImage)image;
+
+            // Apply a Gauss-Wiener deconvolution filter to the entire image
+            tiffImage.Filter(
+                tiffImage.Bounds,
+                new GaussWienerFilterOptions(5, 4.0));
+
+            // Save the processed image as BigTIFF
             var saveOptions = new BigTiffOptions(TiffExpectedFormat.Default);
-            saveOptions.Compression = TiffCompressions.AdobeDeflate;
-            saveOptions.Photometric = TiffPhotometrics.Rgb;
-            saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-            bigTiff.Save(outputPath, saveOptions);
+            tiffImage.Save(outputPath, saveOptions);
         }
     }
 }

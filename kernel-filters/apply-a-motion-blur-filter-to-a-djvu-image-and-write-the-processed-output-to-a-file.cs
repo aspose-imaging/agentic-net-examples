@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -8,26 +10,28 @@ class Program
 {
     static void Main()
     {
-        // Input DJVU file path
-        string inputPath = @"C:\temp\sample.djvu";
-        // Output PNG file path
-        string outputPath = @"C:\temp\sample.MotionBlur.png";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.djvu";
+        string outputPath = @"c:\temp\sample.MotionWienerFilter.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DJVU image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DjvuImage to access DJVU‑specific functionality
             DjvuImage djvuImage = (DjvuImage)image;
 
-            // Apply a motion blur (motion wiener) filter to the whole image.
-            // Parameters: length (kernel size), smooth (blur intensity), angle (direction in degrees)
-            int length = 10;          // size of the motion kernel
-            double smooth = 1.0;      // smoothing factor
-            double angle = 0.0;       // horizontal motion; change to 90 for vertical, etc.
-
-            djvuImage.Filter(
-                djvuImage.Bounds,
-                new MotionWienerFilterOptions(length, smooth, angle));
+            // Apply a motion Wiener (motion blur) filter to the whole image
+            // Parameters: length = 10, sigma = 1.0, angle = 90.0 degrees
+            djvuImage.Filter(djvuImage.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
 
             // Save the processed image as PNG
             djvuImage.Save(outputPath, new PngOptions());

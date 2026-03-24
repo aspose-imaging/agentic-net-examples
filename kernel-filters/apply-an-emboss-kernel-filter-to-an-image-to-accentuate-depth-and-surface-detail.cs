@@ -1,21 +1,40 @@
-// Load an image, apply a 3x3 emboss convolution filter, and save the result.
-// Adjust the paths as needed.
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
-string dataDir = @"c:\temp\";
-
-// Load the image using Aspose.Imaging's load rule.
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dataDir + "input.jpg"))
+class Program
 {
-    // Cast to RasterImage to access the Filter method.
-    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output_emboss.png";
 
-    // Create convolution filter options using the built‑in 3x3 emboss kernel.
-    var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Apply the emboss filter to the whole image.
-    rasterImage.Filter(rasterImage.Bounds, embossOptions);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-    // Save the processed image using Aspose.Imaging's save rule.
-    rasterImage.Save(dataDir + "output_emboss.png");
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply the 3x3 emboss convolution kernel to the whole image
+            rasterImage.Filter(
+                rasterImage.Bounds,
+                new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+            // Save the processed image
+            rasterImage.Save(outputPath);
+        }
+    }
 }

@@ -1,32 +1,40 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
-class DeconvolutionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths for input DICOM file and output processed image
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputPath = @"c:\temp\sample.Deconvolution.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.dcm";
+        string outputPath = "output.dcm";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DICOM image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DicomImage to access DICOM‑specific methods
             DicomImage dicomImage = (DicomImage)image;
 
-            // Create deconvolution filter options (Gauss‑Wiener filter)
-            // Radius = 5, Sigma = 4.0 (adjust as needed)
-            var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
+            // Apply a deconvolution filter (Gauss-Wiener) to the entire image
+            dicomImage.Filter(
+                dicomImage.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
 
-            // Apply the filter to the entire image area
-            dicomImage.Filter(dicomImage.Bounds, deconvOptions);
-
-            // Save the processed image (PNG format in this example)
-            dicomImage.Save(outputPath, new PngOptions());
+            // Save the processed image back as DICOM
+            var dicomOptions = new DicomOptions();
+            dicomImage.Save(outputPath, dicomOptions);
         }
     }
 }

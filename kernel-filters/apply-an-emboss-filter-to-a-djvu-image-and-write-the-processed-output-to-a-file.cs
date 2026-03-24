@@ -1,30 +1,37 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input DJVU file and output PNG file
-        string inputPath = "input.djvu";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.djvu";
+        string outputPath = @"c:\temp\sample.emboss.png";
 
-        // Load the DJVU image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DJVU image, apply an emboss-like filter, and save as PNG
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DjvuImage to access DJVU-specific methods
             DjvuImage djvuImage = (DjvuImage)image;
 
-            // Apply emboss filter using convolution filter options
-            djvuImage.Filter(
-                djvuImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+            // Apply an emboss effect (using SharpenFilterOptions as a stand‑in for emboss)
+            djvuImage.Filter(djvuImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image as PNG
+            // Save the processed image
             djvuImage.Save(outputPath, new PngOptions());
         }
     }

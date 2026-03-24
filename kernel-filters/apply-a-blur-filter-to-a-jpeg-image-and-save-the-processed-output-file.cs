@@ -1,16 +1,25 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPEG file path
-        string inputPath = "input.jpg";
-        // Output JPEG file path
-        string outputPath = "output.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.jpg";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the JPEG image
         using (Image image = Image.Load(inputPath))
@@ -19,17 +28,10 @@ class Program
             RasterImage rasterImage = (RasterImage)image;
 
             // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
-            rasterImage.Filter(rasterImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Prepare JPEG save options (e.g., set quality)
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Quality = 90
-            };
-
-            // Save the processed image as JPEG
-            rasterImage.Save(outputPath, jpegOptions);
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }

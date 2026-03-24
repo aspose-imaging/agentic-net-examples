@@ -1,28 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input DJVU file and output processed image path
-        string inputPath = @"c:\temp\sample.djvu";
-        string outputPath = @"c:\temp\sample.Sharpened.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\sample_sharpened.png";
 
-        // Load the DJVU image using Aspose.Imaging's load rule
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DJVU image, apply sharpen filter, and save as PNG
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DjvuImage to access DJVU-specific functionality
             DjvuImage djvuImage = (DjvuImage)image;
 
-            // Apply a sharpen filter to the entire image.
-            // Example parameters: radius = 5, sigma = 4.0
+            // Apply sharpen filter to the entire image (kernel size 5, sigma 4.0)
             djvuImage.Filter(djvuImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image using Aspose.Imaging's save rule
+            // Save the processed image
             djvuImage.Save(outputPath, new PngOptions());
         }
     }

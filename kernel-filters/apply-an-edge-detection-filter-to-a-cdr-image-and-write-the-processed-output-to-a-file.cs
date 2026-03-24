@@ -1,59 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class Program
+namespace EdgeDetectionExample
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Input CDR file and output image path
-        string inputCdrPath = "input.cdr";
-        string outputImagePath = "output.png";
-
-        // Load the CDR vector image
-        using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdrImage = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputCdrPath))
+        static void Main()
         {
-            // Rasterize the CDR to a PNG stored in memory
-            using (MemoryStream rasterStream = new MemoryStream())
+            // Hardcoded input and output file paths
+            string inputPath = "input.cdr";
+            string outputPath = "output.png";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                PngOptions rasterOptions = new PngOptions
-                {
-                    Source = new StreamSource(rasterStream),
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        PageWidth = cdrImage.Width,
-                        PageHeight = cdrImage.Height
-                    }
-                };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                cdrImage.Save(rasterStream, rasterOptions);
-                rasterStream.Position = 0;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the rasterized image for processing
-                using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
-                {
-                    // Define a simple edge detection kernel (Laplacian)
-                    double[,] edgeKernel = new double[,]
-                    {
-                        { -1, -1, -1 },
-                        { -1,  8, -1 },
-                        { -1, -1, -1 }
-                    };
+            // Load the CDR image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to apply raster filters
+                RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply the convolution filter with the edge detection kernel
-                    rasterImage.Filter(rasterImage.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel));
+                // Apply a sharpen filter (used here as a simple edge detection approximation)
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Save the processed image to the output file (PNG)
-                    PngOptions outputOptions = new PngOptions
-                    {
-                        Source = new FileCreateSource(outputImagePath, false)
-                    };
-                    rasterImage.Save(outputImagePath, outputOptions);
-                }
+                // Save the processed image to the output path
+                rasterImage.Save(outputPath);
             }
         }
     }

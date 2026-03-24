@@ -1,25 +1,35 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.ico";
-        string outputPath = "output.ico";
+        string outputPath = "output.png";
 
-        // Load the ICO image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the ICO image, apply Gaussian blur, and save as PNG
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to apply filters
             RasterImage raster = (RasterImage)image;
-
-            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
             raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the processed image as ICO
-            raster.Save(outputPath);
+            PngOptions pngOptions = new PngOptions();
+            raster.Save(outputPath, pngOptions);
         }
     }
 }

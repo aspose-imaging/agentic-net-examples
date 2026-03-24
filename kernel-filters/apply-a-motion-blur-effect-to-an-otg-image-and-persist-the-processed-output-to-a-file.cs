@@ -2,48 +2,67 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input OTG file path
+        // Hardcoded input and output paths
         string inputPath = "input.otg";
-        // Output raster image path
         string outputPath = "output.png";
+        string tempPath = "temp.png";
 
-        // Load the OTG image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Ensure temporary directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+
+        // Load the OTG image and rasterize it to a temporary PNG file
         using (Image otgImage = Image.Load(inputPath))
         {
-            // Prepare PNG options with rasterization settings for OTG
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.VectorRasterizationOptions = new OtgRasterizationOptions
+            // Configure rasterization options for OTG
+            OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
             {
                 PageSize = otgImage.Size
             };
 
-            // Rasterize OTG to a memory stream
-            using (MemoryStream rasterStream = new MemoryStream())
+            // Set up PNG save options with the rasterization settings
+            PngOptions pngOptions = new PngOptions
             {
-                otgImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0;
+                VectorRasterizationOptions = rasterOptions
+            };
 
-                // Load the rasterized image as RasterImage
-                using (RasterImage raster = (RasterImage)Image.Load(rasterStream))
-                {
-                    // Apply motion wiener filter (motion blur effect)
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
+            // Save the rasterized image to a temporary file
+            otgImage.Save(tempPath, pngOptions);
+        }
 
-                    // Prepare output PNG options bound to a file source
-                    Source outSource = new FileCreateSource(outputPath, false);
-                    PngOptions outOptions = new PngOptions { Source = outSource };
+        // Load the rasterized image, apply motion blur, and save the final result
+        using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+        {
+            // Apply motion blur (length=10, smooth=1.0, angle=90.0)
+            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
 
-                    // Save the processed image
-                    raster.Save(outputPath, outOptions);
-                }
-            }
+            // Save the processed image to the output path as PNG
+            raster.Save(outputPath, new PngOptions());
+        }
+
+        // Optionally delete the temporary file
+        try
+        {
+            File.Delete(tempPath);
+        }
+        catch
+        {
+            // Ignore any errors during cleanup
         }
     }
 }

@@ -1,21 +1,40 @@
-using System.Drawing;
+using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using System.Drawing;
 
-string inputPath = @"c:\temp\sample.gif";
-string outputPath = @"c:\temp\sample_sharpened.gif";
-
-using (Image image = Image.Load(inputPath))
+class Program
 {
-    // Cast the loaded image to GifImage to access GIF‑specific functionality
-    GifImage gifImage = (GifImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.gif";
+        string outputPath = @"C:\Images\sample_sharpened.png";
 
-    // Apply a sharpen filter to the whole image.
-    // Parameters: kernel size = 5, sigma = 4.0 (same as the documentation example)
-    gifImage.Filter(gifImage.Bounds, new SharpenFilterOptions(5, 4.0));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image back to GIF format.
-    gifImage.Save(outputPath, new GifOptions());
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the GIF image, apply sharpen filter, and save the result
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to GifImage to access the Filter method
+            GifImage gifImage = (GifImage)image;
+
+            // Apply sharpen filter to the entire image
+            gifImage.Filter(gifImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image as PNG
+            gifImage.Save(outputPath, new PngOptions());
+        }
+    }
 }

@@ -1,22 +1,34 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output_edge.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output\\edge_detected.jpg";
 
-        // Load the image as a RasterImage
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Custom edge detection kernel (Laplacian)
+            // Define a custom edge detection kernel (Laplacian)
             double[,] kernel = new double[,]
             {
                 { -1, -1, -1 },
@@ -25,11 +37,11 @@ class Program
             };
 
             // Apply the convolution filter with the custom kernel
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+            rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
 
-            // Save the processed image as PNG
-            PngOptions options = new PngOptions();
-            raster.Save(outputPath, options);
+            // Save the processed image as JPEG
+            JpegOptions options = new JpegOptions();
+            rasterImage.Save(outputPath, options);
         }
     }
 }

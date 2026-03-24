@@ -1,35 +1,44 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main()
     {
-        // Paths for input CMX, intermediate PNG, and final output PNG
-        string inputCmxPath = @"c:\temp\sample.cmx";
-        string intermediatePngPath = @"c:\temp\sample_intermediate.png";
-        string outputPngPath = @"c:\temp\sample_gaussian_blur.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\sample_gaussian.png";
 
-        // Load the CMX image
-        using (Image cmxImage = Image.Load(inputCmxPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Save the CMX image as a PNG to obtain a raster representation
-            cmxImage.Save(intermediatePngPath, new PngOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the intermediate PNG as a RasterImage
-        using (Image image = Image.Load(intermediatePngPath))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the CMX image
+        using (Image image = Image.Load(inputPath))
         {
-            RasterImage rasterImage = (RasterImage)image;
+            // Attempt to treat the loaded image as a raster image
+            if (image is RasterImage rasterImage)
+            {
+                // Apply Gaussian blur with kernel size 5 and sigma 4.0 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Apply Gaussian blur filter to the whole image (radius 5, sigma 4.0)
-            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            // Save the processed image to the final output path
-            rasterImage.Save(outputPngPath);
+                // Save the processed image to the output path (PNG format)
+                rasterImage.Save(outputPath);
+            }
+            else
+            {
+                // If the image is not rasterizable, report the limitation
+                Console.Error.WriteLine("The loaded CMX image cannot be processed as a raster image.");
+            }
         }
     }
 }

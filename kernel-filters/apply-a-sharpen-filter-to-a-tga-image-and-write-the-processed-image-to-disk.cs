@@ -1,29 +1,38 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Tga;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Path to the folder containing the source TGA image.
-        string dataDir = @"c:\temp\";
+        // Hardcoded input and output paths
+        string inputPath = "input.tga";
+        string outputPath = "output.tga";
 
-        // Load the TGA image from disk.
-        using (Image image = Image.Load(dataDir + "input.tga"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to a TgaImage to access TGA‑specific members.
-            TgaImage tgaImage = (TgaImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a sharpen filter to the whole image.
-            // Kernel size = 5, sigma = 4.0 (as used in Aspose.Imaging examples).
-            tgaImage.Filter(
-                tgaImage.Bounds,
-                new SharpenFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Save the processed image back to disk.
-            tgaImage.Save(dataDir + "output.tga");
+        // Load the TGA image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering functionality
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply a sharpen filter (kernel size 5, sigma 4.0) to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image as TGA using default TgaOptions
+            rasterImage.Save(outputPath, new TgaOptions());
         }
     }
 }

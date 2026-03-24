@@ -1,27 +1,35 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Paths for input DJVU image and output PNG image
-        string inputPath = "sample.djvu";
-        string outputPath = "sample_deconvolved.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.djvu";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the DJVU image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load DJVU image and apply deconvolution filter
         using (Image image = Image.Load(inputPath))
         {
             DjvuImage djvuImage = (DjvuImage)image;
 
-            // Apply a deconvolution filter (Gauss-Wiener) to the entire image
-            djvuImage.Filter(
-                djvuImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0)
-            );
+            // Apply Gauss-Wiener deconvolution filter to the entire image
+            var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0);
+            djvuImage.Filter(djvuImage.Bounds, deconvOptions);
 
             // Save the processed image as PNG
             djvuImage.Save(outputPath, new PngOptions());

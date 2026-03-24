@@ -1,28 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input BMP file path
+        // Hardcoded input and output paths
         string inputPath = "input.bmp";
-        // Output BMP file path
-        string outputPath = "output_deconvolved.bmp";
+        string outputPath = "output\\processed.bmp";
 
-        // Load the BMP image as a RasterImage
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP image, apply a Gauss-Wiener deconvolution filter, and save the result
         using (Image image = Image.Load(inputPath))
         {
             RasterImage raster = (RasterImage)image;
 
-            // Apply a Gauss-Wiener deconvolution filter to the entire image
-            // Parameters: radius = 5, sigma = 4.0
-            raster.Filter(raster.Bounds, new GaussWienerFilterOptions(5, 4.0));
+            // Apply deconvolution filter with radius 5 and sigma 4.0
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
 
-            // Save the processed image as BMP
-            raster.Save(outputPath, new BmpOptions());
+            // Save as BMP
+            BmpOptions bmpOptions = new BmpOptions();
+            raster.Save(outputPath, bmpOptions);
         }
     }
 }

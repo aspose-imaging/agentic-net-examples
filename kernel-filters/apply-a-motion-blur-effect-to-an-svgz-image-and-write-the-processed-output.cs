@@ -1,48 +1,62 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputFile = "input.svgz";
-        string outputFile = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svgz";
+        string outputPath = @"C:\Images\output.png";
 
-        using (Image image = Image.Load(inputFile))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure SVG rasterization options
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVGZ image
+        using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Create rasterization options for vector image
+            var rasterOptions = new VectorRasterizationOptions
             {
-                PageSize = image.Size,
-                BackgroundColor = Color.White
+                PageWidth = vectorImage.Width,
+                PageHeight = vectorImage.Height,
+                BackgroundColor = Aspose.Imaging.Color.White
             };
 
-            // Set PNG save options with the rasterization settings
-            PngOptions pngOptions = new PngOptions
+            // Set up PNG save options with rasterization
+            var pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Rasterize the SVGZ to a memory stream
-            using (MemoryStream ms = new MemoryStream())
+            // Save rasterized image to a temporary PNG file
+            string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            vectorImage.Save(tempPngPath, pngOptions);
+
+            // Load the rasterized PNG as a RasterImage
+            using (Aspose.Imaging.Image rasterImageBase = Aspose.Imaging.Image.Load(tempPngPath))
             {
-                image.Save(ms, pngOptions);
-                ms.Position = 0;
+                var rasterImage = (Aspose.Imaging.RasterImage)rasterImageBase;
 
-                // Load the rasterized image
-                using (Image rasterImage = Image.Load(ms))
-                {
-                    RasterImage raster = (RasterImage)rasterImage;
+                // Apply motion Wiener filter
+                rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
 
-                    // Apply motion blur (motion wiener) filter
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
-
-                    // Save the processed image
-                    raster.Save(outputFile);
-                }
+                // Save the processed image to the final output path
+                rasterImage.Save(outputPath);
             }
+
+            // Clean up temporary file
+            try { File.Delete(tempPngPath); } catch { }
         }
     }
 }

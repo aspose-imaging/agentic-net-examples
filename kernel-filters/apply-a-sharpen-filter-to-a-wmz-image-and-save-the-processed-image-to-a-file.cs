@@ -2,47 +2,36 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
-class ApplySharpenToWmz
+class Program
 {
     static void Main()
     {
-        // Input WMZ file path
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.wmz";
-        // Output PNG file path after applying sharpen filter
         string outputPath = @"C:\Images\sample_sharpened.png";
 
-        // Load the WMZ image (vector format)
-        using (Image vectorImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Rasterize the vector image to a raster format (PNG) in memory
-            using (MemoryStream rasterStream = new MemoryStream())
-            {
-                // Set up PNG options with vector rasterization settings
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new WmfRasterizationOptions
-                    {
-                        PageSize = vectorImage.Size // preserve original size
-                    }
-                };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-                // Save the rasterized image to the memory stream
-                vectorImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0; // reset stream position for reading
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the rasterized image from the memory stream
-                using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
-                {
-                    // Apply sharpen filter to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+        // Load the WMZ image, apply Sharpen filter, and save the result
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access Filter method
+            var rasterImage = (RasterImage)image;
 
-                    // Save the processed image to the desired output file
-                    rasterImage.Save(outputPath, new PngOptions());
-                }
-            }
+            // Apply Sharpen filter with kernel size 5 and sigma 4.0 to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }

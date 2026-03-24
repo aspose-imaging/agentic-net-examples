@@ -1,41 +1,50 @@
-// Load the EMF vector image
-using (Aspose.Imaging.Image emfImage = Aspose.Imaging.Image.Load(@"C:\Images\input.emf"))
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
+
+class Program
 {
-    // Rasterize the EMF to a bitmap in memory using EmfRasterizationOptions
-    var rasterizationOptions = new Aspose.Imaging.ImageOptions.EmfRasterizationOptions
+    static void Main()
     {
-        // Use the original EMF size for the raster page
-        PageSize = emfImage.Size,
-        // Optional: set background color if needed
-        BackgroundColor = Aspose.Imaging.Color.White
-    };
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.emf";
+        string outputPath = @"c:\temp\output.png";
 
-    // Save the rasterized image to a memory stream in PNG format
-    using (var rasterStream = new System.IO.MemoryStream())
-    {
-        emfImage.Save(rasterStream,
-            new Aspose.Imaging.ImageOptions.PngOptions { VectorRasterizationOptions = rasterizationOptions });
-
-        // Reset stream position for reading
-        rasterStream.Position = 0;
-
-        // Load the rasterized PNG as a RasterImage
-        using (Aspose.Imaging.Image rasterImg = Aspose.Imaging.Image.Load(rasterStream))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage to access filtering capabilities
-            var raster = (Aspose.Imaging.RasterImage)rasterImg;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a Sharpen filter to the whole image
-            raster.Filter(raster.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the sharpened result to a new EMF file (rasterized back to EMF)
-            var saveRasterOptions = new Aspose.Imaging.ImageOptions.EmfOptions
+        // Load the EMF image
+        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        {
+            // Rasterize EMF to PNG in memory
+            var rasterOptions = new EmfRasterizationOptions { PageSize = emfImage.Size };
+            var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+
+            using (var memoryStream = new MemoryStream())
             {
-                // Use the same rasterization options to embed the raster data into EMF
-                VectorRasterizationOptions = rasterizationOptions
-            };
-            raster.Save(@"C:\Images\output_sharpened.emf", saveRasterOptions);
+                emfImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
+
+                // Load the rasterized image
+                using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
+                {
+                    // Apply Sharpen filter to the whole image
+                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                    // Save the processed image
+                    rasterImage.Save(outputPath);
+                }
+            }
         }
     }
 }

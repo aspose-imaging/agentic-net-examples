@@ -1,42 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input CDR file path and output raster image path.
-        string inputPath = args.Length > 0 ? args[0] : "input.cdr";
-        string outputPath = args.Length > 1 ? args[1] : "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample_sharpened.png";
 
-        // Load the CDR vector image.
-        using (Image cdrImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            CdrImage cdr = (CdrImage)cdrImage;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Rasterize the CDR image to a PNG in memory.
-            using (MemoryStream rasterStream = new MemoryStream())
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the CDR image
+        using (Image image = Image.Load(inputPath))
+        {
+            // CDR images are vector; to apply a raster filter we need a RasterImage representation
+            RasterImage raster = image as RasterImage;
+            if (raster == null)
             {
-                PngOptions pngOptions = new PngOptions();
-                cdr.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0;
-
-                // Load the rasterized image.
-                using (Image rasterImage = Image.Load(rasterStream))
-                {
-                    RasterImage raster = (RasterImage)rasterImage;
-
-                    // Apply Sharpen filter to the entire image.
-                    raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-
-                    // Save the processed raster image.
-                    raster.Save(outputPath, new PngOptions());
-                }
+                Console.Error.WriteLine("Loaded image is not a raster image and cannot be filtered.");
+                return;
             }
+
+            // Apply sharpen filter to the entire image bounds
+            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image (PNG format inferred from file extension)
+            raster.Save(outputPath);
         }
     }
 }

@@ -1,56 +1,62 @@
 using System;
-using System.Drawing;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
 
-class ApplyMotionBlurToWmz
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input WMZ (compressed WMF) file path
-        string inputPath = "input.wmz";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.wmz";
+        string outputPath = @"C:\Images\output.png";
 
-        // Output file path (PNG format after applying the filter)
-        string outputPath = "output.png";
-
-        // Load the WMZ image. Aspose.Imaging.Image.Load works for all supported formats.
-        using (Image wmfImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Prepare rasterization options to convert the vector WMZ image to a raster image.
-            // The page size is set to the original image size to preserve dimensions.
-            var rasterizationOptions = new WmfRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Temporary raster file path
+        string tempRasterPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath));
+
+        // Load the WMZ (vector) image and rasterize to PNG
+        using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
+        {
+            var rasterOptions = new WmfRasterizationOptions
             {
-                PageSize = wmfImage.Size
+                PageSize = vectorImage.Size
             };
 
-            // Define PNG save options that include the rasterization settings.
             var pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterizationOptions
+                VectorRasterizationOptions = rasterOptions
             };
 
-            // Render the WMZ image into a raster image by saving it to a memory stream first.
-            using (var memoryStream = new System.IO.MemoryStream())
-            {
-                // Render and store the rasterized image in the memory stream.
-                wmfImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0; // Reset stream position for reading.
+            vectorImage.Save(tempRasterPath, pngOptions);
+        }
 
-                // Load the rasterized image from the memory stream.
-                using (Image rasterImage = Image.Load(memoryStream))
-                {
-                    // Cast to RasterImage to gain access to the Filter method.
-                    var raster = (RasterImage)rasterImage;
+        // Load the rasterized PNG, apply MotionWiener filter, and save the result
+        using (Aspose.Imaging.Image rasterImageContainer = Aspose.Imaging.Image.Load(tempRasterPath))
+        {
+            var rasterImage = (Aspose.Imaging.RasterImage)rasterImageContainer;
 
-                    // Apply a motion Wiener filter (used here as a motion blur effect).
-                    // Parameters: length = 10, smooth = 1.0, angle = 90 degrees.
-                    raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
+            // Apply MotionWiener filter: length=10, smooth=1.0, angle=90.0
+            rasterImage.Filter(rasterImage.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
 
-                    // Save the processed raster image to the desired output file.
-                    raster.Save(outputPath, new PngOptions());
-                }
-            }
+            // Save the processed image
+            rasterImage.Save(outputPath, new PngOptions());
+        }
+
+        // Clean up temporary file
+        if (File.Exists(tempRasterPath))
+        {
+            try { File.Delete(tempRasterPath); } catch { /* ignore */ }
         }
     }
 }

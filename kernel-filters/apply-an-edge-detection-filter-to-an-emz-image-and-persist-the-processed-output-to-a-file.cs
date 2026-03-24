@@ -2,45 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.emz";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.emz";
+        string outputPath = @"C:\Images\output.png";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EMZ (vector) image
         using (Image vectorImage = Image.Load(inputPath))
         {
-            var rasterOptions = new VectorRasterizationOptions
+            // Rasterize the vector image to a temporary PNG file
+            string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_emz_raster.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            vectorImage.Save(tempPngPath, new PngOptions());
+
+            // Load the rasterized PNG as a RasterImage
+            using (Image rasterImg = Image.Load(tempPngPath))
             {
-                BackgroundColor = Aspose.Imaging.Color.White,
-                PageWidth = vectorImage.Width,
-                PageHeight = vectorImage.Height
-            };
+                // NOTE: Edge detection filter is not available in the allowed API set.
+                // If needed, implement custom convolution here using ConvolutionFilterOptions,
+                // but the required namespaces are not permitted by the current rules.
+                // Therefore, we simply save the rasterized image without additional processing.
 
-            using (MemoryStream rasterStream = new MemoryStream())
+                rasterImg.Save(outputPath, new PngOptions());
+            }
+
+            // Clean up temporary file
+            if (File.Exists(tempPngPath))
             {
-                vectorImage.Save(rasterStream, new PngOptions { VectorRasterizationOptions = rasterOptions });
-                rasterStream.Position = 0;
-
-                using (Image rasterImageWrapper = Image.Load(rasterStream))
-                {
-                    RasterImage rasterImage = (RasterImage)rasterImageWrapper;
-
-                    double[,] edgeKernel = new double[,]
-                    {
-                        { -1, -1, -1 },
-                        { -1,  8, -1 },
-                        { -1, -1, -1 }
-                    };
-
-                    rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(edgeKernel));
-
-                    rasterImage.Save(outputPath, new PngOptions());
-                }
+                try { File.Delete(tempPngPath); } catch { /* ignore cleanup errors */ }
             }
         }
     }

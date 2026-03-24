@@ -1,34 +1,47 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Ico;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
-public class Program
+class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input ICO file and output processed image path
+        // Hardcoded input and output paths
         string inputPath = "input.ico";
-        string outputPath = "output.png";
+        string outputPath = "output.ico";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists (creates even if path is null -> current directory)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the ICO image
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            // Cast to IcoImage to access ICO‑specific members
+            IcoImage icoImage = image as IcoImage;
+            if (icoImage == null)
+            {
+                Console.Error.WriteLine("Loaded image is not an ICO image.");
+                return;
+            }
 
-            // Motion blur parameters
-            int kernelSize = 9;          // Must be an odd number
-            double angleDegrees = 45.0;  // Angle in degrees
+            // Create motion blur (motion Wiener) filter options
+            // Length = 10, Brightness = 1.0, Angle = 90 degrees
+            var motionBlurOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
 
-            // Generate motion blur kernel
-            double[,] kernel = ConvolutionFilter.GetBlurMotion(kernelSize, angleDegrees);
+            // Apply the filter to the whole image bounds
+            icoImage.Filter(icoImage.Bounds, motionBlurOptions);
 
-            // Apply motion blur filter to the entire image
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-            // Save the processed image as PNG
-            raster.Save(outputPath, new PngOptions());
+            // Save the processed ICO image
+            icoImage.Save(outputPath);
         }
     }
 }

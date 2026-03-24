@@ -1,13 +1,38 @@
-// Load the DNG image from file
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(@"c:\temp\input.dng"))
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+
+class Program
 {
-    // Cast to DngImage to access format‑specific methods
-    var dngImage = (Aspose.Imaging.FileFormats.Dng.DngImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.dng";
+        string outputPath = @"C:\temp\output.png";
 
-    // Apply a Gaussian blur filter to the whole image (radius 5, sigma 4.0)
-    dngImage.Filter(dngImage.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image to a new file (PNG format)
-    dngImage.Save(@"c:\temp\output.png", new Aspose.Imaging.ImageOptions.PngOptions());
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DNG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to apply filters
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the processed image as PNG
+            rasterImage.Save(outputPath, new PngOptions());
+        }
+    }
 }

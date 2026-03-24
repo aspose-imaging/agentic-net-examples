@@ -3,67 +3,76 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input SVGZ file path (compressed SVG). Provide via args or use a default path.
-        string inputPath = args.Length > 0 ? args[0] : @"C:\Images\input.svgz";
-        // Output PNG file path where the edge‑detected image will be saved.
-        string outputPath = args.Length > 1 ? args[1] : @"C:\Images\output_edge.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svgz";
+        string tempPngPath = @"C:\Images\temp.png";
+        string outputPath = @"C:\Images\output.png";
 
-        // Load the compressed SVG (SVGZ) image.
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVGZ image and rasterize it to a temporary PNG
         using (Image vectorImage = Image.Load(inputPath))
         {
-            // Prepare rasterization options to convert the vector image to a raster bitmap.
-            VectorRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Create rasterization options for vector image
+            var rasterOptions = new VectorRasterizationOptions
             {
-                PageSize = vectorImage.Size,
+                PageWidth = vectorImage.Width,
+                PageHeight = vectorImage.Height,
                 BackgroundColor = Color.White
             };
 
-            // Temporary PNG file to hold the rasterized image.
-            string tempPngPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
-
-            // Rasterize the SVGZ to PNG.
-            PngOptions pngSaveOptions = new PngOptions
+            // Set up PNG save options with the rasterization options
+            var pngSaveOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
+
+            // Save rasterized image to temporary PNG file
             vectorImage.Save(tempPngPath, pngSaveOptions);
+        }
 
-            // Load the rasterized PNG as a RasterImage to apply the filter.
-            using (Image rasterImg = Image.Load(tempPngPath))
+        // Load the rasterized PNG, apply edge detection filter, and save the result
+        using (Image rasterImageContainer = Image.Load(tempPngPath))
+        {
+            var rasterImage = (RasterImage)rasterImageContainer;
+
+            // Define a simple Laplacian edge detection kernel
+            double[,] edgeKernel = new double[,]
             {
-                RasterImage raster = (RasterImage)rasterImg;
+                { -1, -1, -1 },
+                { -1,  8, -1 },
+                { -1, -1, -1 }
+            };
 
-                // Define an edge detection kernel (3x3 Laplacian).
-                double[,] edgeKernel = new double[,]
-                {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
-                };
+            // Apply convolution filter with the edge detection kernel
+            rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(edgeKernel));
 
-                // Create convolution filter options with the kernel.
-                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(edgeKernel);
+            // Save the processed image to the final output path
+            rasterImage.Save(outputPath, new PngOptions());
+        }
 
-                // Apply the edge detection filter to the entire image.
-                raster.Filter(raster.Bounds, filterOptions);
-
-                // Save the processed image.
-                raster.Save(outputPath);
-            }
-
-            // Clean up the temporary rasterized PNG.
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
-            }
+        // Optionally delete the temporary file
+        try
+        {
+            File.Delete(tempPngPath);
+        }
+        catch
+        {
+            // Ignore any errors during cleanup
         }
     }
 }

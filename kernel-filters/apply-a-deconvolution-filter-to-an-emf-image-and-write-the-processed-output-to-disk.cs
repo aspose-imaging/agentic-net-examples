@@ -1,32 +1,49 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
-class DeconvolutionExample
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path to the folder containing the EMF file
-        string dataDir = @"c:\temp\";
+        // Hardcoded paths
+        string inputPath = "input\\sample.emf";
+        string tempPath = "temp\\raster.png";
+        string outputPath = "output\\processed.png";
 
-        // Load the EMF image
-        using (Image image = Image.Load(dataDir + "sample.emf"))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage to gain access to the Filter method
-            RasterImage rasterImage = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Apply a Gauss‑Wiener deconvolution filter to the whole image
-            // Parameters: radius = 5, sigma = 4.0 (adjust as needed)
-            rasterImage.Filter(
-                rasterImage.Bounds,
-                new GaussWienerFilterOptions(5, 4.0));
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image as PNG
-            rasterImage.Save(
-                dataDir + "sample.GaussWienerFilter.png",
-                new PngOptions());
+        // Load EMF and rasterize to PNG
+        using (Image emfImage = Image.Load(inputPath))
+        {
+            var vectorOptions = new EmfRasterizationOptions
+            {
+                PageSize = emfImage.Size,
+                BackgroundColor = Color.White
+            };
+            var pngOptions = new PngOptions { VectorRasterizationOptions = vectorOptions };
+            emfImage.Save(tempPath, pngOptions);
+        }
+
+        // Load rasterized image, apply deconvolution filter, and save result
+        using (Image rasterImg = Image.Load(tempPath))
+        {
+            RasterImage raster = (RasterImage)rasterImg;
+            var deconvOptions = new MotionWienerFilterOptions(10, 1.0, 45.0);
+            raster.Filter(raster.Bounds, deconvOptions);
+            raster.Save(outputPath, new PngOptions());
         }
     }
 }

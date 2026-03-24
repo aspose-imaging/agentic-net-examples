@@ -1,34 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Avif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input AVIF image path
-        string inputPath = "input.avif";
-        // Output JPEG image path (fallback for unsupported AVIF save)
-        string outputPath = "output.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.avif";
+        string outputPath = @"C:\Images\output.avif";
 
-        // Load the AVIF image (AvifImage is a raster image)
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the AVIF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering methods
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage to use filtering methods
+            var rasterImage = (RasterImage)image;
 
-            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            // Apply a Gaussian blur filter to the entire image
+            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+            rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
-            // Prepare JPEG save options with a file create source
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 90 };
-
-            // Save the processed image as JPEG
-            raster.Save(outputPath, jpegOptions);
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }

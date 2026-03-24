@@ -1,28 +1,34 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input ICO file path
-        string inputPath = "input.ico";
-        // Output PNG file path
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.ico";
+        string outputPath = @"C:\Images\output.ico";
 
-        // Prepare PNG save options with a file create source
-        Source outSource = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = outSource };
-
-        // Load the ICO image, apply a sharpen (edge detection) filter, and save the result
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-            raster.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the ICO image, apply a sharpen (edge detection) filter, and save
+        using (Aspose.Imaging.FileFormats.Ico.IcoImage image = (Aspose.Imaging.FileFormats.Ico.IcoImage)Image.Load(inputPath))
+        {
+            // Apply sharpen filter to the whole image
+            image.Filter(image.Bounds, new SharpenFilterOptions(5, 4.0));
+
+            // Save the processed image
+            image.Save(outputPath);
         }
     }
 }

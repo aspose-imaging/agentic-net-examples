@@ -1,64 +1,60 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input EMF file path
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.emf";
-        // Output EMF file path
-        string outputPath = @"C:\Images\output.emf";
-        // Temporary raster file path
-        string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_emf_raster.png");
+        string outputPath = @"C:\Images\output.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EMF image
         using (Image emfImage = Image.Load(inputPath))
         {
-            // Prepare rasterization options for converting EMF to raster (PNG)
-            var rasterizationOptions = new EmfRasterizationOptions
+            // Prepare rasterization options to convert EMF to raster format
+            var rasterOptions = new EmfRasterizationOptions
             {
-                PageSize = emfImage.Size,
-                BackgroundColor = Aspose.Imaging.Color.White
+                PageSize = emfImage.Size
             };
 
-            // Save the EMF as a raster PNG image
+            // Set up PNG save options with the rasterization settings
             var pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterizationOptions
+                VectorRasterizationOptions = rasterOptions
             };
-            emfImage.Save(tempPngPath, pngOptions);
-        }
 
-        // Load the rasterized PNG image
-        using (Image rasterImageContainer = Image.Load(tempPngPath))
-        {
-            var rasterImage = (RasterImage)rasterImageContainer;
-
-            // Apply motion‑wiener (motion blur) filter to the entire image
-            var motionFilter = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0);
-            rasterImage.Filter(rasterImage.Bounds, motionFilter);
-
-            // Prepare EMF save options (re‑rasterize to EMF)
-            var emfSaveOptions = new EmfOptions
+            // Rasterize EMF into a memory stream
+            using (var ms = new MemoryStream())
             {
-                VectorRasterizationOptions = new EmfRasterizationOptions
+                emfImage.Save(ms, pngOptions);
+                ms.Position = 0; // Reset stream position for reading
+
+                // Load the rasterized image
+                using (Image rasterImage = Image.Load(ms))
                 {
-                    PageSize = rasterImage.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    var raster = (RasterImage)rasterImage;
+
+                    // Apply motion blur filter to the entire image
+                    raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
+
+                    // Save the processed image
+                    raster.Save(outputPath);
                 }
-            };
-
-            // Save the filtered image back to EMF format
-            rasterImage.Save(outputPath, emfSaveOptions);
-        }
-
-        // Clean up temporary file
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+            }
         }
     }
 }

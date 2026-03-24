@@ -1,18 +1,38 @@
-// Path to the folder containing the source JPEG image
-string dataDir = @"c:\temp\";
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-// Load the JPEG image using Aspose.Imaging's Image.Load method
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dataDir + "input.jpg"))
+class Program
 {
-    // Cast the loaded image to RasterImage to access raster-specific operations
-    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.jpg";
 
-    // Apply a Gaussian blur filter to the entire image.
-    // Radius = 5, Sigma = 4.0 (adjust these values as needed)
-    rasterImage.Filter(
-        rasterImage.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image back to disk as a JPEG file
-    rasterImage.Save(dataDir + "output.jpg");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the JPEG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply Gaussian blur (size = 5, sigma = 4.0) to the whole image
+            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+            rasterImage.Filter(rasterImage.Bounds, blurOptions);
+
+            // Save the processed image
+            rasterImage.Save(outputPath);
+        }
+    }
 }

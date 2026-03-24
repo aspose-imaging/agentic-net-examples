@@ -1,16 +1,38 @@
-string inputPath = @"C:\Images\sample.jp2";
-string outputPath = @"C:\Images\sample_blurred.jp2";
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+class Program
 {
-    // Cast the loaded image to JPEG2000 specific type
-    var jpeg2000Image = (Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Image)image;
+    static void Main(string[] args)
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jp2";
+        string outputPath = @"C:\Images\output.jp2";
 
-    // Apply a Gaussian blur filter to the whole image (radius = 5, sigma = 4.0)
-    jpeg2000Image.Filter(
-        jpeg2000Image.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image as JPEG2000
-    jpeg2000Image.Save(outputPath, new Aspose.Imaging.ImageOptions.Jpeg2000Options());
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the JPEG2000 image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage for filtering
+            RasterImage raster = (RasterImage)image;
+
+            // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+            // Save the processed image as JPEG2000
+            image.Save(outputPath, new Jpeg2000Options());
+        }
+    }
 }

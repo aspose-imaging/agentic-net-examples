@@ -1,30 +1,37 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input GIF file path
+        // Hardcoded input and output paths
         string inputPath = @"C:\temp\input.gif";
-        // Output GIF file path
-        string outputPath = @"C:\temp\output_blur.gif";
+        string outputPath = @"C:\temp\output_blurred.gif";
 
-        // Load the GIF image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the GIF image, apply Gaussian blur, and save the result
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to GifImage to access GIF-specific methods
-            GifImage gif = (GifImage)image;
+            GifImage gifImage = (GifImage)image;
 
             // Apply Gaussian blur filter to the entire image
-            // Parameters: radius = 5, sigma = 4.0
-            gif.Filter(gif.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            gifImage.Filter(gifImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the processed image as GIF
-            gif.Save(outputPath, new GifOptions());
+            // Save the processed image back to storage
+            gifImage.Save(outputPath);
         }
     }
 }

@@ -1,18 +1,40 @@
-// Path to the folder containing the DICOM file
-string dir = @"c:\temp\";
+using System;
+using System.IO;
+using System.Drawing;
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
-// Load the DICOM image
-using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(dir + "sample.dicom"))
+class Program
 {
-    // Cast the generic Image to DicomImage to access DICOM‑specific methods
-    Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
+    static void Main()
+    {
+        // Hardcoded input and output file paths
+        string inputPath = "input.dcm";
+        string outputPath = "output.dcm";
 
-    // Apply a motion blur (motion‑Wiener) filter to the whole image.
-    // Parameters: length = 10, smooth = 1.0, angle = 90 degrees
-    dicomImage.Filter(
-        dicomImage.Bounds,
-        new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    // Save the processed image as PNG
-    dicomImage.Save(dir + "sample.MotionWienerFilter.png", new Aspose.Imaging.ImageOptions.PngOptions());
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the DICOM image
+        using (Image image = Image.Load(inputPath))
+        {
+            DicomImage dicomImage = (DicomImage)image;
+
+            // Apply a motion blur (motion Wiener) filter to the entire image
+            var motionOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
+            dicomImage.Filter(dicomImage.Bounds, motionOptions);
+
+            // Save the processed image as a DICOM file
+            dicomImage.Save(outputPath, new DicomOptions());
+        }
+    }
 }

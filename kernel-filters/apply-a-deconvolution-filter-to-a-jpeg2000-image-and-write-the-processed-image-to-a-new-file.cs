@@ -2,15 +2,25 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output file paths
-        string inputPath = Path.Combine("C:", "Images", "input.jp2");
-        string outputPath = Path.Combine("C:", "Images", "output.jp2");
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.jp2";
+        string outputPath = @"C:\Images\output.jp2";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the JPEG2000 image
         using (Image image = Image.Load(inputPath))
@@ -18,11 +28,11 @@ class Program
             // Cast to RasterImage for filtering
             RasterImage raster = (RasterImage)image;
 
-            // Apply a motion deconvolution filter (length, sigma, angle)
-            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
+            // Apply a deconvolution filter (Gauss-Wiener) to the entire image
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
 
             // Save the processed image as JPEG2000
-            raster.Save(outputPath, new Jpeg2000Options());
+            image.Save(outputPath, new Jpeg2000Options());
         }
     }
 }

@@ -1,32 +1,37 @@
 using System;
-using System.Drawing;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
-class EmbossExample
+class Program
 {
     static void Main()
     {
-        // Path to the folder containing the source image
-        string dataDir = @"C:\Temp\";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output_emboss.png";
 
-        // Load the source image
-        using (Image image = Image.Load(dataDir + "sample.png"))
+        // Verify that the input file exists; report error and exit if not
+        if (!File.Exists(inputPath))
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Create convolution filter options using the built‑in 3x3 emboss kernel
-            var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Apply the emboss filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, embossOptions);
+        // Load the image, apply the emboss convolution filter, and save the result
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage raster = (RasterImage)image;
+
+            // Apply the built‑in 3x3 emboss kernel
+            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
             // Save the processed image
-            rasterImage.Save(dataDir + "sample_Emboss.png", new PngOptions());
+            raster.Save(outputPath);
         }
     }
 }

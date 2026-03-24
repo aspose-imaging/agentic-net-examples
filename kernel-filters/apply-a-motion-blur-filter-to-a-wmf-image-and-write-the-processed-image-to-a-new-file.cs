@@ -1,53 +1,37 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input WMF file path
-        string inputPath = "input.wmf";
-        // Output raster image path (PNG)
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.wmf";
+        string outputPath = @"C:\Images\sample.motionblur.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WMF image
-        using (Image wmfImage = Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Set up rasterization options for WMF to PNG conversion
-            var rasterizationOptions = new WmfRasterizationOptions
-            {
-                PageSize = wmfImage.Size,
-                BackgroundColor = Aspose.Imaging.Color.White
-            };
+            // Cast to RasterImage to apply filters
+            RasterImage rasterImage = (RasterImage)image;
 
-            // PNG save options with vector rasterization
-            var pngSaveOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
+            // Apply motion Wiener filter (length, smooth, angle)
+            rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
 
-            // Render WMF to a raster image in memory
-            using (var memoryStream = new MemoryStream())
-            {
-                wmfImage.Save(memoryStream, pngSaveOptions);
-                memoryStream.Position = 0;
-
-                // Load the rasterized image
-                using (Image rasterImage = Image.Load(memoryStream))
-                {
-                    var raster = (RasterImage)rasterImage;
-
-                    // Apply motion blur (motion wiener) filter to the entire image
-                    raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
-
-                    // Save the processed image as PNG
-                    raster.Save(outputPath, new PngOptions());
-                }
-            }
+            // Save the processed image
+            rasterImage.Save(outputPath);
         }
     }
 }

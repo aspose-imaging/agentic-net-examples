@@ -1,40 +1,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Paths for input CMX, temporary raster image, and final output
-        string inputCmxPath = "input.cmx";
-        string tempPngPath = "temp.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.cmx";
         string outputPath = "output.png";
 
-        // Load the CMX image and rasterize it to a temporary PNG file
-        using (Image cmxImage = Image.Load(inputCmxPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Save as PNG to obtain a raster representation
-            PngOptions pngOptions = new PngOptions();
-            cmxImage.Save(tempPngPath, pngOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        // Load the rasterized PNG, apply Sharpen filter, and save the result
-        using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
-        {
-            // Apply Sharpen filter with kernel size 5 and sigma 4.0
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image
-            PngOptions outputOptions = new PngOptions();
-            raster.Save(outputPath, outputOptions);
-        }
-
-        // Clean up temporary file
-        if (File.Exists(tempPngPath))
+        // Load the CMX image
+        using (Image cmxImage = Image.Load(inputPath))
         {
-            File.Delete(tempPngPath);
+            // Save a temporary rasterized version (PNG) of the CMX image
+            string tempPath = Path.Combine(Path.GetTempPath(), "temp_cmx_raster.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+            cmxImage.Save(tempPath, new PngOptions());
+
+            // Load the rasterized image
+            using (Image rasterImage = Image.Load(tempPath))
+            {
+                // Cast to RasterImage to access the Filter method
+                var raster = (RasterImage)rasterImage;
+
+                // Apply Sharpen filter with kernel size 5 and sigma 4.0 to the whole image
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                // Save the processed image to the desired output path
+                raster.Save(outputPath);
+            }
+
+            // Clean up temporary file
+            try { File.Delete(Path.Combine(Path.GetTempPath(), "temp_cmx_raster.png")); } catch { }
         }
     }
 }

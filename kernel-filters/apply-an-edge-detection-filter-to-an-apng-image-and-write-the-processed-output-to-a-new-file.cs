@@ -2,46 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Input APNG file path
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
-        // Output APNG file path
-        string outputPath = "output.apng";
+        string outputPath = "output_processed.apng";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the APNG image
-        using (Aspose.Imaging.FileFormats.Apng.ApngImage apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)Image.Load(inputPath))
+        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
         {
-            // Iterate over each frame in the animation
-            foreach (Aspose.Imaging.FileFormats.Apng.ApngFrame frame in apng.Pages)
+            // Edge detection kernel (Sobel horizontal)
+            double[,] kernel = new double[,]
             {
-                // Sobel edge detection kernel (horizontal)
-                double[,] kernel = new double[,]
-                {
-                    { -1, 0, 1 },
-                    { -2, 0, 2 },
-                    { -1, 0, 1 }
-                };
-
-                // Create convolution filter options with the kernel
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-
-                // Apply the filter to the entire frame
-                frame.Filter(frame.Bounds, filterOptions);
-            }
-
-            // Prepare save options for APNG output
-            var saveOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
+                { -1, 0, 1 },
+                { -2, 0, 2 },
+                { -1, 0, 1 }
             };
 
-            // Save the processed APNG image
-            apng.Save(outputPath, saveOptions);
+            // Apply the filter to each frame
+            foreach (ApngFrame frame in apng.Pages)
+            {
+                frame.Filter(frame.Bounds, new ConvolutionFilterOptions(kernel));
+            }
+
+            // Save the processed APNG
+            apng.Save(outputPath, new ApngOptions());
         }
     }
 }
