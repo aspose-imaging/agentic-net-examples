@@ -1,37 +1,48 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define output path and image dimensions
-        string outputPath = "output.j2k";
-        int width = 800;
-        int height = 600;
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.jp2";
+        string outputPath = @"c:\temp\sample.output.png";
 
-        // Configure JPEG2000 options with a memory limit (BufferSizeHint in MB)
-        Jpeg2000Options jp2Options = new Jpeg2000Options
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            BufferSizeHint = 20, // Limit internal buffers to 20 MB
-            Source = new FileCreateSource(outputPath, false),
-            Irreversible = true,
-            Codec = Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Codec.J2K
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure load options to limit memory usage
+        var loadOptions = new Jpeg2000LoadOptions
+        {
+            BufferSizeHint = 50,               // Limit internal buffers to 50 MB
+            ConcurrentImageProcessing = false // Disable concurrent processing to reduce memory pressure
         };
 
-        // Create the JPEG2000 canvas using the options
-        using (Image canvas = Image.Create(jp2Options, width, height))
+        // Load the JPEG2000 image with the specified options
+        using (Image img = Image.Load(inputPath, loadOptions))
         {
-            // Draw a solid rectangle covering the entire canvas
-            Graphics graphics = new Graphics(canvas);
-            SolidBrush brush = new SolidBrush(Color.Blue);
-            graphics.FillRectangle(brush, canvas.Bounds);
+            // Cast to Jpeg2000Image for type‑specific operations (if needed)
+            var jpeg2000Image = img as Jpeg2000Image;
+            if (jpeg2000Image == null)
+            {
+                Console.Error.WriteLine("Failed to load JPEG2000 image.");
+                return;
+            }
 
-            // Save the image; since the source is bound to a file, call Save()
-            canvas.Save();
+            // Save the image as PNG using default PNG options
+            jpeg2000Image.Save(outputPath, new PngOptions());
         }
     }
 }
