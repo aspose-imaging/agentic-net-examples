@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 
@@ -6,20 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Path to the EMF file to be loaded
-        string inputFile = @"C:\Images\sample.emf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\sample_copy.emf";
 
-        // Load the EMF image into memory using the unified Image.Load method
-        using (Image image = Image.Load(inputFile))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Cast the generic Image to a strongly‑typed EmfImage for EMF‑specific operations
-            EmfImage emfImage = (EmfImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Ensure all internal data is cached so the image is fully loaded in memory
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EMF image into memory
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to EmfImage to access EMF-specific members
+            EmfImage emfImage = image as EmfImage;
+            if (emfImage == null)
+            {
+                Console.Error.WriteLine("The loaded file is not an EMF image.");
+                return;
+            }
+
+            // Optionally cache data to force loading of all records
             emfImage.CacheData();
 
-            // At this point emfImage is fully loaded and can be processed further
-            Console.WriteLine($"EMF image loaded: {emfImage.Width}x{emfImage.Height} pixels");
+            // Example: display basic image information
+            Console.WriteLine($"Width: {emfImage.Width}, Height: {emfImage.Height}");
+            Console.WriteLine($"Number of records: {emfImage.Records.Count}");
+
+            // Save a copy of the image (demonstrates safe save handling)
+            emfImage.Save(outputPath);
         }
     }
 }
