@@ -1,44 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.FileFormats.Wmf.Graphics;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace GifToWmfExample
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Input GIF and output WMF file paths
-        string gifPath = "input.gif";
-        string wmfPath = "output.wmf";
-
-        // Load the GIF image
-        using (GifImage gif = (GifImage)Image.Load(gifPath))
+        static void Main()
         {
-            int width = gif.Width;
-            int height = gif.Height;
+            // Hardcoded input and output paths
+            string inputGifPath = @"C:\temp\input.gif";
+            string outputWmfPath = @"C:\temp\output.wmf";
 
-            // Define the WMF canvas size matching the GIF dimensions
-            Aspose.Imaging.Rectangle frame = new Aspose.Imaging.Rectangle(0, 0, width, height);
-            int dpi = 96; // Standard screen resolution
-
-            // Create a WMF recorder graphics object
-            WmfRecorderGraphics2D graphics = new WmfRecorderGraphics2D(frame, dpi);
-
-            // Draw the GIF onto the WMF canvas
-            graphics.DrawImage(
-                gif,
-                new Aspose.Imaging.Rectangle(0, 0, width, height),
-                new Aspose.Imaging.Rectangle(0, 0, width, height),
-                Aspose.Imaging.GraphicsUnit.Pixel);
-
-            // Finalize and obtain the WMF image
-            using (WmfImage wmfImage = graphics.EndRecording())
+            // Verify input file exists
+            if (!File.Exists(inputGifPath))
             {
-                // Save the WMF image to file
-                wmfImage.Save(wmfPath);
+                Console.Error.WriteLine($"File not found: {inputGifPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputWmfPath));
+
+            // Load the GIF image as a raster image
+            using (RasterImage gifImage = (RasterImage)Image.Load(inputGifPath))
+            {
+                // Determine canvas size based on GIF dimensions
+                int canvasWidth = gifImage.Width;
+                int canvasHeight = gifImage.Height;
+                int dpi = 96; // default screen resolution
+
+                // Define the frame rectangle for the WMF canvas (measured in twips)
+                Rectangle frame = new Rectangle(0, 0, canvasWidth, canvasHeight);
+
+                // Create a WMF recorder graphics object
+                WmfRecorderGraphics2D graphics = new WmfRecorderGraphics2D(frame, dpi);
+
+                // Draw the GIF onto the WMF canvas, scaling to fit the full canvas
+                graphics.DrawImage(
+                    gifImage,
+                    new Rectangle(0, 0, canvasWidth, canvasHeight),   // destination rectangle on WMF
+                    new Rectangle(0, 0, canvasWidth, canvasHeight),   // source rectangle from GIF
+                    GraphicsUnit.Pixel);
+
+                // Finalize recording and obtain the WMF image
+                using (WmfImage wmfImage = graphics.EndRecording())
+                {
+                    // Save the WMF image to the specified output path
+                    wmfImage.Save(outputWmfPath);
+                }
             }
         }
     }
