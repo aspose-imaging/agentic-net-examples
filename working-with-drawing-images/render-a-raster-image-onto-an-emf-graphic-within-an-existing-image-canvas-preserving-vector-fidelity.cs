@@ -1,41 +1,57 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Emf.Graphics;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Paths to the source EMF, the raster image to embed, and the output EMF
-        string dir = @"c:\temp\";
-        string sourceEmfPath = System.IO.Path.Combine(dir, "base.emf");
-        string rasterImagePath = System.IO.Path.Combine(dir, "sample.bmp");
-        string outputEmfPath = System.IO.Path.Combine(dir, "result.emf");
+        // Hardcoded input raster image and output EMF paths
+        string inputPath = "input.png";
+        string outputPath = "output.emf";
 
-        // Load the existing EMF image (lifecycle: load)
-        using (EmfImage baseEmf = (EmfImage)Image.Load(sourceEmfPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Obtain a recorder graphics object that contains all existing records
-            EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(baseEmf);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Load the raster image that will be drawn onto the EMF canvas
-            using (RasterImage raster = (RasterImage)Image.Load(rasterImagePath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the raster image
+        using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        {
+            int width = raster.Width;
+            int height = raster.Height;
+
+            // Convert pixel dimensions to millimeters (approx. 100 pixels per mm)
+            int widthMm = (int)(width / 100f);
+            int heightMm = (int)(height / 100f);
+
+            // Define the EMF frame matching the raster size
+            Aspose.Imaging.Rectangle frame = new Aspose.Imaging.Rectangle(0, 0, width, height);
+
+            // Create EMF graphics recorder
+            var graphics = new EmfRecorderGraphics2D(
+                frame,
+                new Aspose.Imaging.Size(width, height),
+                new Aspose.Imaging.Size(widthMm, heightMm));
+
+            // Draw the raster image onto the EMF canvas, scaling to full size
+            graphics.DrawImage(
+                raster,
+                new Aspose.Imaging.Rectangle(0, 0, width, height),   // destination rectangle
+                new Aspose.Imaging.Rectangle(0, 0, width, height),   // source rectangle
+                Aspose.Imaging.GraphicsUnit.Pixel);
+
+            // Finalize recording and obtain the EMF image
+            using (EmfImage emf = graphics.EndRecording())
             {
-                // Destination rectangle on the EMF canvas (position and size)
-                Aspose.Imaging.Rectangle destRect = new Aspose.Imaging.Rectangle(50, 50, raster.Width, raster.Height);
-                // Source rectangle (full raster image)
-                Aspose.Imaging.Rectangle srcRect = new Aspose.Imaging.Rectangle(0, 0, raster.Width, raster.Height);
-
-                // Draw the raster image onto the EMF graphics using original pixel units
-                graphics.DrawImage(raster, destRect, srcRect, Aspose.Imaging.GraphicsUnit.Pixel);
-            }
-
-            // End recording to produce a new EMF image that includes the drawn raster (lifecycle: save)
-            using (EmfImage resultEmf = graphics.EndRecording())
-            {
-                resultEmf.Save(outputEmfPath);
+                // Save the EMF image to the specified path
+                emf.Save(outputPath);
             }
         }
     }
