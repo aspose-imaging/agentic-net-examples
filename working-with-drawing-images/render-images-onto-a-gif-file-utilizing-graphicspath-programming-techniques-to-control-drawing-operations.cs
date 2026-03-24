@@ -1,72 +1,79 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
-        // Output GIF file path
+        // Hardcoded input and output paths
+        string inputPath = "background.png";
         string outputPath = "output.gif";
 
-        // Define frame dimensions
-        int width = 100;
-        int height = 100;
-
-        // Create the first frame block and fill background
-        using (GifFrameBlock firstBlock = new GifFrameBlock((ushort)width, (ushort)height))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Graphics does not implement IDisposable; do not wrap in using
-            Graphics graphicsFirst = new Graphics(firstBlock);
-            SolidBrush backgroundBrush = new SolidBrush(Color.White);
-            graphicsFirst.FillRectangle(backgroundBrush, firstBlock.Bounds);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Initialize GIF image with the first frame
-            using (GifImage gif = new GifImage(firstBlock))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load background image
+        using (Aspose.Imaging.RasterImage background = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Create the first GIF frame from the background image
+            using (GifFrameBlock firstBlock = new GifFrameBlock(background))
+            using (GifImage gifImage = new GifImage(firstBlock))
             {
-                // Create additional frames with varying shapes
-                for (int i = 0; i < 10; i++)
+                // Define a pen for drawing outlines
+                Aspose.Imaging.Pen outlinePen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
+                // Define a solid brush for filling shapes
+                SolidBrush fillBrush = new SolidBrush(Aspose.Imaging.Color.Red);
+
+                // Create additional frames with animated shapes
+                for (int frameIndex = 0; frameIndex < 5; frameIndex++)
                 {
-                    using (GifFrameBlock frame = new GifFrameBlock((ushort)width, (ushort)height))
+                    // Create a new blank frame with same dimensions as background
+                    using (GifFrameBlock frameBlock = new GifFrameBlock((ushort)background.Width, (ushort)background.Height))
                     {
-                        // Fill frame background
-                        Graphics graphics = new Graphics(frame);
-                        SolidBrush bgBrush = new SolidBrush(Color.White);
-                        graphics.FillRectangle(bgBrush, frame.Bounds);
+                        // Create graphics for the frame
+                        Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(frameBlock);
 
-                        // Build a GraphicsPath with a rectangle and an ellipse
-                        GraphicsPath path = new GraphicsPath();
-                        Figure figure = new Figure();
+                        // Clear the frame with white background
+                        graphics.Clear(Aspose.Imaging.Color.White);
 
-                        // Add a static rectangle shape
-                        RectangleF rect = new RectangleF(10f, 10f, 80f, 80f);
-                        figure.AddShape(new RectangleShape(rect));
+                        // Create a GraphicsPath
+                        Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
 
-                        // Add an ellipse that changes size each frame
-                        float offset = i * 5;
-                        RectangleF ellipseRect = new RectangleF(10f + offset, 10f + offset, 80f - 2 * offset, 80f - 2 * offset);
-                        figure.AddShape(new EllipseShape(ellipseRect));
+                        // Create a figure
+                        Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+
+                        // Add a moving rectangle shape to the figure
+                        float rectSize = 50f;
+                        float offset = frameIndex * 20f;
+                        figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(offset, offset, rectSize, rectSize)));
 
                         // Add the figure to the path
                         path.AddFigure(figure);
 
-                        // Draw the path outline
-                        Pen pen = new Pen(Color.Blue, 2);
-                        graphics.DrawPath(pen, path);
+                        // Draw the outline of the path
+                        graphics.DrawPath(outlinePen, path);
+
+                        // Fill the same rectangle
+                        graphics.FillPath(fillBrush, path);
 
                         // Add the completed frame to the GIF
-                        gif.AddBlock(frame);
+                        gifImage.AddBlock(frameBlock);
                     }
                 }
 
-                // Set infinite looping (0 means infinite)
-                gif.LoopsCount = 0;
-
                 // Save the animated GIF
-                gif.Save(outputPath);
+                gifImage.Save(outputPath);
             }
         }
     }
