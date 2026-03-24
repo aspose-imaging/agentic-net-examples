@@ -1,46 +1,59 @@
 using System;
 using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input image path (first argument) or default sample image.
-        string inputPath = args.Length > 0 ? args[0] : "sample.png";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.png";
+        string outputDir = @"c:\temp\processed";
 
-        // Output directory (second argument) or default "output".
-        string outputDir = args.Length > 1 ? args[1] : "output";
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
         Directory.CreateDirectory(outputDir);
 
-        // Define the set of filters to apply with their descriptive names.
-        var filters = new (string Name, FilterOptionsBase Options)[]
+        // Load the image
+        using (Image image = Image.Load(inputPath))
         {
-            ("Median", new MedianFilterOptions(5)),
-            ("BilateralSmoothing", new BilateralSmoothingFilterOptions(5)),
-            ("GaussianBlur", new GaussianBlurFilterOptions(5, 4.0)),
-            ("GaussWiener", new GaussWienerFilterOptions(5, 4.0)),
-            ("MotionWiener", new MotionWienerFilterOptions(10, 1.0, 90.0)),
-            ("Sharpen", new SharpenFilterOptions(5, 4.0))
-        };
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
 
-        // Apply each filter independently and save the result.
-        foreach (var (name, options) in filters)
-        {
-            // Load the source image as a RasterImage.
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            // Define a list of filter options to apply
+            var filters = new (string suffix, FilterOptionsBase options)[]
             {
-                // Apply the filter to the whole image bounds.
-                raster.Filter(raster.Bounds, options);
+                ("Median", new MedianFilterOptions(5)),
+                ("Bilateral", new BilateralSmoothingFilterOptions(5)),
+                ("GaussianBlur", new GaussianBlurFilterOptions(5, 4.0)),
+                ("GaussWiener", new GaussWienerFilterOptions(5, 4.0)),
+                ("MotionWiener", new MotionWienerFilterOptions(10, 1.0, 90.0)),
+                ("Sharpen", new SharpenFilterOptions(5, 4.0))
+            };
 
-                // Construct output file name.
-                string outputPath = Path.Combine(outputDir,
-                    $"{Path.GetFileNameWithoutExtension(inputPath)}_{name}.png");
+            // Apply each filter sequentially and save the result
+            foreach (var (suffix, options) in filters)
+            {
+                // Apply filter to the whole image
+                rasterImage.Filter(rasterImage.Bounds, options);
 
-                // Save the processed image as PNG.
-                raster.Save(outputPath, new PngOptions());
+                // Build output file path
+                string outputPath = Path.Combine(outputDir, $"sample.{suffix}.png");
+
+                // Ensure the directory for the output file exists (already created above)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the filtered image
+                rasterImage.Save(outputPath);
             }
         }
     }
