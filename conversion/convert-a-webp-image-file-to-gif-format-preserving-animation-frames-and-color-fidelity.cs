@@ -1,27 +1,32 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
-class WebPToGifConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source animated WebP file
-        string inputWebPPath = @"C:\Images\animation.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.webp";
+        string outputPath = @"c:\temp\output.gif";
 
-        // Desired path for the output animated GIF file
-        string outputGifPath = @"C:\Images\animation_converted.gif";
-
-        // Load the WebP image (including all animation frames)
-        using (WebPImage webPImage = new WebPImage(inputWebPPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Save the loaded WebP image as GIF.
-            // GifOptions ensures that the output respects GIF format capabilities
-            // (palette, frame delays, etc.) while preserving animation frames.
-            webPImage.Save(outputGifPath, new GifOptions());
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("Conversion completed successfully.");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image (supports animation)
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // Save as GIF, preserving animation frames
+            webPImage.Save(outputPath, new GifOptions());
+        }
     }
 }
