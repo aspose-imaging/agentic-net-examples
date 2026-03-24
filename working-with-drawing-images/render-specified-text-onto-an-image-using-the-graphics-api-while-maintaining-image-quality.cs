@@ -3,49 +3,62 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Graphics;
+using Aspose.Imaging.Fonts;
+using Aspose.Imaging;
 
-class TextOnImageExample
+class Program
 {
     static void Main()
     {
-        // Define output path
-        string outputPath = Path.Combine(Environment.CurrentDirectory, "text_output.png");
+        // Hard‑coded output path
+        string outputPath = @"C:\temp\output.png";
 
-        // Create PNG options (no source needed for creation)
-        PngOptions pngOptions = new PngOptions();
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a new image with desired dimensions (e.g., 800x200)
-        using (Image image = Image.Create(pngOptions, 800, 200))
+        // Create a PNG image with desired size
+        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
-            // Initialize Graphics object for drawing
-            Graphics graphics = new Graphics(image);
+            // Set up PNG options
+            PngOptions pngOptions = new PngOptions
+            {
+                Source = new StreamSource(stream)
+            };
 
-            // Set high‑quality text rendering (ClearTypeGridFit gives the best quality)
-            graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            // Configure vector rasterization options to improve text quality
+            VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+            {
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
+            };
+            pngOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Optional: clear background with a solid color
-            graphics.Clear(Color.White);
+            // Create the image (800x200 pixels)
+            using (Image image = Image.Create(pngOptions, 800, 200))
+            {
+                // Initialize Graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-            // Create a solid brush for the text color
-            SolidBrush textBrush = new SolidBrush();
-            textBrush.Color = Color.DarkBlue;
-            textBrush.Opacity = 100; // fully opaque
+                // Clear background to white
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Define the font (family, size, style)
-            Font textFont = new Font("Arial", 48, FontStyle.Bold);
+                // Prepare brush for text
+                SolidBrush brush = new SolidBrush
+                {
+                    Color = Aspose.Imaging.Color.Black,
+                    Opacity = 100
+                };
 
-            // The text to render
-            string text = "Aspose.Imaging Text Rendering";
+                // Define font
+                Font font = new Font("Arial", 48);
 
-            // Draw the string at a specific location (x=50, y=70)
-            graphics.DrawString(text, textFont, textBrush, 50f, 70f);
+                // Draw the text string at the desired location
+                graphics.DrawString("Hello Aspose!", font, brush, new PointF(50, 70));
 
-            // Save the image to the specified file
-            image.Save(outputPath);
+                // Save the image
+                image.Save();
+            }
         }
-
-        Console.WriteLine($"Image saved to: {outputPath}");
     }
 }
