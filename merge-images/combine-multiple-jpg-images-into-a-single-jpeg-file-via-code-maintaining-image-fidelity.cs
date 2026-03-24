@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
@@ -10,20 +11,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input JPEG files to be combined
-        string[] inputFiles = new string[]
+        // Define input and output paths (hard‑coded)
+        string[] inputPaths = new string[]
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+            @"C:\Images\input1.jpg",
+            @"C:\Images\input2.jpg",
+            @"C:\Images\input3.jpg"
         };
+        string outputPath = @"C:\Images\merged_output.jpg";
 
-        // Output combined JPEG file
-        string outputFile = "combined.jpg";
+        // Verify each input file exists
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
 
         // Collect sizes of all input images
         List<Size> sizes = new List<Size>();
-        foreach (string path in inputFiles)
+        foreach (string path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
@@ -31,24 +40,26 @@ class Program
             }
         }
 
-        // Calculate canvas dimensions (horizontal concatenation)
-        int totalWidth = sizes.Sum(s => s.Width);
-        int maxHeight = sizes.Max(s => s.Height);
+        // Calculate canvas dimensions for horizontal stitching
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Prepare JPEG creation options with bound output source
-        Source src = new FileCreateSource(outputFile, false);
+        Source source = new FileCreateSource(outputPath, false);
         JpegOptions jpegOptions = new JpegOptions()
         {
-            Source = src,
-            Quality = 100 // preserve maximum fidelity
+            Source = source,
+            Quality = 100 // maximum quality to preserve fidelity
         };
 
-        // Create a JPEG canvas with the calculated size
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+        // Create a JPEG canvas and merge images side by side
+        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
         {
             int offsetX = 0;
-            // Merge each image onto the canvas side by side
-            foreach (string path in inputFiles)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -58,7 +69,7 @@ class Program
                 }
             }
 
-            // Save the bound canvas (output file is already bound via FileCreateSource)
+            // Save the bound image (no need to pass path again)
             canvas.Save();
         }
     }
