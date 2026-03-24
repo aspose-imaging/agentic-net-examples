@@ -4,56 +4,92 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input JPEG files and output PDF path
-        string[] jpegPaths = new string[]
+        // Hardcoded input JPEG files
+        string[] inputPaths = new string[]
         {
             @"C:\Images\image1.jpg",
             @"C:\Images\image2.jpg",
             @"C:\Images\image3.jpg"
         };
-        string outputPdfPath = @"C:\Images\merged.pdf";
 
-        // List to hold BMP images (as Image objects)
-        List<Image> bmpImages = new List<Image>();
+        // Hardcoded output PDF file
+        string outputPath = @"C:\Output\merged.pdf";
 
-        foreach (string jpegPath in jpegPaths)
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
-            // Load JPEG as raster image
-            using (RasterImage jpegImage = (RasterImage)Image.Load(jpegPath))
+            if (!File.Exists(inputPath))
             {
-                // Prepare BMP options with an in‑memory stream source
-                BmpOptions bmpOptions = new BmpOptions();
-                MemoryStream bmpStream = new MemoryStream();
-                bmpOptions.Source = new StreamSource(bmpStream, false);
-
-                // Create BMP image with same dimensions as JPEG
-                RasterImage bmpImage = (RasterImage)Image.Create(bmpOptions, jpegImage.Width, jpegImage.Height);
-
-                // Copy pixel data from JPEG to BMP
-                bmpImage.SaveArgb32Pixels(bmpImage.Bounds, jpegImage.LoadArgb32Pixels(jpegImage.Bounds));
-
-                // Add BMP image to collection (will be disposed later)
-                bmpImages.Add(bmpImage);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Create a multipage image from the BMP pages
-        using (Image pdfImage = Image.Create(bmpImages.ToArray()))
-        {
-            // Save the multipage image as PDF
-            pdfImage.Save(outputPdfPath, new PdfOptions());
-        }
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Dispose all BMP images and their underlying streams
-        foreach (Image img in bmpImages)
+        // Temporary directory for BMP conversions
+        string tempBmpDir = Path.Combine(Path.GetTempPath(), "AsposeBmpTemp");
+        Directory.CreateDirectory(tempBmpDir);
+
+        // List to hold BMP images
+        List<Image> bmpImages = new List<Image>();
+
+        try
         {
-            img.Dispose();
+            foreach (string jpegPath in inputPaths)
+            {
+                // Load JPEG image
+                using (Image jpegImage = Image.Load(jpegPath))
+                {
+                    // Define BMP temporary file path
+                    string bmpPath = Path.Combine(
+                        tempBmpDir,
+                        Path.GetFileNameWithoutExtension(jpegPath) + ".bmp");
+
+                    // Save JPEG as BMP
+                    jpegImage.Save(bmpPath, new BmpOptions());
+
+                    // Load the BMP image and keep it for multipage creation
+                    Image bmpImage = Image.Load(bmpPath);
+                    bmpImages.Add(bmpImage);
+                }
+            }
+
+            // Create a multipage image from the BMP images
+            Image multipageImage = Image.Create(bmpImages.ToArray());
+
+            // Save the multipage image as a PDF
+            multipageImage.Save(outputPath, new PdfOptions());
+
+            // Dispose the multipage image
+            multipageImage.Dispose();
+        }
+        finally
+        {
+            // Dispose all BMP images
+            foreach (var img in bmpImages)
+            {
+                img.Dispose();
+            }
+
+            // Optionally clean up temporary BMP files
+            try
+            {
+                if (Directory.Exists(tempBmpDir))
+                {
+                    Directory.Delete(tempBmpDir, true);
+                }
+            }
+            catch
+            {
+                // Suppress any cleanup errors
+            }
         }
     }
 }
