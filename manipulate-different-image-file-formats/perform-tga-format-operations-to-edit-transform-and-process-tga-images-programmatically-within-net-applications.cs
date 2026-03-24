@@ -1,52 +1,72 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace TgaProcessingDemo
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Input and output file paths
-        string inputPath = "input.tga";
-        string outputPath = "output.tga";
-
-        // Load the TGA image
-        using (TgaImage tgaImage = (TgaImage)Image.Load(inputPath))
+        static void Main()
         {
-            // Ensure image data is cached for better performance
-            if (!tgaImage.IsCached) tgaImage.CacheData();
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.tga";
 
-            // Update metadata properties
-            tgaImage.DateTimeStamp = DateTime.Now;
-            tgaImage.AuthorName = "Jane Doe";
-            tgaImage.AuthorComments = "Sample comment";
-            tgaImage.ImageId = "Img001";
-            tgaImage.JobNameOrId = "Job123";
-            tgaImage.JobTime = TimeSpan.FromHours(5);
-            tgaImage.TransparentColor = Color.FromArgb(0, 0, 0, 0);
-            tgaImage.SoftwareId = "MySoftware";
-            tgaImage.SoftwareVersion = "1.0";
-            tgaImage.SoftwareVersionLetter = 'b';
-            tgaImage.SoftwareVersionNumber = 1;
-            tgaImage.XOrigin = 0;
-            tgaImage.YOrigin = 0;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Crop the central region of the image
-            int cropWidth = tgaImage.Width / 2;
-            int cropHeight = tgaImage.Height / 2;
-            int cropX = (tgaImage.Width - cropWidth) / 2;
-            int cropY = (tgaImage.Height - cropHeight) / 2;
-            tgaImage.Crop(new Rectangle(cropX, cropY, cropWidth, cropHeight));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Resize the image to double its dimensions using nearest-neighbour resampling
-            tgaImage.Resize(tgaImage.Width * 2, tgaImage.Height * 2, ResizeType.NearestNeighbourResample);
+            // Load the source image (any supported raster format)
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                // Convert the raster image to a TGA image
+                using (TgaImage tga = new TgaImage(raster))
+                {
+                    // Edit some TGA metadata
+                    tga.AuthorName = "John Doe";
+                    tga.AuthorComments = "Sample TGA conversion";
+                    tga.ImageId = "DemoImage001";
+                    tga.SoftwareId = "Aspose.Imaging";
+                    tga.SoftwareVersion = "23.5";
+                    tga.XOrigin = 0;
+                    tga.YOrigin = 0;
 
-            // Rotate the image 45 degrees, keep canvas size, fill background with gray
-            tgaImage.Rotate(45f, true, Color.Gray);
+                    // Save the TGA image using default options
+                    tga.Save(outputPath);
+                }
+            }
 
-            // Save the modified TGA image
-            tgaImage.Save(outputPath);
+            // Demonstrate loading an existing TGA, modifying metadata, and re‑saving
+            string editInputPath = "existing.tga";
+            string editOutputPath = "edited.tga";
+
+            if (!File.Exists(editInputPath))
+            {
+                Console.Error.WriteLine($"File not found: {editInputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(editOutputPath));
+
+            using (TgaImage existingTga = (TgaImage)Image.Load(editInputPath))
+            {
+                // Update metadata fields
+                existingTga.AuthorName = "Jane Smith";
+                existingTga.JobNameOrId = "MetadataUpdateJob";
+                existingTga.JobTime = TimeSpan.FromHours(2);
+                existingTga.TransparentColor = Color.FromArgb(255, 0, 255, 0); // Green key color
+
+                // Save the modified TGA image
+                existingTga.Save(editOutputPath);
+            }
         }
     }
 }
