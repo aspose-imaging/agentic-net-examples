@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
@@ -7,15 +8,24 @@ class Program
 {
     static void Main()
     {
-        // Path to the source WebP image
-        string inputPath = @"c:\temp\input.webp";
-        // Desired output PDF file path
-        string outputPath = @"c:\temp\output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Load the WebP image using the provided constructor
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image
         using (WebPImage webPImage = new WebPImage(inputPath))
         {
-            // Save the image as a PDF while preserving its original quality
+            // Save the image as a PDF, preserving visual fidelity
             webPImage.Save(outputPath, new PdfOptions());
         }
     }
