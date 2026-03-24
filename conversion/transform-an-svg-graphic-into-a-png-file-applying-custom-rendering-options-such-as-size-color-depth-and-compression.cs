@@ -1,35 +1,55 @@
 using System;
+using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
 
-        int targetWidth = 800;
-        int targetHeight = 600;
-        int bitDepth = 8;
-        var compressionLevel = PngCompressionLevel.ZipLevel6;
-
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            SvgImage svgImage = (SvgImage)image;
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-            rasterOptions.PageSize = new Aspose.Imaging.SizeF(targetWidth, targetHeight);
-            rasterOptions.BackgroundColor = Aspose.Imaging.Color.White;
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.BitDepth = (byte)bitDepth;
-            pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
-            pngOptions.PngCompressionLevel = compressionLevel;
-            pngOptions.VectorRasterizationOptions = rasterOptions;
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure rasterization options (custom size, background, etc.)
+            var rasterOptions = new SvgRasterizationOptions
+            {
+                // Set desired output size (e.g., 800x600)
+                PageSize = new SizeF(800, 600),
+                // Optional: set background color
+                BackgroundColor = Color.White,
+                // Optional: improve rendering quality
+                SmoothingMode = SmoothingMode.AntiAlias,
+                TextRenderingHint = TextRenderingHint.AntiAlias
+            };
 
-            svgImage.Save(outputPath, pngOptions);
+            // Configure PNG export options
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions,
+                // Set color depth and type
+                BitDepth = 8,
+                ColorType = PngColorType.TruecolorWithAlpha,
+                // Set compression level (maximum compression)
+                PngCompressionLevel = PngCompressionLevel.ZipLevel9
+            };
+
+            // Save the rasterized PNG image
+            image.Save(outputPath, pngOptions);
         }
     }
 }
