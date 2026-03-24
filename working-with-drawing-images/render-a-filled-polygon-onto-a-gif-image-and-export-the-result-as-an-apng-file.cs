@@ -4,46 +4,60 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        int width = 300;
-        int height = 300;
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output\\output.gif";
 
-        using (GifImage gif = new GifImage(new GifFrameBlock((ushort)width, (ushort)height)))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the GIF image
+        using (GifImage gif = (GifImage)Image.Load(inputPath))
+        {
+            // Ensure the GIF has at least one frame
+            if (gif.PageCount == 0)
+            {
+                Console.Error.WriteLine("The GIF image contains no frames.");
+                return;
+            }
+
+            // Activate the first frame for drawing
+            gif.ActiveFrame = (GifFrameBlock)gif.Pages[0];
+
+            // Create a graphics object for the active frame (no using block)
+            Graphics graphics = new Graphics(gif.ActiveFrame);
+
+            // Define polygon vertices using Aspose.Imaging.PointF
+            Aspose.Imaging.PointF[] polygonPoints = new Aspose.Imaging.PointF[]
+            {
+                new Aspose.Imaging.PointF(10, 10),
+                new Aspose.Imaging.PointF(100, 20),
+                new Aspose.Imaging.PointF(80, 80),
+                new Aspose.Imaging.PointF(20, 70)
+            };
+
+            // Fill the polygon with a solid blue brush
             using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
             {
-                Point[] polygonPoints = new Point[]
-                {
-                    new Point(50, 50),
-                    new Point(250, 70),
-                    new Point(200, 250),
-                    new Point(80, 200)
-                };
-
-                Graphics graphics = new Graphics(gif.ActiveFrame);
-                graphics.Clear(Aspose.Imaging.Color.White);
                 graphics.FillPolygon(brush, polygonPoints);
             }
 
-            using (MemoryStream gifStream = new MemoryStream())
-            {
-                GifOptions gifOptions = new GifOptions();
-                gif.Save(gifStream, gifOptions);
-                gifStream.Position = 0;
-
-                using (RasterImage raster = (RasterImage)Image.Load(gifStream))
-                {
-                    string jpegOutputPath = "output.jpg";
-                    JpegOptions jpegOptions = new JpegOptions();
-                    raster.Save(jpegOutputPath, jpegOptions);
-                }
-            }
+            // Save the modified image as a GIF file
+            GifOptions saveOptions = new GifOptions();
+            gif.Save(outputPath, saveOptions);
         }
     }
 }
