@@ -2,42 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Apng;
 
-class TiffToApngBatchConverter
+class Program
 {
-    // Entry point
-    static void Main()
+    static void Main(string[] args)
     {
-        // Folder containing TIFF files
-        string inputFolder = @"C:\Images\TiffInput";
-        // Folder to store generated APNG files
-        string outputFolder = @"C:\Images\ApngOutput";
+        // Hardcoded collection of input TIFF files
+        string[] inputPaths = {
+            @"C:\Images\input1.tif",
+            @"C:\Images\input2.tif",
+            @"C:\Images\input3.tif"
+        };
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputFolder);
+        // Output directory for generated APNG files
+        string outputDirectory = @"C:\Images\Output";
 
-        // Get all TIFF files (both .tif and .tiff extensions)
-        string[] tiffFiles = Directory.GetFiles(inputFolder, "*.tif");
-        string[] tiffFilesAlt = Directory.GetFiles(inputFolder, "*.tiff");
-        string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
-        tiffFiles.CopyTo(allTiffFiles, 0);
-        tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
-
-        // Process each TIFF file
-        foreach (string tiffPath in allTiffFiles)
+        foreach (string inputPath in inputPaths)
         {
-            // Load the TIFF image (multi‑page TIFF is supported)
-            using (Image tiffImage = Image.Load(tiffPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Determine output file name (same base name with .png extension)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(tiffPath);
-                string apngPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Save as APNG with a default frame duration (e.g., 500 ms)
-                tiffImage.Save(apngPath, new ApngOptions() { DefaultFrameTime = 500 });
+            // Determine output file path (same name with .apng extension)
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".apng");
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image and save as APNG
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                tiffImage.Save(outputPath, new ApngOptions());
             }
         }
-
-        Console.WriteLine("Batch conversion completed.");
     }
 }
