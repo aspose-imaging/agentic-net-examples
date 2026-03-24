@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -8,43 +9,51 @@ class Program
 {
     static void Main()
     {
-        // Path to the source WebP image
-        string inputPath = @"C:\Temp\source.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.gif";
 
-        // Load the WebP image using the Aspose.Imaging.Image.Load method (lifecycle rule)
-        using (Image webpImage = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Retrieve the default WebP options for the loaded image.
-            // GetDefaultOptions returns an object; cast it to WebPOptions.
-            WebPOptions webpDefaultOptions = webpImage.GetDefaultOptions(new object[0]) as WebPOptions;
-
-            // If the cast succeeded, enumerate all public properties of WebPOptions.
-            if (webpDefaultOptions != null)
-            {
-                Console.WriteLine("Supported WebP input parameters (default values):");
-                PropertyInfo[] properties = typeof(WebPOptions).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                foreach (PropertyInfo prop in properties)
-                {
-                    // Retrieve the current value of the property from the default options instance.
-                    object value = prop.GetValue(webpDefaultOptions);
-                    Console.WriteLine($"{prop.Name} = {value ?? "null"}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Unable to obtain WebPOptions from the loaded image.");
-            }
-
-            // Prepare GIF save options (conversion target).
-            GifOptions gifOptions = new GifOptions
-            {
-                // Example: set background color to white (optional)
-                BackgroundColor = Color.White
-            };
-
-            // Save the image as GIF using the Aspose.Imaging.Image.Save method (lifecycle rule)
-            string outputPath = @"C:\Temp\converted.gif";
-            webpImage.Save(outputPath, gifOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to WebPImage to access WebP-specific options
+            WebPImage webPImage = image as WebPImage;
+            if (webPImage == null)
+            {
+                Console.Error.WriteLine("The loaded image is not a WebP image.");
+                return;
+            }
+
+            // Retrieve the WebPOptions associated with the image
+            WebPOptions webPOptions = webPImage.Options;
+
+            // Enumerate all public instance properties of WebPOptions (input parameters)
+            Console.WriteLine("Supported WebP input parameters:");
+            PropertyInfo[] properties = typeof(WebPOptions).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (PropertyInfo prop in properties)
+            {
+                // Get current value (if readable) for demonstration
+                object value = prop.CanRead ? prop.GetValue(webPOptions) : "N/A";
+                Console.WriteLine($"- {prop.Name}: {value ?? "null"}");
+            }
+
+            // Prepare GIF save options (default)
+            GifOptions gifOptions = new GifOptions();
+
+            // Save the image as GIF
+            image.Save(outputPath, gifOptions);
+        }
+
+        Console.WriteLine("Conversion completed.");
     }
 }
