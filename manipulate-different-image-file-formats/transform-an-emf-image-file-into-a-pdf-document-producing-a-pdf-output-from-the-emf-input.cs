@@ -1,39 +1,34 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 
-class EmfToPdfConverter
+class Program
 {
     static void Main()
     {
-        // Path to the source EMF file
-        string inputFile = @"C:\Temp\input.emf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        // Desired path for the resulting PDF file
-        string outputFile = @"C:\Temp\output.pdf";
-
-        // Load the EMF image using Aspose.Imaging's unified loader
-        using (Image image = Image.Load(inputFile))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure rasterization options for vector formats (EMF in this case)
-            // This ensures the vector data is correctly rendered when saved to PDF.
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-            {
-                // Use the original image size as the page size in the PDF
-                PageSize = image.Size
-            };
-
-            // Set up PDF save options and attach the rasterization settings
-            PdfOptions pdfOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the loaded EMF image as a PDF document
-            image.Save(outputFile, pdfOptions);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        Console.WriteLine("EMF has been successfully converted to PDF.");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the EMF image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Create PDF save options (default options are sufficient for basic conversion)
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the image as PDF
+            image.Save(outputPath, pdfOptions);
+        }
     }
 }
