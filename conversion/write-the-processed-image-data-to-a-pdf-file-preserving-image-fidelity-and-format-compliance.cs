@@ -1,37 +1,41 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;   // PdfCoreOptions
-using Aspose.Imaging;                  // PdfComplianceVersion
+using Aspose.Imaging.FileFormats.Pdf; // For PdfCoreOptions if needed
 
 class Program
 {
     static void Main()
     {
-        // Path to the source image (any supported format)
-        string inputImagePath = @"C:\Images\source.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        // Desired PDF output path
-        string outputPdfPath = @"C:\Images\result.pdf";
-
-        // Load the image using Aspose.Imaging's lifecycle rule
-        using (Image image = Image.Load(inputImagePath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Create PDF export options
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image using Aspose.Imaging
+        using (Image image = Image.Load(inputPath))
+        {
+            // Configure PDF export options
             var pdfOptions = new PdfOptions();
 
-            // Set PDF compliance (e.g., PDF/A-1b) to ensure format compliance
-            pdfOptions.PdfCoreOptions = new PdfCoreOptions
-            {
-                PdfCompliance = PdfComplianceVersion.PdfA1b
-            };
+            // Optional: set PDF compliance version
+            // pdfOptions.PdfCoreOptions = new PdfCoreOptions
+            // {
+            //     PdfCompliance = PdfComplianceVersion.Pdf15
+            // };
 
-            // Preserve image fidelity by using default compression (Auto)
-            // If explicit compression is needed, uncomment and set:
-            // pdfOptions.Compression = PdfImageCompressionOptions.Auto; // property exists in newer versions
-
-            // Save the image as a PDF using the provided save rule
-            image.Save(outputPdfPath, pdfOptions);
+            // Save the image as a PDF preserving fidelity
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
