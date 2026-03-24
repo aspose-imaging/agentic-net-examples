@@ -1,72 +1,69 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input JPEG image paths
-        string[] inputPaths = new string[]
-        {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
+        // Hardcoded input JPEG file paths
+        string[] inputPaths = {
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
         };
 
-        // Output PNG path
-        string outputPath = "merged.png";
+        // Hardcoded output PNG file path
+        string outputPath = "output/combined.png";
 
-        // JPEG compression settings to be applied during processing
-        JpegOptions jpegOptions = new JpegOptions
+        // Verify each input file exists
+        foreach (var inputPath in inputPaths)
         {
-            Quality = 80,
-            CompressionType = JpegCompressionMode.Progressive
-        };
-        // (The jpegOptions instance demonstrates the required JPEG settings;
-        // it is not directly used for PNG output.)
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            if (!File.Exists(inputPath))
             {
-                sizes.Add(img.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
         }
 
-        // Calculate canvas dimensions for horizontal stitching
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
+        // Load JPEG images
+        Image[] jpegImages = new Image[inputPaths.Length];
+        for (int i = 0; i < inputPaths.Length; i++)
         {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight)
-                canvasHeight = sz.Height;
+            jpegImages[i] = Image.Load(inputPaths[i]);
         }
 
-        // Create PNG canvas with appropriate options
-        Source pngSource = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions { Source = pngSource };
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+        // Determine dimensions for the combined image
+        int totalWidth = 0;
+        int maxHeight = 0;
+        foreach (var img in jpegImages)
         {
+            totalWidth += img.Width;
+            if (img.Height > maxHeight)
+                maxHeight = img.Height;
+        }
+
+        // Create a blank PNG image with the calculated size
+        var pngOptions = new PngOptions();
+        using (Image combinedImage = Image.Create(pngOptions, totalWidth, maxHeight))
+        {
+            // Draw each JPEG onto the combined image
+            var graphics = new Graphics(combinedImage);
             int offsetX = 0;
-            foreach (string path in inputPaths)
+            foreach (var jpeg in jpegImages)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
+                graphics.DrawImage(jpeg, offsetX, 0);
+                offsetX += jpeg.Width;
+                jpeg.Dispose(); // Release each source image after drawing
             }
 
-            // Save the bound PNG image
-            canvas.Save();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the combined image as PNG
+            combinedImage.Save(outputPath, pngOptions);
         }
     }
 }
