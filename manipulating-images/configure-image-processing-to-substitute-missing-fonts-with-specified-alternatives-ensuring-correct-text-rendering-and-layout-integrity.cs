@@ -1,52 +1,68 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.CustomFontHandler;
 
 class Program
 {
-    static void Main(string[] args)
+    // Hardcoded paths
+    private const string InputPath = @"C:\Images\input.psd";
+    private const string OutputPath = @"C:\Images\output.png";
+    private const string AlternativeFontsFolder = @"C:\Fonts\Alternatives";
+
+    static void Main()
     {
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
-        string fontFolder = "fonts";
-
-        var loadOptions = new Aspose.Imaging.LoadOptions();
-        loadOptions.AddCustomFontSource(GetFontSource, fontFolder);
-
-        using (var image = Aspose.Imaging.Image.Load(inputPath, loadOptions))
+        // Verify input file exists
+        if (!File.Exists(InputPath))
         {
-            Aspose.Imaging.FontSettings.DefaultFontName = "Arial";
+            Console.Error.WriteLine($"File not found: {InputPath}");
+            return;
+        }
 
-            var vectorOptions = new VectorRasterizationOptions
-            {
-                BackgroundColor = Aspose.Imaging.Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height,
-                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = Aspose.Imaging.SmoothingMode.None
-            };
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
 
-            var pngOptions = new PngOptions { VectorRasterizationOptions = vectorOptions };
-            image.Save(outputPath, pngOptions);
+        // Configure Aspose.Imaging to use alternative fonts
+        // Option 1: Set a fonts folder globally (useful for PSD files)
+        FontSettings.SetFontsFolder(AlternativeFontsFolder);
+        FontSettings.UpdateFonts();
+
+        // Option 2: Provide a custom font source (useful for vector formats)
+        var loadOptions = new LoadOptions();
+        loadOptions.AddCustomFontSource(GetFontSource, AlternativeFontsFolder);
+
+        // Load the image with the configured options
+        using (Image image = Image.Load(InputPath, loadOptions))
+        {
+            // For vector formats you might need rasterization options;
+            // for raster formats like PSD the default options are sufficient.
+            // Save the processed image
+            image.Save(OutputPath, new PngOptions());
         }
     }
 
-    private static Aspose.Imaging.CustomFontHandler.CustomFontData[] GetFontSource(params object[] args)
+    // Custom font provider that reads all font files from the specified folder
+    private static CustomFontData[] GetFontSource(params object[] args)
     {
-        string fontsPath = args.Length > 0 ? args[0]?.ToString() ?? string.Empty : string.Empty;
-        var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-
-        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+        string fontsPath = string.Empty;
+        if (args.Length > 0 && args[0] != null)
         {
-            foreach (var file in Directory.GetFiles(fontsPath))
+            fontsPath = args[0].ToString();
+        }
+
+        var fontDataList = new System.Collections.Generic.List<CustomFontData>();
+        if (Directory.Exists(fontsPath))
+        {
+            foreach (string fontFile in Directory.GetFiles(fontsPath))
             {
-                string fontName = Path.GetFileNameWithoutExtension(file);
-                byte[] fontData = File.ReadAllBytes(file);
-                fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontData));
+                // Use the file name without extension as the font family name
+                string fontFamily = Path.GetFileNameWithoutExtension(fontFile);
+                byte[] fontBytes = File.ReadAllBytes(fontFile);
+                fontDataList.Add(new CustomFontData(fontFamily, fontBytes));
             }
         }
 
-        return fonts.ToArray();
+        return fontDataList.ToArray();
     }
 }
