@@ -1,39 +1,44 @@
 using System;
-using Aspose.Imaging;
+using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.wmz";
-        string tempPngPath = "temp.png";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\sample.wmz";
+        string outputPath = @"C:\Images\sample_processed.png";
 
-        using (Image vectorImage = Image.Load(inputPath))
+        if (!File.Exists(inputPath))
         {
-            var rasterOptions = new VectorRasterizationOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
+        {
+            var rasterOptions = new WmfRasterizationOptions
             {
                 BackgroundColor = Aspose.Imaging.Color.White,
                 PageWidth = vectorImage.Width,
                 PageHeight = vectorImage.Height
             };
 
-            var pngOptions = new PngOptions
+            using (var memoryStream = new MemoryStream())
             {
-                VectorRasterizationOptions = rasterOptions
-            };
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                vectorImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
 
-            vectorImage.Save(tempPngPath, pngOptions);
-        }
-
-        using (Image img = Image.Load(tempPngPath))
-        {
-            var raster = (RasterImage)img;
-            raster.Filter(raster.Bounds, new GaussWienerFilterOptions(5, 4.0));
-            raster.Save(outputPath, new PngOptions());
+                using (Aspose.Imaging.Image rasterImage = Aspose.Imaging.Image.Load(memoryStream))
+                {
+                    var raster = (Aspose.Imaging.RasterImage)rasterImage;
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
+                    raster.Save(outputPath, new PngOptions());
+                }
+            }
         }
     }
 }
