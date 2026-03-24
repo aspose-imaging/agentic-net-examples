@@ -1,41 +1,53 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output file path
-        string outputPath = "output.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.jpg";
+        string outputPath = @"C:\Temp\output.tif";
 
-        // Configure TiffOptions with predefined settings
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-        tiffOptions.ByteOrder = TiffByteOrder.LittleEndian;
-        tiffOptions.Compression = TiffCompressions.Lzw;
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a TIFF image canvas
-        using (Image image = Image.Create(tiffOptions, 200, 200))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Fill the canvas with a linear gradient
-            LinearGradientBrush brush = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(image.Width, image.Height),
-                Color.Blue,
-                Color.Yellow);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            Graphics graphics = new Graphics(image);
-            graphics.FillRectangle(brush, image.Bounds);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image (output path is already bound)
-            image.Save();
+        // Configure TiffOptions with desired settings
+        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+        {
+            // 8 bits per color component (RGB)
+            BitsPerSample = new ushort[] { 8, 8, 8 },
+
+            // Use Big Endian byte order (Motorola)
+            ByteOrder = TiffByteOrder.BigEndian,
+
+            // LZW compression
+            Compression = TiffCompressions.Lzw,
+
+            // Predictor for better LZW compression
+            Predictor = TiffPredictor.Horizontal,
+
+            // RGB photometric interpretation
+            Photometric = TiffPhotometrics.Rgb,
+
+            // Store all components in a single plane
+            PlanarConfiguration = TiffPlanarConfigs.Contiguous
+        };
+
+        // Load the source image and save it as TIFF using the configured options
+        using (Image image = Image.Load(inputPath))
+        {
+            image.Save(outputPath, tiffOptions);
         }
     }
 }
