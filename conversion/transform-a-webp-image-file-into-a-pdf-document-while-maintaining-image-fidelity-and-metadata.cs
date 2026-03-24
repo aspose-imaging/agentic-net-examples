@@ -1,29 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input WebP file path (first argument or default)
-        string inputPath = args.Length > 0 ? args[0] : "input.webp";
-        // Output PDF file path (second argument or default)
-        string outputPath = args.Length > 1 ? args[1] : "output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Load the WebP image (Aspose.Imaging will select the appropriate concrete type)
-        using (Image image = Image.Load(inputPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Configure PDF options to preserve metadata and original resolution
-            var pdfOptions = new PdfOptions
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the WebP image
+        using (WebPImage webPImage = new WebPImage(inputPath))
+        {
+            // Configure PDF options to keep metadata and original resolution
+            PdfOptions pdfOptions = new PdfOptions
             {
                 KeepMetadata = true,
                 UseOriginalImageResolution = true
             };
 
-            // Save the image as a PDF document
-            image.Save(outputPath, pdfOptions);
+            // Save as PDF
+            webPImage.Save(outputPath, pdfOptions);
         }
     }
 }
