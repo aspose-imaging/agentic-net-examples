@@ -1,36 +1,37 @@
 using System;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class JpegToSvgConverter
+class Program
 {
     static void Main()
     {
-        // Input JPEG file path
-        string inputJpegPath = @"C:\Images\sample.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.jpg";
+        string outputPath = @"C:\temp\sample_converted.svg";
 
-        // Output SVG file path
-        string outputSvgPath = @"C:\Images\sample_converted.svg";
+        // Verify that the input JPEG file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the JPEG raster image
-        using (Image rasterImage = Image.Load(inputJpegPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Configure vector rasterization options.
-            // PageSize is set to the original image size to preserve visual fidelity.
-            var vectorOptions = new SvgRasterizationOptions
+            // Configure SVG rasterization options to match the source image size
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = rasterImage.Size
+                PageSize = image.Size
             };
 
-            // Create SVG save options and attach the rasterization settings.
-            var svgSaveOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = vectorOptions
-            };
-
-            // Save the image as SVG. The raster image will be embedded in the SVG,
-            // maintaining the original appearance.
-            rasterImage.Save(outputSvgPath, svgSaveOptions);
+            // Save the image as an SVG file
+            image.Save(outputPath, new SvgOptions { VectorRasterizationOptions = rasterizationOptions });
         }
     }
 }
