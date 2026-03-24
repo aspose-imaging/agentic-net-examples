@@ -3,54 +3,59 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input file paths
-        string rasterPath = "raster.png";          // Raster image to render onto vector graphic
-        string vectorPath = "vector.svg";          // Existing vector graphic
-        string targetPath = "target.png";          // Target image onto which the result will be composited
-        string outputPath = "output.png";          // Final composited image
-        string tempVectorRasterPath = "temp_vector_raster.png"; // Temporary rasterized vector
+        string vectorPath = @"C:\Images\vector.svg";
+        string rasterPath = @"C:\Images\raster.png";
+        string targetPath = @"C:\Images\target.jpg";
+        string intermediatePath = @"C:\Images\vector_with_raster.png";
+        string outputPath = @"C:\Images\final_output.jpg";
 
-        // Rasterize the vector graphic to a temporary PNG
-        using (SvgImage vectorImg = (SvgImage)Image.Load(vectorPath))
+        if (!File.Exists(vectorPath))
         {
-            PngOptions pngOptions = new PngOptions();
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
-            rasterizationOptions.PageSize = vectorImg.Size; // Preserve original size
-            pngOptions.VectorRasterizationOptions = rasterizationOptions;
-
-            vectorImg.Save(tempVectorRasterPath, pngOptions);
+            Console.Error.WriteLine($"File not found: {vectorPath}");
+            return;
+        }
+        if (!File.Exists(rasterPath))
+        {
+            Console.Error.WriteLine($"File not found: {rasterPath}");
+            return;
+        }
+        if (!File.Exists(targetPath))
+        {
+            Console.Error.WriteLine($"File not found: {targetPath}");
+            return;
         }
 
-        // Load images for processing
-        using (RasterImage rasterImg = (RasterImage)Image.Load(rasterPath))
-        using (RasterImage vectorRasterImg = (RasterImage)Image.Load(tempVectorRasterPath))
+        Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (SvgImage vectorImage = (SvgImage)Image.Load(vectorPath))
+        {
+            using (RasterImage rasterImg = (RasterImage)Image.Load(rasterPath))
+            {
+                Graphics vectorGraphics = new Graphics(vectorImage);
+                vectorGraphics.DrawImage(rasterImg, new Point(50, 50));
+            }
+
+            Source vecSource = new FileCreateSource(intermediatePath, false);
+            PngOptions pngOptions = new PngOptions() { Source = vecSource };
+            vectorImage.Save(intermediatePath, pngOptions);
+        }
+
+        using (RasterImage vecRaster = (RasterImage)Image.Load(intermediatePath))
         using (RasterImage targetImg = (RasterImage)Image.Load(targetPath))
         {
-            // Overlay the raster image onto the rasterized vector graphic at (0,0)
-            int overlayPosX = 0;
-            int overlayPosY = 0;
-            Rectangle overlayBounds = new Rectangle(overlayPosX, overlayPosY, rasterImg.Width, rasterImg.Height);
-            vectorRasterImg.SaveArgb32Pixels(overlayBounds, rasterImg.LoadArgb32Pixels(rasterImg.Bounds));
+            Graphics targetGraphics = new Graphics(targetImg);
+            targetGraphics.DrawImage(vecRaster, new Point(0, 0));
 
-            // Composite the combined vector raster onto the target image at (50,50)
-            int targetPosX = 50;
-            int targetPosY = 50;
-            Rectangle targetBounds = new Rectangle(targetPosX, targetPosY, vectorRasterImg.Width, vectorRasterImg.Height);
-            targetImg.SaveArgb32Pixels(targetBounds, vectorRasterImg.LoadArgb32Pixels(vectorRasterImg.Bounds));
-
-            // Save the final composited image
-            targetImg.Save(outputPath);
-        }
-
-        // Clean up temporary file
-        if (File.Exists(tempVectorRasterPath))
-        {
-            File.Delete(tempVectorRasterPath);
+            Source outSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = outSource, Quality = 90 };
+            targetImg.Save(outputPath, jpegOptions);
         }
     }
 }
