@@ -6,33 +6,41 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output_transparent.png";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output.png";
 
-        // Load the source image (must contain an alpha channel)
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PNG export options to preserve transparency and control encoding
+            // Configure PNG export options with transparency (alpha channel)
             PngOptions pngOptions = new PngOptions
             {
-                // Preserve the alpha channel
+                // Use Truecolor with Alpha to preserve transparency
                 ColorType = PngColorType.TruecolorWithAlpha,
-                // Enable progressive PNG loading
-                Progressive = true,
-                // Maximum compression level (0-9)
-                CompressionLevel = 9,
-                // Use adaptive filtering for optimal compression
-                FilterType = PngFilterType.Adaptive,
-                // Set bits per channel
+                // 8 bits per channel (standard)
                 BitDepth = 8,
-                // Keep original metadata if present
-                KeepMetadata = true
+                // Maximum compression (0-9)
+                CompressionLevel = 9,
+                // Use adaptive filtering for better compression
+                FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive,
+                // Enable progressive loading (optional)
+                Progressive = true
             };
 
-            // Save the image using the defined PNG options
+            // Save the image as PNG with the specified options
             image.Save(outputPath, pngOptions);
         }
     }
