@@ -8,88 +8,71 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input image path (can be any supported format)
+        // Hardcoded input and output paths
         string inputPath = "input.jpg";
-
-        // Desired output path with extension indicating target format
         string outputPath = "output.png";
 
-        // Load the source image
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            // Determine the appropriate save options based on the output file extension
+            // Determine output format based on file extension
             string ext = Path.GetExtension(outputPath).ToLowerInvariant();
+            ImageOptionsBase saveOptions;
 
-            // Select and configure the correct ImageOptions instance
             switch (ext)
             {
                 case ".jpg":
                 case ".jpeg":
-                    using (var options = new JpegOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
+                    saveOptions = new JpegOptions();
                     break;
-
                 case ".png":
-                    using (var options = new PngOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
+                    saveOptions = new PngOptions();
                     break;
-
                 case ".bmp":
-                    using (var options = new BmpOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
+                    saveOptions = new BmpOptions();
                     break;
-
                 case ".gif":
-                    using (var options = new GifOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
+                    saveOptions = new GifOptions();
                     break;
-
                 case ".tif":
                 case ".tiff":
-                    using (var options = new TiffOptions(TiffExpectedFormat.Default))
-                    {
-                        image.Save(outputPath, options);
-                    }
+                    saveOptions = new TiffOptions(TiffExpectedFormat.Default);
                     break;
-
                 case ".webp":
-                    using (var options = new WebPOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
+                    saveOptions = new WebPOptions();
                     break;
-
-                case ".apng":
-                    using (var options = new ApngOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
-                    break;
-
                 case ".pdf":
-                    using (var options = new PdfOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
+                    saveOptions = new PdfOptions();
                     break;
-
                 case ".svg":
-                    using (var options = new SvgOptions())
-                    {
-                        image.Save(outputPath, options);
-                    }
+                    saveOptions = new SvgOptions();
                     break;
-
+                case ".apng":
+                    saveOptions = new ApngOptions();
+                    break;
+                case ".psd":
+                    saveOptions = new PsdOptions();
+                    break;
                 default:
-                    throw new NotSupportedException($"The file extension '{ext}' is not supported for automatic saving.");
+                    // Fallback to JPEG if format is unsupported
+                    saveOptions = new JpegOptions();
+                    break;
+            }
+
+            // Save the image with the selected options
+            using (saveOptions)
+            {
+                image.Save(outputPath, saveOptions);
             }
         }
     }
