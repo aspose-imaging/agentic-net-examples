@@ -2,60 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputSvgPath = "input.svg";
-        string outputApngPath = "output.apng";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
 
-        int targetWidth = 400;
-        int targetHeight = 300;
-
-        using (Image svgImage = Image.Load(inputSvgPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            svgImage.Resize(targetWidth, targetHeight);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            using (MemoryStream pngStream = new MemoryStream())
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the SVG image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Desired dimensions for the resized image
+            int newWidth = 200;
+            int newHeight = 200;
+
+            // Resize the SVG image (vector resize)
+            image.Resize(newWidth, newHeight);
+
+            // Prepare APNG save options with rasterization settings
+            var apngOptions = new ApngOptions
             {
-                PngOptions pngOptions = new PngOptions
+                // Set default frame duration (e.g., 500 ms)
+                DefaultFrameTime = 500,
+                // Configure vector rasterization so the SVG is rasterized to PNG frames
+                VectorRasterizationOptions = new SvgRasterizationOptions
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    }
-                };
-                svgImage.Save(pngStream, pngOptions);
-                pngStream.Position = 0;
-
-                using (RasterImage raster = (RasterImage)Image.Load(pngStream))
-                {
-                    ApngOptions apngOptions = new ApngOptions
-                    {
-                        Source = new FileCreateSource(outputApngPath, false),
-                        DefaultFrameTime = 500,
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
-
-                    using (ApngImage apng = (ApngImage)Image.Create(apngOptions, raster.Width, raster.Height))
-                    {
-                        apng.RemoveAllFrames();
-
-                        int frameCount = 5;
-                        for (int i = 0; i < frameCount; i++)
-                        {
-                            apng.AddFrame(raster);
-                        }
-
-                        apng.Save();
-                    }
+                    PageSize = new Size(newWidth, newHeight)
                 }
-            }
+            };
+
+            // Save the resized image as an animated PNG (APNG)
+            image.Save(outputPath, apngOptions);
         }
     }
 }
