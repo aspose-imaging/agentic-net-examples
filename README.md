@@ -6,8 +6,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 1098 |
-| Categories | 8 |
+| Total Examples | 1236 |
+| Categories | 9 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-03-25 |
 
@@ -18,6 +18,7 @@ agents.md
 README.md
 +-- conversion/
 +-- convert-apng/
++-- convert-raster-image/
 +-- image-and-photo-filters/
 +-- kernel-filters/
 +-- manipulate-different-image-file-formats/
@@ -32,6 +33,7 @@ README.md
 |----------|----------|-----------|---------|
 | [Conversion](./conversion/) | 162 | 100.0% | [agents.md](./conversion/agents.md) |
 | [Convert APNG](./convert-apng/) | 51 | 100.0% | [agents.md](./convert-apng/agents.md) |
+| [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 64 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 233 | 100.0% | [agents.md](./kernel-filters/agents.md) |
 | [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 168 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
@@ -53,4 +55,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260325_061231` | 2026-03-25*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260325_135011` | 2026-03-25*
