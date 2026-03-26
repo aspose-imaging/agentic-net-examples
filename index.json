@@ -3,8 +3,8 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.2.0",
-  "total_examples": 1300,
-  "total_categories": 11,
+  "total_examples": 1330,
+  "total_categories": 12,
   "last_updated": "2026-03-25",
   "categories": [
     {
@@ -476,6 +476,67 @@
       ]
     },
     {
+      "name": "convert-dicom-images",
+      "file_count": 30,
+      "files": [
+        "load-a-dicom-file-from-disk-and-save-it-as-a-png-using-a-single-api-call.cs",
+        "convert-a-dicom-image-stored-in-a-byte-array-to-png-by-using-memorystream-for-in-memory-processing.cs",
+        "use-the-image-isvalid-property-to-verify-dicom-file-integrity-before-attempting-png-conversion.cs",
+        "apply-a-median-filter-to-a-dicom-image-before-converting-it-to-png-to-reduce-noise.cs",
+        "resize-a-dicom-image-to-specific-dimensions-prior-to-png-conversion-using-the-image-resize-method.cs",
+        "rotate-a-dicom-image-90-degrees-clockwise-before-saving-it-as-a-png-file.cs",
+        "set-the-png-color-type-to-truecolor-during-conversion-to-preserve-full-color-information-from-dicom.cs",
+        "configure-png-compression-level-in-pngoptions-to-balance-file-size-and-image-quality-during-conversion.cs",
+        "iterate-through-each-frame-of-a-multi-page-dicom-and-export-every-frame-as-an-individual-png-file.cs",
+        "batch-convert-all-dicom-files-in-a-directory-to-png-format-while-preserving-original-filenames.cs",
+        "implement-progress-reporting-for-batch-conversion-of-dicom-files-to-png-using-iprogress-interface.cs",
+        "implement-a-retry-mechanism-that-attempts-dicom-to-png-conversion-up-to-three-times-on-transient-errors.cs",
+        "implement-exception-handling-to-gracefully-skip-corrupted-dicom-files-during-batch-png-conversion.cs",
+        "capture-and-log-aspose-imaging-exceptions-when-a-dicom-to-png-conversion-fails-due-to-corrupted-data.cs",
+        "use-a-using-statement-to-ensure-the-image-object-is-disposed-after-converting-dicom-to-png.cs",
+        "save-the-resulting-png-image-to-a-memorystream-for-further-transmission-over-a-network.cs",
+        "validate-that-the-pixel-data-remains-unchanged-after-converting-a-dicom-image-to-png-format.cs",
+        "validate-that-the-generated-png-files-are-viewable-in-standard-image-viewers-after-conversion.cs",
+        "implement-asynchronous-dicom-to-png-conversion-using-task-run-to-avoid-blocking-the-ui-thread.cs",
+        "create-a-command-line-tool-that-accepts-a-dicom-file-path-and-outputs-a-png-file-to-a-folder.cs",
+        "develop-a-unit-test-that-loads-a-sample-dicom-converts-it-to-png-and-compares-file-sizes.cs",
+        "integrate-dicom-to-png-conversion-into-an-asp-net-core-api-endpoint-returning-the-png-as-a-byte-array.cs",
+        "create-a-windows-forms-application-that-allows-users-to-select-dicom-files-and-view-generated-png-previews.cs",
+        "write-a-powershell-script-that-invokes-the-net-conversion-library-to-process-dicom-files-in-bulk.cs",
+        "configure-the-png-output-to-include-metadata-from-the-original-dicom-file-for-traceability.cs",
+        "extract-the-patient-name-tag-from-dicom-metadata-and-embed-it-into-the-png-file-name.cs",
+        "apply-a-custom-color-palette-to-the-png-output-when-converting-grayscale-dicom-images.cs",
+        "create-a-logging-wrapper-that-records-start-and-end-timestamps-for-each-dicom-to-png-conversion-operation.cs",
+        "develop-a-background-service-that-monitors-a-folder-for-new-dicom-files-and-automatically-converts-them-to-png.cs",
+        "document-the-conversion-process-in-code-comments-including-required-using-directives-and-disposal-patterns.cs"
+      ],
+      "required_namespaces": [
+        "System",
+        "System.IO",
+        "Aspose.Imaging.ImageOptions",
+        "Aspose.Imaging",
+        "Aspose.Imaging.FileFormats.Dicom",
+        "Aspose.Imaging.FileFormats.Png",
+        "System.Linq",
+        "Aspose.Imaging.ImageFilters.FilterOptions",
+        "Aspose.Imaging.ProgressManagement",
+        "Aspose.Imaging.CoreExceptions.ImageFormats",
+        "Aspose.Imaging.CoreExceptions",
+        "System.Threading.Tasks",
+        "System.Collections.Generic",
+        "Aspose.Imaging.Sources"
+      ],
+      "key_apis": [
+        "ApngOptions",
+        "DicomImage",
+        "LoadOptions",
+        "MedianFilterOptions",
+        "PngImage",
+        "PngOptions",
+        "RasterImage"
+      ]
+    },
+    {
       "name": "convert-raster-image",
       "file_count": 138,
       "files": [
@@ -666,7 +727,7 @@
     },
     {
       "name": "image-and-photo-filters",
-      "file_count": 64,
+      "file_count": 72,
       "files": [
         "apply-an-alpha-blending-filter-to-an-image-supplied-in-any-supported-format-producing-a-blended-output.cs",
         "apply-the-magic-wand-filter-to-select-a-region-in-an-image-of-any-supported-format-and-modify-it.cs",
@@ -731,7 +792,15 @@
         "use-removewatermarkfilter-to-eliminate-watermarks-from-apng-images-while-preserving-visual-fidelity-and-metadata.cs",
         "use-removewatermarkfilter-to-programmatically-eliminate-watermarks-from-an-apng-image-while-preserving-visual-integrity.cs",
         "remove-watermarks-from-an-apng-image-by-applying-an-appropriate-filter-that-detects-and-eliminates-embedded-marks.cs",
-        "apply-the-remove-watermark-filter-to-an-apng-image-to-successfully-eliminate-embedded-watermarks.cs"
+        "apply-the-remove-watermark-filter-to-an-apng-image-to-successfully-eliminate-embedded-watermarks.cs",
+        "load-a-jpeg-image-apply-alpha-blending-with-127-opacity-and-save-as-png.cs",
+        "batch-process-a-folder-of-png-images-applying-64-alpha-overlay-and-saving-results-as-jpeg-files.cs",
+        "define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs",
+        "apply-alpha-blending-with-full-opacity-255-to-a-png-overlay-and-verify-no-transparency-loss.cs",
+        "use-magic-wand-tool-with-threshold-30-to-select-red-region-in-a-jpeg-image.cs",
+        "combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs",
+        "subtract-a-green-magic-wand-selection-from-a-blue-selection-and-export-the-result-to-bmp.cs",
+        "remove-watermark-from-a-jpeg-using-content-aware-fill-algorithm-with-three-removal-attempts.cs"
       ],
       "required_namespaces": [
         "System",
@@ -740,19 +809,25 @@
         "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.FileFormats.Apng",
-        "Aspose.Imaging.Shapes",
         "Aspose.Imaging.Sources",
         "Aspose.Imaging.MagicWand",
+        "Aspose.Imaging.Shapes",
         "Aspose.Imaging.MagicWand.ImageMasks",
         "Aspose.Imaging.Watermark",
         "Aspose.Imaging.Watermark.Options",
         "Aspose.Imaging.ImageFilters.FilterOptions",
         "System.Drawing",
+        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
         "System.Linq",
         "Aspose.Imaging.Masking",
         "Aspose.Imaging.Masking.Options",
-        "Aspose.Imaging.Masking.Result"
+        "Aspose.Imaging.Masking.Result",
+        "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.FileFormats.Gif.Blocks",
+        "Aspose.Imaging.Brushes",
+        "Aspose.Imaging.Graphics",
+        "Aspose.Imaging.FileFormats.Jpeg"
       ],
       "key_apis": [
         "ApngFrame",
@@ -766,6 +841,7 @@
         "GifOptions",
         "Graphics",
         "ImageBlendingFilterOptions",
+        "JpegImage",
         "JpegOptions",
         "MedianFilterOptions",
         "MotionWienerFilterOptions",
@@ -773,6 +849,7 @@
         "PngOptions",
         "RasterImage",
         "SharpenFilterOptions",
+        "SolidBrush",
         "TeleaWatermarkOptions"
       ]
     },
