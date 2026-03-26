@@ -6,8 +6,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 1330 |
-| Categories | 12 |
+| Total Examples | 1370 |
+| Categories | 13 |
 | Overall Pass Rate | 99.9% |
 | Last Updated | 2026-03-25 |
 
@@ -22,6 +22,7 @@ README.md
 +-- convert-cmx-images/
 +-- convert-dicom-images/
 +-- convert-raster-image/
++-- convert-svg-to-raster-images/
 +-- image-and-photo-filters/
 +-- kernel-filters/
 +-- manipulate-different-image-file-formats/
@@ -40,6 +41,7 @@ README.md
 | [Convert CMX Images](./convert-cmx-images/) | 34 | 97.1% | [agents.md](./convert-cmx-images/agents.md) |
 | [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
+| [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 40 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 64 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 233 | 100.0% | [agents.md](./kernel-filters/agents.md) |
 | [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 168 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
@@ -61,4 +63,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260325_170549` | 2026-03-25*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260325_174402` | 2026-03-25*
