@@ -1,0 +1,42 @@
+using System;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+
+class Program
+{
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = "Sample.eps";
+        string outputPath = "Sample.pdf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+        // Load the EPS image
+        using (var image = (EpsImage)Image.Load(inputPath))
+        {
+            // Configure PDF options for professional printing (PDF/A-1b compliance)
+            var pdfOptions = new PdfOptions
+            {
+                PdfCoreOptions = new PdfCoreOptions
+                {
+                    PdfCompliance = PdfComplianceVersion.PdfA1b
+                }
+            };
+
+            // Save the EPS as a PDF
+            image.Save(outputPath, pdfOptions);
+        }
+    }
+}
