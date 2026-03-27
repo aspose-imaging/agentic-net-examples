@@ -6,10 +6,10 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 1429 |
-| Categories | 15 |
+| Total Examples | 1489 |
+| Categories | 16 |
 | Overall Pass Rate | 99.9% |
-| Last Updated | 2026-03-26 |
+| Last Updated | 2026-03-27 |
 
 ## Repository Structure
 
@@ -21,6 +21,7 @@ README.md
 +-- convert-cdr/
 +-- convert-cmx-images/
 +-- convert-dicom-images/
++-- convert-eps-images/
 +-- convert-raster-image/
 +-- convert-svg-to-raster-images/
 +-- convert-webp-images/
@@ -42,6 +43,7 @@ README.md
 | [Convert CDR](./convert-cdr/) | 30 | 100.0% | [agents.md](./convert-cdr/agents.md) |
 | [Convert CMX Images](./convert-cmx-images/) | 34 | 97.1% | [agents.md](./convert-cmx-images/agents.md) |
 | [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
+| [Convert EPS Images](./convert-eps-images/) | 60 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
 | [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 40 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 30 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
@@ -67,4 +69,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260326_134259` | 2026-03-26*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260327_055328` | 2026-03-27*
