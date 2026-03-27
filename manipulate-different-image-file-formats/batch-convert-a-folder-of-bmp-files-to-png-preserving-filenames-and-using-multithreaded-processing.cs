@@ -1,0 +1,61 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
+
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+        var tasks = new List<System.Threading.Tasks.Task>();
+
+        foreach (var filePath in files)
+        {
+            if (!filePath.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            tasks.Add(System.Threading.Tasks.Task.Run(() =>
+            {
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(filePath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(filePath))
+                {
+                    using (var pngOptions = new PngOptions())
+                    {
+                        image.Save(outputPath, pngOptions);
+                    }
+                }
+            }));
+        }
+
+        System.Threading.Tasks.Task.WaitAll(tasks.ToArray());
+    }
+}
