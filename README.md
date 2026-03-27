@@ -8,7 +8,7 @@
 |--------|-------|
 | Total Examples | 1489 |
 | Categories | 16 |
-| Overall Pass Rate | 99.9% |
+| Overall Pass Rate | 100.0% |
 | Last Updated | 2026-03-27 |
 
 ## Repository Structure
@@ -41,7 +41,7 @@ README.md
 | [Conversion](./conversion/) | 162 | 100.0% | [agents.md](./conversion/agents.md) |
 | [Convert APNG](./convert-apng/) | 51 | 100.0% | [agents.md](./convert-apng/agents.md) |
 | [Convert CDR](./convert-cdr/) | 30 | 100.0% | [agents.md](./convert-cdr/agents.md) |
-| [Convert CMX Images](./convert-cmx-images/) | 34 | 97.1% | [agents.md](./convert-cmx-images/agents.md) |
+| [Convert CMX Images](./convert-cmx-images/) | 34 | 100.0% | [agents.md](./convert-cmx-images/agents.md) |
 | [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert EPS Images](./convert-eps-images/) | 60 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
 | [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
@@ -69,4 +69,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260327_075335` | 2026-03-27*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260327_080057` | 2026-03-27*
