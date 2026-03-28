@@ -71,4 +71,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260327_161721` | 2026-03-27*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260327_171738` | 2026-03-27*
