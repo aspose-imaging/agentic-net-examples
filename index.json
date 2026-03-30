@@ -3,9 +3,9 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.2.0",
-  "total_examples": 1873,
+  "total_examples": 2104,
   "total_categories": 17,
-  "last_updated": "2026-03-27",
+  "last_updated": "2026-03-30",
   "categories": [
     {
       "name": "conversion",
