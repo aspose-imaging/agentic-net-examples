@@ -3,7 +3,7 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.2.0",
-  "total_examples": 3055,
+  "total_examples": 3127,
   "total_categories": 17,
   "last_updated": "2026-04-04",
   "categories": [
@@ -1208,7 +1208,7 @@
     },
     {
       "name": "image-and-photo-filters",
-      "file_count": 70,
+      "file_count": 72,
       "files": [
         "add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs",
         "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs",
@@ -1221,6 +1221,7 @@
         "apply-getfeathered-with-a-radius-of-5-pixels-to-smooth-mask-edges-on-a-high-resolution-tiff-image.cs",
         "apply-watermarkremover-paintover-to-a-bmp-image-then-save-the-cleaned-result-as-a-high-resolution-png.cs",
         "batch-process-a-folder-of-png-images-applying-64-alpha-overlay-and-saving-results-as-jpeg-files.cs",
+        "batch-process-a-folder-of-png-images-using-the-same-ellipse-mask-and-telea-algorithm-for-each-file.cs",
         "batch-remove-watermarks-from-a-folder-of-tiff-files-using-content-aware-fill-and-save-results.cs",
         "calculate-center-coordinates-of-a-bmp-background-blend-a-png-overlay-and-export-to-tiff.cs",
         "choose-the-telea-algorithm-in-watermark-options-to-compare-removal-quality-against-the-default-contentawarefill-method.cs",
@@ -1238,6 +1239,7 @@
         "create-a-magicwandsettings-object-specifying-a-point-inside-the-target-color-region-and-a-custom-threshold-of-30.cs",
         "create-a-point-object-at-100-200-to-position-overlay-on-a-tiff-image.cs",
         "create-a-reusable-class-library-that-encapsulates-common-mask-operations-like-union-subtract-and-feathering.cs",
+        "create-a-script-that-iterates-through-subfolders-applying-magicwandtool-to-every-jpeg-and-storing-masks-in-a-directory.cs",
         "create-a-ui-button-that-triggers-magicwandtool-apply-with-current-cursor-coordinates-as-the-mask-seed-point.cs",
         "crop-a-bmp-to-central-400x400-area-apply-feathered-magic-wand-selection-and-export-to-png.cs",
         "define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs",
