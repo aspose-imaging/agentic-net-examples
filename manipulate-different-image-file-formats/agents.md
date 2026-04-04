@@ -17,47 +17,47 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 ## Required Namespaces
 
-- `using Aspose.Imaging;` (438/432 files) ← category-specific
-- `using System;` (432/432 files)
-- `using System.IO;` (432/432 files)
-- `using Aspose.Imaging.ImageOptions;` (387/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Djvu;` (63/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (58/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (54/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg;` (41/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Dicom;` (34/432 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (31/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Webp;` (31/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (23/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (21/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Eps;` (21/432 files) ← category-specific
-- `using System.Collections.Generic;` (20/432 files)
-- `using Aspose.Imaging.FileFormats.Pdf;` (20/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (19/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Psd;` (16/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cdr;` (15/432 files) ← category-specific
-- `using Aspose.Imaging.Brushes;` (14/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (13/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif;` (11/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Dng;` (11/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg2000;` (10/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cmx;` (9/432 files) ← category-specific
-- `using System.Linq;` (8/432 files)
-- `using Aspose.Imaging.Exif;` (8/432 files) ← category-specific
-- `using Aspose.Imaging.ImageFilters.FilterOptions;` (7/432 files) ← category-specific
-- `using Aspose.Imaging.ImageLoadOptions;` (4/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (4/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tga;` (4/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Wmf;` (4/432 files) ← category-specific
-- `using System.Threading.Tasks;` (3/432 files)
-- `using System.Text;` (3/432 files)
-- `using System.Text.Json;` (2/432 files)
-- `using Aspose.Imaging.Shapes;` (2/432 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cmx.ObjectModel;` (1/432 files) ← category-specific
-- `using System.Drawing;` (1/432 files)
-- `using Aspose.Imaging.MagicWand.ImageMasks;` (1/432 files) ← category-specific
-- `using System.Reflection;` (1/432 files)
-- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (1/432 files) ← category-specific
+- `using Aspose.Imaging;` (438/600 files) ← category-specific
+- `using System;` (600/600 files)
+- `using System.IO;` (600/600 files)
+- `using Aspose.Imaging.ImageOptions;` (387/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Djvu;` (63/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (58/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (54/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg;` (41/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Dicom;` (34/600 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (31/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Webp;` (31/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf;` (23/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (21/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Eps;` (21/600 files) ← category-specific
+- `using System.Collections.Generic;` (20/600 files)
+- `using Aspose.Imaging.FileFormats.Pdf;` (20/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (19/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Psd;` (16/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cdr;` (15/600 files) ← category-specific
+- `using Aspose.Imaging.Brushes;` (14/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg;` (13/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif;` (11/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Dng;` (11/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg2000;` (10/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cmx;` (9/600 files) ← category-specific
+- `using System.Linq;` (8/600 files)
+- `using Aspose.Imaging.Exif;` (8/600 files) ← category-specific
+- `using Aspose.Imaging.ImageFilters.FilterOptions;` (7/600 files) ← category-specific
+- `using Aspose.Imaging.ImageLoadOptions;` (4/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (4/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tga;` (4/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Wmf;` (4/600 files) ← category-specific
+- `using System.Threading.Tasks;` (3/600 files)
+- `using System.Text;` (3/600 files)
+- `using System.Text.Json;` (2/600 files)
+- `using Aspose.Imaging.Shapes;` (2/600 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cmx.ObjectModel;` (1/600 files) ← category-specific
+- `using System.Drawing;` (1/600 files)
+- `using Aspose.Imaging.MagicWand.ImageMasks;` (1/600 files) ← category-specific
+- `using System.Reflection;` (1/600 files)
+- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (1/600 files) ← category-specific
 
 ## Files in this folder
 
@@ -233,7 +233,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [perform-batch-conversion-of-dng-images-to-jpeg-with-quality-level-set-to-85-percent.cs](./perform-batch-conversion-of-dng-images-to-jpeg-with-quality-level-set-to-85-percent.cs) | `DngImage`, `JpegOptions` | 29429 perform batch conversion of dng images to jpeg with quality level set to 8... |
 | [batch-rename-and-convert-emf-files-in-a-directory-to-sequentially-numbered-png-files.cs](./batch-rename-and-convert-emf-files-in-a-directory-to-sequentially-numbered-png-files.cs) | `EmfRasterizationOptions`, `PngOptions` | 29430 batch rename and convert emf files in a directory to sequentially numbered... |
 | [batch-convert-emf-files-to-jpeg-with-progressive-encoding-enabled.cs](./batch-convert-emf-files-to-jpeg-with-progressive-encoding-enabled.cs) | `JpegOptions`, `VectorRasterizationOptions` | 29431 batch convert emf files to jpeg with progressive encoding enabled |
-| [convert-a-multi-page-emf-document-to-separate-png-files-one-per-page.cs](./convert-a-multi-page-emf-document-to-separate-png-files-one-per-page.cs) | `EmfRasterizationOptions`, `MultiPageOptions`, `PngOptions` | 29432 convert a multi page emf document to separate png files one per page |
+| [convert-a-multi-page-emf-document-to-separate-png-files-one-per-page.cs](./convert-a-multi-page-emf-document-to-separate-png-files-one-per-page.cs) | `EmfRasterizationOptions`, `MultiPageOptions`, `PngOptions` | 29600 convert a multi page emf document to separate png files one per page |
 | [convert-an-emf-vector-to-a-high-resolution-pdf-with-embedded-fonts.cs](./convert-an-emf-vector-to-a-high-resolution-pdf-with-embedded-fonts.cs) | `LoadOptions`, `PdfOptions`, `VectorRasterizationOptions` | 29433 convert an emf vector to a high resolution pdf with embedded fonts |
 | [export-an-emf-vector-to-svg-format-while-preserving-all-shape-definitions.cs](./export-an-emf-vector-to-svg-format-while-preserving-all-shape-definitions.cs) | `EmfImage`, `EmfRasterizationOptions`, `SvgOptions` | 29434 export an emf vector to svg format while preserving all shape definitions |
 | [merge-multiple-emf-files-into-a-single-pdf-document-preserving-vector-quality.cs](./merge-multiple-emf-files-into-a-single-pdf-document-preserving-vector-quality.cs) | `MultiPageOptions`, `PdfOptions`, `VectorRasterizationOptions` | 29435 merge multiple emf files into a single pdf document preserving vector qual... |
@@ -497,7 +497,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | [use-image-load-with-a-memory-stream-to-open-a-tiff-add-a-new-frame-and-save-the-image.cs](./use-image-load-with-a-memory-stream-to-open-a-tiff-add-a-new-frame-and-save-the-image.cs) | `TiffFrame`, `TiffOptions` | 29693 use image load with a memory stream to open a tiff add a new frame and sav... |
 
 ## Category Statistics
-- Total examples: 432
+- Total examples: 600
 - Failed: 0
 - Pass rate: 100.0%
 
@@ -566,5 +566,5 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 All tasks passed ✅
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-03-30 | Run: `20260330_042756` | Examples: 432
+Updated: 2026-03-30 | Run: `20260330_042756` | Examples: 600
 <!-- AUTOGENERATED:END -->
