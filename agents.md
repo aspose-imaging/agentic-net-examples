@@ -83,7 +83,7 @@ This repository contains **3559** working code examples demonstrating Aspose.Ima
 - Guide: [agents.md](./kernel-filters/agents.md)
 
 ### manipulate-different-image-file-formats
-- Examples: 1296
+- Examples: 600
 - Guide: [agents.md](./manipulate-different-image-file-formats/agents.md)
 
 ### manipulating-images
