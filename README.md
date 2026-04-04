@@ -6,7 +6,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 3559 |
+| Total Examples | 2863 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-04-04 |
