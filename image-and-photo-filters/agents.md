@@ -17,97 +17,72 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 ## Required Namespaces
 
-- `using System;` (64/64 files)
-- `using System.IO;` (64/64 files)
-- `using Aspose.Imaging;` (57/64 files) ← category-specific
-- `using Aspose.Imaging.ImageOptions;` (46/64 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (36/64 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Apng;` (20/64 files) ← category-specific
-- `using Aspose.Imaging.Shapes;` (17/64 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (15/64 files) ← category-specific
-- `using Aspose.Imaging.MagicWand;` (15/64 files) ← category-specific
-- `using Aspose.Imaging.MagicWand.ImageMasks;` (11/64 files) ← category-specific
-- `using Aspose.Imaging.Watermark;` (9/64 files) ← category-specific
-- `using Aspose.Imaging.Watermark.Options;` (9/64 files) ← category-specific
-- `using Aspose.Imaging.ImageFilters.FilterOptions;` (7/64 files) ← category-specific
-- `using System.Drawing;` (3/64 files)
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (1/64 files) ← category-specific
-- `using System.Linq;` (1/64 files)
-- `using Aspose.Imaging.Masking;` (1/64 files) ← category-specific
-- `using Aspose.Imaging.Masking.Options;` (1/64 files) ← category-specific
-- `using Aspose.Imaging.Masking.Result;` (1/64 files) ← category-specific
+- `using System;` (136/136 files)
+- `using System.IO;` (134/136 files)
+- `using Aspose.Imaging;` (126/136 files) ← category-specific
+- `using Aspose.Imaging.ImageOptions;` (102/136 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (71/136 files) ← category-specific
+- `using Aspose.Imaging.MagicWand;` (48/136 files) ← category-specific
+- `using Aspose.Imaging.MagicWand.ImageMasks;` (43/136 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (37/136 files) ← category-specific
+- `using Aspose.Imaging.Shapes;` (36/136 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Apng;` (20/136 files) ← category-specific
+- `using Aspose.Imaging.Watermark;` (17/136 files) ← category-specific
+- `using Aspose.Imaging.Watermark.Options;` (17/136 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (9/136 files) ← category-specific
+- `using Aspose.Imaging.ImageFilters.FilterOptions;` (7/136 files) ← category-specific
+- `using Aspose.Imaging.Masking;` (6/136 files) ← category-specific
+- `using Aspose.Imaging.Masking.Options;` (6/136 files) ← category-specific
+- `using Aspose.Imaging.Masking.Result;` (6/136 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (5/136 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif;` (4/136 files) ← category-specific
+- `using System.Drawing;` (3/136 files)
+- `using Aspose.Imaging.FileFormats.Jpeg;` (3/136 files) ← category-specific
+- `using System.Linq;` (2/136 files)
+- `using System.Collections.Generic;` (2/136 files)
+- `using Aspose.Imaging.Brushes;` (2/136 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (2/136 files) ← category-specific
+- `using System.Diagnostics;` (2/136 files)
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (1/136 files) ← category-specific
 
 ## Files in this folder
 
 | File | Key APIs | Description |
 |------|----------|-------------|
-| [apply-an-alpha-blending-filter-to-an-image-supplied-in-any-supported-format-producing-a-blended-output.cs](./apply-an-alpha-blending-filter-to-an-image-supplied-in-any-supported-format-producing-a-blended-output.cs) | `ImageBlendingFilterOptions`, `PngOptions`, `RasterImage` | Apply an Alpha Blending filter to an image supplied in any supported format, pro... |
-| [apply-the-magic-wand-filter-to-select-a-region-in-an-image-of-any-supported-format-and-modify-it.cs](./apply-the-magic-wand-filter-to-select-a-region-in-an-image-of-any-supported-format-and-modify-it.cs) | `PngOptions`, `RasterImage` | Apply the Magic Wand filter to select a region in an image of any supported form... |
-| [apply-the-remove-watermark-filter-to-eliminate-watermarks-from-images-regardless-of-supported-input-format.cs](./apply-the-remove-watermark-filter-to-eliminate-watermarks-from-images-regardless-of-supported-input-format.cs) | `PngImage`, `TeleaWatermarkOptions` | Apply the Remove Watermark filter to eliminate watermarks from images regardless... |
-| [utilize-image-and-photo-filter-functions-to-process-images-of-any-supported-format-programmatically.cs](./utilize-image-and-photo-filter-functions-to-process-images-of-any-supported-format-programmatically.cs) | `SharpenFilterOptions` | Utilize image and photo filter functions to process images of any supported form... |
-| [examine-the-image-and-photo-filters-overview-to-become-familiar-with-available-image-filtering-options.cs](./examine-the-image-and-photo-filters-overview-to-become-familiar-with-available-image-filtering-options.cs) | `JpegOptions`, `RasterImage` | Examine the Image and Photo Filters overview to become familiar with available i... |
-| [determine-the-available-image-filters-and-devise-a-strategy-for-applying-them-within-the-processing-pipeline.cs](./determine-the-available-image-filters-and-devise-a-strategy-for-applying-them-within-the-processing-pipeline.cs) | `BilateralSmoothingFilterOptions`, `GaussWienerFilterOptions`, `GaussianBlurFilterOptions` | Determine the available image filters and devise a strategy for applying them wi... |
-| [apply-the-defined-image-filters-to-the-target-images-following-the-specifications-outlined-in-the-applying-filters-guidelines.cs](./apply-the-defined-image-filters-to-the-target-images-following-the-specifications-outlined-in-the-applying-filters-guidelines.cs) | `BilateralSmoothingFilterOptions`, `GaussWienerFilterOptions`, `GaussianBlurFilterOptions` | Apply the defined image filters to the target images following the specification... |
-| [apply-an-alpha-blending-filter-to-an-image-using-the-provided-example-as-a-reference.cs](./apply-an-alpha-blending-filter-to-an-image-using-the-provided-example-as-a-reference.cs) | `PngOptions`, `RasterImage` | Apply an Alpha Blending filter to an image using the provided example as a refer... |
-| [implement-the-magic-wand-filter-on-an-image-reproducing-the-behavior-demonstrated-in-the-provided-example.cs](./implement-the-magic-wand-filter-on-an-image-reproducing-the-behavior-demonstrated-in-the-provided-example.cs) | `PngOptions`, `RasterImage` | Implement the Magic Wand filter on an image, reproducing the behavior demonstrat... |
-| [eliminate-the-watermark-from-an-image-by-implementing-the-procedure-demonstrated-in-the-provided-example.cs](./eliminate-the-watermark-from-an-image-by-implementing-the-procedure-demonstrated-in-the-provided-example.cs) | `PngImage`, `TeleaWatermarkOptions` | Eliminate the watermark from an image by implementing the procedure demonstrated... |
-| [provide-a-concise-summary-describing-how-each-applied-filter-alters-image-appearance-and-characteristics.cs](./provide-a-concise-summary-describing-how-each-applied-filter-alters-image-appearance-and-characteristics.cs) |  | Provide a concise summary describing how each applied filter alters image appear... |
-| [apply-the-alpha-blending-filter-to-combine-an-image-with-a-specified-color-and-opacity-across-supported-formats.cs](./apply-the-alpha-blending-filter-to-combine-an-image-with-a-specified-color-and-opacity-across-supported-formats.cs) | `BmpOptions`, `GifOptions`, `JpegOptions` | Apply the Alpha Blending filter to combine an image with a specified color and o... |
-| [apply-the-alpha-blending-filter-to-an-image-to-combine-pixel-values-based-on-specified-opacity-levels.cs](./apply-the-alpha-blending-filter-to-an-image-to-combine-pixel-values-based-on-specified-opacity-levels.cs) | `PngOptions`, `RasterImage` | Apply the alpha blending filter to an image to combine pixel values based on spe... |
-| [examine-the-alpha-blending-image-filter-overview-to-understand-its-blending-algorithm-and-usage-parameters.cs](./examine-the-alpha-blending-image-filter-overview-to-understand-its-blending-algorithm-and-usage-parameters.cs) | `PngOptions`, `RasterImage` | Examine the Alpha Blending image filter overview to understand its blending algo... |
-| [set-up-the-alpha-blending-filter-by-specifying-blend-color-opacity-and-blending-mode-parameters.cs](./set-up-the-alpha-blending-filter-by-specifying-blend-color-opacity-and-blending-mode-parameters.cs) | `ImageBlendingFilterOptions`, `PngOptions`, `RasterImage` | Set up the Alpha Blending filter by specifying blend color, opacity, and blendin... |
-| [run-the-provided-code-sample-to-blend-an-image-using-a-specified-color-and-opacity.cs](./run-the-provided-code-sample-to-blend-an-image-using-a-specified-color-and-opacity.cs) | `PngImage`, `PngOptions`, `RasterImage` | Run the provided code sample to blend an image using a specified color and opaci... |
-| [inspect-the-output-image-after-applying-the-alpha-blending-filter-to-verify-blending-effects.cs](./inspect-the-output-image-after-applying-the-alpha-blending-filter-to-verify-blending-effects.cs) | `PngOptions` | Inspect the output image after applying the Alpha Blending filter to verify blen... |
-| [use-the-magic-wand-filter-to-select-a-color-similar-region-and-fill-it-with-a-color-for-any-supported-format.cs](./use-the-magic-wand-filter-to-select-a-color-similar-region-and-fill-it-with-a-color-for-any-supported-format.cs) | `PngOptions`, `RasterImage` | Use the Magic Wand filter to select a color‑similar region and fill it with a co... |
-| [apply-a-magic-wand-selection-filter-to-the-image-to-isolate-contiguous-regions-based-on-color-similarity.cs](./apply-a-magic-wand-selection-filter-to-the-image-to-isolate-contiguous-regions-based-on-color-similarity.cs) | `PngOptions`, `RasterImage` | Apply a Magic Wand selection filter to the image to isolate contiguous regions b... |
-| [examine-the-magic-wand-filter-overview-to-understand-its-functionality-and-applicable-use-cases.cs](./examine-the-magic-wand-filter-overview-to-understand-its-functionality-and-applicable-use-cases.cs) | `PngOptions`, `RasterImage` | Examine the Magic Wand filter overview to understand its functionality and appli... |
-| [configure-the-magic-wand-filter-by-specifying-tolerance-fill-color-and-border-color-parameters.cs](./configure-the-magic-wand-filter-by-specifying-tolerance-fill-color-and-border-color-parameters.cs) | `PngOptions`, `RasterImage` | Configure the Magic Wand filter by specifying tolerance, fill color, and border ... |
-| [execute-the-sample-to-apply-the-magic-wand-filter-for-region-selection-and-filling.cs](./execute-the-sample-to-apply-the-magic-wand-filter-for-region-selection-and-filling.cs) | `PngOptions`, `RasterImage` | Execute the sample to apply the Magic Wand filter for region selection and filli... |
-| [render-the-outcome-of-applying-the-magic-wand-filter-to-the-image-for-visual-verification.cs](./render-the-outcome-of-applying-the-magic-wand-filter-to-the-image-for-visual-verification.cs) | `PngOptions` | Render the outcome of applying the Magic Wand filter to the image for visual ver... |
-| [detect-and-eliminate-watermarks-from-images-using-the-remove-watermark-filter-for-any-supported-format.cs](./detect-and-eliminate-watermarks-from-images-using-the-remove-watermark-filter-for-any-supported-format.cs) | `PngImage` | Detect and eliminate watermarks from images using the Remove Watermark filter fo... |
-| [apply-the-remove-watermark-filter-on-an-image-to-eliminate-embedded-watermarks-while-preserving-image-quality.cs](./apply-the-remove-watermark-filter-on-an-image-to-eliminate-embedded-watermarks-while-preserving-image-quality.cs) | `PngImage`, `TeleaWatermarkOptions` | Apply the Remove Watermark filter on an image to eliminate embedded watermarks w... |
-| [examine-the-remove-watermark-filter-overview-to-understand-its-functionality-and-usage-parameters-within-the-library.cs](./examine-the-remove-watermark-filter-overview-to-understand-its-functionality-and-usage-parameters-within-the-library.cs) | `PngImage`, `TeleaWatermarkOptions` | Examine the Remove Watermark filter overview to understand its functionality and... |
-| [configure-the-remove-watermark-filter-by-defining-watermark-color-and-appropriate-threshold-parameters-clearly.cs](./configure-the-remove-watermark-filter-by-defining-watermark-color-and-appropriate-threshold-parameters-clearly.cs) | `PngImage` | Configure the Remove Watermark filter by defining watermark color and appropriat... |
-| [run-the-provided-code-to-programmatically-strip-the-existing-watermark-from-the-target-image-file.cs](./run-the-provided-code-to-programmatically-strip-the-existing-watermark-from-the-target-image-file.cs) | `PngImage`, `TeleaWatermarkOptions` | Run the provided code to programmatically strip the existing watermark from the ... |
-| [validate-the-image-output-after-watermark-removal-to-ensure-visual-integrity-and-expected-dimensions.cs](./validate-the-image-output-after-watermark-removal-to-ensure-visual-integrity-and-expected-dimensions.cs) | `PngImage`, `TeleaWatermarkOptions` | Validate the image output after watermark removal to ensure visual integrity and... |
-| [utilize-image-and-photo-filters-to-eliminate-a-watermark-from-a-given-image-while-maintaining-visual-fidelity.cs](./utilize-image-and-photo-filters-to-eliminate-a-watermark-from-a-given-image-while-maintaining-visual-fidelity.cs) | `PngImage`, `TeleaWatermarkOptions` | Utilize image and photo filters to eliminate a watermark from a given image whil... |
-| [utilize-image-processing-filters-to-detect-and-eliminate-watermarks-from-a-given-image-file.cs](./utilize-image-processing-filters-to-detect-and-eliminate-watermarks-from-a-given-image-file.cs) |  | Utilize image processing filters to detect and eliminate watermarks from a given... |
-| [utilize-image-processing-filters-to-detect-and-eliminate-watermarks-from-photos-within-a-given-image.cs](./utilize-image-processing-filters-to-detect-and-eliminate-watermarks-from-photos-within-a-given-image.cs) | `PngImage`, `TeleaWatermarkOptions` | Utilize image processing filters to detect and eliminate watermarks from photos ... |
-| [apply-image-and-photo-filters-to-isolate-a-specific-color-region-using-the-magic-wand-selection-tool.cs](./apply-image-and-photo-filters-to-isolate-a-specific-color-region-using-the-magic-wand-selection-tool.cs) | `PngOptions`, `RasterImage` | Apply image and photo filters to isolate a specific color region using the Magic... |
-| [remove-the-background-from-an-image-by-applying-the-magic-wand-filter-within-the-image-processing-library.cs](./remove-the-background-from-an-image-by-applying-the-magic-wand-filter-within-the-image-processing-library.cs) | `PngOptions`, `RasterImage` | Remove the background from an image by applying the Magic Wand filter within the... |
-| [apply-image-and-photo-filters-to-isolate-and-process-a-specific-color-region-within-an-image.cs](./apply-image-and-photo-filters-to-isolate-and-process-a-specific-color-region-within-an-image.cs) | `PngOptions`, `RasterImage` | Apply image and photo filters to isolate and process a specific color region wit... |
-| [apply-built-in-image-and-photo-filter-effects-to-a-target-image-using-the-provided-filter-api.cs](./apply-built-in-image-and-photo-filter-effects-to-a-target-image-using-the-provided-filter-api.cs) | `GaussianBlurFilterOptions`, `MedianFilterOptions`, `RasterImage` | Apply built‑in image and photo filter effects to a target image using the provid... |
-| [apply-the-alpha-blending-filter-to-an-image-to-combine-visual-layers-with-adjustable-opacity.cs](./apply-the-alpha-blending-filter-to-an-image-to-combine-visual-layers-with-adjustable-opacity.cs) |  | Apply the Alpha Blending filter to an image to combine visual layers with adjust... |
-| [apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs](./apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs) | `PngOptions`, `RasterImage` | Apply image and photo filters with the Magic Wand tool to an IMAGE file. |
-| [apply-image-and-photo-filters-using-the-magic-wand-filter-to-a-specified-image.cs](./apply-image-and-photo-filters-using-the-magic-wand-filter-to-a-specified-image.cs) | `PngOptions`, `RasterImage` | Apply image and photo filters using the Magic Wand filter to a specified image. |
-| [apply-image-and-photo-filters-to-define-the-watermark-position-on-a-target-image-file.cs](./apply-image-and-photo-filters-to-define-the-watermark-position-on-a-target-image-file.cs) | `PngImage` | Apply image and photo filters to define the watermark position on a target image... |
-| [apply-image-and-photo-filters-to-remove-watermarks-from-a-given-image-while-preserving-visual-quality.cs](./apply-image-and-photo-filters-to-remove-watermarks-from-a-given-image-while-preserving-visual-quality.cs) | `PngImage` | Apply image and photo filters to remove watermarks from a given image while pres... |
-| [chain-and-apply-multiple-image-filters-sequentially-to-an-apng-file-to-achieve-cumulative-effects.cs](./chain-and-apply-multiple-image-filters-sequentially-to-an-apng-file-to-achieve-cumulative-effects.cs) | `ApngFrame`, `ApngImage`, `ApngOptions` | Chain and apply multiple image filters sequentially to an APNG file to achieve c... |
-| [implement-an-image-filter-that-enables-chaining-multiple-filters-sequentially-on-an-apng-image.cs](./implement-an-image-filter-that-enables-chaining-multiple-filters-sequentially-on-an-apng-image.cs) | `ApngFrame`, `ApngImage`, `ApngOptions` | Implement an image filter that enables chaining multiple filters sequentially on... |
-| [apply-a-specified-image-filter-to-each-raster-frame-within-an-apng-image-while-maintaining-animation-integrity.cs](./apply-a-specified-image-filter-to-each-raster-frame-within-an-apng-image-while-maintaining-animation-integrity.cs) | `ApngFrame`, `ApngImage` | Apply a specified image filter to each raster frame within an APNG image while m... |
-| [apply-an-image-or-photo-filter-to-an-apng-file-modifying-pixel-data-while-preserving-animation-frames.cs](./apply-an-image-or-photo-filter-to-an-apng-file-modifying-pixel-data-while-preserving-animation-frames.cs) | `ApngFrame`, `ApngImage` | Apply an Image or Photo filter to an APNG file, modifying pixel data while prese... |
-| [apply-a-supported-filter-to-an-apng-image-adjusting-pixel-data-according-to-the-selected-filter-type.cs](./apply-a-supported-filter-to-an-apng-image-adjusting-pixel-data-according-to-the-selected-filter-type.cs) | `ApngImage` | Apply a supported filter to an APNG image, adjusting pixel data according to the... |
-| [apply-a-specified-image-filter-to-an-apng-file-ensuring-correct-handling-of-its-animation-frames.cs](./apply-a-specified-image-filter-to-an-apng-file-ensuring-correct-handling-of-its-animation-frames.cs) | `ApngFrame`, `ApngImage`, `ApngOptions` | Apply a specified image filter to an APNG file, ensuring correct handling of its... |
-| [apply-a-specified-filter-to-an-apng-image-modifying-each-frame-while-preserving-animation-properties.cs](./apply-a-specified-filter-to-an-apng-image-modifying-each-frame-while-preserving-animation-properties.cs) | `ApngFrame`, `ApngImage`, `ApngOptions` | Apply a specified filter to an APNG image, modifying each frame while preserving... |
-| [apply-the-alphablendingimagefilter-to-an-apng-image-to-blend-pixel-transparency-effectively-as-specified.cs](./apply-the-alphablendingimagefilter-to-an-apng-image-to-blend-pixel-transparency-effectively-as-specified.cs) | `ApngFrame`, `ApngImage`, `ApngOptions` | Apply the AlphaBlendingImageFilter to an APNG image to blend pixel transparency ... |
-| [apply-the-alphablendingimagefilter-to-an-apng-image-directly-using-the-provided-image-filter-api.cs](./apply-the-alphablendingimagefilter-to-an-apng-image-directly-using-the-provided-image-filter-api.cs) | `ApngImage`, `ApngOptions` | Apply the AlphaBlendingImageFilter to an APNG image directly using the provided ... |
-| [blend-an-apng-image-with-a-chosen-color-and-opacity-using-an-image-filter.cs](./blend-an-apng-image-with-a-chosen-color-and-opacity-using-an-image-filter.cs) | `ApngImage`, `ApngOptions`, `BmpOptions` | Blend an APNG image with a chosen color and opacity using an image filter. |
-| [apply-a-filter-to-an-apng-image-allowing-custom-blending-color-selection-and-configurable-opacity-level.cs](./apply-a-filter-to-an-apng-image-allowing-custom-blending-color-selection-and-configurable-opacity-level.cs) | `ApngImage`, `ApngOptions`, `PngOptions` | Apply a filter to an APNG image allowing custom blending color selection and con... |
-| [apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs](./apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs) | `ApngFrame`, `ApngOptions`, `PngOptions` | Apply the Alpha Blending filter to an APNG image to blend pixel colors based on ... |
-| [apply-a-specified-image-filter-during-construction-of-an-apng-image-object-to-transform-pixel-data.cs](./apply-a-specified-image-filter-during-construction-of-an-apng-image-object-to-transform-pixel-data.cs) | `ApngImage`, `ApngOptions`, `GaussianBlurFilterOptions` | Apply a specified image filter during construction of an APNG image object to tr... |
-| [apply-a-filter-to-an-apng-image-and-set-its-configuration-properties-as-desired.cs](./apply-a-filter-to-an-apng-image-and-set-its-configuration-properties-as-desired.cs) | `ApngOptions` | Apply a filter to an APNG image and set its configuration properties as desired. |
-| [apply-the-specified-image-filter-to-an-apng-file-replicating-the-behavior-demonstrated-in-the-example.cs](./apply-the-specified-image-filter-to-an-apng-file-replicating-the-behavior-demonstrated-in-the-example.cs) | `ApngFrame`, `ApngImage`, `ApngOptions` | Apply the specified image filter to an APNG file, replicating the behavior demon... |
-| [apply-the-magicwandfilter-to-target-and-process-a-selected-region-within-an-apng-image.cs](./apply-the-magicwandfilter-to-target-and-process-a-selected-region-within-an-apng-image.cs) | `RasterImage` | Apply the MagicWandFilter to target and process a selected region within an APNG... |
-| [use-magicwandfilter-to-select-and-process-a-specific-region-within-an-apng-image-efficiently.cs](./use-magicwandfilter-to-select-and-process-a-specific-region-within-an-apng-image-efficiently.cs) | `ApngOptions`, `RasterImage` | Use MagicWandFilter to select and process a specific region within an APNG image... |
-| [apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs](./apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs) | `ApngOptions`, `AutoMaskingGraphCutOptions`, `PngOptions` | Apply a color‑similarity filter to isolate a region within an APNG image based o... |
-| [apply-the-magic-wand-filter-to-an-apng-image-to-modify-its-pixel-data-according-to-specified-criteria.cs](./apply-the-magic-wand-filter-to-an-apng-image-to-modify-its-pixel-data-according-to-specified-criteria.cs) | `ApngOptions`, `RasterImage` | Apply the Magic Wand filter to an APNG image to modify its pixel data according ... |
-| [use-removewatermarkfilter-to-eliminate-watermarks-from-apng-images-while-preserving-visual-fidelity-and-metadata.cs](./use-removewatermarkfilter-to-eliminate-watermarks-from-apng-images-while-preserving-visual-fidelity-and-metadata.cs) | `ApngOptions`, `RasterImage`, `TeleaWatermarkOptions` | Use RemoveWatermarkFilter to eliminate watermarks from APNG images while preserv... |
-| [use-removewatermarkfilter-to-programmatically-eliminate-watermarks-from-an-apng-image-while-preserving-visual-integrity.cs](./use-removewatermarkfilter-to-programmatically-eliminate-watermarks-from-an-apng-image-while-preserving-visual-integrity.cs) | `ApngImage`, `ApngOptions`, `RasterImage` | Use RemoveWatermarkFilter to programmatically eliminate watermarks from an APNG ... |
-| [remove-watermarks-from-an-apng-image-by-applying-an-appropriate-filter-that-detects-and-eliminates-embedded-marks.cs](./remove-watermarks-from-an-apng-image-by-applying-an-appropriate-filter-that-detects-and-eliminates-embedded-marks.cs) | `ApngImage`, `ApngOptions` | Remove watermarks from an APNG image by applying an appropriate filter that dete... |
-| [apply-the-remove-watermark-filter-to-an-apng-image-to-successfully-eliminate-embedded-watermarks.cs](./apply-the-remove-watermark-filter-to-an-apng-image-to-successfully-eliminate-embedded-watermarks.cs) | `ApngImage`, `ApngOptions`, `RasterImage` | Apply the Remove Watermark filter to an APNG image to successfully eliminate emb... |
+| [load-a-jpeg-image-apply-alpha-blending-with-127-opacity-and-save-as-png.cs](./load-a-jpeg-image-apply-alpha-blending-with-127-opacity-and-save-as-png.cs) | `Graphics`, `PngOptions`, `RasterImage` | load a jpeg image apply alpha blending with 127 opacity and save as png |
+| [calculate-center-coordinates-of-a-bmp-background-blend-a-png-overlay-and-export-to-tiff.cs](./calculate-center-coordinates-of-a-bmp-background-blend-a-png-overlay-and-export-to-tiff.cs) | `RasterImage`, `TiffOptions` | calculate center coordinates of a bmp background blend a png overlay and export ... |
+| [batch-process-a-folder-of-png-images-applying-64-alpha-overlay-and-saving-results-as-jpeg-files.cs](./batch-process-a-folder-of-png-images-applying-64-alpha-overlay-and-saving-results-as-jpeg-files.cs) | `JpegOptions`, `RasterImage` | batch process a folder of png images applying 64 alpha overlay and saving result... |
+| [create-a-point-object-at-100-200-to-position-overlay-on-a-tiff-image.cs](./create-a-point-object-at-100-200-to-position-overlay-on-a-tiff-image.cs) | `Graphics`, `TiffImage` | create a point object at 100 200 to position overlay on a tiff image |
+| [define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs](./define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs) | `GifImage`, `GifOptions`, `Graphics` | define a custom overlay rectangle of 200x150 pixels and blend it onto a gif back... |
+| [apply-alpha-blending-with-full-opacity-255-to-a-png-overlay-and-verify-no-transparency-loss.cs](./apply-alpha-blending-with-full-opacity-255-to-a-png-overlay-and-verify-no-transparency-loss.cs) | `PngOptions`, `RasterImage` | apply alpha blending with full opacity 255 to a png overlay and verify no transp... |
+| [use-magic-wand-tool-with-threshold-30-to-select-red-region-in-a-jpeg-image.cs](./use-magic-wand-tool-with-threshold-30-to-select-red-region-in-a-jpeg-image.cs) | `RasterImage` | use magic wand tool with threshold 30 to select red region in a jpeg image |
+| [combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs](./combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs) | `PngOptions`, `RasterImage` | combine two magic wand selections using union operation and save the combined ma... |
+| [subtract-a-green-magic-wand-selection-from-a-blue-selection-and-export-the-result-to-bmp.cs](./subtract-a-green-magic-wand-selection-from-a-blue-selection-and-export-the-result-to-bmp.cs) | `BmpOptions`, `RasterImage` | subtract a green magic wand selection from a blue selection and export the resul... |
+| [invert-a-magic-wand-selection-on-a-tiff-image-and-fill-the-inverted-area-with-white.cs](./invert-a-magic-wand-selection-on-a-tiff-image-and-fill-the-inverted-area-with-white.cs) | `RasterImage`, `TiffOptions` | invert a magic wand selection on a tiff image and fill the inverted area with wh... |
+| [apply-feathering-of-radius-5-pixels-to-a-magic-wand-selection-before-saving-as-png.cs](./apply-feathering-of-radius-5-pixels-to-a-magic-wand-selection-before-saving-as-png.cs) | `PngOptions`, `RasterImage` | apply feathering of radius 5 pixels to a magic wand selection before saving as p... |
+| [remove-watermark-from-a-jpeg-using-content-aware-fill-algorithm-with-three-removal-attempts.cs](./remove-watermark-from-a-jpeg-using-content-aware-fill-algorithm-with-three-removal-attempts.cs) | `ContentAwareFillWatermarkOptions`, `JpegImage`, `JpegOptions` | remove watermark from a jpeg using content aware fill algorithm with three remov... |
+| [remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs](./remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs) | `PngImage` | remove watermark from a png using telea algorithm and set removal attempts to fi... |
+| [define-watermark-region-coordinates-50-50-200-100-and-apply-removal-filter-on-a-bmp-image.cs](./define-watermark-region-coordinates-50-50-200-100-and-apply-removal-filter-on-a-bmp-image.cs) | `BmpOptions`, `RasterImage` | define watermark region coordinates 50 50 200 100 and apply removal filter on a ... |
+| [batch-remove-watermarks-from-a-folder-of-tiff-files-using-content-aware-fill-and-save-results.cs](./batch-remove-watermarks-from-a-folder-of-tiff-files-using-content-aware-fill-and-save-results.cs) | `RasterImage`, `TiffOptions` | batch remove watermarks from a folder of tiff files using content aware fill and... |
+| [load-an-image-from-a-memory-stream-apply-alpha-blending-and-write-output-to-another-stream.cs](./load-an-image-from-a-memory-stream-apply-alpha-blending-and-write-output-to-another-stream.cs) | `PngOptions`, `RasterImage` | load an image from a memory stream apply alpha blending and write output to anot... |
+| [resize-a-jpeg-to-800x600-before-applying-magic-wand-selection-with-threshold-40.cs](./resize-a-jpeg-to-800x600-before-applying-magic-wand-selection-with-threshold-40.cs) | `RasterImage` | resize a jpeg to 800x600 before applying magic wand selection with threshold 40 |
+| [rotate-a-png-by-90-degrees-then-blend-a-semi-transparent-overlay-and-save-as-gif.cs](./rotate-a-png-by-90-degrees-then-blend-a-semi-transparent-overlay-and-save-as-gif.cs) | `GifOptions`, `RasterImage` | rotate a png by 90 degrees then blend a semi transparent overlay and save as gif |
+| [crop-a-bmp-to-central-400x400-area-apply-feathered-magic-wand-selection-and-export-to-png.cs](./crop-a-bmp-to-central-400x400-area-apply-feathered-magic-wand-selection-and-export-to-png.cs) | `PngOptions` | crop a bmp to central 400x400 area apply feathered magic wand selection and expo... |
+| [process-each-page-of-a-multi-page-tiff-applying-alpha-blending-with-200-opacity-and-save.cs](./process-each-page-of-a-multi-page-tiff-applying-alpha-blending-with-200-opacity-and-save.cs) | `BmpOptions`, `Graphics`, `RasterImage` | process each page of a multi page tiff applying alpha blending with 200 opacity ... |
+| [convert-a-pdf-page-to-image-apply-watermark-removal-and-save-the-cleaned-image-as-jpeg.cs](./convert-a-pdf-page-to-image-apply-watermark-removal-and-save-the-cleaned-image-as-jpeg.cs) | `JpegOptions`, `RasterImage`, `VectorRasterizationOptions` | convert a pdf page to image apply watermark removal and save the cleaned image a... |
+| [load-a-gif-animation-apply-magic-wand-selection-on-first-frame-and-reassemble-animation.cs](./load-a-gif-animation-apply-magic-wand-selection-on-first-frame-and-reassemble-animation.cs) | `GifImage`, `GifOptions`, `RasterImage` | load a gif animation apply magic wand selection on first frame and reassemble an... |
+| [apply-alpha-blending-with-0-opacity-to-verify-that-background-image-remains-unchanged-after-operation.cs](./apply-alpha-blending-with-0-opacity-to-verify-that-background-image-remains-unchanged-after-operation.cs) | `PngOptions`, `RasterImage` | apply alpha blending with 0 opacity to verify that background image remains unch... |
+| [set-overlay-alpha-to-192-and-blend-a-png-logo-onto-a-jpeg-banner-at-bottom-right-corner.cs](./set-overlay-alpha-to-192-and-blend-a-png-logo-onto-a-jpeg-banner-at-bottom-right-corner.cs) | `JpegOptions`, `RasterImage` | set overlay alpha to 192 and blend a png logo onto a jpeg banner at bottom right... |
+| [use-magic-wand-threshold-70-to-select-sky-region-in-a-landscape-png-and-invert-selection.cs](./use-magic-wand-threshold-70-to-select-sky-region-in-a-landscape-png-and-invert-selection.cs) | `PngOptions`, `RasterImage` | use magic wand threshold 70 to select sky region in a landscape png and invert s... |
+| [combine-three-magic-wand-selections-using-union-then-apply-feathering-of-radius-8-before-saving.cs](./combine-three-magic-wand-selections-using-union-then-apply-feathering-of-radius-8-before-saving.cs) | `RasterImage` | combine three magic wand selections using union then apply feathering of radius ... |
+| [subtract-a-text-watermark-selection-from-a-scanned-document-image-and-export-as-high-resolution-tiff.cs](./subtract-a-text-watermark-selection-from-a-scanned-document-image-and-export-as-high-resolution-tiff.cs) | `RasterImage`, `TiffOptions` | subtract a text watermark selection from a scanned document image and export as ... |
+| [apply-content-aware-fill-removal-on-a-jpeg-with-two-attempts-then-compare-result-with-telea-algorithm.cs](./apply-content-aware-fill-removal-on-a-jpeg-with-two-attempts-then-compare-result-with-telea-algorithm.cs) | `ContentAwareFillWatermarkOptions`, `RasterImage`, `TeleaWatermarkOptions` | apply content aware fill removal on a jpeg with two attempts then compare result... |
+| [load-images-from-a-zip-archive-apply-alpha-blending-to-each-and-write-outputs-to-another-zip.cs](./load-images-from-a-zip-archive-apply-alpha-blending-to-each-and-write-outputs-to-another-zip.cs) | `PngOptions`, `RasterImage` | load images from a zip archive apply alpha blending to each and write outputs to... |
+| [create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs](./create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs) | `Graphics`, `PngOptions`, `RasterImage` | create a custom selection by combining magic wand union and subtraction then fil... |
+| *...and 106 more files* | | [View all on GitHub](./) |
 
 ## Category Statistics
-- Total examples: 64
+- Total examples: 136
 - Failed: 0
 - Pass rate: 100.0%
 
@@ -119,24 +94,33 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `AutoMaskingGraphCutOptions`
 - `BilateralSmoothingFilterOptions`
 - `BmpOptions`
+- `ContentAwareFillWatermarkOptions`
 - `GaussWienerFilterOptions`
 - `GaussianBlurFilterOptions`
+- `GifImage`
 - `GifOptions`
+- `GraphCutMaskingOptions`
 - `Graphics`
 - `ImageBlendingFilterOptions`
+- `JpegImage`
 - `JpegOptions`
+- `MaskingOptions`
 - `MedianFilterOptions`
 - `MotionWienerFilterOptions`
 - `PngImage`
 - `PngOptions`
 - `RasterImage`
 - `SharpenFilterOptions`
+- `SolidBrush`
 - `TeleaWatermarkOptions`
+- `TiffImage`
+- `TiffOptions`
+- `VectorRasterizationOptions`
 
 ## Failed Tasks
 
 All tasks passed ✅
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-03-24 | Run: `20260324_005626` | Examples: 64
+Updated: 2026-04-04 | Run: `20260404_130505` | Examples: 136
 <!-- AUTOGENERATED:END -->
