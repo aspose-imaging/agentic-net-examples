@@ -90,10 +90,6 @@ This repository contains **3559** working code examples demonstrating Aspose.Ima
 - Examples: 407
 - Guide: [agents.md](./manipulating-images/agents.md)
 
-### merge-images
-- Examples: 135
-- Guide: [agents.md](./merge-images/agents.md)
-
 ### working-with-drawing-images
 - Examples: 397
 - Guide: [agents.md](./working-with-drawing-images/agents.md)
