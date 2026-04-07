@@ -17,76 +17,76 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 ## Required Namespaces
 
-- `using System;` (95/95 files)
-- `using System.IO;` (95/95 files)
-- `using Aspose.Imaging;` (94/95 files) ← category-specific
-- `using Aspose.Imaging.ImageOptions;` (93/95 files) ← category-specific
-- `using System.Collections.Generic;` (53/95 files)
-- `using Aspose.Imaging.Sources;` (47/95 files) ← category-specific
-- `using System.Linq;` (26/95 files)
-- `using Aspose.Imaging.FileFormats.Jpeg;` (24/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (16/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (8/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Apng;` (4/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (4/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (4/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (3/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg2000;` (3/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tga;` (3/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (3/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Wmf;` (3/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.BigTiff;` (2/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (2/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Djvu;` (2/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif;` (2/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (2/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Ico;` (2/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Psd;` (2/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Dicom;` (2/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf.Graphics;` (1/95 files) ← category-specific
-- `using Aspose.Imaging.Brushes;` (1/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cmx;` (1/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.OpenDocument;` (1/95 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Webp;` (1/95 files) ← category-specific
+- `using System;` (135/135 files)
+- `using System.IO;` (135/135 files)
+- `using Aspose.Imaging.ImageOptions;` (133/135 files) ← category-specific
+- `using Aspose.Imaging;` (131/135 files) ← category-specific
+- `using System.Collections.Generic;` (91/135 files)
+- `using Aspose.Imaging.Sources;` (83/135 files) ← category-specific
+- `using System.Linq;` (56/135 files)
+- `using Aspose.Imaging.FileFormats.Jpeg;` (55/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (18/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Pdf;` (14/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (5/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Apng;` (4/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg;` (4/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf;` (3/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg2000;` (3/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tga;` (3/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (3/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Wmf;` (3/135 files) ← category-specific
+- `using Aspose.Imaging.Brushes;` (3/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.BigTiff;` (2/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (2/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Djvu;` (2/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif;` (2/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (2/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Ico;` (2/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Psd;` (2/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Dicom;` (2/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf.Graphics;` (1/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cmx;` (1/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.OpenDocument;` (1/135 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Webp;` (1/135 files) ← category-specific
 
 ## Files in this folder
 
 | File | Key APIs | Description |
 |------|----------|-------------|
-| [combine-multiple-jpg-images-into-a-single-jpeg-file-while-preserving-original-resolution-and-quality.cs](./combine-multiple-jpg-images-into-a-single-jpeg-file-while-preserving-original-resolution-and-quality.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | combine multiple jpg images into a single jpeg file while preserving original re... |
-| [combine-multiple-images-into-a-single-jpeg-with-a-horizontal-arrangement-preserving-original-dimensions.cs](./combine-multiple-images-into-a-single-jpeg-with-a-horizontal-arrangement-preserving-original-dimensions.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | combine multiple images into a single jpeg with a horizontal arrangement preserv... |
-| [combine-multiple-images-into-a-single-vertically-arranged-jpeg-file-maintaining-the-original-image-order.cs](./combine-multiple-images-into-a-single-vertically-arranged-jpeg-file-maintaining-the-original-image-order.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | combine multiple images into a single vertically arranged jpeg file maintaining ... |
-| [combine-multiple-jpeg-images-into-a-single-pdf-document-preserving-original-jpeg-quality-and-image-dimensions.cs](./combine-multiple-jpeg-images-into-a-single-pdf-document-preserving-original-jpeg-quality-and-image-dimensions.cs) | `PdfOptions` | combine multiple jpeg images into a single pdf document preserving original jpeg... |
-| [combine-multiple-jpeg-images-into-a-single-png-file-while-preserving-jpeg-compression-characteristics.cs](./combine-multiple-jpeg-images-into-a-single-png-file-while-preserving-jpeg-compression-characteristics.cs) | `PngOptions`, `RasterImage` | combine multiple jpeg images into a single png file while preserving jpeg compre... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-apng-file-while-preserving-each-image-s-original-dimensions-and-color-fidelity.cs](./programmatically-combine-multiple-jpg-images-into-a-single-apng-file-while-preserving-each-image-s-original-dimensions-and-color-fidelity.cs) | `ApngImage`, `ApngOptions`, `RasterImage` | programmatically combine multiple jpg images into a single apng file while prese... |
-| [programmatically-and-efficiently-combine-multiple-jpg-images-into-a-single-avif-file-preserving-image-quality.cs](./programmatically-and-efficiently-combine-multiple-jpg-images-into-a-single-avif-file-preserving-image-quality.cs) | `PngOptions`, `RasterImage` | programmatically and efficiently combine multiple jpg images into a single avif ... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-bigtiff-file-preserving-image-fidelity-while-maintaining-original-metadata.cs](./programmatically-combine-multiple-jpg-images-into-a-single-bigtiff-file-preserving-image-fidelity-while-maintaining-original-metadata.cs) | `BigTiffImage`, `BigTiffOptions`, `RasterImage` | Programmatically combine multiple JPG images into a single BIGTIFF file, preserv... |
-| [programmatically-combine-multiple-jpeg-files-into-a-single-jpeg-output-by-converting-and-merging-through-bmp-format.cs](./programmatically-combine-multiple-jpeg-files-into-a-single-jpeg-output-by-converting-and-merging-through-bmp-format.cs) | `BmpOptions`, `JpegOptions`, `RasterImage` | Programmatically combine multiple JPEG files into a single JPEG output by conver... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-cdr-file-while-preserving-image-quality.cs](./programmatically-combine-multiple-jpg-images-into-a-single-cdr-file-while-preserving-image-quality.cs) |  | programmatically combine multiple jpg images into a single cdr file while preser... |
-| [programmatically-merge-multiple-jpg-images-into-a-single-jpg-output-utilizing-the-cmx-file-format.cs](./programmatically-merge-multiple-jpg-images-into-a-single-jpg-output-utilizing-the-cmx-file-format.cs) | `JpegOptions` | programmatically merge multiple jpg images into a single jpg output utilizing th... |
-| [programmatically-merge-multiple-jpg-images-into-a-single-jpg-output-while-employing-the-dib-format.cs](./programmatically-merge-multiple-jpg-images-into-a-single-jpg-output-while-employing-the-dib-format.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | programmatically merge multiple jpg images into a single jpg output while employ... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-dicom-file-while-maintaining-image-fidelity.cs](./programmatically-combine-multiple-jpg-images-into-a-single-dicom-file-while-maintaining-image-fidelity.cs) | `DicomOptions`, `RasterImage` | programmatically combine multiple jpg images into a single dicom file while main... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-djvu-file-while-preserving-image-quality.cs](./programmatically-combine-multiple-jpg-images-into-a-single-djvu-file-while-preserving-image-quality.cs) |  | programmatically combine multiple jpg images into a single djvu file while prese... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-jpg-utilizing-dng-as-the-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-utilizing-dng-as-the-intermediate-format.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | programmatically combine multiple jpg images into a single jpg utilizing dng as ... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-utilizing-the-emf-format-as-an-intermediate.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-utilizing-the-emf-format-as-an-intermediate.cs) | `EmfOptions`, `JpegOptions`, `RasterImage` | programmatically combine multiple jpg images into a single jpg output utilizing ... |
-| [implement-a-routine-that-programmatically-merges-multiple-jpeg-images-into-a-single-jpeg-using-eps-as-the-intermediate-format.cs](./implement-a-routine-that-programmatically-merges-multiple-jpeg-images-into-a-single-jpeg-using-eps-as-the-intermediate-format.cs) | `JpegOptions`, `RasterImage` | implement a routine that programmatically merges multiple jpeg images into a sin... |
-| [combine-multiple-jpg-images-into-a-single-gif-file-using-a-programmatic-merging-operation.cs](./combine-multiple-jpg-images-into-a-single-gif-file-using-a-programmatic-merging-operation.cs) | `GifImage`, `RasterImage` | Combine multiple JPG images into a single GIF file using a programmatic merging ... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-ico-file-while-preserving-image-quality.cs](./programmatically-combine-multiple-jpg-images-into-a-single-ico-file-while-preserving-image-quality.cs) | `IcoImage`, `IcoOptions` | programmatically combine multiple jpg images into a single ico file while preser... |
-| [combine-multiple-jpg-files-programmatically-into-a-single-jpeg-image-while-maintaining-original-compression-parameters.cs](./combine-multiple-jpg-files-programmatically-into-a-single-jpeg-image-while-maintaining-original-compression-parameters.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | combine multiple jpg files programmatically into a single jpeg image while maint... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-jpeg2000-file-preserving-image-quality-and-metadata.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpeg2000-file-preserving-image-quality-and-metadata.cs) | `Jpeg2000Image`, `Jpeg2000Options`, `RasterImage` | programmatically combine multiple jpg images into a single jpeg2000 file preserv... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-odg-file-while-preserving-image-integrity.cs](./programmatically-combine-multiple-jpg-images-into-a-single-odg-file-while-preserving-image-integrity.cs) |  | programmatically combine multiple jpg images into a single odg file while preser... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-otg-file-while-maintaining-image-fidelity.cs](./programmatically-combine-multiple-jpg-images-into-a-single-otg-file-while-maintaining-image-fidelity.cs) |  | programmatically combine multiple jpg images into a single otg file while mainta... |
-| [programmatically-combine-several-jpg-files-into-one-png-image-while-maintaining-original-pixel-data.cs](./programmatically-combine-several-jpg-files-into-one-png-image-while-maintaining-original-pixel-data.cs) | `PngOptions`, `RasterImage` | programmatically combine several jpg files into one png image while maintaining ... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-psd-file-preserving-each-image-as-separate-layers.cs](./programmatically-combine-multiple-jpg-images-into-a-single-psd-file-preserving-each-image-as-separate-layers.cs) | `PsdOptions` | programmatically combine multiple jpg images into a single psd file preserving e... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-leveraging-svg-as-an-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-leveraging-svg-as-an-intermediate-format.cs) | `JpegOptions` | programmatically combine multiple jpg images into a single jpg output by leverag... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-utilizing-the-svgz-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-utilizing-the-svgz-intermediate-format.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | programmatically combine multiple jpg images into a single jpg output utilizing ... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-utilizing-tga-as-the-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-utilizing-tga-as-the-intermediate-format.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | programmatically combine multiple jpg images into a single jpg output utilizing ... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-utilizing-tiff-as-an-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-utilizing-tiff-as-an-intermediate-format.cs) | `JpegOptions`, `RasterImage`, `TiffFrame` | programmatically combine multiple jpg images into a single jpg output by utilizi... |
-| [programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-utilizing-wmf-as-the-intermediate-format.cs](./programmatically-combine-multiple-jpg-images-into-a-single-jpg-output-by-utilizing-wmf-as-the-intermediate-format.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | programmatically combine multiple jpg images into a single jpg output by utilizi... |
-| *...and 65 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images) |
+| [load-multiple-jpeg-files-from-a-directory-and-merge-them-horizontally-into-a-single-jpeg-image.cs](./load-multiple-jpeg-files-from-a-directory-and-merge-them-horizontally-into-a-single-jpeg-image.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | load multiple jpeg files from a directory and merge them horizontally into a sin... |
+| [load-several-jpeg-pictures-arrange-them-vertically-and-save-the-combined-result-as-a-jpeg-file.cs](./load-several-jpeg-pictures-arrange-them-vertically-and-save-the-combined-result-as-a-jpeg-file.cs) | `JpegImage`, `JpegOptions` | load several jpeg pictures arrange them vertically and save the combined result ... |
+| [combine-a-set-of-jpeg-images-horizontally-and-output-the-merged-picture-as-a-pdf-document.cs](./combine-a-set-of-jpeg-images-horizontally-and-output-the-merged-picture-as-a-pdf-document.cs) | `JpegImage`, `JpegOptions`, `PdfOptions` | combine a set of jpeg images horizontally and output the merged picture as a pdf... |
+| [merge-multiple-jpeg-files-side-by-side-and-store-the-final-composition-in-png-format.cs](./merge-multiple-jpeg-files-side-by-side-and-store-the-final-composition-in-png-format.cs) | `PngOptions`, `RasterImage` | merge multiple jpeg files side by side and store the final composition in png fo... |
+| [resize-each-input-jpeg-to-a-uniform-width-before-performing-a-horizontal-merge-and-saving-as-jpeg.cs](./resize-each-input-jpeg-to-a-uniform-width-before-performing-a-horizontal-merge-and-saving-as-jpeg.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | resize each input jpeg to a uniform width before performing a horizontal merge a... |
+| [rotate-every-jpeg-image-ninety-degrees-clockwise-then-merge-them-vertically-and-save-as-jpeg.cs](./rotate-every-jpeg-image-ninety-degrees-clockwise-then-merge-them-vertically-and-save-as-jpeg.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | rotate every jpeg image ninety degrees clockwise then merge them vertically and ... |
+| [flip-each-jpeg-image-horizontally-compose-them-in-a-horizontal-layout-and-export-the-result-as-png.cs](./flip-each-jpeg-image-horizontally-compose-them-in-a-horizontal-layout-and-export-the-result-as-png.cs) | `PngOptions` | flip each jpeg image horizontally compose them in a horizontal layout and export... |
+| [crop-all-jpeg-pictures-to-a-central-square-region-merge-them-vertically-and-write-the-output-as-pdf.cs](./crop-all-jpeg-pictures-to-a-central-square-region-merge-them-vertically-and-write-the-output-as-pdf.cs) | `JpegOptions`, `PdfOptions`, `RasterImage` | crop all jpeg pictures to a central square region merge them vertically and writ... |
+| [apply-a-uniform-background-color-to-the-canvas-before-merging-jpeg-images-horizontally-and-saving-as-jpeg.cs](./apply-a-uniform-background-color-to-the-canvas-before-merging-jpeg-images-horizontally-and-saving-as-jpeg.cs) | `Graphics`, `JpegImage`, `JpegOptions` | apply a uniform background color to the canvas before merging jpeg images horizo... |
+| [set-the-output-dpi-to-300-when-merging-jpeg-files-horizontally-and-saving-the-result-as-pdf.cs](./set-the-output-dpi-to-300-when-merging-jpeg-files-horizontally-and-saving-the-result-as-pdf.cs) | `JpegOptions`, `PdfOptions`, `RasterImage` | set the output dpi to 300 when merging jpeg files horizontally and saving the re... |
+| [specify-jpeg-quality-level-of-85-while-merging-images-vertically-and-storing-the-final-file-as-jpeg.cs](./specify-jpeg-quality-level-of-85-while-merging-images-vertically-and-storing-the-final-file-as-jpeg.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | specify jpeg quality level of 85 while merging images vertically and storing the... |
+| [use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs](./use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs) | `JpegImage`, `JpegOptions`, `LoadOptions` | use imageloadoptions to limit memory usage while loading jpeg files for a horizo... |
+| [create-a-memory-stream-merge-jpeg-images-horizontally-and-write-the-combined-output-directly-to-the-stream.cs](./create-a-memory-stream-merge-jpeg-images-horizontally-and-write-the-combined-output-directly-to-the-stream.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | create a memory stream merge jpeg images horizontally and write the combined out... |
+| [read-jpeg-images-from-a-network-stream-merge-them-vertically-and-send-the-resulting-jpeg-back.cs](./read-jpeg-images-from-a-network-stream-merge-them-vertically-and-send-the-resulting-jpeg-back.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | read jpeg images from a network stream merge them vertically and send the result... |
+| [process-a-batch-of-jpeg-folders-merging-each-folder-s-images-horizontally-into-separate-pdf-files.cs](./process-a-batch-of-jpeg-folders-merging-each-folder-s-images-horizontally-into-separate-pdf-files.cs) | `JpegImage`, `JpegOptions`, `PdfOptions` | process a batch of jpeg folders merging each folder s images horizontally into s... |
+| [implement-parallel-loading-of-jpeg-files-then-merge-them-vertically-and-save-the-composition-as-png.cs](./implement-parallel-loading-of-jpeg-files-then-merge-them-vertically-and-save-the-composition-as-png.cs) | `PngOptions`, `RasterImage` | implement parallel loading of jpeg files then merge them vertically and save the... |
+| [use-a-cancellation-token-to-abort-a-long-running-horizontal-jpeg-merge-operation-when-requested.cs](./use-a-cancellation-token-to-abort-a-long-running-horizontal-jpeg-merge-operation-when-requested.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | use a cancellation token to abort a long running horizontal jpeg merge operation... |
+| [log-progress-percentage-after-each-jpeg-image-is-added-to-the-canvas-during-a-vertical-merge.cs](./log-progress-percentage-after-each-jpeg-image-is-added-to-the-canvas-during-a-vertical-merge.cs) | `JpegImage`, `JpegOptions` | log progress percentage after each jpeg image is added to the canvas during a ve... |
+| [wrap-image-loading-and-merging-code-in-try-catch-blocks-to-handle-file-access-exceptions-gracefully.cs](./wrap-image-loading-and-merging-code-in-try-catch-blocks-to-handle-file-access-exceptions-gracefully.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | wrap image loading and merging code in try catch blocks to handle file access ex... |
+| [employ-using-statements-to-ensure-all-image-objects-are-disposed-after-completing-a-jpeg-to-png-merge.cs](./employ-using-statements-to-ensure-all-image-objects-are-disposed-after-completing-a-jpeg-to-png-merge.cs) | `PngOptions`, `RasterImage` | employ using statements to ensure all image objects are disposed after completin... |
+| [generate-output-filenames-by-appending-a-timestamp-to-the-original-jpeg-name-for-each-merged-result.cs](./generate-output-filenames-by-appending-a-timestamp-to-the-original-jpeg-name-for-each-merged-result.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | generate output filenames by appending a timestamp to the original jpeg name for... |
+| [save-merged-jpeg-images-to-a-temporary-folder-then-move-them-to-the-final-destination-after-verification.cs](./save-merged-jpeg-images-to-a-temporary-folder-then-move-them-to-the-final-destination-after-verification.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | save merged jpeg images to a temporary folder then move them to the final destin... |
+| [configure-pdfoptions-to-use-a4-page-size-when-saving-a-horizontally-merged-jpeg-collection-as-pdf.cs](./configure-pdfoptions-to-use-a4-page-size-when-saving-a-horizontally-merged-jpeg-collection-as-pdf.cs) | `JpegOptions`, `PdfOptions`, `RasterImage` | configure pdfoptions to use a4 page size when saving a horizontally merged jpeg ... |
+| [enable-png-interlacing-in-pngoptions-while-merging-jpeg-images-horizontally-and-saving-the-output-as-png.cs](./enable-png-interlacing-in-pngoptions-while-merging-jpeg-images-horizontally-and-saving-the-output-as-png.cs) | `PngOptions`, `RasterImage` | enable png interlacing in pngoptions while merging jpeg images horizontally and ... |
+| [set-jpeg-subsampling-to-4-2-0-in-jpegoptions-during-a-vertical-merge-to-reduce-file-size.cs](./set-jpeg-subsampling-to-4-2-0-in-jpegoptions-during-a-vertical-merge-to-reduce-file-size.cs) | `JpegImage`, `JpegOptions` | set jpeg subsampling to 4 2 0 in jpegoptions during a vertical merge to reduce f... |
+| [apply-a-grayscale-color-conversion-to-each-jpeg-before-merging-them-horizontally-and-exporting-as-pdf.cs](./apply-a-grayscale-color-conversion-to-each-jpeg-before-merging-them-horizontally-and-exporting-as-pdf.cs) | `JpegImage`, `JpegOptions`, `PdfOptions` | Apply a grayscale color conversion to each JPEG before merging them horizontally... |
+| [convert-each-jpeg-to-cmyk-color-space-prior-to-a-vertical-merge-and-save-the-result-as-jpeg.cs](./convert-each-jpeg-to-cmyk-color-space-prior-to-a-vertical-merge-and-save-the-result-as-jpeg.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | convert each jpeg to cmyk color space prior to a vertical merge and save the res... |
+| [add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs](./add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs) | `Graphics`, `JpegImage`, `JpegOptions` | Add a semi‑transparent watermark text to the merged image after completing a hor... |
+| [overlay-a-logo-png-on-the-bottom-right-corner-of-the-merged-jpeg-image-before-saving-as-png.cs](./overlay-a-logo-png-on-the-bottom-right-corner-of-the-merged-jpeg-image-before-saving-as-png.cs) | `PngOptions`, `RasterImage` | overlay a logo png on the bottom right corner of the merged jpeg image before sa... |
+| [insert-a-10-pixel-padding-between-each-jpeg-image-during-a-vertical-merge-to-improve-visual-separation.cs](./insert-a-10-pixel-padding-between-each-jpeg-image-during-a-vertical-merge-to-improve-visual-separation.cs) | `JpegImage`, `JpegOptions`, `RasterImage` | insert a 10 pixel padding between each jpeg image during a vertical merge to imp... |
+| *...and 105 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images) |
 
 ## Category Statistics
-- Total examples: 95
+- Total examples: 135
 - Failed: 0
 - Pass rate: 100.0%
 
@@ -112,6 +112,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `Jpeg2000Options`
 - `JpegImage`
 - `JpegOptions`
+- `LoadOptions`
 - `OdgRasterizationOptions`
 - `OtgRasterizationOptions`
 - `PdfCoreOptions`
@@ -119,6 +120,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 - `PngOptions`
 - `PsdOptions`
 - `RasterImage`
+- `SolidBrush`
 - `SvgImage`
 - `SvgOptions`
 - `SvgRasterizationOptions`
@@ -141,7 +143,8 @@ All tasks passed ✅
 | Version | Examples Added | Total | Date |
 |---------|---------------|-------|------|
 | V1 | 95 | 95 | 2026-04-06 |
+| V2 | 40 | 135 | 2026-04-07 |
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-04-06 | Run: `20260406_133130` | Examples: 95
+Updated: 2026-04-07 | Run: `20260407_065759` | Examples: 135
 <!-- AUTOGENERATED:END -->
