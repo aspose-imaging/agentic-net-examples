@@ -6,10 +6,10 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 3519 |
+| Total Examples | 3559 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-04-06 |
+| Last Updated | 2026-04-07 |
 
 ## Repository Structure
 
@@ -54,7 +54,7 @@ README.md
 | [Kernel Filters](./kernel-filters/) | 464 | 100.0% | [agents.md](./kernel-filters/agents.md) |
 | [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 1296 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
 | [Manipulating Images](./manipulating-images/) | 407 | 100.0% | [agents.md](./manipulating-images/agents.md) |
-| [Merge Images](./merge-images/) | 95 | 100.0% | [agents.md](./merge-images/agents.md) |
+| [Merge Images](./merge-images/) | 135 | 100.0% | [agents.md](./merge-images/agents.md) |
 | [Working With Drawing Images](./working-with-drawing-images/) | 397 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
 
 ## How to Use
@@ -71,4 +71,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260406_133130` | 2026-04-06*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260407_065759` | 2026-04-07*
