@@ -6,7 +6,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 2863 |
+| Total Examples | 28613 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-04-07 |
@@ -39,7 +39,7 @@ README.md
 
 | Category | Examples | Pass Rate | Details |
 |----------|----------|-----------|---------|
-| [Conversion](./conversion/) | 162 | 100.0% | [agents.md](./conversion/agents.md) |
+| [Conversion](./conversion/) | 1162 | 100.0% | [agents.md](./conversion/agents.md) |
 | [Convert APNG](./convert-apng/) | 51 | 100.0% | [agents.md](./convert-apng/agents.md) |
 | [Convert CDR](./convert-cdr/) | 30 | 100.0% | [agents.md](./convert-cdr/agents.md) |
 | [Convert CMX Images](./convert-cmx-images/) | 34 | 100.0% | [agents.md](./convert-cmx-images/agents.md) |
@@ -52,10 +52,10 @@ README.md
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 136 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 464 | 100.0% | [agents.md](./kernel-filters/agents.md) |
-| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 600 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
+| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 6100 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
 | [Manipulating Images](./manipulating-images/) | 407 | 100.0% | [agents.md](./manipulating-images/agents.md) |
 | [Merge Images](./merge-images/) | 135 | 100.0% | [agents.md](./merge-images/agents.md) |
-| [Working With Drawing Images](./working-with-drawing-images/) | 397 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
+| [Working With Drawing Images](./working-with-drawing-images/) | 3197 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
 
 ## How to Use
 
