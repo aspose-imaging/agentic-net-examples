@@ -1,7 +1,7 @@
 {
   "product": "Aspose.Imaging",
   "platform": "net",
-  "framework": "net10.0",
+  "framework": "net9.0",
   "package_version": "26.2.0",
   "total_examples": 2863,
   "total_categories": 17,
