@@ -1555,20 +1555,20 @@
         "use-a-custom-color-profile-when-converting-emf-to-jpeg-to-maintain-color-accuracy.cs"
       ],
       "required_namespaces": [
-        "Aspose.Imaging",
         "System",
         "System.IO",
         "Aspose.Imaging.ImageOptions",
+        "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Wmf",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Jpeg",
-        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Emf",
+        "Aspose.Imaging.FileFormats.Tiff.Enums",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Png",
         "System.Threading.Tasks",
         "System.IO.Compression",
-        "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.Exif"
+        "Aspose.Imaging.Sources",
+        "Aspose.Imaging.FileFormats.Bmp",
+        "System.Collections.Generic"
       ],
       "key_apis": [
         "BmpImage",
@@ -1578,9 +1578,11 @@
         "GifOptions",
         "Image",
         "JpegOptions",
+        "MultiPageOptions",
         "PdfOptions",
         "PngOptions",
         "TiffOptions",
+        "VectorRasterizationOptions",
         "WmfImage",
         "WmfRasterizationOptions"
       ]
