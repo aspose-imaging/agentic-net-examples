@@ -17,37 +17,37 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 ## Required Namespaces
 
-- `using System;` (135/135 files)
-- `using System.IO;` (135/135 files)
-- `using Aspose.Imaging.ImageOptions;` (133/135 files) ← category-specific
-- `using Aspose.Imaging;` (131/135 files) ← category-specific
-- `using System.Collections.Generic;` (91/135 files)
-- `using Aspose.Imaging.Sources;` (83/135 files) ← category-specific
-- `using System.Linq;` (56/135 files)
-- `using Aspose.Imaging.FileFormats.Jpeg;` (55/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (18/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (14/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (5/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Apng;` (4/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (4/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf;` (3/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg2000;` (3/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tga;` (3/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (3/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Wmf;` (3/135 files) ← category-specific
-- `using Aspose.Imaging.Brushes;` (3/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.BigTiff;` (2/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (2/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Djvu;` (2/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif;` (2/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (2/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Ico;` (2/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Psd;` (2/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Dicom;` (2/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Emf.Graphics;` (1/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Cmx;` (1/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.OpenDocument;` (1/135 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Webp;` (1/135 files) ← category-specific
+- `using System;` (175/175 files)
+- `using System.IO;` (175/175 files)
+- `using Aspose.Imaging.ImageOptions;` (173/175 files) ← category-specific
+- `using Aspose.Imaging;` (168/175 files) ← category-specific
+- `using System.Collections.Generic;` (129/175 files)
+- `using Aspose.Imaging.Sources;` (119/175 files) ← category-specific
+- `using System.Linq;` (86/175 files)
+- `using Aspose.Imaging.FileFormats.Jpeg;` (86/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (20/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Pdf;` (20/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (6/175 files) ← category-specific
+- `using Aspose.Imaging.Brushes;` (5/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Apng;` (4/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg;` (4/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf;` (3/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Jpeg2000;` (3/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tga;` (3/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (3/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Wmf;` (3/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.BigTiff;` (2/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (2/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Djvu;` (2/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif;` (2/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Gif.Blocks;` (2/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Ico;` (2/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Psd;` (2/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Dicom;` (2/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Emf.Graphics;` (1/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Cmx;` (1/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.OpenDocument;` (1/175 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Webp;` (1/175 files) ← category-specific
 
 ## Files in this folder
 
@@ -86,7 +86,7 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 | *...and 105 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images) |
 
 ## Category Statistics
-- Total examples: 135
+- Total examples: 175
 - Failed: 0
 - Pass rate: 100.0%
 
@@ -144,7 +144,8 @@ All tasks passed ✅
 |---------|---------------|-------|------|
 | V1 | 95 | 95 | 2026-04-06 |
 | V2 | 40 | 135 | 2026-04-07 |
+| V3 | 40 | 175 | 2026-04-08 |
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-04-07 | Run: `20260407_065759` | Examples: 135
+Updated: 2026-04-08 | Run: `20260408_062449` | Examples: 175
 <!-- AUTOGENERATED:END -->
