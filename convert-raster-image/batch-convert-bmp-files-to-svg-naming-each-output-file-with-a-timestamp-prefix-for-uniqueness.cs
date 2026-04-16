@@ -7,49 +7,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDir = "Input";
-        string outputDir = "Output";
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Get all BMP files in the input directory
-        string[] bmpFiles = Directory.GetFiles(inputDir, "*.bmp");
-
-        foreach (string inputPath in bmpFiles)
+        if (!Directory.Exists(inputDirectory))
         {
-            // Validate input file existence
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+
+        foreach (var inputPath in files)
+        {
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Generate timestamped output file name
+            string fileName = Path.GetFileNameWithoutExtension(inputPath);
             string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(inputPath)}.svg";
-            string outputPath = Path.Combine(outputDir, outputFileName);
+            string outputFileName = $"{timestamp}_{fileName}.svg";
+            string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG rasterization options
-                var rasterOptions = new SvgRasterizationOptions
+                using (SvgOptions svgOptions = new SvgOptions())
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
-                };
-
-                // Prepare SVG save options
-                using (var svgOptions = new SvgOptions())
-                {
-                    svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save as SVG
+                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
                     image.Save(outputPath, svgOptions);
                 }
             }
