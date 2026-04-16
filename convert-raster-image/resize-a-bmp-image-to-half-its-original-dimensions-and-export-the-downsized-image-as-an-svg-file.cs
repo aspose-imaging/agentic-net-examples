@@ -1,16 +1,15 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = "input.bmp";
+        string outputPath = "output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,20 +22,25 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the BMP image
-        using (BmpImage bmp = new BmpImage(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Calculate half dimensions (integer division)
-            int newWidth = bmp.Width / 2;
-            int newHeight = bmp.Height / 2;
+            // Calculate half dimensions
+            int newWidth = image.Width / 2;
+            int newHeight = image.Height / 2;
 
-            // Resize the BMP image to the new dimensions
-            bmp.Resize(newWidth, newHeight);
+            // Resize using nearest neighbour resampling
+            image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-            // Prepare SVG save options (default settings)
+            // Prepare SVG export options with proper page size
             SvgOptions svgOptions = new SvgOptions();
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            {
+                PageSize = new Size(newWidth, newHeight)
+            };
+            svgOptions.VectorRasterizationOptions = rasterOptions;
 
             // Save the resized image as SVG
-            bmp.Save(outputPath, svgOptions);
+            image.Save(outputPath, svgOptions);
         }
     }
 }
