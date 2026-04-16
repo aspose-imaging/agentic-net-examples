@@ -1,61 +1,61 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input image paths
-        string[] inputPaths = {
-            "image1.jpg",
-            "image2.png",
-            "image3.bmp"
-        };
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        foreach (string inputPath in inputPaths)
+        if (!Directory.Exists(inputDirectory))
         {
-            // Verify input file exists
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+        foreach (string inputPath in files)
+        {
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
-            // Determine output PDF path
-            string outputPath = Path.ChangeExtension(inputPath, ".pdf");
-            // Ensure output directory exists
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for drawing
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                Graphics graphics = new Graphics(image);
+                Font font = new Font("Arial", 24);
+                SolidBrush brush = new SolidBrush(Color.Yellow);
+                string watermarkText = $"Watermark {DateTime.Now:yyyy-MM-dd}";
 
-                // Create graphics object (do NOT wrap in using)
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(raster);
+                // Draw watermark at bottom-right with padding
+                float x = image.Width - 200;
+                float y = image.Height - 50;
+                graphics.DrawString(watermarkText, font, brush, new PointF(x, y));
 
-                // Prepare watermark text with current date
-                string watermarkText = $"Generated on {DateTime.Now:yyyy-MM-dd}";
-
-                // Create font and brush
-                Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
-                Aspose.Imaging.Brushes.SolidBrush brush = new Aspose.Imaging.Brushes.SolidBrush(Aspose.Imaging.Color.Yellow);
-
-                // Position the text at bottom‑right corner with a small margin
-                float margin = 10f;
-                float x = raster.Width - margin;
-                float y = raster.Height - margin;
-                Aspose.Imaging.PointF position = new Aspose.Imaging.PointF(x, y);
-
-                // Draw the watermark text
-                graphics.DrawString(watermarkText, font, brush, position);
-
-                // Save as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                raster.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
     }
