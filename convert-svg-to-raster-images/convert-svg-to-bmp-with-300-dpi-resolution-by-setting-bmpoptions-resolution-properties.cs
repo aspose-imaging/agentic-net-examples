@@ -5,11 +5,11 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.bmp";
+        string inputPath = "input.svg";
+        string outputPath = "output\\output.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -18,20 +18,27 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (Image svgImage = Image.Load(inputPath))
+        // Load SVG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Set BMP options with 300 DPI resolution
+            // Configure BMP save options with 300 DPI resolution
             BmpOptions bmpOptions = new BmpOptions
             {
-                ResolutionSettings = new ResolutionSettings(300, 300)
+                ResolutionSettings = new ResolutionSetting(300, 300)
             };
 
-            // Save the image as BMP using the specified options
-            svgImage.Save(outputPath, bmpOptions);
+            // Set vector rasterization options for SVG
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            {
+                PageSize = image.Size
+            };
+            bmpOptions.VectorRasterizationOptions = rasterOptions;
+
+            // Save as BMP
+            image.Save(outputPath, bmpOptions);
         }
     }
 }
