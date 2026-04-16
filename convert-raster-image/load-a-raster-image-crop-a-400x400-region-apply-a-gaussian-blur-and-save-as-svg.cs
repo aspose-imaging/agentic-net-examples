@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -12,7 +11,7 @@ class Program
         string inputPath = "input.png";
         string outputPath = "output.svg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,32 +21,20 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load, process, and save the image
+        // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
+            // Cast to RasterImage for raster operations
             RasterImage raster = (RasterImage)image;
 
-            // Cache data for better performance
-            if (!raster.IsCached)
-                raster.CacheData();
-
             // Crop a 400x400 region from the top-left corner
-            Rectangle cropRect = new Rectangle(0, 0, 400, 400);
-            raster.Crop(cropRect);
+            raster.Crop(new Rectangle(0, 0, 400, 400));
 
-            // Apply Gaussian blur (radius 5, sigma 4.0)
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            // Prepare SVG save options
-            SvgOptions svgOptions = new SvgOptions();
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = raster.Size
-            };
-            svgOptions.VectorRasterizationOptions = rasterOptions;
+            // Apply Gaussian blur with radius 5 and sigma 1.5
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.5));
 
             // Save the processed image as SVG
-            raster.Save(outputPath, svgOptions);
+            raster.Save(outputPath, new SvgOptions());
         }
     }
 }
