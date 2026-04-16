@@ -6,41 +6,43 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Hardcoded input and output file paths
-    private const string InputPath = @"C:\Images\sample.wmf";
-    private const string OutputPath = @"C:\Images\Converted\sample.jpg";
-
-    static void Main()
+    // Asynchronous conversion of a single WMF file to JPEG.
+    private static async Task ConvertWmfToJpegAsync(string inputPath, string outputPath)
     {
-        // Verify input file existence
-        if (!File.Exists(InputPath))
+        // Verify input file exists.
+        if (!File.Exists(inputPath))
         {
-            Console.Error.WriteLine($"File not found: {InputPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
+        // Ensure the output directory exists.
+        string? outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir ?? string.Empty);
 
-        // Run the conversion asynchronously and wait for completion
-        Task conversionTask = ConvertWmfToJpegAsync(InputPath, OutputPath);
-        conversionTask.Wait();
-    }
-
-    // Asynchronous conversion using Task-based pattern
-    private static async Task ConvertWmfToJpegAsync(string inputPath, string outputPath)
-    {
+        // Perform the load and save on a background thread to avoid blocking.
         await Task.Run(() =>
         {
-            // Load the WMF image
+            // Load the WMF image.
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options (default settings)
+                // Configure JPEG options (default quality).
                 var jpegOptions = new JpegOptions();
 
-                // Save the image as JPEG
+                // Save as JPEG to the specified path.
                 image.Save(outputPath, jpegOptions);
             }
         });
+    }
+
+    // Entry point.
+    static async Task Main()
+    {
+        // Hard‑coded input and output paths.
+        string inputPath = @"C:\Images\sample.wmf";
+        string outputPath = @"C:\Images\Output\sample.jpg";
+
+        // Start the asynchronous conversion.
+        await ConvertWmfToJpegAsync(inputPath, outputPath);
     }
 }
