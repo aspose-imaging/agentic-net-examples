@@ -7,52 +7,40 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "InputPngs";
-        string outputDirectory = "OutputPdfs";
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Validate input directory existence
         if (!Directory.Exists(inputDirectory))
         {
-            Console.Error.WriteLine($"Input directory does not exist: {inputDirectory}");
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
             return;
         }
 
-        // Ensure output directory exists
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
         }
 
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+        string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
         foreach (string inputPath in files)
         {
-            // Process only PNG files
-            if (!string.Equals(Path.GetExtension(inputPath), ".png", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the image
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Resize to 500x500 pixels
                 image.Resize(500, 500);
-
-                // Prepare output PDF path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-                // Ensure the output directory exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save as PDF using PdfOptions
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
                     image.Save(outputPath, pdfOptions);
