@@ -1,61 +1,61 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input BMP files
-        var inputPaths = new List<string>
-        {
-            @"C:\temp\image1.bmp",
-            @"C:\temp\image2.bmp",
-            @"C:\temp\image3.bmp"
-        };
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Process each file concurrently
-        Parallel.ForEach(inputPaths, inputPath =>
+        if (!Directory.Exists(inputDirectory))
         {
-            // Verify input file exists
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+
+        files.AsParallel().ForAll(inputPath =>
+        {
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Derive output PDF path (same folder, same name, .pdf extension)
-            string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filter
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
 
-                // Apply median filter with size 5 to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions();
-
-                // Save filtered image to a memory stream as PDF
-                using (var pdfStream = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    image.Save(pdfStream, pdfOptions);
-                    pdfStream.Position = 0; // Reset for reading
+                    PdfOptions pdfOptions = new PdfOptions();
+                    raster.Save(ms, pdfOptions);
 
-                    // Simulate streaming to a client by writing the stream to the output file
-                    using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    Console.WriteLine($"Processed {inputPath} -> PDF stream length {ms.Length} bytes.");
+
+                    ms.Position = 0;
+                    using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                     {
-                        pdfStream.CopyTo(fileStream);
+                        ms.CopyTo(fs);
                     }
                 }
             }
