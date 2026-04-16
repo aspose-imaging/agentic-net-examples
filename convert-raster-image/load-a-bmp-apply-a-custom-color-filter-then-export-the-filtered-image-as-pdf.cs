@@ -25,27 +25,26 @@ class Program
         // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Apply a simple color filter (invert colors)
-            if (image is RasterImage raster)
+            // Cast to RasterImage for pixel manipulation
+            RasterImage raster = (RasterImage)image;
+
+            // Apply a simple invert color filter
+            for (int y = 0; y < raster.Height; y++)
             {
-                for (int y = 0; y < raster.Height; y++)
+                for (int x = 0; x < raster.Width; x++)
                 {
-                    for (int x = 0; x < raster.Width; x++)
-                    {
-                        Color original = raster.GetPixel(x, y);
-                        // Invert each channel
-                        Color inverted = Color.FromArgb(
-                            original.A,
-                            255 - original.R,
-                            255 - original.G,
-                            255 - original.B);
-                        raster.SetPixel(x, y, inverted);
-                    }
+                    Color original = raster.GetPixel(x, y);
+                    Color inverted = Color.FromArgb(
+                        original.A,
+                        255 - original.R,
+                        255 - original.G,
+                        255 - original.B);
+                    raster.SetPixel(x, y, inverted);
                 }
             }
 
             // Save the filtered image as PDF
-            var pdfOptions = new PdfOptions();
+            PdfOptions pdfOptions = new PdfOptions();
             image.Save(outputPath, pdfOptions);
         }
     }
