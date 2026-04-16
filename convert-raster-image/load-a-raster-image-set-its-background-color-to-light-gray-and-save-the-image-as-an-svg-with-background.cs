@@ -8,39 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.svg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG save options with background color
-            SvgOptions saveOptions = new SvgOptions();
+            // Configure SVG save options with a light‑gray background
+            var svgOptions = new SvgOptions();
 
-            // Configure rasterization options
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                // Set light gray background
+                // Set background color for the SVG canvas
                 BackgroundColor = Aspose.Imaging.Color.LightGray,
-                // Use the original image size as page size
+                // Use the original image size as the page size
                 PageSize = image.Size
             };
 
-            saveOptions.VectorRasterizationOptions = rasterOptions;
+            svgOptions.VectorRasterizationOptions = rasterizationOptions;
 
-            // Save as SVG with the specified background
-            image.Save(outputPath, saveOptions);
+            // Save the image as SVG with the specified background
+            image.Save(outputPath, svgOptions);
         }
     }
 }
