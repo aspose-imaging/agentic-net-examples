@@ -2,16 +2,21 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
+        // Hard‑coded input folder containing BMP files
+        string inputFolder = @"C:\Images\InputBmp";
+        // Hard‑coded output folder for generated SVG files
+        string outputFolder = @"C:\Images\OutputSvg";
 
-        // List of BMP files to process (add or modify as needed)
+        // Ensure the output directory exists (unconditional per requirements)
+        Directory.CreateDirectory(outputFolder);
+
+        // Define BMP files to process (could be extended or discovered dynamically)
         string[] bmpFiles = new[]
         {
             Path.Combine(inputFolder, "image1.bmp"),
@@ -21,64 +26,57 @@ class Program
 
         foreach (string inputPath in bmpFiles)
         {
-            // Verify input file exists
+            // Verify input file existence; on failure write error and stop processing this file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Determine output SVG path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
+            // Build corresponding SVG output path
+            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+            string outputPath = Path.Combine(outputFolder, outputFileName);
 
-            // Ensure output directory exists
+            // Ensure the directory for the output file exists (unconditional)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG rasterization options (use original image size)
-                var vectorRasterizationOptions = new SvgRasterizationOptions
+                // Prepare rasterization options required for SVG export
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Save as SVG using SvgOptions
+                // Prepare SVG save options
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = vectorRasterizationOptions,
+                    VectorRasterizationOptions = rasterizationOptions,
                     // No compression for plain SVG
                     Compress = false
                 };
 
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
 
-            // Add custom XML namespace to the generated SVG
+            // After saving, inject a custom XML namespace into the SVG file
+            // Example namespace: xmlns:custom="http://example.com/custom"
             try
             {
                 string svgContent = File.ReadAllText(outputPath);
-                // Insert custom namespace into the root <svg> element
-                // Example namespace: xmlns:custom="http://example.com/custom"
-                const string customNamespace = "xmlns:custom=\"http://example.com/custom\"";
-                int insertPos = svgContent.IndexOf('>');
-                if (insertPos > 0)
+                // Insert the custom namespace right after the opening <svg tag
+                if (svgContent.Contains("<svg") && !svgContent.Contains("xmlns:custom"))
                 {
-                    // Find the position before the closing '>' of the opening <svg ...> tag
-                    int tagStart = svgContent.LastIndexOf("<svg", insertPos);
-                    if (tagStart >= 0)
-                    {
-                        // Insert the namespace before the closing '>'
-                        svgContent = svgContent.Insert(insertPos, " " + customNamespace);
-                        File.WriteAllText(outputPath, svgContent);
-                    }
+                    svgContent = svgContent.Replace("<svg", "<svg xmlns:custom=\"http://example.com/custom\"");
+                    File.WriteAllText(outputPath, svgContent);
                 }
             }
             catch (Exception ex)
             {
-                // Log but do not throw
-                Console.Error.WriteLine($"Failed to add namespace to {outputPath}: {ex.Message}");
+                // Log any I/O errors but do not throw
+                Console.Error.WriteLine($"Error processing SVG namespace for {outputPath}: {ex.Message}");
             }
         }
     }
