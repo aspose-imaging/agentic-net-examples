@@ -8,37 +8,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output.svg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG rasterization options with transparent background
+            // Prepare SVG rasterization options with a transparent background
             SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                PageSize = image.Size,
-                BackgroundColor = Aspose.Imaging.Color.Transparent
+                // Set background to transparent
+                BackgroundColor = Aspose.Imaging.Color.Transparent,
+                // Use the original image size for the SVG page
+                PageSize = image.Size
             };
 
-            // Prepare SVG save options
+            // Prepare SVG save options and attach rasterization options
             SvgOptions svgOptions = new SvgOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the image as SVG without background
+            // Save the image as SVG without a background
             image.Save(outputPath, svgOptions);
         }
     }
