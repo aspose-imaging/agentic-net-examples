@@ -5,68 +5,49 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input BMP files (replace with actual shared folder paths)
-        string[] inputPaths = new[]
-        {
-            @"\\share\images\image1.bmp",
-            @"\\share\images\image2.bmp"
-        };
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Hard‑coded output PDF files (replace with desired output locations)
-        string[] outputPaths = new[]
+        if (!Directory.Exists(inputDirectory))
         {
-            @"C:\output\image1.pdf",
-            @"C:\output\image2.pdf"
-        };
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
 
-        // Process each file pair
-        for (int i = 0; i < inputPaths.Length && i < outputPaths.Length; i++)
+        if (!Directory.Exists(outputDirectory))
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
+            Directory.CreateDirectory(outputDirectory);
+        }
 
-            // Input file existence check (no exception throwing)
+        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+
+        foreach (string inputPath in files)
+        {
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                continue;
             }
 
-            // Ensure output directory exists (unconditional)
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Convert BMP to PDF and stream the result
-            ConvertBmpToPdfAndStream(inputPath, outputPath);
-        }
-    }
-
-    static void ConvertBmpToPdfAndStream(string bmpPath, string pdfPath)
-    {
-        // Load BMP image using Aspose.Imaging
-        using (Image image = Image.Load(bmpPath))
-        {
-            // Prepare PDF save options
-            var pdfOptions = new PdfOptions();
-
-            // Save PDF to file
-            image.Save(pdfPath, pdfOptions);
-
-            // Also save PDF to a memory stream to simulate streaming back to a client
-            using (var memoryStream = new MemoryStream())
+            using (Image image = Image.Load(inputPath))
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                image.Save(memoryStream, pdfOptions);
-                memoryStream.Position = 0;
-
-                // Example: write PDF bytes to standard output (replace with actual response stream in a web app)
-                byte[] buffer = new byte[81920];
-                int bytesRead;
-                while ((bytesRead = memoryStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    Console.OpenStandardOutput().Write(buffer, 0, bytesRead);
-                }
+                image.Save(outputPath, pdfOptions);
             }
+
+            // Stream PDF back to client (write to stdout)
+            byte[] pdfBytes = File.ReadAllBytes(outputPath);
+            Stream stdout = Console.OpenStandardOutput();
+            stdout.Write(pdfBytes, 0, pdfBytes.Length);
         }
     }
 }
