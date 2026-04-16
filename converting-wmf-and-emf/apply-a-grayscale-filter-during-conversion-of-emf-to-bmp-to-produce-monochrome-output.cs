@@ -2,56 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\sample_grayscale.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.bmp";
 
-        // Verify the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image
+        // Load the EMF image and rasterize it to BMP
         using (Image emfImage = Image.Load(inputPath))
         {
-            // Prepare rasterization options for EMF → BMP conversion
-            var rasterOptions = new EmfRasterizationOptions
+            // Set up rasterization options for EMF
+            var rasterizationOptions = new EmfRasterizationOptions
             {
-                // Use the original EMF size for the bitmap
-                PageSize = emfImage.Size,
-                // Optional: set background to white for consistency
-                BackgroundColor = Color.White
+                PageSize = emfImage.Size
             };
 
             // BMP save options with the rasterization settings
             var bmpOptions = new BmpOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the rasterized BMP (still in color)
+            // Save the rasterized image as BMP
             emfImage.Save(outputPath, bmpOptions);
         }
 
-        // Load the newly created BMP to apply grayscale conversion
+        // Load the saved BMP, apply grayscale, and overwrite the file
         using (BmpImage bmpImage = (BmpImage)Image.Load(outputPath))
         {
-            // Convert the bitmap to grayscale (monochrome)
+            // Convert to grayscale (monochrome effect)
             bmpImage.Grayscale();
 
-            // Overwrite the same file with the grayscale version
+            // Save the modified BMP back to the same path
             bmpImage.Save(outputPath);
         }
     }

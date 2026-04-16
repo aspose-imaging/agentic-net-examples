@@ -2,18 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.emf";
         string outputPath = "output.jpg";
 
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,31 +20,26 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image
-        using (Image emfImage = Image.Load(inputPath))
+        // Prepare JPEG options with EXIF metadata
+        JpegOptions jpegOptions = new JpegOptions();
+
+        // Create and set EXIF data (camera make and model as example)
+        Aspose.Imaging.Exif.JpegExifData exifData = new Aspose.Imaging.Exif.JpegExifData();
+        exifData.Make = "ExampleCameraMake";
+        exifData.Model = "ExampleCameraModel";
+        jpegOptions.ExifData = exifData;
+
+        // Configure vector rasterization for EMF to JPEG conversion
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare JPEG options with EXIF metadata
-            JpegOptions jpegOptions = new JpegOptions
+            VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
             {
-                Quality = 90,
-                // Set EXIF data (camera make and model as example)
-                ExifData = new Aspose.Imaging.Exif.JpegExifData
-                {
-                    Make = "MyCameraBrand",
-                    Model = "MyCameraModel"
-                }
+                PageSize = image.Size,
+                BackgroundColor = Aspose.Imaging.Color.White
             };
+            jpegOptions.VectorRasterizationOptions = vectorOptions;
 
-            // Configure vector rasterization for EMF to raster conversion
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-            {
-                PageSize = emfImage.Size,
-                BackgroundColor = Color.White
-            };
-            jpegOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save as JPEG with embedded EXIF
-            emfImage.Save(outputPath, jpegOptions);
+            image.Save(outputPath, jpegOptions);
         }
     }
 }

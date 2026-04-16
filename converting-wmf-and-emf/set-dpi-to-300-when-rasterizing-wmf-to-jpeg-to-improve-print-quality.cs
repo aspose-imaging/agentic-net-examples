@@ -6,42 +6,44 @@ using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = "input.wmf";
+        string outputPath = "output.jpg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (string.IsNullOrEmpty(outputDir))
+            outputDir = ".";
+        Directory.CreateDirectory(outputDir);
 
-        // Load the WMF image
-        using (Image image = Image.Load(inputPath))
+        // Load WMF image
+        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
         {
-            // Configure rasterization options for WMF
-            var rasterOptions = new WmfRasterizationOptions
+            // Configure rasterization options
+            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
             {
-                PageSize = image.Size
-                // If the Inch property is available, set it to 300 DPI
-                // Inch = 300
+                BackgroundColor = Color.White,
+                PageSize = new SizeF(wmfImage.Width, wmfImage.Height)
             };
 
-            // Configure JPEG save options with 300 DPI resolution
-            var jpegOptions = new JpegOptions
+            // Configure JPEG options with 300 DPI
+            JpegOptions jpegOptions = new JpegOptions
             {
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                ResolutionSettings = new ResolutionSetting(300, 300),
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the rasterized image as JPEG
-            image.Save(outputPath, jpegOptions);
+            // Save as JPEG
+            wmfImage.Save(outputPath, jpegOptions);
         }
     }
 }

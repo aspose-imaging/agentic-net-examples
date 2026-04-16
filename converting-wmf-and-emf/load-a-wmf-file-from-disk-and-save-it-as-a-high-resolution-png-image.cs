@@ -7,34 +7,33 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
         string inputPath = "input.wmf";
-        string outputPath = "output.png";
+        string outputPath = "output/output.png";
 
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load WMF image, resize for higher resolution, and save as PNG
         using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
         {
-            // Increase dimensions (e.g., 3x) for higher resolution output
-            int newWidth = wmfImage.Width * 3;
-            int newHeight = wmfImage.Height * 3;
-            wmfImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+            var rasterOptions = new WmfRasterizationOptions
+            {
+                PageWidth = wmfImage.Width * 3,
+                PageHeight = wmfImage.Height * 3,
+                BackgroundColor = Color.White
+            };
 
-            // Set PNG save options
-            PngOptions pngOptions = new PngOptions();
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-            // Save the rasterized PNG
             wmfImage.Save(outputPath, pngOptions);
         }
     }

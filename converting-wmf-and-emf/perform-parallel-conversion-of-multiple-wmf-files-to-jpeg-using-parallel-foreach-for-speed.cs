@@ -4,18 +4,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded list of WMF files to convert
-        List<string> inputFiles = new List<string>
+        var inputFiles = new List<string>
         {
-            @"C:\Images\Input\image1.wmf",
-            @"C:\Images\Input\image2.wmf",
-            @"C:\Images\Input\image3.wmf"
+            @"C:\Images\sample1.wmf",
+            @"C:\Images\sample2.wmf",
+            @"C:\Images\sample3.wmf"
         };
 
         // Parallel conversion
@@ -34,21 +33,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WMF image and save as JPEG
+            // Load WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for WMF
+                // Prepare rasterization options for WMF
                 var rasterOptions = new WmfRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // JPEG save options with vector rasterization
+                // JPEG save options with the rasterization settings
                 var jpegOptions = new JpegOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterOptions,
+                    Quality = 90 // optional quality setting
                 };
 
+                // Save as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         });
