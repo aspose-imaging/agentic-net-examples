@@ -5,40 +5,47 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDir = "Input";
-        string outputDir = "Output";
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Get all PNG files in the input directory
-        string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
-
-        int counter = 1;
-        foreach (string inputPath in pngFiles)
+        if (!Directory.Exists(inputDirectory))
         {
-            // Verify input file exists
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.png");
+        int index = 1;
+        foreach (string inputPath in files)
+        {
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build output file path with sequential numeric suffix
-            string outputFileName = $"output{counter}.pdf";
-            string outputPath = Path.Combine(outputDir, outputFileName);
-
-            // Ensure output directory exists
+            string outputFileName = $"output_{index}.pdf";
+            string outputPath = Path.Combine(outputDirectory, outputFileName);
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load PNG image and save as PDF
             using (Image image = Image.Load(inputPath))
-            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                image.Save(outputPath, pdfOptions);
+                using (PdfOptions options = new PdfOptions())
+                {
+                    image.Save(outputPath, options);
+                }
             }
 
-            counter++;
+            index++;
         }
     }
 }
