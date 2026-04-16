@@ -8,42 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.png";
         string outputPath = @"C:\Images\output.svg";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access raster‑specific operations
+            // Cast to RasterImage to access filtering and resizing
             RasterImage raster = (RasterImage)image;
 
             // Apply a median filter with a kernel size of 5 to the whole image
             raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-            // Resize the image to thumbnail dimensions (e.g., 150x150)
-            const int thumbWidth = 150;
-            const int thumbHeight = 150;
-            raster.Resize(thumbWidth, thumbHeight);
+            // Resize to thumbnail size (e.g., 150x150)
+            raster.Resize(150, 150);
 
-            // Prepare SVG rasterization options using the current image size
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+            // Prepare SVG save options with rasterization settings
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = raster.Size
+                PageSize = raster.Size // Preserve the resized dimensions
             };
-
-            // Set up SVG save options
-            SvgOptions svgOptions = new SvgOptions
+            var svgOptions = new SvgOptions
             {
                 VectorRasterizationOptions = rasterizationOptions
             };
