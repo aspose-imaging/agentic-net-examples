@@ -7,11 +7,11 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.jpg";
         string outputPath = @"C:\Images\output.pdf";
 
-        // Verify the input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,30 +24,19 @@ class Program
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to use Crop
-            RasterImage raster = (RasterImage)image;
-
-            // Define a 400x400 centre crop rectangle
-            const int cropWidth = 400;
-            const int cropHeight = 400;
-
-            // Calculate top‑left corner so the rectangle is centred
-            int left = Math.Max(0, (raster.Width - cropWidth) / 2);
-            int top = Math.Max(0, (raster.Height - cropHeight) / 2);
-
-            // If the source image is smaller than the desired crop size,
-            // adjust the rectangle size to the image dimensions
-            int actualWidth = Math.Min(cropWidth, raster.Width);
-            int actualHeight = Math.Min(cropHeight, raster.Height);
-
-            var area = new Rectangle(left, top, actualWidth, actualHeight);
+            // Determine the top‑left corner for a 400x400 center crop
+            int cropWidth = 400;
+            int cropHeight = 400;
+            int left = (image.Width - cropWidth) / 2;
+            int top = (image.Height - cropHeight) / 2;
 
             // Perform the crop
-            raster.Crop(area);
+            var cropArea = new Rectangle(left, top, cropWidth, cropHeight);
+            image.Crop(cropArea);
 
-            // Save the cropped area as PDF
+            // Save the cropped image as PDF
             var pdfOptions = new PdfOptions();
-            raster.Save(outputPath, pdfOptions);
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
