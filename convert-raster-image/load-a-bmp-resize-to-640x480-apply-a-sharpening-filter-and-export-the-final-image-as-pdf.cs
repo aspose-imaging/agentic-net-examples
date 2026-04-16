@@ -2,40 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.pdf";
+        string inputPath = "Input\\sample.bmp";
+        string outputPath = "Output\\result.pdf";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image
+        // Load the BMP image, process, and save as PDF
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for filter operations
+            // Cast to RasterImage for raster operations
             RasterImage raster = (RasterImage)image;
 
-            // Resize to 640x480 using default nearest neighbour resample
-            image.Resize(640, 480);
+            // Resize to 640x480
+            raster.Resize(640, 480);
 
-            // Apply sharpening filter to the whole image
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+            // Apply sharpening filter
+            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image as PDF
-            image.Save(outputPath, new PdfOptions());
+            // Save as PDF
+            var pdfOptions = new PdfOptions();
+            raster.Save(outputPath, pdfOptions);
         }
     }
 }
