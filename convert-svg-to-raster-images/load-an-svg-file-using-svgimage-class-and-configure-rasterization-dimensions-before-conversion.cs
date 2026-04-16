@@ -8,8 +8,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string inputPath = "Input/sample.svg";
+        string outputPath = "Output/sample.png";
 
         if (!File.Exists(inputPath))
         {
@@ -17,25 +17,21 @@ class Program
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         using (Image image = Image.Load(inputPath))
         {
             SvgImage svgImage = (SvgImage)image;
 
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-            {
-                PageWidth = 800,
-                PageHeight = 600,
-                BackgroundColor = Color.White
-            };
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+            rasterOptions.PageSize = svgImage.Size;
+            rasterOptions.BackgroundColor = Color.White;
 
-            PngOptions pngOptions = new PngOptions
+            using (PngOptions pngOptions = new PngOptions())
             {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            svgImage.Save(outputPath, pngOptions);
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+                svgImage.Save(outputPath, pngOptions);
+            }
         }
     }
 }
