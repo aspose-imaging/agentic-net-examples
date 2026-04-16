@@ -5,11 +5,11 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,20 +24,20 @@ class Program
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options for SVG
-            var rasterOptions = new SvgRasterizationOptions
+            // Set up rasterization options for SVG
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                PageSize = image.Size // Preserve original dimensions
+                PageSize = image.Size
             };
 
-            // Configure PNG options with maximum compression
+            // Configure PNG save options with maximum compression
             var pngOptions = new PngOptions
             {
-                CompressionLevel = 9,
-                VectorRasterizationOptions = rasterOptions
+                CompressionLevel = 9, // Max compression (0-9)
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save as PNG with the specified options
+            // Save the rasterized PNG
             image.Save(outputPath, pngOptions);
         }
     }
