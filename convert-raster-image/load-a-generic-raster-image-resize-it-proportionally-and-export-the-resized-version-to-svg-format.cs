@@ -24,24 +24,22 @@ class Program
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Determine new size while preserving aspect ratio (e.g., 50% scaling)
+            // Resize proportionally (example: reduce size by 50%)
             int newWidth = image.Width / 2;
             int newHeight = image.Height / 2;
-
-            // Resize proportionally
             image.Resize(newWidth, newHeight);
 
             // Prepare SVG rasterization options
-            var rasterizationOptions = new SvgRasterizationOptions
+            var vectorOptions = new SvgRasterizationOptions
             {
-                // Set page size to the resized image dimensions
+                // Preserve the resized image size
                 PageSize = image.Size
             };
 
             // Prepare SVG save options
             var svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = rasterizationOptions
+                VectorRasterizationOptions = vectorOptions
             };
 
             // Save the resized image as SVG
