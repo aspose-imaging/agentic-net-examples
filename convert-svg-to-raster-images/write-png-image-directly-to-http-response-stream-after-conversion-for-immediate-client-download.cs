@@ -5,32 +5,35 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.jpg";
-        string outputPath = "Output/converted.png";
+        // Hardcoded input file path (relative)
+        string inputPath = "Input/sample.bmp";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
             // Prepare PNG save options
-            PngOptions pngOptions = new PngOptions();
-
-            // Simulate HTTP response stream with a file stream
-            using (FileStream responseStream = new FileStream(outputPath, FileMode.Create))
+            PngOptions pngOptions = new PngOptions
             {
-                // Save the image as PNG directly to the response stream
+                // Example option settings (optional)
+                // Compression level 6 (mid-range)
+                // PngCompressionLevel = PngCompressionLevel.ZipLevel6
+            };
+
+            // Obtain the HTTP response stream.
+            // In a real web scenario this would be the response output stream.
+            // Here we use the standard output stream for demonstration.
+            using (Stream responseStream = Console.OpenStandardOutput())
+            {
+                // Write the PNG image directly to the response stream
                 image.Save(responseStream, pngOptions);
             }
         }
