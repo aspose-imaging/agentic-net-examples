@@ -1,69 +1,65 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
+        // Define input and output directories relative to the current directory
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure the input directory exists
-        if (!Directory.Exists(inputDirectory))
+        // Ensure the output directory exists
+        if (!Directory.Exists(outputDirectory))
         {
-            Console.Error.WriteLine($"Input directory does not exist: {inputDirectory}");
-            return;
+            Directory.CreateDirectory(outputDirectory);
         }
 
-        // Create the output directory if it does not exist
-        Directory.CreateDirectory(outputDirectory);
+        // Get all files from the input directory
+        string[] files = Directory.GetFiles(inputDirectory);
 
-        // Define raster file extensions to process
+        // Supported raster extensions
         string[] rasterExtensions = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tif", ".tiff", ".webp" };
 
-        // Enumerate all files in the input directory
-        foreach (string filePath in Directory.GetFiles(inputDirectory))
+        foreach (string inputPath in files)
         {
-            // Skip non‑raster files
-            if (!rasterExtensions.Contains(Path.GetExtension(filePath).ToLower()))
-                continue;
-
-            // Verify the input file exists
-            if (!File.Exists(filePath))
+            // Verify the file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build the output SVG path preserving the original filename
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + ".svg");
+            // Process only supported raster files
+            string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+            if (Array.IndexOf(rasterExtensions, ext) < 0)
+            {
+                continue; // Skip non‑raster files
+            }
 
-            // Ensure the output directory exists (unconditional as required)
+            // Build the output SVG path preserving the original filename
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image and convert to SVG
-            using (Image image = Image.Load(filePath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG rasterization options
-                var rasterOptions = new SvgRasterizationOptions
+                using (SvgOptions options = new SvgOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
+                    // Set rasterization options to match the source image size
+                    options.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
 
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
+                    // Save as SVG
+                    image.Save(outputPath, options);
+                }
             }
         }
     }
