@@ -9,21 +9,22 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input WebP files
-        string[] inputPaths = new string[]
+        // Hardcoded directory containing the WebP files
+        string dir = "c:\\temp\\";
+        // List of WebP file names to convert
+        string[] webpFiles = new string[]
         {
-            @"c:\temp\image1.webp",
-            @"c:\temp\image2.webp"
+            "sample1.webp",
+            "sample2.webp",
+            "sample3.webp"
         };
 
-        // Hardcoded output directory
-        string outputDir = @"c:\temp\output";
-
-        // Ensure the output directory exists (unconditional)
-        Directory.CreateDirectory(outputDir);
-
-        foreach (string inputPath in inputPaths)
+        foreach (string fileName in webpFiles)
         {
+            // Build full input and output paths
+            string inputPath = dir + fileName;
+            string outputPath = dir + Path.GetFileNameWithoutExtension(fileName) + ".gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -31,27 +32,23 @@ class Program
                 return;
             }
 
-            // Build output path with .gif extension
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
-            string outputPath = Path.Combine(outputDir, outputFileName);
-
-            // Ensure the directory for the output file exists (unconditional)
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Measure conversion time
             Stopwatch sw = Stopwatch.StartNew();
 
-            // Load WebP image and save as GIF
-            using (WebPImage webpImage = new WebPImage(inputPath))
+            // Load the WebP image
+            using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Save using GIF options
-                webpImage.Save(outputPath, new GifOptions());
+                // Save as GIF
+                webPImage.Save(outputPath, new GifOptions());
             }
 
             sw.Stop();
 
             // Log performance metrics
-            Console.WriteLine($"Converted '{inputPath}' to '{outputPath}' in {sw.ElapsedMilliseconds} ms.");
+            Console.WriteLine($"Converted '{fileName}' to GIF in {sw.ElapsedMilliseconds} ms. Output: {outputPath}");
         }
     }
 }
