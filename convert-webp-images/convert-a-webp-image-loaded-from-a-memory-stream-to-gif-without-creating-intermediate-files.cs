@@ -12,21 +12,21 @@ class Program
         string inputPath = @"c:\temp\input.webp";
         string outputPath = @"c:\temp\output.gif";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load WebP image from a memory stream and save as GIF
-        using (Stream inputStream = File.OpenRead(inputPath))
+        // Load the WebP image from a memory stream and save it as GIF
+        using (FileStream inputStream = File.OpenRead(inputPath))
         using (WebPImage webPImage = new WebPImage(inputStream))
         {
-            // Save the image to GIF format
+            // Save directly to GIF format without creating intermediate files
             webPImage.Save(outputPath, new GifOptions());
         }
     }
