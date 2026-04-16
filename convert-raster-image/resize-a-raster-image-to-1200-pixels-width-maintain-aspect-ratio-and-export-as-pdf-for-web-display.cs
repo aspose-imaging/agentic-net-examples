@@ -24,14 +24,12 @@ class Program
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Desired width
-            int targetWidth = 1200;
+            // Calculate new height to maintain aspect ratio for width = 1200
+            int newWidth = 1200;
+            int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
 
-            // Calculate proportional height
-            int targetHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
-
-            // Resize while maintaining aspect ratio
-            image.Resize(targetWidth, targetHeight, ResizeType.BilinearResample);
+            // Resize the image
+            image.Resize(newWidth, newHeight);
 
             // Prepare PDF export options
             PdfOptions pdfOptions = new PdfOptions();
