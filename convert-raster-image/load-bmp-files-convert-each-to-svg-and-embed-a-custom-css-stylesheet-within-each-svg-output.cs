@@ -2,30 +2,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input BMP files
-        string[] inputPaths = new[]
-        {
+        string[] inputPaths = {
             @"C:\Images\sample1.bmp",
             @"C:\Images\sample2.bmp"
         };
 
-        // Hardcoded output directory for SVG files
-        string outputDir = @"C:\Images\SvgOutput";
+        // Corresponding output SVG files (ensure they contain a directory)
+        string[] outputPaths = {
+            @"C:\Converted\sample1.svg",
+            @"C:\Converted\sample2.svg"
+        };
 
         // Custom CSS to embed into each SVG
-        string cssContent = @"
-svg { background-color: #f0f0f0; }
-.myClass { fill: red; }
-";
+        string customCss = @"
+            svg { background-color:#f0f0f0; }
+            .myClass { fill:red; }
+        ";
 
-        foreach (string inputPath in inputPaths)
+        for (int i = 0; i < inputPaths.Length; i++)
         {
+            string inputPath = inputPaths[i];
+            string outputPath = outputPaths[i];
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -33,37 +37,36 @@ svg { background-color: #f0f0f0; }
                 return;
             }
 
-            // Build output SVG path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
-
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image and save as SVG
+            // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                var vectorOptions = new SvgRasterizationOptions
+                // Prepare rasterization options for SVG conversion
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
+                // Prepare SVG save options
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = vectorOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
 
-            // Inject custom CSS into the generated SVG file
+            // Embed custom CSS into the generated SVG
             string svgContent = File.ReadAllText(outputPath);
             int insertPos = svgContent.IndexOf('>');
             if (insertPos != -1)
             {
-                string styleTag = $"\n<style type=\"text/css\"><![CDATA[{cssContent}]]></style>\n";
-                svgContent = svgContent.Insert(insertPos + 1, styleTag);
-                File.WriteAllText(outputPath, svgContent);
+                string styleBlock = $"\n<style type=\"text/css\"><![CDATA[{customCss}]]></style>\n";
+                string newSvgContent = svgContent.Insert(insertPos + 1, styleBlock);
+                File.WriteAllText(outputPath, newSvgContent);
             }
         }
     }
