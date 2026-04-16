@@ -22,22 +22,23 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image, apply Gaussian blur, resize, and save as PDF
+        // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access raster-specific methods
-            RasterImage rasterImage = (RasterImage)image;
+            // Cast to RasterImage to access raster operations
+            RasterImage raster = (RasterImage)image;
 
-            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
-            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
-            rasterImage.Filter(rasterImage.Bounds, blurOptions);
+            // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Resize to 200x200 pixels
-            rasterImage.Resize(200, 200);
+            // Resize to 200x200 pixels (default NearestNeighbourResample)
+            raster.Resize(200, 200);
 
-            // Save the processed image as a PDF thumbnail
-            var pdfOptions = new PdfOptions(); // Default PDF options
-            rasterImage.Save(outputPath, pdfOptions);
+            // Prepare PDF save options
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the processed image as PDF
+            raster.Save(outputPath, pdfOptions);
         }
     }
 }
