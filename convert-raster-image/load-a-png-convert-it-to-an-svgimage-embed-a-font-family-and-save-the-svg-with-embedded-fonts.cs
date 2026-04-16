@@ -8,11 +8,11 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.svg";
 
-        // Verify input file existence
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,48 +20,47 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure SVG export options
-            var svgOptions = new SvgOptions
+            // Prepare SVG save options
+            SvgOptions svgOptions = new SvgOptions
             {
-                // Keep text as text (fonts will be referenced)
+                // Keep text as text to embed fonts
                 TextAsShapes = false,
-                // Provide a callback to handle embedded resources such as fonts
-                Callback = new FontEmbeddingCallback()
+                // Set rasterization options (page size matches source image)
+                VectorRasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                },
+                // Callback for handling embedded resources (fonts, images, etc.)
+                Callback = new MySvgResourceKeeperCallback()
             };
 
             // Save as SVG with embedded fonts
             image.Save(outputPath, svgOptions);
         }
     }
+}
 
-    // Callback that can be extended to embed fonts or other resources.
-    private class FontEmbeddingCallback : SvgResourceKeeperCallback
+// Custom callback to handle embedded resources during SVG export
+class MySvgResourceKeeperCallback : SvgResourceKeeperCallback
+{
+    // Called when the SVG document is ready for export
+    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
     {
-        // Called when the SVG document is ready for export.
-        public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
-        {
-            // Save the SVG data to the suggested file name.
-            string targetPath = Path.Combine(Path.GetDirectoryName(suggestedFileName) ?? ".", suggestedFileName);
-            File.WriteAllBytes(targetPath, htmlData);
-            return targetPath;
-        }
+        // Return the suggested file name (the caller will handle the actual saving)
+        return suggestedFileName;
+    }
 
-        // Called when an image resource (e.g., embedded font) is ready for export.
-        public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
-                                                    string suggestedFileName, ref bool useEmbeddedImage)
-        {
-            // Indicate that the resource should be embedded.
-            useEmbeddedImage = true;
-
-            // Save the resource data to a file relative to the SVG document.
-            string resourcePath = Path.Combine(Path.GetDirectoryName(suggestedFileName) ?? ".", suggestedFileName);
-            File.WriteAllBytes(resourcePath, imageData);
-            return resourcePath;
-        }
+    // Called when an image resource (e.g., embedded font) is ready for export
+    public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType, string suggestedFileName, ref bool useEmbeddedImage)
+    {
+        // Indicate that the resource should be embedded
+        useEmbeddedImage = true;
+        // Return the suggested file name (relative path) for the resource
+        return suggestedFileName;
     }
 }
