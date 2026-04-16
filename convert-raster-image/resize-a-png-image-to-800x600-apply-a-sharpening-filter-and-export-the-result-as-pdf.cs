@@ -8,10 +8,10 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.pdf";
+        string inputPath = "Input/sample.png";
+        string outputPath = "Output/result.pdf";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,17 +21,16 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        // Load the PNG image as a raster image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Resize to 800x600
+            // Resize to 800x600 pixels
             image.Resize(800, 600);
 
             // Apply sharpening filter
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+            image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
 
-            // Save the result as PDF
+            // Save the processed image as PDF
             using (PdfOptions pdfOptions = new PdfOptions())
             {
                 image.Save(outputPath, pdfOptions);
