@@ -7,31 +7,30 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.pdf";
+        // Hard‑coded input and output paths
+        string inputPath = "C:\\temp\\input.webp";
+        string outputPath = "C:\\temp\\output.pdf";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WebP image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare PDF options and preserve metadata
+            // Configure PDF options to keep original metadata (including EXIF)
             var pdfOptions = new PdfOptions
             {
-                KeepMetadata = true,
-                ExifData = image.ExifData // copy EXIF data from source
+                KeepMetadata = true
             };
 
-            // Save as PDF with preserved EXIF metadata
+            // Save as PDF while preserving EXIF data
             image.Save(outputPath, pdfOptions);
         }
     }

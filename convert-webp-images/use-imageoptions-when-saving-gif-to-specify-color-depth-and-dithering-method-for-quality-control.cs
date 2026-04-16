@@ -9,8 +9,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.gif";
-        string outputPath = @"C:\temp\output.gif";
+        string inputPath = "C:\\temp\\input.gif";
+        string outputPath = "C:\\temp\\output.gif";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -25,24 +25,21 @@ class Program
         // Load the GIF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to GifImage for GIF-specific operations
             GifImage gif = (GifImage)image;
 
-            // Apply dithering (Floyd‑Steinberg, 4‑bit palette)
-            gif.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
+            // Apply Floyd‑Steinberg dithering with an 8‑bit palette (256 colors)
+            gif.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-            // Configure GIF save options for quality control
+            // Configure GIF save options for color depth and palette handling
             GifOptions saveOptions = new GifOptions
             {
-                // Number of bits per primary color minus 1 (e.g., 7 => 8‑bit per channel)
+                // ColorResolution is (bits per primary color) - 1; 7 means 8 bits per channel
                 ColorResolution = 7,
-                // Enable palette correction for better color matching
                 DoPaletteCorrection = true,
-                // Save as an interlaced GIF
-                Interlaced = true
+                Interlaced = false
             };
 
-            // Save the processed GIF with the specified options
+            // Save the processed GIF using the specified options
             gif.Save(outputPath, saveOptions);
         }
     }

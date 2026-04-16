@@ -7,12 +7,12 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Set up base, input, and output directories
+        // Base directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure input directory exists; if not, create it and exit
+        // Ensure input directory exists; create if missing and exit
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
@@ -31,31 +31,28 @@ class Program
 
         foreach (string inputPath in files)
         {
-            // Process only WebP files
-            if (!Path.GetExtension(inputPath).Equals(".webp", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Determine output PDF path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+            // Build output PDF path with same file name but .pdf extension
+            string outputFileName = Path.ChangeExtension(Path.GetFileName(inputPath), ".pdf");
+            string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-            // Ensure output directory exists
+            // Ensure output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image and save as PDF
             using (Image image = Image.Load(inputPath))
             {
-                PdfOptions pdfOptions = new PdfOptions();
+                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
 
-            Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
+            Console.WriteLine($"Converted '{inputPath}' to PDF at '{outputPath}'.");
         }
     }
 }

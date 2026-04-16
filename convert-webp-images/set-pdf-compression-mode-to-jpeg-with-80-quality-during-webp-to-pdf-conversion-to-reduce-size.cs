@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.pdf";
+        string inputPath = "input.webp";
+        string outputPath = "output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -18,13 +19,13 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the animated WebP image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure GIF options for infinite looping (0 = infinite)
+            // Set GIF loop count to infinite (0 indicates infinite looping)
             var gifOptions = new GifOptions
             {
                 LoopsCount = 0

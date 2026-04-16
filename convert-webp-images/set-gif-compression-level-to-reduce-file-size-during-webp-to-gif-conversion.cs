@@ -24,17 +24,21 @@ class Program
         // Load the WebP image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure GIF options for lossy compression
+            // Configure GIF compression (lossy) via MaxDiff
             GifOptions gifOptions = new GifOptions
             {
                 // Recommended value for optimal lossy compression
-                MaxDiff = 80
+                MaxDiff = 80,
+                // Optional: enable interlacing for progressive display
+                Interlaced = true,
+                // Optional: improve palette quality
+                DoPaletteCorrection = true
             };
 
             // Save as GIF with the specified options
             image.Save(outputPath, gifOptions);
         }
 
-        Console.WriteLine($"Conversion completed: {outputPath}");
+        Console.WriteLine("Conversion completed successfully.");
     }
 }
