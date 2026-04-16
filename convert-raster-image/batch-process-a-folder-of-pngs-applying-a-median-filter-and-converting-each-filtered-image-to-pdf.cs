@@ -5,16 +5,17 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "C:\\InputPngs";
-        string outputDirectory = "C:\\OutputPdfs";
+        // Define relative input and output directories
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
-        // Validate input directory existence
+        // Validate input directory
         if (!Directory.Exists(inputDirectory))
         {
-            Console.Error.WriteLine($"Input directory does not exist: {inputDirectory}");
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
             return;
         }
 
@@ -24,42 +25,38 @@ class Program
             Directory.CreateDirectory(outputDirectory);
         }
 
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+        // Get all PNG files in the input directory
+        string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-        foreach (string filePath in files)
+        foreach (string inputPath in files)
         {
-            // Process only PNG files (case‑insensitive)
-            if (!filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
-                continue;
-
             // Verify the input file exists
-            if (!File.Exists(filePath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Determine output PDF path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            // Prepare output PDF path
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-            // Ensure the output directory exists (unconditional)
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image, apply median filter, and save as PDF
-            using (Image image = Image.Load(filePath))
+            using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-
-                // Apply median filter with a kernel size of 5
                 raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
 
-                // Save the filtered image as PDF
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
                     raster.Save(outputPath, pdfOptions);
                 }
             }
+
+            Console.WriteLine($"Processed and saved: {outputPath}");
         }
     }
 }
