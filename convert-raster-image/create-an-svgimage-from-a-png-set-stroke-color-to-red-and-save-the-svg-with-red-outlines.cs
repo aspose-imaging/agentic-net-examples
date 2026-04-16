@@ -10,8 +10,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,9 +21,9 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG raster image
+        // Load the PNG as a raster image
         using (RasterImage raster = (RasterImage)Image.Load(inputPath))
         {
             int width = raster.Width;
@@ -36,13 +36,16 @@ class Program
             // Draw the raster image onto the SVG canvas
             graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
 
-            // Draw a red stroke rectangle (outline) around the image
-            Aspose.Imaging.Pen redPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 1);
+            // Create a red pen for the outline
+            Pen redPen = new Pen(Color.Red, 2);
+
+            // Draw a red rectangle around the image to serve as the outline
             graphics.DrawRectangle(redPen, 0, 0, width, height);
 
-            // Finalize the SVG image and save it
+            // Finalize the SVG image
             using (SvgImage svgImage = graphics.EndRecording())
             {
+                // Save the SVG file
                 svgImage.Save(outputPath);
             }
         }
