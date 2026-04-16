@@ -1,16 +1,14 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.pdf";
+        // Define input and output paths (relative)
+        string inputPath = Path.Combine("Input", "sample.png");
+        string outputPath = Path.Combine("Output", "filtered.pdf");
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,18 +20,14 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
+        // Load the raster image, apply median filter, and embed into PDF
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering methods
-            RasterImage raster = (RasterImage)image;
+            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
 
-            // Apply a median filter with a size of 5 to the entire image
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-
-            // Save the filtered image embedded in a PDF page
-            PdfOptions pdfOptions = new PdfOptions();
-            raster.Save(outputPath, pdfOptions);
+            var pdfOptions = new PdfOptions();
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
