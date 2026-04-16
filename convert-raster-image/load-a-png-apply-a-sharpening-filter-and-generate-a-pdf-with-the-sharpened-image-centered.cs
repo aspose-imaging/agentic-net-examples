@@ -2,44 +2,32 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.png";
-        string outputPath = "output.pdf";
-
+        // Input PNG path
+        string inputPath = "Input/sample.png";
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Output PDF path
+        string outputPath = "Output/sharpened.pdf";
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Load image, apply sharpening filter, and save as PDF
         using (Image image = Image.Load(inputPath))
         {
             RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-            int canvasWidth = Math.Max(raster.Width, 800);
-            int canvasHeight = Math.Max(raster.Height, 800);
-            int offsetX = (canvasWidth - raster.Width) / 2;
-            int offsetY = (canvasHeight - raster.Height) / 2;
-
-            PdfOptions pdfOptions = new PdfOptions
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            using (Image pdfCanvas = Image.Create(pdfOptions, canvasWidth, canvasHeight))
-            {
-                Graphics graphics = new Graphics(pdfCanvas);
-                graphics.DrawImage(raster, new Rectangle(offsetX, offsetY, raster.Width, raster.Height));
-                pdfCanvas.Save();
+                image.Save(outputPath, pdfOptions);
             }
         }
     }
