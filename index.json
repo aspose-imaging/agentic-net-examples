@@ -1466,20 +1466,17 @@
         "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Webp",
         "Aspose.Imaging.FileFormats.Gif",
-        "System.Linq",
-        "Aspose.Imaging.FileFormats.Pdf",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
         "Aspose.Imaging.FileFormats.Gif.Blocks",
-        "Aspose.Imaging.Sources",
-        "System.Drawing",
+        "Aspose.Imaging.FileFormats.Pdf",
         "System.Threading",
         "System.Threading.Tasks",
         "System.Diagnostics",
-        "System.Collections.Generic"
+        "System.Text.Json"
       ],
       "key_apis": [
         "GifImage",
         "GifOptions",
+        "JpegOptions",
         "PdfCoreOptions",
         "PdfOptions",
         "PngOptions",
