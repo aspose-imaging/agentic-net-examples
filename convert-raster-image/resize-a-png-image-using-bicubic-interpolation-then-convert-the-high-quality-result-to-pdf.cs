@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -22,16 +21,17 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image, resize with bicubic interpolation, and save as PDF
+        // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
-            int newWidth = image.Width * 2;   // Example scaling factor
+            // Calculate new dimensions (example: double the size)
+            int newWidth = image.Width * 2;
             int newHeight = image.Height * 2;
 
             // Resize using bicubic (CubicConvolution) interpolation
             image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
 
-            // Save the high‑quality result to PDF
+            // Convert the resized image to PDF
             image.Save(outputPath, new PdfOptions());
         }
     }
