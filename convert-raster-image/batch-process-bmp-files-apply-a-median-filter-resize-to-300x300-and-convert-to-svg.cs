@@ -2,24 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input BMP files
-        string[] inputFiles = new[]
-        {
-            @"C:\Images\sample1.bmp",
-            @"C:\Images\sample2.bmp"
-        };
+        // Set up base, input, and output directories
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Hard‑coded output folder for SVG files
-        string outputFolder = @"C:\Images\output";
-
-        foreach (string inputPath in inputFiles)
+        // Ensure input directory exists; create if missing
+        if (!Directory.Exists(inputDirectory))
         {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        // Get all files in the input directory
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+        foreach (string inputPath in files)
+        {
+            // Process only BMP files
+            if (!Path.GetExtension(inputPath).Equals(".bmp", StringComparison.OrdinalIgnoreCase))
+                continue;
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,27 +43,35 @@ class Program
             }
 
             // Determine output SVG path
-            string outputPath = Path.Combine(outputFolder,
-                Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+            string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-            // Ensure output directory exists
+            // Ensure output directory exists for this file
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
+            // Load BMP image, apply median filter, resize, and save as SVG
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access raster operations
+                // Cast to RasterImage for raster operations
                 RasterImage raster = (RasterImage)image;
 
-                // Apply median filter with size 5 to the whole image
-                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                // Apply median filter with kernel size 5
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
 
-                // Resize to 300x300 pixels (default nearest‑neighbour resample)
+                // Resize to 300x300 pixels
                 raster.Resize(300, 300);
 
-                // Save as SVG using default SvgOptions
-                SvgOptions svgOptions = new SvgOptions();
-                image.Save(outputPath, svgOptions);
+                // Prepare SVG save options with rasterization settings
+                SvgOptions svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = raster.Size
+                    }
+                };
+
+                // Save the processed image as SVG
+                raster.Save(outputPath, svgOptions);
             }
         }
     }
