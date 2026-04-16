@@ -1,14 +1,16 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,22 +23,24 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the SVG image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options with transparent background
-            var rasterOptions = new SvgRasterizationOptions
+            // Configure rasterization options for SVG
+            var rasterizationOptions = new SvgRasterizationOptions
             {
-                BackgroundColor = Aspose.Imaging.Color.Transparent,
-                PageSize = image.Size
+                // Set page size to match the SVG dimensions
+                PageSize = image.Size,
+                // Disable background color to obtain transparency
+                BackgroundColor = Aspose.Imaging.Color.Transparent
             };
 
-            // Set PNG save options and attach rasterization options
+            // Configure PNG save options and attach rasterization options
             var pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save as PNG with transparent background
+            // Save the rasterized PNG image
             image.Save(outputPath, pngOptions);
         }
     }
