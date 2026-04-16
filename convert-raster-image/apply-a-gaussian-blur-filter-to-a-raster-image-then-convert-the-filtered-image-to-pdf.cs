@@ -1,17 +1,17 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\output\sample.pdf";
+        string inputPath = "Input\\sample.png";
+        string outputPath = "Output\\filtered.pdf";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,19 +21,18 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
+        // Load the image, apply Gaussian blur, and save as PDF
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
+            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
             // Apply Gaussian blur with radius 5 and sigma 4.0
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Save the filtered image as PDF
+            // Save the filtered image to PDF
             using (PdfOptions pdfOptions = new PdfOptions())
             {
-                raster.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
     }
