@@ -5,38 +5,25 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Set up base, input and output directories (atomic block as required)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        // Hardcoded input folder containing WMF files
+        string inputFolder = @"C:\Images\WMF";
 
-        if (!Directory.Exists(inputDirectory))
+        // Ensure the input folder exists; if not, report and exit
+        if (!Directory.Exists(inputFolder))
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            Console.Error.WriteLine($"Input folder not found: {inputFolder}");
             return;
         }
 
-        if (!Directory.Exists(outputDirectory))
+        // Retrieve all WMF files in the folder
+        string[] wmfFiles = Directory.GetFiles(inputFolder, "*.wmf");
+
+        // Process each WMF file
+        foreach (string inputPath in wmfFiles)
         {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        // Define target raster formats
-        string[] targetFormats = new[] { "png", "jpg", "bmp" };
-
-        foreach (string inputPath in files)
-        {
-            // Process only WMF files
-            if (!Path.GetExtension(inputPath).Equals(".wmf", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            // Verify input file exists
+            // Verify the file exists (safety check)
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -46,45 +33,26 @@ class Program
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare vector rasterization options (common for all formats)
-                var rasterOptions = new WmfRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
+                // Prepare vector rasterization options based on the source image size
+                var rasterizationOptions = new WmfRasterizationOptions { PageSize = image.Size };
 
-                foreach (string fmt in targetFormats)
-                {
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDirectory,
-                        $"{Path.GetFileNameWithoutExtension(inputPath)}.{fmt}");
+                // Convert to PNG
+                string pngOutput = Path.ChangeExtension(inputPath, ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(pngOutput));
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterizationOptions };
+                image.Save(pngOutput, pngOptions);
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Convert to JPEG
+                string jpegOutput = Path.ChangeExtension(inputPath, ".jpg");
+                Directory.CreateDirectory(Path.GetDirectoryName(jpegOutput));
+                var jpegOptions = new JpegOptions { VectorRasterizationOptions = rasterizationOptions };
+                image.Save(jpegOutput, jpegOptions);
 
-                    // Choose appropriate options based on format
-                    ImageOptionsBase saveOptions;
-                    switch (fmt)
-                    {
-                        case "png":
-                            saveOptions = new PngOptions();
-                            break;
-                        case "jpg":
-                            saveOptions = new JpegOptions();
-                            break;
-                        case "bmp":
-                            saveOptions = new BmpOptions();
-                            break;
-                        default:
-                            // Should never reach here
-                            continue;
-                    }
-
-                    // Assign rasterization options
-                    saveOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save the rasterized image
-                    image.Save(outputPath, saveOptions);
-                }
+                // Convert to BMP
+                string bmpOutput = Path.ChangeExtension(inputPath, ".bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(bmpOutput));
+                var bmpOptions = new BmpOptions { VectorRasterizationOptions = rasterizationOptions };
+                image.Save(bmpOutput, bmpOptions);
             }
         }
     }
