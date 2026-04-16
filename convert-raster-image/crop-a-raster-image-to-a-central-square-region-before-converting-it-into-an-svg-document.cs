@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = @"C:\temp\sample.png";
+        string outputPath = @"C:\temp\sample_cropped.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,25 +25,23 @@ class Program
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access cropping functionality
-            RasterImage rasterImage = (RasterImage)image;
+            // Cast to RasterImage to access Width, Height and Crop
+            RasterImage raster = (RasterImage)image;
 
-            // Determine the size of the central square region
-            int side = Math.Min(rasterImage.Width, rasterImage.Height);
-            int left = (rasterImage.Width - side) / 2;
-            int top = (rasterImage.Height - side) / 2;
+            // Determine the size of the central square
+            int side = Math.Min(raster.Width, raster.Height);
+            int left = (raster.Width - side) / 2;
+            int top = (raster.Height - side) / 2;
 
             // Define the cropping rectangle
             Rectangle cropArea = new Rectangle(left, top, side, side);
 
-            // Crop the image to the central square
-            rasterImage.Crop(cropArea);
+            // Crop to the central square region
+            raster.Crop(cropArea);
 
-            // Prepare SVG save options
+            // Save the cropped image as SVG
             SvgOptions svgOptions = new SvgOptions();
-
-            // Save the cropped image as an SVG document
-            rasterImage.Save(outputPath, svgOptions);
+            raster.Save(outputPath, svgOptions);
         }
     }
 }
