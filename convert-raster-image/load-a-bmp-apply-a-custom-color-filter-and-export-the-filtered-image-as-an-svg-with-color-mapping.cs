@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -22,38 +23,26 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the BMP image
-        using (Image image = Image.Load(inputPath))
+        using (BmpImage bmp = new BmpImage(inputPath))
         {
-            // Cast to RasterImage for pixel access
-            RasterImage raster = (RasterImage)image;
-
-            // Apply a custom color filter
-            // Example: replace pure red (255,0,0) with blue (0,0,255) and increase brightness of other pixels
-            for (int y = 0; y < raster.Height; y++)
+            // Apply a custom color filter:
+            // Example: replace pure red pixels with pure blue
+            for (int y = 0; y < bmp.Height; y++)
             {
-                for (int x = 0; x < raster.Width; x++)
+                for (int x = 0; x < bmp.Width; x++)
                 {
-                    Color pixel = raster.GetPixel(x, y);
-
+                    Color pixel = bmp.GetPixel(x, y);
                     if (pixel.R == 255 && pixel.G == 0 && pixel.B == 0)
                     {
-                        // Change pure red to blue
-                        raster.SetPixel(x, y, Color.FromArgb(pixel.A, 0, 0, 255));
-                    }
-                    else
-                    {
-                        // Increase brightness by 20 (clamped to 255)
-                        int r = Math.Min(pixel.R + 20, 255);
-                        int g = Math.Min(pixel.G + 20, 255);
-                        int b = Math.Min(pixel.B + 20, 255);
-                        raster.SetPixel(x, y, Color.FromArgb(pixel.A, r, g, b));
+                        // Change red to blue while preserving alpha
+                        bmp.SetPixel(x, y, Color.FromArgb(pixel.A, 0, 0, 255));
                     }
                 }
             }
 
-            // Save the filtered image as SVG
-            SvgOptions svgOptions = new SvgOptions();
-            image.Save(outputPath, svgOptions);
+            // Save the filtered image as SVG with default options
+            var svgOptions = new SvgOptions();
+            bmp.Save(outputPath, svgOptions);
         }
     }
 }
