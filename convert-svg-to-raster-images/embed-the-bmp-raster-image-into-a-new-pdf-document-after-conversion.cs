@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.bmp";
-        string outputPath = "Output/sample.pdf";
+        string inputPath = "input.bmp";
+        string outputPath = "output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,10 +21,14 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load BMP image and save it as PDF
-        using (Image image = Image.Load(inputPath))
+        // Load the BMP image
+        using (Image bmpImage = Image.Load(inputPath))
         {
-            image.Save(outputPath, new PdfOptions());
+            // Prepare PDF export options
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the image as a PDF document (the BMP will be embedded as a page)
+            bmpImage.Save(outputPath, pdfOptions);
         }
     }
 }

@@ -1,16 +1,17 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.jpg";
+        // Hardcoded input and output paths (relative)
+        string inputPath = "Input/sample.bmp";
         string outputPath = "Output/resized.bmp";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,14 +21,17 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image, resize to half, and save as BMP
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        // Load the BMP image
+        using (Image image = Image.Load(inputPath))
         {
-            // Resize to half the original dimensions using nearest neighbour resampling
-            image.Resize(image.Width / 2, image.Height / 2, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+            // Resize to half of original dimensions (default NearestNeighbourResample)
+            image.Resize(image.Width / 2, image.Height / 2);
 
-            // Save the resized image in BMP format
-            image.Save(outputPath, new BmpOptions());
+            // Save the resized image as BMP
+            using (BmpOptions bmpOptions = new BmpOptions())
+            {
+                image.Save(outputPath, bmpOptions);
+            }
         }
     }
 }

@@ -26,22 +26,24 @@ class Program
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure SVG rasterization options with page size in inches
+            // Cast to SvgImage
+            SvgImage svgImage = (SvgImage)image;
+
+            // Configure rasterization options with page size in inches (e.g., 8.5 x 11 inches)
             SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                // Example: 4 inches width, 3 inches height
-                PageSize = new SizeF(4.0f, 3.0f),
+                PageSize = new SizeF(8.5f, 11f), // Width and height in inches
                 BackgroundColor = Color.White
             };
 
-            // Set PNG save options and attach rasterization options
+            // Set up PNG save options and attach rasterization options
             PngOptions pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
             // Save the rasterized image
-            image.Save(outputPath, pngOptions);
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }

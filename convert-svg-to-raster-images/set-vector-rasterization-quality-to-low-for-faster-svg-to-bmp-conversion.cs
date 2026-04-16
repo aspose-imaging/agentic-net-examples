@@ -2,46 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.svg");
-        string outputPath = Path.Combine("Output", "sample.bmp");
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure low-quality rasterization options for faster processing
-            var rasterOptions = new VectorRasterizationOptions
+            // Configure rasterization options for low quality (faster) conversion
+            var rasterOptions = new SvgRasterizationOptions
             {
-                BackgroundColor = Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height,
-                SmoothingMode = SmoothingMode.None,               // Disable anti-aliasing
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel // Low-quality text rendering
+                PageSize = image.Size,                     // Preserve original size
+                SmoothingMode = Aspose.Imaging.SmoothingMode.None,          // Disable anti‑aliasing
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel // Simple text rendering
             };
 
-            // Set up BMP save options with the rasterization settings
-            using (BmpOptions bmpOptions = new BmpOptions())
+            // Set up BMP save options and attach the rasterization options
+            var bmpOptions = new BmpOptions
             {
-                bmpOptions.VectorRasterizationOptions = rasterOptions;
+                VectorRasterizationOptions = rasterOptions
+            };
 
-                // Save the rasterized image as BMP
-                image.Save(outputPath, bmpOptions);
-            }
+            // Save the rasterized image as BMP
+            image.Save(outputPath, bmpOptions);
         }
     }
 }

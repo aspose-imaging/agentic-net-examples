@@ -5,33 +5,37 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input path
-        string inputPath = "Input/sample.bmp";
+        // Hard‑coded input path
+        string inputPath = @"c:\temp\sample.bmp";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the BMP image
+        // Load the BMP image using Aspose.Imaging
         using (Image image = Image.Load(inputPath))
         {
-            // Save the image to a memory stream in BMP format
+            // Define PNG save options (conversion from BMP to PNG)
+            PngOptions pngOptions = new PngOptions();
+
+            // Save the image to a memory stream to obtain a byte array
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(memoryStream, bmpOptions);
+                image.Save(memoryStream, pngOptions);
+                byte[] imageBytes = memoryStream.ToArray();
 
-                // Retrieve the byte array
-                byte[] bmpBytes = memoryStream.ToArray();
+                // Output the size of the resulting byte array
+                Console.WriteLine($"Converted image byte array length: {imageBytes.Length}");
 
-                // Example usage of the byte array
-                Console.WriteLine($"BMP byte array length: {bmpBytes.Length}");
-                // The byte array can now be stored or transmitted as needed
+                // Optional: write the byte array to a file for verification
+                string outputPath = @"c:\temp\output.png";
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                File.WriteAllBytes(outputPath, imageBytes);
             }
         }
     }

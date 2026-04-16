@@ -22,17 +22,15 @@ class Program
 
         using (Image image = Image.Load(inputPath))
         {
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
+            SvgImage svgImage = (SvgImage)image;
 
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+            rasterOptions.PageSize = svgImage.Size;
 
-            image.Save(outputPath, pngOptions);
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.VectorRasterizationOptions = rasterOptions;
+
+            svgImage.Save(outputPath, pngOptions);
         }
     }
 }

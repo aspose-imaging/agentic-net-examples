@@ -8,7 +8,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\input.svg";
         string outputPath = @"C:\Images\output.bmp";
 
@@ -19,24 +19,24 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the SVG image
         using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
         {
             // Configure rasterization options with anti‑aliasing
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
             {
                 PageSize = svgImage.Size,
-                SmoothingMode = SmoothingMode.AntiAlias,
-                BackgroundColor = Color.White
+                SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
             };
 
-            // Set BMP save options and attach the rasterization options
+            // Set up BMP save options and attach rasterization options
             BmpOptions bmpOptions = new BmpOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
             // Save the rasterized image as BMP
