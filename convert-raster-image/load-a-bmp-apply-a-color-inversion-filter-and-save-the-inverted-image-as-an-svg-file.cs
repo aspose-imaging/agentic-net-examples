@@ -3,54 +3,60 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.svg";
 
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Load BMP image as RasterImage
         using (Image image = Image.Load(inputPath))
         {
             RasterImage raster = (RasterImage)image;
-            Rectangle rect = raster.Bounds;
-            int[] pixels = raster.LoadArgb32Pixels(rect);
 
+            // Load pixel data
+            var bounds = raster.Bounds;
+            int[] pixels = raster.LoadArgb32Pixels(bounds);
+
+            // Invert colors (preserve alpha)
             for (int i = 0; i < pixels.Length; i++)
             {
                 int argb = pixels[i];
-                int a = (argb >> 24) & 0xFF;
-                int r = (argb >> 16) & 0xFF;
-                int g = (argb >> 8) & 0xFF;
-                int b = argb & 0xFF;
-
-                r = 255 - r;
-                g = 255 - g;
-                b = 255 - b;
-
-                pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                int alpha = argb & unchecked((int)0xFF000000);
+                int rgb = argb & 0x00FFFFFF;
+                int invertedRgb = (~rgb) & 0x00FFFFFF;
+                pixels[i] = alpha | invertedRgb;
             }
 
-            raster.SaveArgb32Pixels(rect, pixels);
+            // Save modified pixels back to the raster image
+            raster.SaveArgb32Pixels(bounds, pixels);
 
-            SvgOptions svgOptions = new SvgOptions
+            // Create SVG graphics canvas with same dimensions
+            var graphics = new SvgGraphics2D(raster.Width, raster.Height, 96);
+
+            // Draw the raster image onto the SVG canvas
+            graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(raster.Width, raster.Height));
+
+            // Finalize SVG image and save
+            using (SvgImage svgImage = graphics.EndRecording())
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = raster.Size
-                }
-            };
-
-            image.Save(outputPath, svgOptions);
+                svgImage.Save(outputPath, new SvgOptions());
+            }
         }
     }
 }
