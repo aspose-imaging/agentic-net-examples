@@ -2,16 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = "Input/sample.svg";
         string outputPath = "Output/sample.bmp";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,63 +22,21 @@ public class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image and save as BMP
+        // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            var bmpOptions = new BmpOptions
+            // Configure BMP save options with vector rasterization
+            var bmpOptions = new BmpOptions();
+            var vectorOptions = new VectorRasterizationOptions
             {
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                }
+                BackgroundColor = Aspose.Imaging.Color.White,
+                PageWidth = image.Width,
+                PageHeight = image.Height
             };
+            bmpOptions.VectorRasterizationOptions = vectorOptions;
 
+            // Save as BMP
             image.Save(outputPath, bmpOptions);
         }
-    }
-}
-
-// ASP.NET Core controller that returns the converted BMP as a file result
-public class SvgToBmpController : Microsoft.AspNetCore.Mvc.ControllerBase
-{
-    // GET /api/svg-to-bmp
-    public Microsoft.AspNetCore.Mvc.IActionResult ConvertSvgToBmp()
-    {
-        // Hardcoded input and output paths (same as in Main)
-        string inputPath = "Input/sample.svg";
-        string outputPath = "Output/sample.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return NotFound($"Input file not found: {inputPath}");
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image and save as BMP
-        using (Image image = Image.Load(inputPath))
-        {
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                }
-            };
-
-            image.Save(outputPath, bmpOptions);
-        }
-
-        // Return the BMP file to the client
-        byte[] fileBytes = System.IO.File.ReadAllBytes(outputPath);
-        return new Microsoft.AspNetCore.Mvc.FileContentResult(fileBytes, "image/bmp")
-        {
-            FileDownloadName = Path.GetFileName(outputPath)
-        };
     }
 }
