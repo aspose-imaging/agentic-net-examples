@@ -8,10 +8,10 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.pdf";
+        string inputPath = "Input/sample.png";
+        string outputPath = "Output/sample.pdf";
 
-        // Validate input file existence
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,21 +25,20 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Cast to RasterImage for pixel operations
-            using (RasterImage raster = (RasterImage)image)
+            RasterImage raster = (RasterImage)image;
+
+            // Resize to half of original dimensions
+            int newWidth = raster.Width / 2;
+            int newHeight = raster.Height / 2;
+            raster.Resize(newWidth, newHeight); // default NearestNeighbourResample
+
+            // Apply a median filter with kernel size 5
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+
+            // Save the processed image as PDF
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                // Resize to half of original dimensions
-                int newWidth = raster.Width / 2;
-                int newHeight = raster.Height / 2;
-                raster.Resize(newWidth, newHeight);
-
-                // Apply median filter with size 5
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-
-                // Save as PDF using PdfOptions
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    raster.Save(outputPath, pdfOptions);
-                }
+                raster.Save(outputPath, pdfOptions);
             }
         }
     }
