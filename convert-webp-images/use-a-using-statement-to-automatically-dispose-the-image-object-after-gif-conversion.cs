@@ -8,25 +8,28 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.gif";
-        string outputPath = @"C:\Temp\output.png";
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.gif";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the GIF image and automatically dispose it after use
+        // Ensure output directory exists
+        string? outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir ?? ".");
+
+        // Load the source image and automatically dispose it after use
         using (Image image = Image.Load(inputPath))
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Prepare GIF save options (default options are sufficient for basic conversion)
+            GifOptions gifOptions = new GifOptions();
 
-            // Save the image as PNG (conversion from GIF)
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            // Save the image as GIF
+            image.Save(outputPath, gifOptions);
         }
     }
 }
