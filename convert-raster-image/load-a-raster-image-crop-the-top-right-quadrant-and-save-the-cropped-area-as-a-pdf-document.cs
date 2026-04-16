@@ -21,24 +21,24 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image, crop the top‑right quadrant, and save as PDF
+        // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access Width, Height and Crop
-            RasterImage raster = (RasterImage)image;
+            // Determine the rectangle for the top‑right quadrant
+            int rectX = image.Width / 2;          // start at middle of width
+            int rectY = 0;                        // top edge
+            int rectWidth = image.Width - rectX;  // right half width
+            int rectHeight = image.Height / 2;    // top half height
 
-            // Define the top‑right quadrant rectangle
-            int rectX = raster.Width / 2;
-            int rectY = 0;
-            int rectWidth = raster.Width - rectX; // same as raster.Width / 2
-            int rectHeight = raster.Height / 2;
-            Rectangle cropArea = new Rectangle(rectX, rectY, rectWidth, rectHeight);
+            var cropArea = new Rectangle(rectX, rectY, rectWidth, rectHeight);
 
-            // Crop the image
-            raster.Crop(cropArea);
+            // Crop the image to the specified rectangle
+            image.Crop(cropArea);
 
-            // Save the cropped image as PDF
-            PdfOptions pdfOptions = new PdfOptions();
+            // Prepare PDF save options
+            var pdfOptions = new PdfOptions();
+
+            // Save the cropped image as a PDF document
             image.Save(outputPath, pdfOptions);
         }
     }
