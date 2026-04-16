@@ -8,31 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input folder and SVG file names
-        string baseFolder = @"C:\SvgInput";
-        string[] files = new[] { "image1.svg", "image2.svg", "image3.svg" };
+        // Hard‑coded input directory containing SVG files
+        string inputDirectory = @"C:\InputSvgs";
 
-        // Create a single rasterization options instance to reuse for all conversions
-        var rasterizationOptions = new SvgRasterizationOptions
+        // List of SVG file names to convert
+        string[] svgFiles = new[]
         {
-            BackgroundColor = Aspose.Imaging.Color.White,
-            SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-            TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
+            "image1.svg",
+            "image2.svg",
+            "image3.svg"
         };
 
-        var pngSaveOptions = new PngOptions
+        // Create a single rasterization options instance to be reused
+        SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
+
+        // PNG save options that reference the shared rasterization options
+        PngOptions pngSaveOptions = new PngOptions
         {
             VectorRasterizationOptions = rasterizationOptions
         };
 
-        foreach (var fileName in files)
+        foreach (string fileName in svgFiles)
         {
-            string inputPath = Path.Combine(baseFolder, fileName);
+            // Build full input path
+            string inputPath = Path.Combine(inputDirectory, fileName);
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
+            // Determine output path (same name with .png extension)
+            string outputPath = Path.ChangeExtension(inputPath, ".png");
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
@@ -40,13 +52,7 @@ class Program
                 // Update page size for the current image
                 rasterizationOptions.PageSize = image.Size;
 
-                // Determine output path with .png extension
-                string outputPath = Path.ChangeExtension(inputPath, ".png");
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the rasterized PNG using the shared options
+                // Save as PNG using the shared options
                 image.Save(outputPath, pngSaveOptions);
             }
         }
