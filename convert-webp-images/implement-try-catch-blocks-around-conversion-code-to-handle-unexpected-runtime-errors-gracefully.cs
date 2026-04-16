@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = "Input/sample.png";
-        string outputPath = "Output/sample.tif";
+        string outputPath = "Output/sample.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -27,17 +26,13 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare TIFF save options
-                using (TiffOptions options = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    // Save the image as TIFF
-                    image.Save(outputPath, options);
-                }
+                // Save as JPEG using default options
+                image.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
         {
-            // Handle any unexpected errors
+            // Handle any unexpected errors gracefully
             Console.Error.WriteLine($"Error during conversion: {ex.Message}");
         }
     }
