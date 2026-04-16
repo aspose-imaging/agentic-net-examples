@@ -8,11 +8,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\output.pdf";
+        string outputPath = @"C:\Images\sample_sharpened.pdf";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,19 +22,17 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image, apply sharpening, and save as PDF
+        // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
             // Cast to RasterImage to access filtering capabilities
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a sharpen filter (kernel size 5, sigma 4.0) to the whole image
+            // Apply a sharpen filter to the entire image
             rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Prepare PDF save options
+            // Save the processed image as PDF
             PdfOptions pdfOptions = new PdfOptions();
-
-            // Save the processed image as a PDF
             image.Save(outputPath, pdfOptions);
         }
     }

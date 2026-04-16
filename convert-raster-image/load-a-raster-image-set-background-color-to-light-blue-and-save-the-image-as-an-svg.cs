@@ -23,22 +23,25 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the raster image
-        using (Image rasterImage = Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG save options with a light blue background
+            // Configure rasterization options for SVG output
+            var rasterOptions = new SvgRasterizationOptions
+            {
+                // Set the desired background color (light blue)
+                BackgroundColor = Aspose.Imaging.Color.LightBlue,
+                // Use the original image size as the page size
+                PageSize = image.Size
+            };
+
+            // Create SVG save options and attach the rasterization settings
             var svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    // Set the background color to light blue
-                    BackgroundColor = Aspose.Imaging.Color.LightBlue,
-                    // Use the original image size for the SVG page
-                    PageSize = rasterImage.Size
-                }
+                VectorRasterizationOptions = rasterOptions
             };
 
             // Save the image as SVG
-            rasterImage.Save(outputPath, svgOptions);
+            image.Save(outputPath, svgOptions);
         }
     }
 }

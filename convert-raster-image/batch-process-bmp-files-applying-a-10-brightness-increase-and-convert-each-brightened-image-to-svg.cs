@@ -2,50 +2,75 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input BMP files
-        string[] inputPaths = new string[]
-        {
-            @"C:\Images\input1.bmp",
-            @"C:\Images\input2.bmp"
-        };
+        // Define input and output directories relative to the current directory
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDir = Path.Combine(baseDir, "Input");
+        string outputDir = Path.Combine(baseDir, "Output");
 
-        // Corresponding output SVG files
-        string[] outputPaths = new string[]
+        // Validate input directory
+        if (!Directory.Exists(inputDir))
         {
-            @"C:\Images\output1.svg",
-            @"C:\Images\output2.svg"
-        };
+            Directory.CreateDirectory(inputDir);
+            Console.WriteLine($"Input directory created at: {inputDir}. Add BMP files and rerun.");
+            return;
+        }
 
-        for (int i = 0; i < inputPaths.Length; i++)
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDir))
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
+            Directory.CreateDirectory(outputDir);
+        }
 
-            // Verify input file exists
+        // Get all BMP files in the input directory
+        string[] files = Directory.GetFiles(inputDir, "*.bmp");
+
+        foreach (string inputPath in files)
+        {
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                continue;
             }
 
-            // Ensure output directory exists
+            // Prepare output file path with .svg extension
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
+
+            // Ensure the output directory exists (unconditional as required)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
-            using (BmpImage bmp = new BmpImage(inputPath))
+            // Load the BMP image, adjust brightness, and save as SVG
+            using (Image image = Image.Load(inputPath))
             {
-                // Increase brightness by approximately 10% (26 out of 255)
-                bmp.AdjustBrightness(26);
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
 
-                // Save the brightened image as SVG
-                SvgOptions svgOptions = new SvgOptions();
-                bmp.Save(outputPath, svgOptions);
+                // Increase brightness by approximately 10% (value 25 out of 255)
+                raster.AdjustBrightness(25);
+
+                // Configure SVG export options
+                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = raster.Size
+                };
+
+                SvgOptions svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = vectorOptions
+                };
+
+                // Save the processed image as SVG
+                raster.Save(outputPath, svgOptions);
             }
         }
     }

@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.png";
-        string outputPath = @"C:\temp\sample_gamma_corrected.pdf";
+        string inputPath = @"c:\temp\sample.png";
+        string outputPath = @"c:\temp\sample_gamma.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,9 +25,9 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Cast to RasterImage to access AdjustGamma
-            var rasterImage = (RasterImage)image;
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Apply gamma correction (same coefficient for R, G, B)
+            // Apply custom gamma correction (same value for all channels)
             rasterImage.AdjustGamma(2.2f);
 
             // Save the corrected image as PDF

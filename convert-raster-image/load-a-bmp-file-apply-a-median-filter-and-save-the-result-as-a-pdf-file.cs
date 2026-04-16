@@ -8,18 +8,18 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = "input/sample.bmp";
+        string outputPath = "output/result.pdf";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the BMP image
@@ -28,10 +28,10 @@ class Program
             // Cast to RasterImage to access filtering functionality
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a median filter with a size of 5 to the entire image
+            // Apply a median filter with size 5 to the whole image
             rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-            // Save the processed image as a PDF
+            // Save the processed image as PDF
             rasterImage.Save(outputPath, new PdfOptions());
         }
     }

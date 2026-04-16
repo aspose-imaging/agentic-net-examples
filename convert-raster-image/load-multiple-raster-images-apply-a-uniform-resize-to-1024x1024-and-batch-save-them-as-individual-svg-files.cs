@@ -2,28 +2,26 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input folder containing raster images
+        // Hard‑coded input folder and output folder
         string inputFolder = @"C:\Images\Input";
-        // Hardcoded output folder for SVG files
         string outputFolder = @"C:\Images\Output";
 
-        // List of raster image file names to process
-        string[] files = new[]
+        // List of raster image files to process (hard‑coded)
+        string[] inputFiles = new[]
         {
-            "image1.jpg",
-            "image2.png",
-            "image3.bmp"
+            Path.Combine(inputFolder, "image1.png"),
+            Path.Combine(inputFolder, "image2.jpg"),
+            Path.Combine(inputFolder, "image3.bmp")
         };
 
-        foreach (var fileName in files)
+        foreach (string inputPath in inputFiles)
         {
-            // Build full input path
-            string inputPath = Path.Combine(inputFolder, fileName);
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -31,27 +29,27 @@ class Program
                 return;
             }
 
-            // Build full output path (same name with .svg extension)
-            string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(fileName) + ".svg");
+            // Determine output path (same name, .svg extension, placed in output folder)
+            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+            string outputPath = Path.Combine(outputFolder, outputFileName);
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load raster image
+            // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Resize to 1024x1024
+                // Resize uniformly to 1024x1024
                 image.Resize(1024, 1024);
 
-                // Prepare SVG rasterization options (use the resized image size)
-                var vectorOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Prepare SVG save options
+                // Prepare SVG save options with rasterization settings
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = vectorOptions
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        // Set the page size to match the resized dimensions
+                        PageSize = new Size(1024, 1024)
+                    }
                 };
 
                 // Save as SVG

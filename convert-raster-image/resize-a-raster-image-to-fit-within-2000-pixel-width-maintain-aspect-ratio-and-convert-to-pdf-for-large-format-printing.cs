@@ -2,44 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\SourceImage.jpg";
-        string outputPath = @"C:\Images\Output\ResizedDocument.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.pdf";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Determine the target width (max 2000 px) while preserving aspect ratio
-            int targetWidth = Math.Min(image.Width, 2000);
-            int targetHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
+            const int maxWidth = 2000;
+            int newWidth = image.Width;
+            int newHeight = image.Height;
 
-            // Resize the image using a high‑quality resampling algorithm
-            image.Resize(targetWidth, targetHeight, ResizeType.HighQualityResample);
+            // Resize proportionally if width exceeds the limit
+            if (image.Width > maxWidth)
+            {
+                newWidth = maxWidth;
+                newHeight = (int)((long)image.Height * maxWidth / image.Width);
+                image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+            }
 
             // Prepare PDF export options
             var pdfOptions = new PdfOptions
             {
-                // Optional: keep original DPI if required
-                UseOriginalImageResolution = true
+                // Set page size to match the resized image dimensions
+                PageSize = new Size(newWidth, newHeight)
             };
 
-            // Save the resized image as a PDF
+            // Save the image as PDF
             image.Save(outputPath, pdfOptions);
         }
     }

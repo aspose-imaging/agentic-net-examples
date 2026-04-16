@@ -2,14 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPdfPath = @"C:\Images\output.pdf";
+        string inputPath = Path.Combine("Input", "sample.bmp");
+        string outputPath = Path.Combine("Output", "result.pdf");
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,15 +21,15 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load, process, and save the image
+        // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
             // Cast to RasterImage for raster operations
             RasterImage raster = (RasterImage)image;
 
-            // Cache data if not already cached
+            // Cache data for better performance
             if (!raster.IsCached)
                 raster.CacheData();
 
@@ -39,7 +41,7 @@ class Program
 
             // Save the processed image as PDF
             PdfOptions pdfOptions = new PdfOptions();
-            image.Save(outputPdfPath, pdfOptions);
+            raster.Save(outputPath, pdfOptions);
         }
     }
 }

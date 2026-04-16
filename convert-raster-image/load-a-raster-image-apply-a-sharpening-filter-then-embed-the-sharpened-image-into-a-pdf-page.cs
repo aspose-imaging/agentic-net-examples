@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.png";
-        string outputPath = @"C:\Temp\SharpenedOutput.pdf";
+        string inputPath = @"C:\Temp\input.png";
+        string outputPath = @"C:\Temp\output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,17 +25,14 @@ class Program
         // Load the raster image, apply sharpening, and save as PDF
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering capabilities
+            // Cast to RasterImage to access filtering methods
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a sharpen filter (kernel size 5, sigma 4.0) to the whole image
+            // Apply sharpen filter to the entire image
             rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Prepare PDF save options
-            PdfOptions pdfOptions = new PdfOptions();
-
-            // Save the sharpened image into a PDF file
-            rasterImage.Save(outputPath, pdfOptions);
+            // Save the sharpened image into a PDF document (one page)
+            rasterImage.Save(outputPath, new PdfOptions());
         }
     }
 }

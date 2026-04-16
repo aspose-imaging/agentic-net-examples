@@ -7,40 +7,52 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        // Define base, input and output directories (relative to current directory)
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
+        // Validate input directory; create if missing and exit
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
 
         // Get all BMP files in the input directory
-        string[] inputFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
-        int index = 1;
-        foreach (string inputPath in inputFiles)
+        int counter = 1;
+        foreach (string inputPath in files)
         {
-            // Verify input file exists
+            // Verify each input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                continue;
             }
 
-            // Build output file path with sequential numeric suffix
-            string outputPath = Path.Combine(outputDirectory, $"output_{index}.pdf");
+            // Build output PDF path with sequential numeric suffix
+            string outputPath = Path.Combine(outputDirectory, $"output{counter}.pdf");
 
             // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image and save as PDF
+            // Load BMP image and save as PDF
             using (Image image = Image.Load(inputPath))
             using (PdfOptions pdfOptions = new PdfOptions())
             {
                 image.Save(outputPath, pdfOptions);
             }
 
-            index++;
+            counter++;
         }
     }
 }

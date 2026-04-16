@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png; // For raster image types if needed
 
 class Program
 {
     static void Main()
     {
         // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\source.png";
-        string outputPath = @"C:\Images\Inverted.pdf";
+        string inputPath = @"input.png";
+        string outputPdfPath = @"output.pdf";
 
-        // Verify that the input file exists
+        // Verify the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -19,44 +19,41 @@ class Program
         }
 
         // Ensure the output directory exists (creates it unconditionally)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
         // Load the raster image
-        using (Image image = Image.Load(inputPath))
+        using (Image img = Image.Load(inputPath))
         {
-            // Cast to RasterImage for pixel access
-            var raster = (RasterImage)image;
+            // Cast to RasterImage to access pixel‑level methods
+            RasterImage raster = img as RasterImage;
+            if (raster == null)
+            {
+                Console.Error.WriteLine("The loaded image is not a raster image.");
+                return;
+            }
 
             // Invert colors pixel by pixel
             for (int y = 0; y < raster.Height; y++)
             {
                 for (int x = 0; x < raster.Width; x++)
                 {
-                    // Get current ARGB value
                     int argb = raster.GetArgb32Pixel(x, y);
-
-                    // Extract components
                     int a = (argb >> 24) & 0xFF;
                     int r = (argb >> 16) & 0xFF;
                     int g = (argb >> 8) & 0xFF;
                     int b = argb & 0xFF;
 
-                    // Invert RGB channels
-                    r = 255 - r;
-                    g = 255 - g;
-                    b = 255 - b;
+                    int invR = 255 - r;
+                    int invG = 255 - g;
+                    int invB = 255 - b;
 
-                    // Reassemble ARGB
-                    int invertedArgb = (a << 24) | (r << 16) | (g << 8) | b;
-
-                    // Set the inverted pixel back
-                    raster.SetArgb32Pixel(x, y, invertedArgb);
+                    int invArgb = (a << 24) | (invR << 16) | (invG << 8) | invB;
+                    raster.SetArgb32Pixel(x, y, invArgb);
                 }
             }
 
             // Save the inverted image directly as a PDF
-            var pdfOptions = new PdfOptions(); // Aspose.Imaging PDF export options
-            raster.Save(outputPath, pdfOptions);
+            raster.Save(outputPdfPath);
         }
     }
 }

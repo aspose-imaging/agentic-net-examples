@@ -3,14 +3,15 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.pdf";
+        string inputPath = "Input/sample.png";
+        string outputPath = "Output/output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,18 +23,28 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        // Load PNG as a raster image
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Resize to 500x500
-            image.Resize(500, 500);
+            // Cache data for better performance
+            if (!image.IsCached)
+                image.CacheData();
 
             // Apply Gaussian blur filter
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+            image.Filter(image.Bounds, new GaussianBlurFilterOptions
+            {
+                Radius = 5,
+                Sigma = 1.0f
+            });
 
-            // Save as PDF
-            image.Save(outputPath, new PdfOptions());
+            // Resize to 500x500 pixels
+            image.Resize(500, 500);
+
+            // Save the processed image as PDF
+            using (PdfOptions pdfOptions = new PdfOptions())
+            {
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

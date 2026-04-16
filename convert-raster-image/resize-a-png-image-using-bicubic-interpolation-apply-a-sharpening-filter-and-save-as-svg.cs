@@ -10,9 +10,9 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output.svg";
+        string outputPath = "output/output.svg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,26 +25,17 @@ class Program
         // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Desired dimensions for resizing (example: half size)
-            int newWidth = image.Width / 2;
-            int newHeight = image.Height / 2;
+            // Cast to RasterImage for pixel operations
+            RasterImage raster = (RasterImage)image;
 
             // Resize using bicubic interpolation (CubicConvolution)
-            image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
+            raster.Resize(800, 600, ResizeType.CubicConvolution);
 
-            // Apply sharpening filter to the raster image
-            RasterImage raster = (RasterImage)image;
+            // Apply sharpening filter
             raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Prepare SVG save options with rasterization settings
-            var svgOptions = new SvgOptions();
-            var vectorRasterization = new SvgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-            svgOptions.VectorRasterizationOptions = vectorRasterization;
-
-            // Save the processed image as SVG
+            // Save the result as SVG
+            SvgOptions svgOptions = new SvgOptions();
             image.Save(outputPath, svgOptions);
         }
     }

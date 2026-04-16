@@ -3,48 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputBmpPath = "input.bmp";
-        string outputSvgPath = "output.svg";
+        string inputPath = "input.bmp";
+        string outputPath = "output.svg";
 
         // Verify input file exists
-        if (!File.Exists(inputBmpPath))
+        if (!File.Exists(inputPath))
         {
-            Console.Error.WriteLine($"File not found: {inputBmpPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the BMP image
-        using (RasterImage bmp = (RasterImage)Image.Load(inputBmpPath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the BMP image as a raster image
+        using (RasterImage bmpImage = (RasterImage)Image.Load(inputPath))
         {
-            int width = bmp.Width;
-            int height = bmp.Height;
+            int width = bmpImage.Width;
+            int height = bmpImage.Height;
             int dpi = 96; // Standard DPI
 
-            // Create an SVG graphics context with the same dimensions as the BMP
+            // Create an SVG graphics canvas with the same dimensions as the BMP
             SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-            // Draw the raster image onto the SVG canvas
-            graphics.DrawImage(bmp, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
+            // Draw the BMP onto the SVG canvas
+            graphics.DrawImage(bmpImage, new Point(0, 0), new Size(width, height));
 
-            // Draw a green outline around the image
-            graphics.DrawRectangle(new Pen(Color.Green, 1), 0, 0, width, height);
+            // Draw a green rectangle outline around the image
+            Pen greenPen = new Pen(Color.Green, 1);
+            graphics.DrawRectangle(greenPen, 0, 0, width, height);
 
             // Finalize the SVG image
             using (SvgImage svgImage = graphics.EndRecording())
             {
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
-
                 // Save the SVG file
-                svgImage.Save(outputSvgPath);
+                svgImage.Save(outputPath);
             }
         }
     }

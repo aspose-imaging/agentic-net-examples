@@ -8,7 +8,7 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\temp\input.png";
         string outputPath = @"C:\temp\output.pdf";
 
@@ -19,16 +19,13 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
+        // Load PNG, rotate 180°, and save as PDF (portrait orientation)
         using (PngImage pngImage = new PngImage(inputPath))
         {
-            // Rotate the image 180 degrees
             pngImage.RotateFlip(RotateFlipType.Rotate180FlipNone);
-
-            // Export the rotated image as a PDF (portrait orientation is default)
             pngImage.Save(outputPath, new PdfOptions());
         }
     }

@@ -1,15 +1,15 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Export;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.pdf";
+        string inputPath = "Input/sample.bmp";
+        string outputPath = "Output/sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,10 +21,10 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image and save it as PDF using explicit format enumeration
+        // Load BMP image and save as PDF
         using (Image image = Image.Load(inputPath))
         {
-            image.Save(outputPath, ExportFormats.Pdf);
+            image.Save(outputPath, new PdfOptions());
         }
     }
 }

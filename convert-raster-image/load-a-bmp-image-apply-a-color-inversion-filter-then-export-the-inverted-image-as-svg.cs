@@ -5,7 +5,7 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.bmp";
@@ -21,36 +21,33 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load BMP image as RasterImage
-        using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
+        // Load the BMP image
+        using (RasterImage image = Image.Load(inputPath) as RasterImage)
         {
-            // Load pixel data (ARGB)
-            int[] pixels = bmp.LoadArgb32Pixels(bmp.Bounds);
-
-            // Invert colors (preserve alpha)
-            for (int i = 0; i < pixels.Length; i++)
+            if (image == null)
             {
-                int p = pixels[i];
-                int a = (p >> 24) & 0xFF;
-                int rgb = p & 0x00FFFFFF;
-                int invRgb = (~rgb) & 0x00FFFFFF;
-                pixels[i] = (a << 24) | invRgb;
+                Console.Error.WriteLine("Failed to load image as RasterImage.");
+                return;
             }
 
-            // Apply inverted pixels back to the image
-            bmp.SaveArgb32Pixels(bmp.Bounds, pixels);
-
-            // Prepare SVG save options with rasterization settings
-            SvgOptions svgOptions = new SvgOptions
+            // Invert colors pixel by pixel
+            for (int y = 0; y < image.Height; y++)
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions
+                for (int x = 0; x < image.Width; x++)
                 {
-                    PageSize = bmp.Size
+                    Aspose.Imaging.Color original = image.GetPixel(x, y);
+                    Aspose.Imaging.Color inverted = Aspose.Imaging.Color.FromArgb(
+                        original.A,
+                        255 - original.R,
+                        255 - original.G,
+                        255 - original.B);
+                    image.SetPixel(x, y, inverted);
                 }
-            };
+            }
 
             // Save the inverted image as SVG
-            bmp.Save(outputPath, svgOptions);
+            var svgOptions = new SvgOptions();
+            image.Save(outputPath, svgOptions);
         }
     }
 }

@@ -1,54 +1,78 @@
 using System;
 using System.IO;
+using System.Drawing;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input files
-        var inputFiles = new List<string>
+        // Hard‑coded input image files
+        string[] inputPaths = new string[]
         {
             @"C:\Images\image1.png",
             @"C:\Images\image2.jpg",
-            @"C:\Images\image3.bmp"
+            @"C:\Images\image3.tif"
         };
 
-        // Hardcoded output directory
-        var outputDir = @"C:\Output\Pdf\";
-
-        Parallel.ForEach(inputFiles, inputPath =>
+        // Hard‑coded output PDF files (one per input)
+        string[] outputPaths = new string[]
         {
-            // Verify input file exists
+            @"C:\Output\image1.pdf",
+            @"C:\Output\image2.pdf",
+            @"C:\Output\image3.pdf"
+        };
+
+        // Ensure each input file exists before processing
+        for (int i = 0; i < inputPaths.Length; i++)
+        {
+            string inputPath = inputPaths[i];
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+        }
 
-            // Build output PDF path
-            var outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load image with concurrent processing enabled
-            var loadOptions = new LoadOptions { ConcurrentImageProcessing = true };
-            using (Image image = Image.Load(inputPath, loadOptions))
+        // Process images concurrently
+        Parallel.ForEach(
+            // Pair each input with its corresponding output
+            new List<(string input, string output)>() {
+                (inputPaths[0], outputPaths[0]),
+                (inputPaths[1], outputPaths[1]),
+                (inputPaths[2], outputPaths[2])
+            },
+            pair =>
             {
-                var rasterImage = (RasterImage)image;
+                // Create output directory unconditionally
+                Directory.CreateDirectory(Path.GetDirectoryName(pair.output));
 
-                // Apply median filter (size 5) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                // Load the raster image
+                using (Image image = Image.Load(pair.input))
+                {
+                    RasterImage raster = (RasterImage)image;
 
-                // Save filtered image as PDF
-                var pdfOptions = new PdfOptions();
-                rasterImage.Save(outputPath, pdfOptions);
-            }
-        });
+                    // Apply a median filter of size 5 to the whole image
+                    raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                    // Prepare PDF save options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save to a memory stream (simulating streaming to a client)
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        raster.Save(ms, pdfOptions);
+                        // At this point, ms contains the PDF data.
+                        // In a real server scenario, you would write ms to the HTTP response.
+                    }
+
+                    // Also save to a file for demonstration purposes
+                    raster.Save(pair.output, pdfOptions);
+                }
+            });
     }
 }

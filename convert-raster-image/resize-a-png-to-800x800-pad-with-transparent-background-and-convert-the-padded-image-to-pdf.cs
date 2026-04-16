@@ -3,14 +3,13 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main()
     {
-        string inputPath = "input.png";
-        string outputPath = "output.pdf";
+        string inputPath = "Input/input.png";
+        string outputPath = "Output/output.pdf";
 
         if (!File.Exists(inputPath))
         {
@@ -24,16 +23,22 @@ class Program
         {
             if (!src.IsCached) src.CacheData();
 
-            int canvasSize = 800;
-            int offsetX = src.Width < canvasSize ? (canvasSize - src.Width) / 2 : 0;
-            int offsetY = src.Height < canvasSize ? (canvasSize - src.Height) / 2 : 0;
+            const int targetSize = 800;
+            double scale = Math.Min((double)targetSize / src.Width, (double)targetSize / src.Height);
+            int newWidth = (int)(src.Width * scale);
+            int newHeight = (int)(src.Height * scale);
 
-            using (PngImage canvas = new PngImage(canvasSize, canvasSize))
+            src.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+            using (PngImage canvas = new PngImage(targetSize, targetSize))
             {
                 Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.Transparent);
+                graphics.Clear(Color.Transparent);
 
-                Rectangle destRect = new Rectangle(offsetX, offsetY, src.Width, src.Height);
+                int offsetX = (targetSize - newWidth) / 2;
+                int offsetY = (targetSize - newHeight) / 2;
+
+                Rectangle destRect = new Rectangle(offsetX, offsetY, newWidth, newHeight);
                 canvas.SaveArgb32Pixels(destRect, src.LoadArgb32Pixels(src.Bounds));
 
                 using (PdfOptions pdfOptions = new PdfOptions())

@@ -2,28 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.bmp";
-        string outputPath = "Output\\sample.pdf";
+        // Hardcoded relative input and output directories
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
-        if (!File.Exists(inputPath))
+        // Get all BMP files in the input directory
+        string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+
+        foreach (string inputPath in bmpFiles)
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Build the output PDF path using the original file name
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
-        using (PdfOptions pdfOptions = new PdfOptions())
-        {
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image and save it as PDF
             using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPath, new PdfOptions());
             }
         }
     }
