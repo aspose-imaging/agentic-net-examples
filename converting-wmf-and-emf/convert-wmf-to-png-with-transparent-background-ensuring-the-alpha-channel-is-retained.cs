@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.wmf";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = @"C:\Images\sample.wmf";
+        string outputPath = @"C:\Images\sample.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,25 +25,21 @@ class Program
         // Load the WMF image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options for WMF -> PNG conversion
-            var rasterOptions = new WmfRasterizationOptions
+            // Configure rasterization options for transparent background
+            var rasterizationOptions = new WmfRasterizationOptions
             {
-                // Preserve the original size
                 PageSize = image.Size,
-                // Set transparent background
                 BackgroundColor = Aspose.Imaging.Color.Transparent,
-                // Automatic render mode (EMF fallback if present)
                 RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
             };
 
-            // PNG save options with the rasterization settings
+            // Set PNG save options with the rasterization options
             var pngOptions = new PngOptions
             {
-                // Ensure vector data is rasterized using the above options
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the image as PNG with transparency
+            // Save as PNG preserving alpha channel
             image.Save(outputPath, pngOptions);
         }
     }
