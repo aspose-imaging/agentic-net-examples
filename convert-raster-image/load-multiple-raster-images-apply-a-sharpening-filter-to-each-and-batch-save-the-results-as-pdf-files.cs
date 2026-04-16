@@ -8,49 +8,42 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded list of input raster images
-        string[] inputPaths = new string[]
+        // Hardcoded input image paths
+        string[] inputFiles = new string[]
         {
             @"C:\Images\image1.png",
             @"C:\Images\image2.jpg",
             @"C:\Images\image3.bmp"
         };
 
-        // Hardcoded output directory for PDF files
-        string outputDir = @"C:\Images\Output";
-
-        // Ensure the output directory exists (unconditional as required)
-        Directory.CreateDirectory(outputDir);
-
-        foreach (string inputPath in inputPaths)
+        foreach (var inputPath in inputFiles)
         {
-            // Verify that the input file exists; report and exit on missing file
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build the corresponding PDF output path
-            string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+            // Determine output PDF path (same folder, same name with .pdf extension)
+            string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
-            // Ensure the directory for the output file exists (unconditional)
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply a sharpen filter to the entire image bounds
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                // Apply sharpen filter to the whole image
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Prepare PDF save options (default settings)
+                // Set up PDF save options
                 PdfOptions pdfOptions = new PdfOptions();
 
-                // Save the processed image as a PDF file
-                rasterImage.Save(outputPath, pdfOptions);
+                // Save the processed image as PDF
+                raster.Save(outputPath, pdfOptions);
             }
         }
     }
