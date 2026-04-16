@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"input\sample.bmp";
-        string outputPath = @"output\result.pdf";
+        string inputPath = "Input\\sample.bmp";
+        string outputPath = "Output\\result.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,21 +21,22 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image
+        // Load BMP image, resize, apply median filter, and save as PDF
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for raster operations
-            RasterImage raster = (RasterImage)image;
+            var raster = (RasterImage)image;
 
             // Resize to 640x480
             raster.Resize(640, 480);
 
-            // Apply a median filter with kernel size 5
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+            // Apply median filter with size 5
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
 
-            // Save the processed image as PDF
-            PdfOptions pdfOptions = new PdfOptions();
-            image.Save(outputPath, pdfOptions);
+            // Save as PDF
+            using (var pdfOptions = new PdfOptions())
+            {
+                raster.Save(outputPath, pdfOptions);
+            }
         }
     }
 }
