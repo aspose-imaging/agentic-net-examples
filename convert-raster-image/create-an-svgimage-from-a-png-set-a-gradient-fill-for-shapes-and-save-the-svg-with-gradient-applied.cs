@@ -1,63 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPngPath = "input.png";
-        string outputSvgPath = "output.svg";
+        string inputPath = "sample.png";
+        string outputPath = "result.svg";
 
         // Verify input file exists
-        if (!File.Exists(inputPngPath))
+        if (!File.Exists(inputPath))
         {
-            Console.Error.WriteLine($"File not found: {inputPngPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image to obtain its dimensions
-        using (PngImage pngImage = new PngImage(inputPngPath))
+        // Load the PNG image as a raster image
+        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
         {
-            int width = pngImage.Width;
-            int height = pngImage.Height;
-            int dpi = 96; // Standard screen DPI
+            int width = raster.Width;
+            int height = raster.Height;
+            int dpi = 96;
 
-            // Create an SVG graphics context with the same size as the PNG
+            // Create SVG graphics canvas
             SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-            // Define a linear gradient brush (top-left to bottom-right)
-            // Gradient from Red to Blue
-            LinearGradientBrush gradientBrush = new LinearGradientBrush(
-                new PointF(0, 0),               // start point
-                new PointF(width, height),      // end point
-                Color.Red,                      // start color
-                Color.Blue);                    // end color
+            // Create a linear gradient brush from top‑left (red) to bottom‑right (blue)
+            using (LinearGradientBrush gradientBrush = new LinearGradientBrush(
+                new Point(0, 0),
+                new Point(width, height),
+                Color.Red,
+                Color.Blue))
+            {
+                // Pen with zero width (no outline)
+                Pen pen = new Pen(Color.Black, 0);
 
-            // No outline pen (transparent)
-            Pen transparentPen = new Pen(Color.Transparent, 0);
+                // Fill the entire canvas with the gradient
+                graphics.FillRectangle(pen, gradientBrush, 0, 0, width, height);
+            }
 
-            // Fill the entire SVG canvas with the gradient
-            graphics.FillRectangle(transparentPen, gradientBrush, 0, 0, width, height);
-
-            // Optionally, draw the original PNG onto the SVG (as an image element)
-            // This demonstrates embedding the raster image inside the SVG.
-            graphics.DrawImage(pngImage, new Point(0, 0), new Size(width, height));
-
-            // Finalize the SVG image
+            // Obtain the final SVG image
             using (SvgImage svgImage = graphics.EndRecording())
             {
                 // Save the SVG file
-                svgImage.Save(outputSvgPath);
+                svgImage.Save(outputPath);
             }
         }
     }
