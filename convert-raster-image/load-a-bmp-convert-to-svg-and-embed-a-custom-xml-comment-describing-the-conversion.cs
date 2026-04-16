@@ -2,79 +2,69 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-
-class CustomSvgCallback : SvgResourceKeeperCallback
-{
-    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
-    {
-        // Convert the SVG byte data to a string.
-        string svgContent = System.Text.Encoding.UTF8.GetString(htmlData);
-
-        // Prepare a custom XML comment describing the conversion.
-        string comment = "<!-- Converted from BMP to SVG using Aspose.Imaging -->\n";
-
-        // Insert the comment after the XML declaration if it exists.
-        int insertPos = svgContent.IndexOf("?>");
-        if (insertPos != -1)
-        {
-            insertPos += 2; // Move past the declaration.
-            svgContent = svgContent.Insert(insertPos, "\n" + comment);
-        }
-        else
-        {
-            svgContent = comment + svgContent;
-        }
-
-        // Ensure the target directory exists.
-        string dir = Path.GetDirectoryName(suggestedFileName);
-        if (!string.IsNullOrEmpty(dir))
-        {
-            Directory.CreateDirectory(dir);
-        }
-
-        // Write the modified SVG content to the suggested file name.
-        File.WriteAllText(suggestedFileName, svgContent);
-        return suggestedFileName;
-    }
-}
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths.
-        string inputPath = "input/input.bmp";
-        string outputPath = "output/output.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Verify that the input file exists.
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists before saving.
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image.
+        // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options to match the source image size.
-            var rasterOptions = new SvgRasterizationOptions
+            // Prepare rasterization options for SVG conversion
+            var vectorRasterizationOptions = new SvgRasterizationOptions
             {
                 PageSize = image.Size
             };
 
-            // Set up SVG save options with the custom callback.
+            // Save the image as SVG
             var svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = rasterOptions,
-                Callback = new CustomSvgCallback()
+                VectorRasterizationOptions = vectorRasterizationOptions
             };
-
-            // Save the image as SVG; the callback will embed the comment.
             image.Save(outputPath, svgOptions);
         }
+
+        // Embed a custom XML comment describing the conversion
+        const string comment = "<!-- Converted from BMP to SVG using Aspose.Imaging -->";
+
+        string svgContent = File.ReadAllText(outputPath);
+        string updatedContent;
+
+        // Preserve XML declaration if present
+        if (svgContent.StartsWith("<?xml"))
+        {
+            int endOfDeclaration = svgContent.IndexOf("?>", StringComparison.Ordinal);
+            if (endOfDeclaration != -1)
+            {
+                int insertPos = endOfDeclaration + 2;
+                updatedContent = svgContent.Insert(insertPos, Environment.NewLine + comment);
+            }
+            else
+            {
+                // Fallback: prepend comment
+                updatedContent = comment + Environment.NewLine + svgContent;
+            }
+        }
+        else
+        {
+            // No XML declaration, prepend comment
+            updatedContent = comment + Environment.NewLine + svgContent;
+        }
+
+        File.WriteAllText(outputPath, updatedContent);
     }
 }
