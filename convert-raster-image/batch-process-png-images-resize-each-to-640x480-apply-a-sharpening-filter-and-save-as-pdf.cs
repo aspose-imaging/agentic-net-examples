@@ -2,20 +2,33 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input PNG files and corresponding output PDF files
-        string[] inputPaths = { "input1.png", "input2.png" };
-        string[] outputPaths = { "output1.pdf", "output2.pdf" };
+        // Directory validation (must be before any file operations)
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        for (int i = 0; i < inputPaths.Length; i++)
+        if (!Directory.Exists(inputDirectory))
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
+            return;
+        }
 
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+        foreach (string inputPath in files)
+        {
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,18 +36,19 @@ class Program
                 return;
             }
 
+            string outputPath = Path.Combine(outputDirectory,
+                Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load PNG image as RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize to 640x480 using nearest neighbour resampling
-                image.Resize(640, 480, ResizeType.NearestNeighbourResample);
+                // Resize to 640x480
+                image.Resize(640, 480);
 
                 // Apply sharpening filter
-                var sharpenOptions = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions();
-                image.Filter(image.Bounds, sharpenOptions);
+                image.Filter(image.Bounds, new SharpenFilterOptions());
 
                 // Save as PDF
                 using (PdfOptions pdfOptions = new PdfOptions())
