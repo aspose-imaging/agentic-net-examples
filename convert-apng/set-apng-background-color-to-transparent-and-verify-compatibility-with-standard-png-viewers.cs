@@ -1,17 +1,14 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
+        string inputPath = "input.apng";
         string outputPath = "output.apng";
 
         // Verify input file exists
@@ -21,36 +18,26 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists (unconditional call)
+        string outDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outDir ?? ".");
 
-        // Load the source raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Configure APNG options with alpha channel support
-            ApngOptions options = new ApngOptions
+            ApngImage apng = image as ApngImage;
+            if (apng == null)
             {
-                Source = new FileCreateSource(outputPath, false),
-                ColorType = PngColorType.TruecolorWithAlpha,
-                DefaultFrameTime = 100 // milliseconds per frame
-            };
-
-            // Create APNG image bound to the output file
-            using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
-            {
-                // Set transparent background
-                apng.HasBackgroundColor = false;
-                apng.BackgroundColor = Color.Transparent;
-
-                // Remove any default frame
-                apng.RemoveAllFrames();
-
-                // Add a single frame (additional frames can be added similarly)
-                apng.AddFrame(sourceImage);
-
-                // Save the APNG (output path already bound)
-                apng.Save();
+                Console.Error.WriteLine("Loaded image is not an APNG.");
+                return;
             }
+
+            // Set background color to fully transparent
+            apng.BackgroundColor = Aspose.Imaging.Color.Transparent;
+            apng.HasBackgroundColor = true;
+
+            // Save the modified APNG
+            apng.Save(outputPath);
         }
     }
 }

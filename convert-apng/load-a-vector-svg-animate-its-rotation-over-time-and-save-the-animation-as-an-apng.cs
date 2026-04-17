@@ -8,10 +8,10 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string outputPath = "output.apng";
 
         if (!File.Exists(inputPath))
         {
@@ -21,49 +21,50 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        const int animationDuration = 1000; // milliseconds
-        const int frameDuration = 100; // milliseconds per frame
-        int numFrames = animationDuration / frameDuration;
-
-        using (Image vectorImage = Image.Load(inputPath))
+        int width;
+        int height;
+        using (Image temp = Image.Load(inputPath))
         {
-            int width = vectorImage.Width;
-            int height = vectorImage.Height;
+            width = temp.Width;
+            height = temp.Height;
+        }
 
-            ApngOptions apngCreateOptions = new ApngOptions
+        const int totalDurationMs = 2000;
+        const int frameDurationMs = 100;
+        int frameCount = totalDurationMs / frameDurationMs;
+        float angleStep = 360f / frameCount;
+
+        ApngOptions apngOptions = new ApngOptions
+        {
+            Source = new FileCreateSource(outputPath, false),
+            DefaultFrameTime = (uint)frameDurationMs,
+            ColorType = PngColorType.TruecolorWithAlpha
+        };
+
+        using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
+        {
+            apngImage.RemoveAllFrames();
+
+            for (int i = 0; i < frameCount; i++)
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = (uint)frameDuration,
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+                float angle = i * angleStep;
 
-            using (ApngImage apngImage = (ApngImage)Image.Create(apngCreateOptions, width, height))
-            {
-                apngImage.RemoveAllFrames();
-
-                for (int i = 0; i < numFrames; i++)
+                using (Image svg = Image.Load(inputPath))
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    float angle = i * 360f / numFrames;
+                    svg.Save(ms, new PngOptions());
+                    ms.Position = 0;
 
-                    using (MemoryStream ms = new MemoryStream())
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        PngOptions pngOptions = new PngOptions
-                        {
-                            VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = vectorImage.Size }
-                        };
-                        vectorImage.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        using (RasterImage frameRaster = (RasterImage)Image.Load(ms))
-                        {
-                            frameRaster.Rotate(angle, true, Color.Transparent);
-                            apngImage.AddFrame(frameRaster);
-                        }
+                        if (!raster.IsCached) raster.CacheData();
+                        raster.Rotate(angle, true, Color.White);
+                        apngImage.AddFrame(raster);
                     }
                 }
-
-                apngImage.Save();
             }
+
+            apngImage.Save();
         }
     }
 }

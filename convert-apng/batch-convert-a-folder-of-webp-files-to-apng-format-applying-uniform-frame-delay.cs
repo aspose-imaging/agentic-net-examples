@@ -1,47 +1,44 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // List of WebP files to convert
-        List<string> inputFiles = new List<string>
-        {
-            "input1.webp",
-            "input2.webp",
-            "input3.webp"
-        };
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\InputWebp";
+        string outputFolder = @"C:\OutputApng";
 
-        // Output directory
-        string outputFolder = "output";
+        // Ensure the output directory exists (will also work if outputFolder is a root path)
+        Directory.CreateDirectory(outputFolder);
 
-        foreach (string inputPath in inputFiles)
+        // Get all WEBP files in the input folder
+        foreach (string inputPath in Directory.GetFiles(inputFolder, "*.webp"))
         {
-            // Verify input file exists
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Construct output path with .apng.png extension
-            string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".apng.png");
+            // Build the output file path (same name with .png extension for APNG)
+            string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-            // Ensure output directory exists
+            // Ensure the directory for the output file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image and save as APNG with a uniform frame delay
+            // Load the WEBP image and save it as APNG with a uniform frame delay (e.g., 100 ms)
             using (Image image = Image.Load(inputPath))
             {
-                ApngOptions options = new ApngOptions
+                var apngOptions = new ApngOptions
                 {
-                    DefaultFrameTime = 200 // frame delay in milliseconds
+                    DefaultFrameTime = 100 // frame delay in milliseconds
                 };
-                image.Save(outputPath, options);
+
+                image.Save(outputPath, apngOptions);
             }
         }
     }

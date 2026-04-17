@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output.png";
+        string inputPath = "Animation1.webp";
+        string outputPath = "output/Animation1_5loops.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -18,20 +18,20 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image (animated or static)
+        // Load the source image (could be animated or single-frame)
         using (Image image = Image.Load(inputPath))
         {
-            // Configure APNG options: loop 5 times, keep original frame timing
+            // Configure APNG options: set loop count to 5 and a default frame time (e.g., 100 ms)
             var apngOptions = new ApngOptions
             {
-                NumPlays = 5
-                // DefaultFrameTime is left unchanged to preserve playback speed
+                NumPlays = 5,                 // Loop the animation 5 times
+                DefaultFrameTime = 100       // 100 ms per frame to keep playback speed consistent
             };
 
-            // Save as APNG with the specified loop count
+            // Save as APNG with the specified options
             image.Save(outputPath, apngOptions);
         }
     }

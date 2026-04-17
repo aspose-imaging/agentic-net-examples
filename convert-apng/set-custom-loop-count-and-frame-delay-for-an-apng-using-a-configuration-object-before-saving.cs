@@ -9,27 +9,31 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.webp";
+        string outputPath = "output.png";
+
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string outputPath = "output.apng.png";
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image (can be multi‑page)
+        // Load source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure APNG options: custom loop count and frame delay
-            ApngOptions apngOptions = new ApngOptions
+            // Configure APNG options: custom frame delay and loop count
+            var apngOptions = new ApngOptions
             {
-                NumPlays = 3,            // Loop the animation 3 times (0 = infinite)
-                DefaultFrameTime = 150  // Frame duration in milliseconds
+                // Frame duration in milliseconds (e.g., 200 ms per frame)
+                DefaultFrameTime = 200,
+                // Number of animation loops (0 = infinite)
+                NumPlays = 3
             };
 
-            // Save the image as APNG with the specified options
+            // Save as APNG with the configured options
             image.Save(outputPath, apngOptions);
         }
     }

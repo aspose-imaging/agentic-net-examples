@@ -2,17 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.apng";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.apng";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,63 +24,83 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (Image svgImage = Image.Load(inputPath))
+        // Load SVG source as text – it must contain a placeholder {fillColor}
+        string svgTemplate = File.ReadAllText(inputPath);
+
+        // Animation parameters
+        const int frameCount = 20;          // number of frames
+        const int frameDuration = 100;      // duration per frame in ms
+        const int imageWidth = 400;         // desired raster width
+        const int imageHeight = 400;        // desired raster height
+
+        // Prepare APNG creation options
+        ApngOptions createOptions = new ApngOptions
         {
-            int width = svgImage.Width;
-            int height = svgImage.Height;
+            Source = new FileCreateSource(outputPath, false),
+            DefaultFrameTime = (uint)frameDuration,
+            ColorType = PngColorType.TruecolorWithAlpha
+        };
 
-            // Animation parameters
-            const int animationDuration = 1000; // total duration in ms
-            const int frameDuration = 100;      // each frame duration in ms
-            int numFrames = animationDuration / frameDuration;
+        // Create an empty APNG image with the required dimensions
+        using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, imageWidth, imageHeight))
+        {
+            // Remove the default single frame
+            apngImage.RemoveAllFrames();
 
-            // Create APNG options
-            ApngOptions createOptions = new ApngOptions
+            // Generate frames with a smooth red‑to‑blue gradient
+            for (int i = 0; i < frameCount; i++)
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = (uint)frameDuration,
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+                // Compute gradient color
+                float t = (float)i / (frameCount - 1);
+                int red = (int)(255 * (1 - t));
+                int blue = (int)(255 * t);
+                string fillColor = $"rgb({red},0,{blue})";
 
-            // Create the APNG image canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
-            {
-                apngImage.RemoveAllFrames();
+                // Insert the computed color into the SVG template
+                string svgContent = svgTemplate.Replace("{fillColor}", fillColor);
 
-                for (int i = 0; i < numFrames; i++)
+                // Load the modified SVG from a memory stream
+                using (MemoryStream svgStream = new MemoryStream())
                 {
-                    // Rasterize the SVG to a raster image for the current frame
-                    PngOptions pngOptions = new PngOptions();
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                    using (StreamWriter writer = new StreamWriter(svgStream))
                     {
-                        PageWidth = width,
-                        PageHeight = height,
-                        BackgroundColor = Color.White
-                    };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                        writer.Write(svgContent);
+                        writer.Flush();
+                        svgStream.Position = 0;
+                    }
 
-                    using (MemoryStream ms = new MemoryStream())
+                    using (SvgImage svgImage = new SvgImage(svgStream))
                     {
-                        svgImage.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        using (RasterImage frameRaster = (RasterImage)Image.Load(ms))
+                        // Set rasterization options matching the target size
+                        SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                         {
-                            // Add the raster frame to the APNG
-                            apngImage.AddFrame(frameRaster);
+                            PageSize = new Size(imageWidth, imageHeight)
+                        };
 
-                            // Adjust gamma to simulate a gradual fill color change
-                            ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                            float gamma = (float)i / (numFrames - 1); // 0.0 to 1.0
-                            lastFrame.AdjustGamma(gamma);
+                        // Prepare PNG save options that use the rasterization settings
+                        PngOptions pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = rasterOptions
+                        };
+
+                        // Rasterize SVG to PNG in a memory stream
+                        using (MemoryStream pngStream = new MemoryStream())
+                        {
+                            svgImage.Save(pngStream, pngOptions);
+                            pngStream.Position = 0;
+
+                            // Load the rasterized PNG as a frame
+                            using (RasterImage frame = (RasterImage)Image.Load(pngStream))
+                            {
+                                apngImage.AddFrame(frame);
+                            }
                         }
                     }
                 }
-
-                // Save the APNG animation
-                apngImage.Save();
             }
+
+            // Save the assembled APNG file
+            apngImage.Save();
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -7,41 +8,34 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputTiff";
-        string outputDirectory = @"C:\OutputApng";
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
-        {
-            Console.Error.WriteLine($"Input directory does not exist: {inputDirectory}");
-            return;
-        }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+        // Ensure directories exist
+        Directory.CreateDirectory(inputDirectory);
+        Directory.CreateDirectory(outputDirectory);
 
         // Get all TIFF files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.tif");
-        foreach (var file in files)
+        string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
+
+        foreach (string inputPath in tiffFiles)
         {
-            // Verify the input file exists
-            if (!File.Exists(file))
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {file}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build the output file path with .png extension (APNG)
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".png");
+            // Construct output file path with .png extension (APNG)
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-            // Ensure the output directory for this file exists
+            // Ensure output directory exists before saving
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image and save as APNG with 3 loops
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(file))
+            using (Image image = Image.Load(inputPath))
             {
                 image.Save(outputPath, new ApngOptions { NumPlays = 3 });
             }

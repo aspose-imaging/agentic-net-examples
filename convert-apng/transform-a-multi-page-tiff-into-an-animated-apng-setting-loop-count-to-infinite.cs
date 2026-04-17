@@ -5,7 +5,7 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = "input.tif";
@@ -19,20 +19,17 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
 
-        // Load the multi‑page TIFF
+        // Load multi‑page TIFF and save as animated APNG with infinite looping
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare APNG options with infinite looping (NumPlays = 0)
-            var apngOptions = new ApngOptions
-            {
-                NumPlays = 0
-                // DefaultFrameTime can be set here if a specific frame duration is required
-            };
-
-            // Save as animated APNG
-            image.Save(outputPath, apngOptions);
+            // NumPlays = 0 indicates infinite looping
+            image.Save(outputPath, new ApngOptions { NumPlays = 0 });
         }
     }
 }

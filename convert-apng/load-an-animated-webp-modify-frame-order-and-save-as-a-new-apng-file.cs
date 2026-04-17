@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output.apng";
+        string inputPath = @"C:\Images\input_animation.webp";
+        string outputPath = @"C:\Images\output_animation.apng";
 
-        // Validate input file existence
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -36,40 +36,41 @@ class Program
                 return;
             }
 
-            // Collect frames as RasterImage instances
+            // Extract frames into a list
             List<RasterImage> frames = new List<RasterImage>();
             foreach (var page in multipage.Pages)
             {
+                // Each page can be treated as a RasterImage
                 frames.Add((RasterImage)page);
             }
 
-            // Modify frame order (example: reverse the order)
+            // Reverse the order of frames
             frames.Reverse();
 
-            // Prepare options for creating the APNG
+            // Prepare APNG creation options with the output file as the source
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
+                DefaultFrameTime = 100, // default 100 ms per frame
                 ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Use dimensions of the first frame for the new APNG canvas
-            int width = frames[0].Width;
-            int height = frames[0].Height;
-
-            // Create the APNG image bound to the output file
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+            // Create a new APNG image with the same dimensions as the source WebP
+            using (ApngImage apngImage = (ApngImage)Image.Create(
+                createOptions,
+                webpImage.Width,
+                webpImage.Height))
             {
                 // Remove the default single frame
                 apngImage.RemoveAllFrames();
 
-                // Add frames in the new order
+                // Add frames in the new (reversed) order
                 foreach (RasterImage frame in frames)
                 {
                     apngImage.AddFrame(frame);
                 }
 
-                // Save the APNG (output path already bound via FileCreateSource)
+                // Save the APNG to the specified output path
                 apngImage.Save();
             }
         }

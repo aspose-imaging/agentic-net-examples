@@ -20,17 +20,24 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the animated APNG
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
         {
-            // Extract the first frame (index 0)
-            // Pages[0] returns an ApngFrame which derives from RasterImage
-            using (RasterImage firstFrame = (RasterImage)apng.Pages[0])
+            // Try to treat it as an APNG image to access frames
+            ApngImage apng = image as ApngImage;
+            if (apng != null && apng.PageCount > 0)
             {
+                // Extract the first frame
+                Image firstFrame = (Image)apng.Pages[0];
                 // Save the first frame as a static PNG
                 firstFrame.Save(outputPath, new PngOptions());
+            }
+            else
+            {
+                // If not an APNG, save the loaded image directly as PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
     }

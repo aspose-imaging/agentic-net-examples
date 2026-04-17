@@ -3,14 +3,13 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         string inputPath = "input.webp";
-        string outputPath = "output.png";
+        string outputPath = "output.apng.png";
 
         if (!File.Exists(inputPath))
         {
@@ -20,21 +19,20 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (WebPImage webp = (WebPImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            webp.Palette = new ColorPalette(new Color[]
+            var webp = (WebPImage)image;
+
+            var newPalette = new ColorPalette(new Color[]
             {
-                Color.Red,
-                Color.Green,
-                Color.Blue,
-                Color.White,
-                Color.Black
+                Color.FromRgb(255, 0, 0), // Red
+                Color.FromRgb(0, 255, 0), // Green
+                Color.FromRgb(0, 0, 255)  // Blue
             });
 
-            using (ApngOptions apngOptions = new ApngOptions())
-            {
-                webp.Save(outputPath, apngOptions);
-            }
+            webp.Palette = newPalette;
+
+            webp.Save(outputPath, new ApngOptions());
         }
     }
 }

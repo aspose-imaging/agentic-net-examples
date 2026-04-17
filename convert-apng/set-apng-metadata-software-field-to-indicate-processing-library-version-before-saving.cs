@@ -1,43 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.png";
-        string outputPath = "output.apng";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.apng";
+        string outputPath = @"C:\temp\output.apng";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Load the APNG image
+        using (Image image = Image.Load(inputPath))
         {
-            ApngOptions createOptions = new ApngOptions
+            // Cast to ApngImage to access APNG-specific members
+            ApngImage apngImage = image as ApngImage;
+            if (apngImage == null)
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100,
-                ColorType = PngColorType.TruecolorWithAlpha
+                Console.Error.WriteLine("The loaded file is not a valid APNG image.");
+                return;
+            }
+
+            // Create PNG metadata and set the Software field
+            PngMetadata pngMetadata = new PngMetadata
+            {
+                Software = "Aspose.Imaging v2.0"
             };
 
-            using (Aspose.Imaging.FileFormats.Apng.ApngImage apngImage = (Aspose.Imaging.FileFormats.Apng.ApngImage)Image.Create(
-                createOptions,
-                sourceImage.Width,
-                sourceImage.Height))
-            {
-                apngImage.RemoveAllFrames();
-                apngImage.AddFrame(sourceImage);
-                apngImage.Save();
-            }
+            // Apply the metadata to the APNG image
+            apngImage.TrySetMetadata(pngMetadata);
+
+            // Save the modified APNG image
+            apngImage.Save(outputPath);
         }
     }
 }

@@ -1,17 +1,14 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.webp";
-        string outputPath = "output/output.png";
+        string outputPath = "output\\resized.apng";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,25 +21,17 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the animated WebP image
-        using (Image image = Image.Load(inputPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // If the loaded image is a WebPImage, resize it
-            if (image is WebPImage webp)
-            {
-                int newWidth = webp.Width / 2;
-                int newHeight = webp.Height / 2;
+            // Calculate new dimensions (half size)
+            int newWidth = image.Width / 2;
+            int newHeight = image.Height / 2;
 
-                // Resize using high-quality resampling
-                webp.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+            // Resize the animation
+            image.Resize(newWidth, newHeight, Aspose.Imaging.ResizeType.NearestNeighbourResample);
 
-                // Save the resized animation as APNG
-                webp.Save(outputPath, new ApngOptions());
-            }
-            else
-            {
-                // Fallback: save without resizing if not a WebPImage
-                image.Save(outputPath, new ApngOptions());
-            }
+            // Save as APNG
+            image.Save(outputPath, new ApngOptions());
         }
     }
 }

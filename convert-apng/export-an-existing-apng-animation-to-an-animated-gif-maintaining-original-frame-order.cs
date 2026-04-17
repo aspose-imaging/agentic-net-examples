@@ -7,25 +7,26 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\animation.apng";
-        string outputPath = @"C:\Images\output.gif";
+        // Hardcoded input and output file paths
+        string inputPath = "input.apng";
+        string outputPath = "output.gif";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the APNG image (multi‑page animation)
+        // Load the APNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Save as animated GIF, preserving frame order
-            image.Save(outputPath, new GifOptions());
+            // Save as an animated GIF, preserving the original frame order
+            var gifOptions = new GifOptions();
+            image.Save(outputPath, gifOptions);
         }
     }
 }

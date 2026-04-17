@@ -5,10 +5,11 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded list of animated WebP files to convert
-        string[] inputFiles = {
+        string[] inputFiles = new string[]
+        {
             @"C:\Images\anim1.webp",
             @"C:\Images\anim2.webp"
         };
@@ -19,19 +20,24 @@ class Program
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
-            // Determine output path with .apng extension
-            string outputPath = Path.ChangeExtension(inputPath, ".apng");
+            // Determine output path (same folder, .png extension)
+            string outputPath = Path.ChangeExtension(inputPath, ".png");
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the animated WebP and save as APNG preserving frames and timing
+            // Load the animated WebP image
             using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, new ApngOptions());
+                // Save as APNG, preserving metadata (including frame timing)
+                var apngOptions = new ApngOptions
+                {
+                    KeepMetadata = true
+                };
+                image.Save(outputPath, apngOptions);
             }
         }
     }

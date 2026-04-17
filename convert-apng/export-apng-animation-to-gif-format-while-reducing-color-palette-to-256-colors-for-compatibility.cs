@@ -7,31 +7,33 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\animation.apng";
-        string outputPath = @"C:\Images\animation_converted.gif";
+        // Hard‑coded input and output file paths
+        string inputPath = "input.apng";
+        string outputPath = "output.gif";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the APNG animation
         using (Image image = Image.Load(inputPath))
         {
-            // Configure GIF options to reduce palette to 256 colors with best matching palette
-            GifOptions gifOptions = new GifOptions
+            // Configure GIF export options
+            var gifOptions = new GifOptions
             {
-                DoPaletteCorrection = true, // enables palette analysis for optimal 256‑color palette
-                ColorResolution = 7         // maximum color resolution for GIF (2^8‑1 = 255)
+                // Enable palette analysis to build an optimal 256‑color palette
+                DoPaletteCorrection = true
+                // Optional: set color resolution (7 => 8 bits per channel, max 256 colors)
+                // ColorResolution = 7
             };
 
-            // Save as GIF using the configured options
+            // Save as GIF with reduced palette
             image.Save(outputPath, gifOptions);
         }
     }

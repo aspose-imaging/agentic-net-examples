@@ -8,9 +8,8 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input path
         string inputPath = "input.apng";
-        string outputDirectory = "output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,29 +18,33 @@ class Program
             return;
         }
 
-        // Ensure output directory exists (creates parent directories if needed)
-        Directory.CreateDirectory(outputDirectory);
-
         // Load the APNG image
         using (Image image = Image.Load(inputPath))
         {
             // Cast to ApngImage to access frames
-            ApngImage apngImage = (ApngImage)image;
+            ApngImage apngImage = image as ApngImage;
+            if (apngImage == null)
+            {
+                Console.Error.WriteLine("The loaded file is not an APNG image.");
+                return;
+            }
 
             // Iterate through each frame
             for (int i = 0; i < apngImage.PageCount; i++)
             {
-                // Get the frame as a RasterImage
-                RasterImage frame = (RasterImage)apngImage.Pages[i];
+                // Extract the frame as a RasterImage
+                using (RasterImage frame = (RasterImage)apngImage.Pages[i])
+                {
+                    // Build output file name with frame index
+                    string outputPath = $"frame_{i}.jpg";
 
-                // Build output file path with frame index
-                string outputPath = Path.Combine(outputDirectory, $"frame_{i}.jpg");
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the frame as JPEG
-                frame.Save(outputPath, new JpegOptions());
+                    // Save the frame as JPEG
+                    JpegOptions jpegOptions = new JpegOptions();
+                    frame.Save(outputPath, jpegOptions);
+                }
             }
         }
     }
