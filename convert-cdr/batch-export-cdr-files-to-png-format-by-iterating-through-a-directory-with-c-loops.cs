@@ -1,68 +1,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output directories (relative to the executable location)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputCdr";
+        string outputDirectory = @"C:\OutputPng";
 
         // Get all CDR files in the input directory
-        string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
-
-        foreach (string cdrFile in cdrFiles)
+        foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.cdr"))
         {
-            // Verify the input file exists
-            if (!File.Exists(cdrFile))
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {cdrFile}");
-                continue;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
             // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(cdrFile))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Cache the whole document to avoid repeated loading
-                cdrImage.CacheData();
-
-                int pageIndex = 0;
-                foreach (var pageObj in cdrImage.Pages)
+                // Ensure all pages are cached to avoid lazy loading during save
+                foreach (CdrImagePage page in cdrImage.Pages)
                 {
-                    // Each page is a CdrImagePage
-                    var page = (CdrImagePage)pageObj;
                     page.CacheData();
+                }
 
-                    // Build the output PNG file path
-                    string baseName = Path.GetFileNameWithoutExtension(cdrFile);
-                    string outputPath = Path.Combine(outputDirectory, $"{baseName}_page{pageIndex}.png");
+                // Export each page to a separate PNG file
+                for (int pageIndex = 0; pageIndex < cdrImage.PageCount; pageIndex++)
+                {
+                    CdrImagePage page = (CdrImagePage)cdrImage.Pages[pageIndex];
 
-                    // Ensure the directory for the output file exists
+                    // Build the output file path
+                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}.page{pageIndex}.png";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Configure PNG export with vector rasterization options
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None,
-                            PageWidth = page.Width,
-                            PageHeight = page.Height
-                        }
-                    };
-
-                    // Save the current page as PNG
-                    page.Save(outputPath, pngOptions);
-
-                    pageIndex++;
+                    // Save the page as PNG
+                    page.Save(outputPath, new PngOptions());
                 }
             }
         }

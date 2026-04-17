@@ -1,18 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input CDR file path
-        string inputPath = @"C:\temp\sample.cdr";
-
-        // Hardcoded output directory for PDF pages
-        string outputDir = @"C:\temp\output";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.cdr";
+        string outputDirectory = "Output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,28 +19,23 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
         // Load the multi‑page CDR image
-        using (CdrImage image = (CdrImage)Image.Load(inputPath))
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
         {
-            // Cache all pages to avoid repeated data loading
-            foreach (CdrImagePage page in image.Pages)
+            // Cache the whole document to avoid repeated loading
+            cdrImage.CacheData();
+
+            // Iterate through each page
+            for (int i = 0; i < cdrImage.PageCount; i++)
             {
+                // Get the specific page and cache its data
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
                 page.CacheData();
-            }
 
-            // Iterate through each page and save as an individual PDF
-            for (int i = 0; i < image.Pages.Length; i++)
-            {
-                CdrImagePage page = (CdrImagePage)image.Pages[i];
-                string outputPath = Path.Combine(outputDir, $"page_{i}.pdf");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Configure PDF options with rasterization settings matching the page size
+                // Prepare PDF options with rasterization settings
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
@@ -53,7 +46,13 @@ class Program
                 };
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the current page as a PDF file
+                // Build output file path for this page
+                string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.pdf");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the page as a separate PDF file
                 page.Save(outputPath, pdfOptions);
             }
         }

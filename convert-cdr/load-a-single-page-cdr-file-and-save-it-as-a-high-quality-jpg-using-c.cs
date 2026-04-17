@@ -3,14 +3,15 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = "sample.cdr";
+        string outputPath = "output.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,23 +24,20 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the CDR file
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
         {
-            // Cache the whole document to avoid further stream reads
-            cdrImage.CacheData();
-
-            // Access the first (and only) page
-            CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
-            page.CacheData();
-
             // Configure high‑quality JPEG options
-            var jpegOptions = new JpegOptions
+            JpegOptions jpegOptions = new JpegOptions
             {
-                Quality = 100 // maximum quality
+                Quality = 100,
+                CompressionType = JpegCompressionMode.Progressive,
+                // Set vector rasterization options for proper rendering of the vector image
+                VectorRasterizationOptions = (VectorRasterizationOptions)cdr.GetDefaultOptions(
+                    new object[] { Color.White, cdr.Width, cdr.Height })
             };
 
-            // Save the page as a JPEG image
-            page.Save(outputPath, jpegOptions);
+            // Save as JPEG
+            cdr.Save(outputPath, jpegOptions);
         }
     }
 }

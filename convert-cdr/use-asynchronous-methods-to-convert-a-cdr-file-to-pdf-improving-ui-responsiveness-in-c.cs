@@ -1,46 +1,58 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    // Entry point
+    static async Task Main()
     {
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputDirectory = @"C:\Images\PdfOutput";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        using (CdrImage image = (CdrImage)Image.Load(inputPath))
+        // Load the CDR image with default load options
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath, new CdrLoadOptions()))
         {
-            if (image == null)
+            // Iterate through each page in the CDR document
+            for (int i = 0; i < cdrImage.Pages.Length; i++)
             {
-                Console.Error.WriteLine("Failed to load CDR image.");
-                return;
-            }
+                // Prepare output PDF file path for the current page
+                string outputPath = Path.Combine(outputDirectory, $"page_{i}.pdf");
 
-            CdrImagePage page = (CdrImagePage)image.Pages[0];
+                // Ensure the directory for the output file exists (unconditional as required)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (PdfOptions pdfOptions = new PdfOptions())
-            {
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                // Retrieve the specific page
+                var page = (CdrImagePage)cdrImage.Pages[i];
+
+                // Configure PDF options with rasterization settings matching the page size
+                var pdfOptions = new PdfOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        PageWidth = page.Width,
+                        PageHeight = page.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                image.Save(outputPath, pdfOptions);
+                // Save the page to PDF asynchronously to keep UI responsive
+                await Task.Run(() => page.Save(outputPath, pdfOptions));
             }
         }
     }

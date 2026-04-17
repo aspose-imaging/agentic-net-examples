@@ -3,37 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
         string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.jpg";
-
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        string outputPath = "Output/sample.jpg";
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Load the CDR file
         using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
         {
-            using (JpegOptions jpegOptions = new JpegOptions())
-            {
-                jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+            int width = cdr.Width;
+            int height = cdr.Height;
 
-                cdr.Save(outputPath, jpegOptions);
+            // Configure JPEG options with custom quality and embed EXIF metadata
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Quality = 90,
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            if (cdr.ExifData != null)
+            {
+                jpegOptions.ExifData = cdr.ExifData;
+            }
+
+            // Create a JPEG image bound to the output file
+            using (Image jpegImage = Image.Create(jpegOptions, width, height))
+            {
+                // Save the image (no path needed because the source is already bound)
+                jpegImage.Save();
             }
         }
     }

@@ -1,14 +1,16 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.cdr";
-        string outputPath = @"C:\temp\output.png";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -21,21 +23,34 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the CDR file
-        using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Aspose.Imaging.Image.Load(inputPath))
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
         {
-            // Configure PNG options with vector rasterization settings to preserve transparency
-            PngOptions pngOptions = new PngOptions
+            // Guard against empty documents
+            if (cdrImage.PageCount == 0)
             {
-                VectorRasterizationOptions = new CdrRasterizationOptions
-                {
-                    PageWidth = cdr.Width,               // Set canvas width to match CDR page
-                    PageHeight = cdr.Height,             // Set canvas height to match CDR page
-                    BackgroundColor = Aspose.Imaging.Color.Transparent // Preserve transparency
-                }
+                Console.Error.WriteLine("The CDR file contains no pages.");
+                return;
+            }
+
+            // Get the first (single) page
+            CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+
+            // Configure rasterization to preserve transparency
+            var rasterOptions = new CdrRasterizationOptions
+            {
+                BackgroundColor = Color.Transparent,   // keep transparent background
+                PageWidth = page.Width,
+                PageHeight = page.Height
             };
 
-            // Save the rasterized image as PNG
-            cdr.Save(outputPath, pngOptions);
+            // PNG save options using the rasterization settings
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            // Save the page as PNG
+            page.Save(outputPath, pngOptions);
         }
     }
 }

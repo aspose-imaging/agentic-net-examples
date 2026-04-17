@@ -1,67 +1,53 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Psd; 
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output directories (relative paths)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
+        // Define relative input and output directories
+        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
         // Get all CDR files in the input directory
         string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
         foreach (string inputPath in cdrFiles)
         {
-            // Verify input file exists
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
-            // Prepare output path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".psd");
+            // Prepare output PSD path
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".psd");
 
-            // Ensure output directory for this file exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (Image image = Image.Load(inputPath))
+            // Load the CDR file
+            using (CdrImage cdrImage = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                CdrImage cdr = (CdrImage)image;
+                // Configure PSD export options
+                PsdOptions psdOptions = new PsdOptions();
 
-                // Configure PSD save options
-                PsdOptions psdOptions = new PsdOptions
+                // Set vector rasterization options to retain layers
+                var rasterOptions = new CdrRasterizationOptions
                 {
-                    CompressionMethod = CompressionMethod.RLE,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageWidth = cdrImage.Width,
+                    PageHeight = cdrImage.Height,
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
                 };
+                psdOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Export all pages as separate layers in the PSD
-                if (cdr.PageCount > 1)
-                {
-                    psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, cdr.PageCount));
-                }
-
-                // Save as PSD
-                cdr.Save(outputPath, psdOptions);
+                // Save as PSD; all pages become layers
+                cdrImage.Save(outputPath, psdOptions);
             }
         }
     }

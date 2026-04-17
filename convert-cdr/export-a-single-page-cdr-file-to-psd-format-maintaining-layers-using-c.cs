@@ -9,8 +9,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.cdr");
-        string outputPath = Path.Combine("Output", "sample.psd");
+        string inputPath = "sample.cdr";
+        string outputPath = "sample.psd";
 
         if (!File.Exists(inputPath))
         {
@@ -20,30 +20,16 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            PsdOptions psdOptions = new PsdOptions
+            PsdOptions exportOptions = new PsdOptions();
+            exportOptions.VectorRasterizationOptions = new CdrRasterizationOptions
             {
-                CompressionMethod = CompressionMethod.RLE,
-                ColorMode = ColorModes.Rgb,
-                VectorizationOptions = new PsdVectorizationOptions
-                {
-                    VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
-                }
+                PageWidth = image.Width,
+                PageHeight = image.Height
             };
 
-            VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageWidth = cdr.Width,
-                PageHeight = cdr.Height,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
-
-            psdOptions.VectorRasterizationOptions = vectorOptions;
-
-            cdr.Save(outputPath, psdOptions);
+            image.Save(outputPath, exportOptions);
         }
     }
 }

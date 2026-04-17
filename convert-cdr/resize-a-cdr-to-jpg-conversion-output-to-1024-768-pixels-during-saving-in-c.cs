@@ -3,19 +3,16 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.cdr";
-        string outputPath = "output.jpg";
+        string outputPath = "output/output.jpg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,34 +22,17 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR vector image
+        // Load CDR image, resize, and save as JPEG
         using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
         {
-            // Rasterize CDR to PNG in memory
-            using (MemoryStream ms = new MemoryStream())
-            {
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
-                    }
-                };
-                cdr.Save(ms, pngOptions);
-                ms.Position = 0;
+            // Resize to 1024x768 pixels
+            cdr.Resize(1024, 768);
 
-                // Load rasterized image
-                using (RasterImage raster = (RasterImage)Image.Load(ms))
-                {
-                    // Resize to 1024x768 using nearest neighbour resampling
-                    raster.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+            // JPEG save options
+            JpegOptions jpegOptions = new JpegOptions();
 
-                    // Save as JPEG
-                    var jpegOptions = new JpegOptions();
-                    raster.Save(outputPath, jpegOptions);
-                }
-            }
+            // Save the resized image as JPEG
+            cdr.Save(outputPath, jpegOptions);
         }
     }
 }
