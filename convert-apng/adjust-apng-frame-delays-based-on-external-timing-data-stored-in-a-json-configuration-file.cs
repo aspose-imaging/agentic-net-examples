@@ -3,8 +3,8 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -14,16 +14,14 @@ class Program
         // Hardcoded paths
         string inputImagePath = "input.png";
         string jsonConfigPath = "config.json";
-        string outputPath = "output\\animation.apng";
+        string outputPath = "output.apng";
 
-        // Validate input image
+        // Validate input files
         if (!File.Exists(inputImagePath))
         {
             Console.Error.WriteLine($"File not found: {inputImagePath}");
             return;
         }
-
-        // Validate JSON config
         if (!File.Exists(jsonConfigPath))
         {
             Console.Error.WriteLine($"File not found: {jsonConfigPath}");
@@ -31,64 +29,69 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+
+        // Read and parse frame times from JSON (simple numeric extraction)
+        string jsonContent = File.ReadAllText(jsonConfigPath);
+        List<uint> frameTimes = new List<uint>();
+        string numberBuffer = "";
+        foreach (char ch in jsonContent)
+        {
+            if (char.IsDigit(ch))
+            {
+                numberBuffer += ch;
+            }
+            else
+            {
+                if (numberBuffer.Length > 0)
+                {
+                    if (uint.TryParse(numberBuffer, out uint value))
+                    {
+                        frameTimes.Add(value);
+                    }
+                    numberBuffer = "";
+                }
+            }
+        }
+        if (numberBuffer.Length > 0 && uint.TryParse(numberBuffer, out uint lastValue))
+        {
+            frameTimes.Add(lastValue);
+        }
+
+        if (frameTimes.Count == 0)
+        {
+            Console.Error.WriteLine("No frame times found in configuration.");
+            return;
+        }
 
         // Load source raster image
         using (RasterImage sourceImage = (RasterImage)Image.Load(inputImagePath))
         {
-            // Read and parse JSON configuration (expects an array of integers)
-            string json = File.ReadAllText(jsonConfigPath);
-            List<uint> frameTimes = new List<uint>();
-            string numberBuffer = "";
-            foreach (char c in json)
-            {
-                if (char.IsDigit(c))
-                {
-                    numberBuffer += c;
-                }
-                else
-                {
-                    if (numberBuffer.Length > 0)
-                    {
-                        if (uint.TryParse(numberBuffer, out uint value))
-                            frameTimes.Add(value);
-                        numberBuffer = "";
-                    }
-                }
-            }
-            if (numberBuffer.Length > 0 && uint.TryParse(numberBuffer, out uint lastValue))
-                frameTimes.Add(lastValue);
-
             // Create APNG options
             ApngOptions createOptions = new ApngOptions
             {
                 Source = new FileCreateSource(outputPath, false),
                 ColorType = PngColorType.TruecolorWithAlpha,
-                DefaultFrameTime = frameTimes.Count > 0 ? frameTimes[0] : (uint)100
+                DefaultFrameTime = frameTimes[0] // fallback default
             };
 
             // Create APNG image canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(
-                createOptions,
-                sourceImage.Width,
-                sourceImage.Height))
+            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
             {
-                // Remove the default frame
+                // Remove the default initial frame
                 apngImage.RemoveAllFrames();
 
                 // Add frames with specific durations
-                foreach (uint ft in frameTimes)
+                foreach (uint frameTime in frameTimes)
                 {
-                    apngImage.AddFrame(sourceImage, ft);
+                    apngImage.AddFrame(sourceImage, frameTime);
                 }
 
-                // If no frame times were provided, add a single default frame
-                if (frameTimes.Count == 0)
-                {
-                    apngImage.AddFrame(sourceImage);
-                }
-
-                // Save the APNG file
+                // Save the APNG
                 apngImage.Save();
             }
         }
