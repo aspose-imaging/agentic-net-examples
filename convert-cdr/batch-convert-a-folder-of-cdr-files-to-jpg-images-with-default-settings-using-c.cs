@@ -1,62 +1,45 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\InputCdr";
+        string outputFolder = @"C:\OutputJpg";
 
-        if (!Directory.Exists(inputDirectory))
+        // Process each CDR file in the input folder
+        foreach (string inputPath in Directory.GetFiles(inputFolder, "*.cdr"))
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            if (!Path.GetExtension(inputPath).Equals(".cdr", StringComparison.OrdinalIgnoreCase))
-                continue;
-
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            // Load the CDR image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                using (JpegOptions jpegOptions = new JpegOptions())
-                {
-                    if (image is VectorImage)
-                    {
-                        jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        };
-                    }
+                // Base name for output files (one per page)
+                string outputBase = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath));
 
-                    image.Save(outputPath, jpegOptions);
+                // Iterate through all pages of the CDR document
+                for (int i = 0; i < cdrImage.PageCount; i++)
+                {
+                    var page = (CdrImagePage)cdrImage.Pages[i];
+                    string outputPath = $"{outputBase}_page{i}.jpg";
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as JPG using default options
+                    JpegOptions jpegOptions = new JpegOptions();
+                    page.Save(outputPath, jpegOptions);
                 }
             }
         }
