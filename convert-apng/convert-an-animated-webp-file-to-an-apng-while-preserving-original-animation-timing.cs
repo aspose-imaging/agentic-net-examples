@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input_animation.webp";
-        string outputPath = "output_animation.png";
+        string inputPath = "input.webp";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,13 +19,12 @@ class Program
         }
 
         // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-        Directory.CreateDirectory(outputDir);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the animated WebP image
+        // Load the animated WebP image and save it as APNG preserving timing
         using (Image image = Image.Load(inputPath))
         {
-            // Save as APNG preserving animation timing
+            // ApngOptions without explicit timing will keep original frame durations
             image.Save(outputPath, new ApngOptions());
         }
     }
