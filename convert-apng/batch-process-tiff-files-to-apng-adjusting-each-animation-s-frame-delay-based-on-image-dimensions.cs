@@ -1,9 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
@@ -12,68 +10,62 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input TIFF file paths
-        string[] inputPaths = {
-            "C:\\Images\\input1.tif",
-            "C:\\Images\\input2.tif",
-            "C:\\Images\\input3.tif"
-        };
+        // Setup input and output directories
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Corresponding output APNG file paths
-        string[] outputPaths = {
-            "C:\\Images\\output1.apng",
-            "C:\\Images\\output2.apng",
-            "C:\\Images\\output3.apng"
-        };
-
-        for (int i = 0; i < inputPaths.Length; i++)
+        if (!Directory.Exists(inputDirectory))
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
 
-            // Verify input file exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
+
+        foreach (string inputPath in files)
+        {
+            // Ensure the file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image (may contain multiple frames)
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            // Load the TIFF image as a raster image
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                int width = tiffImage.Width;
-                int height = tiffImage.Height;
+                // Compute frame delay based on image dimensions
+                uint frameDelay = (uint)((raster.Width + raster.Height) / 10);
+                if (frameDelay == 0) frameDelay = 1; // Minimum delay
 
-                // Compute default frame time based on dimensions (example logic)
-                uint defaultFrameTime = (uint)((width + height) / 20);
-                if (defaultFrameTime == 0) defaultFrameTime = 100; // fallback to 100 ms
+                // Prepare output path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".apng";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Prepare APNG creation options
-                ApngOptions apngOptions = new ApngOptions
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Configure APNG creation options
+                ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = defaultFrameTime,
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    DefaultFrameTime = frameDelay
                 };
 
-                // Create APNG image bound to the output file
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
+                // Create APNG image and add the raster frame
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, raster.Width, raster.Height))
                 {
-                    // Remove the default single frame
-                    apngImage.RemoveAllFrames();
-
-                    // Add each TIFF frame to the APNG
-                    foreach (TiffFrame frame in tiffImage.Frames)
-                    {
-                        // Cast frame to RasterImage and add as a new frame
-                        apngImage.AddFrame((RasterImage)frame);
-                    }
-
-                    // Save the APNG (output path already bound via FileCreateSource)
-                    apngImage.Save();
+                    apngImage.RemoveAllFrames(); // Remove default frame
+                    apngImage.AddFrame(raster);  // Add the TIFF frame
+                    apngImage.Save();            // Save the APNG file
                 }
             }
         }
