@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output\\sample.png";
+        string inputPath = "sample.dcm";
+        string outputDirectory = "output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,20 +19,25 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        // Load the DICOM image and ensure it is disposed
-        using (Image image = Image.Load(inputPath))
+        // Load the DICOM image and ensure it is disposed after use
+        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
         {
-            // Cast to DicomImage for DICOM-specific operations
-            DicomImage dicomImage = (DicomImage)image;
-
-            // Create PNG options and ensure they are disposed
-            using (var pngOptions = new PngOptions())
+            int pageIndex = 0;
+            foreach (DicomPage dicomPage in dicomImage.DicomPages)
             {
-                // Save the DICOM image as PNG
-                dicomImage.Save(outputPath, pngOptions);
+                // Build output file path for each page
+                string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
+
+                // Ensure the directory for the output file exists (already created above)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the page as PNG
+                dicomPage.Save(outputPath, new PngOptions());
+
+                pageIndex++;
             }
         }
     }
