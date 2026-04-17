@@ -6,11 +6,11 @@ using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputDirectory = "output_frames";
+        // Hardcoded input APNG file and output directory
+        string inputPath = Path.Combine("Input", "animation.apng");
+        string outputDirectory = "Output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,29 +19,29 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists (creates even if null)
+        // Ensure output directory exists
         Directory.CreateDirectory(outputDirectory);
 
         // Load the APNG image
-        using (Image image = Image.Load(inputPath))
+        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
         {
-            // Cast to ApngImage to access frames
-            ApngImage apngImage = (ApngImage)image;
+            int frameCount = apng.PageCount;
 
-            // Iterate over each frame and save as BMP
-            for (int i = 0; i < apngImage.PageCount; i++)
+            for (int i = 0; i < frameCount; i++)
             {
-                // Retrieve the frame (ApngFrame)
-                ApngFrame frame = (ApngFrame)apngImage.Pages[i];
+                // Get the current frame as a raster image
+                using (RasterImage frame = (RasterImage)apng.Pages[i])
+                {
+                    // Build output BMP file path
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.bmp");
 
-                // Build output file path for the current frame
-                string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.bmp");
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Ensure the directory for this file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the frame as BMP using default BmpOptions
-                frame.Save(outputPath, new BmpOptions());
+                    // Save the frame as BMP
+                    BmpOptions bmpOptions = new BmpOptions();
+                    frame.Save(outputPath, bmpOptions);
+                }
             }
         }
     }
