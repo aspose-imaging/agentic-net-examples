@@ -9,7 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input DICOM file path
-        string inputPath = @"C:\temp\multiframe.dicom";
+        string inputPath = @"C:\temp\multiframe.dcm";
+
+        // Hardcoded output directory for PNG files
+        string outputDir = @"C:\temp\output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -18,8 +21,8 @@ class Program
             return;
         }
 
-        // Directory where PNG files will be saved
-        string outputDirectory = @"C:\temp\output";
+        // Ensure the output directory exists (unconditional as per rules)
+        Directory.CreateDirectory(outputDir);
 
         // Open the DICOM file as a stream
         using (Stream stream = File.OpenRead(inputPath))
@@ -30,13 +33,13 @@ class Program
                 // Iterate through each page (frame) in the DICOM image
                 foreach (DicomPage dicomPage in dicomImage.DicomPages)
                 {
-                    // Build the output file path for the current frame
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{dicomPage.Index}.png");
+                    // Build the output PNG file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"frame_{dicomPage.Index}.png");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for this file exists (unconditional)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current page as a PNG file
+                    // Save the current page as a PNG image
                     dicomPage.Save(outputPath, new PngOptions());
                 }
             }
