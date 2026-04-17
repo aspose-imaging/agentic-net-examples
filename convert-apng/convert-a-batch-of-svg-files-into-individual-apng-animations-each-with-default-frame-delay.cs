@@ -2,48 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input SVG files
-        string[] inputFiles = new[]
-        {
-            @"C:\Images\example1.svg",
-            @"C:\Images\example2.svg",
-            @"C:\Images\example3.svg"
-        };
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputSvgs";
+        string outputDirectory = @"C:\OutputApngs";
 
-        // Hardcoded output directory
-        string outputDirectory = @"C:\Images\APNGOutput";
+        // Ensure the output root directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        foreach (string inputPath in inputFiles)
+        // Retrieve all SVG files in the input directory
+        string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
+
+        foreach (string inputPath in svgFiles)
         {
-            // Verify input file exists
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build output file path (same name with .apng extension)
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".apng");
+            // Build the output file path (same name with .png extension for APNG)
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-            // Ensure output directory exists
+            // Ensure the directory for the output file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as APNG with a default frame delay (e.g., 100 ms)
-                var apngOptions = new ApngOptions
-                {
-                    DefaultFrameTime = 100 // milliseconds
-                };
-
-                image.Save(outputPath, apngOptions);
+                // Save as APNG using default frame delay
+                image.Save(outputPath, new ApngOptions());
             }
         }
     }
