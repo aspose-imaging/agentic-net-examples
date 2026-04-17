@@ -1,55 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.dcm";
-        string outputPath = @"C:\Temp\output\image.png";
+        string inputPath = "Input\\sample.dcm";
 
-        // Input file existence check
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists (unconditional)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DICOM image
+        // Load DICOM image
         using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
         {
-            // Extract patient name from DICOM metadata using dynamic to avoid compile‑time binding issues
-            string patientName = "Unknown";
-            try
+            // Attempt to extract Patient Name from metadata via reflection
+            string patientName = "UnknownPatient";
+            var metadata = dicomImage.Metadata;
+            if (metadata != null)
             {
-                dynamic dicomInfo = dicomImage.FileInfo.DicomInfo;
-                patientName = dicomInfo?.PatientName ?? "Unknown";
+                var prop = metadata.GetType().GetProperty("PatientName");
+                if (prop != null)
+                {
+                    var value = prop.GetValue(metadata) as string;
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        patientName = value;
+                    }
+                }
             }
-            catch
-            {
-                // If metadata extraction fails, keep default name
-            }
 
-            // Sanitize patient name for file system usage
-            foreach (char c in Path.GetInvalidFileNameChars())
-                patientName = patientName.Replace(c.ToString(), string.Empty);
+            // Prepare output path with patient name embedded
+            string outputFileName = $"{patientName}.png";
+            string outputPath = Path.Combine("Output", outputFileName);
 
-            // Build the PNG file name embedding the patient name
-            string pngFileName = $"image_{patientName}.png";
-            string pngFullPath = Path.Combine(Path.GetDirectoryName(outputPath), pngFileName);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure the directory for the new file exists (unconditional)
-            Directory.CreateDirectory(Path.GetDirectoryName(pngFullPath));
-
-            // Save the image as PNG
-            dicomImage.Save(pngFullPath, new PngOptions());
+            // Save DICOM image as PNG
+            dicomImage.Save(outputPath, new PngOptions());
         }
     }
 }
