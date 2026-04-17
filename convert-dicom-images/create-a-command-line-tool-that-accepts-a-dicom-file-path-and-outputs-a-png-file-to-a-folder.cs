@@ -1,33 +1,47 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace DicomToPngConverter
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output\\result.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        static void Main()
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input DICOM file path
+            string inputPath = @"C:\temp\sample.dicom";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Hardcoded output directory
+            string outputDirectory = @"C:\temp\output\";
 
-        // Load DICOM image and save as PNG
-        using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
-        {
-            using (PngOptions pngOptions = new PngOptions())
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                dicomImage.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Open the DICOM file as a stream
+            using (Stream stream = File.OpenRead(inputPath))
+            {
+                // Load the DICOM image from the stream
+                using (DicomImage dicomImage = new DicomImage(stream))
+                {
+                    // Iterate through each page in the DICOM image
+                    foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                    {
+                        // Build the output PNG file path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{dicomPage.Index}.png");
+
+                        // Ensure the output directory exists (creates it unconditionally)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as a PNG image
+                        dicomPage.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
     }
