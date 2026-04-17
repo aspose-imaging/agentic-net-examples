@@ -5,71 +5,65 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.apng";
+        string inputPath = "input.svg";
+        string outputPath = "output.apng";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
         using (Image svgImage = Image.Load(inputPath))
         {
-            // Rasterize the SVG to a PNG stored in memory
-            using (MemoryStream pngStream = new MemoryStream())
-            {
-                var pngOptions = new PngOptions
-                {
-                    // Enable vector rasterization so the SVG is rendered to raster pixels
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    }
-                };
-                svgImage.Save(pngStream, pngOptions);
-                pngStream.Position = 0;
+            SvgImage svg = (SvgImage)svgImage;
+            int width = svg.Width;
+            int height = svg.Height;
 
-                // Load the rasterized PNG as a RasterImage (used as a frame source)
-                using (RasterImage rasterSource = (RasterImage)Image.Load(pngStream))
+            using (MemoryStream rasterStream = new MemoryStream())
+            {
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    // APNG creation options
-                    var apngCreateOptions = new ApngOptions
+                    PageSize = svg.Size
+                };
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+                svg.Save(rasterStream, pngOptions);
+                rasterStream.Position = 0;
+
+                using (RasterImage baseFrame = (RasterImage)Image.Load(rasterStream))
+                {
+                    const int animationDurationMs = 1000;
+                    const int frameDurationMs = 100;
+                    int frameCount = animationDurationMs / frameDurationMs;
+
+                    ApngOptions apngOptions = new ApngOptions
                     {
-                        DefaultFrameTime = 100, // 100 ms per frame
+                        Source = new FileCreateSource(outputPath, false),
+                        DefaultFrameTime = (uint)frameDurationMs,
                         ColorType = PngColorType.TruecolorWithAlpha
                     };
 
-                    // Create an empty APNG image with the same dimensions as the raster source
-                    using (ApngImage apng = (ApngImage)Image.Create(apngCreateOptions, rasterSource.Width, rasterSource.Height))
+                    using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
                     {
-                        // Remove the default single frame
                         apng.RemoveAllFrames();
 
-                        const int totalFrames = 10;
-
-                        // Add frames, adjusting gamma to illustrate animation changes
-                        for (int i = 0; i < totalFrames; i++)
+                        for (int i = 0; i < frameCount; i++)
                         {
-                            apng.AddFrame(rasterSource);
-                            ApngFrame lastFrame = (ApngFrame)apng.Pages[apng.PageCount - 1];
-                            // Simple animation effect: gradually change gamma
-                            lastFrame.AdjustGamma(i);
+                            apng.AddFrame(baseFrame);
                         }
 
-                        // Save the animated PNG
-                        apng.Save(outputPath);
+                        apng.Save();
                     }
                 }
             }
