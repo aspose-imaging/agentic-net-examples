@@ -20,26 +20,26 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the APNG image
+        // Load the APNG animation
         using (Image apngImage = Image.Load(inputPath))
         {
-            // Save as GIF using default GifOptions
-            var gifOptions = new GifOptions();
-            apngImage.Save(outputPath, gifOptions);
+            // Save as GIF animation
+            apngImage.Save(outputPath, new GifOptions());
         }
 
-        // Verify the saved GIF can be loaded and has frames
+        // Simple verification: load the saved GIF and check it has multiple frames
         using (Image gifImage = Image.Load(outputPath))
         {
-            if (gifImage is GifImage gif && gif.PageCount > 0)
+            // PageCount indicates number of frames in a multipage image
+            if (gifImage.PageCount > 1)
             {
-                Console.WriteLine($"GIF saved successfully with {gif.PageCount} frame(s).");
+                Console.WriteLine("GIF conversion successful: animation contains multiple frames.");
             }
             else
             {
-                Console.WriteLine("Failed to verify the saved GIF.");
+                Console.WriteLine("Warning: GIF conversion may have lost animation frames.");
             }
         }
     }
