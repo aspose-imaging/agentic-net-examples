@@ -1,17 +1,13 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.apng";
-        string outputPath = "output.gif";
+        string inputPath = Path.Combine("Input", "animation.apng");
+        string outputPath = Path.Combine("Output", "animation.gif");
 
         if (!File.Exists(inputPath))
         {
@@ -21,18 +17,9 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image loadedImage = Image.Load(inputPath))
-        using (ApngImage apngImage = (ApngImage)loadedImage)
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            using (GifImage gifImage = new GifImage(new GifFrameBlock((ushort)apngImage.Width, (ushort)apngImage.Height)))
-            {
-                for (int i = 0; i < apngImage.PageCount; i++)
-                {
-                    gifImage.AddPage((RasterImage)apngImage.Pages[i]);
-                }
-
-                gifImage.Save(outputPath, new GifOptions());
-            }
+            image.Save(outputPath, new GifOptions());
         }
     }
 }
