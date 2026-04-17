@@ -10,17 +10,17 @@ class Program
         // Hardcoded input path
         string inputPath = "sample.apng";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the APNG image
+        // Load the image using Aspose.Imaging
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to ApngImage to access APNG-specific properties
+            // Cast to ApngImage to access APNG‑specific properties
             ApngImage apng = image as ApngImage;
             if (apng == null)
             {
@@ -28,13 +28,13 @@ class Program
                 return;
             }
 
-            // Retrieve loop count (NumPlays) and total frame count (PageCount)
-            int loopCount = apng.NumPlays;      // 0 means infinite looping
-            int frameCount = apng.PageCount;   // total number of frames
+            // Loop count (NumPlays): 0 means infinite looping
+            int loopCount = apng.NumPlays;
+            // Total number of frames in the animation
+            int frameCount = apng.PageCount;
 
-            // Display the metadata
             Console.WriteLine($"Loop count (NumPlays): {(loopCount == 0 ? "Infinite" : loopCount.ToString())}");
-            Console.WriteLine($"Total frame count (PageCount): {frameCount}");
+            Console.WriteLine($"Total frames: {frameCount}");
         }
     }
 }
