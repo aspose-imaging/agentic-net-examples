@@ -9,7 +9,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.apng";
+        string inputPath = "input.png";
         string outputPath = "output.png";
 
         // Verify input file exists
@@ -22,19 +22,19 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // If the image is an APNG with a single frame, save as a regular PNG for compatibility
-            if (image is ApngImage apng && apng.PageCount == 1)
+            // If the image is an APNG with more than one frame, save as APNG
+            if (image is ApngImage apng && apng.PageCount > 1)
             {
-                // Save as static PNG
-                apng.Save(outputPath, new PngOptions());
+                // Save using APNG options (default settings)
+                apng.Save(outputPath, new ApngOptions());
             }
             else
             {
-                // Save as APNG (preserves animation if present)
-                image.Save(outputPath, new ApngOptions());
+                // For single‑frame images (including APNG with one frame), save as regular PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
     }
