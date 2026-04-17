@@ -1,14 +1,15 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.psd";
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample_output.psd";
 
         if (!File.Exists(inputPath))
         {
@@ -18,28 +19,25 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
         {
-            PsdOptions exportOptions = new PsdOptions();
-
-            if (image is IMultipageImage multipage && multipage.PageCount > 0)
+            PsdOptions psdOptions = new PsdOptions
             {
-                exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
-            }
+                CompressionMethod = CompressionMethod.RLE,
+                ColorMode = ColorModes.Rgb,
+                MultiPageOptions = new MultiPageOptions(new IntRange(0, cdr.PageCount))
+            };
 
-            if (image is VectorImage)
+            if (cdr is VectorImage)
             {
-                exportOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    BackgroundColor = Color.White
+                    PageWidth = cdr.Width,
+                    PageHeight = cdr.Height
                 };
             }
 
-            image.Save(outputPath, exportOptions);
+            cdr.Save(outputPath, psdOptions);
         }
     }
 }
