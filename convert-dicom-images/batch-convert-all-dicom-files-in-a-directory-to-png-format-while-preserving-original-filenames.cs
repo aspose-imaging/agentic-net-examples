@@ -1,78 +1,49 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
-        {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputDicom";
+        string outputDirectory = @"C:\OutputPng";
 
         // Get all DICOM files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*")
-            .Where(f => f.EndsWith(".dcm", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
+        string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
 
-        foreach (var filePath in files)
+        foreach (string inputPath in dicomFiles)
         {
             // Verify the input file exists
-            if (!File.Exists(filePath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Preserve original filename for the PNG output
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Ensure the output directory exists before saving
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the DICOM image
-            using (DicomImage dicom = (DicomImage)Image.Load(filePath))
+            // Load the DICOM image from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DicomImage dicomImage = new DicomImage(stream))
             {
-                // Handle multi‑page DICOM files
-                if (dicom.DicomPages != null && dicom.DicomPages.Count() > 1)
+                // Process each page of the DICOM image
+                foreach (DicomPage page in dicomImage.DicomPages)
                 {
-                    foreach (var page in dicom.DicomPages)
-                    {
-                        string pageOutputPath = Path.Combine(outputDirectory,
-                            $"{fileNameWithoutExt}_page{page.Index}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
-                        using (var pngOptions = new PngOptions())
-                        {
-                            page.Save(pageOutputPath, pngOptions);
-                        }
-                    }
-                }
-                else
-                {
-                    // Single‑page DICOM: save directly as PNG
-                    using (var pngOptions = new PngOptions())
-                    {
-                        dicom.Save(outputPath, pngOptions);
-                    }
+                    // Build output file name: original name + optional page index + .png
+                    string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                    string fileName = dicomImage.DicomPages.Count > 1
+                        ? $"{baseName}_{page.Index}.png"
+                        : $"{baseName}.png";
+
+                    string outputPath = Path.Combine(outputDirectory, fileName);
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as PNG
+                    page.Save(outputPath, new PngOptions());
                 }
             }
         }
