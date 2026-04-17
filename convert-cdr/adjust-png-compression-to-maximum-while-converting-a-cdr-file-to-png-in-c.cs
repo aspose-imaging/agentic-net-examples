@@ -3,14 +3,13 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        string inputPath = "C:\\Images\\sample.cdr";
-        string outputPath = "C:\\Images\\sample.png";
+        string inputPath = "sample.cdr";
+        string outputPath = "output.png";
 
         if (!File.Exists(inputPath))
         {
@@ -22,11 +21,9 @@ class Program
 
         using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
         {
-            var pngOptions = new PngOptions
+            PngOptions pngOptions = new PngOptions
             {
                 PngCompressionLevel = PngCompressionLevel.ZipLevel9,
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Progressive = true,
                 VectorRasterizationOptions = new CdrRasterizationOptions
                 {
                     PageWidth = cdr.Width,
