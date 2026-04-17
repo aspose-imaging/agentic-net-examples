@@ -10,50 +10,51 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Get all DICOM files in the input directory
-        string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
-
-        // Progress reporter using IProgress
-        IProgress<ProgressEventHandlerInfo> progress = new Progress<ProgressEventHandlerInfo>(info =>
+        if (!Directory.Exists(inputDirectory))
         {
-            Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}");
-        });
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
 
-        foreach (var inputPath in dicomFiles)
+        if (!Directory.Exists(outputDirectory))
         {
-            // Verify input file exists
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+
+        foreach (string inputPath in files)
+        {
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Open the DICOM file stream
-            using (var stream = File.OpenRead(inputPath))
-            {
-                // Load DICOM image with progress handling
-                using (var dicomImage = new DicomImage(stream, new LoadOptions { ProgressEventHandler = info => progress.Report(info) }))
+            using (DicomImage dicom = (DicomImage)Image.Load(
+                inputPath,
+                new LoadOptions
                 {
-                    int pageIndex = 0;
-                    foreach (var page in dicomImage.DicomPages)
+                    ProgressEventHandler = info => Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
+                }))
+            {
+                foreach (var page in dicom.DicomPages)
+                {
+                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    var pngOptions = new PngOptions
                     {
-                        // Construct output PNG path
-                        string baseFileName = Path.GetFileNameWithoutExtension(inputPath);
-                        string outputPath = Path.Combine(outputDirectory, $"{baseFileName}_{pageIndex}.png");
+                        ProgressEventHandler = info => Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
+                    };
 
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save page as PNG with progress handling
-                        var pngOptions = new PngOptions { ProgressEventHandler = info => progress.Report(info) };
-                        page.Save(outputPath, pngOptions);
-
-                        pageIndex++;
-                    }
+                    page.Save(outputPath, pngOptions);
                 }
             }
         }

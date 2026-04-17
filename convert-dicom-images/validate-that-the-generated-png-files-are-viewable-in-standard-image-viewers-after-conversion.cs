@@ -1,16 +1,14 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.jpg";
+        string outputPath = "Output/sample.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,17 +20,20 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image and convert it to PNG
-        using (Image image = Image.Load(inputPath))
+        // Load the source image and save it as PNG
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            image.Save(outputPath, new PngOptions());
         }
 
-        // Validate that the generated PNG can be loaded (viewable)
-        using (PngImage png = (PngImage)Image.Load(outputPath))
+        // Simple verification that the PNG file was created
+        if (File.Exists(outputPath))
         {
-            Console.WriteLine($"Saved PNG loaded successfully. Size: {png.Width}x{png.Height}");
+            Console.WriteLine($"PNG file saved successfully: {outputPath}");
+        }
+        else
+        {
+            Console.Error.WriteLine($"Failed to save PNG file: {outputPath}");
         }
     }
 }

@@ -9,12 +9,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input DICOM file path
-        string inputPath = @"C:\temp\sample.dcm";
-        // Hardcoded output PNG file path
-        string outputPath = @"C:\temp\output.png";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.dcm";
+        string outputPath = "Output/sample.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,25 +23,26 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DICOM image
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        byte[] pngBytes;
+
+        // Load DICOM image and convert to PNG in memory
+        using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
         {
-            // Get the first page (or you could iterate all pages)
-            DicomPage page = dicomImage.DicomPages[0];
-
-            // Convert page to PNG in memory
-            using (MemoryStream ms = new MemoryStream())
+            using (var memoryStream = new MemoryStream())
             {
-                PngOptions pngOptions = new PngOptions();
-                page.Save(ms, pngOptions);
-                byte[] pngBytes = ms.ToArray();
+                var pngOptions = new PngOptions();
+                dicom.Save(memoryStream, pngOptions);
+                pngBytes = memoryStream.ToArray();
+            }
 
-                // Write PNG bytes to output file
-                File.WriteAllBytes(outputPath, pngBytes);
-
-                // Output length of byte array
-                Console.WriteLine($"PNG byte array length: {pngBytes.Length}");
+            // Optionally save the PNG to a file
+            using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+            {
+                fileStream.Write(pngBytes, 0, pngBytes.Length);
             }
         }
+
+        // Output the size of the resulting PNG byte array
+        Console.WriteLine($"Converted PNG byte array length: {pngBytes.Length}");
     }
 }

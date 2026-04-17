@@ -1,17 +1,15 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Png;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output\\converted.png";
+        string inputPath = "Input/sample.dcm";
+        string outputPath = "Output/sample.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,26 +22,20 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DICOM image
-        using (Image image = Image.Load(inputPath))
+        using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage =
+            (Aspose.Imaging.FileFormats.Dicom.DicomImage)Aspose.Imaging.Image.Load(inputPath))
         {
-            DicomImage dicomImage = (DicomImage)image;
-
-            // Convert to grayscale (optional, ensures grayscale source)
+            // Convert to grayscale (if not already)
             dicomImage.Grayscale();
 
-            // Prepare PNG options with an indexed color palette
-            PngOptions pngOptions = new PngOptions
+            // Configure PNG options with an indexed color type and a custom grayscale palette
+            var pngOptions = new PngOptions
             {
-                // Use indexed color type so the palette is applied
                 ColorType = PngColorType.IndexedColor,
-                // Generate a custom 256‑color palette based on the image content
-                Palette = ColorPaletteHelper.GetCloseImagePalette(
-                    (RasterImage)dicomImage,
-                    256,
-                    PaletteMiningMethod.Histogram)
+                Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false)
             };
 
-            // Save the PNG with the custom palette
+            // Save the image as PNG using the custom palette
             dicomImage.Save(outputPath, pngOptions);
         }
     }

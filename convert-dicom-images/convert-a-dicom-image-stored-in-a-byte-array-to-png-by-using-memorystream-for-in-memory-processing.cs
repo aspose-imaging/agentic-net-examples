@@ -19,25 +19,26 @@ class Program
             return;
         }
 
+        // Read DICOM data into a byte array
+        byte[] dicomData = File.ReadAllBytes(inputPath);
+
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DICOM file into a byte array
-        byte[] dicomBytes = File.ReadAllBytes(inputPath);
-
-        // Use a MemoryStream for in‑memory processing
-        using (var inputStream = new MemoryStream(dicomBytes))
+        // Process the DICOM image using a MemoryStream
+        using (var memoryStream = new MemoryStream(dicomData))
+        using (var dicomImage = new DicomImage(memoryStream))
         {
-            // Create a DicomImage from the stream
-            using (var dicomImage = new DicomImage(inputStream))
-            {
-                // Prepare PNG save options
-                var pngOptions = new PngOptions();
+            // Prepare PNG save options
+            var pngOptions = new PngOptions();
 
-                // Save the first page (or only page) as PNG
-                // If the DICOM contains multiple pages, iterate over dicomImage.DicomPages
-                var firstPage = dicomImage.DicomPages[0];
-                firstPage.Save(outputPath, pngOptions);
+            // Define bounds covering the whole image
+            var bounds = new Rectangle(0, 0, dicomImage.Width, dicomImage.Height);
+
+            // Save the image to a PNG file stream
+            using (var outputStream = File.OpenWrite(outputPath))
+            {
+                dicomImage.Save(outputStream, pngOptions, bounds);
             }
         }
     }

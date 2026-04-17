@@ -8,9 +8,9 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\source.jpg";
-        string outputPath = @"C:\Images\converted.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -25,17 +25,12 @@ class Program
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PNG save options with a balanced compression level (e.g., 6)
+            // Configure PNG save options with a balanced compression level
             var pngOptions = new PngOptions
             {
-                // Progressive PNG loading (optional)
-                Progressive = true,
-
-                // Use truecolor with alpha for full colour fidelity
-                ColorType = PngColorType.TruecolorWithAlpha,
-
-                // Set compression level: 0 (none) – 9 (max). 6 offers a good trade‑off.
-                CompressionLevel = 6
+                Progressive = true,                         // Enable progressive loading (optional)
+                ColorType = PngColorType.TruecolorWithAlpha, // Preserve full color depth and alpha
+                CompressionLevel = 6                         // Compression level 0‑9; 6 offers a good size/quality trade‑off
             };
 
             // Save the image as PNG using the configured options

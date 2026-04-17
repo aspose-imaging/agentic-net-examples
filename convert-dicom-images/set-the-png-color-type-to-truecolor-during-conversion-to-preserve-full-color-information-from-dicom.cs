@@ -6,34 +6,33 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.dcm";
-        string outputPath = @"C:\Images\output.png";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.dcm";
+        string outputPath = "Output/sample.png";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-        Directory.CreateDirectory(outputDir);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DICOM image
-        using (Image dicomImage = Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Configure PNG options with Truecolor color type
+            // Configure PNG options with truecolor to preserve full color information
             var pngOptions = new PngOptions
             {
                 ColorType = PngColorType.Truecolor
             };
 
             // Save the image as PNG using the specified options
-            dicomImage.Save(outputPath, pngOptions);
+            image.Save(outputPath, pngOptions);
         }
     }
 }

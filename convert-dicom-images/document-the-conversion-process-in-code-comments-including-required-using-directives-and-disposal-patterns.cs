@@ -1,48 +1,32 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "source.png";
-        string outputPath = "animation.apng";
+        // Define input and output file paths (relative to the application directory)
+        string inputPath = Path.Combine("Input", "sample.jpg");
+        string outputPath = Path.Combine("Output", "sample.tif");
 
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        // Load the source image and automatically dispose it after use
+        using (Image image = Image.Load(inputPath))
         {
-            using (ApngOptions createOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 70,
-                ColorType = PngColorType.TruecolorWithAlpha
-            })
-            {
-                using (Image apngImage = Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
-                {
-                    var apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)apngImage;
-                    apng.RemoveAllFrames();
-
-                    int frameCount = 5;
-                    for (int i = 0; i < frameCount; i++)
-                    {
-                        apng.AddFrame(sourceImage);
-                    }
-
-                    apng.Save();
-                }
-            }
+            // Convert and save the image to TIFF format using default options
+            image.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
         }
     }
 }

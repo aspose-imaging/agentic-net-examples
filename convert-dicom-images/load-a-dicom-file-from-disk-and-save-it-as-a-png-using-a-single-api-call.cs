@@ -1,14 +1,15 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output file paths
         string inputPath = "input.dcm";
-        string outputPath = "output\\converted.png";
+        string outputPath = "output\\output.png";
 
         // Verify that the input DICOM file exists
         if (!File.Exists(inputPath))
@@ -21,7 +22,7 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DICOM image and save it as PNG in a single call
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
             image.Save(outputPath, new PngOptions());
         }

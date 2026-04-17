@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
@@ -8,10 +7,10 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "C:\\Temp\\input.dcm";
-        string outputFolder = "C:\\Temp\\DicomPreviews";
+        string inputPath = "input.dcm";
+        string outputDirectory = "Previews";
 
         if (!File.Exists(inputPath))
         {
@@ -19,16 +18,15 @@ class Program
             return;
         }
 
-        Directory.CreateDirectory(outputFolder);
-
-        using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
         {
             int pageIndex = 0;
-            foreach (DicomPage page in dicom.DicomPages)
+            foreach (var dicomPage in dicomImage.DicomPages)
             {
-                string pngPath = Path.Combine(outputFolder, $"page_{pageIndex}.png");
+                string pngPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
-                page.Save(pngPath, new PngOptions());
+                dicomPage.Save(pngPath, new PngOptions());
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(pngPath) { UseShellExecute = true });
                 pageIndex++;
             }
         }
