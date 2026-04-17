@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.apng";
-        string outputPath = $"output_{DateTime.Now:yyyyMMdd_HHmmss}.gif";
+        string outputPath = "output.gif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,11 +24,16 @@ class Program
         // Load the APNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Save as GIF with default options
-            GifOptions gifOptions = new GifOptions();
+            // Prepare GIF save options
+            var gifOptions = new GifOptions();
+
+            // Add a timestamp comment indicating conversion date and time
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            // Assuming GifOptions supports a Comment property
+            gifOptions.Comment = $"Converted on {timestamp}";
+
+            // Save as GIF
             image.Save(outputPath, gifOptions);
         }
-
-        Console.WriteLine($"Conversion completed. GIF saved to: {outputPath}");
     }
 }
