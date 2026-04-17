@@ -482,17 +482,16 @@
         "System",
         "System.IO",
         "Aspose.Imaging.ImageOptions",
-        "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Cdr",
-        "Aspose.Imaging.FileFormats.Psd",
-        "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Jpeg",
-        "Aspose.Imaging.ImageLoadOptions",
+        "Aspose.Imaging.FileFormats.Psd",
         "System.Collections.Generic",
-        "Aspose.Imaging.ProgressManagement",
+        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Tiff.Enums"
+        "Aspose.Imaging.FileFormats.Png",
+        "System.Drawing",
+        "System.Threading.Tasks"
       ],
       "key_apis": [
         "CdrImage",
