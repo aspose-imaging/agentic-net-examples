@@ -1,45 +1,37 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = "input.cdr";
+        string outputPath = "output.jpg";
 
-        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists (creates if missing)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        try
+        using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
         {
-            // Load the CDR file using Aspose.Imaging
-            using (Image image = Image.Load(inputPath))
+            JpegOptions jpegOptions = new JpegOptions
             {
-                // Configure JPEG save options
-                var jpegOptions = new JpegOptions
+                VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    Quality = 90 // Adjust quality as needed
-                };
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageWidth = cdr.Width,
+                    PageHeight = cdr.Height
+                }
+            };
 
-                // Save the image as JPEG
-                image.Save(outputPath, jpegOptions);
-            }
-        }
-        catch (Exception ex)
-        {
-            // Log any runtime exceptions that occur during conversion
-            Console.Error.WriteLine($"Error converting CDR to JPG: {ex.Message}");
+            cdr.Save(outputPath, jpegOptions);
         }
     }
 }
