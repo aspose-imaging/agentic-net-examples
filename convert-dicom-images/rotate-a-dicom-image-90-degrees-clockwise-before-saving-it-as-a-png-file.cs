@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,10 +7,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.png";
+        string inputPath = "Input/sample.dcm";
+        string outputPath = "Output/rotated.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,16 +18,19 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DICOM image
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        // Load DICOM image, rotate, and save as PNG
+        using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Aspose.Imaging.Image.Load(inputPath))
         {
-            // Rotate 90 degrees clockwise
-            dicomImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            // Rotate 90 degrees clockwise, resize proportionally, black background
+            dicomImage.Rotate(90f, true, Aspose.Imaging.Color.Black);
 
-            // Save as PNG
-            dicomImage.Save(outputPath, new PngOptions());
+            // Save rotated image as PNG
+            using (PngOptions pngOptions = new PngOptions())
+            {
+                dicomImage.Save(outputPath, pngOptions);
+            }
         }
     }
 }
