@@ -3,8 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -14,7 +12,7 @@ class Program
         string inputPath = "sample.cdr";
         string outputPath = "output.psd";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,28 +22,25 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR vector image
-        using (Image image = Image.Load(inputPath))
+        // Load the CDR file
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
         {
-            // Prepare PSD save options with 300 DPI resolution
-            PsdOptions psdOptions = new PsdOptions
+            // Prepare PSD save options
+            PsdOptions psdOptions = new PsdOptions();
+
+            // Set resolution to 300 DPI for print quality
+            psdOptions.ResolutionSettings = new ResolutionSetting(300.0, 300.0);
+
+            // For vector images, define rasterization options
+            if (cdrImage is VectorImage)
             {
-                // Set resolution to 300 DPI for both axes
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                // Use default vector rasterization options with white background
+                psdOptions.VectorRasterizationOptions = (VectorRasterizationOptions)cdrImage.GetDefaultOptions(
+                    new object[] { Color.White, cdrImage.Width, cdrImage.Height });
+            }
 
-                // Define color mode (optional, default is RGB)
-                ColorMode = ColorModes.Rgb,
-
-                // Rasterize the vector CDR using its dimensions
-                VectorRasterizationOptions = new CdrRasterizationOptions
-                {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                }
-            };
-
-            // Save the image as PSD with the specified options
-            image.Save(outputPath, psdOptions);
+            // Save as PSD with the specified options
+            cdrImage.Save(outputPath, psdOptions);
         }
     }
 }
