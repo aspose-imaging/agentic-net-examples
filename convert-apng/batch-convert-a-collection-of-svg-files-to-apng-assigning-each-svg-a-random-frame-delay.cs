@@ -1,79 +1,118 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input SVG files and output APNG file
-        string[] inputPaths = { "input1.svg", "input2.svg", "input3.svg" };
-        string outputPath = "output.apng";
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
+        string outputPath = Path.Combine(outputDirectory, "combined.apng");
 
-        // Verify each input file exists
-        foreach (string inputPath in inputPaths)
+        if (!Directory.Exists(inputDirectory))
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
         }
 
-        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Determine canvas size from the first SVG
-        int canvasWidth;
-        int canvasHeight;
-        using (Image firstSvg = Image.Load(inputPaths[0]))
-        using (MemoryStream msFirst = new MemoryStream())
+        string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
+        if (svgFiles.Length == 0)
         {
-            firstSvg.Save(msFirst, new PngOptions());
-            msFirst.Position = 0;
-            using (RasterImage firstRaster = (RasterImage)Image.Load(msFirst))
-            {
-                canvasWidth = firstRaster.Width;
-                canvasHeight = firstRaster.Height;
-            }
+            Console.WriteLine("No SVG files found in the input directory.");
+            return;
         }
 
-        // Create APNG image with the determined size
-        ApngOptions createOptions = new ApngOptions
+        Random rand = new Random();
+
+        string firstPath = svgFiles[0];
+        if (!File.Exists(firstPath))
         {
-            Source = new FileCreateSource(outputPath, false),
-            ColorType = PngColorType.TruecolorWithAlpha
-        };
+            Console.Error.WriteLine($"File not found: {firstPath}");
+            return;
+        }
 
-        using (ApngImage apng = (ApngImage)Image.Create(createOptions, canvasWidth, canvasHeight))
+        using (Aspose.Imaging.Image firstSvg = Aspose.Imaging.Image.Load(firstPath))
         {
-            apng.RemoveAllFrames();
-
-            Random rnd = new Random();
-
-            // Process each SVG, rasterize, assign random frame delay, and add as a frame
-            foreach (string inputPath in inputPaths)
+            var rasterOptions = new SvgRasterizationOptions
             {
-                using (Image svgImage = Image.Load(inputPath))
-                using (MemoryStream ms = new MemoryStream())
+                PageWidth = firstSvg.Width,
+                PageHeight = firstSvg.Height,
+                BackgroundColor = Aspose.Imaging.Color.White
+            };
+            var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                firstSvg.Save(ms, pngOptions);
+                ms.Position = 0;
+                using (Aspose.Imaging.RasterImage firstRaster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
                 {
-                    svgImage.Save(ms, new PngOptions());
-                    ms.Position = 0;
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    var createOptions = new ApngOptions
                     {
-                        uint randomDelay = (uint)rnd.Next(50, 500); // delay in milliseconds
-                        apng.DefaultFrameTime = randomDelay;
-                        apng.AddFrame(raster);
+                        Source = new FileCreateSource(outputPath, false),
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+
+                    using (ApngImage apngImage = (ApngImage)Aspose.Imaging.Image.Create(createOptions, firstRaster.Width, firstRaster.Height))
+                    {
+                        apngImage.RemoveAllFrames();
+
+                        int firstDelay = rand.Next(50, 301);
+                        apngImage.AddFrame(firstRaster);
+                        var firstFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        firstFrame.FrameTime = firstDelay;
+
+                        for (int i = 1; i < svgFiles.Length; i++)
+                        {
+                            string path = svgFiles[i];
+                            if (!File.Exists(path))
+                            {
+                                Console.Error.WriteLine($"File not found: {path}");
+                                return;
+                            }
+
+                            using (Aspose.Imaging.Image svg = Aspose.Imaging.Image.Load(path))
+                            {
+                                var ro = new SvgRasterizationOptions
+                                {
+                                    PageWidth = svg.Width,
+                                    PageHeight = svg.Height,
+                                    BackgroundColor = Aspose.Imaging.Color.White
+                                };
+                                var po = new PngOptions { VectorRasterizationOptions = ro };
+
+                                using (MemoryStream ms2 = new MemoryStream())
+                                {
+                                    svg.Save(ms2, po);
+                                    ms2.Position = 0;
+                                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms2))
+                                    {
+                                        int delay = rand.Next(50, 301);
+                                        apngImage.AddFrame(raster);
+                                        var frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                                        frame.FrameTime = delay;
+                                    }
+                                }
+                            }
+                        }
+
+                        apngImage.Save();
                     }
                 }
             }
-
-            // Save the assembled APNG
-            apng.Save();
         }
     }
 }
