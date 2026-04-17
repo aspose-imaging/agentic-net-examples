@@ -6,43 +6,38 @@ using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define input and output directories (relative to current directory)
-        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+        // Hardcoded relative input and output directories
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
         // Get all DICOM files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+        string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
 
-        foreach (string inputPath in files)
+        foreach (string inputPath in dicomFiles)
         {
             // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                continue;
             }
 
-            // Load the DICOM image
-            using (var dicomImage = (DicomImage)Image.Load(inputPath))
+            // Build the output PNG file path
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+            // Ensure the output directory for this file exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image and save it as PNG
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                int pageIndex = 0;
-                // Iterate through each page of the DICOM image
-                foreach (var page in dicomImage.DicomPages)
-                {
-                    // Build output file name for the current page
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + $"_page{pageIndex}.png";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as PNG
-                    page.Save(outputPath, new PngOptions());
-
-                    pageIndex++;
-                }
+                dicomImage.Save(outputPath, new PngOptions());
             }
         }
     }
