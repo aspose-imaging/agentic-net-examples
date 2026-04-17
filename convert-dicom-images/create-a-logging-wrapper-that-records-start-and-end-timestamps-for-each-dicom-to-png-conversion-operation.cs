@@ -1,53 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input DICOM file and output directory
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputDir = @"c:\temp\output";
+        string inputPath = "input.dcm";
+        string outputDirectory = "Output";
 
-        // Input path safety check
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the base output directory exists
-        Directory.CreateDirectory(outputDir);
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        // Load the DICOM image from a file stream
-        using (Stream stream = File.OpenRead(inputPath))
+        // Log overall conversion start
+        Console.WriteLine($"Conversion started at {DateTime.Now:O}");
+
+        // Load DICOM image
+        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
         {
-            using (DicomImage dicomImage = new DicomImage(stream))
+            int pageIndex = 0;
+            foreach (var dicomPage in dicomImage.DicomPages)
             {
-                // Iterate through each page in the DICOM image
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
-                {
-                    // Build the output PNG file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"page_{dicomPage.Index}.png");
+                // Log start of page conversion
+                Console.WriteLine($"Page {pageIndex} conversion started at {DateTime.Now:O}");
 
-                    // Record start timestamp
-                    DateTime start = DateTime.Now;
-                    Console.WriteLine($"Start conversion: Input={inputPath}, Page={dicomPage.Index}, Output={outputPath}, Time={start:O}");
+                // Prepare output path for this page
+                string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
 
-                    // Output path safety: ensure directory exists before saving
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as a PNG image
-                    dicomPage.Save(outputPath, new PngOptions());
+                // Save page as PNG
+                dicomPage.Save(outputPath, new PngOptions());
 
-                    // Record end timestamp and duration
-                    DateTime end = DateTime.Now;
-                    Console.WriteLine($"End conversion: Input={inputPath}, Page={dicomPage.Index}, Output={outputPath}, Time={end:O}, Duration={(end - start).TotalSeconds}s");
-                }
+                // Log end of page conversion
+                Console.WriteLine($"Page {pageIndex} conversion ended at {DateTime.Now:O}");
+
+                pageIndex++;
             }
         }
+
+        // Log overall conversion end
+        Console.WriteLine($"Conversion completed at {DateTime.Now:O}");
     }
 }
