@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -21,33 +21,40 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         // Load the APNG image
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        using (Image loadedImage = Image.Load(inputPath))
         {
-            // Prepare TIFF options (default format, RGB, 8 bits per sample)
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-
-            // Create the first TIFF frame from the first APNG frame
-            RasterImage firstRaster = (RasterImage)apng.Pages[0];
-            TiffFrame firstFrame = new TiffFrame(firstRaster);
-
-            // Initialize the multi-page TIFF image with the first frame
-            using (TiffImage tiffImage = new TiffImage(firstFrame))
+            ApngImage apngImage = loadedImage as ApngImage;
+            if (apngImage == null)
             {
-                // Add remaining APNG frames as additional TIFF pages
-                for (int i = 1; i < apng.PageCount; i++)
+                Console.Error.WriteLine("The input file is not a valid APNG image.");
+                return;
+            }
+
+            // Ensure there is at least one frame
+            if (apngImage.PageCount == 0)
+            {
+                Console.Error.WriteLine("No frames found in the APNG image.");
+                return;
+            }
+
+            // Create the first TIFF frame from the first APNG page
+            TiffFrame firstTiffFrame = new TiffFrame((RasterImage)apngImage.Pages[0]);
+
+            // Create a multi‑page TIFF image using the first frame
+            using (TiffImage tiffImage = new TiffImage(firstTiffFrame))
+            {
+                // Add remaining frames as separate pages
+                for (int i = 1; i < apngImage.PageCount; i++)
                 {
-                    RasterImage raster = (RasterImage)apng.Pages[i];
-                    TiffFrame frame = new TiffFrame(raster);
-                    tiffImage.AddFrame(frame);
+                    TiffFrame tiffFrame = new TiffFrame((RasterImage)apngImage.Pages[i]);
+                    tiffImage.AddFrame(tiffFrame);
                 }
 
-                // Save the resulting multi-page TIFF
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the multi‑page TIFF
                 tiffImage.Save(outputPath);
             }
         }
