@@ -1,17 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Temp\input.dcm";
+        string outputDirectory = @"C:\Temp\Output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,44 +19,48 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         const int maxAttempts = 3;
-        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        int attempt = 0;
+        bool success = false;
+
+        while (attempt < maxAttempts && !success)
         {
             try
             {
-                // Load DICOM image
-                using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+                // Open the DICOM file as a stream
+                using (FileStream stream = File.OpenRead(inputPath))
                 {
-                    int pageIndex = 0;
-                    foreach (var page in dicom.DicomPages)
+                    // Load the DICOM image from the stream
+                    using (DicomImage dicomImage = new DicomImage(stream))
                     {
-                        // Build per-page output file name
-                        string pageOutput = Path.Combine(
-                            Path.GetDirectoryName(outputPath) ?? string.Empty,
-                            $"output_page_{pageIndex}.png");
+                        // Iterate through each page and save as PNG
+                        foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                        {
+                            // Build output file name for the current page
+                            string outputPath = Path.Combine(outputDirectory, $"page_{dicomPage.Index}.png");
 
-                        // Ensure directory for each page exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(pageOutput));
+                            // Ensure the output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save page as PNG
-                        page.Save(pageOutput, new PngOptions());
-                        pageIndex++;
+                            // Save the page as PNG
+                            dicomPage.Save(outputPath, new PngOptions());
+                        }
                     }
                 }
 
-                // Conversion succeeded; exit retry loop
-                break;
+                // If we reach this point, conversion succeeded
+                success = true;
+                Console.WriteLine("Conversion completed successfully.");
             }
-            catch (Exception ex)
+            catch (Exception ex) // Catch transient errors
             {
-                Console.Error.WriteLine($"Attempt {attempt} failed: {ex.Message}");
-                if (attempt == maxAttempts)
+                attempt++;
+                if (attempt >= maxAttempts)
                 {
-                    Console.Error.WriteLine("All attempts failed.");
+                    Console.Error.WriteLine($"Conversion failed after {maxAttempts} attempts: {ex.Message}");
+                    return;
                 }
+                // Optionally, you could add a short delay before retrying
             }
         }
     }
