@@ -2,14 +2,13 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.apng";
-        string outputPath = "output.gif";
+        string inputPath = Path.Combine("Input", "animation.apng");
+        string outputPath = Path.Combine("Output", "animation.gif");
 
         if (!File.Exists(inputPath))
         {
@@ -21,7 +20,8 @@ class Program
 
         using (Image image = Image.Load(inputPath))
         {
-            image.Save(outputPath, new GifOptions());
+            var gifOptions = new GifOptions();
+            image.Save(outputPath, gifOptions);
         }
     }
 }
