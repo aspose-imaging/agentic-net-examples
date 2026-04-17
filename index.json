@@ -694,14 +694,12 @@
         "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Dicom",
         "Aspose.Imaging.FileFormats.Png",
-        "System.Linq",
         "Aspose.Imaging.ImageFilters.FilterOptions",
         "Aspose.Imaging.ProgressManagement",
-        "Aspose.Imaging.CoreExceptions.ImageFormats",
-        "Aspose.Imaging.CoreExceptions",
+        "Aspose.Imaging.Sources",
         "System.Threading.Tasks",
-        "System.Collections.Generic",
-        "Aspose.Imaging.Sources"
+        "System.Threading",
+        "Aspose.Imaging.FileFormats.Tiff.Enums"
       ],
       "key_apis": [
         "ApngOptions",
@@ -710,7 +708,8 @@
         "MedianFilterOptions",
         "PngImage",
         "PngOptions",
-        "RasterImage"
+        "RasterImage",
+        "TiffOptions"
       ]
     },
     {
