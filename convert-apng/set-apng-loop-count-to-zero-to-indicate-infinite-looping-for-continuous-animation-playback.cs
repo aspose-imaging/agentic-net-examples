@@ -2,13 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.webp";
+        string inputPath = "input.png";
         string outputPath = "output.apng";
 
         // Verify input file exists
@@ -19,19 +22,33 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image (can be any animated format supported by Aspose.Imaging)
-        using (Image image = Image.Load(inputPath))
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(outputDir))
         {
-            // Configure APNG options with infinite looping (NumPlays = 0)
-            ApngOptions apngOptions = new ApngOptions
+            Directory.CreateDirectory(outputDir);
+        }
+
+        // Load source raster image
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        {
+            // Configure APNG options with infinite looping
+            ApngOptions options = new ApngOptions
             {
-                NumPlays = 0 // 0 indicates infinite looping
+                Source = new FileCreateSource(outputPath, false),
+                NumPlays = 0, // 0 indicates infinite looping
+                ColorType = PngColorType.TruecolorWithAlpha
             };
 
-            // Save the image as APNG with the specified options
-            image.Save(outputPath, apngOptions);
+            // Create APNG image canvas
+            using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+            {
+                // Remove default frame and add the source frame
+                apngImage.RemoveAllFrames();
+                apngImage.AddFrame(sourceImage);
+
+                // Save the APNG image
+                apngImage.Save();
+            }
         }
     }
 }
