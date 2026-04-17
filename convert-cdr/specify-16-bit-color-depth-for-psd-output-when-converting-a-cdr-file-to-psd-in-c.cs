@@ -2,44 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\input.cdr";
-        string outputPath = @"C:\Temp\output.psd";
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/sample.psd";
 
-        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR file
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PSD options for 16‑bit per channel output
-            var psdOptions = new PsdOptions
+            CdrImage cdr = image as CdrImage;
+            if (cdr == null)
             {
-                // 16 bits per color channel
-                ChannelBitsCount = 16,
-                // Number of channels (e.g., RGBA)
-                ChannelsCount = 4,
-                // Use RGB color mode
+                Console.Error.WriteLine("Input file is not a CDR image.");
+                return;
+            }
+
+            PsdOptions psdOptions = new PsdOptions
+            {
+                ChannelBitsCount = (short)16,
+                ChannelsCount = (short)3,
                 ColorMode = ColorModes.Rgb,
-                // No compression (RAW) for lossless output
-                CompressionMethod = CompressionMethod.Raw
+                CompressionMethod = CompressionMethod.Raw,
+                VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageWidth = cdr.Width,
+                    PageHeight = cdr.Height
+                }
             };
 
-            // Save the image as PSD with the specified options
-            image.Save(outputPath, psdOptions);
+            cdr.Save(outputPath, psdOptions);
         }
     }
 }
