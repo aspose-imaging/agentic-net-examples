@@ -2,13 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input APNG file path
-        string inputPath = "input.apng";
+        string inputPath = @"C:\Images\animation.apng";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -17,39 +18,38 @@ class Program
             return;
         }
 
-        // Output directory for extracted frames
-        string outputDir = "frames";
+        // Directory where extracted frames will be saved
+        string outputDirectory = @"C:\Images\Frames";
 
-        // Ensure the output directory exists (unconditional)
-        Directory.CreateDirectory(outputDir);
+        // Ensure the output directory exists (unconditional as per requirements)
+        Directory.CreateDirectory(outputDirectory);
 
-        // Load the animated APNG
+        // Load the APNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Check if the loaded image supports multiple pages/frames
-            if (image is IMultipageImage multipage)
+            // Cast to ApngImage to access frames
+            ApngImage apngImage = image as ApngImage;
+            if (apngImage == null)
             {
-                int frameCount = multipage.PageCount;
+                Console.Error.WriteLine("The provided file is not a valid APNG image.");
+                return;
+            }
 
-                for (int i = 0; i < frameCount; i++)
+            // Iterate through each frame (page) and save as a separate PNG file
+            for (int i = 0; i < apngImage.PageCount; i++)
+            {
+                // Retrieve the frame as a RasterImage
+                using (RasterImage frame = (RasterImage)apngImage.Pages[i])
                 {
                     // Build output file path for the current frame
-                    string outputPath = Path.Combine(outputDir, $"frame_{i}.png");
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.png");
 
-                    // Ensure the directory for this output path exists (unconditional)
+                    // Ensure the directory for the output file exists (unconditional)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Retrieve the frame and save it as a PNG
-                    using (Image frame = multipage.Pages[i])
-                    {
-                        PngOptions pngOptions = new PngOptions();
-                        frame.Save(outputPath, pngOptions);
-                    }
+                    // Save the frame as PNG
+                    frame.Save(outputPath, new PngOptions());
                 }
-            }
-            else
-            {
-                Console.Error.WriteLine("The loaded image is not a multipage (animated) image.");
             }
         }
     }
