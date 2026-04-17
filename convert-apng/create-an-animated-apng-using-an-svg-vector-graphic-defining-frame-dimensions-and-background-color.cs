@@ -5,14 +5,16 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Drawing;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input SVG and output APNG paths
-        string inputPath = "input.svg";
-        string outputPath = "output.apng";
+        // Hardcoded input SVG and output APNG paths
+        string inputPath = @"C:\Images\vector_graphic.svg";
+        string outputPath = @"C:\Images\animated_output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,50 +26,50 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG vector graphic
-        using (Image svgImage = Image.Load(inputPath))
+        // Load the SVG as a raster image (Aspose.Imaging can rasterize SVG on load)
+        using (RasterImage svgRaster = (RasterImage)Image.Load(inputPath))
         {
-            int width = svgImage.Width;
-            int height = svgImage.Height;
+            // Define frame duration (in milliseconds) and total animation length
+            const int frameDuration = 100; // 100 ms per frame
+            const int totalFrames = 10;    // 10 frames animation
 
-            // Configure APNG creation options
+            // Prepare APNG creation options
             ApngOptions createOptions = new ApngOptions
             {
+                // Destination file creation source
                 Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 200, // frame duration in milliseconds
-                ColorType = PngColorType.TruecolorWithAlpha
+                // Default duration for each frame
+                DefaultFrameTime = (uint)frameDuration,
+                // Use truecolor with alpha for full color support
+                ColorType = PngColorType.TruecolorWithAlpha,
+                // Optional: set background color for the whole animation
+                BackgroundColor = Color.LightGray,
+                // Enable background color usage
+                HasBackgroundColor = true
             };
 
-            // Create the APNG canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+            // Create the APNG image with the same dimensions as the SVG raster
+            using (ApngImage apng = (ApngImage)Image.Create(createOptions, svgRaster.Width, svgRaster.Height))
             {
-                // Set background color for the canvas
-                apngImage.BackgroundColor = Color.White;
+                // Remove the default single frame that exists after creation
+                apng.RemoveAllFrames();
 
-                // Remove the default single frame
-                apngImage.RemoveAllFrames();
-
-                const int frameCount = 5;
-
-                // Add frames by rasterizing the SVG each time
-                for (int i = 0; i < frameCount; i++)
+                // Add frames – for demonstration we reuse the same raster and modify gamma to create variation
+                for (int i = 0; i < totalFrames; i++)
                 {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        // Render SVG to a raster image (PNG) in memory
-                        svgImage.Save(ms, new PngOptions());
-                        ms.Position = 0;
+                    // Add a copy of the SVG raster as a new frame
+                    apng.AddFrame(svgRaster);
 
-                        // Load the rasterized image
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
-                        {
-                            apngImage.AddFrame(raster);
-                        }
-                    }
+                    // Retrieve the frame just added
+                    ApngFrame frame = (ApngFrame)apng.Pages[apng.PageCount - 1];
+
+                    // Adjust gamma to create a simple visual effect across frames
+                    float gamma = 0.5f + (i * 0.1f);
+                    frame.AdjustGamma(gamma);
                 }
 
-                // Save the APNG (output file is already bound via FileCreateSource)
-                apngImage.Save();
+                // Save the animated PNG to the specified output path
+                apng.Save();
             }
         }
     }
