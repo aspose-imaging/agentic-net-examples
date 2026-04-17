@@ -1,56 +1,81 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input CDR file paths
+        // Input CDR files (hardcoded)
         string[] inputPaths = new string[]
         {
-            @"C:\Images\doc1.cdr",
-            @"C:\Images\doc2.cdr",
-            @"C:\Images\doc3.cdr"
+            "Input/file1.cdr",
+            "Input/file2.cdr",
+            "Input/file3.cdr"
         };
 
-        // Hardcoded output PDF path
-        string outputPath = @"C:\Images\Combined.pdf";
+        // Validate each input file
+        foreach (string path in inputPaths)
+        {
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"File not found: {path}");
+                return;
+            }
+        }
+
+        // Output PDF file (hardcoded)
+        string outputPath = "Output/Combined.pdf";
 
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create PDF options with CDR rasterization settings
-        PdfOptions pdfOptions = new PdfOptions();
-        CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-        {
-            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-            SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-            Positioning = Aspose.Imaging.ImageOptions.PositioningTypes.DefinedByDocument
-        };
-        pdfOptions.VectorRasterizationOptions = rasterOptions;
+        // Collect page sizes from all CDR documents
+        List<(int Width, int Height)> pageSizes = new List<(int, int)>();
 
-        // Open output stream once and append each CDR document as PDF pages
-        using (FileStream outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+        foreach (string cdrPath in inputPaths)
         {
-            foreach (string inputPath in inputPaths)
+            using (CdrImage cdrImage = (CdrImage)Image.Load(cdrPath))
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                // Cache all pages
+                cdrImage.CacheData();
+                foreach (CdrImagePage page in cdrImage.Pages)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Load CDR image
-                using (Image cdrImage = Image.Load(inputPath))
-                {
-                    // Save the CDR image (all its pages) to the PDF stream
-                    cdrImage.Save(outStream, pdfOptions);
+                    page.CacheData();
+                    pageSizes.Add((page.Width, page.Height));
                 }
             }
+        }
+
+        // Prepare PDF options with per‑page rasterization settings
+        PdfOptions pdfOptions = new PdfOptions();
+
+        VectorRasterizationOptions[] rasterOptions = new VectorRasterizationOptions[pageSizes.Count];
+        for (int i = 0; i < pageSizes.Count; i++)
+        {
+            rasterOptions[i] = new CdrRasterizationOptions
+            {
+                BackgroundColor = Aspose.Imaging.Color.White,
+                PageWidth = pageSizes[i].Width,
+                PageHeight = pageSizes[i].Height,
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = Aspose.Imaging.SmoothingMode.None
+            };
+        }
+
+        pdfOptions.MultiPageOptions = new MultiPageOptions
+        {
+            PageRasterizationOptions = rasterOptions
+        };
+
+        // Use the first CDR image as a dummy source for saving
+        using (Image dummy = Image.Load(inputPaths[0]))
+        {
+            dummy.Save(outputPath, pdfOptions);
         }
     }
 }
