@@ -1,16 +1,15 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Data\sample.cdr";
-        string outputPath = @"C:\Data\output\sample_page0.pdf";
+        string inputPath = "input.cdr";
+        string outputPath = "output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,24 +21,28 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR image
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+        // Load the CDR document
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Select the first page (index 0)
-            CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+            // Cast to CdrImage to access pages
+            var cdrImage = (CdrImage)image;
+            // Assume single page; get the first page
+            var page = (CdrImagePage)cdrImage.Pages[0];
 
-            // Configure PDF save options with vector rasterization settings
-            PdfOptions pdfOptions = new PdfOptions();
-            CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+            // Prepare PDF options with vector rasterization settings
+            var pdfOptions = new PdfOptions();
+            var rasterOptions = new CdrRasterizationOptions
             {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                PageWidth = page.Width,
-                PageHeight = page.Height
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = Aspose.Imaging.SmoothingMode.None
             };
             pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the selected page as PDF
+            // Set page dimensions to match the CDR page
+            pdfOptions.VectorRasterizationOptions.PageWidth = page.Width;
+            pdfOptions.VectorRasterizationOptions.PageHeight = page.Height;
+
+            // Save the single page as PDF
             page.Save(outputPath, pdfOptions);
         }
     }
