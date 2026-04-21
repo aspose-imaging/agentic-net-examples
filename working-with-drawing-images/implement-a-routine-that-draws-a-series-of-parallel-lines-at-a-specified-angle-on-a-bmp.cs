@@ -8,61 +8,63 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path (hard‑coded)
-        string outputPath = "output\\parallel_lines.bmp";
+        // Hardcoded output path
+        string outputPath = @"C:\Temp\ParallelLines.bmp";
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Image dimensions
+        // Canvas size
         int width = 800;
         int height = 600;
 
-        // Line drawing parameters
-        double angleDeg = 45.0;          // Angle of the lines in degrees
-        double spacing = 20.0;           // Distance between parallel lines
-        int penWidth = 2;                // Pen thickness
-        Color lineColor = Color.Black;   // Line color
+        // Line parameters
+        double angleDeg = 45.0;               // Angle of lines in degrees
+        double spacing = 20.0;                // Distance between parallel lines
+        double angleRad = angleDeg * Math.PI / 180.0;
+        double dx = Math.Cos(angleRad);       // Direction vector X
+        double dy = Math.Sin(angleRad);       // Direction vector Y
+        double px = -dy;                      // Perpendicular vector X
+        double py = dx;                       // Perpendicular vector Y
+        double halfLength = Math.Sqrt(width * width + height * height); // Half length to cover canvas
 
-        // Prepare BMP options with a FileCreateSource (output is already bound)
+        // Number of lines to cover the whole image
+        int lineCount = (int)((width + height) / spacing) * 2;
+
+        // Create BMP image bound to the output file
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create the image canvas
         using (Image image = Image.Create(bmpOptions, width, height))
         {
-            // Initialize graphics for drawing
+            // Initialize graphics
             Graphics graphics = new Graphics(image);
-            Pen pen = new Pen(lineColor, penWidth);
+            graphics.Clear(Color.White);
 
-            // Pre‑compute trigonometric values
-            double angleRad = angleDeg * Math.PI / 180.0;
-            double dirX = Math.Cos(angleRad);
-            double dirY = Math.Sin(angleRad);
-            double perpX = -Math.Sin(angleRad);
-            double perpY = Math.Cos(angleRad);
-
-            // Length sufficient to cover the whole canvas (diagonal)
-            double maxOffset = Math.Sqrt(width * width + height * height);
+            Pen pen = new Pen(Color.Black, 1);
 
             // Center of the canvas
             double centerX = width / 2.0;
             double centerY = height / 2.0;
 
-            // Draw parallel lines across the canvas
-            for (double offset = -maxOffset; offset <= maxOffset; offset += spacing)
+            // Draw parallel lines
+            for (int i = -lineCount; i <= lineCount; i++)
             {
-                double startX = centerX + perpX * offset - dirX * maxOffset;
-                double startY = centerY + perpY * offset - dirY * maxOffset;
-                double endX   = centerX + perpX * offset + dirX * maxOffset;
-                double endY   = centerY + perpY * offset + dirY * maxOffset;
+                double offset = i * spacing;
+                double cx = centerX + offset * px;
+                double cy = centerY + offset * py;
+
+                double x1 = cx - halfLength * dx;
+                double y1 = cy - halfLength * dy;
+                double x2 = cx + halfLength * dx;
+                double y2 = cy + halfLength * dy;
 
                 graphics.DrawLine(pen,
-                    (int)Math.Round(startX), (int)Math.Round(startY),
-                    (int)Math.Round(endX),   (int)Math.Round(endY));
+                    (int)Math.Round(x1), (int)Math.Round(y1),
+                    (int)Math.Round(x2), (int)Math.Round(y2));
             }
 
-            // Save the image (output already bound to the file)
+            // Save the image (output file already bound)
             image.Save();
         }
     }
