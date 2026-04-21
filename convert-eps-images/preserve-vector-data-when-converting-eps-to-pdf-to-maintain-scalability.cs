@@ -3,38 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = "Sample.eps";
+        string outputPath = "Sample.pdf";
 
-        // Verify input file exists
+        // Verify that the input EPS file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image and save as PDF preserving vector data
-        using (Image image = Image.Load(inputPath))
-        using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)image)
+        // Load the EPS image as a vector image
+        using (var image = (EpsImage)Image.Load(inputPath))
         {
-            var pdfOptions = new PdfOptions
+            // Configure PDF options to preserve vector data
+            var options = new PdfOptions
             {
                 PdfCoreOptions = new PdfCoreOptions
                 {
+                    // Set desired PDF compliance (e.g., PDF/A-1b)
                     PdfCompliance = PdfComplianceVersion.PdfA1b
                 }
             };
 
-            epsImage.Save(outputPath, pdfOptions);
+            // Save the EPS as a PDF using the configured options
+            image.Save(outputPath, options);
         }
     }
 }
