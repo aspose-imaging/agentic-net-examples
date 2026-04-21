@@ -1,69 +1,74 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Set up base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add PSD files and rerun.");
-            return;
-        }
+            // Define input and output directories
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all PSD files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.psd");
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Validate input directory
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
             }
 
-            // Load the PSD image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDir))
             {
-                // Cast to RasterImage for deskew operation
-                Aspose.Imaging.RasterImage raster = image as Aspose.Imaging.RasterImage;
-                if (raster == null)
+                Directory.CreateDirectory(outputDir);
+            }
+
+            // Get all PSD files in the input directory
+            string[] files = Directory.GetFiles(inputDir, "*.psd");
+
+            foreach (string inputPath in files)
+            {
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"Unable to process non-raster file: {inputPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Deskew the image without resizing, using a light gray background
-                raster.NormalizeAngle(false, Aspose.Imaging.Color.LightGray);
+                // Construct output file path with PNG extension
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".png");
 
-                // Prepare the output PNG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-                // Ensure the output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the deskewed image as PNG
-                PngOptions pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                // Load the PSD image as a raster image
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+                {
+                    // Deskew the image without resizing the canvas
+                    raster.NormalizeAngle(false, Color.LightGray);
+
+                    // Prepare PNG save options
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    // Save the deskewed image as PNG
+                    raster.Save(outputPath, pngOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
