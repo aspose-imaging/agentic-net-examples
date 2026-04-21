@@ -1,55 +1,54 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the PNG image
-        using (PngImage pngImage = (PngImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Define a custom kernel (example 3x3 kernel)
-            double[] kernel = new double[]
-            {
-                0, -1, 0,
-                -1, 5, -1,
-                0, -1, 0
-            };
+            RasterImage raster = (RasterImage)image;
 
-            // Validate that the kernel represents an odd-sized square matrix
-            int length = kernel.Length;
-            int size = (int)Math.Sqrt(length);
-            if (size * size != length || size % 2 == 0)
+            int kernelSize = 5;
+            if (kernelSize % 2 == 0)
             {
-                Console.Error.WriteLine("Kernel dimensions must be odd and form a square matrix.");
+                Console.Error.WriteLine("Kernel size must be an odd number.");
                 return;
             }
 
-            // Create deconvolution filter options with the validated kernel
-            DeconvolutionFilterOptions filterOptions = new DeconvolutionFilterOptions(kernel);
+            double[,] kernel = new double[kernelSize, kernelSize];
+            double value = 1.0 / (kernelSize * kernelSize);
+            for (int y = 0; y < kernelSize; y++)
+            {
+                for (int x = 0; x < kernelSize; x++)
+                {
+                    kernel[y, x] = value;
+                }
+            }
 
-            // Apply the deconvolution filter to the image
-            pngImage.Filter(filterOptions);
+            var deconvOptions = new DeconvolutionFilterOptions(kernel);
+            raster.Filter(raster.Bounds, deconvOptions);
 
-            // Save the processed image
-            pngImage.Save(outputPath);
+            var saveOptions = new PngOptions
+            {
+                Source = new FileCreateSource(outputPath, false)
+            };
+            raster.Save(outputPath, saveOptions);
         }
     }
 }
