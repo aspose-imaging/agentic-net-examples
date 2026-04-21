@@ -8,43 +8,35 @@ class Program
     static void Main()
     {
         // Hardcoded input path
-        string inputPath = @"C:\Images\sample.otg";
+        string inputPath = @"C:\temp\sample.otg";
 
-        // Verify that the input file exists
+        // Verify the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        // MemoryStream to hold the PNG output
+        using (MemoryStream outputStream = new MemoryStream())
         {
-            // Configure rasterization options for OTG to PNG conversion
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
             {
-                // Preserve the original image size
-                PageSize = image.Size
-            };
+                // Set up PNG save options with OTG rasterization
+                PngOptions pngOptions = new PngOptions();
+                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+                pngOptions.VectorRasterizationOptions = otgRasterization;
 
-            // Set up PNG save options and attach the rasterization options
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = otgRasterOptions
-            };
-
-            // Save the converted image into a memory stream
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                image.Save(memoryStream, pngOptions);
-
-                // The memory stream now contains the PNG data.
-                // Reset position if further processing is needed.
-                memoryStream.Position = 0;
-
-                // Example: output the size of the generated PNG data
-                Console.WriteLine($"PNG data length: {memoryStream.Length} bytes");
+                // Save the image as PNG into the memory stream
+                image.Save(outputStream, pngOptions);
             }
+
+            // The MemoryStream now contains the PNG data
+            Console.WriteLine($"PNG data length: {outputStream.Length} bytes");
         }
     }
 }
