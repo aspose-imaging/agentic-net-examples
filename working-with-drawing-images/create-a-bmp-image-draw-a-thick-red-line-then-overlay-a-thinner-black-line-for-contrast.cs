@@ -6,34 +6,39 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define output path
-        string outputPath = @"C:\Temp\output.bmp";
+        // Output BMP file path (hardcoded)
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file stream for the BMP image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Create a file stream for the output image
+        using (FileStream outStream = new FileStream(outputPath, FileMode.Create))
         {
-            // Set BMP options with the stream as source
+            // Set BMP options with the stream source
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new StreamSource(stream);
+            bmpOptions.Source = new StreamSource(outStream);
 
-            // Create a 200x200 BMP image
+            // Create a BMP image of size 200x200
             using (Image image = Image.Create(bmpOptions, 200, 200))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
+                // Optional: clear background to white
+                graphics.Clear(Color.White);
+
                 // Draw a thick red line
-                graphics.DrawLine(new Pen(Color.Red, 10), new Point(10, 10), new Point(190, 190));
+                Pen redPen = new Pen(Color.Red, 10);
+                graphics.DrawLine(redPen, new Point(20, 20), new Point(180, 180));
 
                 // Overlay a thinner black line for contrast
-                graphics.DrawLine(new Pen(Color.Black, 2), new Point(10, 10), new Point(190, 190));
+                Pen blackPen = new Pen(Color.Black, 2);
+                graphics.DrawLine(blackPen, new Point(20, 20), new Point(180, 180));
 
-                // Save the image (stream is already bound)
+                // Save the image (stream is already bound to the file)
                 image.Save();
             }
         }
