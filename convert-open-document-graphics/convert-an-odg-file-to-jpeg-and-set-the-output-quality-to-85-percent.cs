@@ -2,34 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.odg";
-        string outputPath = @"C:\temp\output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = "sample.odg";
+        string outputPath = "sample_converted.jpg";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure JPEG save options with quality set to 85%
-        JpegOptions jpegOptions = new JpegOptions
-        {
-            Quality = 85
-        };
-
-        // Load the ODG image and save it as JPEG
+        // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
+            // Prepare JPEG save options with quality 85
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Quality = 85,
+                // Configure rasterization for vector source
+                VectorRasterizationOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
+                }
+            };
+
+            // Save as JPEG
             image.Save(outputPath, jpegOptions);
         }
     }
