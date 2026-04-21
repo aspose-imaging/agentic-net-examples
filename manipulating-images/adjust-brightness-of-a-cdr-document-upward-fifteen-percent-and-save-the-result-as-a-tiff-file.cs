@@ -1,62 +1,54 @@
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cdr";
-        string outputPath = "output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.cdr";
+            string outputPath = @"C:\temp\sample_bright.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR document
-        using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Prepare rasterization options for vector to raster conversion
-            var rasterOptions = new VectorRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageWidth = cdr.Width,
-                PageHeight = cdr.Height
-            };
-
-            // Tiff options for rasterization (no source needed when saving to stream)
-            var rasterTiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Rasterize CDR to a memory stream
-            using (MemoryStream ms = new MemoryStream())
-            {
-                cdr.Save(ms, rasterTiffOptions);
-                ms.Position = 0;
-
-                // Load the rasterized image as TiffImage
-                using (TiffImage tiff = (TiffImage)Aspose.Imaging.Image.Load(ms))
-                {
-                    // Increase brightness by ~15% (15% of 255 ≈ 38)
-                    tiff.AdjustBrightness(38);
-
-                    // Save the adjusted image as TIFF
-                    var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    tiff.Save(outputPath, saveOptions);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR document
+            using (Image image = Image.Load(inputPath))
+            {
+                // Increase brightness by ~15% of the maximum range (255 * 0.15 ≈ 38)
+                int brightnessValue = 38;
+
+                // Adjust brightness using the appropriate method
+                if (image is RasterImage rasterImg)
+                {
+                    rasterImg.AdjustBrightness(brightnessValue);
+                }
+                else if (image is TiffImage tiffImg)
+                {
+                    tiffImg.AdjustBrightness(brightnessValue);
+                }
+
+                // Save the result as a TIFF file
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
