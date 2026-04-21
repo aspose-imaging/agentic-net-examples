@@ -2,44 +2,64 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.apng";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.tif";
+            string outputDir = "output";
 
-        string outputDir = "output";
-
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
-        {
-            for (int i = 0; i < apng.PageCount; i++)
+            if (!File.Exists(inputPath))
             {
-                string outputPath = Path.Combine(outputDir, $"page_{i}.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                using (RasterImage frame = (RasterImage)apng.Pages[i])
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            using (Image image = Image.Load(inputPath))
+            {
+                IMultipageImage multipage = image as IMultipageImage;
+                if (multipage == null)
                 {
-                    double[,] kernel = ConvolutionFilter.GetBlurMotion(5, 225);
-                    var filterOptions = new ConvolutionFilterOptions(kernel);
-                    frame.Filter(frame.Bounds, filterOptions);
+                    Console.Error.WriteLine("The loaded image is not a multipage image.");
+                    return;
+                }
 
-                    var pngOptions = new PngOptions
+                // Prepare convolution kernel once
+                double[,] kernel = ConvolutionFilter.GetBlurMotion(5, 225);
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    // Each page is an Image; cast to RasterImage for filtering
+                    using (RasterImage raster = (RasterImage)multipage.Pages[i])
                     {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
-                    frame.Save(outputPath, pngOptions);
+                        // Apply the motion blur convolution filter to the entire page
+                        raster.Filter(raster.Bounds, filterOptions);
+
+                        // Build output path for the current page
+                        string outputPath = Path.Combine(outputDir, $"page_{i}.png");
+
+                        // Ensure the directory for this output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the filtered page as PNG
+                        PngOptions pngOptions = new PngOptions();
+                        raster.Save(outputPath, pngOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
