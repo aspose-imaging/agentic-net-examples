@@ -9,19 +9,19 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string backgroundPath = @"C:\temp\background.png";
-        string overlayPath = @"C:\temp\overlay.png";
-        string outputPath = @"C:\temp\output.png";
+        string inputPath1 = "input1.png";
+        string inputPath2 = "input2.png";
+        string outputPath = "output.png";
 
         // Validate input files
-        if (!File.Exists(backgroundPath))
+        if (!File.Exists(inputPath1))
         {
-            Console.Error.WriteLine($"File not found: {backgroundPath}");
+            Console.Error.WriteLine($"File not found: {inputPath1}");
             return;
         }
-        if (!File.Exists(overlayPath))
+        if (!File.Exists(inputPath2))
         {
-            Console.Error.WriteLine($"File not found: {overlayPath}");
+            Console.Error.WriteLine($"File not found: {inputPath2}");
             return;
         }
 
@@ -29,26 +29,27 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load background image from memory stream
-        using (MemoryStream bgStream = new MemoryStream(File.ReadAllBytes(backgroundPath)))
-        using (RasterImage backgroundImage = (RasterImage)Image.Load(bgStream))
+        using (MemoryStream bgStream = new MemoryStream(File.ReadAllBytes(inputPath1)))
+        using (RasterImage background = (RasterImage)Image.Load(bgStream))
         // Load overlay image from memory stream
-        using (MemoryStream ovStream = new MemoryStream(File.ReadAllBytes(overlayPath)))
-        using (RasterImage overlayImage = (RasterImage)Image.Load(ovStream))
-        // Prepare output memory stream
-        using (MemoryStream outStream = new MemoryStream())
+        using (MemoryStream overlayStream = new MemoryStream(File.ReadAllBytes(inputPath2)))
+        using (RasterImage overlay = (RasterImage)Image.Load(overlayStream))
         {
             // Apply alpha blending (50% opacity)
-            backgroundImage.Blend(new Point(0, 0), overlayImage, 128);
+            background.Blend(new Point(0, 0), overlay, 128);
 
-            // Save blended image to output stream as PNG
-            PngOptions pngOptions = new PngOptions();
-            backgroundImage.Save(outStream, pngOptions);
-
-            // Write output stream to file
-            outStream.Position = 0;
-            using (FileStream fileOut = new FileStream(outputPath, FileMode.Create))
+            // Save blended image to an output memory stream
+            using (MemoryStream outStream = new MemoryStream())
             {
-                outStream.CopyTo(fileOut);
+                PngOptions pngOptions = new PngOptions();
+                background.Save(outStream, pngOptions);
+
+                // Write the memory stream to the output file
+                outStream.Position = 0;
+                using (FileStream fileOut = new FileStream(outputPath, FileMode.Create))
+                {
+                    outStream.CopyTo(fileOut);
+                }
             }
         }
     }
