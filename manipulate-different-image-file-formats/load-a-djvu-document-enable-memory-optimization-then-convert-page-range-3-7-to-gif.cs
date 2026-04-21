@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.djvu";
-        string outputPath = @"C:\Temp\output_pages_3_7.gif";
+        string inputPath = "sample.djvu";
+        string outputDirectory = "output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,27 +20,32 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(outputDirectory);
 
-        // Load DjVu with memory optimization (buffer size hint)
-        using (Stream stream = File.OpenRead(inputPath))
+        // Set load options to limit memory usage (e.g., 1 MB buffer)
+        LoadOptions loadOptions = new LoadOptions
         {
-            var loadOptions = new LoadOptions
-            {
-                // Example: limit internal buffers to 1 MB
-                BufferSizeHint = 1 * 1024 * 1024
-            };
+            BufferSizeHint = 1 * 1024 * 1024 // 1 MB
+        };
 
-            using (var djvuImage = new DjvuImage(stream, loadOptions))
+        // Open the DjVu file with memory‑optimized loading
+        using (FileStream stream = File.OpenRead(inputPath))
+        using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
+        {
+            // Iterate through pages and save pages 3‑7 as GIF files
+            foreach (DjvuPage page in djvuImage.Pages)
             {
-                // Prepare GIF save options and specify page range 3‑7
-                var gifOptions = new GifOptions
+                int pageNumber = page.PageNumber;
+                if (pageNumber >= 3 && pageNumber <= 7)
                 {
-                    MultiPageOptions = new DjvuMultiPageOptions(new int[] { 3, 4, 5, 6, 7 })
-                };
+                    string outputPath = Path.Combine(outputDirectory, $"page{pageNumber}.gif");
 
-                // Save selected pages as a single GIF file
-                djvuImage.Save(outputPath, gifOptions);
+                    // Ensure the directory for the output file exists (already created above)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as GIF
+                    page.Save(outputPath, new GifOptions());
+                }
             }
         }
     }
