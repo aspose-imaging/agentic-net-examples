@@ -2,41 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.pdf";
-        string outputPath = "output/output.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.pdf";
+        string outputPath = @"C:\Temp\output.svg";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        // Load the PDF document
+        using (Image pdfImage = Image.Load(inputPath))
         {
+            // Prepare SVG export options
             SvgOptions exportOptions = new SvgOptions();
 
+            // Export only the first two pages (adjust as needed)
             exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 2));
 
-            if (image is VectorImage)
+            // Configure vector rasterization options
+            var vectorOptions = new VectorRasterizationOptions
             {
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    BackgroundColor = Color.White
-                };
-                exportOptions.VectorRasterizationOptions = rasterOptions;
-            }
+                BackgroundColor = Color.White,
+                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = SmoothingMode.None
+            };
+            exportOptions.VectorRasterizationOptions = vectorOptions;
 
-            image.Save(outputPath, exportOptions);
+            // Save combined layers as a single SVG file
+            pdfImage.Save(outputPath, exportOptions);
         }
     }
 }
