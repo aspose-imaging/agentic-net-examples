@@ -1,58 +1,66 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded password for signature verification
-        string password = "SecretPassword";
-
-        // List of image paths in cloud storage
-        string[] inputPaths = new string[]
+        try
         {
-            "cloud/image1.jpg",
-            "cloud/image2.png",
-            "cloud/image3.tif"
-        };
-
-        // Audit file to log mismatches
-        string auditPath = "audit/mismatches.txt";
-
-        // Ensure the audit directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(auditPath));
-
-        using (var writer = new StreamWriter(auditPath, true))
-        {
-            foreach (var inputPath in inputPaths)
+            // Hardcoded input image paths
+            string[] inputPaths = new string[]
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                "cloudstorage/image1.jpg",
+                "cloudstorage/image2.png",
+                "cloudstorage/image3.tif"
+            };
 
-                // Load the image
-                using (var img = Aspose.Imaging.Image.Load(inputPath))
-                {
-                    // Cast to RasterImage to access digital signature methods
-                    var raster = img as Aspose.Imaging.RasterImage;
-                    bool isSigned = false;
+            // Password used for digital signature verification
+            string password = "SecretPassword";
 
-                    if (raster != null)
+            // Audit log file path
+            string auditFilePath = "audit/mismatches.txt";
+
+            // Ensure audit directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(auditFilePath));
+
+            using (var auditWriter = new StreamWriter(auditFilePath, true))
+            {
+                foreach (var inputPath in inputPaths)
+                {
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        // Check digital signature using the provided password
-                        isSigned = raster.IsDigitalSigned(password);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
                     }
 
-                    // Log any mismatches (unsigned or verification failure)
-                    if (!isSigned)
+                    // Load image and check digital signature
+                    using (Image image = Image.Load(inputPath))
                     {
-                        writer.WriteLine($"Unsigned or verification failed: {inputPath}");
+                        // Cast to RasterImage to access IsDigitalSigned
+                        var raster = image as RasterImage;
+                        if (raster != null)
+                        {
+                            bool signed = raster.IsDigitalSigned(password);
+                            if (!signed)
+                            {
+                                auditWriter.WriteLine($"{DateTime.UtcNow:u} - Signature mismatch: {inputPath}");
+                            }
+                        }
+                        else
+                        {
+                            // If not a raster image, treat as unsigned
+                            auditWriter.WriteLine($"{DateTime.UtcNow:u} - Unable to verify (non-raster): {inputPath}");
+                        }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
