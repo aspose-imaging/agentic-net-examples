@@ -2,80 +2,71 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
         string inputPath = "input.emf";
-        string outputPath = "output.png";
         string tempPath = "temp.png";
+        string outputPath = "output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Ensure temporary file directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-        // Rasterize EMF to a temporary PNG
+        // Load EMF and rasterize to a temporary PNG
         using (Image emfImage = Image.Load(inputPath))
         {
-            // Configure rasterization options
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+            var pngOptions = new PngOptions
             {
-                BackgroundColor = Color.White,
-                PageSize = emfImage.Size
+                VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    PageSize = emfImage.Size,
+                    BackgroundColor = Color.White
+                },
+                Source = new FileCreateSource(tempPath, false)
             };
-
-            // Set PNG options with vector rasterization
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save rasterized image to temporary PNG
-            emfImage.Save(tempPath, pngOptions);
+            emfImage.Save(pngOptions);
         }
 
-        // Apply sepia tone to the rasterized image and save final PNG
+        // Load the rasterized PNG and apply sepia tone
         using (RasterImage raster = (RasterImage)Image.Load(tempPath))
         {
-            // Load ARGB pixels
             int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-
-            // Apply sepia transformation
             for (int i = 0; i < pixels.Length; i++)
             {
-                int pixel = pixels[i];
-                int a = (pixel >> 24) & 0xFF;
-                int r = (pixel >> 16) & 0xFF;
-                int g = (pixel >> 8) & 0xFF;
-                int b = pixel & 0xFF;
+                int argb = pixels[i];
+                int a = (argb >> 24) & 0xFF;
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >> 8) & 0xFF;
+                int b = argb & 0xFF;
 
                 int tr = (int)(0.393 * r + 0.769 * g + 0.189 * b);
                 int tg = (int)(0.349 * r + 0.686 * g + 0.168 * b);
                 int tb = (int)(0.272 * r + 0.534 * g + 0.131 * b);
 
-                r = tr > 255 ? 255 : tr;
-                g = tg > 255 ? 255 : tg;
-                b = tb > 255 ? 255 : tb;
+                tr = tr > 255 ? 255 : tr;
+                tg = tg > 255 ? 255 : tg;
+                tb = tb > 255 ? 255 : tb;
 
-                pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                pixels[i] = (a << 24) | (tr << 16) | (tg << 8) | tb;
             }
-
-            // Save modified pixels back
             raster.SaveArgb32Pixels(raster.Bounds, pixels);
 
-            // Save final PNG
-            raster.Save(outputPath, new PngOptions());
+            // Save the final PNG with sepia effect
+            var finalOptions = new PngOptions
+            {
+                Source = new FileCreateSource(outputPath, false)
+            };
+            raster.Save(finalOptions);
         }
     }
 }
