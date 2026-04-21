@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.bmp";
+        string outputPath = @"C:\Images\Result\sample.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,33 +25,41 @@ class Program
         // Load the OTG image
         using (Image otgImage = Image.Load(inputPath))
         {
-            // Set up rasterization options for OTG
-            var otgRasterizationOptions = new OtgRasterizationOptions
+            // Prepare rasterization options for OTG conversion
+            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
             {
-                PageSize = otgImage.Size
+                PageSize = otgImage.Size // Preserve original size
             };
 
-            // Configure BMP save options with the rasterization settings
-            var bmpOptions = new BmpOptions
+            // Set up BMP save options with vector rasterization
+            BmpOptions bmpOptions = new BmpOptions
             {
                 VectorRasterizationOptions = otgRasterizationOptions
             };
 
-            // Save the image as BMP
+            // Save the OTG as BMP (initial resolution)
             otgImage.Save(outputPath, bmpOptions);
         }
 
-        // Ensure output directory exists before second save (redundant but follows rule)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the saved BMP to adjust its resolution
-        using (Image bmpImage = Image.Load(outputPath))
+        // Load the newly created BMP to adjust resolution
+        using (Image bmpImageBase = Image.Load(outputPath))
         {
-            var bmp = (BmpImage)bmpImage;
-            // Set custom resolution to 150 DPI
-            bmp.SetResolution(150.0, 150.0);
-            // Overwrite the BMP with the new resolution
-            bmp.Save(outputPath);
+            // Cast to BmpImage to access SetResolution
+            if (bmpImageBase is BmpImage bmpImage)
+            {
+                // Set custom resolution to 150 DPI
+                bmpImage.SetResolution(150.0, 150.0);
+
+                // Ensure output directory exists (again, safe)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Overwrite the BMP with the new resolution
+                bmpImage.Save(outputPath);
+            }
+            else
+            {
+                Console.Error.WriteLine("Failed to cast loaded image to BmpImage.");
+            }
         }
     }
 }
