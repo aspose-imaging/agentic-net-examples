@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.tga";
-        string outputPath = "output.bmp";
+        string inputPath = @"C:\temp\input.tga";
+        string outputPath = @"C:\temp\output.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -18,19 +18,19 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the TGA image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering capabilities
+            // Cast to RasterImage to access filtering
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a sharpen filter with size 3 and sigma 1.0 (strength three)
-            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 1.0));
+            // Apply a sharpen filter (strength three) using size=3, sigma=3.0
+            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 3.0));
 
-            // Save the processed image as BMP
+            // Save the result as BMP
             rasterImage.Save(outputPath);
         }
     }
