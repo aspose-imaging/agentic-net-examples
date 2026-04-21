@@ -1,27 +1,21 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input DICOM files
-        string[] inputPaths = new string[]
+        // Define input DICOM files (relative paths)
+        string[] inputFiles = new string[]
         {
-            @"C:\Images\Input1.dcm",
-            @"C:\Images\Input2.dcm"
+            "Input/image1.dcm",
+            "Input/image2.dcm"
         };
 
-        // Output directory for PNG files
-        string outputDir = @"C:\Images\Output";
-
-        // Ensure the output directory exists (unconditional)
-        Directory.CreateDirectory(outputDir);
-
-        foreach (string inputPath in inputPaths)
+        // Process each DICOM file
+        foreach (string inputPath in inputFiles)
         {
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -30,31 +24,30 @@ class Program
                 return;
             }
 
-            // Set up load options with a small buffer size hint for high‑performance memory usage
-            LoadOptions loadOptions = new LoadOptions
-            {
-                BufferSizeHint = 256 * 1024 // 256 KB
-            };
-
-            // Load the DICOM image from a file stream using the load options
+            // Load DICOM image with high‑performance memory strategy
             using (FileStream stream = File.OpenRead(inputPath))
-            using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
             {
-                // Adjust gamma for the whole DICOM image (example gamma value)
-                dicomImage.AdjustGamma(2.2f);
+                // Set a large buffer size hint for performance
+                Aspose.Imaging.LoadOptions loadOptions = new Aspose.Imaging.LoadOptions();
+                loadOptions.BufferSizeHint = 4 * 1024 * 1024; // 4 MB
 
-                // Iterate through each page and save as PNG
-                foreach (DicomPage page in dicomImage.DicomPages)
+                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
                 {
-                    // Build output file name: InputFileName_page{Index}.png
-                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png";
-                    string outputPath = Path.Combine(outputDir, outputFileName);
+                    // Adjust gamma (example value)
+                    dicomImage.AdjustGamma(2.2f);
 
-                    // Ensure the directory for the output file exists (unconditional)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Save each page as PNG
+                    foreach (DicomPage page in dicomImage.DicomPages)
+                    {
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png";
+                        string outputPath = Path.Combine("Output", outputFileName);
 
-                    // Save the page as PNG
-                    page.Save(outputPath, new PngOptions());
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save page as PNG
+                        page.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
