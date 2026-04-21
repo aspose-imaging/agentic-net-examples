@@ -8,9 +8,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output paths
         string inputPath = "input.eps";
-        string outputPath = "output/preview.wmf";
+        string outputPath = "output.wmf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,24 +19,22 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image
+        // Load the EPS file as an EpsImage
         using (var epsImage = (EpsImage)Image.Load(inputPath))
         {
-            // Retrieve the WMF preview (low‑resolution vector preview)
-            Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF);
-
-            if (preview == null)
+            // Retrieve the WMF preview image
+            Image wmfPreview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF);
+            if (wmfPreview == null)
             {
                 Console.Error.WriteLine("No WMF preview available in the EPS file.");
                 return;
             }
 
             // Save the preview as a WMF file
-            preview.Save(outputPath);
-            preview.Dispose();
+            wmfPreview.Save(outputPath, new WmfOptions());
         }
     }
 }
