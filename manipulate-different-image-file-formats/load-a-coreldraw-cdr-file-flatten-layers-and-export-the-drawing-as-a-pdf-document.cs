@@ -1,18 +1,18 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Data\sample.cdr";
-        string outputPath = @"C:\Data\sample.pdf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\input\sample.cdr";
+        string outputPath = @"C:\output\sample.pdf";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,26 +22,30 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR image
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+        try
         {
-            // Assume we want to export the first page (index 0)
-            int pageNumber = 0;
-            CdrImagePage page = (CdrImagePage)cdrImage.Pages[pageNumber];
-
-            // Set up PDF export options with rasterization settings
-            PdfOptions pdfOptions = new PdfOptions();
-            CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+            // Load the CDR file
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                PageWidth = page.Width,
-                PageHeight = page.Height
-            };
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+                // Configure PDF export options with rasterization settings
+                PdfOptions pdfOptions = new PdfOptions();
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                {
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument,
+                    PageWidth = cdrImage.Width,
+                    PageHeight = cdrImage.Height
+                };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the page as PDF
-            page.Save(outputPath, pdfOptions);
+                // Save the flattened PDF
+                cdrImage.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
