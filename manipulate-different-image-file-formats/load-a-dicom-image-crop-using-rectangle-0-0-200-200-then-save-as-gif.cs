@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.dcm";
-        string outputPath = @"C:\Temp\output.gif";
+        string inputPath = "input.dcm";
+        string outputPath = "output.gif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,12 +20,11 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the DICOM image
+        // Load the DICOM image, crop, and save as GIF
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DicomImage to access DICOM-specific methods
             DicomImage dicomImage = (DicomImage)image;
 
             // Crop to rectangle (0,0,200,200)
