@@ -8,29 +8,29 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\output\sample.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Input\sample.cmx";
+        string outputPath = @"C:\Output\sample.pdf";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the CMX image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF export options with vector rasterization for CMX
+            // Configure PDF export options with vector rasterization settings for CMX
             PdfOptions pdfOptions = new PdfOptions
             {
                 VectorRasterizationOptions = new CmxRasterizationOptions
                 {
-                    // Preserve vector fidelity and embed fonts
+                    // Preserve vector fidelity and embed fonts where possible
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.AntiAlias,
                     Positioning = PositioningTypes.DefinedByDocument
