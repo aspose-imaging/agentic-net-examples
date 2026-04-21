@@ -2,35 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.jpg";
-        string outputPath = "Output/sample.psd";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output_300dpi.psd";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PSD save options with 300 DPI resolution
+            // Configure PSD save options with a 300 DPI resolution
             PsdOptions psdOptions = new PsdOptions
             {
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0)
+                // Set horizontal and vertical resolution to 300 DPI
+                ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300.0, 300.0),
+
+                // Example: use RLE compression (optional)
+                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE
             };
 
-            // Save the image as PSD with the specified options
+            // Save the image as a PSD file with the specified options
             image.Save(outputPath, psdOptions);
         }
     }
