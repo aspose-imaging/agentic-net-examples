@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.dng";
-        string outputPath = @"C:\Images\sample_converted.gif";
+        // Define input and output paths (relative)
+        string inputPath = "Input\\sample.dng";
+        string outputPath = "Output\\sample.gif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,27 +22,22 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DNG image
-        using (Image image = Image.Load(inputPath))
+        // Load DNG image
+        using (DngImage dng = (DngImage)Image.Load(inputPath))
         {
-            // Cast to RasterImage to access palette and dithering features
-            RasterImage raster = (RasterImage)image;
-
-            // Generate a 256‑color palette that best fits the image
-            IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
-
-            // Optional: apply dithering to improve visual quality after palette reduction
+            // Cast to RasterImage to apply dithering (8-bit = 256 colors)
+            RasterImage raster = dng;
             raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
 
-            // Prepare GIF save options with the custom palette
-            GifOptions gifOptions = new GifOptions
+            // Prepare GIF save options
+            using (GifOptions gifOptions = new GifOptions())
             {
-                Palette = palette,
-                DoPaletteCorrection = false   // palette already provided
-            };
+                // Optional: improve palette selection
+                gifOptions.DoPaletteCorrection = true;
 
-            // Save the image as GIF using the specified options
-            image.Save(outputPath, gifOptions);
+                // Save as GIF with reduced palette
+                dng.Save(outputPath, gifOptions);
+            }
         }
     }
 }
