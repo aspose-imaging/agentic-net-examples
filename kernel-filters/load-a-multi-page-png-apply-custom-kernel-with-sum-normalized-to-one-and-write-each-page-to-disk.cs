@@ -1,9 +1,9 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
@@ -11,56 +11,65 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = @"C:\Images\multipage.png";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Load the multi‑page PNG
-        using (Image image = Image.Load(inputPath))
-        {
-            IMultipageImage multipage = image as IMultipageImage;
-            if (multipage == null)
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not a multipage image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Custom 3×3 kernel whose sum equals 1 (simple blur)
-            double[,] kernel = new double[,]
-            {
-                { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
-                { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
-                { 1.0 / 9, 1.0 / 9, 1.0 / 9 }
-            };
-            var filterOptions = new ConvolutionFilterOptions(kernel);
+            string outputDir = "output";
+            // Ensure output directory exists before any save
+            Directory.CreateDirectory(outputDir);
 
-            // Process each page
-            for (int i = 0; i < multipage.PageCount; i++)
+            // Load the multi‑page PNG
+            using (Image image = Image.Load(inputPath))
             {
-                // Each page is a RasterImage
-                using (RasterImage page = (RasterImage)multipage.Pages[i])
+                // Determine pages (handle both multipage and single‑page cases)
+                List<Image> pages = new List<Image>();
+                if (image is IMultipageImage multipage && multipage.Pages != null)
                 {
-                    // Apply the convolution filter to the whole page
-                    page.Filter(page.Bounds, filterOptions);
+                    foreach (var page in multipage.Pages)
+                        pages.Add(page);
+                }
+                else
+                {
+                    pages.Add(image);
+                }
 
-                    // Output path for the current page
-                    string outputPath = $@"C:\Images\output_page_{i + 1}.png";
+                // Custom kernel (example 3x3) with sum normalized to 1
+                double[,] kernel = new double[,]
+                {
+                    { 0.0, 0.2, 0.0 },
+                    { 0.2, 0.2, 0.2 },
+                    { 0.0, 0.2, 0.0 }
+                };
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the processed page
-                    var saveOptions = new PngOptions
+                for (int i = 0; i < pages.Count; i++)
+                {
+                    // Cast each page to RasterImage for pixel operations
+                    using (RasterImage raster = (RasterImage)pages[i])
                     {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
-                    page.Save(outputPath, saveOptions);
+                        // Apply convolution filter with the custom kernel
+                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                        // Prepare output file path for the current page
+                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                        // Ensure the directory for this file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the processed page as PNG
+                        raster.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
