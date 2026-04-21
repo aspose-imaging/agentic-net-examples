@@ -2,64 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded list of TIFF input files
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\Input1.tif",
-            @"C:\Images\Input2.tif",
-            @"C:\Images\Input3.tif"
-        };
-
-        // Hardcoded output directory
-        string outputDirectory = @"C:\Images\WebPOutput";
-
-        // Ensure the output directory exists (unconditional as per rule)
-        Directory.CreateDirectory(outputDirectory);
-
-        foreach (string inputPath in inputPaths)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded list of TIFF files to process
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\image1.tif",
+                @"C:\Images\image2.tif",
+                @"C:\Images\image3.tif"
+            };
 
-            // Determine output path with .webp extension
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
+            // Hardcoded output directory for WebP files
+            string outputDirectory = @"C:\Images\WebP";
 
-            // Ensure the output directory exists (unconditional as per rule)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            try
+            foreach (var inputPath in inputPaths)
             {
-                // Load the TIFF image
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build output path with .webp extension
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image and save as WebP with quality 90
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set WebP options with quality 90
                     var webpOptions = new WebPOptions
                     {
                         Quality = 90
                     };
-
-                    // Save as WebP
                     image.Save(outputPath, webpOptions);
                 }
 
-                Console.WriteLine($"Successfully converted '{inputPath}' to '{outputPath}'.");
+                // Log successful conversion
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
-            catch (Exception ex)
-            {
-                // Log any conversion errors without throwing
-                Console.Error.WriteLine($"Error processing '{inputPath}': {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
