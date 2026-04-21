@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Exif;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,34 +19,37 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists (unconditional)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the JPEG image
         using (Image image = Image.Load(inputPath))
         {
             // Cast to JpegImage to access EXIF data
-            JpegImage jpeg = (JpegImage)image;
-
-            // Get EXIF data
-            var exif = jpeg.ExifData;
-
-            // Read DateTimeOriginal, parse, add one hour, and write back
-            string original = exif.DateTimeOriginal;
-            if (!string.IsNullOrEmpty(original))
+            JpegImage jpeg = image as JpegImage;
+            if (jpeg != null && jpeg.ExifData != null)
             {
-                // EXIF date format: "yyyy:MM:dd HH:mm:ss"
-                if (DateTime.TryParseExact(original, "yyyy:MM:dd HH:mm:ss",
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.None, out DateTime dt))
+                string original = jpeg.ExifData.DateTimeOriginal;
+                if (!string.IsNullOrEmpty(original))
                 {
-                    DateTime updated = dt.AddHours(1);
-                    exif.DateTimeOriginal = updated.ToString("yyyy:MM:dd HH:mm:ss");
+                    // EXIF DateTimeOriginal format: "yyyy:MM:dd HH:mm:ss"
+                    if (DateTime.TryParseExact(
+                        original,
+                        "yyyy:MM:dd HH:mm:ss",
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None,
+                        out DateTime dt))
+                    {
+                        // Add one hour
+                        dt = dt.AddHours(1);
+                        // Write back in the same format
+                        jpeg.ExifData.DateTimeOriginal = dt.ToString("yyyy:MM:dd HH:mm:ss");
+                    }
                 }
             }
 
             // Save the modified image
-            jpeg.Save(outputPath, new JpegOptions());
+            jpeg.Save(outputPath);
         }
     }
 }
