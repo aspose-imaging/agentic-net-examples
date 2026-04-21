@@ -1,32 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded paths
-        string thumbnailPath = @"C:\thumbnails\thumb.png";
-        string inputDirectory = @"C:\images\input";
-        string outputDirectory = @"C:\images\output";
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
+        string thumbnailPath = "thumbnail.jpg";
 
-        // Ensure thumbnail exists
+        // Ensure input directory exists
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        // Validate thumbnail file
         if (!File.Exists(thumbnailPath))
         {
             Console.Error.WriteLine($"File not found: {thumbnailPath}");
             return;
         }
 
-        // Load the custom thumbnail once
+        // Load thumbnail as RasterImage
         using (RasterImage thumbnail = (RasterImage)Image.Load(thumbnailPath))
         {
-            // Get all JPEG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-            foreach (string inputPath in inputFiles)
+            // Process each JPEG file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.jpg"))
             {
-                // Verify input file existence
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -34,14 +48,14 @@ class Program
                 }
 
                 // Prepare output path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_with_thumb.jpg");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load JPEG image
-                using (JpegImage jpeg = new JpegImage(inputPath))
+                using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
                 {
                     // Ensure ExifData container exists
                     if (jpeg.ExifData == null)
@@ -49,10 +63,10 @@ class Program
                         jpeg.ExifData = new Aspose.Imaging.Exif.JpegExifData();
                     }
 
-                    // Assign the custom thumbnail
+                    // Assign custom thumbnail
                     jpeg.ExifData.Thumbnail = thumbnail;
 
-                    // Save the modified image
+                    // Save modified JPEG
                     jpeg.Save(outputPath);
                 }
             }
