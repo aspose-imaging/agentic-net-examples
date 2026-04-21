@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.filtered.png";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,35 +22,49 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the OTG image
+        // Temporary PNG path for intermediate rasterization
+        string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
+        // Load the OTG image and rasterize it to PNG
         using (Image otgImage = Image.Load(inputPath))
         {
-            // Prepare PNG options with rasterization settings for OTG
-            PngOptions pngOptions = new PngOptions();
-            OtgRasterizationOptions rasterizationOptions = new OtgRasterizationOptions
+            // Set up rasterization options to match the original size
+            var otgRasterOptions = new OtgRasterizationOptions
             {
                 PageSize = otgImage.Size
             };
-            pngOptions.VectorRasterizationOptions = rasterizationOptions;
 
-            // Rasterize OTG to PNG in memory
-            using (MemoryStream rasterStream = new MemoryStream())
+            // PNG save options with vector rasterization
+            var pngOptions = new PngOptions
             {
-                otgImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0; // Reset stream for reading
+                VectorRasterizationOptions = otgRasterOptions
+            };
 
-                // Load the rasterized image as a RasterImage
-                using (Image rasterImageContainer = Image.Load(rasterStream))
-                {
-                    RasterImage rasterImage = (RasterImage)rasterImageContainer;
+            // Save the rasterized image to a temporary PNG file
+            otgImage.Save(tempPngPath, pngOptions);
+        }
 
-                    // Apply median filter with size 5 to the whole image
-                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+        // Load the temporary PNG as a raster image, apply median filter, and save final PNG
+        using (Image pngImage = Image.Load(tempPngPath))
+        {
+            var rasterImage = (RasterImage)pngImage;
 
-                    // Save the filtered image as PNG
-                    rasterImage.Save(outputPath);
-                }
-            }
+            // Apply median filter with a kernel size of 5 to the entire image
+            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+            // Save the filtered image to the final output path
+            rasterImage.Save(outputPath);
+        }
+
+        // Optionally delete the temporary file
+        try
+        {
+            File.Delete(tempPngPath);
+        }
+        catch
+        {
+            // Ignore any errors during cleanup
         }
     }
 }
