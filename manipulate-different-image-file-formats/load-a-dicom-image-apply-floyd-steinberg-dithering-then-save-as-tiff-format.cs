@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
@@ -23,14 +22,11 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DICOM image
-        using (Image image = Image.Load(inputPath))
+        // Load DICOM image, apply Floyd‑Steinberg dithering, and save as TIFF
+        using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
         {
-            // Cast to DicomImage to access DICOM-specific methods
-            DicomImage dicomImage = (DicomImage)image;
-
             // Apply Floyd‑Steinberg dithering with 1‑bit palette
-            dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+            dicomImage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
 
             // Prepare TIFF save options
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
