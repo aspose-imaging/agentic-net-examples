@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -10,92 +11,72 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-        string outputPath = "merged_with_border.jpg";
-
-        // Validate input files
-        foreach (string path in inputPaths)
+        try
         {
-            if (!File.Exists(path))
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
-            }
-        }
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "merged_with_border.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            // Validate input files
+            foreach (string path in inputPaths)
             {
-                sizes.Add(img.Size);
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
             }
-        }
 
-        // Calculate canvas size for horizontal merge
-        int mergedWidth = 0;
-        int mergedHeight = 0;
-        foreach (Size sz in sizes)
-        {
-            mergedWidth += sz.Width;
-            if (sz.Height > mergedHeight) mergedHeight = sz.Height;
-        }
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create JPEG canvas for merged image (bound to outputPath)
-        JpegOptions mergeOptions = new JpegOptions
-        {
-            Source = new FileCreateSource(outputPath, false),
-            Quality = 100
-        };
-        using (JpegImage mergeCanvas = (JpegImage)Image.Create(mergeOptions, mergedWidth, mergedHeight))
-        {
-            // Merge images horizontally
-            int offsetX = 0;
+            // Collect sizes of all input images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    mergeCanvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
+                    sizes.Add(img.Size);
                 }
             }
 
-            // Capture merged pixels before disposing the canvas
-            int[] mergedPixels = mergeCanvas.LoadArgb32Pixels(mergeCanvas.Bounds);
+            // Calculate canvas size with a 5‑pixel border on each side
+            int border = 5;
+            int canvasWidth = sizes.Sum(s => s.Width) + border * 2;
+            int canvasHeight = sizes.Max(s => s.Height) + border * 2;
 
-            // Dispose mergeCanvas (exits using block)
-            // Create final canvas with border (5 pixels on each side)
-            int borderSize = 5;
-            int finalWidth = mergedWidth + borderSize * 2;
-            int finalHeight = mergedHeight + borderSize * 2;
-
-            JpegOptions finalOptions = new JpegOptions
+            // Create JPEG canvas bound to the output file
+            JpegOptions jpegOptions = new JpegOptions
             {
                 Source = new FileCreateSource(outputPath, false),
                 Quality = 100
             };
-            using (JpegImage finalCanvas = (JpegImage)Image.Create(finalOptions, finalWidth, finalHeight))
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
-                // Fill background with white
-                int totalPixels = finalWidth * finalHeight;
-                int[] whitePixels = new int[totalPixels];
-                int whiteArgb = Aspose.Imaging.Color.White.ToArgb();
-                for (int i = 0; i < totalPixels; i++) whitePixels[i] = whiteArgb;
-                finalCanvas.SaveArgb32Pixels(new Rectangle(0, 0, finalWidth, finalHeight), whitePixels);
+                int offsetX = border;
+                foreach (string path in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, border, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
+                }
 
-                // Paste merged image onto the center (offset by borderSize)
-                Rectangle destRect = new Rectangle(borderSize, borderSize, mergedWidth, mergedHeight);
-                finalCanvas.SaveArgb32Pixels(destRect, mergedPixels);
-
-                // Save final image (bound canvas)
-                finalCanvas.Save();
+                // Save the bound image
+                canvas.Save();
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

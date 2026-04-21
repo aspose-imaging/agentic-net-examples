@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -9,46 +11,70 @@ class Program
 {
     static void Main(string[] args)
     {
-        string[] inputPaths = new string[]
+        try
         {
-            "input1.jpg",
-            "input2.jpg"
-        };
+            // Hardcoded input JPEG files
+            string[] inputPaths = new[] { "input1.jpg", "input2.jpg" };
 
-        foreach (string inputPath in inputPaths)
-        {
-            if (!File.Exists(inputPath))
+            // Validate input files
+            foreach (var path in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            using (RasterImage src = (RasterImage)Image.Load(inputPath))
-            {
-                string directory = Path.GetDirectoryName(inputPath);
-                string nameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                string outputPath = Path.Combine(directory, $"{nameWithoutExt}_{timestamp}.jpg");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                FileCreateSource outSource = new FileCreateSource(outputPath, false);
-
-                JpegOptions jpegOptions = new JpegOptions
+                if (!File.Exists(path))
                 {
-                    Source = outSource,
-                    Quality = 90
-                };
-
-                using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, src.Width, src.Height))
-                {
-                    canvas.SaveArgb32Pixels(
-                        new Rectangle(0, 0, src.Width, src.Height),
-                        src.LoadArgb32Pixels(src.Bounds));
-
-                    canvas.Save();
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
                 }
             }
+
+            // Collect image sizes
+            List<Size> sizes = new List<Size>();
+            foreach (var path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    sizes.Add(img.Size);
+                }
+            }
+
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
+
+            // Generate output filename with timestamp
+            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            string outputFileName = Path.GetFileNameWithoutExtension(inputPaths[0]) + "_" + timestamp + ".jpg";
+            string outputPath = Path.Combine("Output", outputFileName);
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set JPEG options
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                Quality = 90
+            };
+
+            // Create JPEG canvas bound to the output file
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+            {
+                int offsetX = 0;
+                foreach (var path in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
+                }
+                // Save the bound image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

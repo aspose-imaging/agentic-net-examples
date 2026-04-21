@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -11,69 +10,73 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input JPEG file paths
-        string[] inputPaths = new string[]
+        try
         {
-            "Input/image1.jpg",
-            "Input/image2.jpg",
-            "Input/image3.jpg"
-        };
+            // Hardcoded input and output paths
+            string[] inputPaths = { "input1.jpg", "input2.jpg" };
+            string outputPath = "merged.jpg";
 
-        // Hardcoded output path for the merged JPEG
-        string outputPath = "Output/merged.jpg";
-
-        // Validate each input file exists
-        foreach (var path in inputPaths)
-        {
-            if (!File.Exists(path))
+            // Validate input files
+            foreach (string path in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
-            }
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (var path in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
-            {
-                sizes.Add(img.Size);
-            }
-        }
-
-        // Determine canvas dimensions for vertical merge
-        int canvasWidth = sizes.Max(s => s.Width);
-        int canvasHeight = sizes.Sum(s => s.Height);
-
-        // Prepare JPEG options: no metadata, quality set, bound to output file
-        Source source = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions()
-        {
-            Source = source,
-            Quality = 90,
-            KeepMetadata = false
-        };
-
-        // Create a bound JPEG canvas and merge images vertically
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-        {
-            int offsetY = 0;
-            foreach (var path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                if (!File.Exists(path))
                 {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
                 }
             }
 
-            // Save the bound image (output file is already specified in options)
-            canvas.Save();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Collect image sizes
+            List<Size> sizes = new List<Size>();
+            foreach (string path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    sizes.Add(img.Size);
+                }
+            }
+
+            // Calculate canvas dimensions for vertical merge
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (Size sz in sizes)
+            {
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                canvasHeight += sz.Height;
+            }
+
+            // Create JPEG canvas with metadata removal
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = src,
+                Quality = 90,
+                KeepMetadata = false
+            };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            {
+                int offsetY = 0;
+                foreach (string path in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetY += img.Height;
+                    }
+                }
+
+                // Save the bound image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

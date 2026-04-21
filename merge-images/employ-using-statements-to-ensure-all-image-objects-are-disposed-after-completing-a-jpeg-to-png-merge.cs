@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -9,56 +10,65 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string jpegPath = "input.jpg";
-        string pngPath = "input.png";
-        string outputPath = "output.png";
-
-        // Validate input files
-        if (!File.Exists(jpegPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {jpegPath}");
-            return;
-        }
-        if (!File.Exists(pngPath))
-        {
-            Console.Error.WriteLine($"File not found: {pngPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath1 = "input1.jpg";
+            string inputPath2 = "input2.jpg";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load both images and collect their sizes
-        List<Size> sizes = new List<Size>();
-        using (RasterImage jpegImg = (RasterImage)Image.Load(jpegPath))
-        {
-            sizes.Add(jpegImg.Size);
-            using (RasterImage pngImg = (RasterImage)Image.Load(pngPath))
+            // Validate input files
+            if (!File.Exists(inputPath1))
             {
-                sizes.Add(pngImg.Size);
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
+            }
 
-                // Calculate canvas dimensions for horizontal merge
-                int newWidth = sizes[0].Width + sizes[1].Width;
-                int newHeight = Math.Max(sizes[0].Height, sizes[1].Height);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create a PNG canvas bound to the output file
+            // Load JPEG images as raster images
+            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
+            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+            {
+                // Collect sizes
+                List<Size> sizes = new List<Size>();
+                sizes.Add(img1.Size);
+                sizes.Add(img2.Size);
+
+                // Calculate canvas dimensions (horizontal merge)
+                int newWidth = sizes.Sum(s => s.Width);
+                int newHeight = sizes.Max(s => s.Height);
+
+                // Create PNG options with bound source
                 Source src = new FileCreateSource(outputPath, false);
                 PngOptions pngOptions = new PngOptions() { Source = src };
+
+                // Create canvas
                 using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
                 {
-                    // Copy JPEG image onto the left side of the canvas
-                    Rectangle jpegBounds = new Rectangle(0, 0, jpegImg.Width, jpegImg.Height);
-                    canvas.SaveArgb32Pixels(jpegBounds, jpegImg.LoadArgb32Pixels(jpegImg.Bounds));
+                    // Merge first image at (0,0)
+                    Rectangle bounds1 = new Rectangle(0, 0, img1.Width, img1.Height);
+                    canvas.SaveArgb32Pixels(bounds1, img1.LoadArgb32Pixels(img1.Bounds));
 
-                    // Copy PNG image onto the right side of the canvas
-                    Rectangle pngBounds = new Rectangle(jpegImg.Width, 0, pngImg.Width, pngImg.Height);
-                    canvas.SaveArgb32Pixels(pngBounds, pngImg.LoadArgb32Pixels(pngImg.Bounds));
+                    // Merge second image to the right of the first
+                    int offsetX = img1.Width;
+                    Rectangle bounds2 = new Rectangle(offsetX, 0, img2.Width, img2.Height);
+                    canvas.SaveArgb32Pixels(bounds2, img2.LoadArgb32Pixels(img2.Bounds));
 
-                    // Save the merged image (bound to the output path)
+                    // Save the merged PNG (source is already bound)
                     canvas.Save();
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

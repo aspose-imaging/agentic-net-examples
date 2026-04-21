@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -10,81 +12,88 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = new string[]
+        try
         {
-            "input1.jpg",
-            "input2.jpg",
-            "input3.jpg"
-        };
-        string outputPath = "merged_output.jpg";
-
-        // Validate each input file
-        foreach (string path in inputPaths)
-        {
-            if (!File.Exists(path))
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
-            }
-        }
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "merged_output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Cancellation token source (could be triggered elsewhere)
-        var cts = new System.Threading.CancellationTokenSource();
-        var token = cts.Token;
-
-        // Collect image sizes
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
-            {
-                sizes.Add(img.Size);
-            }
-        }
-
-        // Calculate canvas dimensions for horizontal merge
-        int newWidth = 0;
-        int newHeight = 0;
-        foreach (Size sz in sizes)
-        {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight) newHeight = sz.Height;
-        }
-
-        // Create output source and JPEG options
-        Source outputSource = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions()
-        {
-            Source = outputSource,
-            Quality = 90
-        };
-
-        // Create JPEG canvas
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
-        {
-            int offsetX = 0;
+            // Validate input files
             foreach (string path in inputPaths)
             {
-                if (token.IsCancellationRequested)
+                if (!File.Exists(path))
                 {
-                    Console.WriteLine("Operation cancelled.");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
-                }
-
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
                 }
             }
 
-            // Save the bound image (output already bound to source)
-            canvas.Save();
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            // Prepare cancellation token
+            CancellationTokenSource cts = new CancellationTokenSource();
+            CancellationToken token = cts.Token;
+
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
+            foreach (string path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    sizes.Add(img.Size);
+                }
+            }
+
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
+
+            // Create output source and JPEG options
+            Source outputSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = outputSource,
+                Quality = 90
+            };
+
+            // Create JPEG canvas bound to the output source
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+            {
+                int offsetX = 0;
+                foreach (string path in inputPaths)
+                {
+                    // Check for cancellation request
+                    if (token.IsCancellationRequested)
+                    {
+                        Console.WriteLine("Operation cancelled.");
+                        return;
+                    }
+
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
+                }
+
+                // Save the bound image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

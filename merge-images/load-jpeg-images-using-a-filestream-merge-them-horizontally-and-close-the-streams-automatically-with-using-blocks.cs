@@ -1,7 +1,7 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -10,74 +10,73 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output paths
-        string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
-        string outputPath = "merged.jpg";
-
-        // Validate each input file exists
-        foreach (string path in inputPaths)
+        try
         {
-            if (!File.Exists(path))
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "output.jpg";
+
+            // Validate input files
+            foreach (string path in inputPaths)
+            {
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
             }
-        }
 
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
-        {
-            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Collect sizes of all input images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string path in inputPaths)
             {
+                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
                 using (JpegImage img = new JpegImage(fs))
                 {
                     sizes.Add(img.Size);
                 }
             }
-        }
 
-        // Calculate canvas dimensions for horizontal merge
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (Size sz in sizes)
-        {
-            canvasWidth += sz.Width;
-            if (sz.Height > canvasHeight)
-                canvasHeight = sz.Height;
-        }
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Prepare JPEG options for the output image
+            JpegOptions jpegOptions = new JpegOptions();
+            FileCreateSource src = new FileCreateSource(outputPath, false);
+            jpegOptions.Source = src;
+            jpegOptions.Quality = 90;
 
-        // Create JPEG options with bound output source
-        Source outputSource = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions()
-        {
-            Source = outputSource,
-            Quality = 100
-        };
-
-        // Create bound canvas image
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-        {
-            int offsetX = 0;
-            // Merge each image onto the canvas
-            foreach (string path in inputPaths)
+            // Create the output canvas
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, newWidth, newHeight))
             {
-                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                int offsetX = 0;
+                foreach (string path in inputPaths)
                 {
+                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
                     using (JpegImage img = new JpegImage(fs))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
-            }
 
-            // Save the merged image (canvas is already bound to output path)
-            canvas.Save();
+                // Save the merged image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

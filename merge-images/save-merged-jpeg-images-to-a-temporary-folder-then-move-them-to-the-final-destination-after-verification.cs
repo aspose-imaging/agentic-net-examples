@@ -11,85 +11,78 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hard‑coded input JPEG files
-        string[] inputPaths = new string[]
+        try
         {
-            "input1.jpg",
-            "input2.jpg",
-            "input3.jpg"
-        };
+            // Hardcoded input JPEG files
+            string[] inputPaths = { "input1.jpg", "input2.jpg" };
+            // Temporary and final output paths
+            string tempOutputPath = "TempMerged\\merged.jpg";
+            string finalOutputPath = "Merged\\merged.jpg";
 
-        // Temporary and final output locations
-        string tempOutputPath = "Temp/merged.jpg";
-        string finalOutputPath = "Output/merged.jpg";
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(tempOutputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
-
-        // Verify each input file exists
-        foreach (string path in inputPaths)
-        {
-            if (!File.Exists(path))
+            // Validate input files
+            foreach (var path in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
-            }
-        }
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
-            {
-                sizes.Add(img.Size);
-            }
-        }
-
-        // Determine canvas dimensions for horizontal merge
-        int newWidth = sizes.Sum(s => s.Width);
-        int newHeight = sizes.Max(s => s.Height);
-
-        // Prepare JPEG options with a bound file source (temporary file)
-        Source tempSource = new FileCreateSource(tempOutputPath, false);
-        JpegOptions jpegOptions = new JpegOptions()
-        {
-            Source = tempSource,
-            Quality = 100
-        };
-
-        // Create a JPEG canvas and merge images side by side
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
-        {
-            int offsetX = 0;
-            foreach (string path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                if (!File.Exists(path))
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
                 }
             }
 
-            // Save the bound canvas to the temporary file
-            canvas.Save();
-        }
+            // Ensure temporary directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(tempOutputPath));
 
-        // Verify temporary file was created and move it to the final destination
-        if (File.Exists(tempOutputPath))
-        {
-            if (File.Exists(finalOutputPath))
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
+            foreach (var path in inputPaths)
             {
-                File.Delete(finalOutputPath);
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    sizes.Add(img.Size);
+                }
             }
-            File.Move(tempOutputPath, finalOutputPath);
-            Console.WriteLine($"Merged image saved to: {finalOutputPath}");
+
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
+
+            // Create source and JPEG options for the output image
+            Source source = new FileCreateSource(tempOutputPath, false);
+            JpegOptions jpegOptions = new JpegOptions { Source = source, Quality = 90 };
+
+            // Create a bound JPEG canvas and merge images
+            using (JpegImage canvas = new JpegImage(jpegOptions, newWidth, newHeight))
+            {
+                int offsetX = 0;
+                foreach (var path in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
+                }
+                // Save the bound image
+                canvas.Save();
+            }
+
+            // Verify the temporary file and move to final destination
+            if (File.Exists(tempOutputPath) && new FileInfo(tempOutputPath).Length > 0)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
+                if (File.Exists(finalOutputPath))
+                    File.Delete(finalOutputPath);
+                File.Move(tempOutputPath, finalOutputPath);
+            }
+            else
+            {
+                Console.Error.WriteLine("Merged image verification failed.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Console.Error.WriteLine("Failed to create the merged image.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
