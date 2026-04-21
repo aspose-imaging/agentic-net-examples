@@ -7,43 +7,39 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded output path
-        string outputPath = @"C:\temp\output.bmp";
+        string outputPath = "Output/image.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Connect to a network socket (example: localhost:9000)
-        // The socket is used only to obtain a Stream for the StreamSource.
-        using (TcpClient client = new TcpClient())
+        try
         {
-            try
-            {
-                client.Connect("127.0.0.1", 9000);
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Unable to connect to socket: {ex.Message}");
-                return;
-            }
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (NetworkStream networkStream = client.GetStream())
+            // Connect to a network socket (example: localhost:12345)
+            using (TcpClient client = new TcpClient("localhost", 12345))
+            using (NetworkStream netStream = client.GetStream())
             {
-                // Create BMP options and assign the custom StreamSource
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    Source = new StreamSource(networkStream)
-                };
+                // Create image options with a StreamSource based on the network stream
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(netStream, false);
 
-                // Create a new blank image (e.g., 500x500 pixels)
+                // Create a blank image of desired size
                 using (Image image = Image.Create(bmpOptions, 500, 500))
                 {
-                    // Save the image to the specified BMP file
-                    image.Save(outputPath);
+                    // Optional drawing: fill background with a color
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.LightBlue);
+
+                    // Save the image as BMP
+                    image.Save(outputPath, new BmpOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
