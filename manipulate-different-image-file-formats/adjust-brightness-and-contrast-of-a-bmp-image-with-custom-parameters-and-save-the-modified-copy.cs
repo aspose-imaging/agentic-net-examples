@@ -7,34 +7,35 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output_modified.bmp";
+        string outputPath = @"C:\Images\output.bmp";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load BMP image using the BmpImage constructor
+        // Load the BMP image using the BmpImage constructor (lifecycle rule)
         using (BmpImage bmpImage = new BmpImage(inputPath))
         {
-            // BmpImage derives from RasterImage, so we can use raster operations directly
-            // Adjust brightness (range: -255 to 255)
-            int brightness = 40; // custom brightness value
-            bmpImage.AdjustBrightness(brightness);
+            // Cast to RasterImage to access brightness/contrast adjustment methods
+            RasterImage raster = (RasterImage)bmpImage;
 
-            // Adjust contrast (range: -100 to 100)
-            int contrast = 20; // custom contrast value
-            // Assuming RasterImage provides AdjustContrast; if not, this line can be omitted or replaced with appropriate API.
-            bmpImage.AdjustContrast(contrast);
+            // Custom adjustment values (within allowed ranges)
+            int brightness = 50; // -255 .. 255
+            int contrast = 30;   // -100 .. 100
 
-            // Save the modified image
+            // Apply brightness and contrast adjustments
+            raster.AdjustBrightness(brightness);
+            raster.AdjustContrast(contrast);
+
+            // Save the modified image to the output path (lifecycle rule)
             bmpImage.Save(outputPath);
         }
     }
