@@ -7,44 +7,47 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input GIF file paths
-        string[] inputPaths = {
-            @"C:\InputGifs\anim1.gif",
-            @"C:\InputGifs\anim2.gif"
-        };
-
-        foreach (var inputPath in inputPaths)
+        try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputGifs";
+            string outputDirectory = @"C:\OutputGifs";
 
-            // Determine output path (adds "_compressed" suffix)
-            string outputPath = Path.Combine(
-                Path.GetDirectoryName(inputPath) ?? string.Empty,
-                Path.GetFileNameWithoutExtension(inputPath) + "_compressed.gif");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
+            // Process each GIF file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.gif"))
             {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            // Load GIF, apply lossy compression, and save
-            using (Image image = Image.Load(inputPath))
-            {
-                GifOptions options = new GifOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Enable lossy compression (recommended value: 80)
-                    MaxDiff = 80
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                image.Save(outputPath, options);
+                // Determine the output file path (same file name in the output directory)
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
+
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the GIF image, apply lossy compression, and save
+                using (Image image = Image.Load(inputPath))
+                {
+                    var saveOptions = new GifOptions
+                    {
+                        // Enable lossy compression with a recommended value
+                        MaxDiff = 80
+                    };
+
+                    image.Save(outputPath, saveOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
