@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -9,8 +10,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.tif";
+        string inputPath = @"C:\Images\input.dcm";
+        string outputPath = @"C:\Images\output.tif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,22 +23,24 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DICOM image with memory buffer hint
-        using (Stream stream = File.OpenRead(inputPath))
+        // Configure memory strategy
+        LoadOptions loadOptions = new LoadOptions
         {
-            var loadOptions = new LoadOptions();
-            loadOptions.BufferSizeHint = 256 * 1024; // 256 KB buffer
+            BufferSizeHint = 256 * 1024 // 256 KB buffer size hint
+        };
 
-            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = new Aspose.Imaging.FileFormats.Dicom.DicomImage(stream, loadOptions))
-            {
-                // Adjust brightness and contrast
-                dicomImage.AdjustBrightness(30);      // Example brightness value
-                dicomImage.AdjustContrast(20f);       // Example contrast value
+        // Load DICOM image with memory strategy
+        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath, loadOptions))
+        {
+            // Adjust brightness and contrast
+            dicomImage.AdjustBrightness(50);      // Increase brightness
+            dicomImage.AdjustContrast(30f);       // Increase contrast
 
-                // Save the adjusted image as TIFF
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                dicomImage.Save(outputPath, tiffOptions);
-            }
+            // Prepare TIFF save options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+            // Save as TIFF
+            dicomImage.Save(outputPath, tiffOptions);
         }
     }
 }
