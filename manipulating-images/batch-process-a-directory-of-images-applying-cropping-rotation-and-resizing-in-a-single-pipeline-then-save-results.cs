@@ -1,73 +1,69 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input/Output directory setup
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\Images\Input";
+        string outputDirectory = @"C:\Images\Output";
 
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Get all files in the input directory (you can adjust the search pattern as needed)
+            string[] inputFiles = Directory.GetFiles(inputDirectory);
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Enumerate all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in inputFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Prepare output path
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string extension = Path.GetExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, $"{fileName}_processed{extension}");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load image and apply transformations
-            using (Image image = Image.Load(inputPath))
-            {
-                if (image is RasterImage raster)
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Crop 10 pixels from each side (if possible)
-                    int leftShift = 10, rightShift = 10, topShift = 10, bottomShift = 10;
-                    int croppedWidth = Math.Max(raster.Width - leftShift - rightShift, 1);
-                    int croppedHeight = Math.Max(raster.Height - topShift - bottomShift, 1);
-                    raster.Crop(leftShift, rightShift, topShift, bottomShift);
-
-                    // Rotate 90 degrees clockwise, expanding canvas and filling background with white
-                    raster.Rotate(90f, true, Color.White);
-
-                    // Resize to half of the cropped dimensions
-                    raster.Resize(croppedWidth / 2, croppedHeight / 2);
-
-                    // Save processed image
-                    raster.Save(outputPath);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
-                else
+
+                // Load the image
+                using (Image image = Image.Load(inputPath))
                 {
-                    // For non‑raster images, simply copy to output
+                    // ----- Cropping -----
+                    // Crop to the central rectangle (half width and half height)
+                    var cropRect = new Rectangle(
+                        image.Width / 4,
+                        image.Height / 4,
+                        image.Width / 2,
+                        image.Height / 2);
+                    image.Crop(cropRect);
+
+                    // ----- Rotation -----
+                    // Rotate 90 degrees clockwise without flipping
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                    // ----- Resizing -----
+                    // Resize to 50% of the current dimensions
+                    int newWidth = image.Width / 2;
+                    int newHeight = image.Height / 2;
+                    image.Resize(newWidth, newHeight);
+
+                    // Prepare output path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_processed" + Path.GetExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the processed image
                     image.Save(outputPath);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
