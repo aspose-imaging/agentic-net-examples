@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -29,20 +29,24 @@ class Program
             // Cast to SvgImage to access vector-specific methods
             SvgImage svgImage = (SvgImage)image;
 
-            // Create a custom 8‑bit grayscale palette (can be replaced with any custom palette)
+            // Create a custom 8‑bit grayscale palette (can be replaced with any IColorPalette)
             IColorPalette customPalette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false);
 
-            // Apply the custom palette to the SVG; updateColors = true to adjust existing colors
+            // Apply the palette to the SVG; updateColors = true to remap existing colors
             svgImage.SetPalette(customPalette, true);
 
             // Prepare PNG save options for an 8‑bit indexed PNG
             PngOptions pngOptions = new PngOptions
             {
-                ColorType = PngColorType.IndexedColor, // Use indexed color type
-                Palette = customPalette                 // Assign the same palette used for the SVG
+                // Use indexed color type
+                ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.IndexedColor,
+                // Assign the same palette used for the SVG
+                Palette = customPalette,
+                // Optional: set compression level (0‑9)
+                CompressionLevel = 9
             };
 
-            // Save the rasterized PNG image
+            // Save the rasterized PNG
             svgImage.Save(outputPath, pngOptions);
         }
     }
