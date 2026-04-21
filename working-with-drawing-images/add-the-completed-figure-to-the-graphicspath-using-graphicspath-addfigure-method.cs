@@ -4,45 +4,51 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define output file path
-        string outputPath = @"c:\temp\output.tiff";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up TIFF options with a bound file source
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
+        // Set up BMP options with a file create source
+        BmpOptions bmpOptions = new BmpOptions
+        {
+            BitsPerPixel = 24,
+            Source = new FileCreateSource(outputPath, false)
+        };
 
-        // Create a new image canvas
-        using (Image image = Image.Create(tiffOptions, 500, 500))
+        // Create a new image (500x500) using the options
+        using (Image image = Image.Create(bmpOptions, 500, 500))
         {
             // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
+
+            // Clear the background
             graphics.Clear(Color.Wheat);
 
-            // Create a graphics path and a figure
-            GraphicsPath graphicspath = new GraphicsPath();
-            Figure figure = new Figure();
+            // Create a GraphicsPath instance
+            GraphicsPath graphicsPath = new GraphicsPath();
 
-            // Add shapes to the figure
+            // Create a Figure and add shapes to it
+            Figure figure = new Figure();
             figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 300f, 300f)));
             figure.AddShape(new EllipseShape(new RectangleF(50f, 50f, 300f, 300f)));
-            figure.AddShape(new PieShape(new RectangleF(new PointF(250f, 250f), new SizeF(200f, 200f)), 0f, 45f));
+            figure.AddShape(new PieShape(
+                new RectangleF(new PointF(250f, 250f), new SizeF(200f, 200f)),
+                0f, 45f));
 
-            // Add the completed figure to the graphics path
-            graphicspath.AddFigure(figure);
+            // Add the completed Figure to the GraphicsPath
+            graphicsPath.AddFigure(figure);
 
-            // Draw the path onto the image
-            graphics.DrawPath(new Pen(Color.Black, 2), graphicspath);
+            // Draw the path with a black pen
+            graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
 
-            // Save the image (output path is already bound)
+            // Save the image (the file is already linked via the source)
             image.Save();
         }
     }
