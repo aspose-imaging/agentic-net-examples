@@ -2,52 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.psd";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.psd";
+        string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage for filtering
-            RasterImage raster = image as RasterImage;
-            if (raster == null)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not a raster image and cannot be processed.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Apply Gaussian blur filter to the entire image
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prepare PNG export options with text rendering hint
-            PngOptions pngOptions = new PngOptions
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = new VectorRasterizationOptions
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
                 {
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
                 }
-            };
 
-            // Save the blurred image as PNG
-            raster.Save(outputPath, pngOptions);
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

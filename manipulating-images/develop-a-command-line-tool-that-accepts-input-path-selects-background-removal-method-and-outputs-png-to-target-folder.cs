@@ -12,50 +12,61 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input\\image.jpg";
+            string outputPath = "output\\result.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Load the source image as a RasterImage
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
-        {
-            // Configure export options for PNG with transparency
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure PNG export options
             var exportOptions = new PngOptions
             {
                 ColorType = PngColorType.TruecolorWithAlpha,
                 Source = new StreamSource(new MemoryStream())
             };
 
-            // Set up masking options (GraphCut auto masking, transparent background)
+            // Prepare masking arguments (no user-defined strokes)
+            var maskingArgs = new AutoMaskingArgs();
+
+            // Set up masking options
             var maskingOptions = new MaskingOptions
             {
                 Method = SegmentationMethod.GraphCut,
                 Decompose = false,
-                Args = new AutoMaskingArgs(),
+                Args = maskingArgs,
                 BackgroundReplacementColor = Color.Transparent,
                 ExportOptions = exportOptions
             };
 
-            // Perform masking
-            using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
+            // Load the source image as a raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Retrieve the foreground image (index 1)
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                // Perform background removal
+                var masking = new ImageMasking(image);
+                using (MaskingResult result = masking.Decompose(maskingOptions))
                 {
-                    // Save the result as PNG
-                    foreground.Save(outputPath, exportOptions);
+                    // Retrieve the foreground image (masked object)
+                    using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                    {
+                        // Save the result as PNG
+                        foreground.Save(outputPath, exportOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

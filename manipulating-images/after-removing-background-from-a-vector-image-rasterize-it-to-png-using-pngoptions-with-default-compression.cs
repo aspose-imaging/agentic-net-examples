@@ -2,44 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the vector image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Remove background if the image is a vector image
-            if (image is VectorImage vectorImage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                vectorImage.RemoveBackground();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Prepare PNG save options with default compression
-            PngOptions pngOptions = new PngOptions();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set rasterization options for vector images
-            pngOptions.VectorRasterizationOptions = (VectorRasterizationOptions)image.GetDefaultOptions(
-                new object[] { Aspose.Imaging.Color.White, image.Width, image.Height });
+            // Load the vector image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare PNG options with default compression
+                var pngOptions = new PngOptions
+                {
+                    // Preserve alpha channel
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    // Configure rasterization for vector source
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = image.Size
+                    }
+                };
 
-            // Save the rasterized image as PNG
-            image.Save(outputPath, pngOptions);
+                // Remove background if the image is a vector type
+                if (image is VectorImage vectorImage)
+                {
+                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                }
+
+                // Save rasterized PNG
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

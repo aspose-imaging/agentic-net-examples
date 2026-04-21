@@ -7,35 +7,42 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Define crop offsets (pixels to remove from each side)
+                int leftShift = 10;   // left offset
+                int rightShift = 20;  // right offset
+                int topShift = 30;    // top offset
+                int bottomShift = 40; // bottom offset
+
+                // Crop the image using the specified offsets
+                image.Crop(leftShift, rightShift, topShift, bottomShift);
+
+                // Save the cropped image as PNG
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Define cropping offsets (left, right, top, bottom)
-            int leftShift = 50;   // example offset from the left edge
-            int rightShift = 50;  // example offset from the right edge
-            int topShift = 30;    // example offset from the top edge
-            int bottomShift = 30; // example offset from the bottom edge
-
-            // Perform the crop operation
-            image.Crop(leftShift, rightShift, topShift, bottomShift);
-
-            // Save the cropped image as PNG
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

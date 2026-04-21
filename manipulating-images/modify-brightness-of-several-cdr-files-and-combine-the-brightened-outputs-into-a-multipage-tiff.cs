@@ -1,109 +1,101 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input CDR files
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\file1.cdr",
-            @"C:\Images\file2.cdr",
-            @"C:\Images\file3.cdr"
-        };
+            // Hardcoded input CDR file paths
+            string[] inputPaths = {
+                "input1.cdr",
+                "input2.cdr",
+                "input3.cdr"
+            };
 
-        // Hard‑coded output multipage TIFF
-        string outputPath = @"C:\Images\combined.tif";
+            // Hardcoded output TIFF path
+            string outputPath = "output.tif";
 
-        // Verify each input file exists
-        foreach (string inputPath in inputPaths)
-        {
-            if (!File.Exists(inputPath))
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // List to hold paths of temporary adjusted TIFF pages
-        List<string> adjustedTiffPaths = new List<string>();
-
-        // Process each CDR file: rasterize, save as TIFF, adjust brightness
-        foreach (string inputPath in inputPaths)
-        {
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-            {
-                // For simplicity, process only the first page of each CDR file
-                var cdrPage = (CdrImagePage)cdrImage.Pages[0];
-
-                // Rasterization options for converting vector page to raster image
-                var rasterOptions = new CdrRasterizationOptions
+                if (!File.Exists(inputPath))
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    PageWidth = cdrPage.Width,
-                    PageHeight = cdrPage.Height,
-                    BackgroundColor = Color.White
-                };
-
-                // Save the rasterized page directly to a temporary TIFF file
-                string tempTiffPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".tif");
-                var tiffSaveOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                cdrPage.Save(tempTiffPath, tiffSaveOptions);
-
-                // Load the temporary TIFF, adjust brightness, and overwrite it
-                using (TiffImage tiffImage = (TiffImage)Image.Load(tempTiffPath))
-                {
-                    // Brightness value in the range [-255, 255]
-                    tiffImage.AdjustBrightness(50);
-                    tiffImage.Save(tempTiffPath);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
-
-                adjustedTiffPaths.Add(tempTiffPath);
             }
-        }
 
-        // Combine all adjusted TIFF pages into a single multipage TIFF
-        if (adjustedTiffPaths.Count > 0)
-        {
-            // Load the first adjusted TIFF as the base image
-            using (TiffImage finalTiff = (TiffImage)Image.Load(adjustedTiffPaths[0]))
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                // Append remaining pages
-                for (int i = 1; i < adjustedTiffPaths.Count; i++)
+                Directory.CreateDirectory(outputDir);
+            }
+
+            TiffImage tiffImage = null;
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+            foreach (string cdrPath in inputPaths)
+            {
+                // Load CDR canvas
+                using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
                 {
-                    using (TiffImage pageTiff = (TiffImage)Image.Load(adjustedTiffPaths[i]))
+                    // Rasterize CDR to PNG in memory
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        // Add the active frame of the page to the final image
-                        finalTiff.AddFrame(pageTiff.ActiveFrame);
+                        var pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = new CdrRasterizationOptions
+                            {
+                                PageWidth = cdr.Width,
+                                PageHeight = cdr.Height
+                            }
+                        };
+                        cdr.Save(ms, pngOptions);
+                        ms.Position = 0;
+
+                        // Load rasterized PNG as RasterImage
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            // Adjust brightness (example value: 50)
+                            raster.AdjustBrightness(50);
+
+                            if (tiffImage == null)
+                            {
+                                // First frame creates the TIFF image
+                                tiffImage = (TiffImage)Image.Create(tiffOptions, raster.Width, raster.Height);
+                                tiffImage.SavePixels(tiffImage.Bounds, raster.LoadPixels(raster.Bounds));
+                            }
+                            else
+                            {
+                                // Add subsequent frames
+                                tiffImage.AddFrame(new TiffFrame(tiffOptions, raster.Width, raster.Height));
+                                tiffImage.ActiveFrame.SavePixels(tiffImage.ActiveFrame.Bounds, raster.LoadPixels(raster.Bounds));
+                            }
+                        }
                     }
                 }
+            }
 
-                // Save the combined multipage TIFF
-                finalTiff.Save(outputPath);
+            if (tiffImage != null)
+            {
+                // Save the multipage TIFF
+                tiffImage.Save(outputPath, tiffOptions);
+                tiffImage.Dispose();
             }
         }
-
-        // Cleanup temporary files
-        foreach (string tempPath in adjustedTiffPaths)
+        catch (Exception ex)
         {
-            try { File.Delete(tempPath); } catch { /* ignore cleanup errors */ }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

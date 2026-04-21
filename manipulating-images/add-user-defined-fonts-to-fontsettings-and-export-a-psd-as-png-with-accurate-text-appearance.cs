@@ -1,60 +1,60 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.psd";
-        string outputPath = "output.png";
-        string fontsFolder = "fonts";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input, output and fonts folder paths
+            string inputPath = @"C:\Images\input.psd";
+            string outputPath = @"C:\Images\output.png";
+            string fontsFolder = @"C:\Fonts";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource(
-            (object[] _) =>
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                var list = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                if (Directory.Exists(fontsFolder))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Register custom fonts folder and refresh the font cache
+            FontSettings.SetFontsFolder(fontsFolder);
+            FontSettings.UpdateFonts();
+
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PNG options with vector rasterization to preserve text appearance
+                var pngOptions = new PngOptions
                 {
-                    foreach (var file in Directory.GetFiles(fontsFolder))
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        var data = File.ReadAllBytes(file);
-                        var name = Path.GetFileNameWithoutExtension(file);
-                        list.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
                     }
-                }
-                return list.ToArray();
-            }, fontsFolder);
+                };
 
-        using (Image psdImage = Image.Load(inputPath, loadOptions))
+                // Save the image as PNG
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
         {
-            var vectorOpts = new VectorRasterizationOptions
-            {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                BackgroundColor = Color.White,
-                PageWidth = psdImage.Width,
-                PageHeight = psdImage.Height
-            };
-
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = vectorOpts
-            };
-
-            psdImage.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -9,29 +9,37 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.gif";
-        string outputPath = "sample.adjusted.gif";
+        string inputPath = @"C:\Images\input.gif";
+        string outputPath = @"C:\Images\output_contrast.gif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to GifImage to access AdjustContrast
+                GifImage gifImage = (GifImage)image;
+
+                // Apply high contrast (range -100 to 100)
+                gifImage.AdjustContrast(80f);
+
+                // Save the result as a GIF
+                gifImage.Save(outputPath, new GifOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the GIF image, adjust contrast, and save the result
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            GifImage gifImage = (GifImage)image;
-
-            // Apply high contrast (maximum allowed value)
-            gifImage.AdjustContrast(100f);
-
-            // Save the modified image as GIF
-            gifImage.Save(outputPath, new GifOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

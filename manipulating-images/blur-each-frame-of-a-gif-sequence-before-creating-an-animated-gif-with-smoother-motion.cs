@@ -1,40 +1,45 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.gif";
-        string outputPath = "output_blurred.gif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.gif";
+            string outputPath = "output_blurred.gif";
 
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        using (Aspose.Imaging.Image img = Aspose.Imaging.Image.Load(inputPath))
-        {
-            var gif = (Aspose.Imaging.FileFormats.Gif.GifImage)img;
-
-            for (int i = 0; i < gif.PageCount; i++)
+            if (!File.Exists(inputPath))
             {
-                gif.ActiveFrame = (Aspose.Imaging.FileFormats.Gif.Blocks.GifFrameBlock)gif.Pages[i];
-                gif.Filter(gif.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            var options = new GifOptions();
-            gif.Save(outputPath, options);
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var gif = (Aspose.Imaging.FileFormats.Gif.GifImage)image;
+                int pageCount = gif.PageCount;
+
+                for (int i = 0; i < pageCount; i++)
+                {
+                    gif.ActiveFrame = (Aspose.Imaging.FileFormats.Gif.Blocks.GifFrameBlock)gif.Pages[i];
+                    gif.Filter(gif.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                }
+
+                gif.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

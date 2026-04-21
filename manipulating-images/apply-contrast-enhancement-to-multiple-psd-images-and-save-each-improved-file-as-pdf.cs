@@ -5,54 +5,56 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\Images\Input";
-        string outputDir = @"C:\Images\Output";
-
-        // List of PSD files to process
-        string[] psdFiles = new[]
+        try
         {
-            "image1.psd",
-            "image2.psd",
-            "image3.psd"
-        };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        foreach (string fileName in psdFiles)
-        {
-            // Build full input and output paths
-            string inputPath = Path.Combine(inputDir, fileName);
-            string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".pdf");
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PSD image
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                // Apply contrast enhancement if the image supports raster operations
-                if (image is RasterImage rasterImage)
-                {
-                    // Increase contrast by 30 (value range depends on library; adjust as needed)
-                    rasterImage.AdjustContrast(30);
-                }
-
-                // Prepare PDF save options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Save the enhanced image as PDF
-                image.Save(outputPath, pdfOptions);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            Console.WriteLine($"Processed and saved: {outputPath}");
+            string[] files = Directory.GetFiles(inputDirectory, "*.psd");
+
+            foreach (var inputPath in files)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Apply contrast enhancement (dynamic to accommodate format-specific method)
+                    dynamic img = image;
+                    img.AdjustContrast(20f);
+
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

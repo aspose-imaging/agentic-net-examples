@@ -1,56 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\vector.svg";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Temporary rasterized PNG path
-        string tempPngPath = Path.Combine(Path.GetTempPath(), "tempRaster.png");
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-        // Rasterize vector image to PNG
-        using (Image vectorImage = Image.Load(inputPath))
-        {
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = new SvgRasterizationOptions()
-            };
-            vectorImage.Save(tempPngPath, pngOptions);
-        }
-
-        // Load rasterized image and save as output PNG
-        using (Image rasterImage = Image.Load(tempPngPath))
-        {
-            rasterImage.Save(outputPath, new PngOptions());
-        }
-
-        // Clean up temporary file
         try
         {
-            File.Delete(tempPngPath);
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\vector_rasterized.png";
+            string outputPath = @"C:\Images\vector_rasterized_GaussWiener.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply Gauss‑Wiener filter with default parameters
+                rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions());
+
+                // Save the filtered image
+                rasterImage.Save(outputPath);
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore any errors during cleanup
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

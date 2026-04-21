@@ -1,20 +1,15 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,46 +21,30 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image as RasterImage
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+        try
         {
-            // Prepare export options for masking (in‑memory stream)
-            var maskingExportOptions = new PngOptions
+            // Load the image
+            using (Image image = Image.Load(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            };
+                // Cast to RasterImage to access filtering methods
+                RasterImage rasterImage = (RasterImage)image;
 
-            // Configure auto‑masking (GraphCut) to remove background
-            var maskingOptions = new AutoMaskingGraphCutOptions
-            {
-                CalculateDefaultStrokes = true,
-                FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                ExportOptions = maskingExportOptions,
-                BackgroundReplacementColor = Color.Transparent
-            };
+                // ----- Background removal step (placeholder) -----
+                // If a specific background removal filter is available, apply it here.
+                // Example (if such a filter existed):
+                // rasterImage.Filter(rasterImage.Bounds, new BackgroundRemovalFilterOptions());
 
-            // Perform masking
-            using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
-            {
-                // Obtain the foreground (masked object) image
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
-                {
-                    // Apply Gauss‑Wiener filter to reduce blur introduced by masking
-                    foreground.Filter(
-                        foreground.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions());
+                // Apply Gauss‑Wiener filter to correct blur introduced by background removal
+                var gaussWienerOptions = new GaussWienerFilterOptions(5, 4.0);
+                rasterImage.Filter(rasterImage.Bounds, gaussWienerOptions);
 
-                    // Save the filtered foreground image
-                    var saveOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
-                    foreground.Save(outputPath, saveOptions);
-                }
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

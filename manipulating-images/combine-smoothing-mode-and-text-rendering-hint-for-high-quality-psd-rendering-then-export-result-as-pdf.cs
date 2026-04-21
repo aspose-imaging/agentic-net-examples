@@ -2,56 +2,72 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.svg";
-        string psdPath = "Output/result.psd";
-        string pdfPath = "Output/result.pdf";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Define input and output paths
+            string inputPath = "Input/sample.png";
+            string psdPath = "Output/result.psd";
+            string pdfPath = "Output/result.pdf";
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(psdPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-
-        // Load the vector image (SVG)
-        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
-        {
-            // Configure PSD options with high‑quality rasterization settings
-            using (PsdOptions psdOptions = new PsdOptions())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(psdPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD options with high‑quality vector rasterization
+                using (PsdOptions psdOptions = new PsdOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height,
-                    SmoothingMode = SmoothingMode.AntiAlias,
-                    TextRenderingHint = TextRenderingHint.AntiAlias
-                };
+                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        SmoothingMode = SmoothingMode.AntiAlias,
+                        TextRenderingHint = TextRenderingHint.AntiAlias
+                    };
 
-                // Save as PSD
-                svgImage.Save(psdPath, psdOptions);
+                    // Save as PSD
+                    image.Save(psdPath, psdOptions);
+                }
+            }
+
+            // Load the generated PSD
+            using (Image psdImage = Image.Load(psdPath))
+            {
+                // Configure PDF options with the same high‑quality settings
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = psdImage.Width,
+                        PageHeight = psdImage.Height,
+                        SmoothingMode = SmoothingMode.AntiAlias,
+                        TextRenderingHint = TextRenderingHint.AntiAlias
+                    };
+
+                    // Save as PDF
+                    psdImage.Save(pdfPath, pdfOptions);
+                }
             }
         }
-
-        // Load the generated PSD and export to PDF
-        using (Image psdImage = Image.Load(psdPath))
+        catch (Exception ex)
         {
-            using (PdfOptions pdfOptions = new PdfOptions())
-            {
-                psdImage.Save(pdfPath, pdfOptions);
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

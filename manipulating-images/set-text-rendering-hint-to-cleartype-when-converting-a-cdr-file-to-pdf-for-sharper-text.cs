@@ -7,33 +7,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Input\sample.cdr";
-        string outputPath = @"C:\Output\sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\input\sample.cdr";
+            string outputPath = @"C:\output\sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PDF options with ClearType text rendering
-            var pdfOptions = new PdfOptions();
-            var rasterOptions = new CdrRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                TextRenderingHint = TextRenderingHint.ClearTypeGridFit
-            };
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PDF options with ClearType text rendering
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        TextRenderingHint = TextRenderingHint.ClearTypeGridFit
+                    }
+                };
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

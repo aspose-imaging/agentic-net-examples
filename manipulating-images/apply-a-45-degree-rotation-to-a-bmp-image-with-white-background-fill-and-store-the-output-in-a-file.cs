@@ -1,37 +1,52 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output_rotated.bmp";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Ensure the loaded image is a raster image (BmpImage derives from RasterImage)
+                if (image is RasterImage rasterImage)
+                {
+                    // Rotate 45 degrees clockwise, resize canvas to fit the rotated image,
+                    // and fill the empty background with white color
+                    rasterImage.Rotate(45f, true, Color.White);
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the rotated image to the output path
+                    rasterImage.Save(outputPath);
+                }
+                else
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                }
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image, rotate, and save
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Rotate 45 degrees, resize canvas proportionally, fill background with white
-            image.Rotate(45f, true, Color.White);
-
-            // Save the rotated image as BMP
-            BmpOptions options = new BmpOptions();
-            image.Save(outputPath, options);
+            // Report any unexpected errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

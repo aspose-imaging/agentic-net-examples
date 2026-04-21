@@ -2,48 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "C:\\temp\\input.tif";
-        string outputPath = "C:\\temp\\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\input.tif";
+            string outputPath = @"C:\Temp\output.pdf";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (Image tiffImage = Image.Load(inputPath))
-        {
-            // Configure PDF export options
-            var pdfOptions = new PdfOptions();
-
-            // Set up vector rasterization options with enhanced text rendering
-            var rasterOptions = new VectorRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Use anti‑aliased text rendering for better readability of embedded fonts
-                TextRenderingHint = TextRenderingHint.AntiAlias,
-                // Match the PDF page size to the source image size
-                PageSize = tiffImage.Size,
-                // Optional: set a white background
-                BackgroundColor = Color.White
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image as PDF
-            tiffImage.Save(outputPath, pdfOptions);
+            // Load the TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Configure PDF save options with text rendering hint
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        // Enhance readability of embedded fonts
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias,
+                        // Preserve original size
+                        PageSize = tiffImage.Size
+                    }
+                };
+
+                // Save as PDF
+                tiffImage.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,78 +1,69 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    // Loads a raster image, applies auto‑masking and a median filter, then returns the processed image.
-    static RasterImage LoadAndProcess(string inputPath)
+    static void Main(string[] args)
     {
-        // Load the image (no using – the caller will dispose it)
-        var image = (RasterImage)Image.Load(inputPath);
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
 
-        // ---------- Auto‑masking ----------
-        // Prepare default auto‑masking arguments
-        var autoMaskArgs = new AutoMaskingArgs();
-
-        // Create masking instance for the loaded image
-        var masking = new ImageMasking(image);
-
-        // Configure masking options (using KMeans as a generic auto‑masking method)
-        var maskingOptions = new MaskingOptions
-        {
-            Method = SegmentationMethod.KMeans,
-            Decompose = true,
-            Args = autoMaskArgs,
-            BackgroundReplacementColor = Color.Transparent,
-            ExportOptions = new PngOptions() // export options are required but not used here
-        };
-
-        // Decompose the image to obtain a mask and apply it back to the original image
-        using (var maskingResult = masking.Decompose(maskingOptions))
-        {
-            // Take the first segment mask (usually the foreground)
-            using (var mask = maskingResult[0].GetMask())
-            {
-                // Apply the mask to the original image
-                ImageMasking.ApplyMask(image, mask, maskingOptions);
-            }
-        }
-
-        // ---------- Median filter ----------
-        // Apply a median filter with a kernel size of 5 to the whole image
-        image.Filter(image.Bounds, new MedianFilterOptions(5));
-
-        return image;
-    }
-
-    static void Main()
-    {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        Directory.CreateDirectory(outputDir ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Process the image
-        RasterImage processedImage = LoadAndProcess(inputPath);
+        try
+        {
+            using (Aspose.Imaging.RasterImage originalImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                Aspose.Imaging.Size originalSize = originalImage.Size;
 
-        // Save the processed image as PNG
-        processedImage.Save(outputPath, new PngOptions());
+                PngOptions exportOptions = new PngOptions
+                {
+                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
+                    Source = new StreamSource(new MemoryStream())
+                };
 
-        // Dispose the image after saving
-        processedImage.Dispose();
+                var maskingOptions = new Aspose.Imaging.Masking.Options.AutoMaskingGraphCutOptions
+                {
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = (Math.Max(originalImage.Width, originalImage.Height) / 500) + 1,
+                    Method = Aspose.Imaging.Masking.Options.SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = exportOptions,
+                    BackgroundReplacementColor = Aspose.Imaging.Color.Transparent
+                };
+
+                using (Aspose.Imaging.Masking.Result.MaskingResult maskingResult =
+                    new Aspose.Imaging.Masking.ImageMasking(originalImage).Decompose(maskingOptions))
+                {
+                    using (Aspose.Imaging.RasterImage foreground = (Aspose.Imaging.RasterImage)maskingResult[1].GetImage())
+                    {
+                        foreground.Resize(originalSize.Width, originalSize.Height, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+
+                        using (Aspose.Imaging.RasterImage maskedImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+                        {
+                            Aspose.Imaging.Masking.ImageMasking.ApplyMask(maskedImage, foreground, maskingOptions);
+
+                            maskedImage.Filter(maskedImage.Bounds,
+                                new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+
+                            maskedImage.Save(outputPath, exportOptions);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

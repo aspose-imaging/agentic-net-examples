@@ -1,58 +1,63 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded list of input CDR files
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Data\file1.cdr",
-            @"C:\Data\file2.cdr",
-            @"C:\Data\file3.cdr"
-        };
-
-        // Hardcoded output directory
-        string outputDirectory = @"C:\Data\Output";
-
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hard‑coded list of input CDR files
+            string[] inputFiles = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\Sample1.cdr",
+                @"C:\Images\Sample2.cdr",
+                @"C:\Images\Sample3.cdr"
+            };
 
-            // Build output PDF path
-            string outputPath = Path.Combine(outputDirectory,
-                Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image
-            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            foreach (string inputPath in inputFiles)
             {
-                // Configure PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Set rasterization options to render text as vector shapes
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                // Build output PDF path (same folder, same name, .pdf extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
-                // Export the CDR (all pages) to a PDF document
-                image.Save(outputPath, pdfOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                {
+                    // Prepare PDF options with CDR rasterization settings
+                    PdfOptions pdfOptions = new PdfOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            // Render text as vector shapes (single‑bit per pixel rendering)
+                            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                            // Preserve original page size
+                            PageWidth = cdrImage.Width,
+                            PageHeight = cdrImage.Height
+                        }
+                    };
+
+                    // Export the whole CDR document to a single PDF file
+                    cdrImage.Save(outputPath, pdfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

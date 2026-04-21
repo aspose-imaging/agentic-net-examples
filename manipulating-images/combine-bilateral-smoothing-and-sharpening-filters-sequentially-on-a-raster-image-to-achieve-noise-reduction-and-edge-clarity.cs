@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -8,8 +7,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input\\sample.png";
-        string outputPath = "output\\result.png";
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,19 +20,27 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load image and apply filters sequentially
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            RasterImage raster = (RasterImage)image;
+            // Load the image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Cast to RasterImage for filtering
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-            // Bilateral smoothing filter with kernel size 5
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5));
+                // Apply bilateral smoothing filter (kernel size = 5)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5));
 
-            // Sharpen filter with kernel size 5 and sigma 4.0
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                // Apply sharpen filter (kernel size = 5, sigma = 4.0)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image as PNG
-            raster.Save(outputPath, new PngOptions());
+                // Save the processed image as PNG
+                raster.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,60 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cdr";
-        string outputPath = "output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample_adjusted.gif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR image
-        using (Image cdrImage = Image.Load(inputPath))
-        {
-            CdrImage cdr = (CdrImage)cdrImage;
-
-            // Prepare GIF options with vector rasterization settings
-            GifOptions gifOptions = new GifOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                VectorRasterizationOptions = new VectorRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Check for alpha channel support
+                bool hasAlpha = false;
+                if (image is RasterImage rasterImg)
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height
+                    hasAlpha = rasterImg.HasAlpha;
                 }
-            };
-
-            // Create a raster GIF canvas from the CDR vector image
-            using (Image rasterImage = Image.Create(gifOptions, cdr.Width, cdr.Height))
-            {
-                GifImage gif = (GifImage)rasterImage;
-
-                // Adjust gamma (example value 2.2)
-                gif.AdjustGamma(2.2f);
-
-                // Verify presence of alpha channel
-                bool hasAlpha = gif.HasAlpha;
                 Console.WriteLine($"Alpha channel present: {hasAlpha}");
 
-                // Save the GIF (output path already bound via FileCreateSource)
-                gif.Save();
+                // Apply gamma correction (using a sample gamma value)
+                if (image is RasterImage raster)
+                {
+                    raster.AdjustGamma(2.5f);
+                }
+                else
+                {
+                    // Fallback for other image types that may expose AdjustGamma
+                    dynamic dyn = image;
+                    dyn.AdjustGamma(2.5f);
+                }
+
+                // Save the adjusted image as GIF
+                var gifOptions = new GifOptions();
+                image.Save(outputPath, gifOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

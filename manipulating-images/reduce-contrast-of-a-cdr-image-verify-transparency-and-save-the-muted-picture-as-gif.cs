@@ -1,66 +1,59 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample_muted.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.cdr";
+            string outputPath = "output.gif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR image
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-        {
-            // Render the first page of the CDR to a raster image (PNG in memory)
-            using (MemoryStream rasterStream = new MemoryStream())
+            if (!File.Exists(inputPath))
             {
-                // Save the first page as PNG to the memory stream
-                cdrImage.Pages[0].Save(rasterStream, new PngOptions());
-                rasterStream.Position = 0; // Reset stream position for reading
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Load the raster image as a GIF image (still in memory)
-                using (GifImage gifImage = (GifImage)Image.Load(rasterStream))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            {
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Reduce contrast (negative value reduces contrast)
-                    gifImage.AdjustContrast(-30f);
-
-                    // Verify if the image contains any transparent pixels
-                    bool hasTransparency = false;
-                    for (int y = 0; y < gifImage.Height && !hasTransparency; y++)
+                    var rasterOptions = new GifOptions
                     {
-                        for (int x = 0; x < gifImage.Width; x++)
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
-                            int argb = gifImage.GetArgb32Pixel(x, y);
-                            byte alpha = (byte)(argb >> 24);
-                            if (alpha < 255)
-                            {
-                                hasTransparency = true;
-                                break;
-                            }
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height,
+                            BackgroundColor = Aspose.Imaging.Color.White
                         }
+                    };
+
+                    cdr.Save(ms, rasterOptions);
+                    ms.Position = 0;
+
+                    using (GifImage gif = (GifImage)Image.Load(ms))
+                    {
+                        RasterImage raster = (RasterImage)gif;
+                        raster.AdjustContrast(-30f);
+
+                        bool hasTransparency = gif.HasTransparentColor;
+                        Console.WriteLine($"Has transparency: {hasTransparency}");
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        gif.Save(outputPath, new GifOptions());
                     }
-
-                    Console.WriteLine($"Transparency detected: {hasTransparency}");
-
-                    // Save the muted GIF to the output path
-                    gifImage.Save(outputPath, new GifOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

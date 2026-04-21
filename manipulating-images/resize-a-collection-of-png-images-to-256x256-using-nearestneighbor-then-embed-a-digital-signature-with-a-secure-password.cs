@@ -1,54 +1,54 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Secure password for digital signature
-        const string password = "StrongPassword123!";
-
-        // Hardcoded collection of PNG input files
-        string[] inputPaths = { "image1.png", "image2.png", "image3.png" };
-
-        foreach (var inputPath in inputPaths)
+        try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            foreach (var file in files)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            // Build output path inside the 'output' folder
-            string outputDirectory = "output";
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_256x256.png";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image using Aspose.Imaging
-            using (Image image = Image.Load(inputPath))
-            {
-                // Process only raster images (PNG is raster)
-                if (image is RasterImage rasterImage)
+                // Verify input file exists
+                if (!File.Exists(file))
                 {
-                    // Resize to 256x256 using the default NearestNeighbour resample
-                    rasterImage.Resize(256, 256);
-
-                    // Embed a digital signature with the provided password
-                    rasterImage.EmbedDigitalSignature(password);
-
-                    // Save the processed image to the output path
-                    rasterImage.Save(outputPath);
+                    Console.Error.WriteLine($"File not found: {file}");
+                    return;
                 }
-                else
+
+                using (RasterImage image = (RasterImage)Image.Load(file))
                 {
-                    Console.Error.WriteLine($"Unsupported image format: {inputPath}");
+                    // Resize to 256x256 using default NearestNeighbour resampling
+                    image.Resize(256, 256);
+
+                    // Embed digital signature with a secure password
+                    image.EmbedDigitalSignature("secure123");
+
+                    // Prepare output path
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + "_resized.png");
+
+                    // Ensure output directory exists for the file
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as PNG
+                    var options = new PngOptions();
+                    image.Save(outputPath, options);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

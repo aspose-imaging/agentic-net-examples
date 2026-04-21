@@ -2,45 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.tif";
-        string outputPath = "Output/result.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.tif";
+            string outputPath = "Output/result.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Adjust brightness
-            TiffImage tiff = (TiffImage)image;
-            tiff.AdjustBrightness(50);
-
-            // Apply Gaussian blur
-            RasterImage raster = (RasterImage)image;
-            var blurOptions = new GaussianBlurFilterOptions
+            if (!File.Exists(inputPath))
             {
-                Radius = 5,
-                Sigma = 1.5f
-            };
-            raster.Filter(raster.Bounds, blurOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the result as PDF
-            image.Save(outputPath, new PdfOptions());
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                raster.AdjustBrightness(50);
+
+                GaussianBlurFilterOptions blurOptions = new GaussianBlurFilterOptions(5, 5.0);
+                raster.Filter(raster.Bounds, blurOptions);
+
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

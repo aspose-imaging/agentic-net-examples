@@ -1,115 +1,74 @@
 using System;
+using System.Diagnostics;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath4K = @"C:\Images\image_4k.png";
-        string inputPath1080p = @"C:\Images\image_1080p.png";
-        string outputPath4K = @"C:\Images\output_4k.png";
-        string outputPath1080p = @"C:\Images\output_1080p.png";
-
-        // Verify 4K input file exists
-        if (!File.Exists(inputPath4K))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath4K}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath4K = @"C:\Images\image_4k.png";
+            string inputPath1080p = @"C:\Images\image_1080p.png";
+            string outputPath4K = @"C:\Images\output_4k_median.png";
+            string outputPath1080p = @"C:\Images\output_1080p_median.png";
 
-        // Verify 1080p input file exists
-        if (!File.Exists(inputPath1080p))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath1080p}");
-            return;
-        }
-
-        // -------------------- Process 4K image --------------------
-        using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath4K))
-        {
-            var maskExportOptions = new PngOptions
+            // Verify input files exist
+            if (!File.Exists(inputPath4K))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            };
-
-            var maskingOptions = new Aspose.Imaging.Masking.Options.AutoMaskingGraphCutOptions
-            {
-                CalculateDefaultStrokes = true,
-                FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
-                Method = Aspose.Imaging.Masking.Options.SegmentationMethod.GraphCut,
-                Decompose = false,
-                ExportOptions = maskExportOptions,
-                BackgroundReplacementColor = Aspose.Imaging.Color.Transparent
-            };
-
-            using (Aspose.Imaging.Masking.Result.MaskingResult maskingResult =
-                new Aspose.Imaging.Masking.ImageMasking(image).Decompose(maskingOptions))
-            using (Aspose.Imaging.RasterImage foreground = (Aspose.Imaging.RasterImage)maskingResult[1].GetImage())
-            {
-                var sw = new System.Diagnostics.Stopwatch();
-                sw.Start();
-                foreground.Filter(foreground.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
-                sw.Stop();
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath4K));
-
-                var saveOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath4K, false)
-                };
-                foreground.Save(outputPath4K, saveOptions);
-
-                Console.WriteLine($"Median filter on 4K image took {sw.ElapsedMilliseconds} ms");
+                Console.Error.WriteLine($"File not found: {inputPath4K}");
+                return;
             }
-        }
-
-        // -------------------- Process 1080p image --------------------
-        using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath1080p))
-        {
-            var maskExportOptions = new PngOptions
+            if (!File.Exists(inputPath1080p))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            };
-
-            var maskingOptions = new Aspose.Imaging.Masking.Options.AutoMaskingGraphCutOptions
-            {
-                CalculateDefaultStrokes = true,
-                FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
-                Method = Aspose.Imaging.Masking.Options.SegmentationMethod.GraphCut,
-                Decompose = false,
-                ExportOptions = maskExportOptions,
-                BackgroundReplacementColor = Aspose.Imaging.Color.Transparent
-            };
-
-            using (Aspose.Imaging.Masking.Result.MaskingResult maskingResult =
-                new Aspose.Imaging.Masking.ImageMasking(image).Decompose(maskingOptions))
-            using (Aspose.Imaging.RasterImage foreground = (Aspose.Imaging.RasterImage)maskingResult[1].GetImage())
-            {
-                var sw = new System.Diagnostics.Stopwatch();
-                sw.Start();
-                foreground.Filter(foreground.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
-                sw.Stop();
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath1080p));
-
-                var saveOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath1080p, false)
-                };
-                foreground.Save(outputPath1080p, saveOptions);
-
-                Console.WriteLine($"Median filter on 1080p image took {sw.ElapsedMilliseconds} ms");
+                Console.Error.WriteLine($"File not found: {inputPath1080p}");
+                return;
             }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath4K));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1080p));
+
+            // Benchmark for 4K image
+            long elapsed4K = ApplyMedianFilterAndMeasure(inputPath4K, outputPath4K);
+            Console.WriteLine($"4K median filter time: {elapsed4K} ms");
+
+            // Benchmark for 1080p image
+            long elapsed1080p = ApplyMedianFilterAndMeasure(inputPath1080p, outputPath1080p);
+            Console.WriteLine($"1080p median filter time: {elapsed1080p} ms");
         }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    // Loads an image, (placeholder for background removal), applies median filter, saves result, and returns elapsed milliseconds
+    static long ApplyMedianFilterAndMeasure(string inputPath, string outputPath)
+    {
+        Stopwatch sw = new Stopwatch();
+
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage to access filtering capabilities
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Placeholder for background removal step (if needed)
+            // For example, you could use WatermarkRemover with TeleaWatermarkOptions here.
+
+            // Measure median filter execution time
+            sw.Start();
+            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+            sw.Stop();
+
+            // Save the filtered image
+            rasterImage.Save(outputPath);
+        }
+
+        return sw.ElapsedMilliseconds;
     }
 }

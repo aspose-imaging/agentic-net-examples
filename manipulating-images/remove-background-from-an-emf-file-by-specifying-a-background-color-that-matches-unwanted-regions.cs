@@ -9,40 +9,50 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output\ChangedBackground_input.emf";
+        string outputPath = @"C:\Images\output.emf";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the EMF image
+            using (MetaImage metaImage = (MetaImage)Image.Load(inputPath))
+            {
+                // Cast to EmfImage for record manipulation
+                EmfImage emfImage = (EmfImage)metaImage;
+
+                // Add a background rectangle with the desired color (e.g., white)
+                AddBackgroundRectangleEmf(emfImage, Color.White);
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified image
+                emfImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image, add a background rectangle, and save the result
-        using (MetaImage metaImage = (MetaImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to EmfImage to access EMF‑specific members
-            AddBackgroundRectangleEmf((EmfImage)metaImage, Color.Blue);
-
-            // Save the modified image
-            metaImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 
     /// <summary>
-    /// Inserts a rectangle filled with the specified color at the bottom of the EMF record list.
-    /// This effectively changes the background color of the image.
+    /// Inserts a rectangle filled with the specified background color at the beginning of the EMF records.
+    /// This effectively replaces unwanted background regions with the chosen color.
     /// </summary>
     /// <param name="image">The EMF image to modify.</param>
     /// <param name="color">The background color to apply.</param>
     public static void AddBackgroundRectangleEmf(EmfImage image, Color color)
     {
-        // Ensure all records are loaded into memory
+        // Ensure the image data is cached before modifying records
         image.CacheData();
 
         // If there are no records, nothing to modify
@@ -61,27 +71,27 @@ class Program
         EmfCreateBrushIndirect brush = new EmfCreateBrushIndirect
         {
             LogBrush = new EmfLogBrushEx(),
-            IhBrush = 1 // Object handle (must be > 0)
+            IhBrush = 1 // Object handle index (starts at 1)
         };
         brush.LogBrush.Argb32ColorRef = color.ToArgb();
 
-        // Select the brush for subsequent drawing operations
+        // Select the brush for drawing
         EmfSelectObject selectObject = new EmfSelectObject
         {
             ObjectHandle = 1
         };
 
-        // Delete the brush after drawing the rectangle to clean up the object table
+        // Delete the brush after drawing the rectangle
         EmfDeleteObject deleteObject = new EmfDeleteObject
         {
             ObjectHandle = 1
         };
 
         // Insert the new records at the beginning of the record list
-        // Index 0 inserts before all existing drawing commands
-        image.Records.Insert(0, brush);
-        image.Records.Insert(1, selectObject);
-        image.Records.Insert(2, rectangle);
-        image.Records.Insert(3, deleteObject);
+        // Insert order: brush, select brush, rectangle, delete brush
+        image.Records.Insert(1, brush);
+        image.Records.Insert(2, selectObject);
+        image.Records.Insert(3, rectangle);
+        image.Records.Insert(4, deleteObject);
     }
 }

@@ -2,59 +2,80 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Minimum pixel count requirement (e.g., 800x600)
-        int minPixelCount = 800 * 600;
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Process each file in the input directory
-        foreach (string inputPath in Directory.GetFiles(inputDirectory))
+        try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Define input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
                 return;
             }
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory);
+            foreach (string inputPath in files)
             {
-                // Check if the image meets the pixel count requirement
-                if (image.Width * image.Height > minPixelCount)
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    // Embed digital signature using a password
-                    string password = "SecretPassword123";
-                    dynamic raster = image; // Use dynamic to call EmbedDigitalSignature on the concrete type
-                    raster.EmbedDigitalSignature(password);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                    // Prepare output path
-                    string fileName = Path.GetFileName(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileName);
+                // Prepare output path
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
 
-                    // Ensure the output directory for this file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure output directory exists (unconditional as per requirements)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the modified image (preserves original format)
-                    raster.Save(outputPath);
+                // Load the image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Check pixel count requirement (minimum 200x200)
+                    if (image.Width * image.Height < 200 * 200)
+                    {
+                        // Skip embedding for images that do not meet the size requirement
+                        continue;
+                    }
+
+                    // Cast to RasterCachedImage to access EmbedDigitalSignature
+                    if (image is RasterCachedImage rasterImage)
+                    {
+                        // Embed digital signature with a valid password
+                        rasterImage.EmbedDigitalSignature("secure123");
+                        // Save the signed image
+                        rasterImage.Save(outputPath);
+                    }
+                    else if (image is RasterCachedMultipageImage multipageImage)
+                    {
+                        // Embed digital signature for multipage images
+                        multipageImage.EmbedDigitalSignature("secure123");
+                        multipageImage.Save(outputPath);
+                    }
+                    else
+                    {
+                        // If the image type does not support digital signature, just copy it
+                        image.Save(outputPath);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

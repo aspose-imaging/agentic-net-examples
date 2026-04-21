@@ -5,36 +5,47 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/input.png";
-        string outputPath = "output/output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image, resize, and save as JPEG with quality setting
-        using (Image image = Image.Load(inputPath))
-        {
-            int newWidth = image.Width / 2;
-            int newHeight = image.Height / 2;
-
-            image.Resize(newWidth, newHeight);
-
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Quality = 80 // Desired JPEG quality (1-100)
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, jpegOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Compute new dimensions: half the width, maintain aspect ratio
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+
+                // Resize the image
+                image.Resize(newWidth, newHeight);
+
+                // Prepare JPEG save options with desired quality
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 90 // Adjust quality as needed (1-100)
+                };
+
+                // Save the resized image as JPEG
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

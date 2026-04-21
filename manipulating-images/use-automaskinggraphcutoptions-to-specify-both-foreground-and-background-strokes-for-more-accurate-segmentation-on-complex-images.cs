@@ -12,11 +12,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hard‑coded paths
+        // Hard‑coded input and output paths
         string inputPath = "input.jpg";
         string outputPath = "output.png";
-        string refinedOutputPath = "output_refined.png";
-        string tempPath = "tempMask.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,61 +23,68 @@ class Program
             return;
         }
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-        Directory.CreateDirectory(Path.GetDirectoryName(refinedOutputPath) ?? string.Empty);
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPath) ?? string.Empty);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load source image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        try
         {
-            // First pass – calculate default background/foreground strokes
-            var options = new AutoMaskingGraphCutOptions
+            // Load the source image as a raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                CalculateDefaultStrokes = true,
-                FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                ExportOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(tempPath)
-                },
-                BackgroundReplacementColor = Color.Transparent
-            };
+                // Temporary file for export options (required by the API)
+                string tempExportPath = Path.GetTempFileName();
 
-            using (MaskingResult results = new ImageMasking(image).Decompose(options))
-            {
-                using (RasterImage resultImage = (RasterImage)results[1].GetImage())
+                // First pass – calculate default background/foreground strokes
+                var options = new AutoMaskingGraphCutOptions
+                {
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new FileCreateSource(tempExportPath, false)
+                    },
+                    BackgroundReplacementColor = Aspose.Imaging.Color.Transparent
+                };
+
+                // Perform masking to obtain default strokes
+                var initialResult = new ImageMasking(image).Decompose(options);
+
+                // Retrieve the automatically calculated strokes
+                Aspose.Imaging.Point[] backgroundStrokes = options.DefaultBackgroundStrokes;
+                Aspose.Imaging.Point[] foregroundStrokes = options.DefaultForegroundStrokes;
+
+                // Second pass – use both background and foreground strokes explicitly
+                options.CalculateDefaultStrokes = false;
+                options.Args = new AutoMaskingArgs
+                {
+                    ObjectsPoints = new Aspose.Imaging.Point[][]
+                    {
+                        backgroundStrokes,   // background points
+                        foregroundStrokes    // foreground points
+                    }
+                };
+
+                var finalResult = new ImageMasking(image).Decompose(options);
+
+                // Save the foreground segment (index 1) to the desired output file
+                using (RasterImage resultImage = (RasterImage)finalResult[1].GetImage())
                 {
                     resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
-            }
 
-            // Retrieve the automatically generated strokes
-            Point[] backgroundStrokes = options.DefaultBackgroundStrokes;
-            Point[] foregroundStrokes = options.DefaultForegroundStrokes;
-
-            // Second pass – supply explicit background and foreground strokes
-            options.CalculateDefaultStrokes = false;
-            options.Args = new AutoMaskingArgs
-            {
-                ObjectsPoints = new Point[][] { backgroundStrokes, foregroundStrokes }
-            };
-
-            using (MaskingResult refinedResults = new ImageMasking(image).Decompose(options))
-            {
-                using (RasterImage refinedImage = (RasterImage)refinedResults[1].GetImage())
+                // Clean up the temporary export file
+                if (File.Exists(tempExportPath))
                 {
-                    refinedImage.Save(refinedOutputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    File.Delete(tempExportPath);
                 }
             }
         }
-
-        // Delete temporary file used for ExportOptions
-        if (File.Exists(tempPath))
+        catch (Exception ex)
         {
-            File.Delete(tempPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

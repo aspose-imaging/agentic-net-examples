@@ -3,60 +3,55 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cdr";
-        string outputPath = "output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.cdr";
+            string outputPath = "output.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR image
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
-        {
-            // Rasterize CDR to a PNG in memory
-            using (MemoryStream ms = new MemoryStream())
+            if (!File.Exists(inputPath))
             {
-                var pngOptions = new PngOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            {
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Source = new StreamSource(ms),
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    // Rasterize CDR to PNG in memory
+                    cdr.Save(ms, new PngOptions());
+                    ms.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
+                        // Reduce brightness
+                        raster.AdjustBrightness(-50);
+
+                        // Verify alpha channel
+                        bool hasAlpha = raster.HasAlpha;
+                        Console.WriteLine($"Alpha channel present: {hasAlpha}");
+
+                        // Save as TIFF
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        raster.Save(outputPath, tiffOptions);
                     }
-                };
-                cdr.Save(ms, pngOptions);
-                ms.Position = 0;
-
-                // Load rasterized image
-                using (RasterImage raster = (RasterImage)Image.Load(ms))
-                {
-                    // Reduce brightness (negative value dims the image)
-                    raster.AdjustBrightness(-50);
-
-                    // Verify presence of alpha channel
-                    bool hasAlpha = raster.HasAlpha;
-                    Console.WriteLine($"Alpha channel present: {hasAlpha}");
-
-                    // Save the dimmed image as TIFF
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    raster.Save(outputPath, tiffOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

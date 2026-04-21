@@ -8,36 +8,40 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\sample.psd";
-        string outputPath = @"C:\Images\output.pdf";
-
-        // Verify that the input PSD file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "C:\\Images\\input.psd";
+            string outputPath = "C:\\Images\\output.pdf";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access the Dither method
-            if (image is RasterImage rasterImage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Apply ordered dithering approximation using ThresholdDithering
-                // with an 8‑bit palette (256 colors). Adjust bitsCount as needed.
-                rasterImage.Dither(DitheringMethod.ThresholdDithering, 8);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Prepare PDF save options (default settings)
-            var pdfOptions = new PdfOptions();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the dithered image as a PDF file
-            image.Save(outputPath, pdfOptions);
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Perform dithering if the image supports it
+                if (image is RasterImage rasterImage)
+                {
+                    // Ordered dithering is not directly available; using ThresholdDithering as the closest alternative
+                    rasterImage.Dither(DitheringMethod.ThresholdDithering, 4);
+                }
+
+                // Save the result as PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

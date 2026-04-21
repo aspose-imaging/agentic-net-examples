@@ -3,81 +3,69 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source PNG as a raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Configure user-defined strokes for auto masking
-            var userStrokes = new AutoMaskingArgs
+            if (!File.Exists(inputPath))
             {
-                // Example strokes: first array = background points, second = foreground points
-                ObjectsPoints = new Point[][]
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            {
+                var maskingOptions = new AutoMaskingGraphCutOptions
                 {
-                    new Point[] { new Point(30, 30), new Point(40, 30) }, // background strokes
-                    new Point[] { new Point(120, 120), new Point(130, 130) } // foreground strokes
-                }
-            };
+                    Args = new AutoMaskingArgs
+                    {
+                        ObjectsPoints = new Point[][]
+                        {
+                            new Point[] { new Point(30, 30), new Point(30, 60), new Point(60, 30) },
+                            new Point[] { new Point(120, 120), new Point(150, 150) }
+                        }
+                    },
+                    CalculateDefaultStrokes = false,
+                    FeatheringRadius = 3,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    BackgroundReplacementColor = Color.Transparent,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    }
+                };
 
-            // Export options for the masking result (transparent PNG)
-            var exportOptions = new PngOptions
-            {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            };
-
-            // Set up auto-masking options with GraphCut method
-            var maskingOptions = new AutoMaskingGraphCutOptions
-            {
-                CalculateDefaultStrokes = false, // using user strokes
-                FeatheringRadius = 3,
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                ExportOptions = exportOptions,
-                BackgroundReplacementColor = Color.Transparent,
-                Args = userStrokes
-            };
-
-            // Perform masking
-            using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
-            {
-                // Retrieve the foreground (masked object) image
+                using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
                 using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
                 {
-                    // Align DPI: make horizontal and vertical resolutions equal
-                    double maxResolution = Math.Max(foreground.HorizontalResolution, foreground.VerticalResolution);
-                    foreground.HorizontalResolution = maxResolution;
-                    foreground.VerticalResolution = maxResolution;
+                    float targetDpi = (float)Math.Max(foreground.HorizontalResolution, foreground.VerticalResolution);
+                    foreground.HorizontalResolution = targetDpi;
+                    foreground.VerticalResolution = targetDpi;
 
-                    // Save the aligned foreground as PNG
-                    var saveOptions = new PngOptions
+                    foreground.Save(outputPath, new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha
-                    };
-                    foreground.Save(outputPath, saveOptions);
+                    });
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

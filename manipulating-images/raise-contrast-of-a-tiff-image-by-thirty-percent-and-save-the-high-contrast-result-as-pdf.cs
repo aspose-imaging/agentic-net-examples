@@ -8,31 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.tif";
-        string outputPath = @"C:\temp\sample_contrast.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.tif";
+            string outputPath = @"c:\temp\sample_high_contrast.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to TiffImage to access AdjustContrast
+                TiffImage tiffImage = (TiffImage)image;
+
+                // Increase contrast by 30%
+                tiffImage.AdjustContrast(30f);
+
+                // Save the result as PDF
+                tiffImage.Save(outputPath, new PdfOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image, adjust contrast, and save as PDF
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to TiffImage to access AdjustContrast
-            TiffImage tiffImage = (TiffImage)image;
-
-            // Increase contrast by 30%
-            tiffImage.AdjustContrast(30f);
-
-            // Save the result as PDF
-            tiffImage.Save(outputPath, new PdfOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
