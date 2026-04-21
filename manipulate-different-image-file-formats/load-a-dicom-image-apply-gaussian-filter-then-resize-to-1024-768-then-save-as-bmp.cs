@@ -22,16 +22,16 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DICOM image, apply Gaussian filter, resize, and save as BMP
+        // Load the DICOM image
         using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
         {
-            // Apply Gaussian blur filter to the whole image
+            // Apply Gaussian blur filter to the entire image
             dicomImage.Filter(
                 dicomImage.Bounds,
                 new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-            // Resize to 1024x768 using nearest neighbour resampling
-            dicomImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+            // Resize to 1024x768 using Lanczos resampling
+            dicomImage.Resize(1024, 768, ResizeType.LanczosResample);
 
             // Save the processed image as BMP
             dicomImage.Save(outputPath, new BmpOptions());
