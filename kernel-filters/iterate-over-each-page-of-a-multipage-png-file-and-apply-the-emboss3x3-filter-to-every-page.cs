@@ -2,54 +2,56 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (Image image = Image.Load(inputPath))
-        {
-            // If the image supports multiple pages, process each page
-            if (image is IMultipageImage multipageImage)
+            if (!File.Exists(inputPath))
             {
-                for (int i = 0; i < multipageImage.PageCount; i++)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                if (image is IMultipageImage multipageImage && multipageImage.PageCount > 0)
                 {
-                    // Each page is a RasterImage
-                    var page = (RasterImage)multipageImage.Pages[i];
-                    // Apply Emboss3x3 filter to the entire page
-                    page.Filter(page.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                    foreach (Image page in multipageImage.Pages)
+                    {
+                        using (page)
+                        {
+                            if (page is RasterImage rasterPage)
+                            {
+                                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                                rasterPage.Filter(rasterPage.Bounds, filterOptions);
+                            }
+                        }
+                    }
                 }
-            }
-            else if (image is RasterImage rasterImage)
-            {
-                // Single-page image: apply filter directly
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-            }
+                else if (image is RasterImage rasterImage)
+                {
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                    rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                }
 
-            // Save the processed image as PNG
-            PngOptions options = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
-            image.Save(outputPath, options);
+                var saveOptions = new PngOptions();
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
