@@ -2,71 +2,74 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
-class Program
+namespace AsposeImagingSample
 {
-    static void Main(string[] args)
+    class Program
     {
-        // ---------- PNG processing ----------
-        string pngInputPath = @"C:\Images\input.png";
-        string pngOutputPath = @"C:\Images\output_filtered.png";
-
-        if (!File.Exists(pngInputPath))
+        static void Main()
         {
-            Console.Error.WriteLine($"File not found: {pngInputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
-
-        using (Image image = Image.Load(pngInputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            // Apply a sharpen filter to the entire image
-            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-            // Save the filtered image as PNG
-            image.Save(pngOutputPath, new PngOptions());
-        }
-
-        // ---------- SVG processing ----------
-        string svgInputPath = @"C:\Images\input.svg";
-        string svgRasterPath = @"C:\Images\svg_raster.png";
-        string svgFilteredPath = @"C:\Images\svg_filtered.png";
-
-        if (!File.Exists(svgInputPath))
-        {
-            Console.Error.WriteLine($"File not found: {svgInputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(svgRasterPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(svgFilteredPath));
-
-        // Load SVG and rasterize to PNG
-        using (Image svgImage = Image.Load(svgInputPath))
-        {
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Wrap the whole process to catch any unexpected errors.
+            try
             {
-                PageSize = svgImage.Size
-            };
+                // Hard‑coded input and output file paths.
+                string pngInputPath = @"C:\temp\sample.png";
+                string pngOutputPath = @"C:\temp\sample.grayscale.png";
 
-            PngOptions pngOptions = new PngOptions
+                string svgInputPath = @"C:\temp\sample.svg";
+                string svgOutputPath = @"C:\temp\sample_from_svg.png";
+
+                // ---------- PNG processing ----------
+                // Verify the PNG source file exists.
+                if (!File.Exists(pngInputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {pngInputPath}");
+                    return;
+                }
+
+                // Ensure the output directory exists.
+                Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
+
+                // Load the PNG, convert to grayscale, and save.
+                using (PngImage pngImage = new PngImage(pngInputPath))
+                {
+                    pngImage.Grayscale();                     // Apply grayscale filter.
+                    pngImage.Save(pngOutputPath);             // Save the processed image.
+                }
+
+                // ---------- SVG processing ----------
+                // Verify the SVG source file exists.
+                if (!File.Exists(svgInputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {svgInputPath}");
+                    return;
+                }
+
+                // Ensure the output directory exists.
+                Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
+
+                // Load the SVG (vector) image.
+                using (Image svgImage = Image.Load(svgInputPath))
+                {
+                    // Prepare PNG save options (e.g., enable progressive loading).
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        Progressive = true,
+                        // Optional: set compression level, filter type, etc.
+                        CompressionLevel = 9,
+                        FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive
+                    };
+
+                    // Rasterize the SVG and save as PNG.
+                    svgImage.Save(svgOutputPath, pngOptions);
+                }
+            }
+            catch (Exception ex)
             {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            svgImage.Save(svgRasterPath, pngOptions);
-        }
-
-        // Load the rasterized PNG and apply a filter
-        using (Image rasterizedImage = Image.Load(svgRasterPath))
-        {
-            RasterImage raster = (RasterImage)rasterizedImage;
-            // Apply a Gaussian blur filter to the entire image
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-            // Save the filtered PNG
-            rasterizedImage.Save(svgFilteredPath, new PngOptions());
+                // Report any runtime exception without crashing.
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
