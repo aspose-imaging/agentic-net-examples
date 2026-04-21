@@ -26,25 +26,20 @@ class Program
         // Load the CDR image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to CdrImage to access RotateFlip
-            CdrImage cdrImage = image as CdrImage;
-            if (cdrImage == null)
+            // Apply a flip operation (horizontal flip in this example)
+            if (image is CdrImage cdrImage)
             {
-                Console.Error.WriteLine("Loaded image is not a CDR file.");
-                return;
+                cdrImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
             }
 
-            // Apply a horizontal flip
-            cdrImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-            // Prepare TIFF save options with LZW compression
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            // Configure TIFF save options with LZW compression
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
             {
                 Compression = TiffCompressions.Lzw
             };
 
-            // Save as TIFF
-            cdrImage.Save(outputPath, tiffOptions);
+            // Save the transformed image as TIFF
+            image.Save(outputPath, tiffOptions);
         }
     }
 }
