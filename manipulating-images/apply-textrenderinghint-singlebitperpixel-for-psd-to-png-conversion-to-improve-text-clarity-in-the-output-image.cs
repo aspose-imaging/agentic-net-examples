@@ -1,42 +1,50 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.psd";
-        string outputPath = @"C:\Images\sample_converted.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.psd";
+            string outputPath = "Output/sample.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PNG save options with text rendering hint
-            PngOptions pngOptions = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Vector rasterization options are required to set the text rendering hint
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PNG using the configured options
-            image.Save(outputPath, pngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PSD image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Configure PNG options with vector rasterization settings
+                using (var pngOptions = new PngOptions())
+                {
+                    pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    };
+
+                    // Save as PNG with the specified options
+                    image.Save(outputPath, pngOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
