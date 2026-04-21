@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -20,32 +21,30 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(outputDirectory);
 
-        // Load DjVu document from file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
+        // Load the DjVu document from a file stream
+        using (FileStream inputStream = File.OpenRead(inputPath))
+        using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
         {
-            int pageIndex = 0;
-            foreach (var pageObj in djvuImage.Pages)
+            // Prepare TIFF saving options with Deflate compression
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
             {
-                // Each page is a DjvuPage
-                var page = (DjvuPage)pageObj;
+                Compression = TiffCompressions.Deflate
+            };
 
-                // Build output file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.tif");
+            int pageIndex = 1;
+            // Iterate through each page and save as an individual TIFF file
+            foreach (DjvuPage page in djvuImage.Pages)
+            {
+                string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.tiff");
 
-                // Ensure the directory for the output file exists
+                // Ensure the directory for this output file exists (already created above, but called per rule)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure TIFF options with Deflate compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Deflate;
-
-                // Save the page as a TIFF file
+                // Save the current page as TIFF using the defined options
                 page.Save(outputPath, tiffOptions);
-
                 pageIndex++;
             }
         }
