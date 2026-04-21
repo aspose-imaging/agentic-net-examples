@@ -2,60 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-
-            // Define a simple edge detection kernel (3x3)
-            double[,] kernel = new double[,]
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                { -1, -1, -1 },
-                { -1, 8, -1 },
-                { -1, -1, -1 }
-            };
-            double factor = 1.0;
-            int bias = 0;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Create convolution filter options
-            var filterOptions = new ConvolutionFilterOptions(kernel, factor, bias);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Apply the convolution filter to the entire image
-            raster.Filter(raster.Bounds, filterOptions);
-
-            // Save the filtered image to a memory stream (PNG format)
-            using (MemoryStream ms = new MemoryStream())
+            // Load image data into a memory stream
+            byte[] inputBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream inputStream = new MemoryStream(inputBytes))
             {
-                PngOptions pngOptions = new PngOptions();
-                raster.Save(ms, pngOptions);
-                ms.Position = 0;
-
-                // Write the memory stream to the output file
-                using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                using (Image image = Image.Load(inputStream))
                 {
-                    ms.CopyTo(fs);
+                    // Cast to RasterImage for filtering
+                    RasterImage raster = (RasterImage)image;
+
+                    // Apply a Gaussian blur convolution filter
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                    // Save the processed image to a memory stream, then write to file
+                    using (MemoryStream outputStream = new MemoryStream())
+                    {
+                        var pngOptions = new PngOptions();
+                        raster.Save(outputStream, pngOptions);
+                        File.WriteAllBytes(outputPath, outputStream.ToArray());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
