@@ -3,55 +3,64 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
-        {
-            // Desired maximum dimensions while preserving aspect ratio
-            int maxWidth = 800;
-            int maxHeight = 600;
-
-            double ratioX = (double)maxWidth / image.Width;
-            double ratioY = (double)maxHeight / image.Height;
-            double ratio = Math.Min(ratioX, ratioY);
-
-            int newWidth = (int)(image.Width * ratio);
-            int newHeight = (int)(image.Height * ratio);
-
-            // Resize only if dimensions change
-            if (newWidth > 0 && newHeight > 0 && (newWidth != image.Width || newHeight != image.Height))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                image.Resize(newWidth, newHeight);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Embed digital signature with a secure password
-            string password = "securePassword123";
-            image.EmbedDigitalSignature(password);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image with JPEG options
-            JpegOptions saveOptions = new JpegOptions
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
             {
-                Quality = 90
-            };
-            image.Save(outputPath, saveOptions);
+                // Cast to RasterImage for resizing and digital signature
+                RasterImage raster = (RasterImage)image;
+
+                // Maintain aspect ratio with a maximum width of 800 pixels
+                int maxWidth = 800;
+                int newWidth = raster.Width;
+                int newHeight = raster.Height;
+
+                if (raster.Width > maxWidth)
+                {
+                    newWidth = maxWidth;
+                    newHeight = (int)((double)raster.Height * maxWidth / raster.Width);
+                }
+
+                // Resize the image
+                raster.Resize(newWidth, newHeight);
+
+                // Embed digital signature using a secure password (>=4 characters)
+                raster.EmbedDigitalSignature("secure123");
+
+                // Prepare JPEG save options
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Save the processed image
+                raster.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
