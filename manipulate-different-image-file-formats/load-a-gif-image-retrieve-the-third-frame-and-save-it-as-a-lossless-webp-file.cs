@@ -4,61 +4,64 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.gif";
-        string outputPath = "output.webp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded relative input and output paths
+            string inputPath = "Input\\animation.gif";
+            string outputPath = "Output\\frame3.webp";
 
-        // Load the GIF image
-        using (Image img = Image.Load(inputPath))
-        {
-            GifImage gif = img as GifImage;
-            if (gif == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded file is not a GIF image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the GIF has at least three frames (zero‑based index 2)
-            if (gif.PageCount < 3)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine("The GIF does not contain a third frame.");
-                return;
-            }
-
-            // Set the active frame to the third frame
-            gif.ActiveFrame = (GifFrameBlock)gif.Pages[2];
-
-            // Cast the active frame to RasterImage
-            RasterImage frameRaster = (RasterImage)gif.ActiveFrame;
-
-            // Create a WebP image from the raster frame
-            using (WebPImage webp = new WebPImage(frameRaster))
-            {
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Configure lossless WebP options
-                WebPOptions options = new WebPOptions
+                GifImage gif = image as GifImage;
+                if (gif == null)
                 {
-                    Lossless = true
-                };
+                    Console.Error.WriteLine("The input file is not a GIF image.");
+                    return;
+                }
 
-                // Save the frame as a lossless WebP file
-                webp.Save(outputPath, options);
+                // Check that the GIF has at least three frames (zero‑based index 2)
+                if (gif.PageCount <= 2)
+                {
+                    Console.Error.WriteLine("The GIF does not contain a third frame.");
+                    return;
+                }
+
+                // Set the active frame to the third frame
+                gif.ActiveFrame = (GifFrameBlock)gif.Pages[2];
+
+                // Cast the active frame to RasterImage for saving
+                using (RasterImage frame = (RasterImage)gif.ActiveFrame)
+                {
+                    // Configure lossless WebP options
+                    var webpOptions = new WebPOptions
+                    {
+                        Lossless = true
+                    };
+
+                    // Save the frame as a lossless WebP file
+                    frame.Save(outputPath, webpOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
