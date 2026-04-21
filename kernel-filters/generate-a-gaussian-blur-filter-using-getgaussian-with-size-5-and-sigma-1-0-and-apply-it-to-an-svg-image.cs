@@ -1,45 +1,52 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.svg";
+        string tempPath = "temp.png";
+        string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage (Aspose.Imaging rasterizes the vector image on demand)
-            using (RasterImage raster = (RasterImage)image)
+            if (!File.Exists(inputPath))
             {
-                // Optional: retrieve the Gaussian kernel (not directly used)
-                double[] kernel = ConvolutionFilter.GetGaussian(5, 1.0);
-
-                // Create Gaussian blur filter options with size 5 and sigma 1.0
-                var blurOptions = new GaussianBlurFilterOptions(5, 1.0);
-
-                // Apply the filter to the whole image
-                raster.Filter(raster.Bounds, blurOptions);
-
-                // Save the processed image
-                raster.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG and rasterize to a temporary PNG
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                var pngOptions = new PngOptions();
+                svgImage.Save(tempPath, pngOptions);
+            }
+
+            // Load the rasterized PNG, apply Gaussian blur, and save the result
+            using (Image rasterImage = Image.Load(tempPath))
+            {
+                RasterImage raster = (RasterImage)rasterImage;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
+                var outPngOptions = new PngOptions();
+                raster.Save(outputPath, outPngOptions);
+            }
+
+            // Clean up temporary file
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
