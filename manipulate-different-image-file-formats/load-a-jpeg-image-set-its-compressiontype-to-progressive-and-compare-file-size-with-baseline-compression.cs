@@ -8,48 +8,45 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = "input.jpg";
-        string progressiveOutputPath = "output_progressive.jpg";
-        string baselineOutputPath = "output_baseline.jpg";
+        string baselinePath = "baseline.jpg";
+        string progressivePath = "progressive.jpg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(progressiveOutputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(baselineOutputPath));
+        // Ensure output directories exist (unconditional call as required)
+        Directory.CreateDirectory(Path.GetDirectoryName(baselinePath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(progressivePath) ?? ".");
 
-        // Load the source JPEG image
+        // Save baseline JPEG (default compression = Baseline)
         using (Image image = Image.Load(inputPath))
         {
-            // Save with progressive compression
+            image.Save(baselinePath);
+        }
+
+        // Save JPEG with Progressive compression
+        using (Image image = Image.Load(inputPath))
+        {
             JpegOptions progressiveOptions = new JpegOptions
             {
                 CompressionType = JpegCompressionMode.Progressive,
                 Quality = 100 // optional, keep maximum quality
             };
-            image.Save(progressiveOutputPath, progressiveOptions);
-
-            // Save with baseline compression for comparison
-            JpegOptions baselineOptions = new JpegOptions
-            {
-                CompressionType = JpegCompressionMode.Baseline,
-                Quality = 100
-            };
-            image.Save(baselineOutputPath, baselineOptions);
+            image.Save(progressivePath, progressiveOptions);
         }
 
         // Compare file sizes
-        long progressiveSize = new FileInfo(progressiveOutputPath).Length;
-        long baselineSize = new FileInfo(baselineOutputPath).Length;
+        long baselineSize = new FileInfo(baselinePath).Length;
+        long progressiveSize = new FileInfo(progressivePath).Length;
 
-        Console.WriteLine($"Progressive JPEG size: {progressiveSize} bytes");
-        Console.WriteLine($"Baseline JPEG size:   {baselineSize} bytes");
-        Console.WriteLine($"Size difference:      {baselineSize - progressiveSize} bytes");
+        Console.WriteLine($"Baseline size   : {baselineSize} bytes");
+        Console.WriteLine($"Progressive size: {progressiveSize} bytes");
+        Console.WriteLine($"Size difference : {baselineSize - progressiveSize} bytes");
     }
 }
