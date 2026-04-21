@@ -1,14 +1,17 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Setup input and output directories
+        // Input/Output directory setup
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
@@ -25,28 +28,46 @@ class Program
             Directory.CreateDirectory(outputDirectory);
         }
 
+        // Get all EPS files
         string[] files = Directory.GetFiles(inputDirectory, "*.eps");
 
-        foreach (string inputPath in files)
+        foreach (var epsFilePath in files)
         {
-            if (!File.Exists(inputPath))
+            // Verify input file exists
+            if (!File.Exists(epsFilePath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {epsFilePath}");
                 return;
             }
 
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(epsFilePath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            DateTime startTime = DateTime.Now;
+            DateTime start = DateTime.Now;
 
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(epsFilePath))
             {
-                image.Save(outputPath, new PngOptions());
+                var rasterOptions = new EpsRasterizationOptions
+                {
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    BackgroundColor = Color.White
+                };
+
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                image.Save(outputPath, pngOptions);
             }
 
-            TimeSpan duration = DateTime.Now - startTime;
-            Console.WriteLine($"{Path.GetFileName(inputPath)} conversion took {duration.TotalMilliseconds} ms");
+            DateTime end = DateTime.Now;
+            double durationMs = (end - start).TotalMilliseconds;
+            Console.WriteLine($"Converted {epsFilePath} to {outputPath} in {durationMs} ms");
         }
     }
 }
