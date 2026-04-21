@@ -2,39 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\thumbnail.png";
+        string inputPath = "Input\\sample.cmx";
+        string outputPath = "Output\\thumbnail.png";
 
-        // Verify input file exists
+        // Verify that the input CMX file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CMX image
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+        // Load the CMX image using a fully qualified type name
+        using (Aspose.Imaging.FileFormats.Cmx.CmxImage cmxImage = (Aspose.Imaging.FileFormats.Cmx.CmxImage)Aspose.Imaging.Image.Load(inputPath))
         {
-            // Define thumbnail dimensions (width fixed, height proportional)
-            int thumbWidth = 200;
-            int thumbHeight = (int)(cmxImage.Height * thumbWidth / (double)cmxImage.Width);
+            // Cache data for better performance (optional)
+            cmxImage.CacheData();
+
+            // Determine thumbnail dimensions (e.g., quarter size)
+            int thumbWidth = cmxImage.Width / 4;
+            int thumbHeight = cmxImage.Height / 4;
 
             // Resize the image to create a thumbnail
             cmxImage.Resize(thumbWidth, thumbHeight);
 
-            // Save the thumbnail as PNG
-            var pngOptions = new PngOptions();
-            cmxImage.Save(outputPath, pngOptions);
+            // Save the thumbnail as a PNG file
+            cmxImage.Save(outputPath, new PngOptions());
         }
     }
 }
