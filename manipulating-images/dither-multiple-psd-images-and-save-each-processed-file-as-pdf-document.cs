@@ -3,56 +3,65 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input PSD files
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\image1.psd",
-            @"C:\Images\image2.psd",
-            @"C:\Images\image3.psd"
-        };
-
-        // Corresponding output PDF files
-        string[] outputPaths = new string[]
-        {
-            @"C:\Output\image1.pdf",
-            @"C:\Output\image2.pdf",
-            @"C:\Output\image3.pdf"
-        };
-
-        for (int i = 0; i < inputPaths.Length; i++)
-        {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input PSD files
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
+                @"C:\Images\sample1.psd",
+                @"C:\Images\sample2.psd",
+                @"C:\Images\sample3.psd"
+            };
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PSD image
-            using (Image image = Image.Load(inputPath))
+            // Corresponding output PDF files
+            string[] outputPaths = new string[]
             {
-                // Perform dithering if the image is raster based
-                if (image is RasterImage raster)
+                @"C:\Processed\sample1.pdf",
+                @"C:\Processed\sample2.pdf",
+                @"C:\Processed\sample3.pdf"
+            };
+
+            // Process each file
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Apply Floyd‑Steinberg dithering with a 1‑bit palette
-                    raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Save the processed image as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PSD image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to RasterImage for dithering
+                    if (image is RasterImage rasterImage)
+                    {
+                        // Apply Floyd‑Steinberg dithering with 1‑bit palette
+                        rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+                    }
+
+                    // Save as PDF using default options
+                    PdfOptions pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
