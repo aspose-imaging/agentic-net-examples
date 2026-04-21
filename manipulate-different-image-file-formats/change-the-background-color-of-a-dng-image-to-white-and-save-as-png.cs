@@ -30,7 +30,7 @@ class Program
 
             // Set background color to white
             dngImage.BackgroundColor = Aspose.Imaging.Color.White;
-            dngImage.HasBackgroundColor = true;
+            dngImage.HasBackgroundColor = true; // optional, ensures the flag is set
 
             // Save as PNG
             dngImage.Save(outputPath, new PngOptions());
