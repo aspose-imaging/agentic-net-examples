@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "fonts_report.txt";
+        string inputPath = "C:\\temp\\input.emf";
+        string outputPath = "C:\\temp\\fonts_report.txt";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,28 +19,26 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF file as a MetaImage
+        // Load EMF image as MetaImage
         using (MetaImage image = (MetaImage)Image.Load(inputPath))
         {
             // Retrieve used and missed fonts
             string[] usedFonts = image.GetUsedFonts();
             string[] missedFonts = image.GetMissedFonts();
 
-            // Write the report
-            using (StreamWriter writer = new StreamWriter(outputPath))
+            // Write report to text file
+            using (StreamWriter writer = new StreamWriter(outputPath, false))
             {
-                writer.WriteLine($"Font report for: {Path.GetFileName(inputPath)}");
-                writer.WriteLine();
-                writer.WriteLine("Used fonts:");
+                writer.WriteLine($"Font report for {Path.GetFileName(inputPath)}");
+                writer.WriteLine("=== Used Fonts ===");
                 foreach (string font in usedFonts)
                 {
                     writer.WriteLine(font);
                 }
 
-                writer.WriteLine();
-                writer.WriteLine("Missed fonts:");
+                writer.WriteLine("=== Missed Fonts ===");
                 foreach (string font in missedFonts)
                 {
                     writer.WriteLine(font);
@@ -48,6 +46,6 @@ class Program
             }
         }
 
-        Console.WriteLine($"Font report written to: {outputPath}");
+        Console.WriteLine("Font report generated.");
     }
 }
