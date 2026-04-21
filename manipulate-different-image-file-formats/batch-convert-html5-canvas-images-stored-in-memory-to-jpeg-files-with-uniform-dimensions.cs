@@ -5,55 +5,57 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string[] inputPaths = {
-            @"C:\Images\Input1.svg",
-            @"C:\Images\Input2.svg"
-        };
+        // Hardcoded input and output directories
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
-        string[] outputPaths = {
-            @"C:\Images\Output1.jpg",
-            @"C:\Images\Output2.jpg"
-        };
+        // Ensure input directory exists
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
 
-        // Desired uniform dimensions
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        // Get all HTML5 Canvas files (assuming .html extension)
+        string[] inputFiles = Directory.GetFiles(inputDirectory, "*.html");
+
+        // Uniform dimensions for all output JPEGs
         const int targetWidth = 800;
         const int targetHeight = 600;
 
-        for (int i = 0; i < inputPaths.Length; i++)
+        foreach (string inputPath in inputFiles)
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
-
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
+            // Prepare output path
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image (e.g., SVG, WMF, etc.) that will be rasterized to a JPEG
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Resize to uniform dimensions if necessary
-                if (image.Width != targetWidth || image.Height != targetHeight)
-                {
-                    // Resize works on RasterImage; cast if needed
-                    if (image is RasterImage rasterImage)
-                    {
-                        rasterImage.Resize(targetWidth, targetHeight);
-                    }
-                }
+                // Resize to uniform dimensions
+                image.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
 
-                // Configure JPEG save options
-                var jpegOptions = new JpegOptions
+                // Set JPEG save options
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    Quality = 90 // Adjust quality as required
+                    Quality = 90
                 };
 
                 // Save as JPEG
