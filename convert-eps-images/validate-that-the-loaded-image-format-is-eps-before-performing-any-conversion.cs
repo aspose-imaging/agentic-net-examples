@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -19,12 +20,12 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            // Verify the image is an EPS image
+            // Verify that the loaded image is an EPS image
             var epsImage = image as Aspose.Imaging.FileFormats.Eps.EpsImage;
             if (epsImage == null)
             {

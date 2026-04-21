@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
@@ -9,7 +10,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
+        string inputPath = @"C:\Input\sample.eps";
         string outputPath = @"C:\Output\sample.pdf";
 
         // Verify input file exists
@@ -22,33 +23,35 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure PDF options with desired compliance level
-        var pdfOptions = new PdfOptions
-        {
-            PdfCoreOptions = new PdfCoreOptions
-            {
-                PdfCompliance = PdfComplianceVersion.PdfA1b
-            }
-        };
-
-        // Load the source image and save as PDF
-        using (Image image = Image.Load(inputPath))
-        {
-            image.Save(outputPath, pdfOptions);
-        }
-
-        // Validate that the generated PDF can be opened without errors
         try
         {
-            using (Image pdfImage = Image.Load(outputPath))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // If loading succeeds, the PDF is considered valid
-                Console.WriteLine("PDF opened successfully.");
+                // Configure PDF options with desired compliance level
+                var pdfOptions = new PdfOptions
+                {
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    }
+                };
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
             }
+
+            // Attempt to open the generated PDF with the default viewer
+            var startInfo = new ProcessStartInfo(outputPath)
+            {
+                UseShellExecute = true
+            };
+            Process.Start(startInfo);
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"Failed to open PDF: {ex.Message}");
+            // Log any unexpected errors without throwing
+            Console.Error.WriteLine($"Error during conversion: {ex.Message}");
         }
     }
 }

@@ -2,16 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.psd";
+        string inputPath = @"C:\temp\sample.eps";
+        string outputPath = @"C:\temp\result.psd";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,32 +22,29 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+        // Load the EPS image
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare PSD save options
+            // Prepare PSD save options to preserve layers (pages become layers)
             PsdOptions psdOptions = new PsdOptions
             {
-                // Use lossless compression
-                CompressionMethod = CompressionMethod.RLE,
-                // Preserve original color mode (assume RGB)
-                ColorMode = ColorModes.Rgb,
-                // Set vector rasterization options to retain vector data
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height
-                },
-                // Preserve layers by separating vector data into layers
-                VectorizationOptions = new PsdVectorizationOptions
-                {
-                    VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
-                }
+                // Preserve original metadata if needed
+                KeepMetadata = true,
+
+                // If the EPS contains multiple pages, export them as separate layers
+                MultiPageOptions = null // will be set below if applicable
             };
 
+            // If the loaded image supports multipage (e.g., vector EPS with multiple pages),
+            // export the first two pages as layers (example). Adjust as needed.
+            if (image is IMultipageImage multipage && multipage.PageCount > 1)
+            {
+                // Export all pages as layers
+                psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
+            }
+
             // Save as PSD preserving layers
-            epsImage.Save(outputPath, psdOptions);
+            image.Save(outputPath, psdOptions);
         }
     }
 }

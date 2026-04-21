@@ -3,51 +3,43 @@ using System.IO;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded relative input and output directories
+        // Hardcoded input and output directories
         string inputDirectory = "Input";
         string outputDirectory = "Output";
 
-        // Ensure the input directory exists; create if missing and exit
-        if (!Directory.Exists(inputDirectory))
-        {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add EPS files and rerun.");
-            return;
-        }
-
-        // Ensure the output directory exists
+        // Ensure directories exist
+        Directory.CreateDirectory(inputDirectory);
         Directory.CreateDirectory(outputDirectory);
 
         // Get all EPS files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.eps");
+        string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
 
-        // Process files in parallel
-        files.AsParallel().ForAll(inputPath =>
+        // Process files in parallel using PLINQ
+        epsFiles.AsParallel().ForAll(epsPath =>
         {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Verify input file exists
+            if (!File.Exists(epsPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {epsPath}");
                 return;
             }
 
             // Determine output PDF path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(epsPath) + ".pdf");
 
-            // Ensure the output directory for this file exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image and save as PDF
-            using (var image = (EpsImage)Image.Load(inputPath))
+            // Load the EPS image and save as PDF
+            using (Image image = Image.Load(epsPath))
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         });

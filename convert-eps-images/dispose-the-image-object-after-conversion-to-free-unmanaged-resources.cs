@@ -8,7 +8,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.bmp";
+        string inputPath = @"C:\temp\input.jpg";
         string outputPath = @"C:\temp\output.png";
 
         // Verify that the input file exists
@@ -18,17 +18,17 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image, process it, and save as PNG
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Create PNG save options (default settings)
-            PngOptions pngOptions = new PngOptions();
+            // Define PNG save options (default settings)
+            PngOptions saveOptions = new PngOptions();
 
-            // Save the image to the output path
-            image.Save(outputPath, pngOptions);
-        } // Image is disposed here, freeing unmanaged resources
+            // Save the image to the specified output path
+            image.Save(outputPath, saveOptions);
+        } // Image.Dispose() is called automatically here
     }
 }

@@ -2,44 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Sample.eps";
-        string outputPath = "Sample.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = "input.eps";
+        string outputPath = "output.pdf";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load EPS image
+        // Load the EPS image
         using (var image = (EpsImage)Image.Load(inputPath))
         {
-            // Configure PDF conversion options with balanced compression
+            // Configure PDF conversion options
             var pdfOptions = new PdfOptions
             {
+                // Set compression to Flate for good balance between size and quality
                 PdfCoreOptions = new PdfCoreOptions
                 {
-                    // Use Flate compression for good size reduction without quality loss
                     Compression = PdfImageCompressionOptions.Flate,
-                    // Set JPEG quality for rasterized content (if any)
+                    // Adjust JPEG quality for rasterized content (if any)
                     JpegQuality = 85
                 }
             };
 
-            // Save as PDF using the configured options
+            // Save the image as PDF using the configured options
             image.Save(outputPath, pdfOptions);
         }
     }

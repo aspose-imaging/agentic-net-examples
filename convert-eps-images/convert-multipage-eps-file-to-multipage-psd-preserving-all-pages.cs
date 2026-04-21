@@ -2,13 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.eps";
-        string outputPath = "output.psd";
+        string inputPath = @"C:\temp\input.eps";
+        string outputPath = @"C:\temp\output.psd";
 
         if (!File.Exists(inputPath))
         {

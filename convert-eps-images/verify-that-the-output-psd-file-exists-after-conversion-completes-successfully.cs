@@ -30,23 +30,23 @@ class Program
                 // Configure PSD save options
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    // Example settings (optional)
+                    // Example settings – can be adjusted as needed
                     CompressionMethod = CompressionMethod.RLE,
-                    ColorMode = ColorModes.Rgb
+                    ColorMode = ColorModes.Grayscale
                 };
 
                 // Save the image as PSD
                 image.Save(outputPath, psdOptions);
             }
 
-            // Verify that the PSD file was created
+            // Verify that the output PSD file was created
             if (File.Exists(outputPath))
             {
-                Console.WriteLine($"Conversion successful. PSD file created at: {outputPath}");
+                Console.WriteLine("Conversion succeeded, output file exists.");
             }
             else
             {
-                Console.Error.WriteLine("Conversion failed: PSD file was not created.");
+                Console.Error.WriteLine("Output file not found after conversion.");
             }
         }
         catch (Exception ex)

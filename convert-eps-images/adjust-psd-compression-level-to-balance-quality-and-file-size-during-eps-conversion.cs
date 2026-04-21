@@ -8,31 +8,37 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\Converted\sample.psd";
+        // Hardcoded input and output file paths
+        string inputPath = "input.eps";
+        string outputPath = "output.psd";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
+        // Load the EPS image
         using (Image image = Image.Load(inputPath))
         {
             // Configure PSD saving options with balanced compression (RLE)
-            var psdOptions = new PsdOptions
+            PsdOptions psdOptions = new PsdOptions
             {
-                CompressionMethod = CompressionMethod.RLE
-                // Additional options can be set here if needed, e.g., ColorMode, ChannelBitsCount, etc.
+                // RLE provides a good trade‑off between quality and file size
+                CompressionMethod = CompressionMethod.RLE,
+
+                // Optional: set common PSD parameters
+                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
+                ChannelBitsCount = 8,
+                ChannelsCount = 4,
+                Version = 6
             };
 
-            // Save as PSD using the configured options
+            // Save the image as PSD using the configured options
             image.Save(outputPath, psdOptions);
         }
     }
