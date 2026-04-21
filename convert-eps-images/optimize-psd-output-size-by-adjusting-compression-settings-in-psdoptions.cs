@@ -25,15 +25,16 @@ class Program
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PSD options with RLE compression to reduce file size
+            // Configure PSD save options with RLE compression to reduce file size
             PsdOptions psdOptions = new PsdOptions
             {
                 CompressionMethod = CompressionMethod.RLE
-                // Other options can be left as defaults
             };
 
             // Save the image as PSD using the configured options
             image.Save(outputPath, psdOptions);
         }
+
+        Console.WriteLine($"Image saved to {outputPath}");
     }
 }
