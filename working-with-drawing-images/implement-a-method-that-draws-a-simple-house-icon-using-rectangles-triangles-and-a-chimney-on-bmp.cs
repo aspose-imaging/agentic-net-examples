@@ -9,53 +9,63 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\house.bmp";
+        // Output BMP file path
+        string outputPath = @"C:\temp\house.bmp";
+
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Set up BMP options with a file source
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
+        Source src = new FileCreateSource(outputPath, false);
+        bmpOptions.Source = src;
 
-        using (Image image = Image.Create(bmpOptions, 300, 300))
+        // Canvas size
+        int width = 200;
+        int height = 200;
+
+        // Create bound BMP canvas
+        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
         {
-            Graphics graphics = new Graphics(image);
+            // Initialize graphics
+            Graphics graphics = new Graphics(canvas);
             graphics.Clear(Color.White);
 
-            // House body
-            using (SolidBrush bodyBrush = new SolidBrush(Color.LightGray))
-            {
-                graphics.FillRectangle(bodyBrush, new Rectangle(50, 150, 200, 150));
-            }
-            graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 150, 200, 150));
+            // Pen for outlines
+            Pen blackPen = new Pen(Color.Black, 2);
 
-            // Roof
+            // Draw house body
+            Rectangle houseRect = new Rectangle(50, 80, 100, 80);
+            graphics.DrawRectangle(blackPen, houseRect);
+            using (SolidBrush houseBrush = new SolidBrush(Color.LightGray))
+            {
+                graphics.FillRectangle(houseBrush, houseRect);
+            }
+
+            // Draw roof (triangle)
             Point[] roofPoints = new Point[]
             {
-                new Point(50, 150),
+                new Point(50, 80),
                 new Point(150, 80),
-                new Point(250, 150)
+                new Point(100, 30)
             };
-            using (SolidBrush roofBrush = new SolidBrush(Color.Brown))
+            graphics.DrawPolygon(blackPen, roofPoints);
+            using (SolidBrush roofBrush = new SolidBrush(Color.DarkRed))
             {
                 graphics.FillPolygon(roofBrush, roofPoints);
             }
-            graphics.DrawPolygon(new Pen(Color.Black, 2), roofPoints);
 
-            // Door
-            using (SolidBrush doorBrush = new SolidBrush(Color.SaddleBrown))
+            // Draw chimney
+            Rectangle chimneyRect = new Rectangle(120, 30, 20, 30);
+            graphics.DrawRectangle(blackPen, chimneyRect);
+            using (SolidBrush chimneyBrush = new SolidBrush(Color.Brown))
             {
-                graphics.FillRectangle(doorBrush, new Rectangle(120, 230, 40, 70));
+                graphics.FillRectangle(chimneyBrush, chimneyRect);
             }
-            graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(120, 230, 40, 70));
 
-            // Chimney
-            using (SolidBrush chimneyBrush = new SolidBrush(Color.DarkRed))
-            {
-                graphics.FillRectangle(chimneyBrush, new Rectangle(190, 90, 30, 40));
-            }
-            graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(190, 90, 30, 40));
-
-            image.Save();
+            // Save the bound image
+            canvas.Save();
         }
     }
 }
