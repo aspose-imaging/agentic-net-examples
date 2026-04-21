@@ -2,53 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input EPS file path
-        string inputPath = @"C:\Images\sample.eps";
+        // Hardcoded input EPS, output JPEG, and sRGB ICC profile paths
+        string inputPath = "input.eps";
+        string outputPath = "output.jpg";
+        string srgbProfilePath = "sRGB.icc";
 
-        // Hard‑coded output JPEG file path
-        string outputPath = @"C:\Images\sample_converted.jpg";
-
-        // Path to the sRGB ICC profile file
-        string iccProfilePath = @"C:\Images\sRGB.icc";
-
-        // Verify that the input EPS file exists
+        // Verify input EPS file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Verify that the ICC profile file exists
-        if (!File.Exists(iccProfilePath))
+        // Verify sRGB ICC profile file exists
+        if (!File.Exists(srgbProfilePath))
         {
-            Console.Error.WriteLine($"ICC profile not found: {iccProfilePath}");
+            Console.Error.WriteLine($"File not found: {srgbProfilePath}");
             return;
         }
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+        // Load the sRGB ICC profile stream
+        using (var rgbProfileStream = File.OpenRead(srgbProfilePath))
         {
-            // Prepare JPEG save options with the sRGB color profile
-            var jpegOptions = new JpegOptions();
-
-            // Assign the sRGB ICC profile as the destination RGB profile
-            using (FileStream iccStream = File.OpenRead(iccProfilePath))
+            // Prepare JPEG save options with the sRGB profile
+            var jpegOptions = new JpegOptions
             {
-                jpegOptions.RgbColorProfile = new StreamSource(iccStream);
-            }
+                RgbColorProfile = new StreamSource(rgbProfileStream)
+            };
 
-            // Save the image as JPEG using the specified options
-            epsImage.Save(outputPath, jpegOptions);
+            // Load the EPS image
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            {
+                // Save the image as JPEG using the specified options
+                epsImage.Save(outputPath, jpegOptions);
+            }
         }
     }
 }
