@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output file paths
         string inputPath = @"C:\Images\sample.dicom";
-        string outputPath = @"C:\Images\sample.adjusted.png";
+        string outputPath = @"C:\Images\sample_adjusted.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -25,7 +25,7 @@ class Program
         // Load the DICOM image, adjust brightness, and save as PNG
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DicomImage to access AdjustBrightness
+            // Cast to DicomImage to access DICOM-specific methods
             DicomImage dicomImage = (DicomImage)image;
 
             // Increase brightness by 20 units (range -255 to 255)
