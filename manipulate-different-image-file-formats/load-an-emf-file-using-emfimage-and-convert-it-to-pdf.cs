@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.emf";
-        string outputPath = @"C:\Temp\output.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\sample.emf";
+        string outputPath = @"C:\Temp\Result\sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,17 +25,8 @@ class Program
         // Load the EMF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to EmfImage to access EMF-specific functionality
-            EmfImage emfImage = image as EmfImage;
-            if (emfImage == null)
-            {
-                Console.Error.WriteLine("The loaded file is not an EMF image.");
-                return;
-            }
-
-            // Convert and save as PDF
-            PdfOptions pdfOptions = new PdfOptions();
-            emfImage.Save(outputPath, pdfOptions);
+            // Save as PDF using Aspose.Imaging PDF options
+            image.Save(outputPath, new PdfOptions());
         }
     }
 }
