@@ -20,29 +20,45 @@ class Program
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (RasterImage source = (RasterImage)Image.Load(inputPath))
+        try
         {
-            var mask = MagicWandTool
-                .Select(source, new MagicWandSettings(120, 100))
-                .Union(new MagicWandSettings(200, 150))
-                .Subtract(new MagicWandSettings(250, 180) { Threshold = 30 });
-
-            var pngOptions = new PngOptions
+            using (RasterImage source = (RasterImage)Image.Load(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new FileCreateSource(outputPath)
-            };
+                int width = source.Width;
+                int height = source.Height;
 
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, source.Width, source.Height))
-            {
-                var graphics = new Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.FromArgb(255, 255, 0, 0));
+                ImageBitMask mask = MagicWandTool
+                    .Select(source, new MagicWandSettings(100, 100))
+                    .Union(new MagicWandSettings(200, 200))
+                    .Subtract(new MagicWandSettings(150, 150) { Threshold = 30 });
 
-                mask.ApplyTo(canvas);
-                canvas.Save();
+                string tempPath = Path.GetTempFileName();
+                using (RasterImage solid = (RasterImage)Image.Create(
+                    new PngOptions { ColorType = PngColorType.TruecolorWithAlpha, Source = new FileCreateSource(tempPath, false) },
+                    width, height))
+                {
+                    int[] pixels = new int[width * height];
+                    int redArgb = (255 << 24) | (255 << 16) | (0 << 8) | 0;
+                    for (int i = 0; i < pixels.Length; i++) pixels[i] = redArgb;
+
+                    solid.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixels);
+
+                    mask.ApplyTo(solid);
+
+                    solid.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                }
+
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
