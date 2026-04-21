@@ -2,44 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\canvas.html";
-        string outputPath = @"C:\temp\canvas_corrected.jpg";
+        string inputPath = "input.html";
+        string outputPath = "output.jpg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image (HTML5 canvas file)
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Apply gamma correction (2.2) – cast to a raster type that supports AdjustGamma
-            if (image is RasterImage rasterImage)
+            // Load the HTML5 canvas image as a raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                rasterImage.AdjustGamma(2.2f);
-            }
-            else if (image is RasterCachedImage cachedImage)
-            {
-                cachedImage.AdjustGamma(2.2f);
-            }
-            // If the image type does not support AdjustGamma, it will be saved unchanged
+                // Apply gamma correction (gamma = 2.2)
+                image.AdjustGamma(2.2f);
 
-            // Prepare JPEG options with quality 90
-            var jpegOptions = new JpegOptions { Quality = 90 };
+                // Prepare JPEG save options with quality 90
+                Source source = new FileCreateSource(outputPath, false);
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Source = source,
+                    Quality = 90
+                };
 
-            // Save the processed image as JPEG
-            image.Save(outputPath, jpegOptions);
+                // Save the processed image as JPEG
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
