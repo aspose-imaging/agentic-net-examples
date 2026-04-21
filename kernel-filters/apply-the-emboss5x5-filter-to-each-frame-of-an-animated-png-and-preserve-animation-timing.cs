@@ -1,36 +1,63 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.apng";
-        string outputPath = "output.apng";
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            var apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)image;
-
-            for (int i = 0; i < apng.PageCount; i++)
+            if (!File.Exists(inputPath))
             {
-                var frame = (Aspose.Imaging.RasterImage)apng.Pages[i];
-                frame.Filter(frame.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            apng.Save(outputPath, new ApngOptions());
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (ApngImage sourceApng = (ApngImage)Image.Load(inputPath))
+            {
+                int width = sourceApng.Width;
+                int height = sourceApng.Height;
+
+                ApngOptions createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                using (ApngImage resultApng = (ApngImage)Image.Create(createOptions, width, height))
+                {
+                    resultApng.RemoveAllFrames();
+
+                    for (int i = 0; i < sourceApng.PageCount; i++)
+                    {
+                        ApngFrame srcFrame = (ApngFrame)sourceApng.Pages[i];
+                        uint frameTime = (uint)srcFrame.FrameTime;
+
+                        srcFrame.Filter(
+                            srcFrame.Bounds,
+                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5));
+
+                        resultApng.AddFrame(srcFrame, frameTime);
+                    }
+
+                    resultApng.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
