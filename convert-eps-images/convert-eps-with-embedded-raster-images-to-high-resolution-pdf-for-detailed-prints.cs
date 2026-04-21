@@ -20,13 +20,13 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the EPS image
         using (var epsImage = (EpsImage)Image.Load(inputPath))
         {
-            // Configure PDF saving options (PDF/A-1b compliance for high‑quality prints)
+            // Configure PDF save options with desired compliance (e.g., PDF/A-1b)
             var pdfOptions = new PdfOptions
             {
                 PdfCoreOptions = new PdfCoreOptions
