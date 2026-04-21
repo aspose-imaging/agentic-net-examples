@@ -8,32 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.gif";
-        string outputPath = @"C:\temp\output_contrast.gif";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.gif";
+        string outputPath = @"c:\temp\output_contrast.gif";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to GifImage to access GIF-specific methods
+                GifImage gifImage = (GifImage)image;
+
+                // Adjust contrast (value in range [-100, 100]; 50 increases contrast)
+                gifImage.AdjustContrast(50f);
+
+                // Save the modified GIF (preserves animation)
+                gifImage.Save(outputPath, new GifOptions());
+            }
         }
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the GIF image (may contain multiple frames)
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to GifImage to access GIF‑specific methods
-            GifImage gifImage = (GifImage)image;
-
-            // Increase contrast; valid range is [-100, 100]
-            // Here we use a positive value to make tones richer
-            gifImage.AdjustContrast(50f);
-
-            // Save the modified GIF, preserving animation
-            gifImage.Save(outputPath, new GifOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
