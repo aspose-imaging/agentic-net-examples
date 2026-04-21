@@ -5,13 +5,13 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths (relative)
-        string inputPath = Path.Combine("Input", "sample.otg");
-        string outputPath = Path.Combine("Output", "sample.pdf");
+        string inputPath = "Input/sample.otg";
+        string outputPath = "Output/sample.pdf";
 
-        // Validate input file existence
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,31 +21,26 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Custom DPI and margins
-        const int dpiX = 300;
-        const int dpiY = 300;
-        const int margin = 50; // margin in pixels
-
-        // Load OTG image and convert to PDF with custom settings
+        // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure OTG rasterization options
-            OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+            // Configure OTG rasterization options (margins, background, page size)
+            var otgOptions = new OtgRasterizationOptions
             {
                 PageSize = image.Size,
-                BorderX = margin,
-                BorderY = margin,
+                BorderX = 50, // horizontal margin
+                BorderY = 50, // vertical margin
                 BackgroundColor = Color.White
             };
 
-            // Configure PDF options with DPI and vector rasterization
-            PdfOptions pdfOptions = new PdfOptions
+            // Configure PDF options with custom DPI
+            var pdfOptions = new PdfOptions
             {
                 VectorRasterizationOptions = otgOptions,
-                ResolutionSettings = new ResolutionSetting(dpiX, dpiY)
+                ResolutionSettings = new ResolutionSetting(300, 300) // custom DPI
             };
 
-            // Save the PDF
+            // Save as PDF
             image.Save(outputPath, pdfOptions);
         }
     }
