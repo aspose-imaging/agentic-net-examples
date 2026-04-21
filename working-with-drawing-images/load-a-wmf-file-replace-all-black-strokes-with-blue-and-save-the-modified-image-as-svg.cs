@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.wmf";
+        string tempSvgPath = @"C:\Images\temp.svg";
         string outputPath = @"C:\Images\output.svg";
 
         // Verify input file exists
@@ -24,41 +24,47 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WMF image
-        using (Image image = Image.Load(inputPath))
+        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
         {
-            WmfImage wmfImage = (WmfImage)image;
-
-            // Replace black strokes with blue.
-            // The actual record types may vary; this loop shows where the color
-            // substitution would be performed.
-            foreach (var record in wmfImage.Records)
-            {
-                // Example placeholder:
-                // if (record is Aspose.Imaging.FileFormats.Wmf.WmfPenRecord penRecord &&
-                //     penRecord.Color == Aspose.Imaging.Color.Black)
-                // {
-                //     penRecord.Color = Aspose.Imaging.Color.Blue;
-                // }
-            }
-
-            // Set up SVG save options
-            SvgOptions svgOptions = new SvgOptions
+            // Prepare SVG save options
+            SvgOptions saveOptions = new SvgOptions
             {
                 TextAsShapes = true
             };
 
-            // Configure rasterization options for the WMF source
+            // Configure rasterization options for WMF to SVG conversion
             WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
             {
-                BackgroundColor = Aspose.Imaging.Color.White,
+                BackgroundColor = Color.White,
                 PageSize = wmfImage.Size,
                 RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
             };
 
-            svgOptions.VectorRasterizationOptions = rasterOptions;
+            saveOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save as SVG
-            wmfImage.Save(outputPath, svgOptions);
+            // Save the WMF as an intermediate SVG file
+            wmfImage.Save(tempSvgPath, saveOptions);
+        }
+
+        // Read the intermediate SVG content
+        string svgContent = File.ReadAllText(tempSvgPath);
+
+        // Replace black stroke definitions with blue
+        svgContent = svgContent.Replace("stroke=\"black\"", "stroke=\"blue\"");
+        svgContent = svgContent.Replace("#000000", "#0000FF");
+        svgContent = svgContent.Replace("stroke:#000000", "stroke:#0000FF");
+
+        // Write the modified SVG to the final output path
+        File.WriteAllText(outputPath, svgContent);
+
+        // Optionally delete the temporary SVG file
+        try
+        {
+            File.Delete(tempSvgPath);
+        }
+        catch
+        {
+            // Ignore any errors during cleanup
         }
     }
 }
