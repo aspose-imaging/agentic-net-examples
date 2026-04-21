@@ -1,47 +1,54 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Images\sample.png";
-        string sobelOutputPath = @"C:\Images\output\sample_sobel.png";
-        string embossOutputPath = @"C:\Images\output\sample_emboss.png";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPathSobel = "output/output_sobel.png";
+            string outputPathEmboss = "output/output_emboss.png";
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(sobelOutputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(embossOutputPath));
-
-        // Apply Sobel-like custom kernel
-        using (RasterImage sobelImage = (RasterImage)Image.Load(inputPath))
-        {
-            double[,] sobelKernel = new double[,]
+            if (!File.Exists(inputPath))
             {
-                { -1, 0, 1 },
-                { -2, 0, 2 },
-                { -1, 0, 1 }
-            };
-            sobelImage.Filter(sobelImage.Bounds, new ConvolutionFilterOptions(sobelKernel));
-            sobelImage.Save(sobelOutputPath);
-        }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Apply built-in Emboss3x3 kernel
-        using (RasterImage embossImage = (RasterImage)Image.Load(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathSobel));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathEmboss));
+
+            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+            {
+                double[,] sobelKernel = new double[,]
+                {
+                    { -1, 0, 1 },
+                    { -2, 0, 2 },
+                    { -1, 0, 1 }
+                };
+
+                var sobelOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(sobelKernel);
+                rasterImage.Filter(rasterImage.Bounds, sobelOptions);
+                var pngOptions = new PngOptions();
+                rasterImage.Save(outputPathSobel, pngOptions);
+            }
+
+            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+            {
+                double[,] embossKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
+                var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
+                rasterImage.Filter(rasterImage.Bounds, embossOptions);
+                var pngOptions = new PngOptions();
+                rasterImage.Save(outputPathEmboss, pngOptions);
+            }
+        }
+        catch (Exception ex)
         {
-            embossImage.Filter(embossImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-            embossImage.Save(embossOutputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
