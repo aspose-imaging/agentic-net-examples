@@ -8,7 +8,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\sample.eps";
         string outputPath = @"C:\Images\output.psd";
 
@@ -25,19 +25,19 @@ class Program
         // Load EPS image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PSD options to preserve transparency (alpha channel)
-            var psdOptions = new PsdOptions
+            // Configure PSD options to preserve transparency (RGBA)
+            PsdOptions psdOptions = new PsdOptions
             {
                 // 8 bits per channel
                 ChannelBitsCount = 8,
-                // 4 channels: R, G, B, A
+                // 4 channels: Red, Green, Blue, Alpha
                 ChannelsCount = 4,
-                // RGB color mode supports alpha
+                // RGB color mode supports alpha channel
                 ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                // Use RAW (no compression) to keep data intact
+                // No compression (optional)
                 CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
-                // Keep original metadata if any
-                KeepMetadata = true
+                // Use default PSD version (6)
+                Version = 6
             };
 
             // Save as PSD preserving alpha channel
