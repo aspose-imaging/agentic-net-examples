@@ -1,74 +1,88 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
-using Aspose.Imaging.FileFormats.Svg;
 
-class Program
+class SvgValidator
 {
+    // Holds validation errors encountered during schema validation
+    private static readonly List<string> _validationErrors = new List<string>();
+
     static void Main()
     {
         // Hardcoded input SVG path
-        string inputSvgPath = @"C:\temp\input.svg";
-        // Hardcoded SVG schema (XSD) path
-        string schemaPath = @"C:\temp\svg.xsd";
-        // Hardcoded output validation report path
-        string outputReportPath = @"C:\temp\validation_report.txt";
+        string inputSvgPath = @"C:\Temp\input.svg";
 
-        // Verify input SVG exists
+        // Hardcoded output validation report path
+        string outputReportPath = @"C:\Temp\validation\report.txt";
+
+        // Input file existence check
         if (!File.Exists(inputSvgPath))
         {
             Console.Error.WriteLine($"File not found: {inputSvgPath}");
             return;
         }
 
-        // Verify schema file exists
-        if (!File.Exists(schemaPath))
-        {
-            Console.Error.WriteLine($"File not found: {schemaPath}");
-            return;
-        }
-
-        // Ensure the directory for the report exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputReportPath));
 
-        bool isValid = true;
+        // Load SVG and validate against the official SVG XSD
+        bool isValid = ValidateSvgAgainstSchema(inputSvgPath);
 
-        // Set up XML schema validation settings
-        XmlReaderSettings settings = new XmlReaderSettings();
-        settings.Schemas.Add(null, schemaPath);
-        settings.ValidationType = ValidationType.Schema;
-        settings.ValidationEventHandler += (sender, e) =>
+        // Write validation result to the report file
+        using (StreamWriter writer = new StreamWriter(outputReportPath, false))
         {
-            // Record any validation errors or warnings
-            isValid = false;
-            File.AppendAllText(outputReportPath,
-                $"Validation {e.Severity}: {e.Message}{Environment.NewLine}");
-        };
-
-        // Perform schema validation on the SVG file
-        using (XmlReader reader = XmlReader.Create(inputSvgPath, settings))
-        {
-            while (reader.Read()) { }
-        }
-
-        // Additionally, attempt to load the SVG with Aspose.Imaging to ensure it is a well‑formed SVG image
-        try
-        {
-            using (SvgImage svgImage = new SvgImage(inputSvgPath))
+            writer.WriteLine($"SVG Validation Result: {(isValid ? "Valid" : "Invalid")}");
+            if (_validationErrors.Count > 0)
             {
-                // No further processing required; successful construction means the SVG is readable
+                writer.WriteLine("Errors:");
+                foreach (string err in _validationErrors)
+                {
+                    writer.WriteLine(err);
+                }
             }
         }
-        catch (Exception ex)
+
+        Console.WriteLine($"Validation completed. Report saved to: {outputReportPath}");
+    }
+
+    private static bool ValidateSvgAgainstSchema(string svgPath)
+    {
+        // Prepare XML schema set; using the W3C SVG 1.1 schema URL
+        XmlSchemaSet schemas = new XmlSchemaSet();
+        // The schema can be loaded from the web; if offline, replace with a local .xsd file path
+        schemas.Add(null, "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.xsd");
+
+        XmlReaderSettings settings = new XmlReaderSettings
         {
-            isValid = false;
-            File.AppendAllText(outputReportPath,
-                $"Aspose.Imaging loading error: {ex.Message}{Environment.NewLine}");
+            ValidationType = ValidationType.Schema,
+            Schemas = schemas,
+            DtdProcessing = DtdProcessing.Ignore
+        };
+        settings.ValidationEventHandler += ValidationEventHandler;
+
+        using (FileStream fs = new FileStream(svgPath, FileMode.Open, FileAccess.Read))
+        using (XmlReader reader = XmlReader.Create(fs, settings))
+        {
+            try
+            {
+                while (reader.Read()) { /* reading triggers validation */ }
+            }
+            catch (XmlException ex)
+            {
+                _validationErrors.Add($"XML parsing error: {ex.Message}");
+                return false;
+            }
         }
 
-        // Write overall validation result
-        File.AppendAllText(outputReportPath,
-            $"Overall validation result: {(isValid ? "Valid" : "Invalid")}{Environment.NewLine}");
+        // If any errors were collected, the SVG is invalid
+        return _validationErrors.Count == 0;
+    }
+
+    private static void ValidationEventHandler(object sender, ValidationEventArgs e)
+    {
+        string severity = e.Severity == XmlSeverityType.Error ? "Error" : "Warning";
+        _validationErrors.Add($"{severity}: {e.Message}");
     }
 }
