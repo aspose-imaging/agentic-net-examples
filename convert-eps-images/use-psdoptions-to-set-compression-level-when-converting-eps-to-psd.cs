@@ -8,34 +8,32 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.eps";
-        string outputPath = "result.psd";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.eps";
+        string outputPath = @"C:\temp\output.psd";
 
-        // Verify that the input EPS file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EPS image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PSD save options with desired compression method
+            // Configure PSD options with desired compression
             PsdOptions psdOptions = new PsdOptions
             {
-                // Example: use RLE compression; change to CompressionMethod.Raw for no compression
+                // Set compression method (RLE or Raw)
                 CompressionMethod = CompressionMethod.RLE
             };
 
             // Save the image as PSD using the specified options
             image.Save(outputPath, psdOptions);
         }
-
-        Console.WriteLine($"Conversion completed: {outputPath}");
     }
 }
