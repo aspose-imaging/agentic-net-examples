@@ -25,9 +25,8 @@ class Program
         // Load JPEG image
         using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
         {
-            // Get EXIF thumbnail (may be null if not present)
-            RasterImage thumbnail = jpegImage.ExifData?.Thumbnail;
-
+            // Get EXIF thumbnail (may be null)
+            var thumbnail = jpegImage.ExifData?.Thumbnail;
             if (thumbnail == null)
             {
                 Console.Error.WriteLine("No EXIF thumbnail found in the image.");
@@ -35,8 +34,11 @@ class Program
             }
 
             // Save thumbnail as PNG
-            PngOptions pngOptions = new PngOptions();
-            thumbnail.Save(outputPath, pngOptions);
+            using (thumbnail)
+            {
+                var pngOptions = new PngOptions();
+                thumbnail.Save(outputPath, pngOptions);
+            }
         }
     }
 }
