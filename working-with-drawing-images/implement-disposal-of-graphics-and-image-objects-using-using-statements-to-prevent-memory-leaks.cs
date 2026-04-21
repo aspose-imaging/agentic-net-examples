@@ -2,39 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
+        // Hardcoded input path check
+        string inputPath = @"c:\temp\input.png";
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Hardcoded output path
+        string outputPath = @"c:\temp\output.png";
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image inside a using block to ensure disposal
-        using (Image image = Image.Load(inputPath))
+        // Create a PNG image and draw on it
+        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
-            // Create a Graphics instance (Graphics does NOT implement IDisposable)
-            Graphics graphics = new Graphics(image);
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new StreamSource(stream);
 
-            // Example drawing operations
-            graphics.Clear(Color.White);
-            graphics.DrawLine(new Pen(Color.Black, 2), new Point(0, 0), new Point(100, 100));
-            graphics.DrawRectangle(new Pen(Color.Red, 3), new Rectangle(20, 20, 150, 100));
+            using (Image image = Image.Create(pngOptions, 400, 300))
+            {
+                // Graphics does not implement IDisposable; do not wrap in using
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.LightGray);
+                graphics.DrawRectangle(new Pen(Color.Blue, 5), new Rectangle(50, 50, 300, 200));
 
-            // Save the modified image with PNG options
-            PngOptions saveOptions = new PngOptions();
-            image.Save(outputPath, saveOptions);
+                // Use SolidBrush inside using for disposal
+                using (SolidBrush brush = new SolidBrush(Color.Yellow))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(60, 60, 280, 180));
+                }
+
+                // Save the image (stream is already bound)
+                image.Save();
+            }
         }
     }
 }
