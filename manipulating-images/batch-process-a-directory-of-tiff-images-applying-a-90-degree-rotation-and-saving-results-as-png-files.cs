@@ -3,54 +3,53 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output directories
-        string inputDir = "InputTiff";
-        string outputDir = "OutputPng";
+        string inputDirectory = @"C:\Images\Input";
+        string outputDirectory = @"C:\Images\Output";
 
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDir))
+        try
         {
-            Directory.CreateDirectory(inputDir);
-            Console.WriteLine($"Input directory created at: {inputDir}. Add TIFF files and rerun.");
-            return;
+            // Ensure the output directory exists (creates if missing)
+            Directory.CreateDirectory(outputDirectory);
+
+            // Process each TIFF file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.tif"))
+            {
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Determine output PNG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image, rotate, and save as PNG
+                using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+                {
+                    // Rotate 90 degrees clockwise, resize proportionally, black background
+                    tiffImage.Rotate(90f, true, Aspose.Imaging.Color.Black);
+
+                    // Save as PNG using default options
+                    tiffImage.Save(outputPath, new PngOptions());
+                }
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Get all files in the input directory
-        string[] allFiles = Directory.GetFiles(inputDir);
-        foreach (string filePath in allFiles)
+        catch (Exception ex)
         {
-            // Process only .tif and .tiff files
-            string ext = Path.GetExtension(filePath).ToLowerInvariant();
-            if (ext != ".tif" && ext != ".tiff")
-                continue;
-
-            // Verify input file exists
-            if (!File.Exists(filePath))
-            {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                return;
-            }
-
-            // Prepare output file path
-            string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filePath) + ".png");
-
-            // Ensure output directory exists for this file
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load TIFF, rotate, and save as PNG
-            using (TiffImage tiffImage = (TiffImage)Image.Load(filePath))
-            {
-                tiffImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                tiffImage.Save(outputPath, new PngOptions());
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
