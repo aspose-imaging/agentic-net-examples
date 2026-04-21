@@ -1,44 +1,61 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath1 = "input1.tif";
-        string inputPath2 = "input2.tif";
-        string outputPath = "output.tif";
-
-        // Verify input files exist
-        if (!File.Exists(inputPath1))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath1}");
-            return;
+            // Hard‑coded input TIFF files to be concatenated
+            string[] inputPaths = new[]
+            {
+                @"C:\Images\part1.tif",
+                @"C:\Images\part2.tif",
+                @"C:\Images\part3.tif"
+            };
+
+            // Hard‑coded output file
+            string outputPath = @"C:\Images\combined.tif";
+
+            // Verify each input file exists
+            foreach (string inputPath in inputPaths)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+            }
+
+            // Load the first TIFF image – it will become the base of the combined image
+            TiffImage combinedImage = (TiffImage)Image.Load(inputPaths[0]);
+
+            // Append the remaining TIFF images frame‑by‑frame
+            for (int i = 1; i < inputPaths.Length; i++)
+            {
+                using (TiffImage src = (TiffImage)Image.Load(inputPaths[i]))
+                {
+                    // Add all frames from the source image to the combined image.
+                    // This also copies each frame's EXIF metadata.
+                    combinedImage.Add(src);
+                }
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the multi‑page TIFF preserving metadata
+            combinedImage.Save(outputPath);
+
+            // Dispose the combined image
+            combinedImage.Dispose();
         }
-        if (!File.Exists(inputPath2))
+        catch (Exception ex)
         {
-            Console.Error.WriteLine($"File not found: {inputPath2}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load source TIFF images
-        using (TiffImage src1 = (TiffImage)Image.Load(inputPath1))
-        using (TiffImage src2 = (TiffImage)Image.Load(inputPath2))
-        // Create destination TIFF with frames from the first image
-        using (TiffImage dest = new TiffImage(src1.Frames))
-        {
-            // Add frames from the second image, preserving EXIF metadata
-            dest.Add(src2);
-
-            // Save concatenated TIFF
-            dest.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
