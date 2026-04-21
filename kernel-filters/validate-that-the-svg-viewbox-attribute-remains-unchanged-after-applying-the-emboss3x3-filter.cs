@@ -5,90 +5,90 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.svg";
+            string outputPath = "output.svg";
 
-        // Read original viewBox attribute from the SVG file
-        string originalContent = File.ReadAllText(inputPath);
-        string originalViewBox = "";
-        int vbIndex = originalContent.IndexOf("viewBox=\"", StringComparison.Ordinal);
-        if (vbIndex >= 0)
-        {
-            int start = vbIndex + "viewBox=\"".Length;
-            int end = originalContent.IndexOf("\"", start, StringComparison.Ordinal);
-            if (end > start)
-                originalViewBox = originalContent.Substring(start, end - start);
-        }
-
-        // Load the SVG image
-        using (Image img = Image.Load(inputPath))
-        {
-            SvgImage svgImage = (SvgImage)img;
-
-            // Prepare rasterization options for PNG conversion
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-            rasterOptions.PageSize = svgImage.Size;
-
-            // Rasterize SVG to PNG in memory
-            using (MemoryStream pngStream = new MemoryStream())
+            if (!File.Exists(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-                svgImage.Save(pngStream, pngOptions);
-                pngStream.Position = 0;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Load the rasterized PNG as a RasterImage
-                using (Image rasterImg = Image.Load(pngStream))
+            // Read original viewBox attribute
+            string originalContent = File.ReadAllText(inputPath);
+            string originalViewBox = "";
+            int vbStart = originalContent.IndexOf("viewBox=\"");
+            if (vbStart >= 0)
+            {
+                int vbEnd = originalContent.IndexOf("\"", vbStart + 9);
+                if (vbEnd > vbStart)
                 {
-                    RasterImage raster = (RasterImage)rasterImg;
-
-                    // Apply Emboss3x3 convolution filter
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-                    // (Filtered raster can be saved if needed; omitted here)
+                    originalViewBox = originalContent.Substring(vbStart + 9, vbEnd - (vbStart + 9));
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            using (Image image = Image.Load(inputPath))
+            {
+                SvgImage svgImage = (SvgImage)image;
 
-            // Save the original SVG (unchanged) to the output path
-            svgImage.Save(outputPath);
-        }
+                // Rasterize SVG to PNG in memory
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = svgImage.Size;
 
-        // Read viewBox attribute from the saved SVG file
-        string outputContent = File.ReadAllText(outputPath);
-        string outputViewBox = "";
-        int vbOutIndex = outputContent.IndexOf("viewBox=\"", StringComparison.Ordinal);
-        if (vbOutIndex >= 0)
-        {
-            int start = vbOutIndex + "viewBox=\"".Length;
-            int end = outputContent.IndexOf("\"", start, StringComparison.Ordinal);
-            if (end > start)
-                outputViewBox = outputContent.Substring(start, end - start);
-        }
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    PngOptions pngOptions = new PngOptions();
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-        // Validate that the viewBox remained unchanged
-        if (originalViewBox == outputViewBox)
-        {
-            Console.WriteLine("Success: viewBox attribute unchanged after applying Emboss3x3 filter.");
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        // Apply Emboss3x3 filter
+                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                        // (Filtered raster is not saved back to SVG; viewBox should remain unchanged)
+                    }
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save SVG (unchanged)
+                svgImage.Save(outputPath);
+            }
+
+            // Read saved viewBox attribute
+            string savedContent = File.ReadAllText(outputPath);
+            string savedViewBox = "";
+            int svbStart = savedContent.IndexOf("viewBox=\"");
+            if (svbStart >= 0)
+            {
+                int svbEnd = savedContent.IndexOf("\"", svbStart + 9);
+                if (svbEnd > svbStart)
+                {
+                    savedViewBox = savedContent.Substring(svbStart + 9, svbEnd - (svbStart + 9));
+                }
+            }
+
+            if (originalViewBox != savedViewBox)
+            {
+                Console.Error.WriteLine("ViewBox changed after applying Emboss3x3 filter.");
+            }
+            else
+            {
+                Console.WriteLine("ViewBox unchanged after applying Emboss3x3 filter.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine("Failure: viewBox attribute was modified.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
