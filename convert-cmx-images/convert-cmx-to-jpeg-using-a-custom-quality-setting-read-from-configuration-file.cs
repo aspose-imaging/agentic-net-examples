@@ -2,41 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
     static void Main()
     {
-        string inputPath = @"C:\temp\input.cmx";
-        string outputPath = @"C:\temp\output.jpg";
-        string configPath = @"C:\temp\config.txt";
+        // Hard‑coded paths – no argument validation
+        string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\output.jpg";
+        string configPath = @"C:\Images\config.txt";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        int quality = 75;
+        // Read JPEG quality from configuration (default to 90 if missing or invalid)
+        int quality = 90;
         if (File.Exists(configPath))
         {
-            string text = File.ReadAllText(configPath);
-            if (int.TryParse(text.Trim(), out int parsed) && parsed >= 1 && parsed <= 100)
+            string text = File.ReadAllText(configPath).Trim();
+            if (int.TryParse(text, out int parsed))
             {
-                quality = parsed;
+                // Clamp to valid JPEG quality range (1‑100)
+                quality = Math.Max(1, Math.Min(100, parsed));
             }
         }
 
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image cmxImage = Image.Load(inputPath))
+        // Load the CMX image using CMX load options
+        var loadOptions = new CmxLoadOptions();
+        using (Image cmxImage = Image.Load(inputPath, loadOptions))
         {
+            // Prepare JPEG save options with the custom quality
             var jpegOptions = new JpegOptions
             {
-                Quality = quality,
-                VectorRasterizationOptions = new VectorRasterizationOptions()
+                Quality = quality
             };
 
+            // Save the image as JPEG
             cmxImage.Save(outputPath, jpegOptions);
         }
     }

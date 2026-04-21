@@ -7,10 +7,10 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\sample.pdf";
+        string inputPath = "Input/sample.cmx";
+        string outputPath = "Output/sample.pdf";
 
         if (!File.Exists(inputPath))
         {
@@ -20,24 +20,19 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+        using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
         {
-            PdfOptions pdfOptions = new PdfOptions
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                KeepMetadata = true,
-                ExifData = cmxImage.ExifData,
-                XmpData = cmxImage.XmpData,
-                VectorRasterizationOptions = new VectorRasterizationOptions
+                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = cmxImage.Width,
-                    PageHeight = cmxImage.Height,
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                }
-            };
+                    BackgroundColor = Color.White,
+                    PageWidth = cmx.Width,
+                    PageHeight = cmx.Height
+                };
 
-            cmxImage.Save(outputPath, pdfOptions);
+                cmx.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

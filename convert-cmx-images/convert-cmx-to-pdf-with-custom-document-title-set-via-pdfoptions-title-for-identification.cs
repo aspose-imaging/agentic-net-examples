@@ -8,41 +8,48 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.cmx";
-        string outputPath = "Output/sample.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.cmx";
+            string outputPath = "Output/sample.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CMX image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PDF options with custom title
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    Title = "Custom Document Title"
+                    PdfDocumentInfo = new PdfDocumentInfo { Title = "Custom Document Title" }
                 };
 
-                if (image is VectorImage)
+                // Set vector rasterization options for proper rendering
+                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-                }
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
 
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
