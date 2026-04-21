@@ -1,28 +1,16 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
-        if (!Directory.Exists(inputDirectory))
-        {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
         string[] files = Directory.GetFiles(inputDirectory, "*.otg");
 
@@ -34,25 +22,19 @@ class Program
                 return;
             }
 
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
-
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
+                var otgOptions = new OtgRasterizationOptions();
+                otgOptions.PageSize = image.Size;
+                otgOptions.BackgroundColor = Aspose.Imaging.Color.White;
 
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-                    image.Save(outputPath, pdfOptions);
-                }
+                var pdfOptions = new PdfOptions();
+                pdfOptions.VectorRasterizationOptions = otgOptions;
+
+                image.Save(outputPath, pdfOptions);
             }
         }
     }
