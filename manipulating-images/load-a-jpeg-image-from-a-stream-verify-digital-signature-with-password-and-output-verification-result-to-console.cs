@@ -1,41 +1,38 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input path and password
-        string inputPath = "sample.jpg";
-        string password = "mySecretPassword";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input path and password
+            string inputPath = "input.jpg";
+            string password = "secret";
 
-        // Load JPEG image from a file stream
-        using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-        {
-            using (Image image = Image.Load(stream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Cast to RasterImage to access IsDigitalSigned
-                RasterImage raster = image as RasterImage;
-                bool isSigned = false;
-
-                if (raster != null)
-                {
-                    // Perform digital signature verification
-                    isSigned = raster.IsDigitalSigned(password);
-                }
-
-                // Output verification result
-                Console.WriteLine($"Digital signature verification: {(isSigned ? "Valid" : "Invalid")}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Load JPEG image from a file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (JpegImage jpegImage = new JpegImage(stream))
+            {
+                // Check digital signature
+                bool isSigned = jpegImage.IsDigitalSigned(password);
+                Console.WriteLine(isSigned
+                    ? "The image is digitally signed."
+                    : "The image is NOT digitally signed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
