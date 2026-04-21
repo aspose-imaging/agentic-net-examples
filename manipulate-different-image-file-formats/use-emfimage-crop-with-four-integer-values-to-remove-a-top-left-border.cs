@@ -2,42 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output_cropped.emf";
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\sample_cropped.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to EmfImage to access the specific Crop overload
+                EmfImage emfImage = (EmfImage)image;
+
+                // Define border sizes to remove from the top-left corner
+                int leftShift = 50;   // pixels to remove from the left side
+                int rightShift = 0;   // no removal from the right side
+                int topShift = 30;    // pixels to remove from the top side
+                int bottomShift = 0;  // no removal from the bottom side
+
+                // Crop the image using shift values
+                emfImage.Crop(leftShift, rightShift, topShift, bottomShift);
+
+                // Save the cropped image as PNG
+                emfImage.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to EmfImage to access EMF-specific methods
-            EmfImage emfImage = (EmfImage)image;
-
-            // Define the number of pixels to remove from each side
-            int leftShift = 10;   // remove 10 pixels from the left
-            int rightShift = 0;   // keep right side unchanged
-            int topShift = 10;    // remove 10 pixels from the top
-            int bottomShift = 0;  // keep bottom side unchanged
-
-            // Crop the image
-            emfImage.Crop(leftShift, rightShift, topShift, bottomShift);
-
-            // Save the cropped image
-            emfImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
