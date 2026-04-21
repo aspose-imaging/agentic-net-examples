@@ -5,16 +5,10 @@ using Aspose.Imaging.ImageOptions;
 
 class Logger
 {
-    // Records a start timestamp for a given step
-    public static void LogStart(string step)
+    // Simple logger that writes messages with timestamps to the console.
+    public static void Log(string message)
     {
-        Console.WriteLine($"{DateTime.Now:O} - START: {step}");
-    }
-
-    // Records an end timestamp for a given step
-    public static void LogEnd(string step)
-    {
-        Console.WriteLine($"{DateTime.Now:O} - END:   {step}");
+        Console.WriteLine($"{DateTime.Now:O} - {message}");
     }
 }
 
@@ -22,36 +16,49 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hard‑coded input and output directories.
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
+
+            // Get all PNG files in the input directory.
+            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png");
+
+            foreach (string inputPath in inputFiles)
+            {
+                // Verify the input file exists.
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                // Determine output file path.
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_processed.png");
+
+                // Ensure the output directory exists.
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Log start timestamp.
+                Logger.Log($"Start processing: {inputPath}");
+
+                // Load the image, perform any processing, and save.
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Example processing could be added here.
+                    // For demonstration, we simply save the image with default PNG options.
+                    image.Save(outputPath, new PngOptions());
+                }
+
+                // Log end timestamp.
+                Logger.Log($"Finished processing: {inputPath}");
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load image
-        Logger.LogStart("Load Image");
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            Logger.LogEnd("Load Image");
-
-            // Example processing: rotate 90 degrees
-            Logger.LogStart("Rotate Image");
-            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-            Logger.LogEnd("Rotate Image");
-
-            // Save image
-            Logger.LogStart("Save Image");
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
-            Logger.LogEnd("Save Image");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
