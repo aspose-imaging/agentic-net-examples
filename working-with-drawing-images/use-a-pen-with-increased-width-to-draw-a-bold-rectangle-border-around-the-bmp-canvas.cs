@@ -9,32 +9,36 @@ class Program
     static void Main(string[] args)
     {
         // Output BMP file path (hardcoded)
-        string outputPath = @"C:\temp\output.bmp";
+        string outputPath = @"C:\Temp\output.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up BMP options with a file create source bound to the output path
+        // Configure BMP options with a file create source bound to the output path
         BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
         // Define canvas dimensions
         int width = 500;
-        int height = 500;
+        int height = 400;
 
-        // Create the BMP image bound to the output file
+        // Create the image; it is already bound to the output file
         using (Image image = Image.Create(bmpOptions, width, height))
         {
-            // Initialize Graphics for drawing on the image
+            // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
 
-            // Create a thick pen (e.g., 10 pixels wide) with a chosen color
-            Pen pen = new Pen(Color.Blue, 10);
+            // Optional: clear the canvas with a white background
+            graphics.Clear(Color.White);
 
-            // Draw a rectangle border around the entire canvas
-            graphics.DrawRectangle(pen, new Rectangle(0, 0, width, height));
+            // Create a thick pen (e.g., 5 pixels wide) for the bold rectangle border
+            Pen thickPen = new Pen(Color.Black, 5f);
 
-            // Save the image (since it's bound to a FileCreateSource, just call Save)
+            // Draw the rectangle border around the entire canvas
+            graphics.DrawRectangle(thickPen, 0, 0, width, height);
+
+            // Save the image (writes to the bound output file)
             image.Save();
         }
     }
