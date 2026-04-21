@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -24,11 +24,8 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the BMP image
-        using (Image image = Image.Load(inputPath))
+        using (BmpImage bmp = (BmpImage)Image.Load(inputPath))
         {
-            // Cast to BmpImage for pixel access
-            BmpImage bmp = (BmpImage)image;
-
             // Determine the border color (assume top‑left pixel)
             var borderColor = bmp.GetPixel(0, 0);
 
@@ -77,7 +74,7 @@ class Program
             for (int y = 0; y < bmp.Height; y++)
             {
                 bool rowIsBorder = true;
-                for (int x = left; x <= right; x++)
+                for (int x = 0; x < bmp.Width; x++)
                 {
                     if (bmp.GetPixel(x, y) != borderColor)
                     {
@@ -96,7 +93,7 @@ class Program
             for (int y = bmp.Height - 1; y >= 0; y--)
             {
                 bool rowIsBorder = true;
-                for (int x = left; x <= right; x++)
+                for (int x = 0; x < bmp.Width; x++)
                 {
                     if (bmp.GetPixel(x, y) != borderColor)
                     {
@@ -111,16 +108,16 @@ class Program
                 }
             }
 
-            // Define the rectangle without the solid border
+            // Compute the cropping rectangle
             int cropWidth = right - left + 1;
             int cropHeight = bottom - top + 1;
             var cropRect = new Rectangle(left, top, cropWidth, cropHeight);
 
-            // Crop the image
+            // Crop the image to remove solid borders
             bmp.Crop(cropRect);
 
             // Save the processed image
-            bmp.Save(outputPath, new BmpOptions());
+            bmp.Save(outputPath);
         }
     }
 }
