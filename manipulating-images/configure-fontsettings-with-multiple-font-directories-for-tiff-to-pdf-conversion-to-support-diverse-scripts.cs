@@ -2,42 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.tif";
-        string outputPath = "Output/sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.tiff";
+            string outputPath = @"C:\Output\sample.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure multiple font directories (add as needed)
+            string[] fontFolders = new string[]
+            {
+                @"C:\Fonts\Latin",
+                @"C:\Fonts\CJK",
+                @"C:\Fonts\Arabic"
+            };
+            // Set the font folders and enable recursive search
+            FontSettings.SetFontsFolders(fontFolders, true);
+
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions();
+
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure multiple font directories for rendering
-        string[] fontFolders = new string[]
+        catch (Exception ex)
         {
-            "Fonts/Latin",
-            "Fonts/Arabic",
-            "Fonts/Chinese"
-        };
-        // Set font folders and clear cached fonts
-        FontSettings.SetFontsFolders(fontFolders, true);
-
-        // Load the TIFF image and convert to PDF
-        using (Image image = Image.Load(inputPath))
-        {
-            var pdfOptions = new PdfOptions();
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
