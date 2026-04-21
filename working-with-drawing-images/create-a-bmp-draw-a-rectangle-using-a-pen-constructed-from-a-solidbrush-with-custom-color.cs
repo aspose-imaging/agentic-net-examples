@@ -9,13 +9,13 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path (hardcoded)
+        // Output BMP file path
         string outputPath = @"C:\temp\output.bmp";
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set BMP options and bind the output file
+        // Configure BMP options with a file create source
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
@@ -30,16 +30,16 @@ class Program
             // Create a solid brush with a custom color
             using (SolidBrush brush = new SolidBrush())
             {
-                brush.Color = Color.FromArgb(255, 128, 0, 128); // Custom purple color
+                brush.Color = Color.FromArgb(255, 0, 128, 255); // Custom light blue color
 
-                // Construct a pen from the brush's color
-                Pen pen = new Pen(brush.Color, 5);
+                // Construct a pen from the solid brush with a specific width
+                Pen pen = new Pen(brush, 5f);
 
                 // Draw a rectangle using the pen
                 graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
             }
 
-            // Save the image (output path already bound)
+            // Save the image (file is already bound via FileCreateSource)
             image.Save();
         }
     }
