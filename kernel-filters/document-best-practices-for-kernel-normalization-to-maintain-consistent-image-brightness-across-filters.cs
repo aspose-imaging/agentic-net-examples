@@ -1,60 +1,53 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.txt";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for filter operations
+                RasterImage rasterImage = (RasterImage)image;
+
+                // 1. Apply automatic adaptive brightness/contrast normalization.
+                // This step equalizes local brightness and contrast, providing a consistent baseline.
+                rasterImage.AutoBrightnessContrast();
+
+                // 2. Apply a sharpen filter to enhance edges.
+                // Using default kernel size and sigma; these values are chosen to avoid over‑enhancement.
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                // 3. Normalize histogram after sharpening.
+                // This restores the overall brightness range that may have shifted during sharpening.
+                rasterImage.NormalizeHistogram();
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Document best practices for kernel normalization
-        Console.WriteLine("Kernel Normalization Best Practices:");
-        Console.WriteLine();
-        Console.WriteLine("1. Preserve Overall Brightness");
-        Console.WriteLine("   - After applying a convolution filter, the sum of all kernel coefficients should be 1.");
-        Console.WriteLine("   - If the sum differs from 1, divide each coefficient by the sum to normalize.");
-        Console.WriteLine();
-        Console.WriteLine("2. Handle Negative Coefficients");
-        Console.WriteLine("   - Filters like edge detection contain negative values.");
-        Console.WriteLine("   - Add an offset (bias) equal to the absolute sum of negative coefficients to keep pixel values non‑negative.");
-        Console.WriteLine();
-        Console.WriteLine("3. Use the 'Bias' Property When Available");
-        Console.WriteLine("   - Many filter option classes expose a Bias property.");
-        Console.WriteLine("   - Set Bias to compensate for any shift introduced by the kernel.");
-        Console.WriteLine();
-        Console.WriteLine("4. Avoid Clipping");
-        Console.WriteLine("   - Ensure that after normalization and bias adjustment, pixel values stay within the valid range (0‑255).");
-        Console.WriteLine("   - If necessary, clamp values after filtering.");
-        Console.WriteLine();
-        Console.WriteLine("5. Consistent Brightness Across Different Filters");
-        Console.WriteLine("   - For comparable results, apply the same normalization strategy to all kernels.");
-        Console.WriteLine("   - Example: For a 3x3 sharpening kernel, sum = 9; divide each element by 9, then set Bias = 0.");
-        Console.WriteLine();
-        Console.WriteLine("6. Practical Implementation Steps");
-        Console.WriteLine("   a) Compute kernel sum.");
-        Console.WriteLine("   b) If sum != 0, divide each element by sum.");
-        Console.WriteLine("   c) If sum == 0 (e.g., edge detection), set Bias = 128 (mid‑gray) or appropriate offset.");
-        Console.WriteLine("   d) Assign the normalized kernel and bias to the filter options.");
-        Console.WriteLine();
-        Console.WriteLine("7. Example (Pseudo‑code)");
-        Console.WriteLine("   // double[,] kernel = ...;");
-        Console.WriteLine("   // double sum = kernel.Cast<double>().Sum();");
-        Console.WriteLine("   // if (sum != 0) { kernel = kernel / sum; }");
-        Console.WriteLine("   // var options = new ConvolutionFilterOptions(kernel, bias, factor);");
-        Console.WriteLine();
-        Console.WriteLine("By following these guidelines, the visual brightness of the image remains consistent,");
-        Console.WriteLine("regardless of the specific convolution kernel applied.");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
