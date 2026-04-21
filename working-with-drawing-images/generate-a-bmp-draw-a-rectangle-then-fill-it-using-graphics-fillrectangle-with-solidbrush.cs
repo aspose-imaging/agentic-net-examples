@@ -1,46 +1,41 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"c:\temp\output.bmp";
+        // Output BMP file path (hardcoded)
+        string outputPath = @"C:\temp\output.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set BMP creation options
-        BmpOptions bmpOptions = new BmpOptions
+        // Set up BMP options
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.BitsPerPixel = 24;
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Create a new BMP image with specified dimensions
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 200, 200))
         {
-            BitsPerPixel = 24,
-            Source = new FileCreateSource(outputPath, false)
-        };
+            // Initialize Graphics for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-        // Create a new BMP image with the specified size
-        using (Image image = Image.Create(bmpOptions, 400, 300))
-        {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Clear the canvas with white background
+            graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Define a pen for the rectangle outline
-            Pen outlinePen = new Pen(Color.Blue, 2);
-            // Draw rectangle outline at (50,50) with width 300 and height 200
-            graphics.DrawRectangle(outlinePen, 50, 50, 300, 200);
+            // Fill a rectangle using SolidBrush
+            using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+            {
+                graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(50, 50, 100, 100));
+            }
 
-            // Define a solid brush for filling
-            SolidBrush fillBrush = new SolidBrush(Color.LightGreen);
-            // Fill the same rectangle area
-            graphics.FillRectangle(fillBrush, new Rectangle(50, 50, 300, 200));
-
-            // Save the image to the hardcoded path
-            image.Save(outputPath);
+            // Save the image (output is already bound to the file)
+            image.Save();
         }
     }
 }
