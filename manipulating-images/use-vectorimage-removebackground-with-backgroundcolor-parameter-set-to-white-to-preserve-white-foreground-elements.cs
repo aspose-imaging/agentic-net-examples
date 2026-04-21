@@ -7,40 +7,41 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\input.svg";
         string outputPath = @"C:\Images\output.svg";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the vector image
-        using (VectorImage vectorImage = Image.Load(inputPath) as VectorImage)
-        {
-            if (vectorImage == null)
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Failed to load a vector image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Configure background removal to treat white as the background color
-            var bgSettings = new RemoveBackgroundSettings
+            // Load the vector image
+            using (VectorImage vectorImage = (VectorImage)Image.Load(inputPath))
             {
-                Color1 = Color.White   // Preserve white foreground elements
-            };
+                // Configure background removal settings to treat white as background
+                var bgSettings = new RemoveBackgroundSettings
+                {
+                    Color1 = Aspose.Imaging.Color.White // set background color to white
+                };
 
-            // Remove the background using the specified settings
-            vectorImage.RemoveBackground(bgSettings);
+                // Remove the background using the configured settings
+                vectorImage.RemoveBackground(bgSettings);
 
-            // Save the processed image
-            vectorImage.Save(outputPath);
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the processed image
+                vectorImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
