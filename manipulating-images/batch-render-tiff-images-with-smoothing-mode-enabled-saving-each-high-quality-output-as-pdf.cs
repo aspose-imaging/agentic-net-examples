@@ -1,52 +1,71 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (var inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            // Hard‑coded input TIFF files
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\Input1.tif",
+                @"C:\Images\Input2.tif"
+            };
 
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            // Corresponding output PDF files
+            string[] outputPaths = new string[]
             {
-                Graphics graphics = new Graphics(image);
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                @"C:\Images\Output1.pdf",
+                @"C:\Images\Output2.pdf"
+            };
 
-                using (PdfOptions pdfOptions = new PdfOptions())
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Prepare PDF save options with high‑quality smoothing
+                    var pdfOptions = new PdfOptions
+                    {
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            // Enable anti‑aliasing for smoother rendering
+                            SmoothingMode = SmoothingMode.AntiAlias,
+                            // Set background to white (optional)
+                            BackgroundColor = Color.White,
+                            // Use original image dimensions for the PDF page
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        }
+                    };
+
+                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
