@@ -1,43 +1,42 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"c:\temp\arc_output.bmp";
+        // Output BMP file path
+        string outputPath = @"C:\Temp\output.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set BMP creation options
-        BmpOptions bmpOptions = new BmpOptions
+        // Create a source bound to the output file
+        FileCreateSource source = new FileCreateSource(outputPath, false);
+
+        // Set BMP options with the source
+        BmpOptions bmpOptions = new BmpOptions() { Source = source };
+
+        // Create a BMP canvas
+        using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(bmpOptions, 400, 400))
         {
-            BitsPerPixel = 24,
-            Source = new FileCreateSource(outputPath, false)
-        };
+            // Initialize graphics for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
 
-        // Create a 500x500 BMP image
-        using (Image image = Image.Create(bmpOptions, 500, 500))
-        {
-            // Initialize graphics object for drawing
-            Graphics graphics = new Graphics(image);
+            // Clear background
+            graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Define a blue pen with 2-pixel width
-            Pen pen = new Pen(Color.Blue, 2);
+            // Draw a 90-degree arc within the defined rectangle
+            graphics.DrawArc(
+                new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
+                new Aspose.Imaging.Rectangle(50, 50, 300, 300),
+                0,
+                90);
 
-            // Define the rectangle that bounds the ellipse
-            Rectangle rect = new Rectangle(50, 50, 200, 200);
-
-            // Draw a 90-degree arc starting at 0 degrees
-            graphics.DrawArc(pen, rect, 0, 90);
-
-            // Save the image to the specified file
-            image.Save();
+            // Save the image (bound to the source)
+            canvas.Save();
         }
     }
 }
