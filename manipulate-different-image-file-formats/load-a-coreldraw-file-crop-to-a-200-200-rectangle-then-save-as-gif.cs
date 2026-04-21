@@ -8,33 +8,30 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.cdr";
-        string outputPath = @"C:\Temp\output.gif";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample_cropped.gif";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CorelDRAW file
-        using (Image image = Image.Load(inputPath))
+        // Load the CorelDRAW (CDR) image
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
         {
-            // Cast to CdrImage to access vector-specific methods
-            CdrImage cdrImage = (CdrImage)image;
-
-            // Define a 200x200 rectangle (top-left corner at 0,0)
+            // Define a 200x200 rectangle (top‑left corner at (0,0))
             Rectangle cropArea = new Rectangle(0, 0, 200, 200);
 
-            // Crop the image
+            // Crop the image to the defined rectangle
             cdrImage.Crop(cropArea);
 
-            // Save as GIF
+            // Save the cropped image as GIF
             GifOptions gifOptions = new GifOptions();
             cdrImage.Save(outputPath, gifOptions);
         }
