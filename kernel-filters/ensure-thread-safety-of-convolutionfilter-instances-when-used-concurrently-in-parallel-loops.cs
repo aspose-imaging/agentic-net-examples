@@ -1,58 +1,63 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input files
-        var inputFiles = new List<string>
+        try
         {
-            @"C:\Images\Input1.png",
-            @"C:\Images\Input2.png",
-            @"C:\Images\Input3.png"
-        };
+            string inputDir = "InputImages";
+            string outputDir = "OutputImages";
 
-        // Output directory (hardcoded)
-        string outputDir = @"C:\Images\Output";
+            Directory.CreateDirectory(outputDir);
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
+            List<string> inputFiles = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly)
+                .Where(f => f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-        // Process images in parallel
-        System.Threading.Tasks.Parallel.ForEach(inputFiles, inputPath =>
+            inputFiles.AsParallel().ForAll(inputPath =>
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image img = Image.Load(inputPath))
+                {
+                    RasterImage raster = (RasterImage)img;
+
+                    double[,] kernel = new double[,]
+                    {
+                        { -1, -1, -1 },
+                        { -1,  8, -1 },
+                        { -1, -1, -1 }
+                    };
+
+                    var filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
+                    raster.Filter(raster.Bounds, filterOptions);
+                    raster.Save(outputPath, new PngOptions());
+                }
+            });
+        }
+        catch (Exception ex)
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Build output path
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDir, fileName + "_filtered.png");
-
-            // Ensure output directory exists (unconditional as per requirements)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load image, apply filter, and save
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage for filtering
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Each thread creates its own filter options instance (thread‑safe)
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
-
-                // Apply filter to the whole image
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                // Save the filtered image
-                rasterImage.Save(outputPath);
-            }
-        });
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
