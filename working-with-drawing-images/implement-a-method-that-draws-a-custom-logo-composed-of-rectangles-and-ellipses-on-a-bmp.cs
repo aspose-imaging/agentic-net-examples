@@ -6,41 +6,49 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output BMP file path (hard‑coded)
-        string outputPath = @"c:\temp\customlogo.bmp";
+        // Output BMP file path (hardcoded)
+        string outputPath = @"C:\temp\custom_logo.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure BMP options
+        // Create BMP options with a file create source bound to the output path
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create a new image canvas (400x300)
-        using (Image image = Image.Create(bmpOptions, 400, 300))
+        // Define canvas size
+        int width = 500;
+        int height = 400;
+
+        // Create the image canvas
+        using (Image image = Image.Create(bmpOptions, width, height))
         {
             // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
 
-            // Fill background with white
+            // Clear background to white
             graphics.Clear(Color.White);
 
-            // Draw outer rectangle (black border)
-            Pen blackPen = new Pen(Color.Black, 3);
-            graphics.DrawRectangle(blackPen, new Rectangle(50, 50, 300, 200));
+            // Draw a red rectangle (logo outer border)
+            Pen redPen = new Pen(Color.Red, 5);
+            graphics.DrawRectangle(redPen, new Rectangle(50, 50, 400, 300));
 
-            // Draw inner ellipse (red border)
-            Pen redPen = new Pen(Color.Red, 2);
-            graphics.DrawEllipse(redPen, new Rectangle(100, 80, 200, 140));
+            // Draw a blue ellipse inside the rectangle
+            Pen bluePen = new Pen(Color.Blue, 3);
+            graphics.DrawEllipse(bluePen, new Rectangle(100, 100, 300, 200));
 
-            // Draw inner rectangle (blue border)
-            Pen bluePen = new Pen(Color.Blue, 2);
-            graphics.DrawRectangle(bluePen, new Rectangle(120, 100, 160, 100));
+            // Draw a green smaller rectangle
+            Pen greenPen = new Pen(Color.Green, 2);
+            graphics.DrawRectangle(greenPen, new Rectangle(150, 150, 200, 100));
 
-            // Save the image (file is already bound via FileCreateSource)
+            // Draw a purple ellipse overlapping the previous shapes
+            Pen purplePen = new Pen(Color.Purple, 4);
+            graphics.DrawEllipse(purplePen, new Rectangle(200, 120, 150, 150));
+
+            // Save the image (output path already bound)
             image.Save();
         }
     }
