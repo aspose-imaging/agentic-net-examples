@@ -8,42 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.gif";
-        string ditheredPath = @"C:\temp\output_dithered.gif";
-        string lossyPath = @"C:\temp\output_lossy.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.gif";
+            string outputPath = "C:\\temp\\output.lossy.gif";
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(ditheredPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(lossyPath));
-
-        // Load the GIF image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to GifImage to access GIF-specific methods
-            GifImage gifImage = (GifImage)image;
-
-            // Apply dithering (using Floyd‑Steinberg with 8‑bit palette)
-            gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
-
-            // Save the dithered GIF (lossless)
-            gifImage.Save(ditheredPath, new GifOptions());
-
-            // Prepare options for lossy compression
-            GifOptions lossyOptions = new GifOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                MaxDiff = 80 // Recommended value for optimal lossy compression
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the same dithered image using lossy compression
-            gifImage.Save(lossyPath, lossyOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
+            {
+                GifImage gifImage = (GifImage)image;
+
+                // Apply Floyd‑Steinberg dithering with an 8‑bit palette
+                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+
+                // Configure lossy GIF compression
+                GifOptions options = new GifOptions
+                {
+                    MaxDiff = 80 // Recommended value for good lossy compression
+                };
+
+                // Save the dithered image using lossy compression
+                gifImage.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
