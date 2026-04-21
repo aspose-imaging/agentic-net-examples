@@ -7,56 +7,57 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        // Define base, input and output directories (relative to current directory)
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure input directory exists
+        // Ensure input and output directories exist
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
             return;
         }
 
-        // Ensure output directory exists
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
         }
 
         // Get all SVG files in the input directory
-        string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
+        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
-        foreach (string inputPath in svgFiles)
+        foreach (string inputPath in files)
         {
-            // Validate input file existence
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
             // Prepare output JPEG path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-            // Ensure output directory for the file exists
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
+            // Load the SVG image and save as high-quality JPEG
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with high quality and high resolution
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 95,
-                    ResolutionSettings = new ResolutionSetting(300, 300),
-                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        PageSize = image.Size
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
                     }
                 };
 
-                // Save as high-resolution JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
