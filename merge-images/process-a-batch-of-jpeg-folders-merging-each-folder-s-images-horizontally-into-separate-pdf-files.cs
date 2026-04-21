@@ -1,93 +1,103 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output root directories
-        string inputRoot = "Input";
-        string outputRoot = "Output";
-
-        // Ensure the output root directory exists
-        Directory.CreateDirectory(outputRoot);
-
-        // Get all subfolders in the input root
-        var folders = Directory.GetDirectories(inputRoot);
-
-        foreach (var folder in folders)
+        try
         {
-            // Collect JPEG files (both .jpg and .jpeg) in the current folder
-            var jpgFiles = Directory.GetFiles(folder, "*.jpg");
-            var jpegFiles = Directory.GetFiles(folder, "*.jpeg");
-            var imageFiles = jpgFiles.Concat(jpegFiles).ToArray();
+            string inputRoot = "Input";
+            string outputRoot = "Output";
 
-            if (imageFiles.Length == 0)
-                continue; // Skip folders without JPEG images
-
-            // Collect sizes of all images
-            List<Size> sizes = new List<Size>();
-            foreach (var filePath in imageFiles)
+            // Ensure input and output directories exist
+            if (!Directory.Exists(inputRoot))
             {
-                if (!File.Exists(filePath))
-                {
-                    Console.Error.WriteLine($"File not found: {filePath}");
-                    return;
-                }
-
-                using (RasterImage img = (RasterImage)Image.Load(filePath))
-                {
-                    sizes.Add(img.Size);
-                }
+                Directory.CreateDirectory(inputRoot);
+                Console.WriteLine($"Input directory created at: {inputRoot}. Add folders with JPEG images and rerun.");
+                return;
+            }
+            if (!Directory.Exists(outputRoot))
+            {
+                Directory.CreateDirectory(outputRoot);
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
-
-            // Temporary JPEG file to bind the canvas
-            string tempJpegPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".jpg");
-            Source tempSource = new FileCreateSource(tempJpegPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
-
-            // Create JPEG canvas
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            // Process each subfolder
+            foreach (string folderPath in Directory.GetDirectories(inputRoot))
             {
-                int offsetX = 0;
-                foreach (var filePath in imageFiles)
+                string folderName = Path.GetFileName(folderPath);
+                string[] allFiles = Directory.GetFiles(folderPath);
+                List<string> jpegFiles = new List<string>();
+                foreach (string f in allFiles)
                 {
-                    if (!File.Exists(filePath))
+                    string ext = Path.GetExtension(f).ToLowerInvariant();
+                    if (ext == ".jpg" || ext == ".jpeg")
                     {
-                        Console.Error.WriteLine($"File not found: {filePath}");
+                        jpegFiles.Add(f);
+                    }
+                }
+
+                if (jpegFiles.Count == 0)
+                {
+                    continue; // No JPEGs in this folder
+                }
+
+                // Collect sizes
+                List<Size> sizes = new List<Size>();
+                foreach (string imgPath in jpegFiles)
+                {
+                    if (!File.Exists(imgPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {imgPath}");
                         return;
                     }
-
-                    using (RasterImage img = (RasterImage)Image.Load(filePath))
+                    using (RasterImage img = (RasterImage)Image.Load(imgPath))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetX += img.Width;
+                        sizes.Add(img.Size);
                     }
                 }
 
-                // Prepare output PDF path (one PDF per folder)
-                string folderName = Path.GetFileName(folder);
-                string outputPdfPath = Path.Combine(outputRoot, folderName + ".pdf");
+                // Calculate canvas dimensions (horizontal merge)
+                int totalWidth = 0;
+                int maxHeight = 0;
+                foreach (Size sz in sizes)
+                {
+                    totalWidth += sz.Width;
+                    if (sz.Height > maxHeight) maxHeight = sz.Height;
+                }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+                // Create canvas
+                using (RasterImage canvas = (RasterImage)Image.Create(new JpegOptions(), totalWidth, maxHeight))
+                {
+                    int offsetX = 0;
+                    foreach (string imgPath in jpegFiles)
+                    {
+                        using (RasterImage img = (RasterImage)Image.Load(imgPath))
+                        {
+                            Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                            canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                            offsetX += img.Width;
+                        }
+                    }
 
-                // Save the merged canvas as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                canvas.Save(outputPdfPath, pdfOptions);
+                    // Prepare output PDF path
+                    string outputPath = Path.Combine(outputRoot, folderName + ".pdf");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save canvas as PDF
+                    PdfOptions pdfOptions = new PdfOptions();
+                    canvas.Save(outputPath, pdfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
