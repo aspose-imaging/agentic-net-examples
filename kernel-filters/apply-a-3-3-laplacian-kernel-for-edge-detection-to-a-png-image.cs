@@ -1,37 +1,54 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-            double[,] laplacianKernel = new double[,]
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                { 0, -1, 0 },
-                { -1, 4, -1 },
-                { 0, -1, 0 }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(laplacianKernel));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var saveOptions = new PngOptions();
-            raster.Save(outputPath, saveOptions);
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for filtering
+                RasterImage raster = (RasterImage)image;
+
+                // Define a 3×3 Laplacian kernel
+                double[,] laplacianKernel = new double[,]
+                {
+                    { 0,  1, 0 },
+                    { 1, -4, 1 },
+                    { 0,  1, 0 }
+                };
+
+                // Apply convolution filter with the Laplacian kernel
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(laplacianKernel));
+
+                // Save the processed image as PNG
+                raster.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
