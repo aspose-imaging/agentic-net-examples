@@ -1,43 +1,62 @@
 using System;
 using System.IO;
 using System.Linq;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Define a custom 3x3 kernel whose coefficients sum to 1
+            double[,] kernel = new double[,]
+            {
+                { 0.0, -1.0, 0.0 },
+                { -1.0, 5.0, -1.0 },
+                { 0.0, -1.0, 0.0 }
+            };
+
+            // Validate that the sum of kernel coefficients equals 1
+            double sum = kernel.Cast<double>().Sum();
+            if (Math.Abs(sum - 1.0) > 1e-6)
+            {
+                Console.Error.WriteLine("Kernel coefficients must sum to 1.");
+                return;
+            }
+
+            // Load the image as a RasterImage
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply the custom convolution filter
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                // Save the processed image as PNG
+                var pngOptions = new PngOptions();
+                rasterImage.Save(outputPath, pngOptions);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        double[,] kernel = new double[,]
+        catch (Exception ex)
         {
-            { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
-            { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
-            { 1.0 / 9, 1.0 / 9, 1.0 / 9 }
-        };
-
-        double sum = kernel.Cast<double>().Sum();
-        if (Math.Abs(sum - 1.0) > 1e-6)
-        {
-            Console.Error.WriteLine("Kernel coefficients do not sum to 1.");
-            return;
-        }
-
-        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
-
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            var raster = (Aspose.Imaging.RasterImage)image;
-            raster.Filter(raster.Bounds, filterOptions);
-            raster.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
