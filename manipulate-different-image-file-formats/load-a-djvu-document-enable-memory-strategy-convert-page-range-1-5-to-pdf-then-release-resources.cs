@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.djvu";
-        string outputPath = @"C:\Temp\output.pdf";
+        string inputPath = "input.djvu";
+        string outputPath = "output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,28 +22,26 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure load options with a memory buffer hint
-        var loadOptions = new LoadOptions
-        {
-            BufferSizeHint = 10 * 1024 * 1024 // 10 MB buffer
-        };
-
-        // Load the DjVu document using the configured load options
+        // Load the DjVu document with a memory‑friendly load option
         using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
         {
-            // Define the page range 1‑5
-            var pageRange = new IntRange(1, 5);
-            var multiPageOptions = new DjvuMultiPageOptions(pageRange);
-
-            // Set PDF options and attach the multi‑page options
-            var pdfOptions = new PdfOptions
+            LoadOptions loadOptions = new LoadOptions
             {
-                MultiPageOptions = multiPageOptions
+                // Limit internal buffers to 1 MB (enables memory strategy)
+                BufferSizeHint = 1 * 1024 * 1024
             };
 
-            // Save the selected pages as a PDF
-            djvuImage.Save(outputPath, pdfOptions);
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+            {
+                // Prepare PDF save options and specify pages 1‑5
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    MultiPageOptions = new DjvuMultiPageOptions(new int[] { 1, 2, 3, 4, 5 })
+                };
+
+                // Save the selected pages as a PDF file
+                djvuImage.Save(outputPath, pdfOptions);
+            }
         }
     }
 }
