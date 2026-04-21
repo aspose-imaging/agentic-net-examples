@@ -3,7 +3,7 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.3.0",
-  "total_examples": 2911,
+  "total_examples": 2912,
   "total_categories": 17,
   "last_updated": "2026-04-21",
   "categories": [
@@ -1815,8 +1815,9 @@
     },
     {
       "name": "kernel-filters",
-      "file_count": 464,
+      "file_count": 465,
       "all_files": [
+        "28830-apply-the-custom-edge-detection-kernel-to-an-svg-image-using-convolutionfilter.cs",
         "add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs",
         "adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs",
         "adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs",
@@ -2283,6 +2284,7 @@
         "write-a-unit-test-that-confirms-pixel-clamping-works-when-kernel-coefficients-exceed-normal-range.cs"
       ],
       "files": [
+        "28830-apply-the-custom-edge-detection-kernel-to-an-svg-image-using-convolutionfilter.cs",
         "add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs",
         "adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs",
         "adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs",
@@ -2311,8 +2313,7 @@
         "apply-a-blur-filter-to-a-wmz-image-and-save-the-processed-file-to-the-desired-location.cs",
         "apply-a-blur-filter-to-an-apng-image-then-write-the-processed-output-to-disk.cs",
         "apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs",
-        "apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs",
-        "apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs"
+        "apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs"
       ],
       "required_namespaces": [
         "System",
@@ -2320,33 +2321,35 @@
         "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.ImageFilters.FilterOptions",
-        "Aspose.Imaging.ImageFilters.Convolution",
         "Aspose.Imaging.FileFormats.Png",
+        "Aspose.Imaging.ImageFilters.Convolution",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Jpeg",
         "System.Linq",
-        "Aspose.Imaging.FileFormats.Tiff",
         "System.Collections.Generic",
+        "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "System.Diagnostics",
-        "Aspose.Imaging.Filters",
-        "Aspose.Imaging.FileFormats.Bmp",
-        "Aspose.Imaging.CoreExceptions",
-        "Aspose.Imaging.FileFormats.Webp",
-        "Aspose.Imaging.FileFormats.Apng",
-        "Aspose.Imaging.Brushes",
-        "Aspose.Imaging.CoreExceptions.ImageFormats",
-        "Aspose.Imaging.ImageFilters",
-        "System.Text.RegularExpressions",
-        "Aspose.Imaging.ProgressManagement",
-        "System.Text",
-        "System.Xml",
-        "System.Xml.Schema",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "System.Threading.Tasks",
+        "System.Drawing",
         "Aspose.Imaging.FileFormats.Svg.Graphics",
-        "Aspose.Imaging.FileFormats.Pdf"
+        "Aspose.Imaging.CoreExceptions",
+        "System.Diagnostics",
+        "Aspose.Imaging.Brushes",
+        "System.Net",
+        "System.Net.Http",
+        "Aspose.Imaging.FileFormats.Webp",
+        "System.Threading",
+        "Aspose.Imaging.Multithreading",
+        "System.Text.Json",
+        "System.Text",
+        "Aspose.Imaging.FileFormats.Apng",
+        "Aspose.Imaging.ProgressManagement",
+        "System.Xml",
+        "System.Xml.Schema"
       ],
       "key_apis": [
+        "ApngFrame",
         "ApngImage",
         "ApngOptions",
         "BilateralSmoothingFilterOptions",
@@ -2360,6 +2363,7 @@
         "Graphics",
         "JpegImage",
         "JpegOptions",
+        "JsonSerializerOptions",
         "LazyImage",
         "LoadOptions",
         "MedianFilterOptions",
@@ -2378,10 +2382,11 @@
         "TiffOptions",
         "VectorRasterizationOptions",
         "VignetteFilter",
-        "WebPImage"
+        "WebPImage",
+        "WebPOptions"
       ],
       "more_files": {
-        "count": 434,
+        "count": 435,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/kernel-filters"
       }
     },
