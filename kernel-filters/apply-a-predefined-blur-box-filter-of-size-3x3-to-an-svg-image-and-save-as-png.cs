@@ -2,6 +2,10 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -11,7 +15,7 @@ class Program
         string inputPath = "input.svg";
         string outputPath = "output.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,37 +25,35 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (Image svgImage = Image.Load(inputPath))
+        // Load SVG image
+        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
         {
-            // Set up rasterization options for SVG → PNG conversion
-            var rasterOptions = new SvgRasterizationOptions
+            // Set up rasterization options for SVG
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
                 PageSize = svgImage.Size
             };
-            var pngOptions = new PngOptions
+
+            // PNG save options with vector rasterization
+            PngOptions pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Rasterize SVG to a memory stream (PNG format)
-            using (var memoryStream = new MemoryStream())
+            // Rasterize SVG to PNG in memory
+            using (MemoryStream ms = new MemoryStream())
             {
-                svgImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0; // Reset stream position for reading
+                svgImage.Save(ms, pngOptions);
+                ms.Position = 0;
 
-                // Load the rasterized PNG as a RasterImage
-                using (Image rasterImg = Image.Load(memoryStream))
+                // Load rasterized PNG as RasterImage
+                using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
                 {
-                    var raster = (RasterImage)rasterImg;
-
-                    // Apply a 3x3 blur box filter using convolution filter options
-                    var blurFilter = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(3));
-                    raster.Filter(raster.Bounds, blurFilter);
+                    // Apply 3x3 blur box filter
+                    rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.GetBlurBox(3)));
 
                     // Save the filtered image as PNG
-                    raster.Save(outputPath, new PngOptions());
+                    rasterImage.Save(outputPath, new PngOptions());
                 }
             }
         }
