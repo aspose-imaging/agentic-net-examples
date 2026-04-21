@@ -1,63 +1,61 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input TIFF file paths
-        string[] inputFiles = new string[]
+        try
         {
-            "input1.tif",
-            "input2.tif",
-            "input3.tif"
-        };
-
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            // Construct output path (saved in an "output" subfolder)
-            string outputPath = Path.Combine("output", Path.GetFileNameWithoutExtension(inputPath) + "_clean.tif");
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputFolder);
 
-            // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            string[] files = Directory.GetFiles(inputFolder, "*.tif");
+            foreach (string inputPath in files)
             {
-                // Cast to RasterImage for watermark removal
-                RasterImage raster = (RasterImage)image;
-
-                // Create a mask covering the whole image
-                GraphicsPath mask = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(0, 0, raster.Width, raster.Height)));
-                mask.AddFigure(figure);
-
-                // Configure Content Aware Fill options
-                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                if (!File.Exists(inputPath))
                 {
-                    MaxPaintingAttempts = 4
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Remove watermark
-                using (RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
+                string outputPath = Path.Combine(outputFolder, Path.GetFileName(inputPath));
+
+                // Create output directory (unconditionally as per requirement)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (var image = Image.Load(inputPath))
                 {
-                    // Save the cleaned image as TIFF
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    result.Save(outputPath, tiffOptions);
+                    var tiffImage = (TiffImage)image;
+
+                    // Define a mask covering the whole image (placeholder)
+                    var mask = new GraphicsPath();
+                    var figure = new Figure();
+                    figure.AddShape(new RectangleShape(new RectangleF(0, 0, tiffImage.Width, tiffImage.Height)));
+                    mask.AddFigure(figure);
+
+                    var options = new ContentAwareFillWatermarkOptions(mask)
+                    {
+                        MaxPaintingAttempts = 4
+                    };
+
+                    var result = WatermarkRemover.PaintOver(tiffImage, options);
+                    result.Save(outputPath);
+                    result.Dispose();
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
