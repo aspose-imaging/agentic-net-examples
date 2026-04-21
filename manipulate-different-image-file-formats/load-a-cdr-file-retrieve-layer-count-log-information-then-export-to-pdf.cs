@@ -19,28 +19,26 @@ class Program
             return;
         }
 
-        // Ensure output directory exists (will also work if outputDirectory is null)
-        Directory.CreateDirectory(outputDirectory);
-
         // Load the CDR image
-        using (CdrImage image = (CdrImage)Image.Load(inputPath))
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
         {
-            // Log the number of pages (layers) in the document
-            Console.WriteLine($"Page count: {image.PageCount}");
+            // Retrieve and log the number of pages (layers)
+            int pageCount = cdrImage.PageCount;
+            Console.WriteLine($"Cdr file contains {pageCount} page(s).");
 
-            // Export each page to a separate PDF file
-            for (int i = 0; i < image.PageCount; i++)
+            // Iterate through each page and export to a separate PDF file
+            for (int i = 0; i < pageCount; i++)
             {
-                // Prepare output file path for the current page
+                // Access the specific page
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
+
+                // Prepare PDF output path
                 string outputPath = Path.Combine(outputDirectory, $"page{i}.pdf");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Get the specific page
-                CdrImagePage page = (CdrImagePage)image.Pages[i];
-
-                // Set up PDF export options with rasterization settings
+                // Set up PDF options with rasterization settings matching the page size
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
@@ -53,7 +51,7 @@ class Program
 
                 // Save the page as PDF
                 page.Save(outputPath, pdfOptions);
-                Console.WriteLine($"Exported page {i} to {outputPath}");
+                Console.WriteLine($"Exported page {i} to PDF: {outputPath}");
             }
         }
     }
