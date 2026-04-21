@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -8,56 +7,59 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image as a RasterImage
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        try
         {
-            // Create a Graphics instance for drawing
-            Graphics graphics = new Graphics(image);
-
-            // Clear the image with white color
-            graphics.Clear(Color.White);
-
-            // Draw vector shapes
-            // Draw a black line
-            graphics.DrawLine(new Pen(Color.Black, 2), new Point(20, 20), new Point(200, 20));
-
-            // Draw a red rectangle
-            graphics.DrawRectangle(new Pen(Color.Red, 3), new Rectangle(30, 40, 150, 100));
-
-            // Draw a blue ellipse
-            graphics.DrawEllipse(new Pen(Color.Blue, 2), new Rectangle(50, 160, 120, 80));
-
-            // Draw a green polygon
-            graphics.DrawPolygon(new Pen(Color.Green, 2), new[]
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                new Point(100, 260),
-                new Point(150, 300),
-                new Point(80, 340),
-                new Point(40, 300)
-            });
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Prepare BMP save options with a bound file source
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
+                // Draw a rectangle
+                graphics.DrawRectangle(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
+                    new Aspose.Imaging.Rectangle(50, 50, 200, 150));
 
-            // Save the modified image
-            image.Save(outputPath, bmpOptions);
+                // Draw an ellipse
+                graphics.DrawEllipse(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2),
+                    new Aspose.Imaging.Rectangle(300, 100, 100, 100));
+
+                // Draw a line
+                graphics.DrawLine(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2),
+                    new Aspose.Imaging.Point(0, 0),
+                    new Aspose.Imaging.Point(400, 300));
+
+                // Draw a polygon
+                graphics.DrawPolygon(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 2),
+                    new[] {
+                        new Aspose.Imaging.Point(100, 200),
+                        new Aspose.Imaging.Point(150, 250),
+                        new Aspose.Imaging.Point(200, 200)
+                    });
+
+                // Save the modified image as BMP
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.BitsPerPixel = 24;
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
+                image.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
