@@ -8,38 +8,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.odg";
-        string outputPath = @"C:\output\sample.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Input\sample.odg";
+        string outputPath = @"C:\Output\sample.pdf";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
             // Set up rasterization options for ODG to PDF conversion
-            var rasterOptions = new OdgRasterizationOptions
+            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
             {
                 BackgroundColor = Color.White,
                 PageSize = image.Size
             };
 
-            // Configure PDF save options and attach rasterization options
-            var pdfOptions = new PdfOptions
+            // Configure PDF save options and set custom author metadata
+            PdfOptions pdfOptions = new PdfOptions
             {
                 VectorRasterizationOptions = rasterOptions,
-                PdfDocumentInfo = new PdfDocumentInfo { Author = "Custom Author" }
+                PdfDocumentInfo = new PdfDocumentInfo
+                {
+                    Author = "Custom Author"
+                }
             };
 
-            // Save the image as PDF with the specified metadata
+            // Save the image as PDF
             image.Save(outputPath, pdfOptions);
         }
     }
