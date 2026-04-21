@@ -9,8 +9,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.djvu";
-        string outputPath = "Output/output.pdf";
+        string inputPath = "Input\\sample.djvu";
+        string outputPath = "Output\\sample.pdf";
 
         if (!File.Exists(inputPath))
         {
@@ -20,17 +20,12 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
         {
             using (PdfOptions pdfOptions = new PdfOptions())
             {
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
-                {
-                    Author = "Automated"
-                };
-                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-                djvu.Save(outputPath, pdfOptions);
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo { Author = "Automated" };
+                djvuImage.Save(outputPath, pdfOptions);
             }
         }
     }
