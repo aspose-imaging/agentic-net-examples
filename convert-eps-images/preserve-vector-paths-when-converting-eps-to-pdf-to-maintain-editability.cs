@@ -13,30 +13,30 @@ class Program
         string inputPath = "Sample.eps";
         string outputPath = "Sample.pdf";
 
-        // Verify that the input file exists
+        // Verify that the input EPS file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EPS image as a vector image
         using (var image = (EpsImage)Image.Load(inputPath))
         {
-            // Configure PDF options to preserve vector data
+            // Configure PDF options; PdfCoreOptions can be set to define compliance if needed
             var pdfOptions = new PdfOptions
             {
                 PdfCoreOptions = new PdfCoreOptions
                 {
-                    // Example compliance; adjust as needed
+                    // Example compliance setting; adjust as required
                     PdfCompliance = PdfComplianceVersion.PdfA1b
                 }
             };
 
-            // Save the EPS as a PDF while keeping vector paths editable
+            // Save the EPS as a PDF while preserving vector data
             image.Save(outputPath, pdfOptions);
         }
     }
