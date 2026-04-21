@@ -17,7 +17,7 @@ class Program
             return;
         }
 
-        // Load CMX image
+        // Load CMX image and check if it contains multiple pages
         using (CmxImage image = (CmxImage)Image.Load(inputPath))
         {
             bool isMultiPage = false;
@@ -25,7 +25,6 @@ class Program
             {
                 isMultiPage = multipageImage.PageCount > 1;
             }
-
             Console.WriteLine($"Is multi-page: {isMultiPage}");
         }
     }
