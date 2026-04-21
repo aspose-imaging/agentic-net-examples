@@ -1,61 +1,49 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-class Program
+public interface IImageFilterService
 {
-    static void Main(string[] args)
+    void ApplySharpenFilter(string inputPath, string outputPath);
+}
+
+public class ImageFilterService : IImageFilterService
+{
+    public void ApplySharpenFilter(string inputPath, string outputPath)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            RasterImage raster = (RasterImage)image;
+            raster.Filter(raster.Bounds, new SharpenFilterOptions());
+            raster.Save(outputPath);
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Simple DI container
-        var services = new Dictionary<Type, object>();
-        services[typeof(IFilterService)] = new FilterService();
-
-        // Resolve service
-        var filterService = (IFilterService)services[typeof(IFilterService)];
-
-        // Apply sharpen filter
-        filterService.ApplySharpen(inputPath, outputPath);
     }
 }
 
-// Service interface
-interface IFilterService
+public class Program
 {
-    void ApplySharpen(string inputPath, string outputPath);
-}
-
-// Service implementation
-class FilterService : IFilterService
-{
-    public void ApplySharpen(string inputPath, string outputPath)
+    static void Main(string[] args)
     {
-        // Load image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to raster image
-            RasterImage raster = (RasterImage)image;
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Apply sharpen filter with kernel size 5 and sigma 4.0
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the processed image
-            raster.Save(outputPath);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            IImageFilterService filterService = new ImageFilterService();
+            filterService.ApplySharpenFilter(inputPath, outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

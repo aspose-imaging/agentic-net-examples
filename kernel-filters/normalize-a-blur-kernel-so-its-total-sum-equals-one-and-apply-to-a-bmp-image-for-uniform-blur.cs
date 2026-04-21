@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.bmp";
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,34 +25,34 @@ class Program
         // Load the BMP image as a raster image
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage rasterImage = (RasterImage)image;
+            RasterImage raster = (RasterImage)image;
 
-            // Create a blur kernel (box blur) of size 5
-            double[,] kernel = ConvolutionFilter.GetBlurBox(5);
-
-            // Normalize the kernel so that its sum equals 1
-            double sum = 0;
-            foreach (double value in kernel)
-                sum += value;
-
-            if (sum != 0)
+            // Define a simple blur kernel (e.g., 3x3 box blur)
+            double[,] kernel = new double[,]
             {
-                int rows = kernel.GetLength(0);
-                int cols = kernel.GetLength(1);
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < cols; j++)
-                    {
-                        kernel[i, j] /= sum;
-                    }
-                }
-            }
+                { 1, 1, 1 },
+                { 1, 1, 1 },
+                { 1, 1, 1 }
+            };
 
-            // Apply the normalized convolution filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
+            // Compute the sum of all kernel elements
+            double sum = 0;
+            for (int i = 0; i < kernel.GetLength(0); i++)
+                for (int j = 0; j < kernel.GetLength(1); j++)
+                    sum += kernel[i, j];
+
+            // Normalize the kernel so that its total sum equals one
+            for (int i = 0; i < kernel.GetLength(0); i++)
+                for (int j = 0; j < kernel.GetLength(1); j++)
+                    kernel[i, j] /= sum;
+
+            // Apply the custom convolution filter to the entire image
+            var filterOptions = new ConvolutionFilterOptions(kernel);
+            raster.Filter(raster.Bounds, filterOptions);
 
             // Save the processed image as BMP
-            rasterImage.Save(outputPath);
+            BmpOptions bmpOptions = new BmpOptions();
+            raster.Save(outputPath, bmpOptions);
         }
     }
 }

@@ -1,66 +1,73 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Temporary file for the rotated rasterized image
-        string tempPath = Path.Combine(Path.GetTempPath(), "temp_rotated.png");
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-        // Load SVG, rotate, and rasterize to temporary PNG
-        using (Image svgImage = Image.Load(inputPath))
-        {
-            // Rotate by 45 degrees
-            svgImage.Rotate(45f);
-
-            // Rasterize to PNG using vector rasterization options
-            var pngOptions = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = svgImage.Size }
-            };
-            svgImage.Save(tempPath, pngOptions);
-        }
-
-        // Load the rasterized image, apply Gaussian blur, and save final output
-        using (Image rasterImage = Image.Load(tempPath))
-        {
-            var raster = (RasterImage)rasterImage;
-
-            // Apply Gaussian blur with radius 5 and sigma 4.0
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the blurred image as PNG
-            raster.Save(outputPath, new PngOptions());
-        }
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to SvgImage to access vector-specific methods
+                SvgImage svgImage = (SvgImage)image;
 
-        // Optionally delete the temporary file
-        try
-        {
-            File.Delete(tempPath);
+                // Rotate the SVG by 45 degrees
+                svgImage.Rotate(45f);
+
+                // Rasterize the rotated SVG into a PNG stored in memory
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    // Set up rasterization options (use original SVG size)
+                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = svgImage.Size
+                    };
+
+                    // Configure PNG save options with the rasterization settings
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterizationOptions
+                    };
+
+                    // Save the rasterized image to the memory stream
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0; // Reset stream position for reading
+
+                    // Load the rasterized image as a RasterImage to apply filters
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                    {
+                        // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
+                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                        // Save the final image to the output path
+                        rasterImage.Save(outputPath);
+                    }
+                }
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore any errors during cleanup
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -7,36 +7,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.bmp";
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for filtering
             RasterImage raster = (RasterImage)image;
 
-            // Create GaussWiener filter options with a 5x5 kernel
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0);
-            // Increase brightness (value > 1)
-            filterOptions.Brightness = 1.2;
+            var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0)
+            {
+                Bias = 20
+            };
 
-            // Apply the filter to the entire image
-            raster.Filter(raster.Bounds, filterOptions);
+            raster.Filter(raster.Bounds, blurOptions);
+            raster.AdjustBrightness(30);
 
-            // Save the processed image as BMP
-            raster.Save(outputPath, new BmpOptions());
+            var saveOptions = new BmpOptions();
+            raster.Save(outputPath, saveOptions);
         }
     }
 }

@@ -1,56 +1,92 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input SVG file
-        string inputPath = @"C:\temp\sample.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputDir = "output";
+        string outputPath3x3 = Path.Combine(outputDir, "emboss3x3.png");
+        string outputPath5x5 = Path.Combine(outputDir, "emboss5x5.png");
 
-        // Hardcoded output files for each filter
-        string outputPath3x3 = @"C:\temp\output\sample_Emboss3x3.png";
-        string outputPath5x5 = @"C:\temp\output\sample_Emboss5x5.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath3x3));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath5x5));
-
-        // ---------- Apply 3x3 Emboss ----------
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage for filtering
-            using (RasterImage raster = (RasterImage)image)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Apply the 3x3 emboss kernel
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-                // Save the result
-                raster.Save(outputPath3x3);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath3x3));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath5x5));
+
+            // Load the SVG image
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                // ---------- Emboss3x3 ----------
+                using (MemoryStream pngStream = new MemoryStream())
+                {
+                    // Rasterize SVG to PNG in memory
+                    var rasterOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = svgImage.Size,
+                        BackgroundColor = Color.White
+                    };
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+                    svgImage.Save(pngStream, pngOptions);
+                    pngStream.Position = 0;
+
+                    // Load raster image for filtering
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(pngStream))
+                    {
+                        // Apply Emboss3x3 filter
+                        var emboss3x3 = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                            Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                        rasterImage.Filter(rasterImage.Bounds, emboss3x3);
+                        rasterImage.Save(outputPath3x3);
+                    }
+                }
+
+                // ---------- Emboss5x5 ----------
+                using (MemoryStream pngStream = new MemoryStream())
+                {
+                    // Rasterize SVG again to get an unfiltered copy
+                    var rasterOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = svgImage.Size,
+                        BackgroundColor = Color.White
+                    };
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+                    svgImage.Save(pngStream, pngOptions);
+                    pngStream.Position = 0;
+
+                    // Load raster image for filtering
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(pngStream))
+                    {
+                        // Apply Emboss5x5 filter
+                        var emboss5x5 = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                            Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5);
+                        rasterImage.Filter(rasterImage.Bounds, emboss5x5);
+                        rasterImage.Save(outputPath5x5);
+                    }
+                }
             }
         }
-
-        // ---------- Apply 5x5 Emboss ----------
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            using (RasterImage raster = (RasterImage)image)
-            {
-                // Apply the 5x5 emboss kernel
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
-                // Save the result
-                raster.Save(outputPath5x5);
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        Console.WriteLine("Emboss filtering completed.");
     }
 }

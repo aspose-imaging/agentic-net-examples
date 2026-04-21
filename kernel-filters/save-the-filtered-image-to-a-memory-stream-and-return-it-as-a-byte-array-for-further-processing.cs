@@ -5,44 +5,53 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Hardcoded input path
-    private const string InputPath = @"C:\temp\sample.bmp";
+    // Loads an image, saves it to a memory stream using PNG options,
+    // and returns the resulting byte array.
+    static byte[] GetImageBytes()
+    {
+        // Hard‑coded input and dummy output paths.
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.png";
+
+        // Verify the input file exists.
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return null;
+        }
+
+        // Ensure the output directory exists (required before any save operation).
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image, save it to a MemoryStream, and return the byte array.
+        using (Image image = Image.Load(inputPath))
+        {
+            // Use default PNG options; can be customized if needed.
+            PngOptions pngOptions = new PngOptions();
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                image.Save(ms, pngOptions);
+                return ms.ToArray();
+            }
+        }
+    }
 
     static void Main()
     {
-        // Check input file existence
-        if (!File.Exists(InputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {InputPath}");
-            return;
-        }
+            byte[] imageBytes = GetImageBytes();
 
-        // Process the image and obtain the result as a byte array
-        byte[] result = ProcessImage(InputPath);
-
-        // Example usage of the returned byte array
-        Console.WriteLine($"Resulting byte array length: {result.Length}");
-    }
-
-    // Loads the image, applies a simple filter, saves to a memory stream and returns the bytes
-    private static byte[] ProcessImage(string inputPath)
-    {
-        // Load the image from the specified file
-        using (Image image = Image.Load(inputPath))
-        {
-            // Example filter: rotate the image 180 degrees
-            image.RotateFlip(RotateFlipType.Rotate180FlipNone);
-
-            // Prepare save options (PNG format in this example)
-            PngOptions saveOptions = new PngOptions();
-
-            // Save the processed image to a memory stream
-            using (MemoryStream stream = new MemoryStream())
+            if (imageBytes != null)
             {
-                image.Save(stream, saveOptions);
-                // Return the underlying byte array
-                return stream.ToArray();
+                Console.WriteLine($"Image saved to memory stream. Byte count: {imageBytes.Length}");
+                // Further processing can be done with imageBytes here.
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

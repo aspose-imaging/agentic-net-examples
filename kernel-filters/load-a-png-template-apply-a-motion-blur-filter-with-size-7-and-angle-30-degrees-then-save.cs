@@ -5,34 +5,31 @@ using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\template.png";
-        string outputPath = @"C:\Images\output_motion_blur.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "template.png";
+            string outputPath = "output/output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(7, 1.0, 30.0));
+                raster.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering methods
-            RasterImage raster = (RasterImage)image;
-
-            // Apply a motion blur filter with size 7, smooth factor 1.0, and angle 30 degrees
-            var motionOptions = new MotionWienerFilterOptions(7, 1.0, 30.0);
-            raster.Filter(raster.Bounds, motionOptions);
-
-            // Save the processed image
-            raster.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

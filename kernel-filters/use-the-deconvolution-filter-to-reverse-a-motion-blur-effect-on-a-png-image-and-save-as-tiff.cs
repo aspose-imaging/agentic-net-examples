@@ -29,16 +29,13 @@ class Program
             // Cast to RasterImage to apply filters
             RasterImage rasterImage = (RasterImage)image;
 
-            // Configure motion deconvolution filter (length, smooth, angle)
-            var motionWienerOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
+            // Apply a motion deconvolution filter (MotionWienerFilterOptions)
+            // Parameters: length = 10, smooth = 1.0, angle = 90.0 degrees
+            var motionOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
+            rasterImage.Filter(rasterImage.Bounds, motionOptions);
 
-            // Apply the filter to the whole image
-            rasterImage.Filter(rasterImage.Bounds, motionWienerOptions);
-
-            // Prepare TIFF save options
+            // Save the result as a TIFF file
             var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // Save the processed image as TIFF
             rasterImage.Save(outputPath, tiffOptions);
         }
     }

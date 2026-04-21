@@ -1,84 +1,75 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_sharpened.png";
+        string inputPath = "input.png";
+        string outputPath = "output_sharpened.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage for pixel access and filtering
-            RasterImage raster = (RasterImage)image;
-
-            // Compute histogram before processing
-            int[] beforeHistogram = ComputeLuminanceHistogram(raster);
-
-            // Apply Sharpen 3x3 filter (kernel size 3, sigma 1.0)
-            raster.Filter(raster.Bounds, new SharpenFilterOptions(3, 1.0));
-
-            // Compute histogram after processing
-            int[] afterHistogram = ComputeLuminanceHistogram(raster);
-
-            // Save the processed image
-            raster.Save(outputPath);
-
-            // Output histograms to console
-            Console.WriteLine("Histogram before sharpening:");
-            PrintHistogram(beforeHistogram);
-
-            Console.WriteLine("\nHistogram after sharpening:");
-            PrintHistogram(afterHistogram);
-        }
-    }
-
-    // Computes a 256-bin luminance histogram for the given raster image
-    private static int[] ComputeLuminanceHistogram(RasterImage raster)
-    {
-        int[] histogram = new int[256];
-        int[] argbPixels = raster.LoadArgb32Pixels(raster.Bounds);
-
-        foreach (int argb in argbPixels)
-        {
-            // Extract RGB components
-            int r = (argb >> 16) & 0xFF;
-            int g = (argb >> 8) & 0xFF;
-            int b = argb & 0xFF;
-
-            // Compute luminance using Rec. 601 luma formula
-            int lum = (int)(0.299 * r + 0.587 * g + 0.114 * b);
-            histogram[lum]++;
-        }
-
-        return histogram;
-    }
-
-    // Prints a simple representation of the histogram
-    private static void PrintHistogram(int[] histogram)
-    {
-        for (int i = 0; i < histogram.Length; i++)
-        {
-            if (histogram[i] > 0)
+            using (Image image = Image.Load(inputPath))
             {
-                Console.WriteLine($"{i}: {histogram[i]}");
+                RasterImage raster = (RasterImage)image;
+
+                // Load original pixels and compute histogram
+                int[] beforePixels = raster.LoadArgb32Pixels(raster.Bounds);
+                var beforeHist = new Dictionary<int, int>();
+                foreach (int pixel in beforePixels)
+                {
+                    if (beforeHist.ContainsKey(pixel))
+                        beforeHist[pixel]++;
+                    else
+                        beforeHist[pixel] = 1;
+                }
+
+                // Apply Sharpen filter (default SharpenFilterOptions)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+
+                // Save the processed image
+                raster.Save(outputPath, new PngOptions());
+
+                // Load processed pixels and compute histogram
+                int[] afterPixels = raster.LoadArgb32Pixels(raster.Bounds);
+                var afterHist = new Dictionary<int, int>();
+                foreach (int pixel in afterPixels)
+                {
+                    if (afterHist.ContainsKey(pixel))
+                        afterHist[pixel]++;
+                    else
+                        afterHist[pixel] = 1;
+                }
+
+                // Output histograms
+                Console.WriteLine("Histogram before filter:");
+                foreach (var kvp in beforeHist)
+                {
+                    Console.WriteLine($"{kvp.Key:X8}: {kvp.Value}");
+                }
+
+                Console.WriteLine("Histogram after filter:");
+                foreach (var kvp in afterHist)
+                {
+                    Console.WriteLine($"{kvp.Key:X8}: {kvp.Value}");
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

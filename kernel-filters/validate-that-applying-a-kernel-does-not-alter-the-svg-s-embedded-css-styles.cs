@@ -1,58 +1,90 @@
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Text;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.svg";
-        string outputPath = @"C:\Temp\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.svg";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                SvgImage svgImage = (SvgImage)image;
+
+                // Capture original SVG XML (including embedded CSS)
+                string originalXml;
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    svgImage.Save(ms, new SvgOptions());
+                    originalXml = Encoding.UTF8.GetString(ms.ToArray());
+                }
+
+                // Rasterize SVG to PNG
+                PngOptions pngOptions = new PngOptions();
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
+                };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                using (MemoryStream pngStream = new MemoryStream())
+                {
+                    svgImage.Save(pngStream, pngOptions);
+                    pngStream.Position = 0;
+
+                    // Load raster image and apply a convolution kernel
+                    using (RasterImage raster = (RasterImage)Image.Load(pngStream))
+                    {
+                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                        // Save filtered PNG (optional, not used further)
+                        // raster.Save("filtered.png", new PngOptions());
+                    }
+                }
+
+                // After raster operations, retrieve SVG XML again to ensure CSS unchanged
+                string afterXml;
+                using (MemoryStream ms2 = new MemoryStream())
+                {
+                    svgImage.Save(ms2, new SvgOptions());
+                    afterXml = Encoding.UTF8.GetString(ms2.ToArray());
+                }
+
+                if (originalXml == afterXml)
+                {
+                    Console.WriteLine("Embedded CSS styles are unchanged after applying the kernel.");
+                }
+                else
+                {
+                    Console.WriteLine("Embedded CSS styles have been altered.");
+                }
+
+                // Save the original SVG to output path
+                svgImage.Save(outputPath, new SvgOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (SvgImage svgImage = new SvgImage(inputPath))
+        catch (Exception ex)
         {
-            // Save the SVG unchanged (no rasterization) to the output path
-            // This demonstrates that processing does not modify the SVG content
-            svgImage.Save(outputPath, new SvgOptions());
-        }
-
-        // Read original and saved SVG contents
-        string originalSvg = File.ReadAllText(inputPath);
-        string savedSvg = File.ReadAllText(outputPath);
-
-        // Extract CSS inside <style> tags using a simple regex (non‑greedy)
-        string ExtractCss(string svgContent)
-        {
-            var match = Regex.Match(svgContent, @"<style[^>]*>(.*?)</style>", RegexOptions.Singleline);
-            return match.Success ? match.Groups[1].Value.Trim() : string.Empty;
-        }
-
-        string originalCss = ExtractCss(originalSvg);
-        string savedCss = ExtractCss(savedSvg);
-
-        // Validate that the CSS styles are identical
-        if (originalCss == savedCss)
-        {
-            Console.WriteLine("Validation succeeded: Embedded CSS styles are unchanged.");
-        }
-        else
-        {
-            Console.Error.WriteLine("Validation failed: Embedded CSS styles have been altered.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

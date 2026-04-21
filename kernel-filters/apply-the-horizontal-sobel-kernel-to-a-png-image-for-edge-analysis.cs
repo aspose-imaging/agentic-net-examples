@@ -2,27 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output\\output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                double[,] kernel = new double[3, 3]
+                {
+                    { -1, 0, 1 },
+                    { -2, 0, 2 },
+                    { -1, 0, 1 }
+                };
+
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                PngOptions options = new PngOptions();
+                raster.Save(outputPath, options);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            RasterImage raster = (RasterImage)image;
-            PngOptions saveOptions = new PngOptions();
-            raster.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

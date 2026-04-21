@@ -1,46 +1,41 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-
-class SignalRHub
-{
-    // Simple placeholder for broadcasting image data to connected clients.
-    public void BroadcastImage(byte[] imageData)
-    {
-        // In a real SignalR implementation this would send the data to clients.
-        Console.WriteLine($"Broadcasting image of size {imageData.Length} bytes to clients.");
-    }
-}
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths.
-        string inputPath = "sample.png";
-        string outputPath = "sample.filtered.png";
-
-        // Verify input file exists.
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load image, apply Gaussian blur filter, and save
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                raster.Save(outputPath, new PngOptions());
+            }
+
+            // TODO: Broadcast the filtered image at outputPath to connected clients via SignalR
         }
-
-        // Ensure output directory exists.
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load image, apply Gaussian blur filter, and save.
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-            raster.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Read the filtered image and broadcast to clients.
-        byte[] filteredData = File.ReadAllBytes(outputPath);
-        SignalRHub hub = new SignalRHub();
-        hub.BroadcastImage(filteredData);
     }
 }

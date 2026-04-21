@@ -1,14 +1,14 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_edge.png";
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
 
         if (!File.Exists(inputPath))
         {
@@ -18,9 +18,9 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+            RasterImage raster = (RasterImage)image;
 
             double[,] kernel = new double[,]
             {
@@ -29,10 +29,11 @@ class Program
                 { -1, -1, -1 }
             };
 
-            var options = new ConvolutionFilterOptions(kernel, factor: 1.0, bias: 0);
-            rasterImage.Filter(rasterImage.Bounds, options);
+            var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
 
-            rasterImage.Save(outputPath, new PngOptions());
+            raster.Filter(raster.Bounds, options);
+
+            raster.Save(outputPath, new PngOptions());
         }
     }
 }

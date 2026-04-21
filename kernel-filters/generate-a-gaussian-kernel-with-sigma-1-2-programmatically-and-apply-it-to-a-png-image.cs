@@ -1,40 +1,53 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_gaussian.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image as a raster image
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Define sigma and compute kernel size (odd integer)
+                double sigma = 1.2;
+                int size = ((int)Math.Ceiling(sigma * 3) * 2) + 1; // ensures odd size
+
+                // Apply Gaussian blur filter with computed size and sigma
+                rasterImage.Filter(rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(size, sigma));
+
+                // Save the processed image as PNG
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                rasterImage.Save(outputPath, options);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering methods
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Create Gaussian blur options with kernel size 5 and sigma 1.2
-            var gaussianOptions = new GaussianBlurFilterOptions(5, 1.2);
-
-            // Apply the Gaussian blur to the whole image
-            rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
-
-            // Save the processed image
-            rasterImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

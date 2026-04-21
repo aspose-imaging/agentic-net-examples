@@ -7,60 +7,48 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = "input_multi_page.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output\\output.png";
 
-        // Output directory for processed pages
-        string outputDir = "output_pages";
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Load the multi‑page PNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to multipage interface
-            IMultipageImage multipage = image as IMultipageImage;
-            if (multipage == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not a multipage image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Iterate through each page
-            for (int i = 0; i < multipage.PageCount; i++)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑page PNG (APNG)
+            using (Image image = Image.Load(inputPath))
             {
-                // Retrieve the page image
-                using (Image pageImage = multipage.Pages[i])
+                // Process each page if the image supports multiple pages
+                if (image is IMultipageImage multipageImage)
                 {
-                    // Ensure the page is a raster image
-                    RasterImage raster = pageImage as RasterImage;
-                    if (raster == null)
+                    for (int i = 0; i < multipageImage.PageCount; i++)
                     {
-                        Console.Error.WriteLine($"Page {i} is not a raster image.");
-                        continue;
+                        // Each page is an Image; cast to RasterImage for filtering
+                        using (RasterImage page = (RasterImage)multipageImage.Pages[i])
+                        {
+                            // Apply Gaussian blur to the entire page
+                            page.Filter(
+                                page.Bounds,
+                                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                        }
                     }
-
-                    // Apply Gaussian blur filter (radius 5, sigma 4.0)
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                    // Build output file path for this page
-                    string outputPath = Path.Combine(outputDir, $"page_{i}.png");
-
-                    // Ensure the output directory exists (already created above)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the processed page as PNG
-                    PngOptions saveOptions = new PngOptions();
-                    raster.Save(outputPath, saveOptions);
                 }
+
+                // Save the processed image as a multi‑page PNG (APNG)
+                image.Save(outputPath, new ApngOptions());
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

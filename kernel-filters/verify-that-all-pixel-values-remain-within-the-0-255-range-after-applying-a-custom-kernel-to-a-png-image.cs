@@ -1,69 +1,71 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage for pixel manipulation
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-            // Define a custom 3x3 convolution kernel (edge detection example)
-            double[,] kernel = new double[,]
+            using (Image image = Image.Load(inputPath))
             {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
+                RasterImage raster = (RasterImage)image;
 
-            // Apply the custom kernel using ConvolutionFilterOptions
-            var filterOptions = new ConvolutionFilterOptions(kernel);
-            raster.Filter(raster.Bounds, filterOptions);
-
-            // Verify that all pixel channel values are within 0‑255
-            int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-            bool allValid = true;
-            foreach (int argb in pixels)
-            {
-                byte a = (byte)((argb >> 24) & 0xFF);
-                byte r = (byte)((argb >> 16) & 0xFF);
-                byte g = (byte)((argb >> 8) & 0xFF);
-                byte b = (byte)(argb & 0xFF);
-
-                if (a > 255 || r > 255 || g > 255 || b > 255)
+                // Define a custom sharpening kernel
+                double[,] kernel = new double[,]
                 {
-                    allValid = false;
-                    break;
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
+                };
+
+                // Apply the convolution filter with the custom kernel
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                // Verify that all pixel components are within the 0‑255 range
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                bool allValid = true;
+                foreach (int pixel in pixels)
+                {
+                    int a = (pixel >> 24) & 0xFF;
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+
+                    if (a < 0 || a > 255 || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+                    {
+                        allValid = false;
+                        break;
+                    }
                 }
+
+                if (!allValid)
+                {
+                    Console.Error.WriteLine("Pixel values out of range detected.");
+                }
+
+                // Save the processed image
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
-
-            Console.WriteLine(allValid
-                ? "All pixel values are within the 0‑255 range."
-                : "Pixel values out of range detected.");
-
-            // Save the processed image as PNG
-            var saveOptions = new PngOptions();
-            raster.Save(outputPath, saveOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

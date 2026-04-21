@@ -1,68 +1,75 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string embossOutputPath = "emboss_output.png";
-        string gaussianOutputPath = "gaussian_output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded paths
+            string inputPath = "input.png";
+            string outputEmbossPath = "output/output_emboss.png";
+            string outputGaussianPath = "output/output_gaussian.png";
+
+            // Input validation
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputEmbossPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputGaussianPath));
+
+            // Benchmark Emboss3x3
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                DateTime startEmboss = DateTime.Now;
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                DateTime endEmboss = DateTime.Now;
+                double embossMs = (endEmboss - startEmboss).TotalMilliseconds;
+
+                PngOptions embossOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputEmbossPath, false)
+                };
+                raster.Save(outputEmbossPath, embossOptions);
+
+                Console.WriteLine($"Emboss3x3 filter time: {embossMs} ms");
+            }
+
+            // Benchmark Gaussian Blur
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                DateTime startGaussian = DateTime.Now;
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                DateTime endGaussian = DateTime.Now;
+                double gaussianMs = (endGaussian - startGaussian).TotalMilliseconds;
+
+                PngOptions gaussianOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputGaussianPath, false)
+                };
+                raster.Save(outputGaussianPath, gaussianOptions);
+
+                Console.WriteLine($"Gaussian blur filter time: {gaussianMs} ms");
+            }
         }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(embossOutputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(gaussianOutputPath));
-
-        // Benchmark Emboss3x3 filter
-        long embossTime;
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            RasterImage raster = (RasterImage)image;
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-
-            // Apply Emboss3x3 using ConvolutionFilterOptions
-            raster.Filter(
-                raster.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-
-            sw.Stop();
-            embossTime = sw.ElapsedMilliseconds;
-
-            // Save result
-            raster.Save(embossOutputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Benchmark Gaussian blur filter
-        long gaussianTime;
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-
-            // Apply Gaussian blur with radius 5 and sigma 4.0
-            raster.Filter(
-                raster.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-            sw.Stop();
-            gaussianTime = sw.ElapsedMilliseconds;
-
-            // Save result
-            raster.Save(gaussianOutputPath);
-        }
-
-        // Output benchmark results
-        Console.WriteLine($"Emboss3x3 filter time: {embossTime} ms");
-        Console.WriteLine($"Gaussian blur filter time: {gaussianTime} ms");
     }
 }

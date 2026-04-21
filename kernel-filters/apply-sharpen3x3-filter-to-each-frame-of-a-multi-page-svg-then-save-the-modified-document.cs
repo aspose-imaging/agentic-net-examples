@@ -1,88 +1,61 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG (or any vector multipage) image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Try to treat it as a multipage image
-            IMultipageImage multipage = image as IMultipageImage;
-            if (multipage != null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Process each page/frame
-                for (int i = 0; i < multipage.PageCount; i++)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image (may be multi‑page)
+            using (Image image = Image.Load(inputPath))
+            {
+                // If the image supports multiple pages, process each one
+                if (image is IMultipageImage multipageImage && multipageImage.Pages != null)
                 {
-                    // Temporary raster file for the current page
-                    string tempPath = $"temp_page_{i}.png";
-                    Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-                    // Obtain vector rasterization options for proper rendering
-                    var vectorOptions = (Aspose.Imaging.ImageOptions.VectorRasterizationOptions)image.GetDefaultOptions(
-                        new object[] { Aspose.Imaging.Color.White, image.Width, image.Height });
-
-                    // Set up PNG save options with rasterization and single‑page export
-                    var pngOptions = new PngOptions
+                    for (int i = 0; i < multipageImage.PageCount; i++)
                     {
-                        VectorRasterizationOptions = vectorOptions,
-                        MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(i, 1))
-                    };
+                        // Access the current page
+                        var page = multipageImage.Pages[i];
 
-                    // Save the current page as a raster PNG
-                    image.Save(tempPath, pngOptions);
-
-                    // Load the raster PNG, apply Sharpen3x3 filter, and overwrite the file
-                    using (RasterImage raster = (RasterImage)Image.Load(tempPath))
-                    {
-                        raster.Filter(raster.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                        raster.Save(tempPath);
+                        // Attempt to treat the page as a raster image for filtering
+                        if (page is RasterImage rasterPage)
+                        {
+                            // Apply Sharpen filter to the entire page
+                            rasterPage.Filter(rasterPage.Bounds, new SharpenFilterOptions());
+                        }
                     }
                 }
-
-                // Save the (unchanged) vector document to the output path
-                image.Save(outputPath);
-            }
-            else
-            {
-                // Single‑page handling (same logic without page loop)
-                string tempPath = "temp.png";
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-                var vectorOptions = (Aspose.Imaging.ImageOptions.VectorRasterizationOptions)image.GetDefaultOptions(
-                    new object[] { Aspose.Imaging.Color.White, image.Width, image.Height });
-
-                var pngOptions = new PngOptions { VectorRasterizationOptions = vectorOptions };
-                image.Save(tempPath, pngOptions);
-
-                using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+                else if (image is RasterImage rasterImage)
                 {
-                    raster.Filter(raster.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                    raster.Save(tempPath);
+                    // Single‑page raster image case
+                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions());
                 }
 
+                // Save the modified SVG document
                 image.Save(outputPath);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

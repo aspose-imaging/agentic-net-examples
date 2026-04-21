@@ -1,54 +1,63 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "template.svg";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (SvgImage svgImage = new SvgImage(inputPath))
-        {
-            // Set up rasterization options for SVG to PNG conversion
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
-            PngOptions pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = rasterizationOptions
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Rasterize SVG into a memory stream (PNG format)
-            using (MemoryStream ms = new MemoryStream())
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG image
+            using (Image svgImage = Image.Load(inputPath))
             {
-                svgImage.Save(ms, pngOptions);
-                ms.Position = 0; // Reset stream position for reading
-
-                // Load the rasterized PNG as a RasterImage to apply filters
-                using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                // Rasterize SVG to PNG in memory
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    // Apply Sharpen filter (3x3 kernel)
-                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 0.0));
+                    PageSize = svgImage.Size
+                };
+                PngOptions pngSaveOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                    // Save the sharpened image as PNG
-                    rasterImage.Save(outputPath);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    svgImage.Save(ms, pngSaveOptions);
+                    ms.Position = 0;
+
+                    // Load rasterized image
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        // Apply predefined Sharpen3x3 filter
+                        raster.Filter(raster.Bounds,
+                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3));
+
+                        // Save sharpened image as PNG
+                        PngOptions outOptions = new PngOptions();
+                        raster.Save(outputPath, outOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

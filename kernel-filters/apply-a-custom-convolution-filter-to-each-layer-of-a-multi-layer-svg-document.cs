@@ -4,78 +4,64 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string outputPath = "output\\output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
-        {
-            SvgImage svgImage = image as SvgImage;
-            if (svgImage == null)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Input file is not an SVG image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare rasterization options for PNG output
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image svgImage = Image.Load(inputPath))
             {
-                PageSize = svgImage.Size
-            };
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Temporary PNG file to hold the rasterized SVG
-            string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-            // Rasterize SVG to PNG
-            svgImage.Save(tempPngPath, pngOptions);
-
-            // Load the rasterized image
-            using (Image rasterImg = Image.Load(tempPngPath))
-            {
-                RasterImage rasterImage = (RasterImage)rasterImg;
-
-                // Define a custom convolution kernel (sharpen filter)
-                double[,] kernel = new double[,]
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
+                    PageSize = svgImage.Size
                 };
 
-                // Apply the custom convolution filter to the entire image
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Save the filtered image to the final output path
-                rasterImage.Save(outputPath);
-            }
+                string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+                svgImage.Save(tempPngPath, pngOptions);
 
-            // Clean up temporary file
-            if (File.Exists(tempPngPath))
-            {
-                try { File.Delete(tempPngPath); } catch { /* ignore */ }
+                using (Image rasterImg = Image.Load(tempPngPath))
+                {
+                    RasterImage raster = (RasterImage)rasterImg;
+
+                    double[,] kernel = new double[,]
+                    {
+                        { -1, -1, -1 },
+                        { -1,  8, -1 },
+                        { -1, -1, -1 }
+                    };
+
+                    var filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
+                    raster.Filter(raster.Bounds, filterOptions);
+                    raster.Save(outputPath);
+                }
+
+                if (File.Exists(tempPngPath))
+                {
+                    File.Delete(tempPngPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

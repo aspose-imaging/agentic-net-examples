@@ -2,33 +2,36 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
-public class ImageController : Microsoft.AspNetCore.Mvc.Controller
+class Program
 {
-    public Microsoft.AspNetCore.Mvc.FileResult GetFilteredImage()
+    static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = "Input/sample.webp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return null;
-        }
-
-        // Load WebP image, apply grayscale filter, and return as PNG
-        using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
-        {
-            webpImage.Grayscale();
-
-            using (var memoryStream = new MemoryStream())
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            if (!File.Exists(inputPath))
             {
-                webpImage.Save(memoryStream, new PngOptions());
-                byte[] imageBytes = memoryStream.ToArray();
-                return new Microsoft.AspNetCore.Mvc.FileContentResult(imageBytes, "image/png");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            string outputPath = "output.png";
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load image, apply Gaussian blur filter, and save
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                raster.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

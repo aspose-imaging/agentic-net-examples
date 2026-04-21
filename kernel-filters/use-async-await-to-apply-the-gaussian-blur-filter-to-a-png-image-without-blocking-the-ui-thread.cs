@@ -1,49 +1,54 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     // Async entry point
-    static async System.Threading.Tasks.Task Main(string[] args)
+    static async Task Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output/blurred.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.png";
+            string outputPath = @"C:\temp\sample.GaussianBlur.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Apply Gaussian blur without blocking the thread
-        await ApplyGaussianBlurAsync(inputPath, outputPath);
-    }
-
-    // Asynchronous method that performs loading, filtering, and saving
-    static async System.Threading.Tasks.Task ApplyGaussianBlurAsync(string inputPath, string outputPath)
-    {
-        await System.Threading.Tasks.Task.Run(() =>
-        {
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
-
-                // Apply Gaussian blur with radius 5 and sigma 4.0
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                // Save the result as PNG
-                PngOptions options = new PngOptions();
-                raster.Save(outputPath, options);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-        });
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Run the image processing on a background thread to avoid blocking the UI thread
+            await Task.Run(() =>
+            {
+                // Load the PNG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to RasterImage to access filtering capabilities
+                    var rasterImage = (RasterImage)image;
+
+                    // Configure Gaussian blur filter (size = 5, sigma = 4.0)
+                    var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+
+                    // Apply the filter to the entire image
+                    rasterImage.Filter(rasterImage.Bounds, blurOptions);
+
+                    // Save the processed image
+                    rasterImage.Save(outputPath);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

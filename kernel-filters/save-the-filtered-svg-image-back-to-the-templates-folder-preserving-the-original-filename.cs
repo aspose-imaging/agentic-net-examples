@@ -1,36 +1,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths (preserve original filename)
-        string inputPath = @"C:\Templates\sample.svg";
-        string outputPath = @"C:\Templates\sample.svg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input SVG path in the templates folder
+            string inputPath = "templates/sample.svg";
+
+            // Output path preserves the original filename
+            string outputPath = inputPath;
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image and save it back to the same location
+            using (Image image = Image.Load(inputPath))
+            {
+                image.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists (creates it unconditionally)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Here you could apply any filtering to the SVG.
-            // For this example we simply re‑save it unchanged.
-
-            // Save the SVG back to the templates folder preserving the original name
-            var saveOptions = new SvgOptions(); // default options for SVG
-            image.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

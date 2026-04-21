@@ -7,32 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\lowlight.png";
-        string outputPath = @"C:\Images\lowlight_blurred.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\lowlight.png";
+            string outputPath = @"C:\Images\lowlight_blur.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering functionality
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply Gaussian blur with radius size 5 and sigma 0.8
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new GaussianBlurFilterOptions(5, 0.8));
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image, apply Gaussian blur, and save the result
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply Gaussian blur with a kernel size of 3 (odd) and sigma 0.8
-            var blurOptions = new GaussianBlurFilterOptions(3, 0.8);
-            rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-            // Save the processed image
-            rasterImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

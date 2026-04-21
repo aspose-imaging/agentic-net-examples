@@ -2,64 +2,72 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
-        // Base, input and output directories (relative)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Define base, input and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all PNG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Validate input directory
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Build output file path (append "_restored")
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + "_restored.png");
-
-            // Ensure the output directory exists (unconditional as required)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image, apply deconvolution, and save the result
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
             {
-                RasterImage raster = (RasterImage)image;
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Apply deconvolution with default Gauss-Wiener options
-                raster.Filter(raster.Bounds, new GaussWienerFilterOptions());
+            // Get all PNG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-                // Save as PNG using default options
-                using (PngOptions options = new PngOptions())
+            foreach (string inputPath in files)
+            {
+                // Verify each input file exists
+                if (!File.Exists(inputPath))
                 {
-                    raster.Save(outputPath, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Prepare output file path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_restored.png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the image as a raster image
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage raster = (RasterImage)image;
+
+                    // Apply deconvolution filter with default options (GaussWienerFilterOptions)
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions());
+
+                    // Save the restored image as PNG
+                    using (PngOptions saveOptions = new PngOptions())
+                    {
+                        saveOptions.Source = new FileCreateSource(outputPath, false);
+                        raster.Save(outputPath, saveOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

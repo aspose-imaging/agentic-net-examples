@@ -2,63 +2,73 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        const int maxRetries = 3;
-        const int delayMs = 500;
-        int attempt = 0;
-        RasterImage rasterImage = null;
-
-        // Retry loading the image on transient I/O errors
-        while (attempt < maxRetries)
-        {
-            try
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                rasterImage = (RasterImage)Image.Load(inputPath);
-                break; // Success
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            catch (IOException)
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Retry mechanism for transient I/O errors during loading
+            const int maxRetries = 3;
+            Image image = null;
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                attempt++;
-                if (attempt >= maxRetries)
+                try
                 {
-                    Console.Error.WriteLine($"Failed to load image after {maxRetries} attempts: {inputPath}");
-                    return;
+                    image = Image.Load(inputPath);
+                    break; // Success
                 }
-                System.Threading.Thread.Sleep(delayMs);
+                catch (IOException ioEx)
+                {
+                    if (attempt == maxRetries)
+                    {
+                        Console.Error.WriteLine($"Failed to load image after {maxRetries} attempts: {ioEx.Message}");
+                        return;
+                    }
+                    // Optionally, could log the transient error and retry
+                }
+            }
+
+            // If loading failed unexpectedly
+            if (image == null)
+            {
+                Console.Error.WriteLine("Image loading failed.");
+                return;
+            }
+
+            // Process the image within a using block to ensure disposal
+            using (image)
+            {
+                // Cast to RasterImage for filtering
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply a sharpen filter to the entire image
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+                // Save the filtered image
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
-
-        // Proceed if image was loaded
-        using (rasterImage)
+        catch (Exception ex)
         {
-            // Apply a Gaussian blur filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-            // Prepare output options
-            Source source = new FileCreateSource(outputPath, false);
-            PngOptions options = new PngOptions() { Source = source };
-
-            // Save the filtered image
-            rasterImage.Save(outputPath, options);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

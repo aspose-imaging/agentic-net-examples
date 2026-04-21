@@ -1,57 +1,72 @@
 using System;
 using System.IO;
 using System.Linq;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output/output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = @"C:\Images\sample.png";
+            string outputPath = @"C:\Images\sample.embossed.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Ensure data is cached
+                if (!rasterImage.IsCached)
+                {
+                    rasterImage.CacheData();
+                }
+
+                // Measure brightness before filter
+                int[] pixelsBefore = rasterImage.GetDefaultArgb32Pixels(rasterImage.Bounds);
+                double brightnessBefore = pixelsBefore.Average(p =>
+                {
+                    int r = (p >> 16) & 0xFF;
+                    int g = (p >> 8) & 0xFF;
+                    int b = p & 0xFF;
+                    return (r + g + b) / 3.0;
+                });
+
+                // Apply Emboss3x3 filter
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                // Measure brightness after filter
+                int[] pixelsAfter = rasterImage.GetDefaultArgb32Pixels(rasterImage.Bounds);
+                double brightnessAfter = pixelsAfter.Average(p =>
+                {
+                    int r = (p >> 16) & 0xFF;
+                    int g = (p >> 8) & 0xFF;
+                    int b = p & 0xFF;
+                    return (r + g + b) / 3.0;
+                });
+
+                // Save the filtered image
+                rasterImage.Save(outputPath, new PngOptions());
+
+                Console.WriteLine($"Brightness before: {brightnessBefore:F2}");
+                Console.WriteLine($"Brightness after: {brightnessAfter:F2}");
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        catch (Exception ex)
         {
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-            if (!raster.IsCached)
-                raster.CacheData();
-
-            int[] beforePixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-            double beforeBrightness = beforePixels.Average(p =>
-            {
-                int r = (p >> 16) & 0xFF;
-                int g = (p >> 8) & 0xFF;
-                int b = p & 0xFF;
-                return (r + g + b) / 3.0;
-            });
-
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-
-            int[] afterPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-            double afterBrightness = afterPixels.Average(p =>
-            {
-                int r = (p >> 16) & 0xFF;
-                int g = (p >> 8) & 0xFF;
-                int b = p & 0xFF;
-                return (r + g + b) / 3.0;
-            });
-
-            Console.WriteLine($"Average brightness before filter: {beforeBrightness:F2}");
-            Console.WriteLine($"Average brightness after filter: {afterBrightness:F2}");
-
-            raster.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

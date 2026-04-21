@@ -1,70 +1,65 @@
 using System;
 using System.IO;
 using System.Diagnostics;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (var inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            var filters = new (string Name, FilterOptionsBase Options)[]
-            {
-                ("Median", new MedianFilterOptions(5)),
-                ("Bilateral", new BilateralSmoothingFilterOptions(5)),
-                ("Gaussian", new GaussianBlurFilterOptions(5, 4.0)),
-                ("GaussWiener", new GaussWienerFilterOptions(5, 4.0)),
-                ("MotionWiener", new MotionWienerFilterOptions(10, 1.0, 90.0)),
-                ("Sharpen", new SharpenFilterOptions(5, 4.0))
+                @"C:\Images\image1.png",
+                @"C:\Images\image2.png"
             };
 
-            foreach (var filter in filters)
+            string outputDir = @"C:\ProcessedImages";
+
+            Directory.CreateDirectory(outputDir);
+
+            foreach (string inputPath in inputFiles)
             {
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                if (!File.Exists(inputPath))
                 {
-                    Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                    Stopwatch sw = Stopwatch.StartNew();
-                    raster.Filter(raster.Bounds, filter.Options);
-                    sw.Stop();
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage raster = (RasterImage)image;
 
-                    Console.WriteLine($"{Path.GetFileName(inputPath)} - {filter.Name} filter took {sw.ElapsedMilliseconds} ms");
+                    var filters = new (string suffix, Aspose.Imaging.ImageFilters.FilterOptions.FilterOptionsBase options)[]
+                    {
+                        ("Median", new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5)),
+                        ("Gaussian", new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0)),
+                        ("Sharpen", new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0))
+                    };
 
-                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_{filter.Name}.png";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    foreach (var filter in filters)
+                    {
+                        Stopwatch sw = Stopwatch.StartNew();
+                        raster.Filter(raster.Bounds, filter.options);
+                        sw.Stop();
 
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        Console.WriteLine($"Applied {filter.suffix} filter to {Path.GetFileName(inputPath)} in {sw.ElapsedMilliseconds} ms.");
 
-                    var pngOptions = new PngOptions();
-                    raster.Save(outputPath, pngOptions);
+                        string outputPath = Path.Combine(outputDir,
+                            $"{Path.GetFileNameWithoutExtension(inputPath)}_{filter.suffix}.png");
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        raster.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -7,18 +7,18 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\blurred.png";
-        string outputPath = @"C:\Images\restored.png";
+        // Hardcoded input and output file paths
+        string inputPath = "blurred.png";
+        string outputPath = "restored.png";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG image
@@ -27,12 +27,16 @@ class Program
             // Cast to RasterImage to access filtering capabilities
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a Gauss-Wiener deconvolution filter (Gaussian deconvolution)
-            // Parameters: radius = 5, sigma = 4.0 (adjust as needed for the blur)
-            var filterOptions = new GaussWienerFilterOptions(5, 4.0);
-            rasterImage.Filter(rasterImage.Bounds, filterOptions);
+            // Configure a Gauss-Wiener deconvolution filter (radius, sigma)
+            var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
+            // Optional: adjust additional parameters if needed
+            deconvOptions.Snr = 0.007;          // default signal‑to‑noise ratio
+            deconvOptions.Brightness = 1.15;    // default brightness
 
-            // Save the processed image
+            // Apply the filter to the whole image
+            rasterImage.Filter(rasterImage.Bounds, deconvOptions);
+
+            // Save the restored image
             rasterImage.Save(outputPath);
         }
     }

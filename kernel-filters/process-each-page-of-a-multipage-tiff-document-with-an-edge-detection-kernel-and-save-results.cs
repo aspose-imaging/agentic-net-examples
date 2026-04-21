@@ -1,46 +1,57 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Images\input.tif";
-        string outputPath = @"C:\Images\output.tif";
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputDirectory = "output";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        // Edge detection kernel (3x3)
+        double[,] edgeKernel = new double[,]
         {
-            Aspose.Imaging.FileFormats.Tiff.TiffImage tiffImage = (Aspose.Imaging.FileFormats.Tiff.TiffImage)image;
+            { -1, -1, -1 },
+            { -1,  8, -1 },
+            { -1, -1, -1 }
+        };
 
-            double[,] kernel = new double[,]
+        // Load the multipage TIFF
+        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        {
+            int frameIndex = 0;
+            foreach (TiffFrame frame in tiffImage.Frames)
             {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
+                // Set the current frame as active
+                tiffImage.ActiveFrame = frame;
 
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                // Apply edge detection filter to the active frame
+                tiffImage.Filter(tiffImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel));
 
-            for (int i = 0; i < tiffImage.PageCount; i++)
-            {
-                tiffImage.ActiveFrame = tiffImage.Frames[i];
-                ((Aspose.Imaging.RasterImage)tiffImage).Filter(tiffImage.Bounds, filterOptions);
+                // Save the processed frame as PNG
+                string outputPath = Path.Combine(outputDirectory, $"frame_{frameIndex}.png");
+                using (PngOptions pngOptions = new PngOptions())
+                {
+                    frame.Save(outputPath, pngOptions);
+                }
+
+                frameIndex++;
             }
-
-            var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffImage.Save(outputPath, saveOptions);
         }
     }
 }

@@ -3,102 +3,130 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input paths
-        string[] svgInputPaths = new[]
+        try
         {
-            "input1.svg",
-            "input2.svg"
-        };
+            // Input/Output directory setup (atomic block)
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Hardcoded JSON configuration path
-        string jsonConfigPath = "kernels.json";
-
-        // Verify JSON configuration file exists
-        if (!File.Exists(jsonConfigPath))
-        {
-            Console.Error.WriteLine($"File not found: {jsonConfigPath}");
-            return;
-        }
-
-        // Load and parse kernel definitions (simple manual parsing)
-        string json = File.ReadAllText(jsonConfigPath);
-        List<(int Size, double Sigma)> kernels = new List<(int, double)>();
-        int searchIndex = 0;
-        while (true)
-        {
-            int sizeKeyIdx = json.IndexOf("\"Size\"", searchIndex, StringComparison.OrdinalIgnoreCase);
-            if (sizeKeyIdx == -1) break;
-            int colonIdx = json.IndexOf(':', sizeKeyIdx);
-            int commaIdx = json.IndexOf(',', colonIdx);
-            string sizeStr = json.Substring(colonIdx + 1, commaIdx - colonIdx - 1).Trim();
-            int size = int.Parse(sizeStr);
-
-            int sigmaKeyIdx = json.IndexOf("\"Sigma\"", commaIdx, StringComparison.OrdinalIgnoreCase);
-            int colonSigmaIdx = json.IndexOf(':', sigmaKeyIdx);
-            int endIdx = json.IndexOfAny(new char[] { ',', '}' }, colonSigmaIdx);
-            string sigmaStr = json.Substring(colonSigmaIdx + 1, endIdx - colonSigmaIdx - 1).Trim();
-            double sigma = double.Parse(sigmaStr, System.Globalization.CultureInfo.InvariantCulture);
-
-            kernels.Add((size, sigma));
-            searchIndex = endIdx;
-        }
-
-        // Process each SVG with each kernel
-        foreach (string inputPath in svgInputPaths)
-        {
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            for (int k = 0; k < kernels.Count; k++)
+            if (!Directory.Exists(outputDirectory))
             {
-                var (size, sigma) = kernels[k];
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Define output file path
-                string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_k{k + 1}.png";
-                string outputPath = Path.Combine("output", outputFileName);
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-                // Ensure output directory exists
+            // Load kernel definitions from JSON configuration (simple name list)
+            string kernelConfigPath = Path.Combine(inputDirectory, "kernels.json");
+            if (!File.Exists(kernelConfigPath))
+            {
+                Console.Error.WriteLine($"File not found: {kernelConfigPath}");
+                return;
+            }
+
+            List<string> kernelNames = new List<string>();
+            foreach (string line in File.ReadAllLines(kernelConfigPath))
+            {
+                if (line.Contains("Emboss3x3")) kernelNames.Add("Emboss3x3");
+                if (line.Contains("Emboss5x5")) kernelNames.Add("Emboss5x5");
+                if (line.Contains("Sharpen3x3")) kernelNames.Add("Sharpen3x3");
+                if (line.Contains("Sharpen5x5")) kernelNames.Add("Sharpen5x5");
+            }
+
+            if (kernelNames.Count == 0)
+            {
+                Console.Error.WriteLine("No kernel definitions found in configuration.");
+                return;
+            }
+
+            foreach (string filePath in files)
+            {
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    continue;
+                }
+
+                if (!filePath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Skip non‑SVG files
+                    continue;
+                }
+
+                string outputFileName = Path.GetFileNameWithoutExtension(filePath) + "_filtered.png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load SVG image
-                using (Image svgImage = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(filePath))
                 {
                     // Rasterize SVG to PNG in memory
-                    var pngOptions = new PngOptions
+                    var rasterOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions
                     {
-                        VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = svgImage.Size }
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Aspose.Imaging.Color.White
                     };
+                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
 
-                    using (var memoryStream = new MemoryStream())
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        svgImage.Save(memoryStream, pngOptions);
-                        memoryStream.Position = 0;
+                        svgImage.Save(ms, pngOptions);
+                        ms.Position = 0;
 
-                        // Load rasterized image
-                        using (Image rasterImg = Image.Load(memoryStream))
+                        using (Image rasterImage = Image.Load(ms))
                         {
-                            RasterImage rasterImage = (RasterImage)rasterImg;
+                            var raster = (RasterImage)rasterImage;
 
-                            // Apply sharpen filter with kernel from JSON
-                            rasterImage.Filter(rasterImage.Bounds,
-                                new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(size, sigma));
+                            // Apply each kernel from configuration
+                            foreach (string name in kernelNames)
+                            {
+                                double[,] kernel = null;
+                                switch (name)
+                                {
+                                    case "Emboss3x3":
+                                        kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
+                                        break;
+                                    case "Emboss5x5":
+                                        kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
+                                        break;
+                                    case "Sharpen3x3":
+                                        kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3;
+                                        break;
+                                    case "Sharpen5x5":
+                                        kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen5x5;
+                                        break;
+                                }
 
-                            // Save filtered image
-                            rasterImage.Save(outputPath, new PngOptions());
+                                if (kernel != null)
+                                {
+                                    var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 0.0, 1);
+                                    raster.Filter(raster.Bounds, convOptions);
+                                }
+                            }
+
+                            // Save the filtered raster image as PNG
+                            raster.Save(outputPath, new PngOptions());
                         }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

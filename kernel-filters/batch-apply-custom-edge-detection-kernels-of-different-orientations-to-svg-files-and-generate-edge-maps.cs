@@ -1,86 +1,92 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Images\input1.svg",
-            @"C:\Images\input2.svg"
-        };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        foreach (string inputPath in inputFiles)
-        {
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            string baseName = Path.GetFileNameWithoutExtension(inputPath);
-            string dir = Path.GetDirectoryName(inputPath);
-            string outputPathH = Path.Combine(dir, baseName + "_edge_h.png");
-            string outputPathV = Path.Combine(dir, baseName + "_edge_v.png");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathH));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathV));
-
-            using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
-                };
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-                using (var ms = new MemoryStream())
-                {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+            // Define custom edge‑detection kernels and their suffixes
+            var kernels = new Dictionary<string, double[,]>
+            {
+                { "horizontal", new double[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } } }, // Sobel horizontal
+                { "vertical",   new double[,] { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } } }, // Sobel vertical
+                { "diag1",      new double[,] { { 0, 1, 2 }, { -1, 0, 1 }, { -2, -1, 0 } } }, // 45° diagonal
+                { "diag2",      new double[,] { { -2, -1, 0 }, { -1, 0, 1 }, { 0, 1, 2 } } }  // 135° diagonal
+            };
 
-                    using (Aspose.Imaging.Image rasterImg = Aspose.Imaging.Image.Load(ms))
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string baseName = Path.GetFileNameWithoutExtension(inputPath);
+
+                using (Image svgImage = Image.Load(inputPath))
+                {
+                    var rasterOptions = new SvgRasterizationOptions
                     {
-                        var raster = (Aspose.Imaging.RasterImage)rasterImg;
-
-                        double[,] kernelH = new double[,]
-                        {
-                            { -1, 0, 1 },
-                            { -2, 0, 2 },
-                            { -1, 0, 1 }
-                        };
-                        var filterH = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernelH);
-                        raster.Filter(raster.Bounds, filterH);
-                        raster.Save(outputPathH);
-                    }
-
-                    ms.Position = 0;
-
-                    using (Aspose.Imaging.Image rasterImgV = Aspose.Imaging.Image.Load(ms))
+                        PageSize = svgImage.Size,
+                        BackgroundColor = Color.White
+                    };
+                    var pngOptions = new PngOptions
                     {
-                        var rasterV = (Aspose.Imaging.RasterImage)rasterImgV;
+                        VectorRasterizationOptions = rasterOptions
+                    };
 
-                        double[,] kernelV = new double[,]
+                    foreach (var kvp in kernels)
+                    {
+                        string suffix = kvp.Key;
+                        double[,] kernel = kvp.Value;
+
+                        string outputPath = Path.Combine(outputDirectory, $"{baseName}_{suffix}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        using (var ms = new MemoryStream())
                         {
-                            { -1, -2, -1 },
-                            {  0,  0,  0 },
-                            {  1,  2,  1 }
-                        };
-                        var filterV = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernelV);
-                        rasterV.Filter(rasterV.Bounds, filterV);
-                        rasterV.Save(outputPathV);
+                            svgImage.Save(ms, pngOptions);
+                            ms.Position = 0;
+
+                            using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                            {
+                                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
+                                rasterImage.Save(outputPath, new PngOptions());
+                            }
+                        }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

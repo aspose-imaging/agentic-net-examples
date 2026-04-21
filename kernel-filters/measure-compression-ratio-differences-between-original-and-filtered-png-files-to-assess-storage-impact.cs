@@ -6,47 +6,74 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string filteredPath = "filtered.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.png";
+            string outputDir = @"c:\temp\output\";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(filteredPath) ?? ".");
-
-        // Load the original PNG image, apply a Gaussian blur filter, and save the filtered image
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-
-            // Apply Gaussian blur filter with radius 5 and sigma 4.0
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-            // Set PNG save options (maximum compression)
-            PngOptions options = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                CompressionLevel = 9
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputDir));
+
+            // Get original file size
+            long originalSize = new FileInfo(inputPath).Length;
+
+            // Define filter types to test
+            PngFilterType[] filterTypes = new PngFilterType[]
+            {
+                PngFilterType.None,
+                PngFilterType.Up,
+                PngFilterType.Sub,
+                PngFilterType.Paeth,
+                PngFilterType.Avg,
+                PngFilterType.Adaptive
             };
 
-            // Save the filtered image
-            image.Save(filteredPath, options);
+            // Load the original image once
+            using (Image image = Image.Load(inputPath))
+            {
+                foreach (PngFilterType filter in filterTypes)
+                {
+                    // Prepare PNG options with the current filter
+                    PngOptions options = new PngOptions
+                    {
+                        FilterType = filter,
+                        CompressionLevel = 9, // maximum compression for consistency
+                        Progressive = true
+                    };
+
+                    // Build output file path
+                    string outputPath = Path.Combine(outputDir, $"{filter}.png");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the image with the specified options
+                    image.Save(outputPath, options);
+
+                    // Get size of the filtered file
+                    long filteredSize = new FileInfo(outputPath).Length;
+
+                    // Calculate compression ratio (original / filtered)
+                    double ratio = (double)originalSize / filteredSize;
+
+                    // Output the results
+                    Console.WriteLine($"Filter: {filter}, Output Size: {filteredSize} bytes, Compression Ratio: {ratio:F2}");
+                }
+            }
         }
-
-        // Calculate file sizes and compression ratio
-        long originalSize = new FileInfo(inputPath).Length;
-        long filteredSize = new FileInfo(filteredPath).Length;
-        double compressionRatio = (double)originalSize / filteredSize;
-
-        Console.WriteLine($"Original size: {originalSize} bytes");
-        Console.WriteLine($"Filtered size: {filteredSize} bytes");
-        Console.WriteLine($"Compression ratio (original/filtered): {compressionRatio:F2}");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
