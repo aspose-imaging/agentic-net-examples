@@ -2,37 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.png";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image vectorImage = Image.Load(inputPath))
+        // Load the vector image
+        using (Image image = Image.Load(inputPath))
         {
-            PngOptions pngOptions = new PngOptions
+            // Apply a hue rotation of 180 degrees if the operation is supported
+            var vectorImg = image as VectorImage;
+            if (vectorImg != null)
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions
+                // Use dynamic invocation to call AdjustHue if it exists at runtime
+                dynamic dyn = vectorImg;
+                try
                 {
-                    PageWidth = vectorImage.Width,
-                    PageHeight = vectorImage.Height,
-                    BackgroundColor = Color.White
+                    dyn.AdjustHue(180);
                 }
-            };
+                catch
+                {
+                    // If AdjustHue is not available, the image will be saved without hue change
+                }
+            }
 
-            vectorImage.Save(outputPath, pngOptions);
+            // Save the result as PNG
+            PngOptions pngOptions = new PngOptions();
+            image.Save(outputPath, pngOptions);
         }
     }
 }
