@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 
@@ -7,43 +8,51 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\input1.tif",
-            @"C:\Images\input2.tif",
-            @"C:\Images\input3.tif"
-        };
-        string outputPath = @"C:\Images\output.tif";
+            // Hardcoded input and output paths
+            string inputPath1 = "input1.tif";
+            string inputPath2 = "input2.tif";
+            string outputPath = "output.tif";
 
-        // Verify each input file exists
-        foreach (string inputPath in inputPaths)
-        {
-            if (!File.Exists(inputPath))
+            // Verify input files exist
+            if (!File.Exists(inputPath1))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputPath1}");
                 return;
             }
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the first TIFF image – this will become the base image
-        using (TiffImage baseImage = (TiffImage)Image.Load(inputPaths[0]))
-        {
-            // Append frames from the remaining TIFF images
-            for (int i = 1; i < inputPaths.Length; i++)
+            if (!File.Exists(inputPath2))
             {
-                using (TiffImage srcImage = (TiffImage)Image.Load(inputPaths[i]))
-                {
-                    // Add all frames from srcImage to baseImage, preserving each frame's original compression
-                    baseImage.Add(srcImage);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
             }
 
-            // Save the concatenated multi‑page TIFF
-            baseImage.Save(outputPath);
+            // Load the first TIFF image
+            using (Image img1 = Image.Load(inputPath1))
+            using (TiffImage tiff1 = (TiffImage)img1)
+            // Load the second TIFF image
+            using (Image img2 = Image.Load(inputPath2))
+            using (TiffImage tiff2 = (TiffImage)img2)
+            {
+                // Collect all frames preserving original compression
+                List<TiffFrame> allFrames = new List<TiffFrame>();
+                allFrames.AddRange(tiff1.Frames);
+                allFrames.AddRange(tiff2.Frames);
+
+                // Create a new multi‑frame TIFF image from the collected frames
+                using (TiffImage result = new TiffImage(allFrames.ToArray()))
+                {
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the concatenated TIFF
+                    result.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
