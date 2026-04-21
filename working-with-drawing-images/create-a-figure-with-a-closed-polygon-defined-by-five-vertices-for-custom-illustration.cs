@@ -1,60 +1,60 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"c:\temp\polygon_output.bmp";
+        // Output file path (hard‑coded)
+        string outputPath = @"C:\temp\polygon.png";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up BMP options with a file create source
-        BmpOptions bmpOptions = new BmpOptions
+        // Create a file stream for the output image
+        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
-            BitsPerPixel = 24,
-            Source = new FileCreateSource(outputPath, false)
-        };
+            // Set PNG options and bind the stream as the source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new StreamSource(stream);
 
-        // Create a new image (500x500 pixels)
-        using (Image image = Image.Create(bmpOptions, 500, 500))
-        {
-            // Initialize graphics for the image
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Aspose.Imaging.Color.Wheat);
-
-            // Define five vertices for the closed polygon
-            PointF[] vertices = new PointF[]
+            // Create a 500x500 image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
             {
-                new PointF(100, 50),
-                new PointF(200, 30),
-                new PointF(300, 100),
-                new PointF(250, 200),
-                new PointF(150, 180)
-            };
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Create a closed PolygonShape
-            PolygonShape polygon = new PolygonShape(vertices, true);
+                // Create a graphics path and a figure
+                Aspose.Imaging.GraphicsPath graphicspath = new Aspose.Imaging.GraphicsPath();
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-            // Create a Figure and add the polygon shape
-            Figure figure = new Figure();
-            figure.AddShape(polygon);
+                // Define five vertices for the closed polygon
+                Aspose.Imaging.PointF[] points = new Aspose.Imaging.PointF[]
+                {
+                    new Aspose.Imaging.PointF(100f, 50f),
+                    new Aspose.Imaging.PointF(200f, 80f),
+                    new Aspose.Imaging.PointF(250f, 200f),
+                    new Aspose.Imaging.PointF(150f, 250f),
+                    new Aspose.Imaging.PointF(80f, 150f)
+                };
 
-            // Add the Figure to a GraphicsPath
-            GraphicsPath path = new GraphicsPath();
-            path.AddFigure(figure);
+                // Create a closed PolygonShape and add it to the figure
+                Aspose.Imaging.Shapes.PolygonShape polygon = new Aspose.Imaging.Shapes.PolygonShape(points, true);
+                figure.AddShape(polygon);
 
-            // Draw the path with a black pen
-            graphics.DrawPath(new Pen(Aspose.Imaging.Color.Black, 2), path);
+                // Add the figure to the graphics path
+                graphicspath.AddFigure(figure);
 
-            // Save the image (output path already defined in the source)
-            image.Save();
+                // Draw the path with a black pen
+                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicspath);
+
+                // Save the image (stream is already bound)
+                image.Save();
+            }
         }
     }
 }
