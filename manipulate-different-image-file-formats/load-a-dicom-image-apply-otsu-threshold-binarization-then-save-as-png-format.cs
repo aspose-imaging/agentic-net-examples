@@ -22,11 +22,16 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DICOM image, apply Otsu binarization, and save as PNG
+        // Load the DICOM image
         using (Image image = Image.Load(inputPath))
         {
+            // Cast to DicomImage to access DICOM-specific methods
             DicomImage dicomImage = (DicomImage)image;
+
+            // Apply Otsu threshold binarization
             dicomImage.BinarizeOtsu();
+
+            // Save the result as PNG
             dicomImage.Save(outputPath, new PngOptions());
         }
     }
