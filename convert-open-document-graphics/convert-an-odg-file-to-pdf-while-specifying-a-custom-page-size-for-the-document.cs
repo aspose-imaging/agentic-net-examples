@@ -2,35 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main()
     {
-        string inputPath = @"C:\input.odg";
-        string outputPath = @"C:\output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.odg";
+        string outputPath = "Output/sample.pdf";
 
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Load the ODG image and convert to PDF with custom page size
         using (Image image = Image.Load(inputPath))
         {
-            var rasterOptions = new VectorRasterizationOptions();
-            rasterOptions.BackgroundColor = Color.White;
-            rasterOptions.PageWidth = 800f;
-            rasterOptions.PageHeight = 600f;
-
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Set up rasterization options with a custom page size (e.g., 800x600 points)
+            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
             {
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
-                image.Save(outputPath, pdfOptions);
-            }
+                BackgroundColor = Color.White,
+                PageSize = new SizeF(800, 600) // Custom width and height
+            };
+
+            // Configure PDF save options
+            PdfOptions pdfOptions = new PdfOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
+
+            // Save the image as PDF
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
