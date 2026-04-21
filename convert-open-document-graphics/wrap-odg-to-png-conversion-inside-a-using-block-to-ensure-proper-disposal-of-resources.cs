@@ -8,37 +8,37 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\input\sample.odg";
+        string outputPath = @"C:\output\sample.png";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG image and ensure proper disposal
+        // Load ODG image and convert to PNG
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options for ODG to PNG conversion
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            // Set rasterization options for ODG
+            var rasterOptions = new OdgRasterizationOptions
             {
-                BackgroundColor = Color.White,
+                // Preserve original size
                 PageSize = image.Size
             };
 
-            // Set PNG save options with the rasterization options
-            PngOptions pngOptions = new PngOptions
+            // Configure PNG save options
+            var pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the image as PNG
+            // Save as PNG
             image.Save(outputPath, pngOptions);
         }
     }
