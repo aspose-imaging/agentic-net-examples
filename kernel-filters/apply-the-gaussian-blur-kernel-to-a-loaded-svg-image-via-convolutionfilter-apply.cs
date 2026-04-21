@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
 
@@ -12,8 +10,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,42 +23,36 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (Image svgImage = Image.Load(inputPath))
+        // Load SVG image from file stream
+        using (FileStream inputStream = File.OpenRead(inputPath))
+        using (SvgImage svgImage = new SvgImage(inputStream))
         {
-            // Prepare rasterization options for SVG
-            var rasterOptions = new SvgRasterizationOptions
+            // Set up rasterization options for SVG to PNG conversion
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
                 PageSize = svgImage.Size
             };
-
-            // Set up PNG save options with the rasterization options
-            var pngOptions = new PngOptions
+            PngOptions pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Rasterize SVG to a memory stream
-            using (var memoryStream = new MemoryStream())
+            // Rasterize SVG to PNG in memory
+            using (MemoryStream rasterStream = new MemoryStream())
             {
-                svgImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0;
+                svgImage.Save(rasterStream, pngOptions);
+                rasterStream.Position = 0;
 
-                // Load the rasterized image
-                using (Image rasterImageContainer = Image.Load(memoryStream))
+                // Load the rasterized PNG as a RasterImage
+                using (Image rasterImageContainer = Image.Load(rasterStream))
                 {
-                    var rasterImage = (RasterImage)rasterImageContainer;
+                    RasterImage rasterImage = (RasterImage)rasterImageContainer;
 
-                    // Obtain Gaussian kernel (size 5, sigma 4.0)
-                    double[,] gaussianKernel = ConvolutionFilter.GetGaussian(5, 4.0);
+                    // Apply Gaussian blur filter (radius 5, sigma 4.0)
+                    rasterImage.Filter(rasterImage.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                    // Create convolution filter options with the kernel
-                    var convolutionOptions = new ConvolutionFilterOptions(gaussianKernel);
-
-                    // Apply the Gaussian blur to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
-
-                    // Save the blurred raster image as PNG
+                    // Save the blurred image to the output path
                     rasterImage.Save(outputPath, new PngOptions());
                 }
             }
