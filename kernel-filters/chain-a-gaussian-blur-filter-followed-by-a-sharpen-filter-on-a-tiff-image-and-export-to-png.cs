@@ -1,17 +1,18 @@
 using System;
 using System.IO;
+using System.Drawing;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.png";
+        string inputPath = @"C:\temp\sample.tif";
+        string outputPath = @"C:\temp\sample_processed.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,20 +25,18 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the TIFF image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Cast to TiffImage for TIFF-specific operations
             TiffImage tiffImage = (TiffImage)image;
 
             // Apply Gaussian blur filter to the whole image
             tiffImage.Filter(tiffImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Apply Sharpen filter to the whole image
+            // Apply sharpen filter to the whole image
             tiffImage.Filter(tiffImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Save the processed image as PNG
-            PngOptions pngOptions = new PngOptions();
-            tiffImage.Save(outputPath, pngOptions);
+            // Save the result as PNG
+            tiffImage.Save(outputPath, new PngOptions());
         }
     }
 }
