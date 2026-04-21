@@ -6,11 +6,11 @@ using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output\\output.gif";
+        string inputPath = "Input\\sample.dcm";
+        string outputPath = "Output\\result.gif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,16 +22,16 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DICOM image
+        // Load DICOM image, apply dithering, resize, and save as GIF
         using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
         {
-            // Apply Floyd‑Steinberg dithering with a 1‑bit palette
-            dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+            // Apply Floyd‑Steinberg dithering with 8‑bit palette (null palette uses default)
+            dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-            // Resize to 1024×768 using nearest‑neighbour resampling
+            // Resize to 1024x768 using nearest‑neighbour resampling
             dicomImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
 
-            // Save the result as a GIF image
+            // Save as GIF
             GifOptions gifOptions = new GifOptions();
             dicomImage.Save(outputPath, gifOptions);
         }
