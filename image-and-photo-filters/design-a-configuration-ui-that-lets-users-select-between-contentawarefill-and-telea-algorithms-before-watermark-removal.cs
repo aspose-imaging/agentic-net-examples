@@ -1,70 +1,74 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\image.png";
-        string outputPath = "output\\result.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Prompt user to select algorithm
-        Console.WriteLine("Select watermark removal algorithm:");
-        Console.WriteLine("1 - Telea (fast)");
-        Console.WriteLine("2 - Content Aware Fill (high quality)");
-        Console.Write("Enter choice (1 or 2): ");
-        string choice = Console.ReadLine();
-
-        // Load the image
-        using (var image = Image.Load(inputPath))
-        {
-            // Cast to specific format (PNG) for demonstration
-            var pngImage = (PngImage)image;
-
-            // Create a mask (ellipse shape)
-            var mask = new GraphicsPath();
-            var figure = new Figure();
-            figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
-            mask.AddFigure(figure);
-
-            // Create appropriate options based on user choice
-            WatermarkOptions options;
-            if (choice == "2")
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Content Aware Fill algorithm
-                var cafOptions = new ContentAwareFillWatermarkOptions(mask)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists (unconditional as per requirements)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Simple console UI for algorithm selection
+            Console.WriteLine("Select watermark removal algorithm:");
+            Console.WriteLine("1 - Telea");
+            Console.WriteLine("2 - Content Aware Fill");
+            Console.Write("Enter choice (1 or 2): ");
+            string choice = Console.ReadLine();
+
+            // Load the image
+            using (var image = Image.Load(inputPath))
+            {
+                // Cast to a specific format (PNG) for the remover
+                var pngImage = (PngImage)image;
+
+                // Create a mask (example ellipse)
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 220, 230)));
+                mask.AddFigure(figure);
+
+                // Choose options based on user selection
+                Aspose.Imaging.Watermark.Options.WatermarkOptions options;
+                if (choice == "2")
                 {
-                    MaxPaintingAttempts = 4
-                };
-                options = cafOptions;
-            }
-            else
-            {
-                // Default to Telea algorithm
-                options = new TeleaWatermarkOptions(mask);
-            }
+                    var cafOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                    {
+                        MaxPaintingAttempts = 4
+                    };
+                    options = cafOptions;
+                }
+                else
+                {
+                    var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+                    options = teleaOptions;
+                }
 
-            // Perform watermark removal
-            var result = WatermarkRemover.PaintOver(pngImage, options);
+                // Perform watermark removal
+                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
 
-            // Save the result
-            result.Save(outputPath);
+                // Save the resulting image
+                result.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
