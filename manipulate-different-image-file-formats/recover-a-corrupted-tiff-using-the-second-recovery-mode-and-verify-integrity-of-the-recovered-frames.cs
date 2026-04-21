@@ -9,39 +9,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "corrupted.tif";
-        string outputPath = "recovered.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "corrupted.tif";
+            string outputPath = "recovered.tif";
 
-        // Prepare load options with second recovery mode
-        var loadOptions = new LoadOptions
-        {
-            DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
-            DataBackgroundColor = Color.White
-        };
-
-        // Load the corrupted TIFF with recovery options
-        using (TiffImage tiff = (TiffImage)Image.Load(inputPath, loadOptions))
-        {
-            // Verify integrity of recovered frames
-            Console.WriteLine($"Recovered frames count: {tiff.Frames.Length}");
-            foreach (var frame in tiff.Frames)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine($"Frame size: {frame.Width}x{frame.Height}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the recovered TIFF
-            tiff.Save(outputPath);
+            // Load the corrupted TIFF with recovery options
+            var loadOptions = new LoadOptions
+            {
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Color.White
+            };
+
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath, loadOptions))
+            {
+                // Verify integrity of recovered frames
+                Console.WriteLine($"Recovered frame count: {tiff.Frames.Length}");
+                for (int i = 0; i < tiff.Frames.Length; i++)
+                {
+                    var frame = tiff.Frames[i];
+                    Console.WriteLine($"Frame {i}: {frame.Width}x{frame.Height}");
+                }
+
+                // Save the recovered TIFF
+                var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiff.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
