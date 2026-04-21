@@ -1,41 +1,70 @@
 using System;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        int width = 100;
-        int height = 50;
+        string inputPath = "input/source.jpg";
+        string outputPath = "output/union_result.png";
 
-        ImageBitMask mask1 = new ImageBitMask(width, height);
-        for (int y = 10; y < 20; y++)
+        // Ensure input directory exists and create a blank source image if needed
+        Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+        if (!File.Exists(inputPath))
         {
-            for (int x = 10; x < 30; x++)
+            var src = new FileCreateSource(inputPath, false);
+            var jpegOpts = new JpegOptions { Source = src, Quality = 100 };
+            using (JpegImage img = (JpegImage)Image.Create(jpegOpts, 10, 10))
             {
-                mask1.SetMaskPixel(x, y, true);
+                img.Save(); // bound image
             }
         }
 
-        ImageBitMask mask2 = new ImageBitMask(width, height);
-        for (int y = 10; y < 20; y++)
+        if (!File.Exists(inputPath))
         {
-            for (int x = 20; x < 40; x++)
-            {
-                mask2.SetMaskPixel(x, y, true);
-            }
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
         }
 
-        ImageBitMask unionMask = mask1.Union(mask2);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        bool onlyMask1 = unionMask.IsOpaque(15, 15);
-        bool onlyMask2 = unionMask.IsOpaque(35, 15);
-        bool overlap = unionMask.IsOpaque(25, 15);
-        bool outside = unionMask.IsOpaque(5, 5);
+        try
+        {
+            using (RasterImage source = (RasterImage)Image.Load(inputPath))
+            {
+                // Create two overlapping masks
+                var mask1 = new Aspose.Imaging.MagicWand.ImageMasks.ImageBitMask(source);
+                var mask2 = new Aspose.Imaging.MagicWand.ImageMasks.ImageBitMask(source);
 
-        Console.WriteLine($"Only mask1 area opaque: {onlyMask1}");
-        Console.WriteLine($"Only mask2 area opaque: {onlyMask2}");
-        Console.WriteLine($"Overlap area opaque: {overlap}");
-        Console.WriteLine($"Outside area transparent (should be false): {outside}");
+                mask1.SetMaskPixel(2, 2, true);
+                mask1.SetMaskPixel(3, 3, true);
+
+                mask2.SetMaskPixel(3, 3, true);
+                mask2.SetMaskPixel(4, 4, true);
+
+                // Union the masks
+                var unionMask = mask1.Union(mask2);
+
+                // Verify that union contains all expected opaque pixels
+                bool testA = unionMask.IsOpaque(2, 2);
+                bool testB = unionMask.IsOpaque(3, 3);
+                bool testC = unionMask.IsOpaque(4, 4);
+                Console.WriteLine($"Union test results: {testA}, {testB}, {testC}");
+
+                // Apply the union mask to the source image and save
+                unionMask.Apply();
+                var pngOpts = new PngOptions { Source = new FileCreateSource(outputPath, false) };
+                source.Save(outputPath, pngOpts);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
