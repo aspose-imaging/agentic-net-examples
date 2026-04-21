@@ -1,43 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dng;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.dng";
-        string outputPath = @"C:\temp\output.jp2";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Define relative input and output paths
+            string inputPath = "Input\\photo.dng";
+            string outputPath = "Output\\photo.jp2";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DNG image with default load options (demosaicing is performed automatically)
-        using (Image image = Image.Load(inputPath, new DngLoadOptions()))
-        {
-            // Cast to DngImage to access raw-specific features if needed
-            DngImage dngImage = (DngImage)image;
-
-            // Prepare JPEG2000 save options for lossless compression (default)
-            Jpeg2000Options saveOptions = new Jpeg2000Options
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Irreversible = false ensures lossless DWT 5-3 compression (default value)
-                Irreversible = false
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the demosaiced image as JPEG2000
-            dngImage.Save(outputPath, saveOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DNG raw image
+            using (Image dngImage = Image.Load(inputPath))
+            {
+                // Create a JPEG2000 image from the loaded raster (DNG) image
+                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image((RasterImage)dngImage))
+                {
+                    // Configure JPEG2000 options for lossless compression
+                    using (Jpeg2000Options options = new Jpeg2000Options())
+                    {
+                        options.Irreversible = false; // lossless mode
+                        // Save the result
+                        jpeg2000Image.Save(outputPath, options);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
