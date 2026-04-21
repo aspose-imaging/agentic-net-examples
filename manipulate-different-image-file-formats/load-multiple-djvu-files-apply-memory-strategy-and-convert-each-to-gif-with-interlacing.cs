@@ -3,21 +3,22 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main()
     {
-        // Define input and output directories (relative to the current directory)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        // Hardcoded input DjVu files
+        string[] inputFiles = new string[]
+        {
+            @"C:\Input\doc1.djvu",
+            @"C:\Input\doc2.djvu"
+        };
 
-        // Get all DjVu files in the input directory
-        string[] djvuFiles = Directory.GetFiles(inputDirectory, "*.djvu");
+        // Hardcoded output base directory
+        string outputBaseDir = @"C:\Output";
 
-        foreach (string inputPath in djvuFiles)
+        foreach (string inputPath in inputFiles)
         {
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,32 +27,38 @@ class Program
                 return;
             }
 
-            // Prepare output path
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
+            // Create a subdirectory for each source file's pages
+            string sourceName = Path.GetFileNameWithoutExtension(inputPath);
+            string outputDir = Path.Combine(outputBaseDir, sourceName);
+            Directory.CreateDirectory(outputDir); // Ensure directory exists
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DjVu with memory strategy (buffer size hint)
+            // Load DjVu with a memory buffer hint (e.g., 1 MB)
             using (FileStream stream = File.OpenRead(inputPath))
             {
                 LoadOptions loadOptions = new LoadOptions
                 {
-                    BufferSizeHint = 1 * 1024 * 1024 // 1 MB buffer
+                    BufferSizeHint = 1 * 1024 * 1024 // 1 MB
                 };
 
-                using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
                 {
-                    // Set GIF options with interlacing and export all pages
-                    using (GifOptions gifOptions = new GifOptions
+                    int pageIndex = 0;
+                    foreach (var page in djvuImage.Pages)
                     {
-                        Interlaced = true,
-                        MultiPageOptions = new DjvuMultiPageOptions()
-                    })
-                    {
-                        // Save DjVu as GIF
-                        djvuImage.Save(outputPath, gifOptions);
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.gif");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as an interlaced GIF
+                        GifOptions gifOptions = new GifOptions
+                        {
+                            Interlaced = true
+                        };
+                        page.Save(outputPath, gifOptions);
+
+                        pageIndex++;
                     }
                 }
             }
