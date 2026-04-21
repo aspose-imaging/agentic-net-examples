@@ -6,20 +6,20 @@ using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output file paths
-        string inputPath = "input.jpg";
-        string outputPath = "output\\result.psd";
+        string inputPath = "sample.jpg";
+        string outputPath = "output.psd";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
@@ -28,25 +28,20 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure PSD saving options
-                PsdOptions options = new PsdOptions
+                PsdOptions psdOptions = new PsdOptions
                 {
                     CompressionMethod = CompressionMethod.RLE,
                     ColorMode = ColorModes.Rgb
                 };
 
                 // Save the image as PSD
-                image.Save(outputPath, options);
+                image.Save(outputPath, psdOptions);
             }
-        }
-        catch (Aspose.Imaging.CoreExceptions.ImageFormats.PsdImageException ex)
-        {
-            // Handle PSD-specific saving errors
-            Console.Error.WriteLine($"PSD saving error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            // Handle any other unexpected errors
-            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+            // Log any errors that occur during saving
+            Console.Error.WriteLine($"Error saving PSD: {ex.Message}");
         }
     }
 }
