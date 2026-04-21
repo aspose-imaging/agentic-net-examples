@@ -6,58 +6,61 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.jpg";
-        string outputPath = "output_signed.jpg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Work with RasterImage which provides digital signature methods
-            if (image is RasterImage rasterImage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Password longer than four characters
-                string password = "StrongPass123";
-
-                // Embed the digital signature into the image
-                rasterImage.EmbedDigitalSignature(password);
-
-                // Save the signed image to the output path
-                rasterImage.Save(outputPath);
-            }
-            else
-            {
-                Console.Error.WriteLine("The loaded image type does not support digital signatures.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-        }
 
-        // Load the signed image to verify the signature
-        using (Image signedImage = Image.Load(outputPath))
-        {
-            if (signedImage is RasterImage signedRaster)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access digital signature methods
+                var rasterImage = image as RasterImage;
+                if (rasterImage == null)
+                {
+                    Console.Error.WriteLine("Loaded image does not support raster operations.");
+                    return;
+                }
+
+                // Embed a digital signature with a password longer than four characters
                 string password = "StrongPass123";
+                rasterImage.EmbedDigitalSignature(password);
 
-                // Check whether the image is digitally signed with the given password
-                bool isSigned = signedRaster.IsDigitalSigned(password);
-
-                Console.WriteLine($"Signature verification result: {isSigned}");
+                // Save the signed image
+                rasterImage.Save(outputPath);
             }
-            else
+
+            // Load the signed image to verify the signature
+            using (Image signedImage = Image.Load(outputPath))
             {
-                Console.Error.WriteLine("The signed image type does not support digital signature verification.");
+                var rasterImage = signedImage as RasterImage;
+                if (rasterImage == null)
+                {
+                    Console.Error.WriteLine("Signed image does not support raster operations.");
+                    return;
+                }
+
+                string password = "StrongPass123";
+                bool isSigned = rasterImage.IsDigitalSigned(password);
+                Console.WriteLine(isSigned
+                    ? "Digital signature verified successfully."
+                    : "Digital signature verification failed.");
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
