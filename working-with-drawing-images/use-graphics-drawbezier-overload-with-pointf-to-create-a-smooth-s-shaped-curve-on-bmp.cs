@@ -2,55 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded output path (BMP file)
-        string outputPath = @"C:\temp\output.bmp";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\s_curve.bmp";
 
-        // Ensure the output directory exists
+        // Ensure the output directory exists (unconditional)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file stream for the output image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        // Create a BMP image of size 500x500
+        BmpOptions bmpOptions = new BmpOptions();
+        using (Image image = Image.Create(bmpOptions, 500, 500))
         {
-            // Set up BMP options with the stream as the source
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                Source = new StreamSource(stream)
-            };
+            // Initialize graphics object for drawing
+            Graphics graphics = new Graphics(image);
 
-            // Define image dimensions
-            int width = 400;
-            int height = 500;
+            // Fill background with white
+            graphics.Clear(Color.White);
 
-            // Create the BMP image
-            using (Image image = Image.Create(bmpOptions, width, height))
-            {
-                // Initialize graphics object for drawing
-                Graphics graphics = new Graphics(image);
+            // Define four points that form an S‑shaped Bezier curve
+            PointF pt1 = new PointF(50, 400);   // start point
+            PointF pt2 = new PointF(150, 50);   // first control point
+            PointF pt3 = new PointF(350, 450);  // second control point
+            PointF pt4 = new PointF(450, 100);  // end point
 
-                // Optional: clear background to white
-                graphics.Clear(Color.White);
+            // Create a blue pen with thickness 3
+            Pen pen = new Pen(Color.Blue, 3);
 
-                // Define a black pen with a thickness of 2
-                Pen pen = new Pen(Color.Black, 2);
+            // Draw the Bezier curve using the PointF overload
+            graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
 
-                // Define the four points of the S‑shaped Bézier curve
-                PointF pt1 = new PointF(50, 250);   // start point
-                PointF pt2 = new PointF(150, 50);   // first control point
-                PointF pt3 = new PointF(250, 450);  // second control point
-                PointF pt4 = new PointF(350, 250);  // end point
-
-                // Draw the Bézier curve using the PointF overload
-                graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
-
-                // Save changes to the stream (the file)
-                image.Save();
-            }
+            // Save the image to the specified path
+            image.Save(outputPath);
         }
     }
 }
