@@ -2,9 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -21,44 +20,38 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+        string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+
+        using (EpsImage eps = (EpsImage)Image.Load(inputPath))
         {
-            using (var tempOptions = new PngOptions
+            var rasterOptions = new VectorRasterizationOptions
             {
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height
-                }
-            })
+                BackgroundColor = Color.White,
+                PageWidth = eps.Width,
+                PageHeight = eps.Height
+            };
+
+            using (var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions })
             {
-                using (var ms = new MemoryStream())
-                {
-                    epsImage.Save(ms, tempOptions);
-                    ms.Position = 0;
-
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
-                    {
-                        var palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256, PaletteMiningMethod.Histogram);
-
-                        using (var finalOptions = new PngOptions
-                        {
-                            ColorType = PngColorType.IndexedColor,
-                            Palette = palette,
-                            VectorRasterizationOptions = new VectorRasterizationOptions
-                            {
-                                BackgroundColor = Color.White,
-                                PageWidth = epsImage.Width,
-                                PageHeight = epsImage.Height
-                            }
-                        })
-                        {
-                            epsImage.Save(outputPath, finalOptions);
-                        }
-                    }
-                }
+                eps.Save(tempPath, pngOptions);
             }
+        }
+
+        using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+        {
+            var palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256, PaletteMiningMethod.Histogram);
+            raster.SetPalette(palette, true);
+            using (var finalOptions = new PngOptions())
+            {
+                raster.Save(outputPath, finalOptions);
+            }
+        }
+
+        // Optional cleanup of temporary file
+        if (File.Exists(tempPath))
+        {
+            File.Delete(tempPath);
         }
     }
 }
