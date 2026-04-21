@@ -2,67 +2,71 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image vectorImage = Image.Load(inputPath))
-        {
-            // Set up rasterization options for SVG
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                PageSize = vectorImage.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Configure PNG save options with the rasterization settings
-            PngOptions pngOptions = new PngOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (FileStream svgStream = File.OpenRead(inputPath))
+            using (SvgImage svgImage = new SvgImage(svgStream))
             {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Rasterize SVG to a memory stream
-            using (MemoryStream ms = new MemoryStream())
-            {
-                vectorImage.Save(ms, pngOptions);
-                ms.Position = 0;
-
-                // Load the rasterized image
-                using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                // Set up rasterization options for SVG to PNG conversion
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    // Define a custom diagonal edge‑detection kernel
-                    double[,] kernel = new double[,]
+                    PageWidth = svgImage.Width,
+                    PageHeight = svgImage.Height
+                };
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                using (MemoryStream pngStream = new MemoryStream())
+                {
+                    // Rasterize SVG into PNG stored in memory
+                    svgImage.Save(pngStream, pngOptions);
+                    pngStream.Position = 0;
+
+                    using (Image pngImage = Image.Load(pngStream))
                     {
-                        { -1, 0, 1 },
-                        {  0, 0, 0 },
-                        {  1, 0,-1 }
-                    };
+                        RasterImage raster = (RasterImage)pngImage;
 
-                    // Create convolution filter options with the custom kernel
-                    var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                        // Custom diagonal edge‑detection kernel
+                        double[,] kernel = new double[,]
+                        {
+                            { -2, -1, 0 },
+                            { -1,  0, 1 },
+                            {  0,  1, 2 }
+                        };
+                        var convOptions = new ConvolutionFilterOptions(kernel);
 
-                    // Apply the filter to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, convOptions);
+                        // Apply the convolution filter to the entire image
+                        raster.Filter(raster.Bounds, convOptions);
 
-                    // Save the filtered image as PNG
-                    rasterImage.Save(outputPath, new PngOptions());
+                        // Save the filtered image
+                        raster.Save(outputPath);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
