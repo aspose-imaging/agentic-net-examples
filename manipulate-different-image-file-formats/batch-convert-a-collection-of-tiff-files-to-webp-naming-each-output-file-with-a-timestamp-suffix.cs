@@ -5,64 +5,45 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories (relative to current directory)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input and output directories exist
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add TIFF files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Input\TiffFiles";
+            string outputDirectory = @"C:\Output\WebPFiles";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all TIFF files in the input directory
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
 
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Validate that the file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in tiffFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            // Process only TIFF files
-            string extension = Path.GetExtension(inputPath).ToLowerInvariant();
-            if (extension != ".tif" && extension != ".tiff")
-            {
-                continue;
-            }
-
-            // Build output file name with timestamp suffix
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            string outputFileName = $"{fileNameWithoutExt}_{timestamp}.webp";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure the output directory exists (unconditional as required)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image and save as WebP
-            using (Image image = Image.Load(inputPath))
-            {
-                using (WebPOptions options = new WebPOptions())
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    image.Save(outputPath, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build output file name with timestamp suffix
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_" + timestamp + ".webp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image and save it as WebP
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Save using default WebP options
+                    image.Save(outputPath, new WebPOptions());
                 }
             }
-
-            Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
