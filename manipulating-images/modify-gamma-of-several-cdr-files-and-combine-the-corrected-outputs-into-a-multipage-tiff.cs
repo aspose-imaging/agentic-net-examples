@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
@@ -12,87 +11,91 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input CDR files
-        string cdrPath1 = "input1.cdr";
-        string cdrPath2 = "input2.cdr";
-        string cdrPath3 = "input3.cdr";
-
-        // Hardcoded output multipage TIFF
-        string outputPath = "output.tif";
-
-        // Validate input files
-        if (!File.Exists(cdrPath1))
+        try
         {
-            Console.Error.WriteLine($"File not found: {cdrPath1}");
-            return;
-        }
-        if (!File.Exists(cdrPath2))
-        {
-            Console.Error.WriteLine($"File not found: {cdrPath2}");
-            return;
-        }
-        if (!File.Exists(cdrPath3))
-        {
-            Console.Error.WriteLine($"File not found: {cdrPath3}");
-            return;
-        }
+            // Hardcoded input CDR files
+            string[] inputPaths = {
+                @"C:\temp\input1.cdr",
+                @"C:\temp\input2.cdr",
+                @"C:\temp\input3.cdr"
+            };
 
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
+            // Hardcoded output TIFF file
+            string outputPath = @"C:\temp\output.tif";
 
-        // Load first CDR to obtain canvas size
-        int canvasWidth, canvasHeight;
-        using (CdrImage firstCdr = (CdrImage)Image.Load(cdrPath1))
-        {
-            canvasWidth = firstCdr.Width;
-            canvasHeight = firstCdr.Height;
-        }
-
-        // Prepare TIFF options for the multipage TIFF
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-        // Create the multipage TIFF canvas
-        using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
-        {
-            // Array of input paths for iteration
-            string[] cdrPaths = { cdrPath1, cdrPath2, cdrPath3 };
-            float gammaValue = 2.2f; // Desired gamma correction
-
-            foreach (string cdrPath in cdrPaths)
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
-                // Rasterize CDR to PNG in memory
-                using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
-                using (MemoryStream ms = new MemoryStream())
+                if (!File.Exists(inputPath))
                 {
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            PageWidth = cdr.Width,
-                            PageHeight = cdr.Height
-                        }
-                    };
-                    cdr.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+            }
 
-                    // Load raster image, apply gamma, and add as a page
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // List to hold processed raster images
+            var rasterImages = new System.Collections.Generic.List<RasterImage>();
+
+            // Process each CDR file: rasterize, adjust gamma, store raster image
+            foreach (string inputPath in inputPaths)
+            {
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+                {
+                    // Rasterize CDR to PNG in memory
+                    using (var memoryStream = new MemoryStream())
                     {
-                        raster.AdjustGamma(gammaValue);
-                        tiff.AddPage(raster);
+                        var pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = new CdrRasterizationOptions
+                            {
+                                PageWidth = cdr.Width,
+                                PageHeight = cdr.Height
+                            }
+                        };
+                        cdr.Save(memoryStream, pngOptions);
+                        memoryStream.Position = 0;
+
+                        // Load rasterized image
+                        RasterImage raster = (RasterImage)Image.Load(memoryStream);
+                        // Adjust gamma (example value 1.2)
+                        raster.AdjustGamma(1.2f);
+                        rasterImages.Add(raster);
                     }
                 }
             }
 
-            // Save the multipage TIFF (output path already bound)
-            tiff.Save();
+            if (rasterImages.Count == 0)
+            {
+                Console.Error.WriteLine("No images were processed.");
+                return;
+            }
+
+            // Create multipage TIFF using the first raster image as the base
+            RasterImage firstRaster = rasterImages[0];
+            using (TiffImage tiff = new TiffImage(new TiffFrame(firstRaster)))
+            {
+                // Add remaining rasters as pages
+                for (int i = 1; i < rasterImages.Count; i++)
+                {
+                    tiff.AddPage(rasterImages[i]);
+                }
+
+                // Save the multipage TIFF
+                tiff.Save();
+            }
+
+            // Dispose raster images after saving
+            foreach (var raster in rasterImages)
+            {
+                raster.Dispose();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
