@@ -1,12 +1,15 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.png";
-        string outputPath = "sample.filtered.png";
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
         if (!File.Exists(inputPath))
         {
@@ -16,15 +19,25 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        try
         {
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-            raster.Filter(
-                raster.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-            raster.Save(outputPath);
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                try
+                {
+                    raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+                    raster.Save(outputPath, new PngOptions());
+                }
+                finally
+                {
+                    // Disposal handled by the using block above
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
