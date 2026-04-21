@@ -2,61 +2,70 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
-        {
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-            rasterOptions.PageSize = svgImage.Size;
-            rasterOptions.BackgroundColor = Color.White;
-
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.VectorRasterizationOptions = rasterOptions;
-
-            using (MemoryStream ms = new MemoryStream())
+            if (!File.Exists(inputPath))
             {
-                svgImage.Save(ms, pngOptions);
-                ms.Position = 0;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                using (Image rasterContainer = Image.Load(ms))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image vectorImage = Image.Load(inputPath))
+            {
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    RasterImage rasterImage = (RasterImage)rasterContainer;
+                    PageSize = vectorImage.Size
+                };
 
-                    double[,] originalKernel = ConvolutionFilter.Emboss5x5;
-                    double scale = 0.5;
-                    int rows = originalKernel.GetLength(0);
-                    int cols = originalKernel.GetLength(1);
-                    double[,] scaledKernel = new double[rows, cols];
-                    for (int i = 0; i < rows; i++)
+                var pngSaveOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                using (var ms = new MemoryStream())
+                {
+                    vectorImage.Save(ms, pngSaveOptions);
+                    ms.Position = 0;
+
+                    using (Image rasterImg = Image.Load(ms))
                     {
-                        for (int j = 0; j < cols; j++)
-                        {
-                            scaledKernel[i, j] = originalKernel[i, j] * scale;
-                        }
-                    }
+                        var raster = (RasterImage)rasterImg;
 
-                    var convOptions = new ConvolutionFilterOptions(scaledKernel);
-                    rasterImage.Filter(rasterImage.Bounds, convOptions);
-                    rasterImage.Save(outputPath, new PngOptions());
+                        double[,] embossKernel = ConvolutionFilter.Emboss5x5;
+                        double scale = 0.5;
+                        double[,] customKernel = new double[5, 5];
+                        for (int i = 0; i < 5; i++)
+                        {
+                            for (int j = 0; j < 5; j++)
+                            {
+                                customKernel[i, j] = embossKernel[i, j] * scale;
+                            }
+                        }
+
+                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(customKernel));
+
+                        var outputOptions = new PngOptions();
+                        raster.Save(outputPath, outputOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
