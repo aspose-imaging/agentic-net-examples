@@ -1,61 +1,56 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            // Get all BMP files in the input folder
+            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp", SearchOption.TopDirectoryOnly);
 
-        var tasks = new List<System.Threading.Tasks.Task>();
-
-        foreach (var filePath in files)
-        {
-            if (!filePath.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            tasks.Add(System.Threading.Tasks.Task.Run(() =>
+            // Process files in parallel
+            Parallel.ForEach(bmpFiles, bmpPath =>
             {
-                if (!File.Exists(filePath))
+                // Verify input file exists
+                if (!File.Exists(bmpPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {bmpPath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(filePath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+                // Determine output file path with .png extension
+                string fileName = Path.GetFileNameWithoutExtension(bmpPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".png");
 
+                // Ensure the output directory exists (unconditional)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(filePath))
+                // Load BMP image
+                using (Image image = Image.Load(bmpPath))
                 {
-                    using (var pngOptions = new PngOptions())
-                    {
-                        image.Save(outputPath, pngOptions);
-                    }
-                }
-            }));
-        }
+                    // Set PNG save options
+                    var pngOptions = new PngOptions();
 
-        System.Threading.Tasks.Task.WaitAll(tasks.ToArray());
+                    // Save as PNG
+                    image.Save(outputPath, pngOptions);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
