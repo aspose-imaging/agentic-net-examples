@@ -4,61 +4,61 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.tif";
-        string outputPath = @"c:\temp\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the existing TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            // Options for the new frame with a custom photometric interpretation
-            TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions.Photometric = TiffPhotometrics.MinIsBlack; // custom photometric
-            frameOptions.BitsPerSample = new ushort[] { 8 }; // 8 bits per sample
-
-            // Create a simple raster image to serve as the frame content
-            using (BmpImage bmp = new BmpImage(100, 100))
+            if (!File.Exists(inputPath))
             {
-                // Fill the bitmap with a solid gray color
-                SolidBrush grayBrush = new SolidBrush(Color.Gray);
-                using (Graphics gfx = new Graphics(bmp))
-                {
-                    gfx.FillRectangle(grayBrush, bmp.Bounds);
-                }
-
-                // Create a TIFF frame from the bitmap using the custom options
-                TiffFrame newFrame = new TiffFrame(bmp, frameOptions);
-
-                // Add the new frame to the TIFF image
-                tiffImage.AddFrame(newFrame);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save options: JPEG compression
-            TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-            saveOptions.Compression = TiffCompressions.Jpeg;
-            saveOptions.CompressedQuality = 80; // quality level (0-100)
-            saveOptions.Photometric = TiffPhotometrics.Rgb;
-            saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the updated TIFF image
-            tiffImage.Save(outputPath, saveOptions);
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Options for the new frame with custom photometric interpretation
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                frameOptions.BitsPerSample = new ushort[] { 8 };
+                frameOptions.Photometric = TiffPhotometrics.MinIsBlack;
+                frameOptions.Compression = TiffCompressions.Jpeg;
+
+                // Create a new frame (100x100 pixels)
+                TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
+
+                // Fill the new frame with a simple gradient
+                Graphics graphics = new Graphics(newFrame);
+                LinearGradientBrush brush = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(newFrame.Width, newFrame.Height),
+                    Color.Gray,
+                    Color.White);
+                graphics.FillRectangle(brush, newFrame.Bounds);
+
+                // Add the new frame to the existing TIFF image
+                tiffImage.AddFrame(newFrame);
+
+                // Save the updated TIFF image using JPEG compression
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                saveOptions.Compression = TiffCompressions.Jpeg;
+                saveOptions.Photometric = TiffPhotometrics.Rgb;
+                saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+
+                tiffImage.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
