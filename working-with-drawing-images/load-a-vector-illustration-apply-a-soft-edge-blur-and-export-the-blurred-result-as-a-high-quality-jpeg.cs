@@ -3,11 +3,13 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         string inputPath = "input.svg";
         string outputPath = "output.jpg";
@@ -20,32 +22,36 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        using (Image vectorImage = Image.Load(inputPath))
         {
-            // Prepare JPEG save options with high quality
-            var jpegOptions = new JpegOptions { Quality = 100 };
-
-            if (image is VectorImage)
+            var rasterOptions = new SvgRasterizationOptions
             {
-                // Rasterize vector image via in‑memory PNG
-                using (var ms = new MemoryStream())
+                PageWidth = vectorImage.Width,
+                PageHeight = vectorImage.Height,
+                BackgroundColor = Color.White,
+                SmoothingMode = SmoothingMode.AntiAlias
+            };
+
+            using (MemoryStream pngStream = new MemoryStream())
+            {
+                var pngOptions = new PngOptions
                 {
-                    image.Save(ms, new PngOptions());
-                    ms.Position = 0;
+                    VectorRasterizationOptions = rasterOptions
+                };
+                vectorImage.Save(pngStream, pngOptions);
+                pngStream.Position = 0;
 
-                    using (Image rasterImg = Image.Load(ms))
+                using (Image rasterImage = Image.Load(pngStream))
+                {
+                    var raster = (RasterImage)rasterImage;
+                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 2.0));
+
+                    var jpegOptions = new JpegOptions
                     {
-                        var raster = (RasterImage)rasterImg;
-                        raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 2.0));
-                        raster.Save(outputPath, jpegOptions);
-                    }
+                        Quality = 95
+                    };
+                    raster.Save(outputPath, jpegOptions);
                 }
-            }
-            else
-            {
-                var raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 2.0));
-                raster.Save(outputPath, jpegOptions);
             }
         }
     }
