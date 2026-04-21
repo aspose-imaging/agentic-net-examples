@@ -1,58 +1,16 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-
-class SimplifySvgCallback : SvgResourceKeeperCallback
-{
-    private readonly string _outputPath;
-
-    public SimplifySvgCallback(string outputPath)
-    {
-        _outputPath = outputPath;
-    }
-
-    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
-    {
-        // Load the SVG XML from the byte array
-        XDocument doc;
-        using (var ms = new MemoryStream(htmlData))
-        {
-            doc = XDocument.Load(ms);
-        }
-
-        // Recursively remove empty <g> elements (no child elements and no meaningful text)
-        bool removed;
-        do
-        {
-            removed = false;
-            var emptyGroups = doc.Descendants()
-                                 .Where(e => e.Name.LocalName == "g" && !e.HasElements && string.IsNullOrWhiteSpace(e.Value))
-                                 .ToList();
-
-            foreach (var g in emptyGroups)
-            {
-                g.Remove();
-                removed = true;
-            }
-        } while (removed);
-
-        // Save the cleaned SVG to the desired output path
-        doc.Save(_outputPath);
-        return _outputPath;
-    }
-}
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.otg";
+        string outputPath = @"C:\Temp\output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -68,18 +26,50 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Prepare SVG export options
-            var svgOptions = new SvgOptions
+            var svgOptions = new SvgOptions();
+            var rasterOptions = new SvgRasterizationOptions
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                },
-                // Attach callback to clean up the SVG
-                Callback = new SimplifySvgCallback(outputPath)
+                PageSize = image.Size
             };
+            svgOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save as SVG (callback will handle final writing)
+            // Save as SVG
             image.Save(outputPath, svgOptions);
+        }
+
+        // Load the generated SVG for post‑processing
+        XDocument svgDoc = XDocument.Load(outputPath);
+
+        // Simplify unnecessary <g> elements
+        SimplifyGroups(svgDoc.Root);
+
+        // Overwrite the SVG file with the simplified version
+        svgDoc.Save(outputPath);
+    }
+
+    // Recursively removes <g> elements that have no attributes and a single child,
+    // replacing the group with its child element.
+    static void SimplifyGroups(XElement element)
+    {
+        if (element == null) return;
+
+        // Process a copy of the child elements list to avoid modification issues
+        var children = element.Elements().ToList();
+
+        foreach (var child in children)
+        {
+            SimplifyGroups(child);
+        }
+
+        // After processing descendants, check if current element is a <g> that can be flattened
+        if (element.Name.LocalName == "g" &&
+            !element.HasAttributes &&
+            element.Elements().Count() == 1)
+        {
+            XElement inner = element.Elements().First();
+
+            // Preserve any whitespace or formatting by inserting the inner element before the group
+            element.ReplaceWith(inner);
         }
     }
 }
