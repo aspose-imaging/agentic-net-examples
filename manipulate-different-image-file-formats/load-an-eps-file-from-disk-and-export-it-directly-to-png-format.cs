@@ -7,11 +7,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.eps";
-        string outputPath = "output.png";
+        string outputPath = "output/output.png";
 
-        // Verify that the input EPS file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -19,13 +19,12 @@ class Program
         }
 
         // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image and export it to PNG format
+        // Load the EPS image and export it to PNG
         using (var image = Image.Load(inputPath))
         {
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            image.Save(outputPath, new PngOptions());
         }
     }
 }
