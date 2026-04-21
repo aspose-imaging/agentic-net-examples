@@ -9,48 +9,57 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output folders
-        string inputFolder = "input";
-        string outputFolder = "output";
+        // Hardcoded input and output directories
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
-        // Ensure output folder exists
-        Directory.CreateDirectory(outputFolder);
+        // Validate input directory exists before enumeration
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
+            return;
+        }
 
-        // Get all PNG files in the input folder
-        string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        // Get all PNG files in the input directory
+        string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
 
         foreach (string inputPath in pngFiles)
         {
-            // Verify input file exists
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare output path with .jpg extension
-            string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+            // Determine output JPEG path
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
 
-            // Ensure the directory for the output file exists
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
+            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Create a blur box kernel (size 5) and apply it
-                double[,] kernel = ConvolutionFilter.GetBlurBox(5);
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-                // Set JPEG save options (optional quality setting)
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90
-                };
+                // Apply a predefined blur box filter (size 5)
+                double[,] blurKernel = ConvolutionFilter.GetBlurBox(5);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(blurKernel));
 
                 // Save the processed image as JPEG
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90 // optional quality setting
+                };
                 raster.Save(outputPath, jpegOptions);
             }
         }
