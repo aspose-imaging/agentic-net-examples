@@ -9,29 +9,17 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        // Input and output directories (relative paths)
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
-        {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
         // Get all DjVu files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
+        string[] inputFiles = Directory.GetFiles(inputDirectory, "*.djvu");
 
-        foreach (string inputPath in files)
+        foreach (string inputPath in inputFiles)
         {
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -44,21 +32,21 @@ class Program
             string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
             string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-            // Ensure output directory exists (unconditional as per requirements)
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu image and convert to PDF with custom author metadata
+            // Load DjVu image
             using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions
+                // Set up PDF options with custom author metadata
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Author = "Custom Author"
-                    }
-                };
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    pdfOptions.PdfDocumentInfo.Author = "Custom Author";
 
-                djvuImage.Save(outputPath, pdfOptions);
+                    // Save as PDF
+                    djvuImage.Save(outputPath, pdfOptions);
+                }
             }
         }
     }
