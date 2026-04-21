@@ -2,28 +2,21 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.png";
-        string iccProfilePath = @"C:\Profiles\myprofile.icc";
+        string inputPath = "Input/sample.odg";
+        string outputPath = "Output/sample.png";
 
-        // Verify input file exists
+        // Validate input image existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Verify ICC profile file exists (optional, but we load it)
-        if (!File.Exists(iccProfilePath))
-        {
-            Console.Error.WriteLine($"ICC profile not found: {iccProfilePath}");
             return;
         }
 
@@ -33,31 +26,27 @@ class Program
         // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to OdgImage for ODG-specific functionality
-            OdgImage odgImage = image as OdgImage;
+            // Cast to OdgImage (vector format)
+            var odgImage = image as OdgImage;
             if (odgImage == null)
             {
-                Console.Error.WriteLine("The loaded file is not a valid ODG image.");
+                Console.Error.WriteLine("Failed to load ODG image.");
                 return;
             }
 
-            // Load the ICC profile stream (placeholder for actual usage)
-            using (Stream iccStream = File.OpenRead(iccProfilePath))
+            // Configure PNG save options
+            var pngOptions = new PngOptions();
+
+            // Set rasterization options for vector to raster conversion
+            var rasterOptions = new OdgRasterizationOptions
             {
-                // NOTE: Aspose.Imaging does not expose a direct method to attach an ICC profile
-                // to an ODG image before rasterization. If such functionality exists, it would be
-                // applied here using the appropriate API (e.g., setting a color profile on the
-                // image metadata or using a specific option). This placeholder demonstrates where
-                // the ICC profile would be applied.
+                BackgroundColor = Color.White,
+                PageSize = odgImage.Size
+            };
+            pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions();
-
-                // Save the ODG image as PNG
-                odgImage.Save(outputPath, pngOptions);
-            }
+            // Save as PNG
+            odgImage.Save(outputPath, pngOptions);
         }
-
-        Console.WriteLine("Conversion completed successfully.");
     }
 }
