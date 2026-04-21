@@ -6,53 +6,54 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output\\filtered.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            Console.WriteLine("Enter kernel size (odd integer):");
+            int size = int.Parse(Console.ReadLine());
+
+            Console.WriteLine("Enter factor (double):");
+            double factor = double.Parse(Console.ReadLine());
+
+            int count = size * size;
+            double[] flatKernel = new double[count];
+            Console.WriteLine($"Enter {count} kernel coefficients separated by spaces:");
+            string[] parts = Console.ReadLine().Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < Math.Min(count, parts.Length); i++)
+            {
+                flatKernel[i] = double.Parse(parts[i]);
+            }
+
+            double[,] kernel = new double[size, size];
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    kernel[y, x] = flatKernel[y * size + x];
+                }
+            }
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, factor, 0);
+                raster.Filter(raster.Bounds, filterOptions);
+                raster.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Prompt user for Gaussian blur parameters
-        Console.Write("Enter radius (positive odd integer): ");
-        string radiusInput = Console.ReadLine();
-        Console.Write("Enter sigma (positive double): ");
-        string sigmaInput = Console.ReadLine();
-
-        if (!int.TryParse(radiusInput, out int radius) || radius <= 0 || radius % 2 == 0)
+        catch (Exception ex)
         {
-            Console.Error.WriteLine("Invalid radius. Must be a positive odd integer.");
-            return;
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        if (!double.TryParse(sigmaInput, out double sigma) || sigma <= 0)
-        {
-            Console.Error.WriteLine("Invalid sigma. Must be a positive number.");
-            return;
-        }
-
-        // Load image, apply Gaussian blur with user-defined parameters, and save
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-
-            // Create Gaussian blur filter options with dynamic parameters
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(radius, sigma);
-
-            // Apply filter to the entire image
-            raster.Filter(raster.Bounds, filterOptions);
-
-            // Save the processed image
-            raster.Save(outputPath);
-        }
-
-        Console.WriteLine($"Filtered image saved to: {outputPath}");
     }
 }
