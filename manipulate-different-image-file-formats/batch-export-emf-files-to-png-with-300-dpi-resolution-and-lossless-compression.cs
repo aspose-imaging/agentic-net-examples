@@ -7,10 +7,12 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Define base, input and output directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
+        // Ensure input directory exists
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
@@ -18,44 +20,51 @@ class Program
             return;
         }
 
+        // Ensure output directory exists
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
         }
 
+        // Get all EMF files in the input directory
         string[] files = Directory.GetFiles(inputDirectory, "*.emf");
 
         foreach (var inputPath in files)
         {
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Prepare output PNG path
             string fileName = Path.GetFileNameWithoutExtension(inputPath);
             string outputPath = Path.Combine(outputDirectory, fileName + ".png");
 
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                var vectorOptions = new VectorRasterizationOptions
+                // Set up vector rasterization options for EMF to PNG conversion
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
                     PageSize = image.Size,
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    BackgroundColor = Color.White
                 };
 
-                using (var pngOptions = new PngOptions())
+                // Configure PNG options with 300 DPI resolution (lossless compression by default)
+                var pngOptions = new PngOptions
                 {
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
-                    pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-                    pngOptions.PngCompressionLevel = PngCompressionLevel.ZipLevel9;
+                    VectorRasterizationOptions = rasterOptions,
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                    // PngCompressionLevel can be set if needed, e.g., ZipLevel9 for maximum compression
+                };
 
-                    image.Save(outputPath, pngOptions);
-                }
+                // Save the PNG file
+                image.Save(outputPath, pngOptions);
             }
         }
     }
