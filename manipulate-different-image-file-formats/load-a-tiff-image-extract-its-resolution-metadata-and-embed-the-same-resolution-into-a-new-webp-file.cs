@@ -1,44 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.tif";
-        string outputPath = "Output/sample.webp";
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Images\output.webp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported cleanly
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (Image tiffImageBase = Image.Load(inputPath))
-        {
-            // Cast to TiffImage to access resolution properties
-            TiffImage tiffImage = (TiffImage)tiffImageBase;
-            double dpiX = tiffImage.HorizontalResolution;
-            double dpiY = tiffImage.VerticalResolution;
-
-            // Create a WebP image from the loaded TIFF raster data
-            using (WebPImage webpImage = new WebPImage((RasterImage)tiffImage))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Embed the same resolution metadata
-                webpImage.SetResolution(dpiX, dpiY);
-
-                // Save the WebP image
-                webpImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to TiffImage to access resolution properties
+                TiffImage tiffImage = (TiffImage)image;
+
+                // Extract horizontal and vertical resolution
+                double horizontalResolution = tiffImage.HorizontalResolution;
+                double verticalResolution = tiffImage.VerticalResolution;
+
+                // Apply the same resolution to the image (ensures it is stored in the output)
+                tiffImage.SetResolution(horizontalResolution, verticalResolution);
+
+                // Prepare WebP save options
+                WebPOptions webpOptions = new WebPOptions
+                {
+                    // Example: lossless compression; adjust as needed
+                    Lossless = true
+                };
+
+                // Save the image as WebP with the embedded resolution
+                image.Save(outputPath, webpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
