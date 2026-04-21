@@ -2,55 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input SVG (multi‑page) and output directory
-        string inputPath = @"C:\Images\multi_page.svg";
-        string outputDir = @"C:\Images\output";
+        // Hardcoded input SVG path
+        string inputPath = "input.svg";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the SVG image
+        // Hardcoded output directory for EMF files
+        string outputDir = "output";
+
+        // Ensure output directory exists (unconditional as per safety rule)
+        Directory.CreateDirectory(outputDir);
+
+        // Load the SVG image (supports multipage vector images)
         using (Image image = Image.Load(inputPath))
         {
-            // Determine the number of pages (fallback to 1 if not a multipage image)
-            int pageCount = 1;
-            if (image is IMultipageImage multipage && multipage.PageCount > 0)
-            {
-                pageCount = multipage.PageCount;
-            }
+            // Determine if the image supports multiple pages
+            IMultipageImage multipage = image as IMultipageImage;
+            int pageCount = (multipage != null) ? multipage.PageCount : 1;
 
-            // Process each page separately
+            // Iterate through each page and save as separate EMF file
             for (int i = 0; i < pageCount; i++)
             {
-                // Build the output EMF file path for the current page
                 string outputPath = Path.Combine(outputDir, $"page_{i + 1}.emf");
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 // Configure EMF export options
-                var exportOptions = new EmfOptions
+                EmfOptions exportOptions = new EmfOptions
                 {
-                    // Restrict saving to the current page only
+                    // Export only the current page (EMF is single-page)
                     MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1)),
-                    // Set rasterization options (page size taken from the source image)
+                    // Set rasterization options based on the source image size
                     VectorRasterizationOptions = new EmfRasterizationOptions
                     {
                         PageSize = image.Size
                     }
                 };
 
-                // Save the current page as an EMF file
+                // Save the current page as EMF
                 image.Save(outputPath, exportOptions);
             }
         }
