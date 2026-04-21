@@ -9,15 +9,21 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-        string outputPath = "output.jpg";
-        int uniformWidth = 200; // Desired width for each image
+        // Hardcoded input JPEG file paths
+        string[] inputPaths = new[]
+        {
+            "input1.jpg",
+            "input2.jpg",
+            "input3.jpg"
+        };
 
-        // Validate input files
-        foreach (var path in inputPaths)
+        // Hardcoded output path
+        string outputPath = "output/merged.jpg";
+
+        // Ensure all input files exist
+        foreach (string path in inputPaths)
         {
             if (!File.Exists(path))
             {
@@ -29,42 +35,54 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // First pass: calculate resized heights and collect sizes
-        List<Size> resizedSizes = new List<Size>();
-        foreach (var path in inputPaths)
+        // Desired uniform width for each image
+        int uniformWidth = 200;
+
+        // First pass: calculate resized dimensions
+        List<Aspose.Imaging.Size> resizedSizes = new List<Aspose.Imaging.Size>();
+        foreach (string path in inputPaths)
         {
             using (RasterImage img = (RasterImage)Image.Load(path))
             {
                 int newHeight = img.Height * uniformWidth / img.Width;
-                resizedSizes.Add(new Size(uniformWidth, newHeight));
+                resizedSizes.Add(new Aspose.Imaging.Size(uniformWidth, newHeight));
             }
         }
 
-        // Determine canvas dimensions
-        int totalWidth = resizedSizes.Sum(s => s.Width);
-        int maxHeight = resizedSizes.Max(s => s.Height);
+        // Determine canvas size for horizontal merge
+        int canvasWidth = resizedSizes.Sum(s => s.Width);
+        int canvasHeight = resizedSizes.Max(s => s.Height);
 
-        // Create JPEG canvas bound to the output file
-        Source outputSource = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions() { Source = outputSource, Quality = 90 };
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+        // Prepare JPEG options with bound source
+        Source fileSource = new FileCreateSource(outputPath, false);
+        JpegOptions jpegOptions = new JpegOptions
+        {
+            Source = fileSource,
+            Quality = 90
+        };
+
+        // Create bound JPEG canvas
+        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
         {
             int offsetX = 0;
             for (int i = 0; i < inputPaths.Length; i++)
             {
                 string path = inputPaths[i];
-                Size targetSize = resizedSizes[i];
-
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    img.Resize(targetSize.Width, targetSize.Height, ResizeType.NearestNeighbourResample);
+                    // Resize to uniform width while preserving aspect ratio
+                    int newHeight = img.Height * uniformWidth / img.Width;
+                    img.Resize(uniformWidth, newHeight);
+
+                    // Copy pixels onto canvas at the current offset
                     Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+
                     offsetX += img.Width;
                 }
             }
 
-            // Save the bound canvas
+            // Save the bound canvas (output file already bound via source)
             canvas.Save();
         }
     }
