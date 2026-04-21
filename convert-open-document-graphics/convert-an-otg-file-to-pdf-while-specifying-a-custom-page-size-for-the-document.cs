@@ -1,16 +1,15 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "C:\\Images\\sample.otg";
-        string outputPath = "C:\\Images\\sample.pdf";
+        // Hardcoded relative input and output paths
+        string inputPath = Path.Combine("Input", "sample.otg");
+        string outputPath = Path.Combine("Output", "sample.pdf");
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,18 +21,25 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the OTG image and convert to PDF
-        using (Image image = Image.Load(inputPath))
+        // Load the OTG image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            var rasterOptions = new VectorRasterizationOptions();
-            rasterOptions.BackgroundColor = Color.White;
-            rasterOptions.PageSize = new SizeF(595f, 842f); // A4 size in points
-
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Configure OTG rasterization options with a custom page size
+            var otgOptions = new OtgRasterizationOptions
             {
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
-                image.Save(outputPath, pdfOptions);
-            }
+                // Example custom size: 800x600 points
+                PageSize = new Aspose.Imaging.SizeF(800, 600),
+                BackgroundColor = Aspose.Imaging.Color.White
+            };
+
+            // Set up PDF save options and assign the rasterization options
+            var pdfOptions = new PdfOptions
+            {
+                VectorRasterizationOptions = otgOptions
+            };
+
+            // Save the image as PDF
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
