@@ -1,43 +1,42 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\temp\input.png";
         string outputPath = @"C:\temp\output.png";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the existing image
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
             // Create a Graphics object for drawing
             Graphics graphics = new Graphics(image);
 
-            // Optional: clear the surface with a background color
-            graphics.Clear(Color.White);
+            // Define a pen for the ellipse outline
+            Pen pen = new Pen(Color.Black, 2);
 
-            // Define a pen for the ellipse
-            Pen pen = new Pen(Color.Blue, 3);
+            // Draw an off‑center oval using location and size parameters
+            // (x, y) = upper‑left corner of bounding rectangle, width, height
+            graphics.DrawEllipse(pen, 120f, 80f, 250f, 150f);
 
-            // Draw an off‑center oval using location (x, y) and size (width, height)
-            // This ellipse's bounding rectangle starts at (100, 50) with width 200 and height 100
-            graphics.DrawEllipse(pen, 100f, 50f, 200f, 100f);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the modified image to the output path
+            // Save the modified image
             image.Save(outputPath);
         }
     }
