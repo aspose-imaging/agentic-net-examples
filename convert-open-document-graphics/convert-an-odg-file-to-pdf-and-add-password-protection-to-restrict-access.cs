@@ -3,14 +3,15 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.odg";
-        string outputPath = @"C:\Temp\sample.pdf";
+        string inputPath = @"C:\Data\sample.odg";
+        string outputPath = @"C:\Data\sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,7 +27,7 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Set up rasterization options for ODG to PDF conversion
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
             {
                 BackgroundColor = Color.White,
                 PageSize = image.Size
@@ -35,17 +36,18 @@ class Program
             // Configure PDF save options
             PdfOptions pdfOptions = new PdfOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Embed a digital signature using a password (restricts access)
+            // Embed a digital signature (password protection) into the image
+            // The password can be any string; here we use a hardcoded example
             const string password = "SecretPassword123";
             if (image is RasterCachedMultipageImage cachedImage)
             {
                 cachedImage.EmbedDigitalSignature(password);
             }
 
-            // Save the PDF file
+            // Save the image as PDF with the specified options
             image.Save(outputPath, pdfOptions);
         }
     }
