@@ -1,64 +1,76 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output SVG file path
-        string outputPath = @"C:\temp\diagram.svg";
+        // Hardcoded output path
+        string outputPath = "C:\\temp\\diagram.svg";
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Canvas size
+        // Create an SVG graphics context
         int width = 800;
         int height = 600;
         int dpi = 96;
+        SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-        // Create SVG graphics context
-        var graphics = new SvgGraphics2D(width, height, dpi);
+        // Draw two rectangles that will be connected
+        Pen blackPen = new Pen(Color.Black, 2);
+        graphics.DrawRectangle(blackPen, 100, 100, 200, 150);   // First rectangle
+        graphics.DrawRectangle(blackPen, 400, 300, 250, 180);   // Second rectangle
 
-        // Common pen and brush
-        var pen = new Pen(Color.Black, 2);
-        var brush = new SolidBrush(Color.LightGray);
+        // Draw a connector line between the centers of the rectangles
+        Pen connectorPen = new Pen(Color.Red, 1);
+        int x1 = 100 + 200 / 2;
+        int y1 = 100 + 150 / 2;
+        int x2 = 400 + 250 / 2;
+        int y2 = 300 + 180 / 2;
+        graphics.DrawLine(connectorPen, x1, y1, x2, y2);
 
-        // Draw first node rectangle and label
-        graphics.FillRectangle(pen, brush, 100, 100, 150, 100);
-        graphics.DrawRectangle(pen, 100, 100, 150, 100);
-        graphics.DrawString(new Font("Arial", 24, FontStyle.Regular), "Node 1", new Point(125, 130), Color.Black);
+        // Add a simple arrowhead at the end of the connector line
+        GraphicsPath arrowPath = new GraphicsPath();
+        Figure arrowFigure = new Figure { IsClosed = true };
+        arrowPath.AddFigure(arrowFigure);
 
-        // Draw second node rectangle and label
-        graphics.FillRectangle(pen, brush, 400, 100, 150, 100);
-        graphics.DrawRectangle(pen, 400, 100, 150, 100);
-        graphics.DrawString(new Font("Arial", 24, FontStyle.Regular), "Node 2", new Point(425, 130), Color.Black);
+        float arrowSize = 10f;
+        float dx = x2 - x1;
+        float dy = y2 - y1;
+        float length = (float)Math.Sqrt(dx * dx + dy * dy);
+        float ux = dx / length;
+        float uy = dy / length;
 
-        // Draw third node rectangle and label
-        graphics.FillRectangle(pen, brush, 250, 300, 150, 100);
-        graphics.DrawRectangle(pen, 250, 300, 150, 100);
-        graphics.DrawString(new Font("Arial", 24, FontStyle.Regular), "Node 3", new Point(275, 330), Color.Black);
+        // Base point (end of line)
+        float bx = x2;
+        float by = y2;
 
-        // Connector lines between node centers
-        // Center points
-        int cx1 = 100 + 75;  // 175
-        int cy1 = 100 + 50;  // 150
-        int cx2 = 400 + 75;  // 475
-        int cy2 = 100 + 50;  // 150
-        int cx3 = 250 + 75;  // 325
-        int cy3 = 300 + 50;  // 350
+        // Two other points forming a triangle
+        float px1 = bx - ux * arrowSize - uy * arrowSize / 2;
+        float py1 = by - uy * arrowSize + ux * arrowSize / 2;
+        float px2 = bx - ux * arrowSize + uy * arrowSize / 2;
+        float py2 = by - uy * arrowSize - ux * arrowSize / 2;
 
-        // Line between Node 1 and Node 2
-        graphics.DrawLine(pen, cx1, cy1, cx2, cy2);
-        // Line between Node 1 and Node 3
-        graphics.DrawLine(pen, cx1, cy1, cx3, cy3);
-        // Line between Node 2 and Node 3
-        graphics.DrawLine(pen, cx2, cy2, cx3, cy3);
+        arrowFigure.AddShapes(new Shape[]
+        {
+            new PolygonShape(new PointF[]
+            {
+                new PointF(bx, by),
+                new PointF(px1, py1),
+                new PointF(px2, py2)
+            })
+        });
 
-        // Finalize and save SVG
+        // Fill the arrowhead
+        graphics.FillPath(new Pen(Color.Red, 1), new SolidBrush(Color.Red), arrowPath);
+
+        // Finalize the SVG image and save it
         using (SvgImage svgImage = graphics.EndRecording())
         {
             svgImage.Save(outputPath);
