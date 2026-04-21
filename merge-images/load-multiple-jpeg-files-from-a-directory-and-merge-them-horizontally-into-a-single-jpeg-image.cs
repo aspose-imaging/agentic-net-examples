@@ -11,70 +11,73 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input directory and output file path
+        // Hardcoded input and output paths
         string inputDirectory = "InputImages";
-        string outputPath = "Output\\merged.jpg";
+        string outputPath = "Output/merged.jpg";
 
-        // Ensure the output directory exists
+        // Ensure input directory exists
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Retrieve JPEG files from the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
-        // Include .jpeg extension as well
-        files = files.Concat(Directory.GetFiles(inputDirectory, "*.jpeg")).ToArray();
+        // Get JPEG files from the input directory
+        string[] imagePaths = Directory.GetFiles(inputDirectory, "*.jpg");
+        imagePaths = imagePaths.Concat(Directory.GetFiles(inputDirectory, "*.jpeg")).ToArray();
 
-        // Collect sizes of all images
-        List<Size> sizes = new List<Size>();
-        foreach (string file in files)
+        if (imagePaths.Length == 0)
         {
-            // Validate input file existence
-            if (!File.Exists(file))
+            Console.WriteLine("No JPEG files found in the input directory.");
+            return;
+        }
+
+        // Validate each input file exists and collect sizes
+        List<Size> sizes = new List<Size>();
+        foreach (string path in imagePaths)
+        {
+            if (!File.Exists(path))
             {
-                Console.Error.WriteLine($"File not found: {file}");
+                Console.Error.WriteLine($"File not found: {path}");
                 return;
             }
 
-            using (RasterImage img = (RasterImage)Image.Load(file))
+            using (RasterImage img = (RasterImage)Image.Load(path))
             {
                 sizes.Add(img.Size);
             }
         }
 
-        if (sizes.Count == 0)
-        {
-            Console.WriteLine("No JPEG images found to merge.");
-            return;
-        }
-
-        // Calculate dimensions for the horizontal canvas
+        // Calculate canvas dimensions for horizontal merge
         int newWidth = sizes.Sum(s => s.Width);
         int newHeight = sizes.Max(s => s.Height);
 
-        // Prepare JPEG options with a bound output source
-        Source outputSource = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions()
+        // Prepare JPEG options with bound source
+        JpegOptions jpegOptions = new JpegOptions
         {
-            Source = outputSource,
-            Quality = 90 // Adjust quality as needed
+            Source = new FileCreateSource(outputPath, false),
+            Quality = 100
         };
 
-        // Create a JPEG canvas bound to the output file
+        // Create a bound JPEG canvas
         using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
         {
             int offsetX = 0;
-            foreach (string file in files)
+            foreach (string path in imagePaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(file))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    // Define the region where the current image will be placed
                     Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    // Copy pixel data onto the canvas
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                     offsetX += img.Width;
                 }
             }
 
-            // Save the bound canvas (output file is already specified in options)
+            // Save the bound image (output path already set in options)
             canvas.Save();
         }
     }
