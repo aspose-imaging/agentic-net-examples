@@ -2,38 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.tif";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            {
+                // Convert color profile to sRGB if supported
+                // epsImage.ConvertColorProfile(ColorProfile.Srgb);
+
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                tiffOptions.VectorRasterizationOptions = new EpsRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = epsImage.Width,
+                    PageHeight = epsImage.Height
+                };
+
+                epsImage.Save(outputPath, tiffOptions);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            var rasterOptions = new EpsRasterizationOptions
-            {
-                PageWidth = 3000,
-                PageHeight = 3000,
-                BackgroundColor = Color.White
-            };
-
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            image.Save(outputPath, tiffOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
