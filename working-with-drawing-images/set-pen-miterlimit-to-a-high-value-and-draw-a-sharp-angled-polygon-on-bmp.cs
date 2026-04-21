@@ -6,46 +6,48 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define output path
+        // Hardcoded output path for the BMP image
         string outputPath = @"C:\temp\sharp_polygon.bmp";
 
-        // Ensure output directory exists
+        // Ensure the output directory exists (unconditional)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up BMP options with a file create source bound to the output path
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
+        // Create BMP options with 24 bits per pixel
+        BmpOptions bmpOptions = new BmpOptions
+        {
+            BitsPerPixel = 24,
+            // Use FileCreateSource to specify the file to be created
+            Source = new FileCreateSource(outputPath, false)
+        };
 
-        // Create a 400x400 BMP image
+        // Create a new image of size 400x400 pixels
         using (Image image = Image.Create(bmpOptions, 400, 400))
         {
-            // Initialize graphics for drawing
+            // Initialize Graphics object for drawing
             Graphics graphics = new Graphics(image);
+
+            // Clear the background to white
             graphics.Clear(Color.White);
 
-            // Create a pen with a high MiterLimit to preserve sharp angles
+            // Create a Pen with a relatively thick width
             Pen pen = new Pen(Color.Black, 5);
-            pen.MiterLimit = 1000; // high value for sharp‑angled joins
+            // Set a high MiterLimit to allow sharp corners without beveling
+            pen.MiterLimit = 10f;
 
-            // Define points of a sharp‑angled polygon (star‑like shape)
+            // Define a sharp‑angled polygon (a thin triangle)
             Point[] points = new Point[]
             {
-                new Point(200, 50),
-                new Point(210, 190),
-                new Point(250, 200),
-                new Point(210, 210),
-                new Point(200, 350),
-                new Point(190, 210),
-                new Point(150, 200),
-                new Point(190, 190)
+                new Point(200, 10),   // Top vertex
+                new Point(210, 200),  // Bottom‑right vertex
+                new Point(190, 200)   // Bottom‑left vertex
             };
 
-            // Draw the polygon
+            // Draw the polygon using the configured Pen
             graphics.DrawPolygon(pen, points);
 
-            // Save the image (output file is already bound via FileCreateSource)
+            // Save the image (the file is already created by FileCreateSource)
             image.Save();
         }
     }
