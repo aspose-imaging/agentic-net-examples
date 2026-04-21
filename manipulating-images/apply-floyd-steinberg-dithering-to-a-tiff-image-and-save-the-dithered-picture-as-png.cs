@@ -8,26 +8,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.tif";
-        string outputPath = @"c:\temp\sample.FloydSteinbergDithering1.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "c:\\temp\\sample.tif";
+            string outputPath = "c:\\temp\\sample.FloydSteinbergDithering1.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to TiffImage to access Dither method
+                TiffImage tiffImage = (TiffImage)image;
+
+                // Apply Floyd‑Steinberg dithering with a 1‑bit palette
+                tiffImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+
+                // Save the dithered image as PNG
+                tiffImage.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image, apply Floyd‑Steinberg dithering, and save as PNG
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            TiffImage tiffImage = (TiffImage)image;
-            tiffImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
-            tiffImage.Save(outputPath, new PngOptions());
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
