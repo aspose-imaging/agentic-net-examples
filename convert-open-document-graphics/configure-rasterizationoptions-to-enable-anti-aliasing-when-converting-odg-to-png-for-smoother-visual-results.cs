@@ -12,7 +12,7 @@ class Program
         string inputPath = @"C:\Images\sample.odg";
         string outputPath = @"C:\Images\sample.png";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,15 +26,21 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Configure rasterization options with anti‑aliasing
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions();
-            rasterOptions.PageSize = image.Size;                     // Preserve original size
-            rasterOptions.SmoothingMode = SmoothingMode.AntiAlias;   // Enable anti‑aliasing
+            var rasterizationOptions = new OdgRasterizationOptions
+            {
+                BackgroundColor = Color.White,
+                PageSize = image.Size,
+                SmoothingMode = SmoothingMode.AntiAlias,
+                TextRenderingHint = TextRenderingHint.AntiAlias
+            };
 
-            // Set PNG save options and attach rasterization options
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.VectorRasterizationOptions = rasterOptions;
+            // Set up PNG save options and attach the rasterization options
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterizationOptions
+            };
 
-            // Save the image as PNG
+            // Save the image as PNG with the configured options
             image.Save(outputPath, pngOptions);
         }
     }
