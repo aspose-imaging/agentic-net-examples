@@ -2,37 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.psd";
-        string outputPath = "Output/straightened.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.psd";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PSD image as a raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Deskew the image without resizing, using a light gray background
+                image.NormalizeAngle(false, Color.LightGray);
+
+                // Prepare PNG save options
+                var pngOptions = new PngOptions();
+
+                // Save the deskewed image as PNG
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage for deskewing
-            RasterImage raster = (RasterImage)image;
-
-            // Deskew without resizing canvas, using light gray background for empty areas
-            raster.NormalizeAngle(false, Color.LightGray);
-
-            // Save the straightened image as PNG
-            PngOptions pngOptions = new PngOptions();
-            raster.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
