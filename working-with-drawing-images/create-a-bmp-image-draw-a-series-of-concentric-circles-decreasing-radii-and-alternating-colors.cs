@@ -2,61 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded output path
-        string outputPath = @"C:\Temp\concentric_circles.bmp";
+        string outputPath = @"C:\temp\concentric_circles.bmp";
 
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // BMP options with 24 bits per pixel
+        // Set up BMP options with a file create source
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        int width = 500;
-        int height = 500;
-
-        // Create the BMP image bound to the output file
-        using (Image image = Image.Create(bmpOptions, width, height))
+        // Create a 500x500 BMP image
+        using (Image image = Image.Create(bmpOptions, 500, 500))
         {
             // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
+
+            // Clear background to white
             graphics.Clear(Color.White);
 
-            // Center of the image
-            int centerX = width / 2;
-            int centerY = height / 2;
+            // Center of the circles
+            int centerX = 250;
+            int centerY = 250;
 
-            // Define radii and alternating colors
-            int maxRadius = Math.Min(width, height) / 2 - 10;
-            int step = 20;
-            Color[] colors = new Color[] { Color.Red, Color.Blue, Color.Green, Color.Orange, Color.Purple };
-
-            int colorIndex = 0;
-            for (int radius = maxRadius; radius > 0; radius -= step)
+            // Draw concentric circles with decreasing radii and alternating colors
+            for (int radius = 200; radius > 0; radius -= 20)
             {
-                // Calculate bounding rectangle for the circle
-                int x = centerX - radius;
-                int y = centerY - radius;
-                int diameter = radius * 2;
+                // Alternate between Red and Blue
+                Color fillColor = (radius / 20) % 2 == 0 ? Color.Red : Color.Blue;
 
-                // Create pen with current color
-                Pen pen = new Pen(colors[colorIndex % colors.Length], 3);
+                using (SolidBrush brush = new SolidBrush(fillColor))
+                {
+                    // Define bounding rectangle for the ellipse (circle)
+                    Rectangle rect = new Rectangle(
+                        centerX - radius,
+                        centerY - radius,
+                        radius * 2,
+                        radius * 2);
 
-                // Draw the circle (ellipse with equal width and height)
-                graphics.DrawEllipse(pen, new Rectangle(x, y, diameter, diameter));
-
-                colorIndex++;
+                    // Fill the circle
+                    graphics.FillEllipse(brush, rect);
+                }
             }
 
-            // Save the image (output file already bound)
+            // Save the image (file is already bound via FileCreateSource)
             image.Save();
         }
     }
