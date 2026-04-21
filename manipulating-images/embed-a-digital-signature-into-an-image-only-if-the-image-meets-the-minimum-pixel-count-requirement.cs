@@ -1,58 +1,60 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg; // Example format, adjust if needed
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    // Minimum pixel count required to embed a digital signature
-    const long MinPixelCount = 1024 * 768; // 786,432 pixels
-
-    // Hardcoded input and output file paths
-    const string InputPath = @"C:\Images\input.jpg";
-    const string OutputPath = @"C:\Images\output_signed.jpg";
-
-    // Password used for the digital signature
-    const string SignaturePassword = "MySecretPassword";
-
     static void Main()
     {
-        // Verify that the input file exists
-        if (!File.Exists(InputPath))
+        // Wrap the whole logic to catch unexpected exceptions
+        try
         {
-            Console.Error.WriteLine($"File not found: {InputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input/sample.jpg";
+            string outputPath = "output/signed_sample.jpg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
-
-        // Load the image using Aspose.Imaging
-        using (Image image = Image.Load(InputPath))
-        {
-            // Cast to RasterImage to access pixel dimensions and signature methods
-            if (image is RasterImage rasterImage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                long pixelCount = (long)rasterImage.Width * rasterImage.Height;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Check if the image meets the minimum pixel count requirement
-                if (pixelCount >= MinPixelCount)
+            // Ensure the output directory exists (creates if missing)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image using Aspose.Imaging
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access digital signature methods
+                if (image is RasterImage rasterImage)
                 {
-                    // Embed the digital signature
-                    rasterImage.EmbedDigitalSignature(SignaturePassword);
+                    // Minimum pixel count requirement (example: 800x600 = 480,000)
+                    const long MinPixelCount = 800L * 600L;
+
+                    // Calculate total pixel count
+                    long pixelCount = (long)rasterImage.Width * rasterImage.Height;
+
+                    // Embed digital signature only if the image meets the size requirement
+                    if (pixelCount >= MinPixelCount)
+                    {
+                        string password = "MySecretPassword";
+                        rasterImage.EmbedDigitalSignature(password);
+                    }
+
+                    // Save the (potentially signed) image to the output path
+                    rasterImage.Save(outputPath);
                 }
                 else
                 {
-                    Console.WriteLine($"Image does not meet the minimum pixel count ({MinPixelCount}). Skipping signature embedding.");
+                    Console.Error.WriteLine("The loaded image is not a raster image and cannot be signed.");
                 }
-
-                // Save the (potentially modified) image to the output path
-                rasterImage.Save(OutputPath);
             }
-            else
-            {
-                Console.WriteLine("Loaded image is not a raster image. Operation aborted.");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
