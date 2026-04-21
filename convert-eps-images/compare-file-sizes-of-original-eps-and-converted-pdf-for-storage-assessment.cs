@@ -9,42 +9,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "Sample.eps";
-        string outputPath = "Sample.pdf";
+        string outputPath = "output/Sample.pdf";
 
-        // Verify that the input EPS file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        Directory.CreateDirectory(outputDir ?? ".");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+        // Load EPS image and convert to PDF
+        using (var image = (EpsImage)Image.Load(inputPath))
         {
-            // Set up PDF conversion options (default compliance)
             var pdfOptions = new PdfOptions
             {
-                PdfCoreOptions = new PdfCoreOptions()
-                // Additional options can be set here if needed
+                PdfCoreOptions = new PdfCoreOptions
+                {
+                    PdfCompliance = PdfComplianceVersion.PdfA1b
+                }
             };
 
-            // Save the image as PDF
-            epsImage.Save(outputPath, pdfOptions);
+            image.Save(outputPath, pdfOptions);
         }
 
-        // Retrieve file sizes
+        // Compare file sizes
         long epsSize = new FileInfo(inputPath).Length;
         long pdfSize = new FileInfo(outputPath).Length;
 
-        // Output the size comparison
-        Console.WriteLine($"EPS file size: {epsSize} bytes");
-        Console.WriteLine($"PDF file size: {pdfSize} bytes");
-        Console.WriteLine($"Size difference: {pdfSize - epsSize} bytes");
+        Console.WriteLine($"EPS size: {epsSize} bytes");
+        Console.WriteLine($"PDF size: {pdfSize} bytes");
+        Console.WriteLine($"Size difference (PDF - EPS): {pdfSize - epsSize} bytes");
     }
 }
