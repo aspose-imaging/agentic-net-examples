@@ -8,10 +8,10 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path (hardcoded)
-        string outputPath = @"C:\temp\output.bmp";
+        // Define output BMP path
+        string outputPath = @"C:\Temp\DashedLine.bmp";
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Set up BMP options with a file create source
@@ -19,12 +19,8 @@ class Program
         bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Define canvas size
-        int width = 800;
-        int height = 600;
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, width, height))
+        // Create a new image canvas
+        using (Image image = Image.Create(bmpOptions, 800, 200))
         {
             // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
@@ -33,12 +29,12 @@ class Program
             // Create a pen with custom dash style
             Pen pen = new Pen(Color.Black, 5f);
             pen.DashStyle = DashStyle.Custom;
-            pen.DashPattern = new float[] { 10f, 5f }; // dash length 10, space length 5
+            pen.DashPattern = new float[] { 10f, 5f, 2f, 5f }; // dash, space, dash, space
 
             // Draw a horizontal dashed line across the image
-            graphics.DrawLine(pen, 0, height / 2, width, height / 2);
+            graphics.DrawLine(pen, 0, image.Height / 2, image.Width, image.Height / 2);
 
-            // Save the image (output path already bound via FileCreateSource)
+            // Save the image (output path already bound)
             image.Save();
         }
     }
