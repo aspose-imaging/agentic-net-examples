@@ -3,11 +3,10 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "Input/sample.eps";
@@ -24,16 +23,17 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load EPS image and convert to PDF
-        using (EpsImage image = (EpsImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            var options = new PdfOptions
+            var pdfOptions = new PdfOptions
             {
                 PdfCoreOptions = new PdfCoreOptions
                 {
                     PdfCompliance = PdfComplianceVersion.PdfA1b
                 }
             };
-            image.Save(outputPath, options);
+
+            image.Save(outputPath, pdfOptions);
         }
 
         // Verify conversion succeeded
@@ -43,7 +43,7 @@ class Program
         }
         else
         {
-            Console.Error.WriteLine("EPS to PDF conversion failed.");
+            Console.Error.WriteLine("Conversion failed: output file not created.");
         }
     }
 }
