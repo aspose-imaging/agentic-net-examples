@@ -7,39 +7,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dxf";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Input DXF file and output PNG file (relative paths)
+            string inputPath = "Input/sample.dxf";
+            string outputPath = "Output/sample.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DXF vector image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PNG export options
-            var pngOptions = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Set resolution to 72 DPI
-                ResolutionSettings = new ResolutionSetting(72, 72),
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Configure vector rasterization (background and page size)
-                VectorRasterizationOptions = new VectorRasterizationOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DXF vector image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PNG save options
+                using (PngOptions pngOptions = new PngOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                }
-            };
+                    // Set resolution to 72 DPI
+                    pngOptions.ResolutionSettings = new ResolutionSetting(72, 72);
 
-            // Save as PNG with the specified options
-            image.Save(outputPath, pngOptions);
+                    // Set rasterization options with white background
+                    pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+
+                    // Save as PNG
+                    image.Save(outputPath, pngOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
