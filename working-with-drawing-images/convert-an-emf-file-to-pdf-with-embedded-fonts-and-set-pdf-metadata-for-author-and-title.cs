@@ -1,18 +1,18 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define input and output paths
-        string inputPath = Path.Combine("Input", "sample.emf");
-        string outputPath = Path.Combine("Output", "sample.pdf");
+        // Hardcoded input and output paths
+        string inputPath = "input.emf";
+        string outputPath = "output.pdf";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,21 +23,20 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EMF image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
             // Configure vector rasterization options for EMF rendering
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+            var vectorOptions = new EmfRasterizationOptions
             {
-                BackgroundColor = Aspose.Imaging.Color.White,
                 PageSize = image.Size,
-                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = SmoothingMode.None
             };
 
-            // Set PDF options, embed fonts via vector rasterization, and add metadata
-            PdfOptions pdfOptions = new PdfOptions
+            // Set PDF options with embedded fonts and metadata
+            var pdfOptions = new PdfOptions
             {
-                VectorRasterizationOptions = rasterOptions,
+                VectorRasterizationOptions = vectorOptions,
                 PdfDocumentInfo = new PdfDocumentInfo
                 {
                     Author = "Author Name",
@@ -45,7 +44,7 @@ class Program
                 }
             };
 
-            // Save the image as PDF with the specified options
+            // Save the image as PDF
             image.Save(outputPath, pdfOptions);
         }
     }
