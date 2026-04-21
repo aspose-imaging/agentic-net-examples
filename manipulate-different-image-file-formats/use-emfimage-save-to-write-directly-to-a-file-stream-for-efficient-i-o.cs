@@ -8,40 +8,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.emf";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
         string outputPath = @"C:\temp\output.emf";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to EmfImage for EMF-specific operations
-            EmfImage emfImage = image as EmfImage;
-            if (emfImage == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded file is not a valid EMF image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare EMF save options (default options are sufficient for this example)
-            EmfOptions saveOptions = new EmfOptions();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open a file stream for the output file
-            using (FileStream outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Save the EMF image directly to the stream
-                emfImage.Save(outputStream, saveOptions);
+                // Prepare EMF save options
+                var emfOptions = new EmfOptions
+                {
+                    // Set rasterization options so the EMF matches the source size
+                    VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
+                };
+
+                // Save directly to a file stream for efficient I/O
+                using (FileStream outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                {
+                    image.Save(outStream, emfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
