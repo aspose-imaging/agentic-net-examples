@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.cmx";
-        string outputPath = @"C:\temp\output.tif";
+        string inputPath = @"C:\temp\sample.cmx";
+        string outputPath = @"C:\temp\sample.tif";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -25,10 +25,10 @@ class Program
         // Load the CMX image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare default TIFF save options (default compression)
+            // Prepare default TIFF save options
             var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-            // Save the image as a single‑page TIFF
+            // Save the image as a single‑page TIFF with default compression
             image.Save(outputPath, tiffOptions);
         }
     }
