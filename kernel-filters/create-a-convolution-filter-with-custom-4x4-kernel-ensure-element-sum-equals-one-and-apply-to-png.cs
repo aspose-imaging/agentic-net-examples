@@ -9,48 +9,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                double[,] kernel = new double[4, 4];
+                for (int y = 0; y < 4; y++)
+                {
+                    for (int x = 0; x < 4; x++)
+                    {
+                        kernel[y, x] = 1.0 / 16.0;
+                    }
+                }
+
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
+
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, saveOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image as a raster image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            RasterImage raster = (RasterImage)image;
-
-            // Define a custom 4x4 kernel whose elements sum to 1 (uniform blur)
-            double[,] kernel = new double[,]
-            {
-                { 0.0625, 0.0625, 0.0625, 0.0625 },
-                { 0.0625, 0.0625, 0.0625, 0.0625 },
-                { 0.0625, 0.0625, 0.0625, 0.0625 },
-                { 0.0625, 0.0625, 0.0625, 0.0625 }
-            };
-
-            // Create convolution filter options (factor = 1.0, divisor = 1)
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 1);
-
-            // Apply the custom convolution filter to the entire image
-            raster.Filter(raster.Bounds, filterOptions);
-
-            // Prepare PNG save options with a FileCreateSource
-            PngOptions saveOptions = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            // Save the processed image
-            raster.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
