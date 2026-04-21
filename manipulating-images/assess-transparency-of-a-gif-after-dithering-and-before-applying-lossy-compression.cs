@@ -9,51 +9,51 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.gif";
-        string outputPath = @"C:\temp\sample.dithered.png";
+        string inputPath = @"c:\temp\sample.gif";
+        string outputPath = @"c:\temp\sample.dithered.gif";
 
-        // Verify input file exists
+        // Ensure the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the GIF image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to GifImage to access GIF‑specific methods
-            GifImage gifImage = (GifImage)image;
-
-            // Apply dithering (example: Floyd‑Steinberg with 8‑bit palette)
-            gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
-
-            // Assess transparency after dithering
-            bool hasTransparentPixel = false;
-            // GifImage derives from RasterImage, so we can use GetPixel
-            for (int y = 0; y < gifImage.Height && !hasTransparentPixel; y++)
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
             {
-                for (int x = 0; x < gifImage.Width; x++)
+                // Cast to GifImage to access GIF‑specific members
+                GifImage gifImage = (GifImage)image;
+
+                // Apply Floyd‑Steinberg dithering with an 8‑bit palette (full color depth)
+                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+
+                // Assess transparency after dithering
+                bool hasTransparency = gifImage.HasTransparentColor;
+                Console.WriteLine($"Has transparent color after dithering: {hasTransparency}");
+
+                // Save the dithered image as a lossless GIF
+                using (FileStream stream = File.OpenWrite(outputPath))
                 {
-                    // GetPixel returns a Color structure; A == 0 means fully transparent
-                    if (gifImage.GetPixel(x, y).A == 0)
+                    GifOptions saveOptions = new GifOptions
                     {
-                        hasTransparentPixel = true;
-                        break;
-                    }
+                        // Enable palette correction for best visual result
+                        DoPaletteCorrection = true,
+                        // No lossy compression (MaxDiff = 0)
+                        MaxDiff = 0
+                    };
+                    gifImage.Save(stream, saveOptions);
                 }
             }
-
-            Console.WriteLine(hasTransparentPixel
-                ? "The dithered image contains transparent pixels."
-                : "The dithered image does not contain transparent pixels.");
-
-            // Save the dithered image (lossless PNG)
-            PngOptions pngOptions = new PngOptions();
-            gifImage.Save(outputPath, pngOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
