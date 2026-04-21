@@ -3883,14 +3883,14 @@
         "System.IO",
         "Aspose.Imaging.ImageOptions",
         "System.Collections.Generic",
-        "Aspose.Imaging",
         "Aspose.Imaging.Sources",
+        "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Jpeg",
         "System.Linq",
         "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.Brushes",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Tiff.Enums"
+        "System.Threading"
       ],
       "key_apis": [
         "ApngImage",
