@@ -7,10 +7,10 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string inputPath = @"C:\temp\input.jpg";
-        string canvasPath = @"C:\temp\canvas.html";
-        string markdownPath = @"C:\temp\output.md";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.jpg";
+        string canvasOutputPath = @"C:\temp\canvas.html";
+        string markdownOutputPath = @"C:\temp\image.md";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,28 +20,28 @@ class Program
         }
 
         // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(markdownPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(canvasOutputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(markdownOutputPath));
 
-        // Load the JPEG image
+        // Load the JPEG image and save it as an HTML5 Canvas (only the <canvas> tag)
         using (Image image = Image.Load(inputPath))
         {
-            // Save only the <canvas> tag (no full HTML page)
             var canvasOptions = new Html5CanvasOptions
             {
-                FullHtmlPage = false
-                // For raster images no additional rasterization options are required
+                FullHtmlPage = false,          // Export only the canvas element
+                CanvasTagId = "myCanvas"        // Optional identifier for the canvas tag
             };
-            image.Save(canvasPath, canvasOptions);
+
+            image.Save(canvasOutputPath, canvasOptions);
         }
 
         // Read the generated canvas HTML
-        string canvasHtml = File.ReadAllText(canvasPath);
+        string canvasHtml = File.ReadAllText(canvasOutputPath);
 
-        // Build markdown content embedding the canvas element
+        // Create Markdown content embedding the canvas element
         string markdownContent = "# Image Canvas\n\n" + canvasHtml + "\n";
 
-        // Write markdown file
-        File.WriteAllText(markdownPath, markdownContent);
+        // Write the Markdown file
+        File.WriteAllText(markdownOutputPath, markdownContent);
     }
 }
