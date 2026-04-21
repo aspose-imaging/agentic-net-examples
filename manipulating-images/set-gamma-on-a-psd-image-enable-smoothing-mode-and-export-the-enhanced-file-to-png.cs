@@ -1,43 +1,54 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.psd";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.psd";
+            string outputPath = "output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Adjust gamma on the raster data
-            var raster = image as Aspose.Imaging.RasterImage;
-            if (raster != null)
+            if (!File.Exists(inputPath))
             {
-                raster.AdjustGamma(2.2f);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Configure PNG export with smoothing mode
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
-                }
-            };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the enhanced image as PNG
-            image.Save(outputPath, pngOptions);
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
+                {
+                    if (!raster.IsCached)
+                        raster.CacheData();
+
+                    raster.AdjustGamma(2.2f);
+                }
+
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        SmoothingMode = SmoothingMode.HighQuality
+                    }
+                };
+
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
