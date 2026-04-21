@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.pdf";
-        string outputPath = "output.svg";
+        string inputPath = "Input/multipage.pdf";
+        string outputPath = "Output/merged.svg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,76 +22,77 @@ class Program
         }
 
         // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load PDF and rasterize each page to PNG in memory
-        List<RasterImage> rasterPages = new List<RasterImage>();
-        List<Size> pageSizes = new List<Size>();
-
+        // Load the PDF document
         using (Image pdfImage = Image.Load(inputPath))
         {
+            // Cast to multipage interface
             IMultipageImage multipage = pdfImage as IMultipageImage;
-            if (multipage != null)
+            if (multipage == null || multipage.Pages == null)
             {
-                for (int i = 0; i < multipage.PageCount; i++)
+                Console.Error.WriteLine("The input file does not contain multiple pages.");
+                return;
+            }
+
+            // Collect page sizes
+            List<Size> pageSizes = new List<Size>();
+            foreach (var page in multipage.Pages)
+            {
+                pageSizes.Add(page.Size);
+            }
+
+            // Determine canvas dimensions (vertical stacking)
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (var sz in pageSizes)
+            {
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                canvasHeight += sz.Height;
+            }
+
+            // Prepare SVG options
+            SvgOptions svgOptions = new SvgOptions
+            {
+                TextAsShapes = true
+            };
+
+            // Create an empty SVG canvas
+            using (SvgImage canvas = new SvgImage(svgOptions, canvasWidth, canvasHeight))
+            {
+                // Graphics object for drawing
+                Graphics graphics = new Graphics(canvas);
+
+                int offsetY = 0;
+                foreach (var page in multipage.Pages)
                 {
-                    Image page = multipage.Pages[i];
+                    // Rasterize the current page to PNG in memory
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        PngOptions pngOpts = new PngOptions();
+                        PngOptions pngOpts = new PngOptions
+                        {
+                            VectorRasterizationOptions = new SvgRasterizationOptions
+                            {
+                                PageSize = page.Size
+                            }
+                        };
                         page.Save(ms, pngOpts);
                         ms.Position = 0;
-                        RasterImage raster = (RasterImage)Image.Load(ms);
-                        rasterPages.Add(raster);
-                        pageSizes.Add(new Size(raster.Width, raster.Height));
+
+                        // Load rasterized image
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            // Draw raster image onto SVG canvas
+                            graphics.DrawImage(raster, new Point(0, offsetY));
+                        }
                     }
-                    page.Dispose();
+
+                    offsetY += page.Height;
                 }
+
+                // Save the merged SVG
+                canvas.Save(outputPath, svgOptions);
             }
-            else
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    PngOptions pngOpts = new PngOptions();
-                    pdfImage.Save(ms, pngOpts);
-                    ms.Position = 0;
-                    RasterImage raster = (RasterImage)Image.Load(ms);
-                    rasterPages.Add(raster);
-                    pageSizes.Add(new Size(raster.Width, raster.Height));
-                }
-            }
-        }
-
-        // Calculate canvas size for vertical stacking
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-        foreach (var sz in pageSizes)
-        {
-            if (sz.Width > canvasWidth) canvasWidth = sz.Width;
-            canvasHeight += sz.Height;
-        }
-
-        // Create SVG canvas
-        SvgGraphics2D graphics = new SvgGraphics2D(canvasWidth, canvasHeight, 96);
-
-        // Draw each raster page onto the SVG canvas
-        int offsetY = 0;
-        for (int i = 0; i < rasterPages.Count; i++)
-        {
-            RasterImage raster = rasterPages[i];
-            graphics.DrawImage(raster, new Point(0, offsetY), new Size(raster.Width, raster.Height));
-            offsetY += raster.Height;
-            raster.Dispose();
-        }
-
-        // Finalize SVG and save
-        using (SvgImage finalSvg = graphics.EndRecording())
-        {
-            finalSvg.Save(outputPath);
         }
     }
 }
