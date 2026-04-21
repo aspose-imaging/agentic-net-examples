@@ -1,15 +1,15 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.eps";
+        string inputPath = "input.eps";
         string outputPath = "preview.png";
 
         // Verify input file exists
@@ -20,13 +20,13 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the EPS image
         using (var epsImage = (EpsImage)Image.Load(inputPath))
         {
-            // Get the preview image (default format)
-            using (var preview = epsImage.GetPreviewImage())
+            // Retrieve the preview image (default format)
+            using (Image preview = epsImage.GetPreviewImage())
             {
                 if (preview == null)
                 {
@@ -35,9 +35,10 @@ class Program
                 }
 
                 // Save the preview image as PNG
-                var pngOptions = new PngOptions();
-                preview.Save(outputPath, pngOptions);
+                preview.Save(outputPath, new PngOptions());
             }
         }
+
+        Console.WriteLine($"Preview image saved to: {outputPath}");
     }
 }
