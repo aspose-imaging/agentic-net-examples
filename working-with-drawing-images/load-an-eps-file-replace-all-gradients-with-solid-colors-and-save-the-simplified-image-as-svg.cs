@@ -3,15 +3,14 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.svg";
+        string inputPath = @"C:\Images\input.eps";
+        string outputPath = @"C:\Images\output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,20 +25,18 @@ class Program
         // Load EPS image
         using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
         {
-            // NOTE: Direct gradient replacement is not exposed via Aspose.Imaging API.
-            // The image is saved as SVG, which will retain vector data.
-            // For simplification, we proceed with saving to SVG format.
-
-            // Configure SVG export options with rasterization settings matching EPS size
+            // Prepare SVG rasterization options matching the EPS size
             SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                PageWidth = epsImage.Width,
-                PageHeight = epsImage.Height
+                PageSize = epsImage.Size
             };
 
+            // Configure SVG save options
             SvgOptions svgOptions = new SvgOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterOptions,
+                // Render all text as shapes to avoid text gradients (optional)
+                TextAsShapes = true
             };
 
             // Save as SVG
