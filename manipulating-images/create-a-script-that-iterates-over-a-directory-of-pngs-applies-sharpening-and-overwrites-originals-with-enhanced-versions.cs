@@ -1,42 +1,49 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded directory containing PNG files
-        string inputDirectory = "C:\\Images";
-
-        // Ensure the directory exists (creates if missing)
-        Directory.CreateDirectory(inputDirectory);
-
-        // Get all PNG files in the directory
-        string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png", SearchOption.TopDirectoryOnly);
-
-        foreach (string inputPath in pngFiles)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input directory containing PNG files
+            string inputDirectory = @"C:\Images";
+
+            // Get all PNG files in the directory
+            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+
+            foreach (string inputPath in pngFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Load the image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to RasterImage to apply filters
+                    RasterImage rasterImage = (RasterImage)image;
+
+                    // Apply a sharpen filter (kernel size 5, sigma 4.0)
+                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                    // Ensure the output directory exists (same as input directory)
+                    Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+
+                    // Overwrite the original file with the sharpened image
+                    rasterImage.Save(inputPath);
+                }
             }
-
-            // Ensure the output directory exists (same as input directory)
-            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
-
-            // Load the image, apply sharpening, and overwrite the original
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-            {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-                // Apply sharpen filter with kernel size 5 and sigma 4.0
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-
-                // Save back to the original file
-                raster.Save(inputPath);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
