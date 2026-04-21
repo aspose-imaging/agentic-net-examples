@@ -1,81 +1,60 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all BMP files in the input folder
+            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
 
-        // Get all BMP files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-        foreach (string inputPath in files)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in bmpFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Prepare output path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Ensure output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the BMP image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-            {
-                // Cast to RasterImage for cropping
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-                // Cache data for performance
-                if (!raster.IsCached)
-                    raster.CacheData();
-
-                // Define crop rectangle (10-pixel border on each side)
-                int cropX = 10;
-                int cropY = 10;
-                int cropWidth = raster.Width - 20;
-                int cropHeight = raster.Height - 20;
-
-                // Skip if image is too small to crop
-                if (cropWidth <= 0 || cropHeight <= 0)
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"Image too small to crop: {inputPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(cropX, cropY, cropWidth, cropHeight);
-                raster.Crop(cropRect);
+                // Build the output PNG path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                // Save as PNG with default options
-                using (var options = new PngOptions())
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the BMP image
+                using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, options);
+                    // Apply a 10‑pixel border crop
+                    int cropX = 10;
+                    int cropY = 10;
+                    int cropWidth = Math.Max(0, image.Width - 20);
+                    int cropHeight = Math.Max(0, image.Height - 20);
+                    if (cropWidth > 0 && cropHeight > 0)
+                    {
+                        image.Crop(new Aspose.Imaging.Rectangle(cropX, cropY, cropWidth, cropHeight));
+                    }
+
+                    // Save as PNG
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
