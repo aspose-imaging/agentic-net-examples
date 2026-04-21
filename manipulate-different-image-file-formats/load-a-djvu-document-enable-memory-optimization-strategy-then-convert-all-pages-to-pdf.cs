@@ -6,11 +6,11 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputPath = @"C:\temp\sample.pdf";
+        string inputPath = "sample.djvu";
+        string outputPath = "Output/output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,18 +22,19 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure load options to limit internal buffer size (memory optimization)
-        LoadOptions loadOptions = new LoadOptions
+        // Set memory optimization options
+        var loadOptions = new LoadOptions
         {
             BufferSizeHint = 1 * 1024 * 1024 // 1 MB buffer
         };
 
-        // Load the DjVu document with the specified load options
+        // Load DjVu document with memory optimization
         using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+        using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
         {
-            // Convert the entire DjVu document (all pages) to a single PDF file
-            djvuImage.Save(outputPath, new PdfOptions());
+            // Convert all pages to PDF
+            var pdfOptions = new PdfOptions();
+            djvuImage.Save(outputPath, pdfOptions);
         }
     }
 }
