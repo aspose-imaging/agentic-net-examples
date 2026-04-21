@@ -8,52 +8,52 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_gaussian.png";
+        string inputPath = "input.png";
+        string outputPath = "output.GaussianBlur.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Read environment variables for size and sigma, with fallback defaults
+        string sizeEnv = Environment.GetEnvironmentVariable("GAUSSIAN_BLUR_SIZE");
+        string sigmaEnv = Environment.GetEnvironmentVariable("GAUSSIAN_BLUR_SIGMA");
+
+        int size = 5;          // default kernel size (must be positive odd)
+        double sigma = 4.0;    // default sigma (must be positive)
+
+        if (int.TryParse(sizeEnv, out int parsedSize) && parsedSize > 0 && parsedSize % 2 == 1)
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            size = parsedSize;
         }
 
-        // Retrieve Gaussian blur parameters from environment variables
-        // Fallback to defaults if variables are missing or invalid
-        const int defaultSize = 5;          // must be positive odd integer
-        const double defaultSigma = 4.0;    // must be positive non‑zero
-
-        string sizeEnv = Environment.GetEnvironmentVariable("GAUSSIAN_SIZE");
-        string sigmaEnv = Environment.GetEnvironmentVariable("GAUSSIAN_SIGMA");
-
-        int size;
-        double sigma;
-
-        if (!int.TryParse(sizeEnv, out size) || size <= 0 || size % 2 == 0)
+        if (double.TryParse(sigmaEnv, out double parsedSigma) && parsedSigma > 0)
         {
-            size = defaultSize;
+            sigma = parsedSigma;
         }
 
-        if (!double.TryParse(sigmaEnv, out sigma) || sigma <= 0)
+        try
         {
-            sigma = defaultSigma;
-        }
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Load the image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply Gaussian blur filter to the entire image bounds
-            var blurOptions = new GaussianBlurFilterOptions(size, sigma);
-            rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image
-            rasterImage.Save(outputPath);
+            // Load image, apply Gaussian blur, and save
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage rasterImage = (RasterImage)image;
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new GaussianBlurFilterOptions(size, sigma)
+                );
+                rasterImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
