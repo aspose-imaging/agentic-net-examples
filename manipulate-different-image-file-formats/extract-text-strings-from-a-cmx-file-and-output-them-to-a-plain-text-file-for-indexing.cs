@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Data\sample.cmx";
-        string outputPath = @"C:\Data\output.txt";
+        string inputPath = "input.cmx";
+        string outputPath = "output.txt";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,17 +20,19 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the CMX image
         using (CmxImage image = (CmxImage)Image.Load(inputPath))
         {
-            // Retrieve the document and convert it to string
+            // Access the CMX document
             CmxDocument document = image.Document;
-            string textContent = document.ToString();
+
+            // Extract textual representation of the document
+            string extractedText = document.ToString();
 
             // Write extracted text to the output file
-            File.WriteAllText(outputPath, textContent);
+            File.WriteAllText(outputPath, extractedText);
         }
     }
 }
