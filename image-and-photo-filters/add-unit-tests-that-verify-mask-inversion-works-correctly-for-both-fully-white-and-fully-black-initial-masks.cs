@@ -1,46 +1,71 @@
 using System;
+using System.IO;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Test 1: Invert a fully opaque (white) mask
-        var whiteMask = new ImageGrayscaleMask(5, 5);
-        for (int y = 0; y < whiteMask.Height; y++)
-            for (int x = 0; x < whiteMask.Width; x++)
-                whiteMask[x, y] = 255;
-
-        var invertedWhite = whiteMask.Invert() as ImageGrayscaleMask;
-        if (invertedWhite != null)
+        try
         {
-            for (int y = 0; y < invertedWhite.Height; y++)
-                for (int x = 0; x < invertedWhite.Width; x++)
-                    if (invertedWhite[x, y] != 0)
-                    {
-                        Console.Error.WriteLine($"Test failed: Inverted white mask pixel not transparent at ({x},{y}).");
-                        return;
-                    }
+            // Hardcoded paths (not used in the test but required by path‑safety rules)
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+            // Run tests
+            bool whiteMaskResult = TestMaskInversion(isInitiallyOpaque: true);
+            bool blackMaskResult = TestMaskInversion(isInitiallyOpaque: false);
+
+            Console.WriteLine($"White mask inversion test passed: {whiteMaskResult}");
+            Console.WriteLine($"Black mask inversion test passed: {blackMaskResult}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    // Verifies that Invert() correctly flips a fully opaque (white) or fully transparent (black) mask.
+    static bool TestMaskInversion(bool isInitiallyOpaque)
+    {
+        const int width = 10;
+        const int height = 10;
+        byte initialValue = isInitiallyOpaque ? (byte)255 : (byte)0;
+        byte expectedInvertedValue = isInitiallyOpaque ? (byte)0 : (byte)255;
+
+        // Create a grayscale mask and fill it uniformly.
+        var mask = new ImageGrayscaleMask(width, height);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                mask[x, y] = initialValue;
+            }
         }
 
-        // Test 2: Invert a fully transparent (black) mask
-        var blackMask = new ImageGrayscaleMask(5, 5);
-        for (int y = 0; y < blackMask.Height; y++)
-            for (int x = 0; x < blackMask.Width; x++)
-                blackMask[x, y] = 0;
+        // Invert the mask.
+        var invertedMask = mask.Invert();
 
-        var invertedBlack = blackMask.Invert() as ImageGrayscaleMask;
-        if (invertedBlack != null)
+        // Verify every pixel has the expected inverted opacity.
+        for (int y = 0; y < height; y++)
         {
-            for (int y = 0; y < invertedBlack.Height; y++)
-                for (int x = 0; x < invertedBlack.Width; x++)
-                    if (invertedBlack[x, y] != 255)
-                    {
-                        Console.Error.WriteLine($"Test failed: Inverted black mask pixel not opaque at ({x},{y}).");
-                        return;
-                    }
+            for (int x = 0; x < width; x++)
+            {
+                if (invertedMask.GetByteOpacity(x, y) != expectedInvertedValue)
+                {
+                    return false;
+                }
+            }
         }
 
-        Console.WriteLine("All mask inversion tests passed.");
+        return true;
     }
 }

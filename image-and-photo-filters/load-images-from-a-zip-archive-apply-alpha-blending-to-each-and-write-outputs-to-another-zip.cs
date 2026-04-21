@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -8,70 +7,65 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output ZIP paths
-        string inputZipPath = "input.zip";
-        string outputZipPath = "output.zip";
-
-        // Verify input ZIP exists
-        if (!File.Exists(inputZipPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputZipPath}");
-            return;
-        }
+            string inputZipPath = "input.zip";
+            string outputZipPath = "output.zip";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
-
-        // Open input ZIP for reading
-        using (FileStream inputZipStream = new FileStream(inputZipPath, FileMode.Open, FileAccess.Read))
-        using (System.IO.Compression.ZipArchive inputArchive = new System.IO.Compression.ZipArchive(inputZipStream, System.IO.Compression.ZipArchiveMode.Read))
-        // Create output ZIP for writing
-        using (FileStream outputZipStream = new FileStream(outputZipPath, FileMode.Create, FileAccess.ReadWrite))
-        using (System.IO.Compression.ZipArchive outputArchive = new System.IO.Compression.ZipArchive(outputZipStream, System.IO.Compression.ZipArchiveMode.Create))
-        {
-            foreach (var entry in inputArchive.Entries)
+            if (!File.Exists(inputZipPath))
             {
-                // Process only image files based on extension
-                string ext = Path.GetExtension(entry.Name).ToLowerInvariant();
-                if (ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".bmp" && ext != ".gif" && ext != ".tif" && ext != ".tiff")
-                    continue;
+                Console.Error.WriteLine($"File not found: {inputZipPath}");
+                return;
+            }
 
-                // Load image from ZIP entry into memory
-                using (Stream entryStream = entry.Open())
-                using (MemoryStream imageData = new MemoryStream())
+            Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
+
+            using (FileStream inputZipStream = new FileStream(inputZipPath, FileMode.Open, FileAccess.Read))
+            using (System.IO.Compression.ZipArchive inputArchive = new System.IO.Compression.ZipArchive(inputZipStream, System.IO.Compression.ZipArchiveMode.Read))
+            using (FileStream outputZipStream = new FileStream(outputZipPath, FileMode.Create, FileAccess.ReadWrite))
+            using (System.IO.Compression.ZipArchive outputArchive = new System.IO.Compression.ZipArchive(outputZipStream, System.IO.Compression.ZipArchiveMode.Create))
+            {
+                foreach (System.IO.Compression.ZipArchiveEntry entry in inputArchive.Entries)
                 {
-                    entryStream.CopyTo(imageData);
-                    imageData.Position = 0;
+                    if (string.IsNullOrEmpty(entry.Name))
+                        continue;
 
-                    using (RasterImage sourceImage = (RasterImage)Image.Load(imageData))
+                    using (Stream entryStream = entry.Open())
+                    using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(entryStream))
                     {
-                        int width = sourceImage.Width;
-                        int height = sourceImage.Height;
+                        int width = image.Width;
+                        int height = image.Height;
 
-                        // Create an in‑memory canvas (PNG) to hold the blended result
-                        Stream canvasMemory = new MemoryStream();
-                        StreamSource canvasSource = new StreamSource(canvasMemory);
-                        PngOptions pngOptions = new PngOptions() { Source = canvasSource };
-
-                        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
+                        StreamSource overlaySource = new StreamSource(new MemoryStream());
+                        PngOptions overlayOptions = new PngOptions() { Source = overlaySource };
+                        using (Aspose.Imaging.RasterImage overlay = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(overlayOptions, width, height))
                         {
-                            // Apply alpha blending with 50% opacity
-                            canvas.Blend(new Point(0, 0), sourceImage, 128);
+                            int[] pixels = new int[width * height];
+                            int argb = Aspose.Imaging.Color.FromArgb(128, 255, 0, 0).ToArgb();
+                            for (int i = 0; i < pixels.Length; i++) pixels[i] = argb;
 
-                            // Save the bound canvas to its stream
-                            canvas.Save();
+                            overlay.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, width, height), pixels);
+                            image.Blend(new Aspose.Imaging.Point(0, 0), overlay, (byte)128);
+                        }
 
-                            // Prepare the output ZIP entry
-                            canvasMemory.Position = 0;
-                            var outEntry = outputArchive.CreateEntry(entry.Name);
-                            using (Stream outEntryStream = outEntry.Open())
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            image.Save(ms, new PngOptions());
+                            ms.Position = 0;
+
+                            System.IO.Compression.ZipArchiveEntry outEntry = outputArchive.CreateEntry(entry.FullName);
+                            using (Stream outStream = outEntry.Open())
                             {
-                                canvasMemory.CopyTo(outEntryStream);
+                                ms.CopyTo(outStream);
                             }
                         }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

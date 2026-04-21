@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
@@ -10,68 +9,87 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input JPEG path
-        string inputPath = @"C:\Images\input.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input JPEG path
+            string inputPath = @"C:\temp\input.jpg";
 
-        // Output directory for mask results
-        string outputDir = @"C:\Images\MaskResults";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Threshold values to experiment with
-        int[] thresholds = new int[] { 10, 20, 30, 40, 50 };
-
-        // Load source image as RasterImage
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Iterate over each threshold value
-            foreach (int threshold in thresholds)
+            // Verify the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Prepare export options (in‑memory stream source)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Directory where all results will be stored
+            string outputBaseDir = @"C:\temp\output";
+            Directory.CreateDirectory(outputBaseDir); // ensure the base output folder exists
+
+            // Load the source image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Common export options for all results (PNG with alpha)
                 PngOptions exportOptions = new PngOptions
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
+                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
                     Source = new StreamSource(new MemoryStream())
                 };
 
-                // Configure masking options
-                MaskingOptions maskingOptions = new MaskingOptions
-                {
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = exportOptions,
-                    // Using Precision as a placeholder for threshold experimentation
-                    Args = new AutoMaskingArgs { Precision = threshold }
-                };
+                // Different threshold (precision) values to test
+                int[] thresholds = new int[] { 1, 2, 3, 4, 5 };
 
-                // Perform masking
-                using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
+                foreach (int thresh in thresholds)
                 {
-                    // Obtain foreground mask image (index 1)
-                    using (RasterImage foregroundMask = (RasterImage)maskingResult[1].GetMask())
+                    // Configure arguments for the segmentation algorithm
+                    AutoMaskingArgs args = new AutoMaskingArgs
                     {
-                        // Build output file path
-                        string outputPath = Path.Combine(outputDir, $"mask_threshold_{threshold}.png");
+                        // Using Precision as a stand‑in for “threshold”
+                        Precision = thresh,
+                        // Optional: keep default number of objects (foreground/background)
+                        NumberOfObjects = 2
+                    };
 
-                        // Ensure directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Set up masking options
+                    MaskingOptions maskingOptions = new MaskingOptions
+                    {
+                        Method = SegmentationMethod.KMeans, // K‑means clustering
+                        Decompose = true,                  // produce separate segments
+                        Args = args,
+                        BackgroundReplacementColor = Color.Transparent,
+                        ExportOptions = exportOptions
+                    };
 
-                        // Save the mask
-                        foregroundMask.Save(outputPath, exportOptions);
+                    // Create the masking processor
+                    ImageMasking masking = new ImageMasking(image);
+
+                    // Perform decomposition
+                    using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+                    {
+                        for (int i = 0; i < maskingResult.Length; i++)
+                        {
+                            // Build a unique output file name that includes the threshold value
+                            string outputPath = Path.Combine(
+                                outputBaseDir,
+                                $"segment_thresh{thresh}_{maskingResult[i].ObjectNumber}.png");
+
+                            // Ensure the directory for this file exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Retrieve the segment image and save it
+                            using (Image resultImage = maskingResult[i].GetImage())
+                            {
+                                resultImage.Save(outputPath);
+                            }
+                        }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

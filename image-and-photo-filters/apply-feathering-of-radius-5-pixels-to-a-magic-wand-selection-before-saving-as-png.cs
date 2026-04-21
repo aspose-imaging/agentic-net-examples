@@ -22,19 +22,23 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the image and apply Magic Wand selection with feathering
+        // Load image and apply Magic Wand selection with feathering
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Select a region based on pixel at (100, 100), feather it with radius 5, and apply the mask
+            // Select a region based on a reference point (e.g., 120,100)
             MagicWandTool
-                .Select(image, new MagicWandSettings(100, 100))
-                .GetFeathered(new FeatheringSettings() { Size = 5 })
+                .Select(image, new MagicWandSettings(120, 100))
+                .GetFeathered(new FeatheringSettings { Size = 5 })
                 .Apply();
 
-            // Save the result as PNG
-            image.Save(outputPath, new PngOptions());
+            // Save the result as PNG with alpha channel
+            var pngOptions = new PngOptions
+            {
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
+            image.Save(outputPath, pngOptions);
         }
     }
 }

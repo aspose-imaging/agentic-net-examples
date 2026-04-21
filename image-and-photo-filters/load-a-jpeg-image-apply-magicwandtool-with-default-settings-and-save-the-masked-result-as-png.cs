@@ -8,11 +8,11 @@ using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output/result.png";
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,20 +24,27 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load JPEG image as RasterImage
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        try
         {
-            // Apply MagicWandTool with default settings (reference point at 0,0)
-            MagicWandTool
-                .Select(image, new MagicWandSettings(0, 0))
-                .Apply();
-
-            // Save the masked result as PNG with alpha channel
-            PngOptions pngOptions = new PngOptions
+            // Load the JPEG image as a RasterImage
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-            image.Save(outputPath, pngOptions);
+                // Create a mask using MagicWandTool with default settings (reference point at 0,0)
+                MagicWandTool
+                    .Select(image, new MagicWandSettings(0, 0))
+                    .Apply();
+
+                // Save the masked result as PNG with alpha channel
+                var pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

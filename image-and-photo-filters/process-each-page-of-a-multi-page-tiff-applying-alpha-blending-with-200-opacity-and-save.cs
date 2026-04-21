@@ -4,52 +4,45 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "C:\\temp\\input.tif";
+            string outputPath = "C:\\temp\\output.tif";
 
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
-        {
-            foreach (TiffFrame frame in tiff.Frames)
+            if (!File.Exists(inputPath))
             {
-                tiff.ActiveFrame = frame;
-
-                int width = frame.Width;
-                int height = frame.Height;
-
-                // Create a solid white overlay image
-                Source overlaySource = new FileCreateSource(Path.GetTempFileName(), false);
-                BmpOptions overlayOptions = new BmpOptions { Source = overlaySource };
-                using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, width, height))
-                {
-                    // Fill overlay with white color
-                    Graphics graphics = new Graphics(overlay);
-                    graphics.Clear(Aspose.Imaging.Color.White);
-
-                    // Blend overlay onto the current frame with opacity 200
-                    ((RasterImage)frame).Blend(new Point(0, 0), overlay, 200);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiff.Save(outputPath, saveOptions);
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                int pageCount = tiff.PageCount;
+                for (int i = 0; i < pageCount; i++)
+                {
+                    tiff.ActiveFrame = tiff.Frames[i];
+                    var bounds = tiff.ActiveFrame.Bounds;
+                    Color[] pixels = tiff.LoadPixels(bounds);
+                    for (int p = 0; p < pixels.Length; p++)
+                    {
+                        Color c = pixels[p];
+                        pixels[p] = Color.FromArgb(200, c.R, c.G, c.B);
+                    }
+                    tiff.SavePixels(bounds, pixels);
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                tiff.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

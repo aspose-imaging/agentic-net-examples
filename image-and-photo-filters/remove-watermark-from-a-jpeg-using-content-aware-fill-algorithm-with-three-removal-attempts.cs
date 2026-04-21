@@ -1,11 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
@@ -22,31 +19,30 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create mask for the area to be removed (example ellipse)
+        // Create a mask for the watermark region (example ellipse)
         var mask = new GraphicsPath();
         var figure = new Figure();
         figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
         mask.AddFigure(figure);
 
         // Configure Content Aware Fill options with three attempts
-        var options = new ContentAwareFillWatermarkOptions(mask)
+        var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
         {
             MaxPaintingAttempts = 3
         };
 
-        // JPEG save options
-        var jpegOptions = new JpegOptions();
-
-        // Load the JPEG image, apply watermark removal, and save the result
-        using (Image image = Image.Load(inputPath))
+        // Load the JPEG image, remove the watermark, and save the result
+        using (var image = Image.Load(inputPath))
         {
             var jpegImage = (JpegImage)image;
-            using (RasterImage result = WatermarkRemover.PaintOver(jpegImage, options))
+
+            using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(jpegImage, options))
             {
-                result.Save(outputPath, jpegOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the processed image
+                result.Save(outputPath);
             }
         }
     }

@@ -2,61 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define relative input and output paths
-        string inputPath = Path.Combine("Input", "sample.pdf");
-        string outputPath = Path.Combine("Output", "cleaned.jpg");
-        string tempPath = Path.Combine("Output", "temp.jpg");
+        string inputPath = "Input\\sample.pdf";
+        string outputPath = "Output\\cleaned.jpg";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directories exist
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-        // Load PDF and rasterize first page to a temporary JPEG
-        using (Image pdfImage = Image.Load(inputPath))
+        try
         {
-            JpegOptions jpegOptions = new JpegOptions
+            using (Image pdfImage = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = new VectorRasterizationOptions
+                // Cast to RasterImage for watermark removal
+                RasterImage raster = (RasterImage)pdfImage;
+                raster.CacheData();
+
+                // Define mask (example ellipse)
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
+                mask.AddFigure(figure);
+
+                // Create watermark removal options
+                var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+
+                // Remove watermark
+                using (RasterImage cleaned = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = pdfImage.Width,
-                    PageHeight = pdfImage.Height
+                    var jpegOptions = new JpegOptions();
+                    cleaned.Save(outputPath, jpegOptions);
                 }
-            };
-
-            pdfImage.Save(tempPath, jpegOptions);
-        }
-
-        // Load the rasterized image, apply watermark removal, and save the cleaned JPEG
-        using (Image tempImg = Image.Load(tempPath))
-        {
-            RasterImage raster = (RasterImage)tempImg;
-
-            // Define a mask covering the whole image (adjust as needed)
-            var mask = new GraphicsPath();
-            var figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(0, 0, raster.Width, raster.Height)));
-            mask.AddFigure(figure);
-
-            var watermarkOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-
-            using (RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, watermarkOptions))
-            {
-                result.Save(outputPath);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

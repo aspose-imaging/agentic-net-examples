@@ -1,69 +1,54 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        var inputs = new List<string>
+        try
         {
-            @"C:\Images\input1.jpg",
-            @"C:\Images\input2.jpg"
-        };
-
-        var outputs = new List<string>
-        {
-            @"C:\Images\output1.png",
-            @"C:\Images\output2.png"
-        };
-
-        for (int i = 0; i < inputs.Count; i++)
-        {
-            string inputPath = inputs[i];
-            string outputPath = outputs[i];
-
-            if (!File.Exists(inputPath))
+            var tasks = new (string input, string output, int threshold, int featherSize)[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            var maskingOptions = new GraphCutMaskingOptions
-            {
-                FeatheringRadius = 5,
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                BackgroundReplacementColor = Color.Transparent,
-                ExportOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
-                }
+                (@"C:\Images\image1.png", @"C:\Processed\image1_processed.png", 120, 3),
+                (@"C:\Images\image2.png", @"C:\Processed\image2_processed.png", 200, 0),
+                (@"C:\Images\image3.png", @"C:\Processed\image3_processed.png", 80, 5)
             };
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            foreach (var (inputPath, outputPath, threshold, featherSize) in tasks)
             {
-                ImageMasking masking = new ImageMasking(image);
-                using (MaskingResult result = masking.Decompose(maskingOptions))
-                using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                if (!File.Exists(inputPath))
                 {
-                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
                 }
-            }
 
-            int threshold = maskingOptions.FeatheringRadius;
-            bool feathered = maskingOptions.FeatheringRadius > 0;
-            Console.WriteLine($"{Path.GetFileName(inputPath)}, Threshold: {threshold}, Feathered: {feathered}");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+                {
+                    var mask = MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = threshold });
+
+                    if (featherSize > 0)
+                    {
+                        var featheredMask = mask.GetFeathered(new FeatheringSettings { Size = featherSize });
+                        featheredMask.Apply();
+                    }
+                    else
+                    {
+                        mask.Apply();
+                    }
+
+                    image.Save(outputPath);
+                }
+
+                Console.WriteLine($"{Path.GetFileName(inputPath)}\tThreshold={threshold}\tFeathered={(featherSize > 0)}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,71 +1,63 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input\\sample.jpg";
-        string outputPath = "Output\\mask.bin";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\temp\source.jpg";
+        string outputPath = @"C:\temp\mask.bin";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load source image as RasterImage
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Configure masking options
-            var exportOptions = new PngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            var maskingOptions = new MaskingOptions
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                Args = new AutoMaskingArgs(),
-                BackgroundReplacementColor = Color.Transparent,
-                ExportOptions = exportOptions
-            };
-
-            // Perform masking to obtain the foreground mask
-            var masking = new ImageMasking(sourceImage);
-            using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
-            using (RasterImage maskImage = (RasterImage)maskingResult[1].GetMask())
-            {
-                // Extract raw ARGB pixel data
-                int width = maskImage.Width;
-                int height = maskImage.Height;
-                int[] pixels = new int[width * height];
-                maskImage.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, width, height), pixels);
-
-                // Write pixel data to binary file
-                using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                using (BinaryWriter bw = new BinaryWriter(fs))
+                // Prepare masking options (automatic segmentation)
+                var maskingOptions = new MaskingOptions
                 {
-                    foreach (int pixel in pixels)
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    Args = new AutoMaskingArgs(),
+                    BackgroundReplacementColor = Color.Transparent,
+                    // Use BMP options – the result will be a binary bitmap suitable for CV pipelines
+                    ExportOptions = new BmpOptions()
+                };
+
+                // Create the ImageMasking instance
+                var masking = new ImageMasking(image);
+
+                // Perform masking and obtain the foreground mask (layer 1)
+                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+                {
+                    // The mask is stored as a raster image
+                    using (RasterImage mask = maskingResult[1].GetMask())
                     {
-                        bw.Write(pixel);
+                        // Save the mask to a binary file (BMP format written to .bin)
+                        mask.Save(outputPath, (BmpOptions)maskingOptions.ExportOptions);
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

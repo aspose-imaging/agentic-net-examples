@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
@@ -10,62 +10,61 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Set up base, input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Validate input directory
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
+                return;
+            }
 
-        // Get all PNG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-        // Path to the overlay image (must be present in the input folder)
-        string overlayPath = Path.Combine(inputDirectory, "overlay.png");
-        if (!File.Exists(overlayPath))
-        {
-            Console.Error.WriteLine($"File not found: {overlayPath}");
-            return;
-        }
+            // Get all PNG files in the input folder
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-        // Load overlay image once
-        using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
-        {
+            // Path to the overlay image (must be a PNG with alpha channel)
+            string overlayPath = "overlay.png";
+            if (!File.Exists(overlayPath))
+            {
+                Console.Error.WriteLine($"File not found: {overlayPath}");
+                return;
+            }
+
             foreach (string inputPath in files)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output file path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+                // Determine output JPEG path
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
 
-                // Ensure output directory exists
+                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the background PNG image
-                using (RasterImage background = (RasterImage)Image.Load(inputPath))
+                // Load base PNG image
+                using (RasterImage baseImage = (RasterImage)Image.Load(inputPath))
+                // Load overlay PNG image
+                using (RasterImage overlayImage = (RasterImage)Image.Load(overlayPath))
                 {
-                    // Apply the overlay with 64 (out of 255) alpha
-                    background.Blend(new Point(0, 0), overlay, 64);
+                    // Apply overlay with 64 (out of 255) opacity
+                    baseImage.Blend(new Point(0, 0), overlayImage, 64);
 
-                    // Set JPEG save options
+                    // Prepare JPEG options with a file source
                     JpegOptions jpegOptions = new JpegOptions
                     {
                         Source = new FileCreateSource(outputPath, false),
@@ -73,9 +72,13 @@ class Program
                     };
 
                     // Save the result as JPEG
-                    background.Save(outputPath, jpegOptions);
+                    baseImage.Save(outputPath, jpegOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

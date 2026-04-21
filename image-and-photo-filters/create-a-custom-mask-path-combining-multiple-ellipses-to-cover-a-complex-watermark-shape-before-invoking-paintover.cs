@@ -1,63 +1,73 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (var image = Image.Load(inputPath))
-        {
-            var pngImage = (PngImage)image;
-
-            // Create a mask composed of multiple ellipses
-            var mask = new GraphicsPath();
-
-            // First ellipse
-            var figure1 = new Figure();
-            figure1.AddShape(new EllipseShape(new RectangleF(100, 80, 150, 120)));
-            mask.AddFigure(figure1);
-
-            // Second ellipse
-            var figure2 = new Figure();
-            figure2.AddShape(new EllipseShape(new RectangleF(300, 200, 180, 140)));
-            mask.AddFigure(figure2);
-
-            // Third ellipse
-            var figure3 = new Figure();
-            figure3.AddShape(new EllipseShape(new RectangleF(500, 50, 200, 160)));
-            mask.AddFigure(figure3);
-
-            // Configure watermark removal options (using Telea algorithm)
-            var options = new TeleaWatermarkOptions(mask);
-
-            // Perform watermark removal
-            using (RasterImage result = WatermarkRemover.PaintOver(pngImage, options))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Save the result as PNG
-                var saveOptions = new PngOptions();
-                result.Save(outputPath, saveOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to PNG image (required for PaintOver)
+                PngImage pngImage = (PngImage)image;
+
+                // Create a graphics path mask composed of multiple ellipses
+                GraphicsPath mask = new GraphicsPath();
+
+                // First ellipse
+                Figure ellipseFigure1 = new Figure();
+                ellipseFigure1.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
+                mask.AddFigure(ellipseFigure1);
+
+                // Second ellipse
+                Figure ellipseFigure2 = new Figure();
+                ellipseFigure2.AddShape(new EllipseShape(new RectangleF(300, 200, 180, 120)));
+                mask.AddFigure(ellipseFigure2);
+
+                // Third ellipse (optional, add more for complex shapes)
+                Figure ellipseFigure3 = new Figure();
+                ellipseFigure3.AddShape(new EllipseShape(new RectangleF(200, 350, 250, 180)));
+                mask.AddFigure(ellipseFigure3);
+
+                // Configure watermark removal options
+                var options = new ContentAwareFillWatermarkOptions(mask)
+                {
+                    MaxPaintingAttempts = 4
+                };
+
+                // Perform the paint-over operation
+                using (Image result = WatermarkRemover.PaintOver(pngImage, options))
+                {
+                    // Save the processed image
+                    result.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
