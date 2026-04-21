@@ -9,37 +9,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = Path.Combine(
-            @"C:\Images\Converted",
-            Path.GetFileNameWithoutExtension(inputPath) + "_converted.pdf");
+        // Hard‑coded input EPS file path
+        string inputPath = @"C:\Images\Sample.eps";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Build a custom output file name based on the input name
+        string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_converted.pdf";
+        string outputPath = Path.Combine(@"C:\Images\Output", outputFileName);
+
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
+        // Load the EPS image
         using (var image = (EpsImage)Image.Load(inputPath))
         {
-            // Configure PDF options (optional compliance setting)
+            // Configure PDF options (example: set PDF/A‑1b compliance)
             var pdfOptions = new PdfOptions
             {
                 PdfCoreOptions = new PdfCoreOptions
                 {
-                    // Example compliance; adjust as needed
                     PdfCompliance = PdfComplianceVersion.PdfA1b
                 }
             };
 
-            // Save as PDF using the custom output path
+            // Save the EPS as PDF using the custom output path
             image.Save(outputPath, pdfOptions);
         }
+
+        Console.WriteLine($"Conversion completed: {outputPath}");
     }
 }
