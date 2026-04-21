@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -24,18 +23,28 @@ class Program
             Directory.CreateDirectory(outputDirectory);
         }
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+        double[,] edgeKernel = new double[,]
+        {
+            { -1, -1, -1 },
+            { -1,  8, -1 },
+            { -1, -1, -1 }
+        };
 
         foreach (string inputPath in files)
         {
+            if (!inputPath.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
+                continue;
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
@@ -43,19 +52,13 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                double[,] kernel = new double[,]
+                raster.Filter(raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel));
+
+                using (JpegOptions jpegOptions = new JpegOptions())
                 {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
-                };
-
-                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 3);
-
-                raster.Filter(raster.Bounds, convOptions);
-
-                var jpegOptions = new JpegOptions();
-                raster.Save(outputPath, jpegOptions);
+                    raster.Save(outputPath, jpegOptions);
+                }
             }
         }
     }
