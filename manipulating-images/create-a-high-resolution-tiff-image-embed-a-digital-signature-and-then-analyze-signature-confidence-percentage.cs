@@ -11,56 +11,55 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded paths
-        string outputPath = @"C:\temp\highres_signed.tif";
-        string inputPath = outputPath;
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create high‑resolution TIFF (e.g., 2000x2000)
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.Compression = TiffCompressions.Lzw;
-        tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create image bound to the output file
-        using (Image image = Image.Create(tiffOptions, 2000, 2000))
+        try
         {
-            // Fill with a simple gradient
-            using (LinearGradientBrush brush = new LinearGradientBrush(
+            string outputPath = "output.tif";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure TIFF options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            tiffOptions.Compression = TiffCompressions.Lzw;
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+            // Create a high‑resolution frame (2000x2000)
+            int width = 2000;
+            int height = 2000;
+            TiffFrame frame = new TiffFrame(tiffOptions, width, height);
+
+            // Fill the frame with a blue‑to‑yellow gradient
+            LinearGradientBrush brush = new LinearGradientBrush(
                 new Point(0, 0),
-                new Point(image.Width, image.Height),
+                new Point(width, height),
                 Color.Blue,
-                Color.Yellow))
+                Color.Yellow);
+
+            Graphics graphics = new Graphics(frame);
+            graphics.FillRectangle(brush, frame.Bounds);
+
+            // Create TIFF image from the frame
+            using (TiffImage tiffImage = new TiffImage(frame))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.FillRectangle(brush, image.Bounds);
+                // Save the initial image
+                tiffImage.Save(outputPath);
+
+                // Embed a digital signature with a valid password
+                tiffImage.EmbedDigitalSignature("secure123");
+
+                // Save after embedding the signature
+                tiffImage.Save(outputPath);
+
+                // Analyze signature confidence percentage
+                double confidence = tiffImage.AnalyzePercentageDigitalSignature("secure123");
+                Console.WriteLine($"Signature confidence: {confidence}%");
             }
-
-            // Embed digital signature
-            RasterImage raster = (RasterImage)image;
-            raster.EmbedDigitalSignature("mySecretPassword");
-
-            // Save the bound image
-            image.Save();
         }
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        catch (Exception ex)
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Load the TIFF and analyze signature confidence
-        using (Image loadedImage = Image.Load(inputPath))
-        {
-            RasterImage loadedRaster = (RasterImage)loadedImage;
-            double confidence = loadedRaster.AnalyzePercentageDigitalSignature("mySecretPassword");
-            Console.WriteLine($"Signature confidence: {confidence}%");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
