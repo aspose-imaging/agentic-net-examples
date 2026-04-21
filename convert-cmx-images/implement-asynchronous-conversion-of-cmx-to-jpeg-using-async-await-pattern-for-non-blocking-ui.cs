@@ -7,13 +7,14 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main(string[] args)
+    // Async entry point
+    static async Task Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "C:\\Images\\sample.cmx";
-        string outputPath = "C:\\Images\\output.jpg";
+        string inputPath = @"c:\temp\sample.cmx";
+        string outputPath = @"c:\temp\output.jpg";
 
-        // Validate input file existence
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,24 +24,21 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Asynchronous conversion using async/await pattern
-        var conversionTask = Task.Run(async () =>
+        // Perform conversion asynchronously
+        await ConvertCmxToJpegAsync(inputPath, outputPath);
+    }
+
+    // Asynchronous conversion method
+    private static async Task ConvertCmxToJpegAsync(string inputPath, string outputPath)
+    {
+        // Load CMX image on a background thread
+        using (CmxImage cmxImage = await Task.Run(() => (CmxImage)Image.Load(inputPath)))
         {
-            // Yield to ensure async context
-            await Task.Yield();
+            // Prepare JPEG save options (default options are sufficient for basic conversion)
+            var jpegOptions = new JpegOptions();
 
-            // Load CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
-            {
-                // Prepare JPEG options
-                var jpegOptions = new JpegOptions();
-
-                // Save as JPEG
-                cmxImage.Save(outputPath, jpegOptions);
-            }
-        });
-
-        // Wait for the conversion to complete
-        conversionTask.GetAwaiter().GetResult();
+            // Save JPEG image on a background thread
+            await Task.Run(() => cmxImage.Save(outputPath, jpegOptions));
+        }
     }
 }
