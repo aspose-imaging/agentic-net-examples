@@ -1,20 +1,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input CDR files
-        string[] inputPaths = {
-            @"C:\Images\sample1.cdr",
-            @"C:\Images\sample2.cdr"
-        };
+        // Hardcoded input and output directories
+        string inputDirectory = "InputCdr";
+        string outputDirectory = "OutputPng";
 
-        foreach (string inputPath in inputPaths)
+        // Validate input directory
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add CDR files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        // Get all CDR files
+        string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+
+        foreach (string inputPath in files)
         {
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,24 +38,34 @@ class Program
                 return;
             }
 
-            // Determine output PNG path (same folder, same name, .png extension)
-            string outputPath = Path.ChangeExtension(inputPath, ".png");
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-            // Ensure output directory exists
+            // Ensure output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            // Load CDR, rasterize to PNG in memory, resize, and save
+            using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath))
             {
-                // Process each page (CorelDRAW files can be multipage)
-                foreach (CdrImagePage page in cdrImage.Pages)
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Resize page to 800x600 pixels
-                    page.Resize(800, 600);
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
 
-                    // Save the resized page as PNG
-                    PngOptions pngOptions = new PngOptions();
-                    page.Save(outputPath, pngOptions);
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        raster.Resize(800, 600);
+                        raster.Save(outputPath);
+                    }
                 }
             }
         }
