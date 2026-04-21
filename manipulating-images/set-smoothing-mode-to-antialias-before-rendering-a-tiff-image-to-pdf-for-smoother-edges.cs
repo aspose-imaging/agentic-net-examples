@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputPath = @"C:\temp\output.pdf";
+        string inputPath = @"C:\Temp\input.tif";
+        string outputPath = @"C:\Temp\output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,25 +22,27 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the TIFF image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure PDF save options with anti‑alias smoothing
-            var pdfOptions = new PdfOptions
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = new VectorRasterizationOptions
+                // Configure PDF save options with anti‑alias smoothing
+                var pdfOptions = new PdfOptions
                 {
-                    // Apply anti‑aliasing for smoother edges
-                    SmoothingMode = SmoothingMode.AntiAlias,
-                    // Use the original image size as the PDF page size
-                    PageSize = image.Size,
-                    // Optional: set a background color
-                    BackgroundColor = Color.White
-                }
-            };
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        SmoothingMode = SmoothingMode.AntiAlias
+                    }
+                };
 
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
