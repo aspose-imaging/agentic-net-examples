@@ -1,45 +1,43 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path
-        string outputPath = @"C:\temp\horizontal_lines.bmp";
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up BMP options with a file create source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        int width = 200;
-        int height = 100;
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, width, height))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Pen for drawing horizontal lines
-            Pen pen = new Pen(Color.Black, 1);
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Draw pixel‑perfect horizontal lines every 10 pixels
-            for (int y = 0; y < height; y += 10)
+        // Load the BMP image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        {
+            // Create a Graphics object for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+
+            // Define a 1-pixel black pen
+            Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1);
+
+            // Draw horizontal lines across the image width at every 10-pixel interval
+            for (int y = 0; y < image.Height; y += 10)
             {
-                graphics.DrawLine(pen, 0, y, width - 1, y);
+                graphics.DrawLine(pen, 0, y, image.Width - 1, y);
             }
 
-            // Save the image (file is already bound to the output path)
-            image.Save();
+            // Save the modified image to the output path
+            image.Save(outputPath);
         }
     }
 }
