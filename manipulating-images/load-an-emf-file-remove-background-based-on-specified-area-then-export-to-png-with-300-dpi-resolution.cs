@@ -2,49 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.emf";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EMF image
-        using (EmfImage emf = (EmfImage)Image.Load(inputPath))
-        {
-            // Remove background (global removal)
-            emf.RemoveBackground();
-
-            // Configure PNG export with 300 DPI resolution
-            var pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                ResolutionSettings = new ResolutionSetting(300, 300),
-                Source = new FileCreateSource(outputPath, false),
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    PageSize = emf.Size,
-                    BackgroundColor = Color.Transparent
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as PNG
-            emf.Save(outputPath, pngOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                EmfImage emfImage = (EmfImage)image;
+
+                // Remove background using default settings
+                emfImage.RemoveBackground(new RemoveBackgroundSettings());
+
+                // Configure PNG export with 300 DPI resolution
+                PngOptions pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    ResolutionSettings = new ResolutionSetting(300, 300),
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.Transparent,
+                        PageSize = emfImage.Size
+                    }
+                };
+
+                emfImage.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
