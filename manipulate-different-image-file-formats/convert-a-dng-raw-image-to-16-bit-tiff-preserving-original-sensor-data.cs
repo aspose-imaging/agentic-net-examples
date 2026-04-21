@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dng;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
@@ -23,22 +23,25 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DNG image
+        // Load DNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare TIFF saving options with 16‑bit per channel
+            DngImage dngImage = (DngImage)image;
+
+            // Preserve raw sensor data
+            dngImage.UseRawData = true;
+
+            // Configure TIFF options for 16‑bit per channel
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
             {
-                BitsPerSample = new ushort[] { 16, 16, 16 }, // 16‑bit for R, G, B
-                Photometric = TiffPhotometrics.Rgb,
-                Compression = TiffCompressions.None,
-                // Preserve original metadata if needed
-                ExifData = ((DngImage)image).ExifData,
-                XmpData = ((DngImage)image).XmpData
+                BitsPerSample = new ushort[] { 16, 16, 16 },          // 16 bits for each color component
+                Photometric = TiffPhotometrics.Rgb,                  // RGB color model
+                Compression = TiffCompressions.None,                // No compression
+                PlanarConfiguration = TiffPlanarConfigs.Contiguous // Store components in a single plane
             };
 
             // Save as 16‑bit TIFF
-            image.Save(outputPath, tiffOptions);
+            dngImage.Save(outputPath, tiffOptions);
         }
     }
 }
