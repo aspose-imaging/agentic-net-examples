@@ -2,38 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input and output paths
-        string inputPath = "Input\\sample.djvu";
+        // Define input and output paths
+        string inputPath = Path.Combine("Input", "sample.djvu");
+        string outputPath = Path.Combine("Output", "sample.pdf");
+
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string outputPath = "Output\\output.pdf";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
 
         // Load DjVu image
-        using (Aspose.Imaging.FileFormats.Djvu.DjvuImage djvuImage = (Aspose.Imaging.FileFormats.Djvu.DjvuImage)Image.Load(inputPath))
+        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
         {
             // Configure PDF options with author metadata
-            using (PdfOptions pdfOptions = new PdfOptions())
-            {
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                pdfOptions.PdfDocumentInfo.Author = "Custom Author";
+            PdfOptions pdfOptions = new PdfOptions();
+            pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+            pdfOptions.PdfDocumentInfo.Author = "Custom Author";
 
-                // Export all pages
-                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-                // Save as PDF
-                djvuImage.Save(outputPath, pdfOptions);
-            }
+            // Export all pages to PDF
+            djvuImage.Save(outputPath, pdfOptions);
         }
     }
 }
