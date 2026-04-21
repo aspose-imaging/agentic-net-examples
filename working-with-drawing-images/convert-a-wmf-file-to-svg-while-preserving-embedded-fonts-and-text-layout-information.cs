@@ -1,25 +1,25 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\temp\input.wmf";
         string outputPath = @"C:\temp\output.svg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WMF image
@@ -28,21 +28,25 @@ class Program
             // Set up SVG save options
             SvgOptions saveOptions = new SvgOptions
             {
-                // Preserve text as text (fonts will be embedded if possible)
-                TextAsShapes = false
+                // Render all text as shapes to preserve layout and embedded fonts
+                TextAsShapes = true
             };
 
             // Configure rasterization options for WMF
-            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+            WmfRasterizationOptions rasterizationOptions = new WmfRasterizationOptions
             {
-                BackgroundColor = Color.WhiteSmoke,
+                // Background color for the drawing surface
+                BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
+                // Use the original WMF size as the page size
                 PageSize = wmfImage.Size,
-                RenderMode = WmfRenderMode.Auto
+                // Automatically choose rendering mode (EMF or WMF)
+                RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
             };
 
-            saveOptions.VectorRasterizationOptions = rasterOptions;
+            // Assign rasterization options to the SVG options
+            saveOptions.VectorRasterizationOptions = rasterizationOptions;
 
-            // Save as SVG
+            // Save the image as SVG
             wmfImage.Save(outputPath, saveOptions);
         }
     }
