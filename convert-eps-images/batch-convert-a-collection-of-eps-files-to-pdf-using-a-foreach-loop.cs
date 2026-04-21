@@ -2,17 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Initialize input and output directories
+        // Define base, input and output directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
+        // Ensure input directory exists
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
@@ -20,15 +20,16 @@ class Program
             return;
         }
 
+        // Ensure output directory exists
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
         }
 
         // Get all EPS files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.eps");
+        string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
 
-        foreach (string inputPath in files)
+        foreach (var inputPath in epsFiles)
         {
             // Verify the input file exists
             if (!File.Exists(inputPath))
@@ -45,13 +46,13 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image and save as PDF
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var options = new PdfOptions();
-                image.Save(outputPath, options);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
-
-            Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
         }
     }
 }
