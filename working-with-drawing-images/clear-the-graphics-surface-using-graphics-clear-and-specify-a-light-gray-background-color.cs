@@ -6,29 +6,33 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Define output path
-        string outputPath = "output\\cleared_image.png";
+        string outputPath = @"C:\temp\output.png";
 
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create PNG options with a file create source bound to the output path
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a new image canvas (500x500)
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        // Create a file stream for the output image
+        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
-            // Initialize graphics for the image
-            Graphics graphics = new Graphics(image);
+            // Set up PNG options with the stream as source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new StreamSource(stream);
 
-            // Clear the surface with light gray color
-            graphics.Clear(Aspose.Imaging.Color.LightGray);
+            // Create a new image canvas (500x500)
+            using (Image image = Image.Create(pngOptions, 500, 500))
+            {
+                // Initialize graphics for the image
+                Graphics graphics = new Graphics(image);
 
-            // Save the image (output is already bound via FileCreateSource)
-            image.Save();
+                // Clear the canvas with a light gray background
+                graphics.Clear(Color.LightGray);
+
+                // Save the image (stream is already bound)
+                image.Save();
+            }
         }
     }
 }
