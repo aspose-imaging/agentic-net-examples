@@ -2,15 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.cdr";
-        string outputPath = @"C:\temp\sample_flipped.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\output.tif";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -19,17 +20,17 @@ class Program
             return;
         }
 
-        // Load the CorelDRAW (CDR) file
-        using (Image image = Image.Load(inputPath))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the CorelDRAW (CDR) image
+        using (CdrImage image = (CdrImage)Image.Load(inputPath))
         {
             // Flip the image horizontally
             image.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
-            // Prepare TIFF save options
+            // Prepare default TIFF save options
             var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Save the flipped image as TIFF
             image.Save(outputPath, tiffOptions);
