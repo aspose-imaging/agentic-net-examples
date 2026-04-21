@@ -1,17 +1,15 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu file path
-        string inputPath = @"C:\temp\sample.djvu";
-        // Hardcoded output directory for converted PNG pages
-        string outputDir = @"C:\temp\output";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.djvu";
+        string outputDirectory = "Output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,42 +18,39 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists (creates if missing)
-        Directory.CreateDirectory(outputDir);
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        // Open the DjVu file stream
-        using (Stream stream = File.OpenRead(inputPath))
+        // Load DjVu document from file stream
+        using (FileStream stream = File.OpenRead(inputPath))
+        using (DjvuImage djvuImage = new DjvuImage(stream))
         {
-            // Load the DjVu document
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+            // Iterate through each page
+            foreach (DjvuPage page in djvuImage.Pages)
             {
-                // Iterate through each page in the document
-                foreach (DjvuPage page in djvuImage.Pages)
-                {
-                    // Retrieve original page dimensions
-                    var originalSize = page.Size;
-                    Console.WriteLine($"Page {page.PageNumber}: {originalSize.Width}x{originalSize.Height}");
+                // Retrieve original dimensions
+                int originalWidth = page.Width;
+                int originalHeight = page.Height;
+                Console.WriteLine($"Page {page.PageNumber}: {originalWidth}x{originalHeight}");
 
-                    // Define a target width for scaling (example: 1000 pixels)
-                    int targetWidth = 1000;
-                    // Compute scaling factor based on width
-                    double scale = (double)targetWidth / originalSize.Width;
-                    // Calculate new dimensions while preserving aspect ratio
-                    int newWidth = (int)(originalSize.Width * scale);
-                    int newHeight = (int)(originalSize.Height * scale);
+                // Define target width for scaling (example: 1000 pixels)
+                const int targetWidth = 1000;
+                // Calculate scaling factor while preserving aspect ratio
+                double scale = (double)targetWidth / originalWidth;
+                int newWidth = targetWidth;
+                int newHeight = (int)(originalHeight * scale);
 
-                    // Resize the page to the new dimensions
-                    page.Resize(newWidth, newHeight);
+                // Resize the page
+                page.Resize(newWidth, newHeight);
 
-                    // Build the output file path for this page
-                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.png");
+                // Prepare output file path
+                string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the resized page as PNG
-                    page.Save(outputPath, new PngOptions());
-                }
+                // Save the resized page as PNG
+                page.Save(outputPath, new PngOptions());
             }
         }
     }
