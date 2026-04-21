@@ -4,52 +4,46 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded output path
+            string outputPath = @"C:\Temp\scanned.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load existing TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            // Create options for the new frame
-            TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions.BitsPerSample = new ushort[] { 1 }; // 1 bit per pixel (B/W)
-            frameOptions.ByteOrder = TiffByteOrder.LittleEndian;
-            frameOptions.Compression = TiffCompressions.CcittFax4; // CCITT Group 4
+            // Configure TIFF options for the frame
+            var frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+            frameOptions.Compression = TiffCompressions.CcittFax4; // CCITT Group 4 compression
             frameOptions.Photometric = TiffPhotometrics.MinIsBlack; // 0 = black, 1 = white
+            frameOptions.BitsPerSample = new ushort[] { 1 }; // 1‑bit per pixel
 
-            // Define custom dimensions for the new frame
-            int frameWidth = 1200;
-            int frameHeight = 1800;
+            // Custom dimensions (e.g., A4 at 300 DPI)
+            int width = 2480;   // 8.27 in × 300 dpi
+            int height = 3508;  // 11.69 in × 300 dpi
 
-            // Create the new TIFF frame
-            TiffFrame newFrame = new TiffFrame(frameOptions, frameWidth, frameHeight);
+            // Create the TIFF frame with the specified options and size
+            var frame = new TiffFrame(frameOptions, width, height);
 
-            // Add the new frame to the TIFF image
-            tiffImage.AddFrame(newFrame);
+            // Create a TIFF image containing the frame
+            using (var tiffImage = new TiffImage(frame))
+            {
+                // Set DPI values for scanning quality
+                tiffImage.HorizontalResolution = 300;
+                tiffImage.VerticalResolution = 300;
 
-            // Set DPI values for scanning quality
-            tiffImage.HorizontalResolution = 300f; // 300 DPI horizontal
-            tiffImage.VerticalResolution = 300f;   // 300 DPI vertical
-
-            // Save the modified TIFF image
-            tiffImage.Save(outputPath);
+                // Save the TIFF image
+                tiffImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
