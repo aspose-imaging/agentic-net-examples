@@ -2,58 +2,68 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output_blur.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string originalRasterPath = "output_original.png";
+            string blurredRasterPath = "output_blurred.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image vectorImage = Image.Load(inputPath))
-        {
-            // Set up rasterization options for converting SVG to raster
-            var rasterOptions = new SvgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = vectorImage.Size,
-                BackgroundColor = Color.White
-            };
-
-            // Configure PNG save options with the rasterization settings
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Rasterize SVG to a memory stream
-            using (MemoryStream rasterStream = new MemoryStream())
-            {
-                vectorImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0;
-
-                // Load the rasterized image as a RasterImage
-                using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
-                {
-                    // Apply Gaussian blur filter (radius 5, sigma 4.0) to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                    // Save the blurred raster image
-                    rasterImage.Save(outputPath);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(originalRasterPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(blurredRasterPath));
+
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to SvgImage
+                SvgImage svgImage = (SvgImage)image;
+
+                // Set up rasterization options for PNG output
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
+                };
+
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the original rasterized PNG
+                svgImage.Save(originalRasterPath, pngOptions);
+            }
+
+            // Load the rasterized PNG to apply Gaussian blur
+            using (Image rasterImageContainer = Image.Load(originalRasterPath))
+            {
+                RasterImage rasterImage = (RasterImage)rasterImageContainer;
+
+                // Apply Gaussian blur with radius 5 and sigma 4.0
+                rasterImage.Filter(rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the blurred image
+                rasterImage.Save(blurredRasterPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
