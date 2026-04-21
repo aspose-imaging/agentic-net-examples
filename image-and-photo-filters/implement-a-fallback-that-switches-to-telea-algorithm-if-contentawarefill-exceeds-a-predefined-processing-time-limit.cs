@@ -1,69 +1,86 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to specific raster image type
-            PngImage pngImage = (PngImage)image;
-
-            // Create a mask (example ellipse)
-            GraphicsPath mask = new GraphicsPath();
-            Figure figure = new Figure();
-            // Adjust rectangle as needed for the area to remove
-            figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
-            mask.AddFigure(figure);
-
-            // Define processing time limit (e.g., 5 seconds)
-            TimeSpan timeLimit = TimeSpan.FromSeconds(5);
-
-            // First attempt with Content Aware Fill
-            ContentAwareFillWatermarkOptions cafOptions = new ContentAwareFillWatermarkOptions(mask)
+            if (!File.Exists(inputPath))
             {
-                MaxPaintingAttempts = 4
-            };
-
-            Stopwatch sw = Stopwatch.StartNew();
-            Image result = WatermarkRemover.PaintOver(pngImage, cafOptions);
-            sw.Stop();
-
-            // If processing exceeds the limit, fallback to Telea algorithm
-            if (sw.Elapsed > timeLimit)
-            {
-                // Dispose previous result if needed
-                result.Dispose();
-
-                TeleaWatermarkOptions teleaOptions = new TeleaWatermarkOptions(mask);
-                result = WatermarkRemover.PaintOver(pngImage, teleaOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save the resulting image
-            result.Save(outputPath);
-            result.Dispose();
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            // Create mask (example ellipse)
+            var mask = new GraphicsPath();
+            var figure = new Figure();
+            figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
+            mask.AddFigure(figure);
+
+            // Processing time limit
+            TimeSpan timeLimit = TimeSpan.FromSeconds(5);
+
+            // Load image
+            using (var image = Image.Load(inputPath))
+            {
+                var raster = (RasterImage)image;
+
+                // Attempt with ContentAwareFill algorithm
+                var cafOptions = new ContentAwareFillWatermarkOptions(mask)
+                {
+                    MaxPaintingAttempts = 4
+                };
+
+                DateTime start = DateTime.Now;
+                using (var result = WatermarkRemover.PaintOver(raster, cafOptions))
+                {
+                    TimeSpan duration = DateTime.Now - start;
+
+                    var saveOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    };
+
+                    if (duration > timeLimit)
+                    {
+                        // Fallback to Telea algorithm
+                        using (var image2 = Image.Load(inputPath))
+                        {
+                            var raster2 = (RasterImage)image2;
+                            var teleaOptions = new TeleaWatermarkOptions(mask);
+                            using (var fallbackResult = WatermarkRemover.PaintOver(raster2, teleaOptions))
+                            {
+                                fallbackResult.Save(outputPath, saveOptions);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        result.Save(outputPath, saveOptions);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
