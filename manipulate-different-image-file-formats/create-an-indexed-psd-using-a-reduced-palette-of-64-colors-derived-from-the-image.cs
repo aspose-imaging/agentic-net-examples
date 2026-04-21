@@ -8,46 +8,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.psd";
+        // Hardcoded input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output/output.psd";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to work with pixel data
-            RasterImage raster = (RasterImage)image;
-
-            // Create a palette with the 64 most frequent colors from the source image
-            IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 64);
-
-            // Configure PSD save options
-            PsdOptions psdOptions = new PsdOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Standard 8 bits per channel
-                ChannelBitsCount = 8,
-                // RGB channels
-                ChannelsCount = 3,
-                // Use RGB color mode
-                ColorMode = ColorModes.Rgb,
-                // No compression (RAW)
-                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
-                // Assign the generated palette
-                Palette = palette
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as an indexed PSD
-            image.Save(outputPath, psdOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access pixel data
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Create PSD save options
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    // Use 8 bits per channel (standard for PSD)
+                    ChannelBitsCount = 8,
+                    // Set the desired color mode (RGB)
+                    ColorMode = ColorModes.Rgb,
+                    // Use RLE compression (optional)
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                    // Generate a palette with 64 colors derived from the image
+                    Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(rasterImage, 64)
+                };
+
+                // Save the image as an indexed PSD
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
