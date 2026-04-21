@@ -8,39 +8,61 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.emf");
-        if (!File.Exists(inputPath))
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\InputEmf";
+        string outputFolder = @"C:\OutputPdf";
+
+        // Validate input directory
+        if (!Directory.Exists(inputFolder))
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
+            Directory.CreateDirectory(inputFolder);
+            Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
             return;
         }
 
-        string outputPath = Path.Combine("Output", "sample.pdf");
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Get all EMF files
+        string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
 
-        using (Image image = Image.Load(inputPath))
+        foreach (string inputPath in emfFiles)
         {
-            EmfImage emfImage = (EmfImage)image;
-            EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
-
-            string headerText = $"Converted on {DateTime.Now:yyyy-MM-dd}";
-            graphics.DrawString(headerText, new Font("Arial", 24), Aspose.Imaging.Color.Black, 10, 10);
-
-            using (EmfImage annotatedEmf = graphics.EndRecording())
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = annotatedEmf.Width,
-                    PageHeight = annotatedEmf.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                annotatedEmf.Save(outputPath, pdfOptions);
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                EmfImage emfImage = (EmfImage)image;
+
+                // Create graphics recorder from the EMF image
+                EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
+
+                // Draw header with conversion date
+                graphics.DrawString(
+                    $"Converted on {DateTime.Now:yyyy-MM-dd}",
+                    new Font("Arial", 24),
+                    Color.Black,
+                    10,
+                    10);
+
+                // End recording to obtain a new EMF image containing the header
+                using (EmfImage newEmf = graphics.EndRecording())
+                {
+                    // Save as PDF
+                    PdfOptions pdfOptions = new PdfOptions();
+                    newEmf.Save(outputPath, pdfOptions);
+                }
             }
         }
     }
