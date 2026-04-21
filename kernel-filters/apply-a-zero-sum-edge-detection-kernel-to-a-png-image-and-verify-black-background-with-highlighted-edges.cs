@@ -11,7 +11,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_edges.png";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,74 +23,78 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source PNG image
-        using (PngImage sourceImage = new PngImage(inputPath))
+        // Load the PNG image
+        using (PngImage image = new PngImage(inputPath))
         {
-            int width = sourceImage.Width;
-            int height = sourceImage.Height;
+            int width = image.Width;
+            int height = image.Height;
+            var bounds = image.Bounds;
 
-            // Load all ARGB pixels from the source image
-            int[] srcPixels = sourceImage.LoadArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, width, height));
+            // Load all ARGB32 pixels
+            int[] srcPixels = image.LoadArgb32Pixels(bounds);
+            int[] dstPixels = new int[srcPixels.Length];
 
-            // Prepare destination pixel buffer
-            int[] destPixels = new int[width * height];
-
-            // Zero‑sum edge detection kernel (3x3)
+            // Zero‑sum edge detection kernel (Laplacian)
             int[,] kernel = new int[,]
             {
                 { -1, -1, -1 },
                 { -1,  8, -1 },
                 { -1, -1, -1 }
             };
-            int kSize = 3;
-            int kOffset = kSize / 2;
 
-            // Apply convolution
-            for (int y = 0; y < height; y++)
+            // Apply convolution (skip border pixels)
+            for (int y = 1; y < height - 1; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 1; x < width - 1; x++)
                 {
                     int sum = 0;
-
-                    for (int ky = 0; ky < kSize; ky++)
+                    for (int ky = -1; ky <= 1; ky++)
                     {
-                        int py = y + ky - kOffset;
-                        if (py < 0 || py >= height) continue;
-
-                        for (int kx = 0; kx < kSize; kx++)
+                        for (int kx = -1; kx <= 1; kx++)
                         {
-                            int px = x + kx - kOffset;
-                            if (px < 0 || px >= width) continue;
+                            int srcIndex = (y + ky) * width + (x + kx);
+                            int argb = srcPixels[srcIndex];
 
-                            int pixel = srcPixels[py * width + px];
+                            // Extract RGB components
+                            int r = (argb >> 16) & 0xFF;
+                            int g = (argb >> 8) & 0xFF;
+                            int b = argb & 0xFF;
 
-                            // Convert pixel to grayscale intensity using luminance formula
-                            int r = (pixel >> 16) & 0xFF;
-                            int g = (pixel >> 8) & 0xFF;
-                            int b = pixel & 0xFF;
-                            int intensity = (r * 299 + g * 587 + b * 114) / 1000;
+                            // Simple intensity (grayscale) value
+                            int intensity = (r + g + b) / 3;
 
-                            sum += intensity * kernel[ky, kx];
+                            int k = kernel[ky + 1, kx + 1];
+                            sum += intensity * k;
                         }
                     }
 
-                    // Clamp result to [0,255]
-                    sum = Math.Max(0, Math.Min(255, sum));
+                    // Absolute value and clamp to [0,255]
+                    int v = Math.Abs(sum);
+                    if (v > 255) v = 255;
 
-                    // Build ARGB pixel (opaque)
-                    destPixels[y * width + x] = (255 << 24) | (sum << 16) | (sum << 8) | sum;
+                    // Construct ARGB pixel (opaque)
+                    int dstArgb = (255 << 24) | (v << 16) | (v << 8) | v;
+                    dstPixels[y * width + x] = dstArgb;
                 }
             }
 
-            // Create a new PNG image for the result
-            using (PngImage resultImage = new PngImage(width, height))
+            // Set border pixels to black
+            for (int x = 0; x < width; x++)
             {
-                // Write processed pixels
-                resultImage.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, width, height), destPixels);
-
-                // Save the result image
-                resultImage.Save(outputPath);
+                dstPixels[x] = 0; // top row
+                dstPixels[(height - 1) * width + x] = 0; // bottom row
             }
+            for (int y = 0; y < height; y++)
+            {
+                dstPixels[y * width] = 0; // left column
+                dstPixels[y * width + (width - 1)] = 0; // right column
+            }
+
+            // Write processed pixels back to the image
+            image.SaveArgb32Pixels(bounds, dstPixels);
+
+            // Save the result
+            image.Save(outputPath);
         }
     }
 }
