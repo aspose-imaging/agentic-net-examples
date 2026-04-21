@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -8,10 +7,10 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.bmp";
-        string outputPath = @"C:\Images\thumbnails\thumb.bmp";
+        string inputPath = "input.bmp";
+        string outputPath = "thumb.bmp";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -19,25 +18,37 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Desired thumbnail dimensions
-        const int thumbWidth = 150;
-        const int thumbHeight = 150;
-
-        // Load BMP image, resize, and save as thumbnail
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        // Load the BMP image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
+            // Work with raster image for resizing
+            Aspose.Imaging.RasterImage raster = image as Aspose.Imaging.RasterImage;
+            if (raster == null)
+            {
+                Console.Error.WriteLine("Loaded image is not a raster image.");
+                return;
+            }
+
             // Cache data for better performance
             if (!raster.IsCached)
                 raster.CacheData();
 
-            // Resize to fixed thumbnail size (default nearest neighbour resample)
-            raster.Resize(thumbWidth, thumbHeight);
+            // Fixed thumbnail size
+            int thumbWidth = 150;
+            int thumbHeight = 150;
 
-            // Save using default BMP options
-            BmpOptions saveOptions = new BmpOptions();
-            raster.Save(outputPath, saveOptions);
+            // Resize using nearest neighbor resampling
+            raster.Resize(thumbWidth, thumbHeight, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+
+            // Save as BMP with default options (24 bpp)
+            BmpOptions saveOptions = new BmpOptions
+            {
+                BitsPerPixel = 24
+            };
+
+            image.Save(outputPath, saveOptions);
         }
     }
 }
