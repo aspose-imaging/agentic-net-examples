@@ -2,16 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using System.Drawing;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
 
-        // Verify input file exists
+        // Check input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,22 +22,27 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Rasterize the SVG by converting it to a RasterImage
-            // (Aspose.Imaging automatically rasterizes when casting to RasterImage)
-            RasterImage rasterImage = (RasterImage)image;
+            // Load the rasterized image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
 
-            // Create Gauss-Wiener filter options with custom strength parameters
-            // Example: kernel size = 7, sigma = 3.5 (adjust as needed)
-            var gaussWienerOptions = new GaussWienerFilterOptions(7, 3.5);
+                // Configure Gauss‑Wiener filter (size = 7, sigma = 3.0)
+                var gaussWienerOptions = new GaussWienerFilterOptions(7, 3.0);
 
-            // Apply the filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, gaussWienerOptions);
+                // Apply the filter to the whole image
+                rasterImage.Filter(rasterImage.Bounds, gaussWienerOptions);
 
-            // Save the filtered raster image
-            rasterImage.Save(outputPath);
+                // Save the processed image
+                rasterImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
