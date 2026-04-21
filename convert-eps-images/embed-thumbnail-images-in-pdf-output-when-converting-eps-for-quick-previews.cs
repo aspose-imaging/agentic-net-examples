@@ -6,7 +6,7 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         string inputPath = "Input/sample.eps";
         string outputPath = "Output/result.pdf";
@@ -21,7 +21,8 @@ class Program
 
         using (Image image = Image.Load(inputPath))
         {
-            image.Save(outputPath, new PdfOptions());
+            var pdfOptions = new PdfOptions();
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
