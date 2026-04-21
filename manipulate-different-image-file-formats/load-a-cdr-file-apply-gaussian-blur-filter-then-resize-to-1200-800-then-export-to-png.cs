@@ -1,60 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cdr";
-        string outputPath = "output.png";
+        // Hardcoded paths
+        string inputCdrPath = @"C:\Images\input.cdr";
+        string tempPngPath = @"C:\Images\temp.png";
+        string outputPngPath = @"C:\Images\output.png";
 
         // Verify input file exists
-        if (!File.Exists(inputPath))
+        if (!File.Exists(inputCdrPath))
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
+            Console.Error.WriteLine($"File not found: {inputCdrPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure directory for temporary PNG exists
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
-        // Load CDR vector image
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+        // Load CDR and export to temporary PNG
+        using (Image cdrImage = Image.Load(inputCdrPath))
         {
-            // Rasterize CDR to PNG in memory
-            using (MemoryStream ms = new MemoryStream())
-            {
-                var rasterizeOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new CdrRasterizationOptions()
-                };
-                cdr.Save(ms, rasterizeOptions);
-                ms.Position = 0;
+            cdrImage.Save(tempPngPath, new PngOptions());
+        }
 
-                // Load rasterized image
-                using (RasterImage raster = (RasterImage)Image.Load(ms))
-                {
-                    // Apply Gaussian blur filter
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+        // Ensure directory for final output exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPngPath));
 
-                    // Resize to 1200x800
-                    raster.Resize(1200, 800);
+        // Load the temporary PNG, apply Gaussian blur, resize, and save final PNG
+        using (Image pngImage = Image.Load(tempPngPath))
+        {
+            var raster = (RasterImage)pngImage;
 
-                    // Save as PNG
-                    var saveOptions = new PngOptions
-                    {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
-                    raster.Save(outputPath, saveOptions);
-                }
-            }
+            // Apply Gaussian blur filter to the whole image
+            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+            raster.Filter(raster.Bounds, blurOptions);
+
+            // Resize to 1200x800 using default resampling
+            raster.Resize(1200, 800);
+
+            // Save the processed image as PNG
+            raster.Save(outputPngPath, new PngOptions());
         }
     }
 }
