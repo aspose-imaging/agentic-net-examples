@@ -1,46 +1,54 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input CDR files
-        string cdrPath1 = @"C:\temp\input1.cdr";
-        string cdrPath2 = @"C:\temp\input2.cdr";
-        string cdrPath3 = @"C:\temp\input3.cdr";
-
-        // Verify each input exists
-        if (!File.Exists(cdrPath1)) { Console.Error.WriteLine($"File not found: {cdrPath1}"); return; }
-        if (!File.Exists(cdrPath2)) { Console.Error.WriteLine($"File not found: {cdrPath2}"); return; }
-        if (!File.Exists(cdrPath3)) { Console.Error.WriteLine($"File not found: {cdrPath3}"); return; }
-
-        // Output multipage TIFF
-        string outputPath = @"C:\temp\deskewed_output.tif";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Collect frames after deskewing each CDR
-        List<TiffFrame> frames = new List<TiffFrame>();
-
-        // Process each CDR file
-        foreach (string cdrPath in new[] { cdrPath1, cdrPath2, cdrPath3 })
+        try
         {
-            // Load vector CDR image
-            using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
+            // Hardcoded input CDR files
+            string[] inputPaths = {
+                "input1.cdr",
+                "input2.cdr",
+                "input3.cdr"
+            };
+
+            // Hardcoded output TIFF file
+            string outputPath = "output.tif";
+
+            // Verify each input file exists
+            foreach (var path in inputPaths)
             {
-                // Rasterize CDR to a memory stream (PNG)
-                using (MemoryStream ms = new MemoryStream())
+                if (!File.Exists(path))
                 {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
+            }
+
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            Aspose.Imaging.FileFormats.Tiff.TiffImage tiffImage = null;
+            bool firstPage = true;
+
+            foreach (var cdrPath in inputPaths)
+            {
+                // Load CDR vector image
+                using (var cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Aspose.Imaging.Image.Load(cdrPath))
+                {
+                    // Rasterize CDR to PNG in memory
                     var pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = new VectorRasterizationOptions
@@ -49,44 +57,51 @@ class Program
                             PageHeight = cdr.Height
                         }
                     };
-                    cdr.Save(ms, pngOptions);
-                    ms.Position = 0;
 
-                    // Load rasterized image
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    using (var ms = new MemoryStream())
                     {
-                        // Deskew the raster image
-                        raster.NormalizeAngle(false, Color.LightGray);
+                        cdr.Save(ms, pngOptions);
+                        ms.Position = 0;
 
-                        // Create a TIFF frame from the deskewed raster image
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                        TiffFrame frame = new TiffFrame(tiffOptions, raster.Width, raster.Height);
-                        frame.SavePixels(frame.Bounds, raster.LoadPixels(raster.Bounds));
-                        frames.Add(frame);
+                        // Load rasterized image
+                        using (var raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
+                        {
+                            // Deskew the raster image
+                            raster.NormalizeAngle(false, Aspose.Imaging.Color.White);
+
+                            if (firstPage)
+                            {
+                                // Create the multipage TIFF with the first page dimensions
+                                var tiffCreateOptions = new TiffOptions(TiffExpectedFormat.Default)
+                                {
+                                    Source = new FileCreateSource(outputPath, false),
+                                    Photometric = TiffPhotometrics.Rgb,
+                                    BitsPerSample = new ushort[] { 8, 8, 8 }
+                                };
+
+                                tiffImage = (Aspose.Imaging.FileFormats.Tiff.TiffImage)Aspose.Imaging.Image.Create(tiffCreateOptions, raster.Width, raster.Height);
+
+                                // Copy pixels of the first page into the TIFF canvas
+                                tiffImage.SaveArgb32Pixels(tiffImage.Bounds, raster.LoadArgb32Pixels(tiffImage.Bounds));
+
+                                firstPage = false;
+                            }
+                            else
+                            {
+                                // Add subsequent pages directly
+                                tiffImage.AddPage(raster);
+                            }
+                        }
                     }
                 }
             }
+
+            // Save the multipage TIFF (source is already bound to outputPath)
+            tiffImage?.Save();
         }
-
-        // Build multipage TIFF from collected frames
-        if (frames.Count == 0) { Console.Error.WriteLine("No frames were created."); return; }
-
-        // Save options bound to the output file
-        var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
+        catch (Exception ex)
         {
-            Source = new FileCreateSource(outputPath, false)
-        };
-
-        // Create TIFF image with the first frame, then add remaining frames
-        using (TiffImage tiffImage = new TiffImage(frames[0]))
-        {
-            for (int i = 1; i < frames.Count; i++)
-            {
-                tiffImage.AddFrame(frames[i]);
-            }
-
-            // Save the multipage TIFF
-            tiffImage.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
