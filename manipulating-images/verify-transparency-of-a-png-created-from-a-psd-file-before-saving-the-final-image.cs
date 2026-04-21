@@ -1,53 +1,62 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.psd";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.psd";
+            string outputPath = @"C:\temp\output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image psdImage = Image.Load(inputPath))
-        {
-            // Prepare PNG options preserving alpha channel
-            PngOptions pngOptions = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save PSD to a memory stream as PNG
-            using (MemoryStream ms = new MemoryStream())
+            // Load the PSD image
+            using (Image psdImage = Image.Load(inputPath))
             {
-                psdImage.Save(ms, pngOptions);
-                ms.Position = 0; // Reset stream position for reading
-
-                // Load the PNG from the memory stream
-                using (PngImage pngImage = new PngImage(ms))
+                // Prepare PNG save options
+                var pngOptions = new PngOptions
                 {
-                    // Verify transparency
-                    bool hasAlpha = pngImage.HasAlpha;
-                    Console.WriteLine($"PNG has alpha channel: {hasAlpha}");
+                    // Preserve alpha channel if present
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
 
-                    // Save the final PNG to disk
-                    pngImage.Save(outputPath);
+                // Save to a memory stream first to inspect transparency
+                using (var memoryStream = new MemoryStream())
+                {
+                    psdImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    // Load the generated PNG from the memory stream
+                    using (PngImage pngImage = (PngImage)Image.Load(memoryStream))
+                    {
+                        // Verify if the PNG has an alpha channel (transparency)
+                        bool hasAlpha = pngImage.HasAlpha;
+                        Console.WriteLine($"PNG has alpha (transparency): {hasAlpha}");
+
+                        // Ensure output directory exists before final save
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the final PNG to disk
+                        // Reuse the same options; the image data is already in pngImage
+                        pngImage.Save(outputPath, pngOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
