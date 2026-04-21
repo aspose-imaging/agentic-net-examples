@@ -3,6 +3,8 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging;
 
 class Program
 {
@@ -12,28 +14,31 @@ class Program
         string inputPath = @"C:\temp\input.tif";
         string outputPath = @"C:\temp\output.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to TiffImage to access NormalizeAngle
-            if (image is TiffImage tiffImage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Deskew the image (resize proportionally, white background)
-                tiffImage.NormalizeAngle(resizeProportionally: true, backgroundColor: Color.White);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save the corrected image as PDF
-            image.Save(outputPath, new PdfOptions());
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Deskew the image (do not resize, use LightGray as background)
+                image.NormalizeAngle(false, Color.LightGray);
+
+                // Save the corrected image as PDF
+                image.Save(outputPath, new PdfOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
