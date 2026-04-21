@@ -2,52 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Dithering;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.psd";
-        string outputPath = @"C:\Images\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.psd";
+            string outputPath = "output.pdf";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to apply dithering
-            RasterImage raster = image as RasterImage;
-            if (raster != null)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Apply Floyd‑Steinberg dithering with an 8‑bit palette
-                raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
-
-                // Set smoothing mode if the property is available
-                // raster.SmoothingMode = SmoothingMode.AntiAlias; // Uncomment if supported
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Configure PDF export options
-            var pdfOptions = new PdfOptions
-            {
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image as PDF
-            image.Save(outputPath, pdfOptions);
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for dithering
+                RasterImage raster = (RasterImage)image;
+
+                // Apply Floyd‑Steinberg dithering with 1‑bit palette
+                raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+
+                // Prepare PDF export options with smoothing mode
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        SmoothingMode = SmoothingMode.None
+                    }
+                };
+
+                // Save the processed image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
