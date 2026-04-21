@@ -1,34 +1,40 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputPath = @"C:\temp\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "C:\\temp\\input.tif";
+            string outputPath = "C:\\temp\\output.tif";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                // Draw a red rectangle on the active frame
+                Graphics graphics = new Graphics(image);
+                Pen pen = new Pen(Color.Red, 5);
+                graphics.DrawRectangle(pen, new RectangleF(10, 10, 100, 100));
+
+                // Save the modified image, overwriting if the file exists
+                image.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Example modification: rotate the image 90 degrees clockwise
-            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-            // Save the modified image, overwriting if the file already exists
-            image.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
