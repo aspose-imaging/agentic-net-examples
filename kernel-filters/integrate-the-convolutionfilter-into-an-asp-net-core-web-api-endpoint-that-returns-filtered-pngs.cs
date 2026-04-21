@@ -2,46 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
-
-            // Apply a convolution filter (Emboss 3x3 kernel)
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-
-            // Prepare PNG save options
-            PngOptions pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                // Example: set a PNG filter type for compression
-                FilterType = PngFilterType.Sub
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the filtered image as PNG
-            raster.Save(outputPath, pngOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
