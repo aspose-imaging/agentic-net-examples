@@ -1,42 +1,53 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.gif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = @"C:\Images\input.cdr";
+            string outputPath = @"C:\Images\output.gif";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
-        {
-            GifOptions gifOptions = new GifOptions
+            if (!File.Exists(inputPath))
             {
-                MaxDiff = 80,
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height,
-                    BackgroundColor = Color.White
-                }
-            };
-
-            using (RasterImage raster = (RasterImage)Image.Create(gifOptions, cdr.Width, cdr.Height))
-            {
-                raster.NormalizeAngle(false, Color.White);
-                raster.Save(outputPath, gifOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
+                    {
+                        raster.NormalizeAngle(false, Aspose.Imaging.Color.White);
+                        var gifOptions = new GifOptions();
+                        raster.Save(outputPath, gifOptions);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
