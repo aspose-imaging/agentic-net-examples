@@ -1,16 +1,15 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"input\sample.djvu";
-        string outputDirectory = @"output";
+        // Hardcoded input DjVu file path
+        string inputPath = @"C:\Temp\sample.djvu";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,10 +18,13 @@ class Program
             return;
         }
 
-        // Ensure output directory exists (DirectoryName may be null for root paths, handle safely)
-        Directory.CreateDirectory(outputDirectory);
+        // Hardcoded output directory for GIF files
+        string outputDir = @"C:\Temp\GifOutput";
 
-        // Load DjVu document from file stream
+        // Ensure the output directory exists (creates parent directories as needed)
+        Directory.CreateDirectory(outputDir);
+
+        // Load the DjVu document from a file stream
         using (FileStream inputStream = File.OpenRead(inputPath))
         using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
         {
@@ -32,16 +34,15 @@ class Program
                 Interlaced = true
             };
 
-            // Iterate through each page and save as GIF
+            // Iterate through each page and save as an interlaced GIF
             foreach (DjvuPage page in djvuImage.Pages)
             {
-                // Build output file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
+                string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.gif");
 
                 // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the page as GIF using the custom options
+                // Save the page as GIF using the specified options
                 page.Save(outputPath, gifOptions);
             }
         }
