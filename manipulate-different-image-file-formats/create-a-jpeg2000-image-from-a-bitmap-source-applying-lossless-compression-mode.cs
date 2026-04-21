@@ -2,14 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"c:\temp\source.png";
-        string outputPath = @"c:\temp\output.jp2";
+        string inputPath = @"C:\temp\source.png";
+        string outputPath = @"C:\temp\output.jp2";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,17 +22,29 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the bitmap source
-        using (Image bitmap = Image.Load(inputPath))
+        // Load the bitmap source image
+        using (Image srcImage = Image.Load(inputPath))
         {
-            // Configure JPEG2000 options for lossless compression (default)
-            Jpeg2000Options jpeg2000Options = new Jpeg2000Options
+            // Cast to RasterImage for conversion
+            RasterImage raster = srcImage as RasterImage;
+            if (raster == null)
             {
-                Irreversible = false // explicit lossless mode
-            };
+                Console.Error.WriteLine("Source image is not a raster image.");
+                return;
+            }
 
-            // Save as JPEG2000 image
-            bitmap.Save(outputPath, jpeg2000Options);
+            // Create JPEG2000 image from the raster source
+            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(raster))
+            {
+                // Configure lossless compression (Irreversible = false)
+                Jpeg2000Options options = new Jpeg2000Options
+                {
+                    Irreversible = false
+                };
+
+                // Save the JPEG2000 image with the specified options
+                jpeg2000Image.Save(outputPath, options);
+            }
         }
     }
 }
