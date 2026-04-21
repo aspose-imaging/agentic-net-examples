@@ -3,15 +3,14 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "Sample.eps";
-        string outputPath = "Sample.pdf";
+        // Hardcoded relative input and output paths
+        string inputPath = "Input/sample.eps";
+        string outputPath = "Output/sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,22 +20,22 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
-        using (var image = (EpsImage)Image.Load(inputPath))
+        // Load the EPS image
+        using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options with PDF/A‑1b compliance
-            var pdfOptions = new PdfOptions
+            // Configure PDF/A-1b compliance options
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                PdfCoreOptions = new PdfCoreOptions
+                pdfOptions.PdfCoreOptions = new PdfCoreOptions
                 {
                     PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+                };
 
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+                // Save as PDF with the specified compliance
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }
