@@ -1,10 +1,8 @@
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -27,14 +25,14 @@ class Program
         // Load the DICOM image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to DicomImage to access DICOM-specific methods
-            DicomImage dicomImage = (DicomImage)image;
+            // Cast to RasterImage to apply filters
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Apply Gaussian blur filter to the whole image
-            dicomImage.Filter(dicomImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            // Apply Gaussian blur with radius 5 and sigma 4.0
+            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
             // Save the processed image as GIF with default options
-            dicomImage.Save(outputPath, new GifOptions());
+            image.Save(outputPath, new GifOptions());
         }
     }
 }
