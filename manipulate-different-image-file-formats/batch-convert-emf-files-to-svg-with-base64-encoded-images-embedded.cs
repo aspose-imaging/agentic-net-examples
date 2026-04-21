@@ -3,63 +3,65 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input directory and list of EMF files to process
+        // Hardcoded input and output directories
         string inputDir = @"C:\InputEmf";
-        string[] emfFiles = new[] { "sample1.emf", "sample2.emf", "sample3.emf" };
+        string outputDir = @"C:\OutputSvg";
 
-        foreach (string fileName in emfFiles)
+        try
         {
-            // Build full input path
-            string inputPath = Path.Combine(inputDir, fileName);
+            // Get all EMF files in the input directory
+            string[] files = Directory.GetFiles(inputDir, "*.emf");
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in files)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Define output path (same name with .svg extension)
-            string outputPath = inputPath + ".svg";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
-            {
-                // Configure SVG save options
-                SvgOptions svgOptions = new SvgOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Render all text as shapes to preserve appearance
-                    TextAsShapes = true
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Configure rasterization options for EMF
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                // Build output SVG path
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load EMF image
+                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    // Use the original EMF size
-                    PageSize = emfImage.Size,
-                    // White background for the SVG canvas
-                    BackgroundColor = Color.White,
-                    // Let Aspose decide whether to render embedded EMF or WMF
-                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                    // Optional margins (set to zero for no extra border)
-                    BorderX = 0,
-                    BorderY = 0
-                };
+                    // Set up SVG save options
+                    SvgOptions saveOptions = new SvgOptions
+                    {
+                        TextAsShapes = true
+                    };
 
-                svgOptions.VectorRasterizationOptions = rasterOptions;
+                    // Configure rasterization options for EMF
+                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                    {
+                        BackgroundColor = Color.WhiteSmoke,
+                        PageSize = emfImage.Size,
+                        RenderMode = EmfRenderMode.Auto,
+                        BorderX = 0,
+                        BorderY = 0
+                    };
 
-                // Save as SVG; raster images inside the EMF will be embedded as Base64 automatically
-                emfImage.Save(outputPath, svgOptions);
+                    saveOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Save as SVG (embedded images are stored as Base64 by default)
+                    emfImage.Save(outputPath, saveOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
