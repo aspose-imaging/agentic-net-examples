@@ -1,21 +1,21 @@
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define relative input and output directories
+        // Set up base, input, and output directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure input and output directories exist
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
             return;
         }
 
@@ -24,8 +24,8 @@ class Program
             Directory.CreateDirectory(outputDirectory);
         }
 
-        // Get all SVG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+        // Get all files in the input directory
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
         foreach (string inputPath in files)
         {
@@ -36,30 +36,28 @@ class Program
                 return;
             }
 
-            // Determine output PDF path
+            // Prepare the output PDF path
             string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
             string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-            // Ensure the output directory exists (unconditional)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image and save as PDF with vector rasterization options
+            // Load the SVG image and convert to PDF preserving vector data
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions
+                // Configure PDF options with vector rasterization settings
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
 
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
-
-        Console.WriteLine("Batch conversion completed.");
     }
 }
