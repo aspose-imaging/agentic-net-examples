@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument; // For OtgImage if needed
+using Aspose.Imaging.FileFormats.OpenDocument; // For OTG image support
 
 class Program
 {
@@ -19,18 +19,17 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Define the region to crop (example values)
-            // Rectangle(x, y, width, height)
-            var cropArea = new Rectangle(100, 100, 200, 200);
+            // Define the cropping rectangle (X, Y, Width, Height)
+            var cropRect = new Rectangle(100, 100, 200, 200);
 
-            // Crop the image to the specified rectangle
-            image.Crop(cropArea);
+            // Crop the image
+            image.Crop(cropRect);
 
             // Save the cropped image as PNG
             var pngOptions = new PngOptions();
