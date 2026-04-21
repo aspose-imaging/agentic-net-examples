@@ -16,19 +16,15 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create BMP options
+        // Set up BMP options
         BmpOptions bmpOptions = new BmpOptions
         {
             BitsPerPixel = 24,
             Source = new FileCreateSource(outputPath, false)
         };
 
-        // Define image size
-        int width = 500;
-        int height = 500;
-
-        // Create a new BMP image
-        using (Image image = Image.Create(bmpOptions, width, height))
+        // Create a 500x500 BMP image
+        using (Image image = Image.Create(bmpOptions, 500, 500))
         {
             // Initialize graphics object
             Graphics graphics = new Graphics(image);
@@ -36,28 +32,31 @@ class Program
             // Clear background to white
             graphics.Clear(Color.White);
 
-            // Parameters for nested rectangles
-            int rectangleCount = 10;
-            int marginStep = 20; // Decrease size by this amount each step
-            int penWidth = 3;
+            // Define rectangle parameters
+            int rectCount = 8;                     // Number of nested rectangles
+            int startSize = 400;                   // Size of the outermost rectangle
+            int startX = (image.Width - startSize) / 2;
+            int startY = (image.Height - startSize) / 2;
+            int decrement = 40;                    // Size reduction for each inner rectangle
 
-            for (int i = 0; i < rectangleCount; i++)
+            // Colors to alternate between
+            Color[] colors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Yellow };
+
+            for (int i = 0; i < rectCount; i++)
             {
-                // Calculate rectangle position and size
-                int margin = i * marginStep;
-                int rectWidth = width - 2 * margin;
-                int rectHeight = height - 2 * margin;
-                Rectangle rect = new Rectangle(margin, margin, rectWidth, rectHeight);
+                int size = startSize - i * decrement;
+                int x = startX + i * (decrement / 2);
+                int y = startY + i * (decrement / 2);
 
-                // Alternate colors between Red and Blue
-                Color rectColor = (i % 2 == 0) ? Color.Red : Color.Blue;
-                Pen pen = new Pen(rectColor, penWidth);
+                // Choose color based on index
+                Color penColor = colors[i % colors.Length];
+                Pen pen = new Pen(penColor, 3f);
 
                 // Draw the rectangle
-                graphics.DrawRectangle(pen, rect);
+                graphics.DrawRectangle(pen, new Rectangle(x, y, size, size));
             }
 
-            // Save the image (the file is already created via FileCreateSource)
+            // Save changes (the source already points to outputPath)
             image.Save();
         }
     }
