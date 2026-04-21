@@ -1,35 +1,45 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output/output.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load image as RasterImage, rotate, and save as BMP
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                if (!image.IsCached)
+                    image.CacheData();
+
+                // Rotate 33 degrees, resize proportionally, gray background
+                image.Rotate(33f, true, Color.Gray);
+
+                // Save with BMP options
+                BmpOptions options = new BmpOptions();
+                image.Save(outputPath, options);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load, rotate, and save the image
-        using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Rotate 33 degrees, resize proportionally, gray background
-            image.Rotate(33f, true, Aspose.Imaging.Color.Gray);
-
-            // Save as BMP
-            BmpOptions options = new BmpOptions() { Source = new FileCreateSource(outputPath, false) };
-            image.Save(outputPath, options);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
