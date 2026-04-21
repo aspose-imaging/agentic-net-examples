@@ -1,68 +1,83 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input JPEG files
-        string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
+        string[] inputPaths = new string[]
+        {
+            "image1.jpg",
+            "image2.jpg",
+            "image3.jpg"
+        };
+
         // Hardcoded output PNG file
         string outputPath = "merged.png";
 
-        // Validate each input file exists
-        foreach (var path in inputPaths)
+        // Validate input files
+        foreach (string inputPath in inputPaths)
         {
-            if (!File.Exists(path))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {path}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Collect sizes of flipped images
-        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-        foreach (var path in inputPaths)
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrEmpty(outputDir))
         {
-            using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+            Directory.CreateDirectory(outputDir);
+        }
+
+        // Lists to hold pixel data and sizes of flipped images
+        List<int[]> pixelDataList = new List<int[]>();
+        List<Size> sizeList = new List<Size>();
+
+        // Load each JPEG, flip horizontally, and store its pixel data and size
+        foreach (string inputPath in inputPaths)
+        {
+            using (RasterImage img = (RasterImage)Image.Load(inputPath))
             {
-                img.RotateFlip(Aspose.Imaging.RotateFlipType.RotateNoneFlipX);
-                sizes.Add(img.Size);
+                img.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                pixelDataList.Add(img.LoadArgb32Pixels(img.Bounds));
+                sizeList.Add(img.Size);
             }
         }
 
-        // Calculate canvas dimensions for horizontal layout
-        int totalWidth = 0;
-        int maxHeight = 0;
-        foreach (var sz in sizes)
+        // Calculate canvas dimensions for horizontal composition
+        int newWidth = 0;
+        int newHeight = 0;
+        foreach (Size sz in sizeList)
         {
-            totalWidth += sz.Width;
-            if (sz.Height > maxHeight) maxHeight = sz.Height;
+            newWidth += sz.Width;
+            if (sz.Height > newHeight)
+                newHeight = sz.Height;
         }
 
-        // Create PNG canvas bound to output file
-        var source = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = source };
-        using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pngOptions, totalWidth, maxHeight))
+        // Create PNG canvas bound to the output file
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
+
+        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
         {
             int offsetX = 0;
-            foreach (var path in inputPaths)
+            for (int i = 0; i < pixelDataList.Count; i++)
             {
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
-                {
-                    img.RotateFlip(Aspose.Imaging.RotateFlipType.RotateNoneFlipX);
-                    var bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
-                }
+                Size sz = sizeList[i];
+                Rectangle bounds = new Rectangle(offsetX, 0, sz.Width, sz.Height);
+                canvas.SaveArgb32Pixels(bounds, pixelDataList[i]);
+                offsetX += sz.Width;
             }
-            // Save the composed image
+
+            // Save the bound canvas (output file already specified in options)
             canvas.Save();
         }
     }
