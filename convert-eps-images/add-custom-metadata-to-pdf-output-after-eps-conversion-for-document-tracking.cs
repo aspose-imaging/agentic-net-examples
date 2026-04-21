@@ -3,15 +3,14 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.pdf";
+        string outputPath = "Output/result.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,21 +22,31 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
-        using (var image = (EpsImage)Image.Load(inputPath))
+        // Load the EPS image
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare PDF options with custom metadata
+            // Cast to the specific EPS image type
+            var epsImage = image as Aspose.Imaging.FileFormats.Eps.EpsImage;
+            if (epsImage == null)
+            {
+                Console.Error.WriteLine("Loaded image is not an EPS image.");
+                return;
+            }
+
+            // Configure PDF options with custom metadata
             var pdfOptions = new PdfOptions
             {
                 PdfDocumentInfo = new PdfDocumentInfo
                 {
-                    Title = "Document Tracking ID: 12345",
-                    Author = "MyCompany"
+                    Title = "Document Title",
+                    Author = "Author Name",
+                    Subject = "Subject Text",
+                    Keywords = "keyword1, keyword2"
                 }
             };
 
-            // Save as PDF with metadata
-            image.Save(outputPath, pdfOptions);
+            // Save the EPS as PDF with the metadata
+            epsImage.Save(outputPath, pdfOptions);
         }
     }
 }
