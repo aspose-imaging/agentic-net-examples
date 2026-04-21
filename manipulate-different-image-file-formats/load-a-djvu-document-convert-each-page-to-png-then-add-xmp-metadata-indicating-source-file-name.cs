@@ -3,42 +3,34 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
         string inputPath = "Input/sample.djvu";
-        string outputDirectory = "Output";
-
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
+        string outputDirectory = "Output";
 
-        // Load DjVu document from file stream
-        using (Stream stream = File.OpenRead(inputPath))
+        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
         {
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            foreach (DjvuPage page in djvuImage.Pages)
             {
-                // Iterate through each page
-                foreach (DjvuPage page in djvuImage.Pages)
+                string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                var pngOptions = new PngOptions
                 {
-                    // Build output file path for the PNG page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as PNG
-                    page.Save(outputPath, new PngOptions());
-                }
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                page.Save(outputPath, pngOptions);
             }
         }
     }
