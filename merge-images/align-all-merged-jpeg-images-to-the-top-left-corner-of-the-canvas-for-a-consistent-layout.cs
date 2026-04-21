@@ -11,55 +11,68 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
-        string outputPath = "merged.jpg";
-
-        // Validate input files
-        foreach (var path in inputPaths)
+        try
         {
-            if (!File.Exists(path))
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
-            }
-        }
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (var path in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
-                sizes.Add(img.Size);
-            }
-        }
-
-        // Calculate canvas dimensions (horizontal merge, top‑left alignment)
-        int newWidth = sizes.Sum(s => s.Width);
-        int newHeight = sizes.Max(s => s.Height);
-
-        // Create JPEG canvas bound to the output file
-        Source source = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
-
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
-        {
-            int offsetX = 0;
-            foreach (var path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                if (!File.Exists(inputPath))
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
             }
-            // Save the bound canvas
-            canvas.Save();
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
+            foreach (string inputPath in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                {
+                    sizes.Add(img.Size);
+                }
+            }
+
+            // Calculate canvas dimensions (horizontal stitching, top‑left alignment)
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
+
+            // Create JPEG canvas with bound source
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            {
+                int offsetX = 0;
+                foreach (string inputPath in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
+                }
+
+                // Save the bound image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
