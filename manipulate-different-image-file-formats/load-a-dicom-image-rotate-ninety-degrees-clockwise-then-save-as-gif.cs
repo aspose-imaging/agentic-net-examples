@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -20,15 +20,12 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the DICOM image, rotate, and save as GIF
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        // Load the DICOM image, rotate 90 degrees clockwise, and save as GIF
+        using (var dicomImage = (DicomImage)Image.Load(inputPath))
         {
-            // Rotate 90 degrees clockwise without flipping
             dicomImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-            // Save the rotated image as GIF
             dicomImage.Save(outputPath, new GifOptions());
         }
     }
