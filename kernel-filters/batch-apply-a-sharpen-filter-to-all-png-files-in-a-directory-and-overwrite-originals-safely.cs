@@ -8,33 +8,45 @@ class Program
     static void Main()
     {
         // Hardcoded directory containing PNG files
-        string inputDirectory = "C:\\Images\\";
+        string inputDirectory = @"C:\Images";
 
-        // Get all PNG files in the directory
+        // Ensure the directory exists before enumerating files
+        if (!Directory.Exists(inputDirectory))
+        {
+            Console.Error.WriteLine($"Directory not found: {inputDirectory}");
+            return;
+        }
+
+        // Get all PNG files in the directory (non‑recursive)
         string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
 
-        foreach (string filePath in pngFiles)
+        foreach (string inputPath in pngFiles)
         {
             // Verify the input file exists
-            if (!File.Exists(filePath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (same as input directory here)
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            // Output path is the same as input path (overwrite)
+            string outputPath = inputPath;
 
-            // Load the image, apply sharpen filter, and overwrite the original file
-            using (Image image = Image.Load(filePath))
+            // Ensure the output directory exists (unconditional call as required)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image, apply sharpen filter, and save back
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access Filter method
                 RasterImage rasterImage = (RasterImage)image;
 
                 // Apply sharpen filter with kernel size 5 and sigma 4.0
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                var sharpenOptions = new SharpenFilterOptions(5, 4.0);
+                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
 
-                // Save back to the same path, overwriting the original
-                rasterImage.Save(filePath);
+                // Save the modified image, overwriting the original file
+                rasterImage.Save(outputPath);
             }
         }
     }
