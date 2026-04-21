@@ -8,38 +8,42 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\input.emf";
+            string outputPath = @"C:\Temp\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (Image emfImage = Image.Load(inputPath))
+            {
+                // Prepare PNG save options with rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = emfImage.Size,
+                        BackgroundColor = Color.White // optional background
+                    }
+                };
+
+                // Save the rendered bitmap as PNG
+                emfImage.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Set up rasterization options for EMF to bitmap conversion
-            var rasterizationOptions = new EmfRasterizationOptions
-            {
-                PageSize = image.Size,
-                BackgroundColor = Color.White
-            };
-
-            // Configure PNG save options with the rasterization settings
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Save the rendered bitmap as PNG
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
