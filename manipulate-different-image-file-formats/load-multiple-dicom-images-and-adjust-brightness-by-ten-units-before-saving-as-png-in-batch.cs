@@ -1,30 +1,29 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output directories
-        string inputDir = @"C:\Input\";
-        string outputDir = @"C:\Output\";
+        string inputDir = @"C:\InputDICOM\";
+        string outputDir = @"C:\OutputPNG\";
 
-        // List of DICOM files to process
-        string[] dicomFiles = new[]
+        // List of DICOM files to process (hardcoded)
+        string[] files = new string[]
         {
             "image1.dcm",
             "image2.dcm",
             "image3.dcm"
         };
 
-        foreach (string fileName in dicomFiles)
+        foreach (var fileName in files)
         {
-            // Build full input and output paths
+            // Build full input path
             string inputPath = Path.Combine(inputDir, fileName);
-            string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".png");
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -33,14 +32,23 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the DICOM image, adjust brightness, and save as PNG
+            // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
-                dicomImage.AdjustBrightness(10); // Increase brightness by 10 units
+
+                // Adjust brightness by 10 units
+                dicomImage.AdjustBrightness(10);
+
+                // Prepare output path (same name with .png extension)
+                string outputFileName = Path.ChangeExtension(fileName, ".png");
+                string outputPath = Path.Combine(outputDir, outputFileName);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save as PNG
                 dicomImage.Save(outputPath, new PngOptions());
             }
         }
