@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = "input.cdr";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -20,17 +20,16 @@ class Program
         }
 
         // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the CorelDRAW file, resize, and save as PNG
         using (CdrImage image = (CdrImage)Image.Load(inputPath))
         {
-            // Resize to 1024x768 pixels using the default resampling method
+            // Resize to 1024x768 using the default resampling method
             image.Resize(1024, 768);
 
-            // Save the image as PNG
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            // Save the image as PNG with default options
+            image.Save(outputPath, new PngOptions());
         }
     }
 }
