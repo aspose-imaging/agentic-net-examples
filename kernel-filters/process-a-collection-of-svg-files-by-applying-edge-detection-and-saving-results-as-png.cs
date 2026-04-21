@@ -3,63 +3,97 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\input\image1.svg",
-            @"C:\input\image2.svg"
-        };
+            // Hardcoded input and output directories
+            string inputDirectory = "InputSvgs";
+            string outputDirectory = "OutputPngs";
 
-        foreach (var inputPath in inputFiles)
-        {
-            if (!File.Exists(inputPath))
+            // Validate input directory
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
                 return;
             }
 
-            string outputPath = Path.ChangeExtension(inputPath, ".png");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image svgImage = Image.Load(inputPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height,
-                    BackgroundColor = Color.White
-                };
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+            // Get all SVG files
+            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
-                using (var memoryStream = new MemoryStream())
+            foreach (string inputPath in svgFiles)
+            {
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
+                // Prepare output path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                // Ensure output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load SVG image
+                using (Image svgImage = Image.Load(inputPath))
+                {
+                    // Set up rasterization options for SVG
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                     {
-                        double[,] kernel = new double[,]
-                        {
-                            { -1, 0, 1 },
-                            { -2, 0, 2 },
-                            { -1, 0, 1 }
-                        };
+                        PageSize = svgImage.Size
+                    };
 
-                        var filterOptions = new ConvolutionFilterOptions(kernel);
-                        raster.Filter(raster.Bounds, filterOptions);
-                        raster.Save(outputPath, new PngOptions());
+                    // PNG save options with vector rasterization
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Rasterize SVG to PNG in memory
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        svgImage.Save(ms, pngOptions);
+                        ms.Position = 0;
+
+                        // Load rasterized PNG as RasterImage
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            // Edge detection kernel (simple Laplacian)
+                            double[,] kernel = new double[,]
+                            {
+                                { -1, -1, -1 },
+                                { -1,  8, -1 },
+                                { -1, -1, -1 }
+                            };
+
+                            // Apply convolution filter for edge detection
+                            ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
+                            raster.Filter(raster.Bounds, filterOptions);
+
+                            // Save the processed image as PNG
+                            raster.Save(outputPath, new PngOptions());
+                        }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
