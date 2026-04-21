@@ -8,28 +8,31 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded list of EPS files to convert
-        string[] inputFiles = new[]
+        // Hardcoded input EPS files
+        string[] inputPaths = new string[]
         {
-            "input1.eps",
-            "input2.eps"
+            @"C:\Images\Input1.eps",
+            @"C:\Images\Input2.eps"
         };
 
-        // Output directory (hardcoded)
-        string outputDirectory = "output";
-
-        foreach (string inputPath in inputFiles)
+        // Corresponding output PNG files
+        string[] outputPaths = new string[]
         {
+            @"C:\Images\Output1.png",
+            @"C:\Images\Output2.png"
+        };
+
+        for (int i = 0; i < inputPaths.Length; i++)
+        {
+            string inputPath = inputPaths[i];
+            string outputPath = outputPaths[i];
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
-
-            // Determine output PNG path
-            string outputPath = Path.Combine(outputDirectory,
-                Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -37,14 +40,14 @@ class Program
             // Load EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Calculate new dimensions (scale factor 2)
+                // Apply uniform scaling factor of 2
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
 
-                // Resize using nearest neighbour resampling (preserves transparency)
+                // Resize the image (default interpolation)
                 image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-                // Save as PNG with default options (transparency preserved)
+                // Save as PNG preserving transparency
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
