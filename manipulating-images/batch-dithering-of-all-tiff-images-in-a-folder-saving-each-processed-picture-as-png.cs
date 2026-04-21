@@ -7,48 +7,55 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output directories (relative to current directory)
-        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Get all TIFF files in the input directory
-        var tiffFiles = Directory.GetFiles(inputDirectory)
-            .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
-                        f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase));
-
-        foreach (var inputPath in tiffFiles)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Ensure the output base directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Get all TIFF files (both .tif and .tiff extensions)
+            var tiffFiles = Directory.GetFiles(inputFolder, "*.tif")
+                .Concat(Directory.GetFiles(inputFolder, "*.tiff"));
+
+            foreach (var inputPath in tiffFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Load the TIFF image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to TiffImage to access the Dither method
+                    TiffImage tiffImage = (TiffImage)image;
+
+                    // Apply Floyd‑Steinberg dithering with a 1‑bit palette
+                    tiffImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+
+                    // Build the output PNG path
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
+
+                    // Ensure the output directory exists (handles subfolders if any)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the processed image as PNG
+                    tiffImage.Save(outputPath, new PngOptions());
+                }
             }
-
-            // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to TiffImage to access Dither method
-                TiffImage tiffImage = (TiffImage)image;
-
-                // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                tiffImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
-
-                // Prepare output PNG path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the processed image as PNG
-                tiffImage.Save(outputPath, new PngOptions());
-            }
+        }
+        catch (Exception ex)
+        {
+            // Report any unexpected errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
