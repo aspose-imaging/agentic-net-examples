@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\source.eps";
-        string outputPath = @"C:\Images\result.png";
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -20,21 +20,21 @@ class Program
         }
 
         // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir ?? ".");
 
-        // Load the EPS image
+        // Load the EPS image, resize while keeping aspect ratio, and save as PNG
         using (Image image = Image.Load(inputPath))
         {
-            // Calculate new height to preserve aspect ratio for a width of 2000 pixels
+            // Calculate new height to maintain aspect ratio for a width of 2000 pixels
             int newWidth = 2000;
-            int newHeight = (int)((double)image.Height * newWidth / image.Width);
+            int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
 
-            // Resize using a high‑quality interpolation method
+            // Resize using Mitchell cubic interpolation
             image.Resize(newWidth, newHeight, ResizeType.Mitchell);
 
             // Save the resized image as PNG
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            image.Save(outputPath, new PngOptions());
         }
     }
 }
