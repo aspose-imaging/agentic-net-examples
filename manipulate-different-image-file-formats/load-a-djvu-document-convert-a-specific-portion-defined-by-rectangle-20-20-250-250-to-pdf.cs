@@ -1,17 +1,16 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "Input\\sample.djvu";
-        string outputPath = "Output\\output.pdf";
+        string inputPath = "input.djvu";
+        string outputPath = "output.pdf";
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -23,23 +22,23 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DjVu document
-        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+        // Load the DjVu document
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
             // Define the export rectangle (x, y, width, height)
-            Rectangle exportArea = new Rectangle(20, 20, 250, 250);
+            var exportArea = new Aspose.Imaging.Rectangle(20, 20, 250, 250);
 
-            // Configure multi-page options to export the first page with the specified area
-            DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(0, exportArea);
+            // Configure DjVu multi-page options for the first page and the export area
+            var djvuOptions = new DjvuMultiPageOptions(0, exportArea);
 
-            // Set up PDF save options
-            PdfOptions pdfOptions = new PdfOptions
+            // Set up PDF save options with the DjVu multi-page options
+            var pdfOptions = new PdfOptions
             {
-                MultiPageOptions = multiPageOptions
+                MultiPageOptions = djvuOptions
             };
 
-            // Save the selected portion as PDF
-            djvuImage.Save(outputPath, pdfOptions);
+            // Save the specified portion as a PDF
+            image.Save(outputPath, pdfOptions);
         }
     }
 }
