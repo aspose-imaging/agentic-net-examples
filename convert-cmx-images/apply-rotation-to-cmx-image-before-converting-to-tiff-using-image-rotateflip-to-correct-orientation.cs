@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.cmx";
-        string outputPath = "output.tif";
+        string outputPath = "output/rotated.tiff";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,20 +18,17 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CMX image, rotate it, and save as TIFF
+        // Load the CMX image
         using (Image image = Image.Load(inputPath))
         {
-            // Rotate 90 degrees clockwise (adjust as needed)
+            // Apply rotation (example: 90 degrees clockwise, no flip)
             image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-            // Prepare TIFF save options
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // Save the rotated image as TIFF
-            image.Save(outputPath, tiffOptions);
+            // Save the image as TIFF (format inferred from file extension)
+            image.Save(outputPath);
         }
     }
 }
