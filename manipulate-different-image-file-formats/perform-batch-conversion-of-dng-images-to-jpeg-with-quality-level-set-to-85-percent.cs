@@ -3,13 +3,11 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Setup input and output directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
@@ -30,30 +28,25 @@ class Program
 
         foreach (string inputPath in files)
         {
-            // Ensure the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                continue;
             }
 
-            // Process only DNG files
-            if (!string.Equals(Path.GetExtension(inputPath), ".dng", StringComparison.OrdinalIgnoreCase))
-                continue;
+            string fileName = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
 
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DNG image and save as JPEG with quality 85
-            using (DngImage dng = (DngImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
+                DngImage dngImage = (DngImage)image;
+
                 using (JpegOptions jpegOptions = new JpegOptions())
                 {
                     jpegOptions.Quality = 85;
-                    dng.Save(outputPath, jpegOptions);
+                    dngImage.Save(outputPath, jpegOptions);
                 }
             }
         }
