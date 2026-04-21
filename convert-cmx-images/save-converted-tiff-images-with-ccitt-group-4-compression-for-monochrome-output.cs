@@ -25,20 +25,14 @@ class Program
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure TIFF save options for monochrome CCITT Group 4 compression
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                // 1 bit per pixel (monochrome)
-                BitsPerSample = new ushort[] { 1 },
+            // Configure TIFF options for 1‑bit monochrome with CCITT Group 4 compression
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.BitsPerSample = new ushort[] { 1 };                     // 1 bit per pixel
+            tiffOptions.Compression = TiffCompressions.CcittFax4;              // CCITT Group 4
+            tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;            // 0 = black, 1 = white
+            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;   // single plane
 
-                // CCITT Group 4 (Fax4) compression
-                Compression = TiffCompressions.CcittFax4,
-
-                // Black is represented by 0 (MinIsBlack)
-                Photometric = TiffPhotometrics.MinIsBlack
-            };
-
-            // Save the image as a TIFF with the specified options
+            // Save the image as a TIFF using the configured options
             image.Save(outputPath, tiffOptions);
         }
     }
