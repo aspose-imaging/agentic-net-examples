@@ -5,19 +5,29 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output directories (relative paths)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        // Hardcoded input and output directories
+        string inputDir = "C:\\input\\";
+        string outputDir = "C:\\output\\";
+        // Ensure the output base directory exists
+        Directory.CreateDirectory(outputDir);
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Get all files from the input directory
-        string[] files = Directory.GetFiles(inputDirectory);
-        foreach (string inputPath in files)
+        // List of input file names (HTML5 Canvas images stored as files)
+        string[] inputFiles = new string[]
         {
+            "canvas1.png",
+            "canvas2.png",
+            "canvas3.png"
+        };
+
+        // Uniform JPEG quality for all output images
+        int jpegQuality = 80;
+
+        for (int i = 0; i < inputFiles.Length; i++)
+        {
+            string inputPath = Path.Combine(inputDir, inputFiles[i]);
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -30,22 +40,22 @@ class Program
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 fileStream.CopyTo(memoryStream);
-                memoryStream.Position = 0;
+                memoryStream.Position = 0; // Reset position for reading
 
-                // Load the image from the memory stream
+                // Load image from the memory stream
                 using (Image image = Image.Load(memoryStream))
                 {
-                    // Configure JPEG options with uniform quality
+                    // Configure JPEG save options with the desired quality
                     JpegOptions jpegOptions = new JpegOptions
                     {
-                        Quality = 90 // Set desired quality (1-100)
+                        Quality = jpegQuality
                     };
 
-                    // Determine output file path with .jpg extension
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    // Define output file path
+                    string outputFileName = $"canvas{i + 1}.jpg";
+                    string outputPath = Path.Combine(outputDir, outputFileName);
 
-                    // Ensure the output directory for this file exists
+                    // Ensure the output directory exists (unconditional as required)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the image as JPEG using the specified options
