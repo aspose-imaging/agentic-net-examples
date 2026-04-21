@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 
@@ -8,60 +7,64 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define relative input and output directories
+        // Input and output directories
         string inputDirectory = "Input";
         string outputDirectory = "Output";
 
-        // Ensure directories exist
-        Directory.CreateDirectory(inputDirectory);
-        Directory.CreateDirectory(outputDirectory);
+        // Validate input directory
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
 
         // Get all DjVu files in the input directory
-        string[] djvuFiles = Directory.GetFiles(inputDirectory, "*.djvu");
+        string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
 
-        foreach (string inputPath in djvuFiles)
+        // Define the rectangles to export (example rectangle)
+        Aspose.Imaging.Rectangle[] exportRectangles = new Aspose.Imaging.Rectangle[]
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            new Aspose.Imaging.Rectangle(0, 0, 500, 500)
+        };
+
+        foreach (string filePath in files)
+        {
+            // Check if the file exists
+            if (!File.Exists(filePath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                Console.Error.WriteLine($"File not found: {filePath}");
+                continue;
             }
 
-            // Open the DjVu file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            // Load DjVu image from file stream
+            using (FileStream stream = File.OpenRead(filePath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Load DjVu image
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Iterate through each page
+                for (int i = 0; i < djvuImage.PageCount; i++)
                 {
-                    // Define rectangles to export (example areas)
-                    Rectangle[] exportAreas = new Rectangle[]
-                    {
-                        new Rectangle(0, 0, 200, 200),
-                        new Rectangle(100, 100, 300, 300)
-                    };
+                    var page = djvuImage.Pages[i];
 
-                    // Iterate over each page
-                    for (int pageIndex = 0; pageIndex < djvuImage.PageCount; pageIndex++)
+                    // Export each defined rectangle
+                    foreach (var rect in exportRectangles)
                     {
-                        // Export each defined rectangle from the current page
-                        for (int rectIndex = 0; rectIndex < exportAreas.Length; rectIndex++)
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(filePath)}_page{i + 1}_region.png";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the specified region as PNG
+                        using (PngOptions options = new PngOptions())
                         {
-                            Rectangle area = exportAreas[rectIndex];
-
-                            // Set up PNG save options with multi‑page export configuration
-                            PngOptions pngOptions = new PngOptions();
-                            pngOptions.MultiPageOptions = new DjvuMultiPageOptions(pageIndex, area);
-
-                            // Build output file path
-                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}_rect{rectIndex}.png";
-                            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                            // Ensure output directory exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save the selected area as PNG
-                            djvuImage.Save(outputPath, pngOptions);
+                            page.Save(outputPath, options, rect);
                         }
                     }
                 }
