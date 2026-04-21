@@ -2,12 +2,12 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -24,75 +24,71 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // ---------- First pass: auto‑masking (GraphCut) ----------
-        MaskingResult results;
-        AutoMaskingGraphCutOptions autoOptions = null;
-
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        try
         {
-            autoOptions = new AutoMaskingGraphCutOptions
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                CalculateDefaultStrokes = true,
-                FeatheringRadius = (int)((Math.Max(image.Width, image.Height) / 500) + 1),
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                ExportOptions = new PngOptions
+                var autoOptions = new AutoMaskingGraphCutOptions
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource("temp_auto.png", false)
-                },
-                BackgroundReplacementColor = Color.Transparent
-            };
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
+                    BackgroundReplacementColor = Color.Transparent
+                };
 
-            results = new ImageMasking(image).Decompose(autoOptions);
-        }
+                MaskingResult autoResult = new ImageMasking(image).Decompose(autoOptions);
 
-        // Retrieve default strokes from the first pass
-        Point[] defaultBackgroundStrokes = autoOptions.DefaultBackgroundStrokes;
-        Point[] defaultForegroundStrokes = autoOptions.DefaultForegroundStrokes;
+                Point[] defaultBackgroundStrokes = autoOptions.DefaultBackgroundStrokes;
+                Point[] defaultForegroundStrokes = autoOptions.DefaultForegroundStrokes;
+                Rectangle[] defaultObjectRectangles = autoOptions.DefaultObjectsRectangles;
 
-        // ---------- Manual correction: add extra foreground points ----------
-        Point[] manualForegroundPoints = new Point[]
-        {
-            new Point(200, 200),
-            new Point(210, 210)
-        };
+                var correctedForeground = new List<Point>();
+                if (defaultForegroundStrokes != null)
+                    correctedForeground.AddRange(defaultForegroundStrokes);
+                correctedForeground.Add(new Point(200, 200));
+                correctedForeground.Add(new Point(210, 210));
 
-        List<Point> combinedForeground = new List<Point>(defaultForegroundStrokes);
-        combinedForeground.AddRange(manualForegroundPoints);
-        Point[] correctedForegroundStrokes = combinedForeground.ToArray();
+                Point[][] objectsPoints = new Point[2][];
+                objectsPoints[0] = defaultBackgroundStrokes ?? new Point[0];
+                objectsPoints[1] = correctedForeground.ToArray();
 
-        // ---------- Second pass: GraphCut with combined points ----------
-        GraphCutMaskingOptions secondOptions = new GraphCutMaskingOptions
-        {
-            FeatheringRadius = 3,
-            Method = SegmentationMethod.GraphCut,
-            Decompose = false,
-            ExportOptions = new PngOptions
-            {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new FileCreateSource("temp_second.png", false)
-            },
-            BackgroundReplacementColor = Color.Transparent,
-            Args = new AutoMaskingArgs
-            {
-                ObjectsPoints = new Point[][]
+                var secondOptions = new GraphCutMaskingOptions
                 {
-                    defaultBackgroundStrokes,
-                    correctedForegroundStrokes
+                    FeatheringRadius = 3,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
+                    BackgroundReplacementColor = Color.Transparent,
+                    Args = new AutoMaskingArgs
+                    {
+                        ObjectsPoints = objectsPoints,
+                        ObjectsRectangles = defaultObjectRectangles
+                    }
+                };
+
+                using (RasterImage image2 = (RasterImage)Image.Load(inputPath))
+                {
+                    MaskingResult finalResult = new ImageMasking(image2).Decompose(secondOptions);
+                    using (RasterImage finalForeground = (RasterImage)finalResult[1].GetImage())
+                    {
+                        finalForeground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    }
                 }
             }
-        };
-
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
-        using (MaskingResult finalResult = new ImageMasking(image).Decompose(secondOptions))
-        using (RasterImage foreground = (RasterImage)finalResult[1].GetImage())
-        {
-            foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
         }
-
-        // Clean up temporary files
-        if (File.Exists("temp_auto.png")) File.Delete("temp_auto.png");
-        if (File.Exists("temp_second.png")) File.Delete("temp_second.png");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
