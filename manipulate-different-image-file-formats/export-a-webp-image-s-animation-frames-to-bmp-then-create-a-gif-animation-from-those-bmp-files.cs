@@ -1,101 +1,95 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input WebP file path
-        string inputWebPPath = "input.webp";
-
-        // Verify input file exists
-        if (!File.Exists(inputWebPPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputWebPPath}");
-            return;
-        }
+            // Hardcoded paths
+            string inputWebPPath = @"C:\temp\input.webp";
+            string bmpFramesDir = @"C:\temp\bmp_frames\";
+            string outputGifPath = @"C:\temp\output.gif";
 
-        // Directory to store extracted BMP frames
-        string bmpFramesDir = "frames";
-
-        // Ensure the directory exists before any save operation
-        Directory.CreateDirectory(Path.GetDirectoryName(bmpFramesDir));
-
-        // Load the animated WebP image
-        using (Image webpImage = Image.Load(inputWebPPath))
-        {
-            // Cast to multipage interface to access frames
-            IMultipageImage multipage = webpImage as IMultipageImage;
-            if (multipage == null || multipage.Pages == null || multipage.PageCount == 0)
+            // Input file existence check
+            if (!File.Exists(inputWebPPath))
             {
-                Console.Error.WriteLine("The WebP image does not contain animation frames.");
+                Console.Error.WriteLine($"File not found: {inputWebPPath}");
                 return;
             }
 
-            // Extract each frame and save as BMP
-            int frameIndex = 0;
-            foreach (var page in multipage.Pages)
+            // Ensure output directories exist
+            Directory.CreateDirectory(bmpFramesDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
+
+            // List to hold BMP file paths
+            List<string> bmpPaths = new List<string>();
+
+            // Load the animated WebP image
+            using (WebPImage webPImage = new WebPImage(inputWebPPath))
             {
-                // Each page is a raster image
-                RasterImage raster = page as RasterImage;
-                if (raster == null)
-                    continue;
-
-                string bmpPath = Path.Combine(bmpFramesDir, $"frame_{frameIndex}.bmp");
-
-                // Ensure the output directory exists (already created above)
-                Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
-
-                // Save the frame as BMP
-                raster.Save(bmpPath, new BmpOptions());
-
-                frameIndex++;
-            }
-        }
-
-        // Path for the resulting GIF animation
-        string outputGifPath = "output.gif";
-
-        // Ensure the output directory exists before saving GIF
-        Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
-
-        // Load the first BMP frame to initialize the GIF image
-        string firstBmpPath = Path.Combine(bmpFramesDir, "frame_0.bmp");
-        if (!File.Exists(firstBmpPath))
-        {
-            Console.Error.WriteLine($"File not found: {firstBmpPath}");
-            return;
-        }
-
-        using (RasterImage firstFrame = (RasterImage)Image.Load(firstBmpPath))
-        {
-            // Create a GIF image using the first frame block
-            using (GifImage gifImage = new GifImage(new GifFrameBlock(firstFrame)))
-            {
-                // Add remaining BMP frames to the GIF
-                int index = 1;
-                while (true)
+                // Cast to multipage interface to access frames
+                var multipage = webPImage as IMultipageImage;
+                if (multipage == null || multipage.PageCount == 0)
                 {
-                    string bmpPath = Path.Combine(bmpFramesDir, $"frame_{index}.bmp");
-                    if (!File.Exists(bmpPath))
-                        break;
-
-                    using (RasterImage frame = (RasterImage)Image.Load(bmpPath))
-                    {
-                        gifImage.AddPage(frame);
-                    }
-
-                    index++;
+                    Console.Error.WriteLine("No frames found in the WebP image.");
+                    return;
                 }
 
-                // Save the assembled GIF animation
-                gifImage.Save(outputGifPath);
+                // Extract each frame and save as BMP
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    // Each page is a RasterImage
+                    var frame = (RasterImage)multipage.Pages[i];
+                    string bmpPath = Path.Combine(bmpFramesDir, $"frame_{i}.bmp");
+
+                    // Ensure directory for this BMP exists (already created above)
+                    Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
+
+                    // Save frame as BMP
+                    frame.Save(bmpPath, new BmpOptions());
+
+                    bmpPaths.Add(bmpPath);
+                }
             }
+
+            if (bmpPaths.Count == 0)
+            {
+                Console.Error.WriteLine("No BMP frames were created.");
+                return;
+            }
+
+            // Create GIF animation from BMP frames
+            // Load the first frame
+            using (RasterImage firstFrame = (RasterImage)Image.Load(bmpPaths[0]))
+            {
+                // Initialize GIF with the first frame
+                using (GifImage gifImage = new GifImage(new GifFrameBlock(firstFrame)))
+                {
+                    // Add remaining frames
+                    for (int i = 1; i < bmpPaths.Count; i++)
+                    {
+                        using (RasterImage frame = (RasterImage)Image.Load(bmpPaths[i]))
+                        {
+                            gifImage.AddPage(frame);
+                        }
+                    }
+
+                    // Save the GIF animation
+                    gifImage.Save(outputGifPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
