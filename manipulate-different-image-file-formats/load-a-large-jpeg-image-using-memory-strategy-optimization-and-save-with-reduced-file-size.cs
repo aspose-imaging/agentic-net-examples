@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\large_input.jpg";
-        string outputPath = @"C:\Images\output\large_output.jpg";
+        string inputPath = "input\\large.jpg";
+        string outputPath = "output\\large_compressed.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,21 +22,19 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the JPEG image with memory‑strategy optimization
-        var loadOptions = new LoadOptions { BufferSizeHint = 10 * 1024 * 1024 }; // 10 MB buffer
+        // Load the JPEG image with memory‑usage optimization
+        var loadOptions = new LoadOptions { BufferSizeHint = 100 }; // limit internal buffers to 100 MB
 
         using (Image image = Image.Load(inputPath, loadOptions))
         {
-            // Configure JPEG save options to reduce file size
+            // Set JPEG options to reduce file size
             var jpegOptions = new JpegOptions
             {
-                Quality = 75, // Reduce quality to lower size
-                CompressionType = JpegCompressionMode.Progressive,
-                ColorType = JpegCompressionColorMode.Grayscale,
-                BufferSizeHint = 5 * 1024 * 1024 // 5 MB buffer for saving
+                Quality = 70, // lower quality for smaller size
+                CompressionType = JpegCompressionMode.Progressive
             };
 
-            // Save the image with the specified options
+            // Save the image using the configured options
             image.Save(outputPath, jpegOptions);
         }
     }
