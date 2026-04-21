@@ -7,32 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\source.jpg";
-        string outputPath = @"C:\temp\output.webp";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = "C:\\temp\\source.jpg";
+            string outputPath = "C:\\temp\\output.webp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure WebP options: lossy compression with quality 75
-            var webpOptions = new WebPOptions
+            // Verify that the source JPEG exists
+            if (!File.Exists(inputPath))
             {
-                Lossless = false,
-                Quality = 75f
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as WebP with the specified options
-            image.Save(outputPath, webpOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure WebP options: lossy compression, quality 75, alpha channel support is inherent to WebP
+                var webpOptions = new WebPOptions
+                {
+                    Lossless = false,   // lossy compression
+                    Quality = 75f       // quality level 75
+                };
+
+                // Save the image as WebP with the specified options
+                image.Save(outputPath, webpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
