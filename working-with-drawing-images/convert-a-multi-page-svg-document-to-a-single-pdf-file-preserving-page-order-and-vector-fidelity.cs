@@ -7,39 +7,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Temp\multipage.svg";
-        string outputPath = @"C:\Temp\output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = "Input\\multi_page.svg";
+        string outputPath = "Output\\result.pdf";
 
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Load the SVG document
         using (Image image = Image.Load(inputPath))
         {
-            PdfOptions exportOptions = new PdfOptions();
-
-            if (image is IMultipageImage multipage && multipage.PageCount > 0)
+            // Prepare PDF export options
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
-            }
+                // Export all pages (null means all pages)
+                pdfOptions.MultiPageOptions = null;
 
-            if (image is VectorImage)
-            {
-                exportOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                // Configure vector rasterization for fidelity
+                if (image is VectorImage)
                 {
-                    BackgroundColor = Color.White,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
-            }
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+                }
 
-            image.Save(outputPath, exportOptions);
+                // Save as a single PDF preserving page order
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }
