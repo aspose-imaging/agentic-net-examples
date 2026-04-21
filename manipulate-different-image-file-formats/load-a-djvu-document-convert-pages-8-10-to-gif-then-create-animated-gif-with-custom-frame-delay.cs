@@ -10,69 +10,57 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output paths
         string inputPath = "Input/sample.djvu";
-        string outputDir = "Output";
-        string animatedGifPath = Path.Combine(outputDir, "animated.gif");
+        string outputPath = "Output/animated.gif";
 
-        // Validate input file
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DjVu document
-        using (FileStream stream = File.OpenRead(inputPath))
+        using (Stream stream = File.OpenRead(inputPath))
         using (DjvuImage djvu = new DjvuImage(stream))
         {
-            // Export pages 8‑10 (zero‑based indexes 7,8,9) as individual GIF files
-            int[] pageIndexes = new int[] { 7, 8, 9 };
-            string[] tempGifPaths = new string[pageIndexes.Length];
+            int[] pageIndices = { 7, 8, 9 };
+            GifImage gif = null;
+            const int frameDelayMs = 200;
 
-            for (int i = 0; i < pageIndexes.Length; i++)
+            foreach (int idx in pageIndices)
             {
-                string tempPath = Path.Combine(outputDir, $"page_{pageIndexes[i] + 1}.gif");
-                tempGifPaths[i] = tempPath;
+                DjvuPage djvuPage = (DjvuPage)djvu.Pages[idx];
+                RasterImage raster = (RasterImage)djvuPage;
 
-                // Ensure directory for each temp file
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+                if (!raster.IsCached)
+                    raster.CacheData();
 
-                GifOptions pageOptions = new GifOptions
+                GifFrameBlock frameBlock = new GifFrameBlock((ushort)raster.Width, (ushort)raster.Height)
                 {
-                    MultiPageOptions = new DjvuMultiPageOptions(pageIndexes[i])
+                    FrameTime = frameDelayMs
                 };
 
-                djvu.Save(tempPath, pageOptions);
+                Graphics graphics = new Graphics(frameBlock);
+                graphics.DrawImage(raster, 0, 0);
+
+                if (gif == null)
+                {
+                    gif = new GifImage(frameBlock);
+                }
+                else
+                {
+                    gif.AddPage(frameBlock);
+                }
             }
 
-            // Create animated GIF from the exported pages with custom frame delay (e.g., 200 ms)
-            const int customFrameDelay = 200; // milliseconds
-
-            // Load first frame and initialize GifImage
-            using (RasterImage firstFrame = (RasterImage)Image.Load(tempGifPaths[0]))
-            using (GifImage animatedGif = new GifImage(new GifFrameBlock(firstFrame)))
+            using (gif)
             {
-                animatedGif.ActiveFrame.FrameTime = customFrameDelay;
-
-                // Add remaining frames
-                for (int i = 1; i < tempGifPaths.Length; i++)
+                GifOptions gifOptions = new GifOptions
                 {
-                    using (RasterImage frame = (RasterImage)Image.Load(tempGifPaths[i]))
-                    {
-                        animatedGif.AddPage(new GifFrameBlock(frame));
-                        animatedGif.ActiveFrame.FrameTime = customFrameDelay;
-                    }
-                }
-
-                // Ensure directory for animated GIF
-                Directory.CreateDirectory(Path.GetDirectoryName(animatedGifPath));
-
-                // Save the animated GIF
-                animatedGif.Save(animatedGifPath);
+                    LoopsCount = 0
+                };
+                gif.Save(outputPath, gifOptions);
             }
         }
     }
