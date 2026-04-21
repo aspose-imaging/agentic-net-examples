@@ -3,36 +3,45 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Output BMP file path
-        string outputPath = @"C:\temp\output.bmp";
+        // Hard‑coded output path
+        string outputPath = @"C:\Temp\output.bmp";
 
-        // Ensure the output directory exists
+        // Ensure the output directory exists (unconditional)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set BMP options and bind to the output file
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a 200x200 BMP image
-        using (Image image = Image.Create(bmpOptions, 200, 200))
+        // Set up BMP options (24‑bit)
+        BmpOptions bmpOptions = new BmpOptions
         {
-            // Initialize graphics for drawing
+            BitsPerPixel = 24,
+            Source = new FileCreateSource(outputPath, false)
+        };
+
+        // Create a new BMP image of size 300x200 pixels
+        using (Image image = Image.Create(bmpOptions, 300, 200))
+        {
+            // Initialize graphics object for drawing
             Graphics graphics = new Graphics(image);
 
-            // Create a pen with Inset alignment
-            Pen pen = new Pen(Color.Blue, 5);
+            // Optional: clear background to a visible colour
+            graphics.Clear(Color.Wheat);
+
+            // Create a pen with black colour and 10‑pixel width
+            Pen pen = new Pen(Color.Black, 10);
+
+            // Set pen alignment to Inset to draw the border inside the rectangle bounds
             pen.Alignment = PenAlignment.Inset;
 
-            // Draw a rectangle using the inset-aligned pen
-            graphics.DrawRectangle(pen, new Rectangle(20, 20, 160, 160));
+            // Draw a rectangle at (20,20) with width 260 and height 160
+            graphics.DrawRectangle(pen, 20, 20, 260, 160);
 
-            // Save the image (file is already bound to outputPath)
+            // Save the image (the file was already created by FileCreateSource)
             image.Save();
         }
     }
