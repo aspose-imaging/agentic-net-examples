@@ -8,39 +8,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.dcm";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = "input.dcm";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DICOM image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to DicomImage to access DICOM‑specific methods
-            DicomImage dicomImage = (DicomImage)image;
-
-            // Apply window‑level adjustment.
-            // In medical imaging, window level can be approximated by adjusting brightness and contrast.
-            // These values are examples; adjust as needed for your data.
-            dicomImage.AdjustBrightness(40);   // Increase brightness
-            dicomImage.AdjustContrast(30f);    // Increase contrast
-
-            // Save as a 16‑bit PNG for analysis
-            var pngOptions = new PngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Set the bit depth to 16 bits per channel
-                BitDepth = 16
-            };
-            dicomImage.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to DicomImage to access DICOM‑specific operations
+                DicomImage dicomImage = (DicomImage)image;
+
+                // Apply window‑level adjustment (approximated with brightness and contrast)
+                // Adjust these values as needed for the specific window level
+                dicomImage.AdjustBrightness(40);      // Example brightness offset
+                dicomImage.AdjustContrast(30f);       // Example contrast factor
+
+                // Prepare PNG options for 16‑bit output
+                var pngOptions = new PngOptions
+                {
+                    BitDepth = 16
+                };
+
+                // Save the processed image as a 16‑bit PNG
+                dicomImage.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
