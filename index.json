@@ -3,9 +3,9 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.3.0",
-  "total_examples": 2863,
+  "total_examples": 2864,
   "total_categories": 17,
-  "last_updated": "2026-04-17",
+  "last_updated": "2026-04-21",
   "categories": [
     {
       "name": "conversion",
@@ -511,8 +511,9 @@
     },
     {
       "name": "convert-cmx-images",
-      "file_count": 34,
+      "file_count": 35,
       "all_files": [
+        "28194-convert-a-single-page-cmx-image-to-a-multi-page-tiff-file-by-adding-blank-pages.cs",
         "apply-rotation-to-cmx-image-before-converting-to-tiff-using-image-rotateflip-to-correct-orientation.cs",
         "convert-a-cmx-image-to-jpeg-format-with-progressive-encoding-enabled-for-smoother-loading.cs",
         "convert-a-cmx-image-to-jpeg-format-with-quality-set-to-90-using-jpegoptions.cs",
@@ -549,6 +550,7 @@
         "write-unit-tests-for-cmx-to-tiff-conversion-covering-single-page-and-multi-page-scenarios.cs"
       ],
       "files": [
+        "28194-convert-a-single-page-cmx-image-to-a-multi-page-tiff-file-by-adding-blank-pages.cs",
         "apply-rotation-to-cmx-image-before-converting-to-tiff-using-image-rotateflip-to-correct-orientation.cs",
         "convert-a-cmx-image-to-jpeg-format-with-progressive-encoding-enabled-for-smoother-loading.cs",
         "convert-a-cmx-image-to-jpeg-format-with-quality-set-to-90-using-jpegoptions.cs",
@@ -577,30 +579,29 @@
         "preserve-cmx-metadata-when-converting-to-pdf-by-copying-imageproperties-to-the-pdf-document.cs",
         "save-converted-tiff-images-with-ccitt-group-4-compression-for-monochrome-output.cs",
         "save-converted-tiff-images-with-lzw-compression-and-verify-file-size-reduction.cs",
-        "set-dpi-of-output-jpeg-image-to-300-using-jpegoptions-resolutionx-and-resolutiony.cs",
-        "use-aspose-imaging-to-convert-cmx-stream-from-memory-to-tiff-without-temporary-files.cs"
+        "set-dpi-of-output-jpeg-image-to-300-using-jpegoptions-resolutionx-and-resolutiony.cs"
       ],
       "required_namespaces": [
-        "Aspose.Imaging",
         "System",
         "System.IO",
+        "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Cmx",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "System.Collections.Generic",
+        "Aspose.Imaging.FileFormats.Tiff",
+        "Aspose.Imaging.FileFormats.Png",
         "System.Threading.Tasks",
-        "Aspose.Imaging.FileFormats.Bmp",
-        "Aspose.Imaging.FileFormats.Gif",
-        "Aspose.Imaging.FileFormats.Webp"
+        "System.Linq",
+        "Aspose.Imaging.ImageLoadOptions"
       ],
       "key_apis": [
         "BmpOptions",
         "CmxImage",
+        "CmxLoadOptions",
         "CmxRasterizationOptions",
         "GifOptions",
         "Graphics",
@@ -612,11 +613,13 @@
         "PngImage",
         "PngOptions",
         "RasterImage",
+        "TiffFrame",
+        "TiffImage",
         "TiffOptions",
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 4,
+        "count": 5,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/convert-cmx-images"
       }
     },
