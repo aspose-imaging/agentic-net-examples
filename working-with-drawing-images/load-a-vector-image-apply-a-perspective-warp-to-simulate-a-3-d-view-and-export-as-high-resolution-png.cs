@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -18,28 +20,35 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        using (Image vectorImage = Image.Load(inputPath))
         {
-            // High-resolution PNG options
+            var rasterOptions = new SvgRasterizationOptions
+            {
+                PageSize = vectorImage.Size,
+                BackgroundColor = Color.White
+            };
+
             var pngOptions = new PngOptions
             {
+                VectorRasterizationOptions = rasterOptions,
                 ResolutionSettings = new ResolutionSetting(300, 300)
             };
 
-            // SVG rasterization options
-            var rasterOptions = new SvgRasterizationOptions
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                PageSize = image.Size
-            };
-            pngOptions.VectorRasterizationOptions = rasterOptions;
+                vectorImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
 
-            // Simulate perspective warp by non-uniform scaling
-            int newWidth = image.Width * 2;
-            int newHeight = image.Height;
-            image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-            // Save the result
-            image.Save(outputPath, pngOptions);
+                using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
+                {
+                    using (Image outputImage = Image.Create(pngOptions, rasterImage.Width, rasterImage.Height))
+                    {
+                        Graphics graphics = new Graphics(outputImage);
+                        graphics.DrawImage(rasterImage, new Point(0, 0));
+                        outputImage.Save(outputPath);
+                    }
+                }
+            }
         }
     }
 }
