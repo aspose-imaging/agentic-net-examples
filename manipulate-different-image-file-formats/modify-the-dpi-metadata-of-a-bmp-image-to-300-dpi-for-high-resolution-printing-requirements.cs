@@ -7,9 +7,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output_300dpi.bmp";
+        // Hardcoded input and output file paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,7 +21,7 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image, set its resolution to 300 DPI, and save
+        // Load BMP image, set DPI to 300, and save
         using (Image image = Image.Load(inputPath))
         {
             BmpImage bmpImage = (BmpImage)image;

@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.jp2";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = @"C:\temp\sample.jp2";
+        string outputPath = @"C:\temp\sample.output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,15 +22,13 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load JPEG2000 image with a 4 MB buffer size hint
-        var loadOptions = new Jpeg2000LoadOptions
-        {
-            BufferSizeHint = 4 // Buffer size in megabytes
-        };
+        // Set buffer size hint to 4 MB
+        var loadOptions = new Jpeg2000LoadOptions { BufferSizeHint = 4 };
 
+        // Load JPEG2000 image with custom buffer size
         using (Image image = Image.Load(inputPath, loadOptions))
         {
-            // Save the loaded image as PNG
+            // Save the image as PNG
             image.Save(outputPath, new PngOptions());
         }
     }

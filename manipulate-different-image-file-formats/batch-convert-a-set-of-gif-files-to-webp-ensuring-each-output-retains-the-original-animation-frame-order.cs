@@ -1,55 +1,57 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Set up base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputGifs";
+            string outputDir = @"C:\OutputWebp";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
 
-        // Get all GIF files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.gif");
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Process each GIF file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.gif"))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the corresponding output WebP file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".webp");
+
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the GIF (including all animation frames)
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Configure WebP options – keep all frames, set desired quality
+                    var webpOptions = new WebPOptions
+                    {
+                        // MultiPageOptions left null to include all frames
+                        Lossless = false,
+                        Quality = 80
+                    };
+
+                    // Save as animated WebP, preserving frame order
+                    image.Save(outputPath, webpOptions);
+                }
             }
-
-            // Determine output path with .webp extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
-
-            // Ensure the output directory exists (unconditional as per requirements)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the GIF image and save as animated WebP preserving frame order
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-            {
-                var options = new WebPOptions(); // default options preserve all frames
-                image.Save(outputPath, options);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

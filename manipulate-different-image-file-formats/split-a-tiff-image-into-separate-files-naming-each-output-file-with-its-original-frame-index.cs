@@ -2,47 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.tif";
-        string outputDirectory = @"C:\Temp\OutputFrames";
+        // Hardcoded input and output locations
+        string inputPath = "input.tif";
+        string outputDirectory = "output_frames";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the multi-frame TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            // Iterate over each frame
-            for (int i = 0; i < tiffImage.Frames.Length; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                TiffFrame frame = tiffImage.Frames[i];
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Create a new TiffImage containing only this frame
-                using (TiffImage singleFrameImage = new TiffImage(frame))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the multi‑frame TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                TiffImage tiffImage = image as TiffImage;
+                if (tiffImage == null)
                 {
-                    // Build output file path with original frame index
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.tif");
+                    Console.Error.WriteLine("The specified file is not a TIFF image.");
+                    return;
+                }
 
-                    // Ensure the directory for the output file exists (already created above)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Iterate over each frame and save it as a separate TIFF file
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                {
+                    // Create a new TiffImage that contains only the current frame
+                    using (TiffImage singleFrameImage = new TiffImage(tiffImage.Frames[i]))
+                    {
+                        string outputPath = Path.Combine(outputDirectory, $"frame_{i}.tif");
 
-                    // Save the single-frame TIFF
-                    singleFrameImage.Save(outputPath);
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the single‑frame TIFF
+                        singleFrameImage.Save(outputPath);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

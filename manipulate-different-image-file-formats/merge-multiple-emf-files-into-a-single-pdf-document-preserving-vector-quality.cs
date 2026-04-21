@@ -4,63 +4,69 @@ using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input EMF files (relative paths)
-        string[] inputPaths = new string[]
+        // Hardcoded input EMF files
+        string[] inputPaths = new[]
         {
-            Path.Combine("Input", "file1.emf"),
-            Path.Combine("Input", "file2.emf")
-            // Add more files as needed
+            "input1.emf",
+            "input2.emf",
+            "input3.emf"
         };
 
-        // Verify each input file exists
-        foreach (string inputPath in inputPaths)
+        // Hardcoded output PDF file
+        string outputPath = "merged.pdf";
+
+        // Validate each input file
+        foreach (string path in inputPaths)
         {
-            if (!File.Exists(inputPath))
+            if (!File.Exists(path))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {path}");
                 return;
             }
         }
 
-        // Define output PDF path
-        string outputPath = Path.Combine("Output", "merged.pdf");
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Prepare rasterization options for each EMF page
-        List<VectorRasterizationOptions> pageOptions = new List<VectorRasterizationOptions>();
-        foreach (string inputPath in inputPaths)
+        // Collect sizes of all EMF images
+        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+        foreach (string path in inputPaths)
         {
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage img = (RasterImage)Image.Load(path))
             {
-                VectorRasterizationOptions vopt = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-                pageOptions.Add(vopt);
+                sizes.Add(img.Size);
             }
         }
 
-        // Configure PDF options with multiple pages
-        using (PdfOptions pdfOptions = new PdfOptions())
-        {
-            pdfOptions.MultiPageOptions = new MultiPageOptions
-            {
-                PageRasterizationOptions = pageOptions.ToArray()
-            };
+        // Calculate canvas size (horizontal stitching)
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
 
-            // Load any image (first EMF) to invoke Save with PDF options
-            using (Image dummy = Image.Load(inputPaths[0]))
+        // Create an unbound raster canvas (JPEG image) to hold merged content
+        JpegOptions canvasOptions = new JpegOptions();
+        using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
+        {
+            int offsetX = 0;
+            foreach (string path in inputPaths)
             {
-                dummy.Save(outputPath, pdfOptions);
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    // Copy pixels from EMF rasterized image onto the canvas
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
+                }
             }
+
+            // Save the merged canvas as a PDF
+            canvas.Save(outputPath);
         }
     }
 }

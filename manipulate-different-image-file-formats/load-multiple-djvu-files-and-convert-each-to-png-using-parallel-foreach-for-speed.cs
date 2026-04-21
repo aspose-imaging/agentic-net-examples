@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
@@ -18,7 +18,7 @@ class Program
         };
 
         // Hardcoded output directory
-        string outputDir = @"C:\Images\Output";
+        string outputDirectory = @"C:\Images\Output";
 
         // Process each DjVu file in parallel
         Parallel.ForEach(inputFiles, inputPath =>
@@ -30,25 +30,27 @@ class Program
                 return;
             }
 
-            // Open the DjVu file as a stream
+            // Ensure the output directory exists (unconditional)
+            Directory.CreateDirectory(outputDirectory);
+
+            // Open the DjVu file stream
             using (Stream stream = File.OpenRead(inputPath))
             {
                 // Load the DjVu document
                 using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
                 {
                     // Iterate through each page
-                    foreach (DjvuPage page in djvuImage.Pages)
+                    foreach (DjvuPage djvuPage in djvuImage.Pages)
                     {
-                        // Build output file name: <originalFileName>_page<Number>.png
-                        string inputFileName = Path.GetFileNameWithoutExtension(inputPath);
-                        string outputFileName = $"{inputFileName}_page{page.PageNumber}.png";
-                        string outputPath = Path.Combine(outputDir, outputFileName);
+                        // Build output file name: originalname_page{PageNumber}.png
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{djvuPage.PageNumber}.png";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                        // Ensure the output directory exists
+                        // Ensure the directory for the output file exists (unconditional)
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Save the page as PNG
-                        page.Save(outputPath, new PngOptions());
+                        djvuPage.Save(outputPath, new PngOptions());
                     }
                 }
             }

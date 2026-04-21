@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -9,29 +10,31 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.tga";
+        string inputPath = "Input\\sample.tga";
+        string outputPath = "Output\\sample.tif";
+
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string outputPath = "output.tif";
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the TGA image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        using (TgaImage tgaImage = (TgaImage)Image.Load(inputPath))
         {
-            // Change DPI to 300
-            image.HorizontalResolution = 300;
-            image.VerticalResolution = 300;
+            // Change DPI from 72 to 300
+            tgaImage.HorizontalResolution = 300;
+            tgaImage.VerticalResolution = 300;
 
-            // Prepare TIFF saving options
+            // Prepare TIFF save options
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-            // Save as TIFF
-            image.Save(outputPath, tiffOptions);
+            // Save the image as TIFF with the new DPI
+            tgaImage.Save(outputPath, tiffOptions);
         }
     }
 }

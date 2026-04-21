@@ -11,7 +11,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.cdr";
-        string intermediatePath = @"C:\Images\temp.bmp";
+        string intermediatePath = @"C:\Images\intermediate.bmp";
         string outputPath = @"C:\Images\output.bmp";
 
         // Verify input file exists
@@ -21,28 +21,27 @@ class Program
             return;
         }
 
-        // Ensure output directories exist
+        // Ensure directories for intermediate and final output exist
         Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CorelDRAW (CDR) file
+        // Load the CorelDRAW (CDR) file and export it to a BMP file
         using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
         {
-            // Save the vector image to a temporary BMP file (unfiltered)
-            cdrImage.Save(intermediatePath, new BmpOptions());
+            BmpOptions bmpExportOptions = new BmpOptions();
+            cdrImage.Save(intermediatePath, bmpExportOptions);
         }
 
-        // Load the temporary BMP as a raster image
-        using (Image bmpImage = Image.Load(intermediatePath))
+        // Load the intermediate BMP as a raster image
+        using (RasterImage rasterImage = (RasterImage)Image.Load(intermediatePath))
         {
-            // Cast to RasterImage to access filtering capabilities
-            var rasterImage = (RasterImage)bmpImage;
-
             // Apply Gaussian blur filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+            rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
-            // Save the processed image as BMP to the final output path
-            rasterImage.Save(outputPath, new BmpOptions());
+            // Save the processed image as BMP
+            BmpOptions bmpSaveOptions = new BmpOptions();
+            rasterImage.Save(outputPath, bmpSaveOptions);
         }
     }
 }

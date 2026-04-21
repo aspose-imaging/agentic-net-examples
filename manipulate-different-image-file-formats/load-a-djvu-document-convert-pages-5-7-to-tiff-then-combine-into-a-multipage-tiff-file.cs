@@ -10,8 +10,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.djvu";
-        string outputPath = @"C:\Temp\output.tif";
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\output.tif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,23 +23,21 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DjVu document from stream
+        // Load the DjVu document from a file stream
         using (FileStream stream = File.OpenRead(inputPath))
+        using (DjvuImage djvuImage = new DjvuImage(stream))
         {
-            using (DjvuImage djvuImage = new DjvuImage(stream))
-            {
-                // Configure TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Deflate;
-                // Optional: force B/W output
-                tiffOptions.BitsPerSample = new ushort[] { 1 };
+            // Configure TIFF save options
+            TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+            saveOptions.Compression = TiffCompressions.Deflate;
+            // Optional: force B/W output
+            saveOptions.BitsPerSample = new ushort[] { 1 };
 
-                // Select pages 5‑7 (zero‑based indexes 4,5,6)
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 });
+            // Specify pages 5‑7 (zero‑based indexes 4,5,6) for the multipage TIFF
+            saveOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 });
 
-                // Save selected pages as a multipage TIFF
-                djvuImage.Save(outputPath, tiffOptions);
-            }
+            // Save the selected pages as a multipage TIFF file
+            djvuImage.Save(outputPath, saveOptions);
         }
     }
 }

@@ -1,35 +1,38 @@
 using System;
 using System.IO;
+using System.Net.Http;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.webp";
-        string outputPath = "output/metadata.txt";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded URL of the WebP image
+            string url = "https://example.com/image.webp";
+
+            using (var httpClient = new HttpClient())
+            {
+                using (Stream stream = httpClient.GetStreamAsync(url).GetAwaiter().GetResult())
+                {
+                    using (var webPImage = new WebPImage(stream))
+                    {
+                        // Extract metadata
+                        var exif = webPImage.ExifData;
+                        var xmp = webPImage.XmpData;
+
+                        Console.WriteLine("Metadata extraction:");
+                        Console.WriteLine("Exif data: " + (exif != null ? "Present" : "None"));
+                        Console.WriteLine("XMP data: " + (xmp != null ? "Present" : "None"));
+                    }
+                }
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (var webPImage = new WebPImage(inputPath))
+        catch (Exception ex)
         {
-            var exifData = webPImage.ExifData;
-            var xmpData = webPImage.XmpData;
-            var genericMetadata = webPImage.Metadata;
-
-            var log = "WebP Image Metadata:" + Environment.NewLine;
-            log += "ExifData: " + (exifData != null ? exifData.ToString() : "None") + Environment.NewLine;
-            log += "XmpData: " + (xmpData != null ? xmpData.ToString() : "None") + Environment.NewLine;
-            log += "Generic Metadata: " + (genericMetadata != null ? genericMetadata.ToString() : "None") + Environment.NewLine;
-
-            Console.WriteLine(log);
-            File.WriteAllText(outputPath, log);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,12 +1,13 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.dcm";
@@ -22,25 +23,18 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DICOM image, apply transformations, and save as GIF
-        using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+        // Load the DICOM image
+        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
         {
-            // Crop the image (example values)
-            int leftShift = 10;
-            int rightShift = 10;
-            int topShift = 10;
-            int bottomShift = 10;
-            dicom.Crop(leftShift, rightShift, topShift, bottomShift);
+            // Crop the image (example rectangle)
+            var cropRect = new Rectangle(10, 10, 200, 200);
+            dicomImage.Crop(cropRect);
 
-            // Rotate the image 45 degrees clockwise, resize proportionally, white background
-            dicom.Rotate(45f, true, Color.White);
+            // Rotate and flip the image
+            dicomImage.RotateFlip(RotateFlipType.Rotate90FlipX);
 
-            // Flip horizontally
-            dicom.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-            // Save the transformed image as GIF
-            GifOptions gifOptions = new GifOptions();
-            dicom.Save(outputPath, gifOptions);
+            // Save as GIF
+            dicomImage.Save(outputPath, new GifOptions());
         }
     }
 }

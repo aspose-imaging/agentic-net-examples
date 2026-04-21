@@ -8,37 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\large.tif";
-        string outputPath = @"C:\Images\output\large_processed.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\large_input.tif";
+            string outputPath = @"C:\Images\processed_output.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set memory usage limit to 500 MB via LoadOptions
-        var loadOptions = new LoadOptions
-        {
-            BufferSizeHint = 500 // limit internal buffers to 500 MB
-        };
-
-        // Load the TIFF image with the memory limit applied
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            // Prepare save options for TIFF and apply the same memory limit
-            var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                BufferSizeHint = 500 // limit internal buffers during saving
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the processed image
-            image.Save(outputPath, saveOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set memory usage limit to 500 MB via LoadOptions
+            var loadOptions = new LoadOptions { BufferSizeHint = 500 };
+
+            // Load the TIFF image with the memory limit applied
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                // (Optional) image processing can be performed here
+
+                // Prepare save options with the same memory limit
+                var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    BufferSizeHint = 500
+                };
+
+                // Save the processed image
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

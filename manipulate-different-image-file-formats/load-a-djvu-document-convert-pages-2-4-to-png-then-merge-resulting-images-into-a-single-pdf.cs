@@ -1,25 +1,18 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputDir = "output";
-        string pngPath2 = Path.Combine(outputDir, "page2.png");
-        string pngPath3 = Path.Combine(outputDir, "page3.png");
-        string pngPath4 = Path.Combine(outputDir, "page4.png");
-        string pdfPath = Path.Combine(outputDir, "merged.pdf");
+        string inputPath = "sample.djvu";
+        string outputDirectory = "output";
+        string pdfPath = Path.Combine(outputDirectory, "merged.pdf");
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -29,61 +22,52 @@ class Program
         }
 
         // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(pngPath2));
-        Directory.CreateDirectory(Path.GetDirectoryName(pngPath3));
-        Directory.CreateDirectory(Path.GetDirectoryName(pngPath4));
         Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+        Directory.CreateDirectory(outputDirectory);
 
-        // Export pages 2‑4 to PNG
+        // List to hold generated PNG file paths
+        List<string> pngPaths = new List<string>();
+
+        // Load DjVu document and export pages 2‑4 as PNG
         using (FileStream stream = File.OpenRead(inputPath))
+        using (DjvuImage djvuImage = new DjvuImage(stream))
         {
-            using (DjvuImage djvu = new DjvuImage(stream))
+            foreach (DjvuPage djvuPage in djvuImage.Pages)
             {
-                // Page numbers are 1‑based; array index is 0‑based
-                DjvuPage page2 = (DjvuPage)djvu.Pages[1];
-                page2.Save(pngPath2, new PngOptions());
-
-                DjvuPage page3 = (DjvuPage)djvu.Pages[2];
-                page3.Save(pngPath3, new PngOptions());
-
-                DjvuPage page4 = (DjvuPage)djvu.Pages[3];
-                page4.Save(pngPath4, new PngOptions());
-            }
-        }
-
-        // Collect sizes of the PNG images
-        List<Size> sizes = new List<Size>();
-        string[] pngPaths = new[] { pngPath2, pngPath3, pngPath4 };
-        foreach (string pngPath in pngPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(pngPath))
-            {
-                sizes.Add(img.Size);
-            }
-        }
-
-        // Determine canvas dimensions (vertical stacking)
-        int canvasWidth = sizes.Max(s => s.Width);
-        int canvasHeight = sizes.Sum(s => s.Height);
-
-        // Create PDF canvas bound to the output file
-        Source pdfSource = new FileCreateSource(pdfPath, false);
-        JpegOptions jpegOptions = new JpegOptions { Source = pdfSource, Quality = 100 };
-        using (JpegImage pdfCanvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-        {
-            int offsetY = 0;
-            foreach (string pngPath in pngPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(pngPath))
+                int pageNumber = djvuPage.PageNumber;
+                if (pageNumber >= 2 && pageNumber <= 4)
                 {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    pdfCanvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
+                    string pngPath = Path.Combine(outputDirectory, $"page_{pageNumber}.png");
+                    // Save the page as PNG
+                    djvuPage.Save(pngPath, new PngOptions());
+                    pngPaths.Add(pngPath);
                 }
             }
+        }
 
-            // Save the PDF (canvas is already bound to the file source)
-            pdfCanvas.Save();
+        // Merge the PNG images into a single PDF
+        if (pngPaths.Count > 0)
+        {
+            // Load the first PNG to start the PDF document
+            using (Image pdfDocument = Image.Load(pngPaths[0]))
+            {
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Append remaining PNGs as additional pages
+                for (int i = 1; i < pngPaths.Count; i++)
+                {
+                    using (Image pageImage = Image.Load(pngPaths[i]))
+                    {
+                        // Add the page to the PDF document
+                        pdfDocument.Save(pdfPath, pdfOptions);
+                        // Note: Aspose.Imaging automatically handles multi‑page PDF creation
+                        // when saving subsequent images with the same PdfOptions.
+                    }
+                }
+
+                // Save the final PDF (covers the case of a single page as well)
+                pdfDocument.Save(pdfPath, pdfOptions);
+            }
         }
     }
 }

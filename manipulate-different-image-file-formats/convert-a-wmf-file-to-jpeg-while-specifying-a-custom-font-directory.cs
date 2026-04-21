@@ -3,60 +3,70 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.CustomFontHandler;
 
 class Program
 {
-    static void Main(string[] args)
+    // Custom font source provider that loads all font files from the specified folder
+    private static CustomFontData[] GetFontSource(params object[] args)
     {
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\sample.jpg";
-        string fontDirectory = @"C:\Fonts";
+        string fontsPath = string.Empty;
+        if (args.Length > 0 && args[0] != null)
+        {
+            fontsPath = args[0].ToString();
+        }
 
+        var fontDataList = new List<CustomFontData>();
+        if (Directory.Exists(fontsPath))
+        {
+            foreach (var fontFile in Directory.GetFiles(fontsPath))
+            {
+                string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                byte[] fontBytes = File.ReadAllBytes(fontFile);
+                fontDataList.Add(new CustomFontData(fontName, fontBytes));
+            }
+        }
+        return fontDataList.ToArray();
+    }
+
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.wmf";
+        string outputPath = @"C:\Images\sample_converted.jpg";
+
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource((args) =>
-        {
-            string fontsPath = "";
-            if (args.Length > 0 && args[0] != null)
-                fontsPath = args[0].ToString();
+        // Custom fonts directory
+        string customFontsFolder = @"C:\CustomFonts";
 
-            var fontList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-            if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-            {
-                foreach (var file in Directory.GetFiles(fontsPath))
-                {
-                    string fontName = Path.GetFileNameWithoutExtension(file);
-                    byte[] fontData = File.ReadAllBytes(file);
-                    fontList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontData));
-                }
-            }
-            return fontList.ToArray();
-        }, fontDirectory);
+        // Load the WMF image with custom font source
+        var loadOptions = new LoadOptions();
+        loadOptions.AddCustomFontSource(GetFontSource, customFontsFolder);
 
         using (Image image = Image.Load(inputPath, loadOptions))
         {
-            var vectorOptions = new VectorRasterizationOptions
+            // Set rasterization options based on the source image size
+            var rasterizationOptions = new WmfRasterizationOptions
             {
-                BackgroundColor = Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
+                PageSize = image.Size
             };
 
+            // JPEG save options with vector rasterization
             var jpegOptions = new JpegOptions
             {
-                Quality = 90,
-                VectorRasterizationOptions = vectorOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
+            // Save the image as JPEG
             image.Save(outputPath, jpegOptions);
         }
     }

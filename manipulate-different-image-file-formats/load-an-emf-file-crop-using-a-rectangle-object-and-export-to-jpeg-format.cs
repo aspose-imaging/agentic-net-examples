@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Emf.Graphics;
 
 class Program
 {
@@ -23,25 +23,20 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image
+        // Load the EMF image, crop it, and save as JPEG
         using (Image image = Image.Load(inputPath))
         {
             // Cast to EmfImage to access EMF-specific functionality
             EmfImage emfImage = (EmfImage)image;
 
-            // Define the cropping rectangle (example values)
-            // Adjust X, Y, Width, Height as needed
-            int cropX = 50;
-            int cropY = 50;
-            int cropWidth = 200;
-            int cropHeight = 150;
-            Rectangle cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+            // Define the cropping rectangle (example: top-left 100,100 with size 400x300)
+            var cropRect = new Rectangle(100, 100, 400, 300);
 
-            // Crop the image
+            // Perform the crop operation
             emfImage.Crop(cropRect);
 
-            // Prepare JPEG save options
-            JpegOptions jpegOptions = new JpegOptions();
+            // Set JPEG save options (default quality)
+            var jpegOptions = new JpegOptions();
 
             // Save the cropped image as JPEG
             emfImage.Save(outputPath, jpegOptions);

@@ -19,30 +19,26 @@ class Program
             return;
         }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         // Load the DICOM image
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        using (DicomImage image = (DicomImage)Image.Load(inputPath))
         {
             // Retrieve original dimensions
-            int originalWidth = dicomImage.Width;
-            int originalHeight = dicomImage.Height;
+            int originalWidth = image.Width;
+            int originalHeight = image.Height;
 
             // Calculate scaling factor (example: reduce size by 50%)
             double scaleFactor = 0.5;
             int newWidth = (int)(originalWidth * scaleFactor);
             int newHeight = (int)(originalHeight * scaleFactor);
 
-            // Ensure dimensions are at least 1 pixel
-            if (newWidth < 1) newWidth = 1;
-            if (newHeight < 1) newHeight = 1;
-
             // Resize the image using nearest neighbour resampling
-            dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
             // Save the resized image as BMP
-            dicomImage.Save(outputPath, new BmpOptions());
+            image.Save(outputPath, new BmpOptions());
         }
     }
 }

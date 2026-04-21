@@ -3,41 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output\\resized.webp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\input.webp";
+            string outputPath = @"c:\temp\output.webp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load WebP image from byte array
-        byte[] imageData = File.ReadAllBytes(inputPath);
-        using (var memoryStream = new MemoryStream(imageData))
-        using (WebPImage webpImage = new WebPImage(memoryStream))
-        {
-            // Resize to 1024x768 using nearest neighbour resampling
-            webpImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
-
-            // Set lossless option
-            var options = new WebPOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Lossless = true
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the resized image
-            webpImage.Save(outputPath, options);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the WebP image from a byte array
+            byte[] imageData = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(imageData))
+            using (WebPImage webPImage = new WebPImage(ms))
+            {
+                // Resize to 1024x768 using nearest neighbour resampling
+                webPImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+
+                // Save with lossless compression
+                var saveOptions = new WebPOptions
+                {
+                    Lossless = true
+                };
+                webPImage.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,7 +12,7 @@ class Program
         string inputPath = @"C:\Images\sample.eps";
         string outputPath = @"C:\Images\sample.svg";
 
-        // Verify that the input file exists
+        // Verify that the input EPS file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,13 +22,22 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image and save it as SVG
+        // Load the EPS image
         using (Image image = Image.Load(inputPath))
         {
-            // Create SVG export options (default settings)
+            // Prepare SVG export options
             var svgOptions = new SvgOptions();
 
-            // Save the image to SVG format
+            // If the source is a vector image, set rasterization options (optional but recommended)
+            if (image is VectorImage)
+            {
+                svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+            }
+
+            // Save the image as SVG
             image.Save(outputPath, svgOptions);
         }
     }

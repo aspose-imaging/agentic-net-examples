@@ -10,63 +10,53 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "Output\\output.tif";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.webp";
+            string outputPath = "output.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the animated WebP image
-        using (WebPImage webp = new WebPImage(inputPath))
-        {
-            // Verify that the image supports multiple pages/frames
-            IMultipageImage multipage = webp as IMultipageImage;
-            if (multipage == null || multipage.PageCount == 0)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The provided WebP image does not contain animation frames.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Dimensions of frames (assumed uniform)
-            RasterImage firstRaster = (RasterImage)multipage.Pages[0];
-            int width = firstRaster.Width;
-            int height = firstRaster.Height;
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
-            // Prepare TIFF options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // Create the first TIFF frame
-            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+            using (WebPImage webp = new WebPImage(inputPath))
             {
-                // Save pixels of the first frame
-                TiffFrame tiffFrame0 = tiff.Frames[0];
-                tiffFrame0.SavePixels(tiffFrame0.Bounds, firstRaster.LoadPixels(firstRaster.Bounds));
-
-                // Process remaining frames
-                for (int i = 1; i < multipage.PageCount; i++)
+                IMultipageImage multipage = webp as IMultipageImage;
+                if (multipage == null || multipage.PageCount == 0)
                 {
-                    // Add a new blank frame to the TIFF
-                    tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
-
-                    // Load raster data of the current WebP frame
-                    RasterImage raster = (RasterImage)multipage.Pages[i];
-
-                    // Save its pixels into the corresponding TIFF frame
-                    TiffFrame tiffFrame = tiff.Frames[i];
-                    tiffFrame.SavePixels(tiffFrame.Bounds, raster.LoadPixels(raster.Bounds));
+                    Console.Error.WriteLine("No frames found in the WebP animation.");
+                    return;
                 }
 
-                // Save the assembled multi-page TIFF
-                tiff.Save(outputPath);
+                RasterImage firstFrame = (RasterImage)multipage.Pages[0];
+                int width = firstFrame.Width;
+                int height = firstFrame.Height;
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+                {
+                    tiff.SavePixels(tiff.ActiveFrame.Bounds, firstFrame.LoadPixels(firstFrame.Bounds));
+
+                    for (int i = 1; i < multipage.PageCount; i++)
+                    {
+                        tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
+                        tiff.ActiveFrame = tiff.Frames[i];
+                        RasterImage frame = (RasterImage)multipage.Pages[i];
+                        tiff.SavePixels(tiff.ActiveFrame.Bounds, frame.LoadPixels(frame.Bounds));
+                    }
+
+                    tiff.Save(outputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

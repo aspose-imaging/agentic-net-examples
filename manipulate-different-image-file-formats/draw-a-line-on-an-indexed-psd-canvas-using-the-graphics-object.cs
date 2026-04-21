@@ -1,50 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Drawing; // For Pen, Color, Point
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.psd";
-        string outputPath = @"C:\Images\output.psd";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Define output path for the indexed PSD file
+            string outputPath = Path.Combine("output", "indexed_canvas.psd");
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure PSD options for an indexed color mode with a simple palette
+            PsdOptions psdOptions = new PsdOptions();
+            psdOptions.Source = new FileCreateSource(outputPath, false);
+            psdOptions.ColorMode = ColorModes.Indexed;
+            psdOptions.Palette = new ColorPalette(new Color[]
+            {
+                Color.Black,
+                Color.White,
+                Color.Red,
+                Color.Green,
+                Color.Blue
+            });
+
+            // Create a new PSD image (e.g., 400x400 pixels)
+            using (Image image = Image.Create(psdOptions, 400, 400))
+            {
+                // Initialize Graphics for drawing
+                Graphics graphics = new Graphics(image);
+
+                // Draw a black line from (50,50) to (350,350)
+                graphics.DrawLine(new Pen(Color.Black, 2), new Point(50, 50), new Point(350, 350));
+
+                // Save the changes to the bound file
+                image.Save();
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image (indexed canvas)
-        using (Image img = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to PSD image type for safety
-            PsdImage psdImage = img as PsdImage;
-            if (psdImage == null)
-            {
-                Console.Error.WriteLine("The loaded file is not a PSD image.");
-                return;
-            }
-
-            // Create Graphics object for drawing
-            using (Graphics graphics = new Graphics(psdImage))
-            {
-                // Define a red pen with width 5
-                Pen pen = new Pen(Color.Red, 5);
-
-                // Draw a line from (10,10) to (200,200)
-                graphics.DrawLine(pen, new Point(10, 10), new Point(200, 200));
-            }
-
-            // Save the modified image
-            psdImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

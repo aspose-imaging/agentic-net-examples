@@ -1,7 +1,8 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 
@@ -9,45 +10,47 @@ class Program
 {
     static void Main()
     {
-        string inputPath = "input.tif";
-        string outputDir = "output";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.tif";
+            string outputDir = "output_paths";
 
-        Directory.CreateDirectory(outputDir);
-
-        using (var tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            int frameCount = tiffImage.Frames.Length;
-            for (int i = 0; i < frameCount; i++)
+            if (!File.Exists(inputPath))
             {
-                var frame = tiffImage.Frames[i];
-                tiffImage.ActiveFrame = frame;
-                var pathResources = frame.PathResources;
-                if (pathResources == null || pathResources.Count == 0)
-                    continue;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
-                    pathResources.ToArray(),
-                    frame.Size);
+            Directory.CreateDirectory(outputDir);
 
-                int width = frame.Width;
-                int height = frame.Height;
-                var svgGraphics = new SvgGraphics2D(width, height, 96);
-                var graphics = new Graphics(svgGraphics);
-                graphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
-
-                using (var svgImage = svgGraphics.EndRecording())
+            using (Aspose.Imaging.FileFormats.Tiff.TiffImage tiff = (Aspose.Imaging.FileFormats.Tiff.TiffImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                for (int i = 0; i < tiff.Frames.Length; i++)
                 {
-                    string outputPath = Path.Combine(outputDir, $"frame_{i}.svg");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    svgImage.Save(outputPath);
+                    Aspose.Imaging.FileFormats.Tiff.TiffFrame frame = tiff.Frames[i];
+                    var resources = frame.PathResources;
+                    if (resources == null) continue;
+
+                    for (int j = 0; j < resources.Count; j++)
+                    {
+                        var pathResource = resources[j];
+
+                        var svgGraphics = new SvgGraphics2D(frame.Width, frame.Height, 96);
+                        // No drawing performed; just create empty SVG for each path resource
+
+                        using (var svgImage = svgGraphics.EndRecording())
+                        {
+                            string outputPath = Path.Combine(outputDir, $"frame_{i}_path_{j}.svg");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            svgImage.Save(outputPath);
+                        }
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

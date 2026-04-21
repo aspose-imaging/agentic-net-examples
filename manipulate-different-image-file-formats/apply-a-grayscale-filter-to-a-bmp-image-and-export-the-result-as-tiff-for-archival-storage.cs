@@ -8,10 +8,10 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input.bmp";
-        string outputPath = "Output.tif";
+        string inputPath = "Input/sample.bmp";
+        string outputPath = "Output/sample.tif";
 
         if (!File.Exists(inputPath))
         {
@@ -26,20 +26,20 @@ class Program
             int width = bmpImage.Width;
             int height = bmpImage.Height;
 
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
             {
-                // Draw the BMP onto the TIFF canvas
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            using (Image tiffImage = Image.Create(tiffOptions, width, height))
+            {
                 Graphics graphics = new Graphics(tiffImage);
                 graphics.DrawImage(bmpImage, 0, 0);
 
-                // Apply grayscale conversion
-                tiffImage.Grayscale();
+                var tiffImg = (TiffImage)tiffImage;
+                tiffImg.Grayscale();
 
-                // Since the image is bound to a file source, save without specifying path
-                tiffImage.Save();
+                tiffImg.Save();
             }
         }
     }

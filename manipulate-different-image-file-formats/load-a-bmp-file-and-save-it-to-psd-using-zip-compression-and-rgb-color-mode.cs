@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.bmp";
-        string outputPath = @"C:\Images\output.psd";
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.psd";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -28,13 +28,13 @@ class Program
             // Configure PSD save options
             PsdOptions psdOptions = new PsdOptions
             {
-                // Use RAW compression (no compression) – closest to ZIP in this context
-                CompressionMethod = CompressionMethod.Raw,
+                // Use RLE compression (ZIP‑like compression for PSD)
+                CompressionMethod = CompressionMethod.RLE,
                 // Set color mode to RGB
-                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
+                ColorMode = ColorModes.Rgb
             };
 
-            // Save as PSD with the specified options
+            // Save the image as PSD with the specified options
             image.Save(outputPath, psdOptions);
         }
     }

@@ -1,14 +1,16 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.fodg";
+        string inputPath = "input.odg";
         string outputPath = "output.pdf";
 
         // Verify input file exists
@@ -21,31 +23,47 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure font substitution
-        // Folder that contains replacement fonts (must exist and contain .ttf files)
-        string substituteFontsFolder = "fonts";
-        Aspose.Imaging.FontSettings.SetFontsFolder(substituteFontsFolder);
-        // Optional: set a default font name to use when a specific font is missing
-        Aspose.Imaging.FontSettings.DefaultFontName = "Arial";
+        // Configure custom font source
+        var loadOptions = new LoadOptions();
+        loadOptions.AddCustomFontSource(GetFontSource, "fonts"); // "fonts" folder contains required fonts
 
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        // Load ODG image with custom fonts
+        using (var image = Image.Load(inputPath, loadOptions))
         {
-            // Set up rasterization options for ODG to PDF conversion
-            var rasterizationOptions = new OdgRasterizationOptions
+            // Set up ODG rasterization options (used for vector formats like PDF)
+            var odgRasterOptions = new OdgRasterizationOptions
             {
                 BackgroundColor = Color.White,
                 PageSize = image.Size
             };
 
-            // Set up PDF save options using the rasterization options
+            // Configure PDF save options with the rasterization settings
             var pdfOptions = new PdfOptions
             {
-                VectorRasterizationOptions = rasterizationOptions
+                VectorRasterizationOptions = odgRasterOptions
             };
 
-            // Save the image to PDF, missing fonts will be substituted
+            // Save the image to PDF, substituting missing fonts with the provided ones
             image.Save(outputPath, pdfOptions);
         }
+    }
+
+    // Custom font provider delegate
+    private static Aspose.Imaging.CustomFontHandler.CustomFontData[] GetFontSource(params object[] args)
+    {
+        string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+        var fontDataList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+
+        if (Directory.Exists(fontsPath))
+        {
+            foreach (var fontFile in Directory.GetFiles(fontsPath))
+            {
+                string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                byte[] fontBytes = File.ReadAllBytes(fontFile);
+                fontDataList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+            }
+        }
+
+        return fontDataList.ToArray();
     }
 }

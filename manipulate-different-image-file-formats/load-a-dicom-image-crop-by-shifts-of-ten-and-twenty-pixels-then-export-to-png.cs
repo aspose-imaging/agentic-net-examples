@@ -22,15 +22,16 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DICOM image, crop, and save as PNG
+        // Load the DICOM image
         using (Image image = Image.Load(inputPath))
         {
+            // Cast to DicomImage to access DICOM-specific methods
             DicomImage dicomImage = (DicomImage)image;
 
-            // Crop with left/right shift of 10 pixels and top/bottom shift of 20 pixels
+            // Crop the image: left/right shift = 10 pixels, top/bottom shift = 20 pixels
             dicomImage.Crop(10, 10, 20, 20);
 
-            // Save the cropped image to PNG format
+            // Save the cropped image as PNG
             dicomImage.Save(outputPath, new PngOptions());
         }
     }

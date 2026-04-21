@@ -1,16 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.eps";
         string outputPath = "output.tif";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,21 +21,28 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
-        using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+        // Load the EPS image
+        using (Image eps = Image.Load(inputPath))
         {
-            // Extract TIFF preview
-            using (var preview = epsImage.GetPreviewImage(Aspose.Imaging.FileFormats.Eps.EpsPreviewFormat.TIFF))
+            // Cast to the concrete EpsImage type using fully qualified name
+            var epsImage = eps as Aspose.Imaging.FileFormats.Eps.EpsImage;
+            if (epsImage == null)
             {
-                if (preview != null)
+                Console.Error.WriteLine("Failed to load EPS image.");
+                return;
+            }
+
+            // Retrieve the TIFF preview
+            using (Image preview = epsImage.GetPreviewImage(Aspose.Imaging.FileFormats.Eps.EpsPreviewFormat.TIFF))
+            {
+                if (preview == null)
                 {
-                    // Save the preview as a TIFF file
-                    preview.Save(outputPath);
+                    Console.Error.WriteLine("No TIFF preview available.");
+                    return;
                 }
-                else
-                {
-                    Console.Error.WriteLine("No TIFF preview available in the EPS file.");
-                }
+
+                // Save the preview image; the file extension determines the format
+                preview.Save(outputPath);
             }
         }
     }

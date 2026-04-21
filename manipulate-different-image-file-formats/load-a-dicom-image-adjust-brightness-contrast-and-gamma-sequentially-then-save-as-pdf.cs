@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.dcm";
-        string outputPath = @"c:\temp\output\result.pdf";
+        string inputPath = "input.dcm";
+        string outputPath = "output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -28,14 +28,14 @@ class Program
             // Cast to DicomImage to access DICOM-specific methods
             DicomImage dicomImage = (DicomImage)image;
 
-            // Adjust brightness (example value: 30)
-            dicomImage.AdjustBrightness(30);
+            // Adjust brightness (value range: -255 to 255)
+            dicomImage.AdjustBrightness(30); // increase brightness
 
-            // Adjust contrast (example value: 20f)
-            dicomImage.AdjustContrast(20f);
+            // Adjust contrast (value range: -100 to 100)
+            dicomImage.AdjustContrast(20f); // increase contrast
 
-            // Adjust gamma (example value: 1.2f)
-            dicomImage.AdjustGamma(1.2f);
+            // Adjust gamma (positive float, 1.0 = no change)
+            dicomImage.AdjustGamma(1.2f); // apply gamma correction
 
             // Save the processed image as PDF
             dicomImage.Save(outputPath, new PdfOptions());

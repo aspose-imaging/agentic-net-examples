@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"input.html";
-        string outputPath = @"output.jpg";
+        string inputPath = @"C:\Temp\input.html";
+        string outputPath = @"C:\Temp\output.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -28,7 +28,7 @@ class Program
             // Prepare JPEG save options (default settings)
             JpegOptions jpegOptions = new JpegOptions();
 
-            // Save the image to a JPEG file stream
+            // Save the image as JPEG to a file stream
             using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
             {
                 image.Save(outputStream, jpegOptions);

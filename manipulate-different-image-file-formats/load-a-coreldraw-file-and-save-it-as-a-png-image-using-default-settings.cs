@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\sample.cdr";
-        string outputPath = @"c:\temp\sample.png";
+        string inputPath = @"C:\temp\sample.cdr";
+        string outputPath = @"C:\temp\sample.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -24,10 +24,10 @@ class Program
         // Load the CorelDRAW (CDR) file
         using (Image image = Image.Load(inputPath))
         {
-            // Create default PNG save options
+            // Use default PNG options
             PngOptions pngOptions = new PngOptions();
 
-            // Save the image as PNG using the default options
+            // Save the image as PNG
             image.Save(outputPath, pngOptions);
         }
     }

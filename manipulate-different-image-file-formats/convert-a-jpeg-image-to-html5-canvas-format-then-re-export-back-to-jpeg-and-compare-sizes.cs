@@ -9,9 +9,9 @@ class Program
     static void Main()
     {
         // Hardcoded paths
-        string inputPath = "input.jpg";
-        string canvasPath = "canvas.html";
-        string outputJpegPath = "output.jpg";
+        string inputPath = @"C:\Images\input.jpg";
+        string htmlPath = @"C:\Images\canvas.html";
+        string outputJpegPath = @"C:\Images\output.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,34 +20,32 @@ class Program
             return;
         }
 
-        // Ensure output directories exist (handles cases with no directory part)
-        Directory.CreateDirectory(Path.GetDirectoryName(canvasPath) ?? ".");
-        Directory.CreateDirectory(Path.GetDirectoryName(outputJpegPath) ?? ".");
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(htmlPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputJpegPath));
 
         // Load the original JPEG image
         using (Image image = Image.Load(inputPath))
         {
             // Save as HTML5 Canvas
-            var canvasOptions = new Html5CanvasOptions
+            var htmlOptions = new Html5CanvasOptions
             {
-                // Export a full HTML page; adjust as needed
+                // Generate a full HTML page (optional)
                 FullHtmlPage = true,
-                // Required for vector rasterization; using default SVG options
-                VectorRasterizationOptions = new SvgRasterizationOptions()
+                // Required for vector rasterization when source is vector; for raster images it can be null
+                VectorRasterizationOptions = null
             };
-            image.Save(canvasPath, canvasOptions);
+            image.Save(htmlPath, htmlOptions);
         }
 
-        // Load the generated Canvas HTML file
-        using (Image canvasImage = Image.Load(canvasPath))
+        // Load the generated HTML5 Canvas file
+        using (Image canvasImage = Image.Load(htmlPath))
         {
-            // Prepare JPEG save options
+            // Save back to JPEG
             var jpegOptions = new JpegOptions
             {
-                Quality = 100 // Maximum quality for comparison
+                Quality = 100 // Preserve maximum quality
             };
-
-            // Save back to JPEG
             canvasImage.Save(outputJpegPath, jpegOptions);
         }
 

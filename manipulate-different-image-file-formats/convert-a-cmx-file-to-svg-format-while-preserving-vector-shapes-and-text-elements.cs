@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -25,18 +25,20 @@ class Program
         // Load the CMX image
         using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
         {
-            // Prepare SVG save options
+            // Configure SVG save options
             SvgOptions svgOptions = new SvgOptions
             {
-                // Render text as shapes to preserve appearance
+                // Render text as vector shapes to preserve appearance
                 TextAsShapes = true
             };
 
-            // Configure rasterization options specific to CMX
+            // Set up CMX rasterization options
             CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
             {
                 // Use the original image size for the SVG page
-                PageSize = cmxImage.Size
+                PageSize = cmxImage.Size,
+                // Optional: set a background color if needed
+                BackgroundColor = Color.White
             };
 
             svgOptions.VectorRasterizationOptions = rasterOptions;

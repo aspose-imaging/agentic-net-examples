@@ -7,33 +7,35 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output paths
-        string inputPath = Path.Combine("Input", "sample.djvu");
-        string outputPath = Path.Combine("Output", "sample.tif");
+        // Hardcoded input and output file paths
+        string inputPath = "sample.djvu";
+        string outputPath = "sample.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load DjVu document
-        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+        // Load the DjVu document from a file stream
+        using (FileStream stream = File.OpenRead(inputPath))
         {
-            // Configure TIFF options with Deflate compression
-            using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
+                // Configure TIFF save options with Deflate compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 tiffOptions.Compression = TiffCompressions.Deflate;
-                // Export all pages
+
+                // Set MultiPageOptions to include all pages
                 tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
 
-                // Save all pages to a multi-page TIFF file
+                // Save all pages of the DjVu document as a multi‑page TIFF file
                 djvuImage.Save(outputPath, tiffOptions);
             }
         }

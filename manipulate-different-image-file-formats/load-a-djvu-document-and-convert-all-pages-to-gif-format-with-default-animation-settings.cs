@@ -11,7 +11,7 @@ class Program
         // Hardcoded input DjVu file path
         string inputPath = "sample.djvu";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -19,16 +19,16 @@ class Program
         }
 
         // Open the DjVu file as a stream
-        using (Stream stream = File.OpenRead(inputPath))
+        using (Stream inputStream = File.OpenRead(inputPath))
         {
             // Load the DjVu document from the stream
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
             {
                 // Iterate through each page in the DjVu document
                 foreach (DjvuPage djvuPage in djvuImage.Pages)
                 {
-                    // Construct output file path for the current page
-                    string outputPath = Path.Combine("output", $"page_{djvuPage.PageNumber}.gif");
+                    // Build the output GIF file path for the current page
+                    string outputPath = Path.Combine("output", $"page{djvuPage.PageNumber}.gif");
 
                     // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));

@@ -2,35 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Tga;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.tga";
         string outputPath = "output.bmp";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TGA image as a raster image
-        using (RasterImage tgaImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Create a BMP image from the loaded raster image
-            using (BmpImage bmpImage = new BmpImage(tgaImage))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Save the BMP image, preserving alpha channel and original bit depth
-                bmpImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TGA image
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                // Preserve the original bits per pixel
+                int bitsPerPixel = raster.BitsPerPixel;
+
+                // Create a BMP image with the same bit depth and resolution
+                using (BmpImage bmp = new BmpImage(
+                    raster,
+                    (ushort)bitsPerPixel,
+                    BitmapCompression.Rgb,
+                    raster.HorizontalResolution,
+                    raster.VerticalResolution))
+                {
+                    // Save as BMP, preserving alpha channel if present
+                    bmp.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

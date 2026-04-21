@@ -2,45 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample_grayscale.png";
-
-        // Verify input file exists
+        // Define input and output paths
+        string inputPath = Path.Combine("Input", "sample.eps");
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        string outputPath = Path.Combine("Output", "sample_grayscale.png");
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
-        using (Image image = Image.Load(inputPath))
+        // Load EPS image and export as grayscale PNG
+        using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
         {
-            var epsImage = (EpsImage)image;
-
-            // Configure PNG export options for grayscale
-            using (var options = new PngOptions())
+            var options = new PngOptions
             {
-                options.ColorType = PngColorType.Grayscale;
-                options.VectorRasterizationOptions = new EpsRasterizationOptions
+                ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.Grayscale,
+                VectorRasterizationOptions = new EpsRasterizationOptions
                 {
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height
-                };
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                }
+            };
 
-                // Save as grayscale PNG
-                epsImage.Save(outputPath, options);
-            }
+            image.Save(outputPath, options);
         }
     }
 }

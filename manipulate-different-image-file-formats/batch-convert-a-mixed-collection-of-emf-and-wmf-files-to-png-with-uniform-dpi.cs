@@ -1,78 +1,84 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Base directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input and output directories exist
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Process only EMF or WMF files
-            string extension = Path.GetExtension(inputPath).ToLowerInvariant();
-            if (extension != ".emf" && extension != ".wmf")
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDir))
             {
-                continue;
+                Directory.CreateDirectory(outputDir);
             }
 
-            // Determine output path
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
+            var files = Directory.GetFiles(inputDir, "*.*")
+                .Where(f => f.EndsWith(".emf", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".wmf", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the vector image
-            using (Image image = Image.Load(inputPath))
+            foreach (var inputPath in files)
             {
-                // Prepare PNG options with vector rasterization settings
-                using (PngOptions pngOptions = new PngOptions())
+                if (!File.Exists(inputPath))
                 {
-                    // Uniform DPI (e.g., 300x300)
-                    pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                    // Configure vector rasterization
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+
+                // Ensure output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Prepare PNG options with uniform DPI
+                    PngOptions pngOptions = new PngOptions();
+                    pngOptions.ResolutionSettings = new ResolutionSetting(300, 300); // uniform DPI
+
+                    // Set appropriate vector rasterization options based on file type
+                    if (inputPath.EndsWith(".emf", StringComparison.OrdinalIgnoreCase))
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    };
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
+                        var rasterOptions = new EmfRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageSize = image.Size
+                        };
+                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                    }
+                    else // .wmf
+                    {
+                        var rasterOptions = new WmfRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageSize = image.Size
+                        };
+                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                    }
 
-                    // Save as PNG
                     image.Save(outputPath, pngOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,69 +1,72 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input, output, and fonts folder paths
-        string inputPath = "C:\\Input\\sample.emf";
-        string outputPath = "C:\\Output\\sample.pdf";
-        string fontsFolder = "C:\\Fonts";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "C:\\input.emf";
+            string outputPath = "C:\\output.pdf";
+            string fontFolder = "C:\\fonts";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource(GetFontSource, fontFolder);
+
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                var vectorOptions = new VectorRasterizationOptions
+                {
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = vectorOptions
+                };
+
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure custom font source
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource(GetFontSource, fontsFolder);
-
-        // Load EMF image with custom fonts
-        using (Image image = Image.Load(inputPath, loadOptions))
+        catch (Exception ex)
         {
-            // Set vector rasterization options for PDF conversion
-            var vectorOptions = new EmfRasterizationOptions
-            {
-                PageSize = image.Size,
-                BackgroundColor = Color.White,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
-
-            var pdfOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = vectorOptions
-            };
-
-            // Save as PDF with embedded fonts
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 
-    // Custom font provider delegate
     private static Aspose.Imaging.CustomFontHandler.CustomFontData[] GetFontSource(params object[] args)
     {
-        string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-        var fonts = new System.Collections.Generic.List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+        string fontsPath = string.Empty;
+        if (args.Length > 0)
+        {
+            fontsPath = args[0]?.ToString();
+        }
 
+        var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
         if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
         {
-            foreach (var file in Directory.GetFiles(fontsPath))
+            foreach (var fontFile in Directory.GetFiles(fontsPath))
             {
-                string fontName = Path.GetFileNameWithoutExtension(file);
-                byte[] fontData = File.ReadAllBytes(file);
-                fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontData));
+                byte[] fontBytes = File.ReadAllBytes(fontFile);
+                string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
             }
         }
 
-        return fonts.ToArray();
+        return result.ToArray();
     }
 }

@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\sample_converted.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -24,7 +24,7 @@ class Program
         // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare PNG save options (default preserves color depth and transparency)
+            // Create PNG save options (default preserves color depth and transparency)
             var pngOptions = new PngOptions();
 
             // Save the image as PNG

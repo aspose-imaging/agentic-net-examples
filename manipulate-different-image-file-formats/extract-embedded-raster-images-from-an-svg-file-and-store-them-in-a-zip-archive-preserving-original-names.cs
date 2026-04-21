@@ -1,20 +1,19 @@
 using System;
 using System.IO;
+using System.IO.Compression;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input SVG file path
-        string inputPath = @"C:\Images\input.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "embedded_images.zip";
 
-        // Hardcoded output ZIP file path
-        string outputPath = @"C:\Images\embedded_images.zip";
-
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,36 +23,61 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to VectorImage to access embedded images
-            var vectorImage = (VectorImage)image;
-            var embeddedImages = vectorImage.GetEmbeddedImages();
-
-            // Create ZIP archive for output
-            using (FileStream zipStream = new FileStream(outputPath, FileMode.Create))
-            using (System.IO.Compression.ZipArchive zip = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create))
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                int index = 0;
-                foreach (var embedded in embeddedImages)
-                {
-                    using (embedded)
-                    {
-                        // Preserve original name if available, otherwise use indexed name
-                        string entryName = $"image{index++}.png";
+                // Cast to VectorImage to access embedded images
+                var vectorImage = (VectorImage)image;
+                EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
 
-                        // Create entry in ZIP archive
-                        var entry = zip.CreateEntry(entryName);
-                        using (Stream entryStream = entry.Open())
+                // Create the ZIP archive
+                using (FileStream zipFileStream = new FileStream(outputPath, FileMode.Create))
+                using (ZipArchive archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
+                {
+                    int index = 0;
+                    foreach (var embedded in embeddedImages)
+                    {
+                        // Determine a name for the entry; preserve original if possible
+                        string entryName = $"image{index}.png";
+                        // Some EmbeddedImage implementations expose a Name property; use it if available
+                        var nameProp = embedded.GetType().GetProperty("Name");
+                        if (nameProp != null)
                         {
-                            // Save the embedded raster image as PNG into the ZIP entry
-                            var pngOptions = new PngOptions();
-                            embedded.Image.Save(entryStream, pngOptions);
+                            string originalName = nameProp.GetValue(embedded) as string;
+                            if (!string.IsNullOrEmpty(originalName))
+                            {
+                                entryName = originalName;
+                            }
                         }
+
+                        // Save the embedded image to a memory stream as PNG
+                        using (embedded)
+                        {
+                            var pngOptions = new PngOptions();
+                            using (var ms = new MemoryStream())
+                            {
+                                embedded.Image.Save(ms, pngOptions);
+                                ms.Position = 0;
+
+                                // Add the image to the ZIP archive
+                                var entry = archive.CreateEntry(entryName);
+                                using (var entryStream = entry.Open())
+                                {
+                                    ms.CopyTo(entryStream);
+                                }
+                            }
+                        }
+
+                        index++;
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

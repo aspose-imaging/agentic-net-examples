@@ -1,50 +1,53 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input DjVu files
-        string[] inputFiles = new string[]
+        string[] inputPaths = new[]
         {
-            "Input/file1.djvu",
-            "Input/file2.djvu",
-            "Input/file3.djvu"
+            @"C:\Temp\sample1.djvu",
+            @"C:\Temp\sample2.djvu"
         };
 
+        // Hardcoded output directory
+        string outputDirectory = @"C:\Temp\Output";
+
         // Process each file in parallel
-        System.Threading.Tasks.Parallel.ForEach(inputFiles, inputPath =>
+        Parallel.ForEach(inputPaths, inputPath =>
         {
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Determine output TIFF path
-            string outputPath = Path.Combine("Output", Path.GetFileNameWithoutExtension(inputPath) + ".tif");
+            // Build output TIFF path
+            string outputPath = Path.Combine(outputDirectory,
+                Path.GetFileNameWithoutExtension(inputPath) + ".tif");
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu image from stream and convert to multipage TIFF
+            // Load DjVu document from file stream
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Configure TIFF save options
+                // Configure TIFF save options for multipage output
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 tiffOptions.Compression = TiffCompressions.Deflate;
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(); // Export all pages
+                tiffOptions.BitsPerSample = new ushort[] { 1 }; // optional B/W conversion
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
 
-                // Save as multipage TIFF
+                // Save the DjVu document as a multipage TIFF
                 djvuImage.Save(outputPath, tiffOptions);
             }
         });

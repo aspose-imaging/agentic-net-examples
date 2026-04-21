@@ -8,9 +8,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\sample_grayscale.png";
+        // Hardcoded input and output file paths
+        string inputPath = "sample.eps";
+        string outputPath = "sample_grayscale.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,10 +20,10 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load EPS image
-        using (Image epsImage = Image.Load(inputPath))
+        // Load the EPS image
+        using (Image image = Image.Load(inputPath))
         {
             // Configure PNG options for grayscale output
             var pngOptions = new PngOptions
@@ -31,8 +31,8 @@ class Program
                 ColorType = PngColorType.Grayscale
             };
 
-            // Save as PNG with grayscale color type
-            epsImage.Save(outputPath, pngOptions);
+            // Save as PNG with the specified options
+            image.Save(outputPath, pngOptions);
         }
     }
 }

@@ -5,26 +5,22 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.tga";
+        string outputPath = "output\\converted.png";
+
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string outputPath = "output.png";
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the TGA image
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Save as PNG preserving the alpha channel
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            image.Save(outputPath, new PngOptions());
         }
     }
 }

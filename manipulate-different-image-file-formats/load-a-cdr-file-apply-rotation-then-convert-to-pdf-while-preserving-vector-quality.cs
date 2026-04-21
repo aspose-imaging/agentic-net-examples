@@ -6,11 +6,11 @@ using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample_rotated.pdf";
+        // Define input and output paths
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,30 +22,23 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR image
-        using (CdrImage image = (CdrImage)Image.Load(inputPath))
+        // Load CDR image, apply rotation, and save as PDF preserving vector quality
+        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
         {
-            // Rotate the image by 90 degrees (clockwise)
-            image.Rotate(90f);
+            // Rotate the vector image by 90 degrees (adjust as needed)
+            cdrImage.Rotate(90f);
 
-            // Configure PDF export options with vector rasterization settings
+            // Prepare PDF options with vector rasterization settings
             PdfOptions pdfOptions = new PdfOptions();
             CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
             {
-                // Preserve vector quality settings
-                Positioning = PositioningTypes.DefinedByDocument,
-                SmoothingMode = SmoothingMode.None,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel
+                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = SmoothingMode.None
             };
-
-            // Optionally set page size to match the source image
-            rasterOptions.PageWidth = image.Width;
-            rasterOptions.PageHeight = image.Height;
-
             pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the rotated image as PDF
-            image.Save(outputPath, pdfOptions);
+            // Save the rotated image to PDF
+            cdrImage.Save(outputPath, pdfOptions);
         }
     }
 }

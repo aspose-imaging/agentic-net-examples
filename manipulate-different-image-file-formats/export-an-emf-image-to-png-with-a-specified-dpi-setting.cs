@@ -2,9 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,9 +10,9 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.emf";
-        string outputPath = "output\\converted.png";
+        string outputPath = "output.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,28 +22,26 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Desired DPI settings
-        int dpiX = 300;
-        int dpiY = 300;
-
-        // Load EMF image and convert to PNG with specified DPI
-        using (Image image = Image.Load(inputPath))
+        // Load the EMF image
+        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
         {
-            // Configure vector rasterization options
-            EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-
-            // Configure PNG options with DPI and vector rasterization
+            // Configure PNG export options with desired DPI
             PngOptions pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = vectorOptions,
-                ResolutionSettings = new Aspose.Imaging.ResolutionSetting(dpiX, dpiY)
+                // Set DPI (horizontal and vertical)
+                ResolutionSettings = new ResolutionSetting(300, 300)
             };
 
-            // Save the PNG file
-            image.Save(outputPath, pngOptions);
+            // Set up rasterization options for the EMF source
+            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+            {
+                PageSize = emfImage.Size
+            };
+
+            pngOptions.VectorRasterizationOptions = rasterOptions;
+
+            // Save the image as PNG with the specified DPI
+            emfImage.Save(outputPath, pngOptions);
         }
     }
 }

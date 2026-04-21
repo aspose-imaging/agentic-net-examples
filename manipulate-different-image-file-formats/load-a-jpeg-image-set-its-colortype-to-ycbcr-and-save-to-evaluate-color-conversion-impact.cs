@@ -9,10 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_ycbcr.jpg";
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output_ycbcr.jpg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,8 +25,8 @@ class Program
         // Load the JPEG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure JPEG save options to use YCbCr color type
-            var saveOptions = new JpegOptions
+            // Configure JPEG save options to use YCbCr color mode
+            JpegOptions saveOptions = new JpegOptions
             {
                 ColorType = JpegCompressionColorMode.YCbCr
             };

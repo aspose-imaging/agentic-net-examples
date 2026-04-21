@@ -5,11 +5,11 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.pdf";
+        string inputPath = "Input/sample.bmp";
+        string outputPath = "Output/sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,17 +21,16 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image
+        // Load BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF export options
-            PdfOptions pdfOptions = new PdfOptions
+            // Configure PDF options to preserve original resolution
+            var pdfOptions = new PdfOptions
             {
-                // Preserve the original DPI resolution of the BMP image
                 UseOriginalImageResolution = true
             };
 
-            // Save the image as a single‑page PDF
+            // Save as single-page PDF
             image.Save(outputPath, pdfOptions);
         }
     }

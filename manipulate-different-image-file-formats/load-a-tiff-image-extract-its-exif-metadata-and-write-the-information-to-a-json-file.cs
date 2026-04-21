@@ -1,47 +1,60 @@
 using System;
 using System.IO;
+using System.Text.Json;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using System.Text.Json;
+using Aspose.Imaging.Exif;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputPath = @"C:\temp\exif.json";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.tif";
+            string outputPath = @"C:\temp\exif.json";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image using Aspose.Imaging
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to TiffImage to access EXIF data
-            TiffImage tiff = image as TiffImage;
-            if (tiff == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not a TIFF image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Retrieve EXIF metadata
-            var exifData = tiff.ExifData;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Serialize EXIF data to JSON
-            var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(exifData, jsonOptions);
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to TiffImage to access EXIF data
+                TiffImage tiffImage = image as TiffImage;
+                if (tiffImage == null)
+                {
+                    Console.Error.WriteLine("The loaded image is not a TIFF image.");
+                    return;
+                }
 
-            // Write JSON to the output file
-            File.WriteAllText(outputPath, json);
+                // Retrieve EXIF metadata
+                ExifData exifData = tiffImage.ExifData;
+                if (exifData == null)
+                {
+                    Console.Error.WriteLine("No EXIF data found in the TIFF image.");
+                    return;
+                }
+
+                // Serialize EXIF data to JSON
+                var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(exifData, jsonOptions);
+
+                // Write JSON to output file
+                File.WriteAllText(outputPath, json);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

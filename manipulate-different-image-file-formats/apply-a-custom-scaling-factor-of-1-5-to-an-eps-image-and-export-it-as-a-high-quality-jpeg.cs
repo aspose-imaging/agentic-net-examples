@@ -8,46 +8,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\sample_scaled.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = "input.eps";
+        string outputPath = "output.jpg";
 
-        // Verify input file exists
+        // Verify that the input EPS file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
+        // Load the EPS image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to EpsImage for EPS-specific functionality (optional)
-            EpsImage epsImage = image as EpsImage;
-            if (epsImage == null)
-            {
-                Console.Error.WriteLine("Loaded image is not an EPS image.");
-                return;
-            }
+            // Calculate new dimensions applying a scaling factor of 1.5
+            int newWidth = (int)(image.Width * 1.5);
+            int newHeight = (int)(image.Height * 1.5);
 
-            // Calculate new dimensions with scaling factor 1.5
-            int newWidth = (int)(epsImage.Width * 1.5);
-            int newHeight = (int)(epsImage.Height * 1.5);
+            // Resize the image using a high‑quality interpolation method
+            image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-            // Resize using a high‑quality resampling method
-            epsImage.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-
-            // Prepare JPEG save options with high quality
+            // Configure JPEG options for high quality output
             var jpegOptions = new JpegOptions
             {
-                Quality = 100 // maximum quality
+                Quality = 100,                     // Maximum quality
+                CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
+                // Additional high‑quality settings can be added here if needed
             };
 
-            // Save as JPEG
-            epsImage.Save(outputPath, jpegOptions);
+            // Save the resized image as a JPEG file
+            image.Save(outputPath, jpegOptions);
         }
     }
 }

@@ -5,68 +5,56 @@ using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input directory and output report path
-        string inputDirectory = @"C:\Images";
-        string outputReportPath = @"C:\Images\ExposureReport.txt";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "report.txt";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputReportPath));
-
-        // Collect exposure information
-        var exposureList = new List<(string FileName, string ExposureString, double ExposureValue)>();
-
-        // Get all JPEG files in the input directory
-        string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-
-        foreach (string filePath in jpegFiles)
+        // Validate input file existence
+        if (!File.Exists(inputPath))
         {
-            // Verify the file exists
-            if (!File.Exists(filePath))
-            {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                return;
-            }
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Load the JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(filePath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        var results = new List<(string FileName, double ExposureValue)>();
+
+        // Load JPEG image and extract EXIF exposure time
+        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        {
+            var exif = image.ExifData;
+            if (exif != null)
             {
-                // Retrieve EXIF data as JpegExifData
-                var jpegExif = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
-                if (jpegExif != null)
+                // ExposureTime may be null or a non‑numeric type; convert safely
+                string exposureStr = exif.ExposureTime?.ToString() ?? string.Empty;
+                double exposureVal = double.MaxValue;
+                if (double.TryParse(exposureStr, out double parsed))
                 {
-                    string exposureStr = jpegExif.ExposureTime?.ToString() ?? "N/A";
-
-                    // Attempt to parse a numeric exposure value for sorting
-                    double exposureVal = double.MaxValue;
-                    if (!string.IsNullOrEmpty(exposureStr))
-                    {
-                        // Take the part before any '(' character
-                        string numericPart = exposureStr.Split('(')[0].Trim();
-                        double.TryParse(numericPart, out exposureVal);
-                    }
-
-                    exposureList.Add((Path.GetFileName(filePath), exposureStr, exposureVal));
+                    exposureVal = parsed;
                 }
+
+                results.Add((Path.GetFileName(inputPath), exposureVal));
             }
         }
 
-        // Sort by fastest shutter speed (smallest exposure value)
-        var sortedList = exposureList.OrderBy(item => item.ExposureValue).ToList();
+        // Sort by fastest shutter speed (smallest exposure time)
+        var sorted = results.OrderBy(r => r.ExposureValue).ToList();
 
         // Prepare report lines
-        var reportLines = new List<string>();
-        reportLines.Add("Exposure Time Report (sorted by fastest shutter speed):");
-        reportLines.Add("--------------------------------------------------------");
-        foreach (var entry in sortedList)
+        var lines = new List<string>();
+        foreach (var entry in sorted)
         {
-            reportLines.Add($"{entry.FileName}: Exposure Time = {entry.ExposureString}");
+            string exposureDisplay = entry.ExposureValue == double.MaxValue ? "N/A" : entry.ExposureValue.ToString();
+            lines.Add($"{entry.FileName}: ExposureTime = {exposureDisplay}");
         }
 
-        // Write the report to the output file
-        File.WriteAllLines(outputReportPath, reportLines);
+        // Write report to output file
+        File.WriteAllLines(outputPath, lines);
     }
 }

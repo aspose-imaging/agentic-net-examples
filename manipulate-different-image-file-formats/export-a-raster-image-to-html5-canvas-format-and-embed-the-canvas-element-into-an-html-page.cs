@@ -8,8 +8,9 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"input.png";
-        string outputPath = @"output.html";
+        string inputPath = "input.png";
+        string canvasSnippetPath = "canvas.html";
+        string outputHtmlPath = "output.html";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -18,25 +19,38 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(canvasSnippetPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputHtmlPath));
 
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure HTML5 Canvas export options
-            var options = new Html5CanvasOptions
+            // Save only the canvas tag (no full HTML page)
+            var canvasOptions = new Html5CanvasOptions
             {
-                // Generate a full HTML page containing the canvas element
-                FullHtmlPage = true,
-                // Optional: set a custom canvas tag identifier
+                FullHtmlPage = false,
                 CanvasTagId = "myCanvas"
             };
-
-            // Save the image as an HTML5 Canvas page
-            image.Save(outputPath, options);
+            image.Save(canvasSnippetPath, canvasOptions);
         }
 
-        Console.WriteLine($"Canvas HTML page saved to: {outputPath}");
+        // Read the generated canvas snippet
+        string canvasTag = File.ReadAllText(canvasSnippetPath);
+
+        // Build a simple HTML page that embeds the canvas tag
+        string htmlPage = $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <title>Canvas Image</title>
+</head>
+<body>
+    {canvasTag}
+</body>
+</html>";
+
+        // Write the final HTML page
+        File.WriteAllText(outputHtmlPath, htmlPage);
     }
 }

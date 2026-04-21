@@ -8,48 +8,53 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories (relative to current directory)
+        // Batch processing directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Get all CDR files in the input directory
-        string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
-
-        foreach (string inputPath in cdrFiles)
+        if (!Directory.Exists(inputDirectory))
         {
-            // Verify input file exists
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+        foreach (string inputPath in files)
+        {
+            // Process only CDR files
+            if (!inputPath.EndsWith(".cdr", StringComparison.OrdinalIgnoreCase))
+                continue;
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare output path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".gif");
-
-            // Ensure output directory exists
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR image and convert to GIF
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF options with vector rasterization settings
-                GifOptions gifOptions = new GifOptions
+                var gifOptions = new GifOptions
                 {
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
                     }
                 };
 
-                // Save as GIF (256‑color palette is default for GIF)
-                cdr.Save(outputPath, gifOptions);
+                image.Save(outputPath, gifOptions);
             }
         }
     }

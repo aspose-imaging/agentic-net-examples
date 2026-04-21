@@ -1,93 +1,94 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = "sample.djvu";
-        string pngDir = "png_pages";
-        string outputPath = "merged.tif";
+        // Hardcoded input DjVu file and output TIFF file
+        string inputPath = "input.djvu";
+        string outputTiffPath = "merged.tif";
 
-        // Input file existence check
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(pngDir);
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Temporary directory for intermediate PNG files
+        string tempDir = "temp";
+        Directory.CreateDirectory(tempDir); // unconditional creation
 
-        // Load DjVu and export pages 1‑3 to PNG
-        using (FileStream djvuStream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(djvuStream))
+        // Convert pages 1‑3 of DjVu to PNG
+        using (FileStream stream = File.OpenRead(inputPath))
+        using (DjvuImage djvu = new DjvuImage(stream))
         {
-            for (int i = 0; i < 3 && i < djvuImage.Pages.Length; i++)
+            int pagesToConvert = Math.Min(3, djvu.Pages.Length);
+            for (int i = 0; i < pagesToConvert; i++)
             {
-                DjvuPage page = (DjvuPage)djvuImage.Pages[i];
-                string pngPath = Path.Combine(pngDir, $"page{i + 1}.png");
-                page.Save(pngPath, new PngOptions());
+                string pngPath = Path.Combine(tempDir, $"page{i + 1}.png");
+                // Ensure directory exists (already created above)
+                djvu.Pages[i].Save(pngPath, new PngOptions());
             }
         }
 
-        // Load first PNG to obtain dimensions
-        string firstPng = Path.Combine(pngDir, "page1.png");
-        if (!File.Exists(firstPng))
+        // Collect generated PNG paths
+        List<string> pngPaths = new List<string>();
+        for (int i = 1; i <= 3; i++)
         {
-            Console.Error.WriteLine($"File not found: {firstPng}");
+            string path = Path.Combine(tempDir, $"page{i}.png");
+            if (File.Exists(path))
+                pngPaths.Add(path);
+        }
+
+        if (pngPaths.Count == 0)
+        {
+            Console.Error.WriteLine("No PNG pages were generated.");
             return;
         }
 
-        using (RasterImage firstImg = (RasterImage)Image.Load(firstPng))
+        // Load first PNG to obtain dimensions
+        using (RasterImage first = (RasterImage)Image.Load(pngPaths[0]))
         {
-            int width = firstImg.Width;
-            int height = firstImg.Height;
+            int width = first.Width;
+            int height = first.Height;
 
-            // Prepare TIFF options with output source
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create TIFF canvas bound to the output file
-            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
+            // Create a multipage TIFF canvas
+            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
             {
-                // Copy first page pixels
-                int[] pixels = firstImg.LoadArgb32Pixels(firstImg.Bounds);
-                tiffImage.SaveArgb32Pixels(firstImg.Bounds, pixels);
+                // Save pixels of the first frame
+                tiff.SavePixels(tiff.Bounds, first.LoadPixels(first.Bounds));
 
-                // Process remaining PNG pages (pages 2 and 3)
-                for (int i = 2; i <= 3; i++)
+                // Process remaining PNGs
+                for (int i = 1; i < pngPaths.Count; i++)
                 {
-                    string pngPath = Path.Combine(pngDir, $"page{i}.png");
-                    if (!File.Exists(pngPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {pngPath}");
-                        continue;
-                    }
-
-                    using (RasterImage img = (RasterImage)Image.Load(pngPath))
+                    using (RasterImage img = (RasterImage)Image.Load(pngPaths[i]))
                     {
                         // Add a new frame to the TIFF
-                        tiffImage.AddFrame(new TiffFrame(tiffOptions, width, height));
-                        int frameIndex = tiffImage.Frames.Length - 1;
-
-                        // Copy PNG pixels into the new frame
-                        int[] framePixels = img.LoadArgb32Pixels(img.Bounds);
-                        tiffImage.Frames[frameIndex].SaveArgb32Pixels(img.Bounds, framePixels);
+                        tiff.AddFrame(new TiffFrame(tiffOptions, img.Width, img.Height));
+                        // Save pixels into the newly added frame
+                        tiff.Frames[i].SavePixels(tiff.Frames[i].Bounds, img.LoadPixels(img.Bounds));
                     }
                 }
 
+                // Ensure output directory exists
+                string outDir = Path.GetDirectoryName(outputTiffPath);
+                if (!string.IsNullOrWhiteSpace(outDir))
+                {
+                    Directory.CreateDirectory(outDir);
+                }
+
                 // Save the multipage TIFF
-                tiffImage.Save();
+                tiff.Save(outputTiffPath);
             }
         }
     }

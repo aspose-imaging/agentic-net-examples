@@ -2,44 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.djvu";
-        string outputPath = "Output/result.pdf";
+        string inputPath = Path.Combine("Input", "sample.djvu");
+        string outputPath = Path.Combine("Output", "result.pdf");
 
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DjVu document from file stream
-        using (FileStream stream = File.OpenRead(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            using (Aspose.Imaging.FileFormats.Djvu.DjvuImage djvuImage = new Aspose.Imaging.FileFormats.Djvu.DjvuImage(stream))
+            DjvuImage djvu = (DjvuImage)image;
+
+            int identifier = djvu.Identifier;
+            var xmpData = djvu.XmpData;
+
+            PdfOptions pdfOptions = new PdfOptions
             {
-                // Extract metadata (XMP) from DjVu
-                string metadata = djvuImage.Metadata?.ToString() ?? string.Empty;
-
-                // Prepare PDF options and embed metadata
-                using (PdfOptions pdfOptions = new PdfOptions())
+                PdfDocumentInfo = new PdfDocumentInfo
                 {
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                    pdfOptions.PdfDocumentInfo.Title = metadata;
+                    Title = identifier.ToString()
+                },
+                XmpData = xmpData
+            };
 
-                    // Save DjVu as PDF with embedded metadata
-                    djvuImage.Save(outputPath, pdfOptions);
-                }
-            }
+            image.Save(outputPath, pdfOptions);
         }
     }
 }

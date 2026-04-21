@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output_75.jpg";
+        string inputPath = @"C:\Images\sample.bmp";
+        string outputPath = @"C:\Images\sample_75.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,35 +21,33 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Get original file size
-        long originalSize = new FileInfo(inputPath).Length;
-
-        // Load the image
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure JPEG options with 75% quality
-            JpegOptions jpegOptions = new JpegOptions
+            // Configure JPEG save options with 75% quality
+            JpegOptions saveOptions = new JpegOptions
             {
                 Quality = 75
             };
 
-            // Save the image using the JPEG options
-            image.Save(outputPath, jpegOptions);
+            // Save the image with the specified JPEG options
+            image.Save(outputPath, saveOptions);
         }
 
-        // Get compressed file size
+        // Calculate file size reduction percentage
+        long originalSize = new FileInfo(inputPath).Length;
         long compressedSize = new FileInfo(outputPath).Length;
 
-        // Calculate reduction percentage
-        double reduction = 0;
-        if (originalSize > 0)
+        if (originalSize == 0)
         {
-            reduction = (double)(originalSize - compressedSize) / originalSize * 100;
+            Console.WriteLine("Original file size is zero, cannot compute reduction.");
+            return;
         }
 
-        // Output results
+        double reductionPercent = (double)(originalSize - compressedSize) / originalSize * 100.0;
+
         Console.WriteLine($"Original size: {originalSize} bytes");
         Console.WriteLine($"Compressed size: {compressedSize} bytes");
-        Console.WriteLine($"Size reduction: {reduction:F2}%");
+        Console.WriteLine($"Size reduction: {reductionPercent:F2}%");
     }
 }

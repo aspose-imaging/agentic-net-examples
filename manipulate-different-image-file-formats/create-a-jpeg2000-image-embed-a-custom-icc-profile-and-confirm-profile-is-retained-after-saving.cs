@@ -1,73 +1,57 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define paths
-        string inputPngPath = "Input/sample.png";
-        string iccProfilePath = "Input/profile.icc";
-        string outputJp2Path = "Output/output.jp2";
+        string inputPath = "input.png";
+        string iccProfilePath = "profile.icc";
+        string outputPath = "output.jp2";
 
-        // Validate input PNG
-        if (!File.Exists(inputPngPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPngPath}");
-            return;
-        }
-
-        // Validate ICC profile
-        if (!File.Exists(iccProfilePath))
-        {
-            Console.Error.WriteLine($"File not found: {iccProfilePath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputJp2Path));
-
-        // Load PNG image
-        using (PngImage pngImage = (PngImage)Image.Load(inputPngPath))
-        {
-            // Load ICC profile stream (placeholder - actual embedding not shown)
-            using (FileStream iccStream = File.OpenRead(iccProfilePath))
+            if (!File.Exists(inputPath))
             {
-                // Create JPEG2000 options (no direct ICC profile property available)
-                Jpeg2000Options jp2Options = new Jpeg2000Options();
-                // Example: set irreversible compression (optional)
-                jp2Options.Irreversible = true;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Create JPEG2000 image with same dimensions as PNG
-                using (Jpeg2000Image jp2Image = new Jpeg2000Image(pngImage.Width, pngImage.Height, jp2Options))
+            if (!File.Exists(iccProfilePath))
+            {
+                Console.Error.WriteLine($"File not found: {iccProfilePath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load source PNG image
+            using (Aspose.Imaging.Image sourceImage = Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Create JPEG2000 image from the raster source
+                using (Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Image jp2Image = new Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Image((Aspose.Imaging.RasterImage)sourceImage))
                 {
-                    // Draw PNG onto JPEG2000 canvas
-                    Graphics graphics = new Graphics(jp2Image);
-                    graphics.DrawImage(pngImage, 0, 0);
+                    // Note: Direct ICC profile embedding for JPEG2000 is not exposed via the API.
+                    // This placeholder demonstrates where such logic would be applied if supported.
 
                     // Save JPEG2000 image
-                    jp2Image.Save(outputJp2Path);
+                    jp2Image.Save(outputPath, new Jpeg2000Options());
                 }
             }
-        }
 
-        // Reload saved JPEG2000 image to confirm it was saved correctly
-        if (!File.Exists(outputJp2Path))
-        {
-            Console.Error.WriteLine($"File not found: {outputJp2Path}");
-            return;
+            // Load the saved JPEG2000 image to confirm it was saved correctly
+            using (Aspose.Imaging.Image loadedJp2 = Aspose.Imaging.Image.Load(outputPath))
+            {
+                // Placeholder for ICC profile verification logic
+                Console.WriteLine("JPEG2000 image saved successfully. ICC profile embedding verification not implemented.");
+            }
         }
-
-        using (Jpeg2000Image loadedJp2 = new Jpeg2000Image(outputJp2Path))
+        catch (Exception ex)
         {
-            // Placeholder for ICC profile verification logic
-            // Actual ICC profile retrieval would depend on API support
-            Console.WriteLine("JPEG2000 image loaded successfully. ICC profile verification not implemented.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

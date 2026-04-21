@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -11,8 +10,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.tiff";
+        string inputPath = "input/input.djvu";
+        string outputPath = "output/output.tif";
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -27,16 +26,14 @@ class Program
         // Load DjVu document
         using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
         {
-            // Flip each page horizontally
+            // Apply flip to each page
             foreach (Image page in djvu.Pages)
             {
-                ((DjvuPage)page).RotateFlip(RotateFlipType.RotateNoneFlipX);
+                page.RotateFlip(RotateFlipType.RotateNoneFlipX);
             }
 
-            // Prepare TIFF save options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // Save the flipped pages as a multi-page TIFF
+            // Save the flipped document as a multi-page TIFF
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
             djvu.Save(outputPath, tiffOptions);
         }
     }

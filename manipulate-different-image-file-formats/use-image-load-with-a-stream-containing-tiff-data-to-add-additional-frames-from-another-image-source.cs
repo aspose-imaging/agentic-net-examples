@@ -1,54 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string tiffInputPath = "input\\source.tif";
-        string pngInputPath = "input\\frame.png";
-        string outputPath = "output\\result.tif";
+        // Hardcoded paths
+        string inputTiffPath = "input.tif";
+        string additionalImagePath = "additional.png";
+        string outputTiffPath = "output.tif";
 
-        // Verify input files exist
-        if (!File.Exists(tiffInputPath))
+        // Input validation
+        if (!File.Exists(inputTiffPath))
         {
-            Console.Error.WriteLine($"File not found: {tiffInputPath}");
+            Console.Error.WriteLine($"File not found: {inputTiffPath}");
             return;
         }
-        if (!File.Exists(pngInputPath))
+        if (!File.Exists(additionalImagePath))
         {
-            Console.Error.WriteLine($"File not found: {pngInputPath}");
+            Console.Error.WriteLine($"File not found: {additionalImagePath}");
             return;
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
 
-        // Load the existing TIFF image from a memory stream
-        byte[] tiffBytes = File.ReadAllBytes(tiffInputPath);
-        using (MemoryStream tiffStream = new MemoryStream(tiffBytes))
+        try
         {
+            // Load the existing TIFF image from a stream
+            using (FileStream tiffStream = new FileStream(inputTiffPath, FileMode.Open, FileAccess.Read))
             using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
             {
-                // Load the additional frame image (PNG) from file
-                using (Image pngImage = Image.Load(pngInputPath))
+                // Load the additional image (any supported format)
+                using (Image extraImage = Image.Load(additionalImagePath))
                 {
-                    // Create a TiffFrame from the raster image
-                    TiffFrame newFrame = new TiffFrame((RasterImage)pngImage);
+                    // Create a TiffFrame from the extra image
+                    TiffFrame extraFrame = new TiffFrame((RasterImage)extraImage);
+
                     // Add the new frame to the TIFF image
-                    tiffImage.AddFrame(newFrame);
+                    tiffImage.AddFrame(extraFrame);
                 }
 
                 // Save the updated TIFF image
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffImage.Save(outputPath, saveOptions);
+                tiffImage.Save(outputTiffPath);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

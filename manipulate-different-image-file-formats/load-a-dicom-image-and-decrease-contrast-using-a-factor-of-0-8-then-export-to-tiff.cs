@@ -30,7 +30,7 @@ class Program
             // Decrease contrast by 20% (negative value reduces contrast)
             dicomImage.AdjustContrast(-20f);
 
-            // Prepare TIFF save options
+            // Configure TIFF save options
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
             // Save the adjusted image as TIFF

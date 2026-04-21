@@ -8,52 +8,51 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tif";
-        string outputDir = @"C:\Images\output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input path
+            string inputPath = @"C:\temp\input.tif";
 
-        // Ensure the output directory exists (will be called before each save as required)
-        Directory.CreateDirectory(outputDir);
-
-        // Load the multi‑page TIFF
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to TiffImage to access pages
-            TiffImage tiffImage = image as TiffImage;
-            if (tiffImage == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not a TIFF image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Iterate through each page/frame
-            for (int i = 0; i < tiffImage.PageCount; i++)
+            // Load the multi‑page TIFF image
+            using (Image image = Image.Load(inputPath))
             {
-                // Set the current frame as active
-                tiffImage.ActiveFrame = tiffImage.Frames[i];
-
-                // Build output file path for this page
-                string outputPath = Path.Combine(outputDir, $"page_{i + 1}.jpg");
-
-                // Ensure the directory for this output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                TiffImage tiffImage = image as TiffImage;
+                if (tiffImage == null)
+                {
+                    Console.Error.WriteLine("The loaded image is not a TIFF.");
+                    return;
+                }
 
                 // JPEG save options with quality 80
-                var jpegOptions = new JpegOptions
+                JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 80
                 };
 
-                // Save the current page as JPEG
-                tiffImage.Save(outputPath, jpegOptions);
+                // Iterate through each page/frame
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                {
+                    // Hardcoded output path for each page
+                    string outputPath = $@"C:\temp\output_page_{i + 1}.jpg";
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the current frame as a JPEG file
+                    tiffImage.Frames[i].Save(outputPath, jpegOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

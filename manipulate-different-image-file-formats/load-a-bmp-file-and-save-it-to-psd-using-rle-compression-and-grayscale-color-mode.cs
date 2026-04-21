@@ -8,11 +8,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "C:\\temp\\sample.bmp";
-        string outputPath = "C:\\temp\\output.psd";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.psd";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,7 +25,7 @@ class Program
         // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PSD save options: RLE compression and grayscale color mode
+            // Configure PSD save options: RLE compression and Grayscale color mode
             PsdOptions psdOptions = new PsdOptions
             {
                 CompressionMethod = CompressionMethod.RLE,

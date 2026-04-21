@@ -9,7 +9,7 @@ class Program
     {
         // Hardcoded input and output file paths
         string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.png";
+        string outputPath = @"C:\Images\output_cropped.bmp";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -25,15 +25,18 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Define the rectangle to crop (left, top, width, height)
-            // Example: crop a 200x150 region starting at (50,50)
-            Rectangle cropArea = new Rectangle(50, 50, 200, 150);
+            // Adjust these values as needed for the desired region
+            int left = 50;
+            int top = 50;
+            int width = 200;
+            int height = 150;
+            Rectangle cropArea = new Rectangle(left, top, width, height);
 
-            // Perform the crop operation
+            // Perform the cropping operation
             image.Crop(cropArea);
 
-            // Save the cropped image as PNG
-            PngOptions pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            // Save the cropped image to the output path
+            image.Save(outputPath);
         }
     }
 }

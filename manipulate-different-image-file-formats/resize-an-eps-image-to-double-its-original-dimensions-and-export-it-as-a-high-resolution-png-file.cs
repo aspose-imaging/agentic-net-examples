@@ -23,8 +23,14 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the EPS image, resize it to double its original size, and save as PNG
-        using (var image = Image.Load(inputPath))
+        using (var image = Image.Load(inputPath) as EpsImage)
         {
+            if (image == null)
+            {
+                Console.Error.WriteLine("Failed to load EPS image.");
+                return;
+            }
+
             // Calculate new dimensions (double the original width and height)
             int newWidth = image.Width * 2;
             int newHeight = image.Height * 2;

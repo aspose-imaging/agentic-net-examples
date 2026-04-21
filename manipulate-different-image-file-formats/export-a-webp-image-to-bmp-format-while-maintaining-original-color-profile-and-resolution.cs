@@ -7,33 +7,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.webp";
-        string outputPath = "output.bmp";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = @"C:\temp\input.webp";
+            string outputPath = @"C:\temp\output.bmp";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = image as RasterImage;
-            if (raster == null)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Loaded image is not a raster image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            BmpOptions options = new BmpOptions
-            {
-                KeepMetadata = true,
-                ResolutionSettings = new ResolutionSetting(raster.HorizontalResolution, raster.VerticalResolution)
-            };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            raster.Save(outputPath, options);
+            using (Image image = Image.Load(inputPath))
+            {
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    KeepMetadata = true
+                };
+
+                image.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

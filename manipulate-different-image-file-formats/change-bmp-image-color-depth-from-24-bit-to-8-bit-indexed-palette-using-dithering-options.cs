@@ -22,25 +22,27 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the 24‑bit BMP image
+        // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            RasterImage raster = (RasterImage)image;
+            // Cast to RasterImage to access dithering
+            RasterImage rasterImage = (RasterImage)image;
 
-            // Dither the image to an 8‑bit indexed palette using Floyd‑Steinberg algorithm
-            raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
+            // Apply Floyd‑Steinberg dithering to reduce to 8‑bit palette
+            rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 8);
 
-            // Configure BMP save options for 8‑bpp with an optimal palette
+            // Prepare BMP save options for 8‑bit indexed image
             BmpOptions saveOptions = new BmpOptions
             {
                 BitsPerPixel = 8,
-                Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256),
+                // Generate a palette that best matches the image colors
+                Palette = ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256),
                 Compression = BitmapCompression.Rgb,
                 ResolutionSettings = new ResolutionSetting(96.0, 96.0)
             };
 
-            // Save the palettized image
-            raster.Save(outputPath, saveOptions);
+            // Save the dithered image as an 8‑bit BMP
+            image.Save(outputPath, saveOptions);
         }
     }
 }

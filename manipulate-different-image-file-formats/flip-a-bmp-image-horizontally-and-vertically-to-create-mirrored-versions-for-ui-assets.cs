@@ -1,44 +1,37 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.bmp";
-        string outputHorizontalPath = "output_horizontal.bmp";
-        string outputVerticalPath = "output_vertical.bmp";
+        // Hardcoded input and output paths
+        string inputPath = "sample.bmp";
+        string outputPathHorizontal = "sample.horizontal.bmp";
+        string outputPathVertical = "sample.vertical.bmp";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputHorizontalPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputVerticalPath));
-
-        using (Image imgH = Image.Load(inputPath))
+        // Create horizontal mirrored version
+        using (Image image = Image.Load(inputPath))
         {
-            imgH.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            BmpOptions bmpOptionsH = new BmpOptions
-            {
-                Source = new FileCreateSource(outputHorizontalPath, false)
-            };
-            imgH.Save(outputHorizontalPath, bmpOptionsH);
+            image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathHorizontal) ?? ".");
+            image.Save(outputPathHorizontal);
         }
 
-        using (Image imgV = Image.Load(inputPath))
+        // Create vertical mirrored version
+        using (Image image = Image.Load(inputPath))
         {
-            imgV.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            BmpOptions bmpOptionsV = new BmpOptions
-            {
-                Source = new FileCreateSource(outputVerticalPath, false)
-            };
-            imgV.Save(outputVerticalPath, bmpOptionsV);
+            image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathVertical) ?? ".");
+            image.Save(outputPathVertical);
         }
     }
 }

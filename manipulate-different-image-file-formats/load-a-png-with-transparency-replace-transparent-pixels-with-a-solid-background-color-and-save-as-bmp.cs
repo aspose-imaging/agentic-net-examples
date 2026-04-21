@@ -1,13 +1,14 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
@@ -21,41 +22,27 @@ class Program
         }
 
         // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (string.IsNullOrEmpty(outputDir))
-            outputDir = ".";
-        Directory.CreateDirectory(outputDir);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load PNG image as RasterImage
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        try
         {
-            // Load all ARGB pixels
-            int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-
-            // Define solid background color (white)
-            int backgroundArgb = Color.FromArgb(255, 255, 255, 255).ToArgb();
-
-            // Replace fully transparent pixels with background color
-            for (int i = 0; i < pixels.Length; i++)
+            // Load the PNG image (may contain transparency)
+            using (Image image = Image.Load(inputPath))
             {
-                int alpha = (pixels[i] >> 24) & 0xFF;
-                if (alpha == 0)
-                {
-                    pixels[i] = backgroundArgb;
-                }
+                // Cast to PngImage to access PNG‑specific properties
+                PngImage pngImage = (PngImage)image;
+
+                // Define the solid background color to replace transparent pixels
+                pngImage.HasBackgroundColor = true;
+                pngImage.BackgroundColor = Color.White; // change as needed
+
+                // Save the image as BMP; BMP supports background color via default Bitfields compression
+                pngImage.Save(outputPath, new BmpOptions());
             }
-
-            // Write modified pixels back to the image
-            raster.SaveArgb32Pixels(raster.Bounds, pixels);
-
-            // Prepare BMP save options with file source
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            // Save the image as BMP
-            raster.Save(outputPath, bmpOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

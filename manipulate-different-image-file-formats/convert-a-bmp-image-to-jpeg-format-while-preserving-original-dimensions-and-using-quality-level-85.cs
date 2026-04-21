@@ -7,32 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\sample_converted.jpg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully.
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths.
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output.jpg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure JPEG save options with desired quality
-            JpegOptions saveOptions = new JpegOptions
+            // Verify that the input file exists.
+            if (!File.Exists(inputPath))
             {
-                Quality = 85,
-                BitsPerChannel = 8 // standard 8‑bit per channel
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as JPEG preserving original dimensions
-            image.Save(outputPath, saveOptions);
+            // Ensure the output directory exists (creates it if necessary).
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image.
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure JPEG save options with the required quality.
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = 85
+                };
+
+                // Save the image as JPEG, preserving original dimensions.
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Output any runtime errors without crashing the program.
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

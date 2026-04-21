@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\temp\sample.cdr";
-        string outputPath = @"C:\temp\output.gif";
+        string outputPath = @"C:\temp\sample.gif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,17 +25,18 @@ class Program
         // Load the CorelDRAW (CDR) file
         using (Image image = Image.Load(inputPath))
         {
-            // Configure GIF saving options (256 colors)
-            GifOptions gifOptions = new GifOptions
+            // Configure GIF save options (256‑color palette)
+            var gifOptions = new GifOptions
             {
-                // 7 means 2^(7+1) = 256 colors
+                // Number of bits per primary color minus 1 (7 => 8 bits)
                 ColorResolution = 7,
+                // Analyze source colors to build the best matching palette
                 DoPaletteCorrection = true,
-                // Optional: keep lossless (no lossy compression)
-                MaxDiff = 0
+                // Optional: interlaced GIF
+                Interlaced = false
             };
 
-            // Save as GIF
+            // Save as GIF using the configured options
             image.Save(outputPath, gifOptions);
         }
     }

@@ -2,42 +2,56 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\sample.png";
-        string fontFolder = @"C:\CustomFonts";
-
-        FontSettings.SetFontsFolders(new string[] { fontFolder }, false);
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.wmf";
+            string outputPath = "Output\\sample.png";
+            string fontFolder = "Fonts";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set custom font folder
+            FontSettings.SetFontsFolders(new string[] { fontFolder }, true);
+
+            // Load WMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure rasterization options
+                var rasterOptions = new WmfRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size,
+                    RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
+                };
+
+                // Set PNG save options with rasterization
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as raster PNG
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            var vectorOptions = new VectorRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
-
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = vectorOptions
-            };
-
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

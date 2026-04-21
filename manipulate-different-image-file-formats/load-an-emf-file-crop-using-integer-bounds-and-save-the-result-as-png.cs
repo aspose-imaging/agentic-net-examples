@@ -1,16 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.png";
+        string inputPath = "input.emf";
+        string outputPath = "output.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -22,21 +23,24 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image, crop it, and save as PNG
+        // Load the EMF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to EmfImage to access cropping functionality
+            // Cast to EmfImage to access EMF-specific functionality
             EmfImage emfImage = (EmfImage)image;
 
             // Define the cropping rectangle (example values)
-            // Rectangle(x, y, width, height)
-            var cropRect = new Aspose.Imaging.Rectangle(50, 50, 200, 150);
+            int cropX = 50;      // left offset
+            int cropY = 50;      // top offset
+            int cropWidth = 200; // width of the cropped area
+            int cropHeight = 150; // height of the cropped area
+            Rectangle cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
 
             // Perform the crop operation
             emfImage.Crop(cropRect);
 
             // Prepare PNG save options
-            var pngOptions = new PngOptions();
+            PngOptions pngOptions = new PngOptions();
 
             // Save the cropped image as PNG
             emfImage.Save(outputPath, pngOptions);

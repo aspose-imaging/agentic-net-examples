@@ -3,30 +3,28 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "Sample.eps";
-        string outputPath = "Result.pdf";
+        // Hardcoded input and output paths
+        string inputPath = Path.Combine("Input", "sample.eps");
+        string outputPath = Path.Combine("Output", "sample.pdf");
 
-        // Verify that the input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image and cast to EpsImage
-        using (var image = (EpsImage)Image.Load(inputPath))
+        // Load EPS image and convert to PDF with PDF/A-1b compliance
+        using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options with PDF/A-1b compliance
             var pdfOptions = new PdfOptions
             {
                 PdfCoreOptions = new PdfCoreOptions
@@ -35,7 +33,6 @@ class Program
                 }
             };
 
-            // Save the image as PDF with the specified options
             image.Save(outputPath, pdfOptions);
         }
     }

@@ -2,64 +2,60 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string tiffInputPath = "input.tif";
-        string[] additionalImagePaths = new[] { "frame1.png", "frame2.png" };
-        string outputPath = "output.tif";
-
-        // Verify the main TIFF input file exists
-        if (!File.Exists(tiffInputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {tiffInputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputTiffPath = "input.tif";
+            string[] additionalImagePaths = new string[] { "frame1.png", "frame2.jpg" };
+            string outputTiffPath = "output\\result.tif";
 
-        // Verify each additional image file exists
-        foreach (var path in additionalImagePaths)
-        {
-            if (!File.Exists(path))
+            // Verify the base TIFF file exists
+            if (!File.Exists(inputTiffPath))
             {
-                Console.Error.WriteLine($"File not found: {path}");
+                Console.Error.WriteLine($"File not found: {inputTiffPath}");
                 return;
             }
-        }
 
-        // Load the original TIFF image from a memory stream
-        using (FileStream fileStream = new FileStream(tiffInputPath, FileMode.Open, FileAccess.Read))
-        using (MemoryStream memoryStream = new MemoryStream())
-        {
-            fileStream.CopyTo(memoryStream);
-            memoryStream.Position = 0; // Reset stream position for reading
-
-            using (TiffImage tiffImage = (TiffImage)Image.Load(memoryStream))
+            // Verify each additional image file exists
+            foreach (var path in additionalImagePaths)
             {
-                // Add each additional image as a new frame
-                foreach (var imgPath in additionalImagePaths)
+                if (!File.Exists(path))
                 {
-                    // Load the image (e.g., PNG, JPEG) into a RasterImage
-                    using (RasterImage raster = (RasterImage)Image.Load(imgPath))
-                    {
-                        // Create a TiffFrame from the raster image
-                        TiffFrame frame = new TiffFrame(raster);
-                        // Add the frame to the TIFF image
-                        tiffImage.AddFrame(frame);
-                        // No need to dispose 'frame' explicitly; it will be disposed with the TiffImage
-                    }
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
                 }
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-
-                // Save the updated multi-frame TIFF
-                tiffImage.Save(outputPath);
             }
+
+            // Load the base TIFF image from a memory stream
+            byte[] tiffBytes = File.ReadAllBytes(inputTiffPath);
+            using (MemoryStream memoryStream = new MemoryStream(tiffBytes))
+            {
+                using (TiffImage tiffImage = (TiffImage)Image.Load(memoryStream))
+                {
+                    // Add each additional image as a new frame
+                    foreach (var imgPath in additionalImagePaths)
+                    {
+                        // Create a TiffFrame directly from the image file
+                        TiffFrame frame = new TiffFrame(imgPath);
+                        tiffImage.AddFrame(frame);
+                    }
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+
+                    // Save the multi‑frame TIFF
+                    tiffImage.Save(outputTiffPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

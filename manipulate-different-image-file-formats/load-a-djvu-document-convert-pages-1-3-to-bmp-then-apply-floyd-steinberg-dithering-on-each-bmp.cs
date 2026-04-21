@@ -8,9 +8,8 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
+        // Hardcoded input DjVu file path
         string inputPath = @"C:\Images\sample.djvu";
-        string outputFolder = @"C:\Images\Output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,28 +18,31 @@ class Program
             return;
         }
 
-        // Load the DjVu document
-        using (Image image = Image.Load(inputPath))
+        // Open the DjVu file stream
+        using (Stream stream = File.OpenRead(inputPath))
         {
-            DjvuImage djvuImage = (DjvuImage)image;
-
-            // Process pages 1‑3 (index 0‑2)
-            for (int i = 0; i < 3 && i < djvuImage.Pages.Length; i++)
+            // Load DjVu document
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Retrieve the page
-                DjvuPage djvuPage = (DjvuPage)djvuImage.Pages[i];
+                // Process pages 1‑3 (indices 0‑2)
+                int pagesToProcess = Math.Min(3, djvuImage.PageCount);
+                for (int i = 0; i < pagesToProcess; i++)
+                {
+                    // Build output BMP file path
+                    string outputPath = $@"C:\Images\output\page{i + 1}.bmp";
 
-                // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                djvuPage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Build output file path
-                string outputPath = Path.Combine(outputFolder, $"page{i + 1}.bmp");
+                    // Retrieve the specific page
+                    DjvuPage page = (DjvuPage)djvuImage.Pages[i];
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Apply Floyd‑Steinberg dithering with 1‑bit palette (black & white)
+                    page.Dither(DitheringMethod.FloydSteinbergDithering, 1);
 
-                // Save the dithered page as BMP
-                djvuPage.Save(outputPath, new BmpOptions());
+                    // Save the dithered page as BMP
+                    page.Save(outputPath, new BmpOptions());
+                }
             }
         }
     }

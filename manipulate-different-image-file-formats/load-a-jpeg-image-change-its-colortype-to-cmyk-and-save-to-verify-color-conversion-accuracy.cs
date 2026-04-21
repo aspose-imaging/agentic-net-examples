@@ -9,32 +9,31 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output.cmyk.jpg";
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPath = @"C:\Images\output.cmyk.jpg";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the JPEG image
         using (Image image = Image.Load(inputPath))
         {
             // Prepare JPEG save options with CMYK color type
-            JpegOptions saveOptions = new JpegOptions
+            var saveOptions = new JpegOptions
             {
                 ColorType = JpegCompressionColorMode.Cmyk
+                // Additional options (e.g., Quality) can be set here if needed
             };
 
             // Save the image as CMYK JPEG
             image.Save(outputPath, saveOptions);
         }
-
-        Console.WriteLine($"Image saved as CMYK JPEG to: {outputPath}");
     }
 }

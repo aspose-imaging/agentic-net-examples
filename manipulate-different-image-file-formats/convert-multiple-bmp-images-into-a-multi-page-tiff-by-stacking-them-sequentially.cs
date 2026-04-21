@@ -9,18 +9,19 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input BMP file paths
-        string[] inputPaths = {
-            @"C:\temp\image1.bmp",
-            @"C:\temp\image2.bmp",
-            @"C:\temp\image3.bmp"
+        // Hard‑coded input BMP files
+        string[] inputPaths = new[]
+        {
+            @"c:\temp\image1.bmp",
+            @"c:\temp\image2.bmp",
+            @"c:\temp\image3.bmp"
         };
 
-        // Hardcoded output TIFF file path
-        string outputPath = @"C:\temp\output.tif";
+        // Hard‑coded output multi‑page TIFF file
+        string outputPath = @"c:\temp\output.tif";
 
-        // Validate each input file exists
-        foreach (var inputPath in inputPaths)
+        // Verify each input file exists
+        foreach (string inputPath in inputPaths)
         {
             if (!File.Exists(inputPath))
             {
@@ -32,21 +33,28 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load each BMP and create a corresponding TiffFrame
-        TiffFrame[] frames = new TiffFrame[inputPaths.Length];
-        for (int i = 0; i < inputPaths.Length; i++)
+        // Load the first BMP and create the initial TIFF image
+        using (Image firstBmp = Image.Load(inputPaths[0]))
         {
-            using (Image bmp = Image.Load(inputPaths[i]))
-            {
-                // BMP is a raster image; create a frame from it
-                frames[i] = new TiffFrame((RasterImage)bmp);
-            }
-        }
+            // Create a TIFF frame from the first BMP
+            TiffFrame firstFrame = new TiffFrame((RasterImage)firstBmp);
 
-        // Create a multi‑page TIFF from the frames and save it
-        using (TiffImage tiffImage = new TiffImage(frames))
-        {
-            tiffImage.Save(outputPath);
+            // Create a TIFF image containing the first frame
+            using (TiffImage tiffImage = new TiffImage(firstFrame))
+            {
+                // Process remaining BMP files and add them as frames
+                for (int i = 1; i < inputPaths.Length; i++)
+                {
+                    using (Image bmp = Image.Load(inputPaths[i]))
+                    {
+                        TiffFrame frame = new TiffFrame((RasterImage)bmp);
+                        tiffImage.AddFrame(frame);
+                    }
+                }
+
+                // Save the multi‑page TIFF to the specified path
+                tiffImage.Save(outputPath);
+            }
         }
     }
 }

@@ -2,42 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\source.eps";
         string outputPath = @"C:\Images\ResizedResult.jpg";
 
-        // Verify that the input EPS file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists (creates it if necessary)
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image
+        // Load EPS image
         using (Image image = Image.Load(inputPath))
         {
-            // Calculate new dimensions while preserving aspect ratio
-            int targetWidth = 2000;
-            double scaleFactor = (double)targetWidth / image.Width;
-            int targetHeight = (int)Math.Round(image.Height * scaleFactor);
+            // Calculate new height to keep aspect ratio for width = 2000
+            int newWidth = 2000;
+            int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
 
             // Resize using a high‑quality interpolation method
-            image.Resize(targetWidth, targetHeight, ResizeType.Mitchell);
+            image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
 
-            // Prepare JPEG save options (default options are sufficient for this example)
+            // Save as JPEG
             var jpegOptions = new JpegOptions();
-
-            // Save the resized image as JPEG
             image.Save(outputPath, jpegOptions);
         }
     }

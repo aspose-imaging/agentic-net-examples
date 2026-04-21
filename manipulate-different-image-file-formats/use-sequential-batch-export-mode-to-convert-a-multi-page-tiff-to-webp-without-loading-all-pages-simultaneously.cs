@@ -1,49 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputDirectory = @"C:\temp\output_webp";
-        string dummyOutputPath = @"C:\temp\dummy_output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/multipage.tif";
+            string outputPath = "Output/animated.webp";
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(outputDirectory);
-        Directory.CreateDirectory(Path.GetDirectoryName(dummyOutputPath));
-
-        // Load the multi‑page TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            // Set batch processing action for each page
-            tiffImage.PageExportingAction = (int index, Image page) =>
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Build output file name for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{index + 1}.webp");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the current page as WebP
-                page.Save(outputPath, new WebPOptions());
+            // Load the multi‑page TIFF
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Configure WebP export options
+                using (WebPOptions webpOptions = new WebPOptions())
+                {
+                    // Example settings (adjust as needed)
+                    webpOptions.Lossless = false;
+                    webpOptions.Quality = 80;
+                    webpOptions.AnimLoopCount = 0; // infinite loop
 
-                // Resources for this page will be released automatically after this delegate returns
-            };
+                    // Batch processing: action executed for each page before it is saved
+                    tiffImage.PageExportingAction = delegate (int index, Image page)
+                    {
+                        // Optional per‑page processing can be placed here
+                        // For demonstration, force garbage collection to free previous page resources
+                        GC.Collect();
+                    };
 
-            // Trigger the batch export by saving to a dummy file
-            tiffImage.Save(dummyOutputPath);
+                    // Save all pages as an animated WebP
+                    tiffImage.Save(outputPath, webpOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,50 +8,34 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input files (15 DjVu documents)
-        string[] inputFiles = new string[]
+        // Hard‑coded input and output directories
+        string inputDir = @"C:\Input";
+        string outputDir = @"C:\Output";
+
+        // Process fifteen DjVu files named file1.djvu … file15.djvu
+        for (int i = 1; i <= 15; i++)
         {
-            "doc1.djvu", "doc2.djvu", "doc3.djvu", "doc4.djvu", "doc5.djvu",
-            "doc6.djvu", "doc7.djvu", "doc8.djvu", "doc9.djvu", "doc10.djvu",
-            "doc11.djvu", "doc12.djvu", "doc13.djvu", "doc14.djvu", "doc15.djvu"
-        };
-
-        // Base directories (hardcoded)
-        string inputBaseDir = @"C:\InputDjvu";
-        string outputBaseDir = @"C:\OutputBmp";
-
-        for (int i = 0; i < inputFiles.Length; i++)
-        {
-            string inputPath = Path.Combine(inputBaseDir, inputFiles[i]);
-
-            // Input file existence check
+            string inputPath = Path.Combine(inputDir, $"file{i}.djvu");
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load DjVu document
+            string outputPath = Path.Combine(outputDir, $"file{i}.bmp");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DjVu document, apply default dithering, and save as BMP
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
             {
-                // Apply default dithering (Floyd‑Steinberg, 8‑bit palette)
+                // Apply default Floyd‑Steinberg dithering with 8‑bit palette
                 djvuImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-                // Convert each page to BMP
-                for (int pageIndex = 0; pageIndex < djvuImage.Pages.Length; pageIndex++)
-                {
-                    // Ensure output directory exists
-                    string outputFileName = $"doc{i + 1}_page{pageIndex}.bmp";
-                    string outputPath = Path.Combine(outputBaseDir, outputFileName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save page as BMP
-                    using (Image page = djvuImage.Pages[pageIndex])
-                    {
-                        page.Save(outputPath, new BmpOptions());
-                    }
-                }
+                // Save the processed image as BMP
+                djvuImage.Save(outputPath, new BmpOptions());
             }
         }
     }

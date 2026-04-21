@@ -2,36 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = @"c:\temp\test.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.png";
 
-        // Verify the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Open a file stream for the WebP image
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                // Load the image from the stream
+                using (Image image = Image.Load(stream))
+                {
+                    // Cast to WebPImage to access PageCount (frame count)
+                    WebPImage webPImage = image as WebPImage;
+                    if (webPImage != null)
+                    {
+                        int frameCount = webPImage.PageCount;
+                        Console.WriteLine($"Frame count: {frameCount}");
+
+                        // Optionally save the first frame to PNG
+                        webPImage.Save(outputPath, new PngOptions());
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Loaded image is not a WebP image.");
+                    }
+                }
+            }
         }
-
-        // Open a file stream and load the WebP image using Image.Load
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (Image image = Image.Load(stream))
+        catch (Exception ex)
         {
-            // Cast to WebPImage to access the PageCount property (frame count)
-            WebPImage webPImage = image as WebPImage;
-            if (webPImage != null)
-            {
-                int frameCount = webPImage.PageCount;
-                Console.WriteLine($"Frame count: {frameCount}");
-            }
-            else
-            {
-                Console.Error.WriteLine("Loaded image is not a WebP image.");
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -6,11 +6,11 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\sample.bmp";
-        string outputPath = @"c:\temp\sample_baseline.jpg";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output/output.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,19 +25,15 @@ class Program
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure JPEG save options with Baseline compression
-            JpegOptions saveOptions = new JpegOptions
+            // Configure JPEG options with Baseline compression
+            JpegOptions jpegOptions = new JpegOptions
             {
-                // Baseline compression is widely supported by older JPEG viewers
                 CompressionType = JpegCompressionMode.Baseline,
-                // Set quality to a typical high value (adjust as needed)
-                Quality = 90
+                Quality = 90 // optional quality setting
             };
 
             // Save the image as JPEG using the configured options
-            image.Save(outputPath, saveOptions);
+            image.Save(outputPath, jpegOptions);
         }
-
-        Console.WriteLine($"Image saved with Baseline compression to: {outputPath}");
     }
 }

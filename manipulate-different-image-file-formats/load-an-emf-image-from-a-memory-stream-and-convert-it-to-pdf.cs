@@ -11,23 +11,31 @@ class Program
         string inputPath = "input.emf";
         string outputPath = "output.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EMF image from a memory stream
+            byte[] emfData = File.ReadAllBytes(inputPath);
+            using (var memoryStream = new MemoryStream(emfData))
+            using (Image image = Image.Load(memoryStream))
+            {
+                // Save the image as PDF
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EMF image from a memory stream
-        byte[] emfData = File.ReadAllBytes(inputPath);
-        using (MemoryStream ms = new MemoryStream(emfData))
-        using (Image emfImage = Image.Load(ms))
+        catch (Exception ex)
         {
-            // Save the image as PDF
-            emfImage.Save(outputPath, new PdfOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

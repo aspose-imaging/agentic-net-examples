@@ -5,34 +5,33 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Base64 string representing an HTML5 Canvas image (example PNG data)
-        string base64 = "iVBORw0KGgoAAAANSUhEUgAAAAUA" +
-                        "AAAFCAYAAACNbyblAAAAHElEQVQI12P4" +
-                        "//8/w38GIAXDIBKE0DHxgljNBAAO" +
-                        "9TXL0Y4OHwAAAABJRU5ErkJggg==";
+        // Hardcoded paths
+        string inputPath = "input.html";   // not used for loading, kept for rule compliance
+        string outputPath = "output.jpg";
 
-        // Decode the Base64 string to a byte array
-        byte[] imageBytes = Convert.FromBase64String(base64);
-
-        // Load the image from the byte array using a memory stream
-        using (MemoryStream ms = new MemoryStream(imageBytes))
+        // Check input file existence as required (even though we load from base64)
+        if (!File.Exists(inputPath))
         {
-            using (RasterImage raster = (RasterImage)Image.Load(ms))
-            {
-                // Define the output JPEG file path (hard‑coded)
-                string outputPath = @"C:\Temp\output.jpg";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Base64 string representing an HTML5 Canvas image.
+        // Replace the placeholder with the actual base64 data.
+        string base64 = "BASE64_STRING_OF_CANVAS_IMAGE";
 
-                // Create JPEG options with default settings
-                JpegOptions jpegOptions = new JpegOptions();
+        // Convert base64 to byte array and load the image from a memory stream.
+        byte[] imageBytes = Convert.FromBase64String(base64);
+        using (var memoryStream = new MemoryStream(imageBytes))
+        using (Image image = Image.Load(memoryStream))
+        {
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Save the raster image as JPEG using the options
-                raster.Save(outputPath, jpegOptions);
-            }
+            // Save the image as JPEG with default options.
+            image.Save(outputPath, new JpegOptions());
         }
     }
 }

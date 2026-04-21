@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input DjVu file path
         string inputPath = @"C:\temp\sample.djvu";
-        string outputDirectory = @"C:\temp\output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,14 +25,14 @@ class Program
             // Cast to DjvuImage to access pages
             DjvuImage djvuImage = (DjvuImage)image;
 
-            // Iterate through each page
+            // Iterate through each page in the DjVu document
             foreach (DjvuPage page in djvuImage.Pages)
             {
-                // Apply dithering to the page (using Floyd‑Steinberg dithering with 8‑bit palette)
-                page.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+                // Apply dithering to the page (using Floyd‑Steinberg and 8‑bit palette)
+                page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8, null);
 
-                // Prepare output file path for this page
-                string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
+                // Prepare output file name for the current page
+                string outputPath = $@"C:\temp\output\page_{page.PageNumber}.gif";
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));

@@ -2,66 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tif";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\input_multi.tif";
         string outputPath = @"C:\Images\output.webp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported cleanly
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the multi‑page TIFF
-        using (RasterCachedMultipageImage tiffImage = (RasterCachedMultipageImage)Image.Load(inputPath))
-        {
-            // First pass: determine the size of the final WebP image
-            int maxWidth = 0;
-            int totalHeight = 0;
-            foreach (var pageObj in tiffImage.Pages)
+            // Verify the input file exists
+            if (!File.Exists(inputPath))
             {
-                var page = (RasterImage)pageObj;
-                if (page.Width > maxWidth) maxWidth = page.Width;
-                totalHeight += page.Height;
-                page.Dispose(); // release resources immediately
-                GC.Collect();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Create a blank WebP image with the calculated dimensions
-            var webpOptions = new WebPOptions();
-            using (Image webpImage = Image.Create(webpOptions, maxWidth, totalHeight))
-            {
-                var graphics = new Graphics(webpImage);
-                int currentY = 0;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Second pass: draw each TIFF page onto the WebP canvas sequentially
-                for (int i = 0; i < tiffImage.PageCount; i++)
+            // Load the multi‑page TIFF
+            using (Image tiffImage = Image.Load(inputPath))
+            {
+                // Cast to RasterCachedMultipageImage to release each page after it is processed
+                if (tiffImage is RasterCachedMultipageImage rasterImage)
                 {
-                    using (RasterImage page = (RasterImage)tiffImage.Pages[i])
+                    rasterImage.PageExportingAction = (index, page) =>
                     {
-                        graphics.DrawImage(page, new Rectangle(0, currentY, page.Width, page.Height));
-                        currentY += page.Height;
-                    }
-                    // Release page resources and force garbage collection to keep memory low
-                    GC.Collect();
+                        // Release resources for the just‑processed page
+                        GC.Collect();
+                    };
                 }
 
-                // Save the composed image as WebP
-                webpImage.Save(outputPath, webpOptions);
+                // Prepare WebP export options (animated WebP will contain all pages as frames)
+                var webpOptions = new WebPOptions
+                {
+                    // Keep all pages; MultiPageOptions left null to export the whole image
+                    // Adjust quality/compression as needed
+                    Quality = 80,
+                    Lossless = false
+                };
+
+                // Save as a single (animated) WebP file
+                tiffImage.Save(outputPath, webpOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

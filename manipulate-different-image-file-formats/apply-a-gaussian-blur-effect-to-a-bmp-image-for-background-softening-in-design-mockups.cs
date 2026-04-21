@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.bmp";
-        string outputPath = "output\\output_gaussian.bmp";
+        string outputPath = "output.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,20 +18,20 @@ class Program
             return;
         }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
             // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
+            RasterImage raster = (RasterImage)image;
 
             // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
-            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
             // Save the processed image
-            rasterImage.Save(outputPath);
+            raster.Save(outputPath);
         }
     }
 }

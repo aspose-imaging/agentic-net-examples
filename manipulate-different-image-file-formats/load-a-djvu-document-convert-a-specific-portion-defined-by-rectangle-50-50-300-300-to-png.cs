@@ -2,36 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
     static void Main()
     {
-        string inputPath = "input.djvu";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\output.png";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+        // Load the DjVu document
+        using (Image image = Image.Load(inputPath))
         {
-            if (djvu.Pages.Length == 0)
-            {
-                Console.Error.WriteLine("No pages found in DjVu document.");
-                return;
-            }
+            // Define the rectangle area to export (x, y, width, height)
+            Rectangle exportRect = new Rectangle(50, 50, 300, 300);
 
-            using (Image page = djvu.Pages[0])
+            // PNG save options
+            PngOptions pngOptions = new PngOptions();
+
+            // Save the specified portion as PNG
+            using (FileStream outStream = new FileStream(outputPath, FileMode.Create))
             {
-                Rectangle region = new Rectangle(50, 50, 300, 300);
-                PngOptions pngOptions = new PngOptions();
-                page.Save(outputPath, pngOptions, region);
+                image.Save(outStream, pngOptions, exportRect);
             }
         }
     }

@@ -3,39 +3,45 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.cmx";
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.cmx";
+            string outputPath = "output.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX vector image
-        using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
-        {
-            // Apply scaling factor of 2.0
-            cmx.Resize(cmx.Width * 2, cmx.Height * 2);
-
-            // Configure BMP options for 24‑bit color
-            BmpOptions bmpOptions = new BmpOptions
+            if (!File.Exists(inputPath))
             {
-                BitsPerPixel = 24
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the scaled image as BMP
-            cmx.Save(outputPath, bmpOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            {
+                int newWidth = cmx.Width * 2;
+                int newHeight = cmx.Height * 2;
+
+                cmx.Resize(newWidth, newHeight);
+
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 24,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                cmx.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

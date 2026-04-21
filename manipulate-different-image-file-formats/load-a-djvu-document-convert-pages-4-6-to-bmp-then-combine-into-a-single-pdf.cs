@@ -4,15 +4,13 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input DjVu file
-        string inputPath = "input.djvu";
+        // Input DjVu file
+        string inputPath = "sample.djvu";
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,48 +18,47 @@ class Program
         }
 
         // Directory for temporary BMP files
-        string bmpDirectory = "bmps";
-        Directory.CreateDirectory(bmpDirectory);
-
-        // Output PDF file
-        string outputPdfPath = "combined.pdf";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+        string bmpOutputDir = "bmp_pages";
+        Directory.CreateDirectory(bmpOutputDir);
 
         // List to hold loaded BMP images
-        List<Image> bmpImages = new List<Image>();
+        var bmpImages = new List<Image>();
 
         // Load DjVu document
         using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvu = new DjvuImage(stream))
         {
-            // Pages 4‑6 correspond to indices 3‑5 (zero‑based)
-            for (int pageIndex = 3; pageIndex <= 5; pageIndex++)
+            using (DjvuImage djvu = new DjvuImage(stream))
             {
-                // Ensure the page exists
-                if (pageIndex < 0 || pageIndex >= djvu.Pages.Length)
+                // Zero‑based indexes for pages 4‑6
+                int[] pageIndexes = new int[] { 3, 4, 5 };
+                foreach (int idx in pageIndexes)
                 {
-                    Console.Error.WriteLine($"Page index out of range: {pageIndex + 1}");
-                    continue;
+                    if (idx < 0 || idx >= djvu.PageCount)
+                        continue; // Skip invalid indexes
+
+                    string bmpPath = Path.Combine(bmpOutputDir, $"page_{idx + 1}.bmp");
+                    // Ensure the directory for the BMP exists (already created above)
+                    djvu.Pages[idx].Save(bmpPath, new BmpOptions());
+
+                    // Load the saved BMP for PDF creation
+                    Image bmpImg = Image.Load(bmpPath);
+                    bmpImages.Add(bmpImg);
                 }
-
-                // Save current page as BMP
-                string bmpPath = Path.Combine(bmpDirectory, $"page{pageIndex + 1}.bmp");
-                Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
-
-                // Cast to DjvuPage and save
-                DjvuPage djvuPage = (DjvuPage)djvu.Pages[pageIndex];
-                djvuPage.Save(bmpPath, new BmpOptions());
-
-                // Load saved BMP for PDF assembly
-                Image bmpImage = Image.Load(bmpPath);
-                bmpImages.Add(bmpImage);
             }
         }
 
-        // Create PDF from BMP images
-        using (Image pdf = Image.Create(bmpImages.ToArray(), true))
+        // Combine BMP pages into a single PDF
+        if (bmpImages.Count > 0)
         {
-            pdf.Save(outputPdfPath, new PdfOptions());
+            string pdfOutputPath = "combined.pdf";
+            string pdfDir = Path.GetDirectoryName(pdfOutputPath);
+            if (!string.IsNullOrWhiteSpace(pdfDir))
+                Directory.CreateDirectory(pdfDir);
+
+            using (Image pdf = Image.Create(bmpImages.ToArray(), true))
+            {
+                pdf.Save(pdfOutputPath, new PdfOptions());
+            }
         }
 
         // Dispose loaded BMP images

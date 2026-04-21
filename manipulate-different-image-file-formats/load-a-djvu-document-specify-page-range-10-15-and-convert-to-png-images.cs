@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDirectory = @"C:\temp\output";
+        string inputPath = @"C:\Temp\sample.djvu";
+        string outputDir = @"C:\Temp\output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,28 +19,31 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDir);
 
-        // Open the DjVu file
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
+        // Open the DjVu file stream
+        using (Stream stream = File.OpenRead(inputPath))
         {
-            // Iterate through pages and process pages 10‑15
-            foreach (DjvuPage djvuPage in djvuImage.Pages)
+            // Load DjVu image
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                int pageNumber = djvuPage.PageNumber;
-                if (pageNumber < 10 || pageNumber > 15)
-                    continue; // Skip pages outside the desired range
+                // Iterate through pages and process pages 10‑15
+                foreach (DjvuPage page in djvuImage.Pages)
+                {
+                    int pageNumber = page.PageNumber;
+                    if (pageNumber < 10 || pageNumber > 15)
+                        continue;
 
-                // Build output file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{pageNumber}.png");
+                    // Build output file path
+                    string outputPath = Path.Combine(outputDir, $"page_{pageNumber}.png");
 
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the page as PNG
-                djvuPage.Save(outputPath, new PngOptions());
+                    // Save the page as PNG
+                    page.Save(outputPath, new PngOptions());
+                }
             }
         }
     }

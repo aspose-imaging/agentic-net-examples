@@ -22,43 +22,40 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource((object[] parameters) =>
+        loadOptions.AddCustomFontSource((obj) =>
         {
-            string fontsPath = string.Empty;
-            if (parameters != null && parameters.Length > 0 && parameters[0] != null)
-                fontsPath = parameters[0].ToString();
+            string fontsPath = obj.Length > 0 ? obj[0]?.ToString() : string.Empty;
+            var customFonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
 
-            var fontDataList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
             if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
             {
-                foreach (var file in Directory.GetFiles(fontsPath))
+                foreach (var fontFile in Directory.GetFiles(fontsPath))
                 {
-                    string fontName = Path.GetFileNameWithoutExtension(file);
-                    byte[] fontBytes = File.ReadAllBytes(file);
-                    fontDataList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    byte[] fontData = File.ReadAllBytes(fontFile);
+                    string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                    customFonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontData));
                 }
             }
-            return fontDataList.ToArray();
+
+            return customFonts.ToArray();
         }, fontFolderPath);
 
         using (Image image = Image.Load(inputPath, loadOptions))
         {
-            var vectorOptions = new VectorRasterizationOptions
+            var rasterOptions = new SvgRasterizationOptions
             {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
                 BackgroundColor = Color.White,
                 PageWidth = image.Width,
                 PageHeight = image.Height
             };
 
-            var saveOptions = new SvgOptions
+            var svgSaveOptions = new SvgOptions
             {
-                VectorRasterizationOptions = vectorOptions,
+                VectorRasterizationOptions = rasterOptions,
                 TextAsShapes = false
             };
 
-            image.Save(outputPath, saveOptions);
+            image.Save(outputPath, svgSaveOptions);
         }
     }
 }

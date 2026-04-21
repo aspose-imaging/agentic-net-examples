@@ -9,7 +9,7 @@ class Program
     static void Main()
     {
         // Hardcoded input DjVu file path
-        string inputPath = @"C:\temp\sample.djvu";
+        string inputPath = @"c:\temp\sample.djvu";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,7 +19,10 @@ class Program
         }
 
         // Hardcoded output directory
-        string outputDir = @"C:\temp\output";
+        string outputDir = @"c:\temp\output\";
+
+        // Ensure the output directory exists (unconditional)
+        Directory.CreateDirectory(outputDir);
 
         // Open the DjVu file as a stream
         using (Stream stream = File.OpenRead(inputPath))
@@ -27,18 +30,19 @@ class Program
             // Load the DjVu document
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Iterate through each page in the document
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
+                // Iterate through each page
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
                     // Build output file name: sample.1.bmp, sample.2.bmp, etc.
-                    string fileName = $"{Path.GetFileNameWithoutExtension(inputPath)}.{djvuPage.PageNumber}.bmp";
-                    string outputPath = Path.Combine(outputDir, fileName);
+                    string outputPath = Path.Combine(
+                        outputDir,
+                        $"{Path.GetFileNameWithoutExtension(inputPath)}.{page.PageNumber}.bmp");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for this file exists (unconditional)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as BMP using default resolution
-                    djvuPage.Save(outputPath, new BmpOptions());
+                    // Save the page as BMP using default options
+                    page.Save(outputPath, new BmpOptions());
                 }
             }
         }

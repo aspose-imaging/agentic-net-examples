@@ -1,38 +1,41 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.tif";
-        string outputPath = "Output\\thumbnail.webp";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.tif";
+            string outputPath = "Output/thumbnail.webp";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
-        {
-            int thumbMaxWidth = 150;
-            int thumbMaxHeight = 150;
-            double ratio = Math.Min((double)thumbMaxWidth / raster.Width, (double)thumbMaxHeight / raster.Height);
-            int newWidth = (int)(raster.Width * ratio);
-            int newHeight = (int)(raster.Height * ratio);
-
-            raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-            using (WebPOptions webpOptions = new WebPOptions())
+            if (!File.Exists(inputPath))
             {
-                raster.Save(outputPath, webpOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.FileFormats.Tiff.TiffImage tiff = (Aspose.Imaging.FileFormats.Tiff.TiffImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                var frame = tiff.Frames[0];
+                using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)frame)
+                {
+                    int thumbWidth = 150;
+                    int thumbHeight = 150;
+                    raster.Resize(thumbWidth, thumbHeight, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+                    raster.Save(outputPath, new WebPOptions());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

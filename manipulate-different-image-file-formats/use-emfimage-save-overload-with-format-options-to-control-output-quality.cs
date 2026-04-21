@@ -9,10 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.emf";
+        string inputPath = @"C:\Images\input.emf";
         string outputPath = @"C:\Images\output.emf";
 
-        // Verify that the input file exists
+        // Ensure the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,27 +22,31 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure vector rasterization options (affects rendering quality)
-            var vectorOptions = new EmfRasterizationOptions
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                PageSize = image.Size,
-                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = Aspose.Imaging.SmoothingMode.None
-            };
+                // Prepare rasterization options (page size matches the source image)
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-            // Set EMF save options, including compression and buffer size hint
-            var emfOptions = new EmfOptions
-            {
-                VectorRasterizationOptions = vectorOptions,
-                Compress = true,               // enable compression for smaller file size
-                BufferSizeHint = 1024 * 1024   // 1 MB buffer hint for internal processing
-            };
+                // Configure EMF save options, enabling compression for better quality/size
+                EmfOptions saveOptions = new EmfOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    Compress = true
+                };
 
-            // Save the image using the specified EMF options
-            image.Save(outputPath, emfOptions);
+                // Save the image using the specified options
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

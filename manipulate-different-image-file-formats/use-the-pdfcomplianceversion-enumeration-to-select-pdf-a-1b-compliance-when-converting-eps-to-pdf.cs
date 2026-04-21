@@ -26,7 +26,7 @@ class Program
         // Load the EPS image
         using (var image = (EpsImage)Image.Load(inputPath))
         {
-            // Configure PDF options with PDF/A-1b compliance
+            // Set PDF options with PDF/A‑1b compliance
             var pdfOptions = new PdfOptions
             {
                 PdfCoreOptions = new PdfCoreOptions
@@ -35,7 +35,7 @@ class Program
                 }
             };
 
-            // Save the image as PDF with the specified options
+            // Save the image as a PDF file
             image.Save(outputPath, pdfOptions);
         }
     }

@@ -3,48 +3,58 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "large.tif");
-        string outputDir = "Output";
+        // Hard‑coded input and output locations
+        string inputPath = @"C:\Images\large_input.tif";
+        string outputDirectory = @"C:\Images\WebP_Output";
 
-        // Validate input file existence
+        // Path‑safety checks
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
+        // Ensure the output directory exists (unconditional)
+        Directory.CreateDirectory(outputDirectory);
 
-        // Load the large TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        try
         {
-            // Set up sequential processing for each page/frame
-            tiffImage.PageExportingAction = delegate (int index, Image page)
+            // Load the multi‑page TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Build output path for the current page
-                string outputPath = Path.Combine(outputDir, $"page_{index}.webp");
+                // Define the action executed before each page is saved.
+                // Here we convert the current page to WebP and write it to disk.
+                tiffImage.PageExportingAction = (int index, Image page) =>
+                {
+                    // Build a file name for the current page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{index}.webp");
 
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure the directory for this page exists (unconditional)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the current page as WebP
-                var webpOptions = new WebPOptions(); // default options
-                ((RasterImage)page).Save(outputPath, webpOptions);
-            };
+                    // Save the page as WebP using default options
+                    page.Save(outputPath, new WebPOptions());
 
-            // Trigger the page exporting action by saving to a dummy TIFF (the file is not needed)
-            string dummyOutput = Path.Combine(outputDir, "dummy.tif");
-            Directory.CreateDirectory(Path.GetDirectoryName(dummyOutput));
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffImage.Save(dummyOutput, tiffOptions);
+                    // Release memory used by the previous page
+                    GC.Collect();
+                };
+
+                // Trigger processing of all pages.
+                // Saving to a dummy stream forces the PageExportingAction to run for each page.
+                using (var dummyStream = new MemoryStream())
+                {
+                    tiffImage.Save(dummyStream);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

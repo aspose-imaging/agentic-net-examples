@@ -7,14 +7,15 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output directories (relative paths)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        // Define input and output directories relative to the current directory
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
         // Get all BMP files in the input directory
-        string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
+        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
-        foreach (string inputPath in bmpFiles)
+        foreach (string inputPath in files)
         {
             // Verify the input file exists
             if (!File.Exists(inputPath))
@@ -24,8 +25,7 @@ class Program
             }
 
             // Build the output file path with .webp extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -33,10 +33,7 @@ class Program
             // Load the BMP image and save it as lossless WebP
             using (Image image = Image.Load(inputPath))
             {
-                WebPOptions options = new WebPOptions
-                {
-                    Lossless = true
-                };
+                var options = new WebPOptions { Lossless = true };
                 image.Save(outputPath, options);
             }
         }

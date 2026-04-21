@@ -8,9 +8,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.bmp";
-        string outputPath = @"C:\Images\sample_converted.jpg";
+        // Hard‑coded input and output file paths
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\sample_converted.jpg";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -19,29 +19,31 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configurable JPEG quality (1-100)
+        // Desired JPEG quality (1‑100). Adjust as needed.
         int jpegQuality = 85;
 
         // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare JPEG save options
-            JpegOptions saveOptions = new JpegOptions
+            // Configure JPEG save options
+            JpegOptions jpegOptions = new JpegOptions
             {
-                // Set desired quality
+                // Set the compression quality
                 Quality = jpegQuality,
+
                 // Optional: set progressive compression
                 CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                // Optional: set resolution (96 DPI)
+
+                // Optional: keep default resolution (96 DPI) or set explicitly
                 ResolutionSettings = new ResolutionSetting(96.0, 96.0),
                 ResolutionUnit = ResolutionUnit.Inch
             };
 
-            // Save the image as JPEG using the specified options
-            image.Save(outputPath, saveOptions);
+            // Save the image as JPEG using the configured options
+            image.Save(outputPath, jpegOptions);
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -8,22 +7,38 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        // Define base, input and output directories
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Collect all TIFF files (both .tif and .tiff)
-        string[] tifFiles = Directory.GetFiles(inputDirectory, "*.tif");
-        string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tiff");
-        List<string> allFiles = new List<string>();
-        allFiles.AddRange(tifFiles);
-        allFiles.AddRange(tiffFiles);
-
-        foreach (string inputPath in allFiles)
+        // Ensure input directory exists
+        if (!Directory.Exists(inputDirectory))
         {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        // Get all files in the input directory
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+        foreach (string inputPath in files)
+        {
+            // Process only TIFF files
+            string ext = Path.GetExtension(inputPath);
+            if (!ext.Equals(".tif", StringComparison.OrdinalIgnoreCase) &&
+                !ext.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -31,26 +46,21 @@ class Program
                 return;
             }
 
-            // Prepare output path with .jpg extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+            // Build output path with .jpg extension
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
 
-            // Ensure the output directory for this file exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure JPEG options with 90% quality
+            // Load the TIFF image and convert to JPEG
+            using (Image image = Image.Load(inputPath))
             using (JpegOptions jpegOptions = new JpegOptions())
             {
                 jpegOptions.Quality = 90;
-
-                // Load the TIFF image and save as JPEG
-                using (Image image = Image.Load(inputPath))
-                {
-                    image.Save(outputPath, jpegOptions);
-                }
+                image.Save(outputPath, jpegOptions);
             }
 
-            Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+            Console.WriteLine($"Converted {inputPath} to {outputPath}");
         }
     }
 }

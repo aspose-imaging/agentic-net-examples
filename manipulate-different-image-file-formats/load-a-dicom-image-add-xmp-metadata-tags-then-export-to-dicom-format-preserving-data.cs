@@ -1,12 +1,11 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         string inputPath = "input.dcm";
         string outputPath = "output.dcm";
@@ -19,10 +18,14 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        using (DicomImage image = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
         {
-            DicomImage dicomImage = (DicomImage)image;
-            dicomImage.Save(outputPath, new DicomOptions());
+            var options = new DicomOptions
+            {
+                KeepMetadata = true
+            };
+
+            image.Save(outputPath, options);
         }
     }
 }

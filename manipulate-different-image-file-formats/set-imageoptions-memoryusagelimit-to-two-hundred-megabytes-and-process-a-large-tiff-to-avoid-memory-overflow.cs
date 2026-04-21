@@ -2,45 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\large_input.tif";
-        string outputPath = @"C:\Images\large_output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\large.tif";
+            string outputPath = @"C:\Images\output.png";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the large TIFF with a memory limit of 200 MB
-        var loadOptions = new LoadOptions
-        {
-            BufferSizeHint = 200 // memory limit in megabytes
-        };
-
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            // Example processing: no operation, just re-save
-            // (Insert any image manipulation here if needed)
-
-            // Prepare save options with the same memory limit
-            var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                BufferSizeHint = 200 // memory limit in megabytes
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF with a memory buffer limit of 200 MB
+            var loadOptions = new LoadOptions
+            {
+                BufferSizeHint = 200 // limit internal buffers to 200 MB
             };
 
-            // Save the processed image
-            image.Save(outputPath, saveOptions);
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                // Save the image as PNG, also respecting the 200 MB buffer limit
+                var pngOptions = new PngOptions
+                {
+                    BufferSizeHint = 200
+                };
+
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

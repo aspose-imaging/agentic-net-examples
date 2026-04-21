@@ -8,9 +8,8 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input DjVu file path
         string inputPath = "sample.djvu";
-        string outputDirectory = "output";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,28 +18,34 @@ class Program
             return;
         }
 
+        // Hardcoded output directory for GIF files
+        string outputDir = "output";
+
+        // Ensure the output directory exists (unconditional as required)
+        Directory.CreateDirectory(outputDir);
+
         // Open the DjVu file stream
-        using (Stream stream = File.OpenRead(inputPath))
+        using (FileStream inputStream = File.OpenRead(inputPath))
         {
             // Load the DjVu document
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
             {
-                // Prepare GIF save options with interlacing enabled
-                GifOptions gifOptions = new GifOptions
-                {
-                    Interlaced = true
-                };
-
-                // Iterate through each page and save as GIF
+                // Iterate through each page in the DjVu document
                 foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
+                    // Build the output file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"page{page.PageNumber}.gif");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists (unconditional)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as a GIF using the specified options
+                    // Configure GIF options with interlacing enabled
+                    GifOptions gifOptions = new GifOptions
+                    {
+                        Interlaced = true
+                    };
+
+                    // Save the current page as a GIF using the specified options
                     page.Save(outputPath, gifOptions);
                 }
             }

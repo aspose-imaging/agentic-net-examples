@@ -8,21 +8,21 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output\\output.tif";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.eps";
+        string outputPath = @"C:\temp\output.tif";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image and save as TIFF
+        // Load the EPS image and save it directly as TIFF
         using (Image image = Image.Load(inputPath))
         {
             var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);

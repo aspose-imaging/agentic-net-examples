@@ -1,21 +1,17 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text.Json;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tga;
-using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = "input.tga";
-        string outputPath = "output.json";
+        string outputPath = "output/metadata.json";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,38 +19,126 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the TGA image
-        using (TgaImage image = (TgaImage)Image.Load(inputPath))
+        // Load image and extract metadata via reflection
+        using (Image image = Image.Load(inputPath))
         {
-            // Access EXIF data
-            var exif = image.ExifData;
+            var metadata = new Dictionary<string, object>();
+            var imgType = image.GetType();
 
-            // Convert EXIF properties to a dictionary for JSON serialization
-            var exifDict = new Dictionary<string, object>();
-
-            if (exif != null)
+            // List of TGA-specific metadata properties to extract
+            var propertyNames = new[]
             {
-                Type exifType = exif.GetType();
-                foreach (PropertyInfo prop in exifType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                "DateTimeStamp",
+                "AuthorName",
+                "AuthorComments",
+                "ImageId",
+                "JobNameOrId",
+                "JobTime",
+                "TransparentColor",
+                "SoftwareId",
+                "SoftwareVersion",
+                "SoftwareVersionLetter",
+                "SoftwareVersionNumber",
+                "XOrigin",
+                "YOrigin",
+                "HasAlpha",
+                "HasColorMap",
+                "Height",
+                "Width",
+                "IsGrayScale",
+                "GammaValueNumerator",
+                "GammaValueDenominator",
+                "PixelAspectRatioNumerator",
+                "PixelAspectRatioDenominator"
+            };
+
+            foreach (var propName in propertyNames)
+            {
+                var propInfo = imgType.GetProperty(propName);
+                if (propInfo != null)
                 {
-                    try
+                    var value = propInfo.GetValue(image);
+                    if (value is DateTime dt)
                     {
-                        object value = prop.GetValue(exif);
-                        exifDict[prop.Name] = value;
+                        metadata[propName] = dt.ToString("o");
                     }
-                    catch
+                    else if (value is DateTime? ndt)
                     {
-                        // Ignore properties that cannot be read
+                        metadata[propName] = ndt.HasValue ? ndt.Value.ToString("o") : null;
+                    }
+                    else if (value is TimeSpan ts)
+                    {
+                        metadata[propName] = ts.ToString();
+                    }
+                    else if (value is TimeSpan? nts)
+                    {
+                        metadata[propName] = nts.HasValue ? nts.Value.ToString() : null;
+                    }
+                    else if (value is Aspose.Imaging.Color color)
+                    {
+                        metadata[propName] = color.ToArgb();
+                    }
+                    else
+                    {
+                        metadata[propName] = value;
                     }
                 }
             }
 
-            // Serialize dictionary to JSON
-            string json = JsonSerializer.Serialize(exifDict, new JsonSerializerOptions { WriteIndented = true });
+            // EXIF data (if present)
+            var exifProp = imgType.GetProperty("ExifData");
+            if (exifProp != null)
+            {
+                var exifData = exifProp.GetValue(image);
+                if (exifData != null)
+                {
+                    var exifType = exifData.GetType();
+                    var exifProps = new[] { "ExifVersion", "Make", "Model", "Orientation", "Software" };
+                    foreach (var propName in exifProps)
+                    {
+                        var propInfo = exifType.GetProperty(propName);
+                        if (propInfo != null)
+                        {
+                            var value = propInfo.GetValue(exifData);
+                            metadata[$"Exif_{propName}"] = value;
+                        }
+                    }
+                }
+            }
 
-            // Write JSON to output file
+            // Build simple JSON string manually
+            var sb = new System.Text.StringBuilder();
+            sb.Append("{");
+            bool first = true;
+            foreach (var kvp in metadata)
+            {
+                if (!first) sb.Append(",");
+                first = false;
+                sb.Append($"\"{kvp.Key}\":");
+                if (kvp.Value == null)
+                {
+                    sb.Append("null");
+                }
+                else if (kvp.Value is string str)
+                {
+                    string escaped = str.Replace("\\", "\\\\").Replace("\"", "\\\"");
+                    sb.Append($"\"{escaped}\"");
+                }
+                else if (kvp.Value is bool b)
+                {
+                    sb.Append(b.ToString().ToLower());
+                }
+                else
+                {
+                    sb.Append(kvp.Value);
+                }
+            }
+            sb.Append("}");
+            string json = sb.ToString();
+
+            // Write JSON to file
             File.WriteAllText(outputPath, json);
         }
     }

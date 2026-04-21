@@ -1,52 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded list of DICOM files to process
+        // Hardcoded list of DICOM input files
         string[] inputFiles = new string[]
         {
             @"C:\Images\dicom1.dcm",
-            @"C:\Images\dicom2.dcm",
-            @"C:\Images\dicom3.dcm"
+            @"C:\Images\dicom2.dcm"
         };
 
-        // Hardcoded output directory for the generated PDFs
-        string outputDirectory = @"C:\Images\PdfOutput";
-
-        foreach (string inputPath in inputFiles)
+        // Corresponding PDF output files
+        string[] outputFiles = new string[]
         {
-            // Verify that the input DICOM file exists
+            @"C:\Output\dicom1.pdf",
+            @"C:\Output\dicom2.pdf"
+        };
+
+        for (int i = 0; i < inputFiles.Length; i++)
+        {
+            string inputPath = inputFiles[i];
+            string outputPath = outputFiles[i];
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build the output PDF file path (same name, .pdf extension)
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-            // Ensure the output directory exists before saving
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure load options to limit internal buffer size (memory optimization)
-            LoadOptions loadOptions = new LoadOptions
+            // Load the DICOM image with memory optimization (buffer size hint)
+            using (FileStream stream = File.OpenRead(inputPath))
             {
-                BufferSizeHint = 256 * 1024 // 256 KB
-            };
+                LoadOptions loadOptions = new LoadOptions
+                {
+                    BufferSizeHint = 256 * 1024 // 256 KB
+                };
 
-            // Load the DICOM image using the memory‑optimized load options
-            using (Image dicomImage = Image.Load(inputPath, loadOptions))
-            {
-                // Prepare PDF export options (default settings are sufficient here)
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Save the loaded image as a PDF document
-                dicomImage.Save(outputPath, pdfOptions);
+                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
+                {
+                    // Convert and save the image as PDF
+                    PdfOptions pdfOptions = new PdfOptions();
+                    dicomImage.Save(outputPath, pdfOptions);
+                }
             }
         }
     }

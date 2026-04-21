@@ -12,33 +12,33 @@ class Program
         string inputPath = @"C:\Data\sample.cdr";
         string outputPath = @"C:\Data\sample.cdr.pdf";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CorelDRAW (CDR) file
+        // Load the CDR file
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF export options
-            PdfOptions pdfOptions = new PdfOptions();
+            // Prepare PDF export options
+            var pdfOptions = new PdfOptions();
 
-            // Set up rasterization options specific to CDR
-            CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+            // Configure rasterization options specific to CDR
+            var rasterizationOptions = new CdrRasterizationOptions
             {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                Positioning = PositioningTypes.DefinedByDocument
+                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                Positioning = Aspose.Imaging.ImageOptions.PositioningTypes.DefinedByDocument
             };
 
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+            pdfOptions.VectorRasterizationOptions = rasterizationOptions;
 
-            // Save the image as a PDF preserving the original layout
+            // Save the image as PDF preserving original layout
             image.Save(outputPath, pdfOptions);
         }
     }

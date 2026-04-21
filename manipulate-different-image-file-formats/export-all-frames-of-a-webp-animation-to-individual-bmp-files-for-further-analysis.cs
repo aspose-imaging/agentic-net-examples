@@ -6,43 +6,57 @@ using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/animation.webp";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\animation.webp";
+            string outputDirectory = @"C:\temp\frames";
 
-        string outputDirectory = "Output";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the animated WebP image
-        using (WebPImage webP = new WebPImage(inputPath))
-        {
-            int frameCount = webP.PageCount;
-
-            for (int i = 0; i < frameCount; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Build output file path for each frame
-                string outputPath = Path.Combine(outputDirectory, $"frame_{i}.bmp");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Configure BMP options to export only the current frame
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
-                };
-
-                // Save the current frame as BMP
-                webP.Save(outputPath, bmpOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists (unconditional)
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the WebP animation
+            using (WebPImage webPImage = new WebPImage(inputPath))
+            {
+                // Try to treat the image as a multipage image
+                if (webPImage is IMultipageImage multipage && multipage.PageCount > 0)
+                {
+                    for (int i = 0; i < multipage.PageCount; i++)
+                    {
+                        // Each page is a frame; cast to RasterImage for saving
+                        var frame = multipage.Pages[i] as RasterImage;
+                        if (frame == null)
+                            continue;
+
+                        string outputPath = Path.Combine(outputDirectory, $"frame_{i}.bmp");
+                        // Ensure the directory for this file exists (unconditional)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the frame as BMP
+                        frame.Save(outputPath, new BmpOptions());
+                    }
+                }
+                else
+                {
+                    // Fallback: single-frame image, save the active frame
+                    string outputPath = Path.Combine(outputDirectory, "frame_0.bmp");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    webPImage.Save(outputPath, new BmpOptions());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
