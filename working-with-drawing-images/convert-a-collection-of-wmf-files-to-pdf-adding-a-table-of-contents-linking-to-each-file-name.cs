@@ -1,91 +1,60 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    // Hard‑coded input folder containing WMF files and output folder for PDFs.
-    // No argument validation is performed as per the safety rules.
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input directory (change as needed)
-        string inputFolder = @"C:\WmfInput";
-        // Output directory (change as needed)
-        string outputFolder = @"C:\PdfOutput";
-
-        // Ensure the output directory exists before any save operation.
-        Directory.CreateDirectory(outputFolder);
-
-        // Collection of WMF file names to process.
-        // Add or remove file names as required.
+        // Hardcoded collection of WMF input files
         string[] wmfFiles = new[]
         {
-            "FirstImage.wmf",
-            "SecondImage.wmf",
-            "ThirdImage.wmf"
+            @"C:\Images\file1.wmf",
+            @"C:\Images\file2.wmf",
+            @"C:\Images\file3.wmf"
         };
 
-        // Create a simple table‑of‑contents text file that lists the generated PDFs.
-        // This file can be opened alongside the PDFs for reference.
-        string tocPath = Path.Combine(outputFolder, "TableOfContents.txt");
-        using (var tocWriter = new StreamWriter(tocPath))
+        // Output directory for PDFs
+        string outputDir = @"C:\Output\Pdf";
+        Directory.CreateDirectory(outputDir);
+
+        // List to hold TOC entries
+        List<string> tocLines = new List<string>();
+        tocLines.Add("Table of Contents");
+        tocLines.Add("=================");
+
+        foreach (string wmfPath in wmfFiles)
         {
-            tocWriter.WriteLine("Table of Contents");
-            tocWriter.WriteLine("=================");
-            tocWriter.WriteLine();
-
-            foreach (string wmfFileName in wmfFiles)
+            // Validate input file existence
+            if (!File.Exists(wmfPath))
             {
-                string inputPath = Path.Combine(inputFolder, wmfFileName);
-
-                // Verify that the input WMF file exists.
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Derive the output PDF path.
-                string pdfFileName = Path.GetFileNameWithoutExtension(wmfFileName) + ".pdf";
-                string outputPath = Path.Combine(outputFolder, pdfFileName);
-
-                // Ensure the directory for the output file exists (already created above,
-                // but the rule requires the call before each save).
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the WMF image.
-                using (Image wmfImage = Image.Load(inputPath))
-                {
-                    // Prepare PDF save options.
-                    var pdfOptions = new PdfOptions
-                    {
-                        // Optional: set page size to match the source image size.
-                        PageSize = wmfImage.Size,
-                        // Optional: keep original resolution.
-                        UseOriginalImageResolution = true,
-                        // Configure core PDF options (e.g., enable bookmarks outline level).
-                        PdfCoreOptions = new Aspose.Imaging.FileFormats.Pdf.PdfCoreOptions
-                        {
-                            // BookmarksOutlineLevel = 1 would show a bookmark for each page,
-                            // but since each PDF contains a single page, this creates a simple outline.
-                            BookmarksOutlineLevel = 1
-                        }
-                    };
-
-                    // Save the WMF as a PDF.
-                    wmfImage.Save(outputPath, pdfOptions);
-                }
-
-                // Write an entry to the TOC file.
-                tocWriter.WriteLine($"{Path.GetFileNameWithoutExtension(wmfFileName)} -> {pdfFileName}");
+                Console.Error.WriteLine($"File not found: {wmfPath}");
+                continue;
             }
 
-            tocWriter.WriteLine();
-            tocWriter.WriteLine("End of Table of Contents");
+            // Determine PDF output path
+            string pdfFileName = Path.GetFileNameWithoutExtension(wmfPath) + ".pdf";
+            string pdfPath = Path.Combine(outputDir, pdfFileName);
+
+            // Ensure output directory exists (already created above, but rule requires unconditional call)
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
+            // Load WMF and save as PDF
+            using (Image image = Image.Load(wmfPath))
+            {
+                image.Save(pdfPath, new PdfOptions());
+            }
+
+            // Add entry to TOC
+            tocLines.Add($"{Path.GetFileName(wmfPath)} -> {pdfFileName}");
         }
 
-        Console.WriteLine("Conversion completed. PDFs and TableOfContents.txt are located at:");
-        Console.WriteLine(outputFolder);
+        // Write TOC to a text file
+        string tocPath = Path.Combine(outputDir, "TableOfContents.txt");
+        Directory.CreateDirectory(Path.GetDirectoryName(tocPath));
+        File.WriteAllLines(tocPath, tocLines);
     }
 }
