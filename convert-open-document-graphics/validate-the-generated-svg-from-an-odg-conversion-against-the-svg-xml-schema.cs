@@ -7,13 +7,11 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Entry point
     static void Main()
     {
-        // Hardcoded input, output and schema paths
+        // Hard‑coded input and output paths
         string inputPath = @"C:\temp\input.odg";
         string outputPath = @"C:\temp\output.svg";
-        string schemaPath = @"C:\temp\svg.xsd";
 
         // Input file existence check
         if (!File.Exists(inputPath))
@@ -25,48 +23,39 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG (or any vector) image
+        // Load the ODG image and save it as SVG
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG export options
+            // Configure SVG export options
             var svgOptions = new SvgOptions
             {
                 // Use default rasterization options; can be customized if needed
                 VectorRasterizationOptions = new SvgRasterizationOptions()
             };
 
-            // Save as SVG
             image.Save(outputPath, svgOptions);
         }
 
-        // Validate the generated SVG against the provided XSD schema
-        ValidateSvg(outputPath, schemaPath);
+        // Validate the generated SVG against the SVG XML schema
+        ValidateSvg(outputPath);
     }
 
-    // Performs XML schema validation on an SVG file
-    static void ValidateSvg(string svgFilePath, string xsdFilePath)
+    static void ValidateSvg(string svgFilePath)
     {
-        // Schema file existence check
-        if (!File.Exists(xsdFilePath))
-        {
-            Console.Error.WriteLine($"File not found: {xsdFilePath}");
-            return;
-        }
-
-        // Prepare schema set
+        // Load the SVG schema (W3C SVG 1.1 schema)
         var schemas = new XmlSchemaSet();
-        schemas.Add(null, xsdFilePath);
+        // The schema is retrieved from the official W3C location.
+        // If the environment cannot access the internet, replace the URL with a local copy.
+        schemas.Add("http://www.w3.org/2000/svg", "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.xsd");
 
-        // Configure XML reader settings for validation
         var settings = new XmlReaderSettings
         {
             ValidationType = ValidationType.Schema,
             Schemas = schemas,
-            DtdProcessing = DtdProcessing.Prohibit
+            DtdProcessing = DtdProcessing.Ignore
         };
         settings.ValidationEventHandler += ValidationCallback;
 
-        // Read and validate the SVG file
         using (var reader = XmlReader.Create(svgFilePath, settings))
         {
             try
@@ -81,13 +70,10 @@ class Program
         }
     }
 
-    // Handles validation errors and warnings
     static void ValidationCallback(object sender, ValidationEventArgs e)
     {
-        string message = $"SVG validation {e.Severity}: {e.Message}";
-        if (e.Severity == XmlSeverityType.Error)
-            Console.Error.WriteLine(message);
-        else
-            Console.WriteLine(message);
+        // Report validation warnings and errors
+        string severity = e.Severity == XmlSeverityType.Error ? "Error" : "Warning";
+        Console.Error.WriteLine($"{severity}: {e.Message}");
     }
 }
