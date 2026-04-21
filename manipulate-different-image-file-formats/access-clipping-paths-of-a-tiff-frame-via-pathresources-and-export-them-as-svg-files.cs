@@ -1,43 +1,51 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputFolder = "output_paths";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(outputFolder);
-
-        using (Aspose.Imaging.FileFormats.Tiff.TiffImage tiff = (Aspose.Imaging.FileFormats.Tiff.TiffImage)Aspose.Imaging.Image.Load(inputPath))
-        {
-            var pathResources = tiff.ActiveFrame.PathResources;
-            for (int i = 0; i < pathResources.Count; i++)
+            string inputPath = "input.tif";
+            if (!File.Exists(inputPath))
             {
-                var pathResource = pathResources[i];
-                var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
-                    new[] { pathResource },
-                    tiff.ActiveFrame.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Create(new SvgOptions(), tiff.Width, tiff.Height))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                var resources = tiff.ActiveFrame.PathResources;
+                int index = 0;
+                foreach (var res in resources)
                 {
-                    var graphics = new Aspose.Imaging.Graphics(svgImage);
-                    graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1), graphicsPath);
+                    // Convert the clipping path to a GraphicsPath
+                    Aspose.Imaging.GraphicsPath graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
+                        new[] { res }, tiff.ActiveFrame.Size);
 
-                    string outputPath = Path.Combine(outputFolder, $"Path_{i}.svg");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    svgImage.Save(outputPath);
+                    // Create SVG graphics and draw the path
+                    var svgGraphics = new SvgGraphics2D(tiff.ActiveFrame.Width, tiff.ActiveFrame.Height, 96);
+                    svgGraphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
+
+                    // Finalize SVG image
+                    using (var svgImage = svgGraphics.EndRecording())
+                    {
+                        string outputPath = Path.Combine("output", $"clipping_{index}.svg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        svgImage.Save(outputPath);
+                    }
+
+                    index++;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
