@@ -3,42 +3,43 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\sample.png";
+        // Hardcoded input and output file paths
+        string inputPath = "sample.cmx";
+        string outputPath = "output.png";
 
-        // Verify input file exists
+        // Verify that the input CMX file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the CMX vector image
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+        using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
         {
-            // Prepare PNG save options
-            PngOptions pngOptions = new PngOptions();
-
-            // Configure rasterization options with desired DPI (e.g., 300 DPI)
-            CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
+            // Configure rasterization options with the desired DPI (e.g., 96 DPI)
+            var rasterOptions = new CmxRasterizationOptions
             {
-                ResolutionSettings = new ResolutionSetting(300, 300)
+                ResolutionSettings = new ResolutionSetting(96, 96)
             };
 
-            // Assign rasterization options to PNG options
-            pngOptions.VectorRasterizationOptions = rasterOptions;
+            // Set PNG save options and attach the rasterization settings
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-            // Save the rasterized PNG image
-            cmxImage.Save(outputPath, pngOptions);
+            // Save the rasterized image as PNG
+            cmx.Save(outputPath, pngOptions);
         }
     }
 }
