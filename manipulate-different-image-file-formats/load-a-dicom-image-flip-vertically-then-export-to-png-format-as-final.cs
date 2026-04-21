@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.png";
+        string inputPath = "input\\sample.dcm";
+        string outputPath = "output\\flipped.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,8 +19,8 @@ class Program
             return;
         }
 
-        // Ensure output directory exists (handles cases with no directory part)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the DICOM image, flip vertically, and save as PNG
         using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
@@ -28,7 +28,7 @@ class Program
             // Flip vertically
             dicomImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
-            // Save to PNG format
+            // Save the transformed image as PNG
             dicomImage.Save(outputPath, new PngOptions());
         }
     }
