@@ -5,13 +5,13 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.odg";
-        string outputPath = "output\\result.png";
+        string inputPath = "Input/sample.odg";
+        string outputPath = "Output/sample.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,16 +25,24 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Create rasterization options for ODG
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions();
-            rasterOptions.PageSize = image.Size;               // Preserve original size
-            rasterOptions.BackgroundColor = Color.White;       // Optional background
+            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            {
+                // Set background color if needed
+                BackgroundColor = Color.White,
+                // Use the original image size as page size
+                PageSize = image.Size
+            };
 
             // Configure PNG save options
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.VectorRasterizationOptions = rasterOptions;
-            pngOptions.ResolutionSettings = new ResolutionSetting(300, 300); // Set DPI
+            PngOptions pngOptions = new PngOptions
+            {
+                // Set desired resolution (e.g., 300 DPI)
+                ResolutionSettings = new ResolutionSetting(300, 300),
+                // Assign the rasterization options
+                VectorRasterizationOptions = rasterOptions
+            };
 
-            // Save the image as PNG
+            // Save the image as PNG using the configured options
             image.Save(outputPath, pngOptions);
         }
     }
