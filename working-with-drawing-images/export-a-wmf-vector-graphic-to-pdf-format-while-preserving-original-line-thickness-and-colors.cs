@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\input.wmf";
-        string outputPath = @"C:\Temp\output.pdf";
+        string inputPath = @"C:\Images\sample.wmf";
+        string outputPath = @"C:\Images\sample.pdf";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -25,15 +25,15 @@ class Program
         // Load the WMF image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options to preserve original line thickness and colors
+            // Configure rasterization options to keep original line thickness and colors
             var rasterOptions = new WmfRasterizationOptions
             {
-                PageSize = image.Size,                         // Use original image size
-                SmoothingMode = Aspose.Imaging.SmoothingMode.None, // Disable smoothing to keep line thickness
+                PageSize = image.Size,                     // Preserve original size
+                SmoothingMode = Aspose.Imaging.SmoothingMode.None, // No smoothing to keep line thickness
                 TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel // Preserve text rendering
             };
 
-            // Set up PDF export options with the vector rasterization options
+            // Set up PDF export options with the rasterization settings
             var pdfOptions = new PdfOptions
             {
                 VectorRasterizationOptions = rasterOptions
