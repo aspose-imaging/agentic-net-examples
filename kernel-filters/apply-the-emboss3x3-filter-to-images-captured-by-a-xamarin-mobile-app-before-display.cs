@@ -1,29 +1,48 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hard‑coded input and output file paths
+            string inputPath = "input.png";
+            string outputPath = "output_emboss.png";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image using Aspose.Imaging
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply the 3x3 emboss convolution kernel
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+        catch (Exception ex)
         {
-            var filterOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
-            raster.Filter(raster.Bounds, filterOptions);
-            raster.Save(outputPath, new JpegOptions());
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
