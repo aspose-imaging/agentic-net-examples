@@ -2,70 +2,69 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output directories
-        string inputFolder = "Input";
-        string outputFolder = "Output";
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputFolder);
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        // Get all files in the input folder
-        string[] inputFiles = Directory.GetFiles(inputFolder);
+        // Verify input directory exists
+        if (!Directory.Exists(inputDirectory))
+        {
+            Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
+            return;
+        }
+
+        // Get all files in the input directory
+        string[] inputFiles = Directory.GetFiles(inputDirectory);
+
         foreach (string inputPath in inputFiles)
         {
             // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                continue;
             }
 
-            // Prepare output path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + "_thumb.bmp");
-
-            // Ensure output directory exists (unconditional)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Thumbnail dimensions
-            int thumbWidth = 100;
-            int thumbHeight = 100;
-
-            // Load source image as RasterImage
-            using (RasterImage srcImage = (RasterImage)Image.Load(inputPath))
+            // Load the image as a raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create BMP options with bound output file
+                // Define thumbnail size
+                int thumbWidth = 100;
+                int thumbHeight = 100;
+
+                // Resize to thumbnail dimensions
+                image.Resize(thumbWidth, thumbHeight);
+
+                // Create Graphics instance for drawing
+                Graphics graphics = new Graphics(image);
+
+                // Calculate centered circle dimensions (leave a small margin)
+                int diameter = Math.Min(thumbWidth, thumbHeight) - 10;
+                int x = (thumbWidth - diameter) / 2;
+                int y = (thumbHeight - diameter) / 2;
+
+                // Draw the centered circle using a red pen
+                Pen pen = new Pen(Color.Red, 2);
+                graphics.DrawEllipse(pen, new Rectangle(x, y, diameter, diameter));
+
+                // Prepare output file path (BMP with same base name)
+                string fileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
+                string outputPath = Path.Combine(outputDirectory, fileName);
+
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the thumbnail as BMP
                 BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-                // Create thumbnail canvas
-                using (Image thumbImage = Image.Create(bmpOptions, thumbWidth, thumbHeight))
-                {
-                    // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(thumbImage);
-
-                    // Draw the source image scaled to thumbnail size
-                    graphics.DrawImage(srcImage, new Rectangle(0, 0, thumbWidth, thumbHeight));
-
-                    // Define centered circle parameters
-                    int radius = Math.Min(thumbWidth, thumbHeight) / 2 - 5;
-                    int centerX = thumbWidth / 2;
-                    int centerY = thumbHeight / 2;
-                    Rectangle circleRect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
-
-                    // Draw the circle using a red pen
-                    Pen pen = new Pen(Color.Red, 3);
-                    graphics.DrawEllipse(pen, circleRect);
-
-                    // Save the thumbnail (output file already bound)
-                    thumbImage.Save();
-                }
+                image.Save(outputPath, bmpOptions);
             }
         }
     }

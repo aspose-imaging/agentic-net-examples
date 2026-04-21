@@ -2,42 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.pdf";
-        string outputPath = @"C:\Temp\output.svg";
+        string inputPath = @"C:\Input\sample.pdf";
+        string outputPath = @"C:\Output\sample.svg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PDF document
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options with the source image size
-            var rasterizationOptions = new SvgRasterizationOptions
+            // Configure SVG export options
+            SvgOptions svgOptions = new SvgOptions
             {
-                PageSize = image.Size
+                // Preserve text as selectable text (not converted to shapes)
+                TextAsShapes = false,
+                // Set rasterization options with the source page size
+                VectorRasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                }
             };
 
-            // Configure SVG save options; keep text as selectable (TextAsShapes = false)
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions,
-                TextAsShapes = false
-            };
-
-            // Save as SVG
+            // Save the PDF as SVG
             image.Save(outputPath, svgOptions);
         }
     }

@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -16,7 +16,7 @@ class Program
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
             return;
         }
 
@@ -25,53 +25,51 @@ class Program
             Directory.CreateDirectory(outputDirectory);
         }
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
-        foreach (string inputPath in files)
+        foreach (var filePath in files)
         {
+            string inputPath = filePath;
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            if (!inputPath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
-                continue;
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string pdfPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
 
             using (Image svgImage = Image.Load(inputPath))
             {
-                int width = svgImage.Width;
-                int height = svgImage.Height;
-
-                using (PdfOptions pdfOptions = new PdfOptions())
+                using (PdfOptions pdfOptions = new PdfOptions
                 {
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageWidth = width,
-                        PageHeight = height
-                    };
-
-                    using (Image canvas = Image.Create(pdfOptions, width, height))
-                    {
-                        Graphics graphics = new Graphics(canvas);
-                        graphics.Clear(Color.White);
-                        graphics.DrawImage(svgImage, new Point(0, 0));
-
-                        Font footerFont = new Font("Arial", 12, FontStyle.Regular);
-                        using (SolidBrush brush = new SolidBrush(Color.Black))
-                        {
-                            graphics.DrawString(fileName, footerFont, brush, new Point(10, height - 20));
-                        }
-
-                        canvas.Save(outputPath);
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height
                     }
+                })
+                {
+                    svgImage.Save(pdfPath, pdfOptions);
                 }
+            }
+
+            using (Image pdfImage = Image.Load(pdfPath))
+            {
+                Graphics graphics = new Graphics(pdfImage);
+
+                Font font = new Font("Arial", 12, FontStyle.Regular);
+                using (SolidBrush brush = new SolidBrush(Color.Black))
+                {
+                    int margin = 10;
+                    int yPosition = pdfImage.Height - margin - 12;
+                    graphics.DrawString(fileNameWithoutExt, font, brush, new Point(margin, yPosition));
+                }
+
+                pdfImage.Save(pdfPath);
             }
         }
     }

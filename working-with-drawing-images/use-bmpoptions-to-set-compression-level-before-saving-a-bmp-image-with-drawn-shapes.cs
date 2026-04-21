@@ -1,60 +1,62 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path (hardcoded)
+        // Output BMP file path
         string outputPath = @"C:\temp\output.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file source for the BMP image
-        Source source = new FileCreateSource(outputPath, false);
-
-        // Configure BMP options with desired compression
+        // Configure BMP options with compression and bits per pixel
         BmpOptions bmpOptions = new BmpOptions
         {
-            Source = source,
-            Compression = BitmapCompression.Rgb // No compression (RGB)
+            Compression = BitmapCompression.Rgb,
+            BitsPerPixel = 24,
+            Source = new FileCreateSource(outputPath, false)
         };
 
-        // Create a new BMP image with a canvas size of 500x500 pixels
-        using (Image image = Image.Create(bmpOptions, 500, 500))
+        // Create a new image using the BMP options
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
         {
-            // Initialize Graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Initialize graphics for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Clear the canvas with white background
-            graphics.Clear(Color.White);
+            // Clear background
+            graphics.Clear(Aspose.Imaging.Color.White);
 
             // Draw a blue rectangle
-            Pen rectPen = new Pen(Color.Blue, 5);
-            graphics.DrawRectangle(rectPen, new Rectangle(50, 50, 200, 150));
+            graphics.DrawRectangle(
+                new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5),
+                new Aspose.Imaging.Rectangle(50, 50, 400, 300));
 
-            // Draw a red diagonal line
-            Pen linePen = new Pen(Color.Red, 3);
-            graphics.DrawLine(linePen, new Point(0, 0), new Point(500, 500));
+            // Draw a red ellipse
+            graphics.DrawEllipse(
+                new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 3),
+                new Aspose.Imaging.Rectangle(100, 100, 200, 150));
 
-            // Draw a green ellipse
-            Pen ellipsePen = new Pen(Color.Green, 4);
-            graphics.DrawEllipse(ellipsePen, new Rectangle(300, 100, 150, 150));
+            // Draw a green diagonal line
+            graphics.DrawLine(
+                new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 2),
+                new Aspose.Imaging.Point(0, 0),
+                new Aspose.Imaging.Point(500, 500));
 
-            // Draw text using a solid brush
-            using (SolidBrush textBrush = new SolidBrush(Color.Black))
+            // Fill a yellow rectangle using a solid brush
+            using (SolidBrush brush = new SolidBrush())
             {
-                Font font = new Font("Arial", 24);
-                graphics.DrawString("Sample BMP", font, textBrush, new PointF(100, 400));
+                brush.Color = Aspose.Imaging.Color.Yellow;
+                brush.Opacity = 100;
+                graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(200, 200, 100, 100));
             }
 
-            // Save the image (bound to the file source)
+            // Save the image (output is already bound to the file via FileCreateSource)
             image.Save();
         }
     }

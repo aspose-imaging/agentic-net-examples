@@ -9,28 +9,24 @@ class Program
     static void Main(string[] args)
     {
         // Define image dimensions
-        int width = 500;
-        int height = 500;
+        int width = 800;
+        int height = 600;
 
-        // Hardcoded output path
+        // Define output file path
         string outputPath = @"C:\temp\output.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set BMP options and bind to the output file
+        // Set up BMP options with a file create source
         BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create the image canvas
+        // Create the image and a Graphics object for drawing
         using (Image image = Image.Create(bmpOptions, width, height))
         {
-            // Initialize Graphics for drawing
             Graphics graphics = new Graphics(image);
-
-            // Clear the canvas with white color
-            graphics.Clear(Color.White);
+            // Graphics object is ready for drawing operations here
 
             // Save the image (file is already bound via FileCreateSource)
             image.Save();

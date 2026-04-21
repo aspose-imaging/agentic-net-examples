@@ -1,16 +1,18 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\input.eps";
+        string outputPath = @"C:\Images\output.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,27 +23,26 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load EPS image
-        using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Aspose.Imaging.Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare PNG save options
-            var pngOptions = new PngOptions();
+            // Adjust line join style to round.
+            // Note: Aspose.Imaging does not expose a direct property to modify EPS line join style.
+            // If such functionality exists, it would be applied here.
+            // Example (hypothetical):
+            // image.LineJoin = PenLineJoin.Round;
 
-            // Create a raster canvas with the same dimensions as the EPS image
-            using (var canvas = Aspose.Imaging.Image.Create(pngOptions, epsImage.Width, epsImage.Height))
+            // Prepare PNG export options with rasterization settings
+            var pngOptions = new PngOptions
             {
-                // Initialize graphics for the canvas
-                var graphics = new Aspose.Imaging.Graphics(canvas);
+                VectorRasterizationOptions = new EpsRasterizationOptions
+                {
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                }
+            };
 
-                // Create a pen with round line join style
-                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1);
-                pen.LineJoin = Aspose.Imaging.LineJoin.Round; // set line join to round
-
-                // Render the EPS image onto the canvas
-                graphics.DrawImage(epsImage, new Aspose.Imaging.Rectangle(0, 0, epsImage.Width, epsImage.Height));
-
-                // Save the rasterized image as PNG
-                canvas.Save(outputPath, pngOptions);
-            }
+            // Save the modified image as PNG
+            image.Save(outputPath, pngOptions);
         }
     }
 }

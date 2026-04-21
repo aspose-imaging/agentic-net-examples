@@ -2,14 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "multipage.svg");
-        string outputDirectory = "Output";
+        // Define input and output paths
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputPath = Path.Combine(baseDir, "Input", "multipage.svg");
+        string outputDir = Path.Combine(baseDir, "Output");
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -18,44 +20,40 @@ class Program
             return;
         }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDir);
+
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Determine number of pages (SVG is typically single-page, but handle multipage if supported)
-            int pageCount = 1;
-            if (image is IMultipageImage multipageImage)
-            {
-                pageCount = multipageImage.PageCount;
-            }
+            // Determine if the image supports multiple pages
+            IMultipageImage multipage = image as IMultipageImage;
+            int pageCount = multipage != null ? multipage.PageCount : 1;
 
-            // Iterate through each page and save as PNG with 300 DPI
-            for (int i = 0; i < pageCount; i++)
+            for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
             {
-                string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
-
-                // Ensure output directory exists
+                // Prepare output file path for each page
+                string outputPath = Path.Combine(outputDir, $"page_{pageIndex + 1}.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure PNG save options
-                PngOptions pngOptions = new PngOptions
+                // Configure PNG export options with 300 DPI resolution
+                using (PngOptions pngOptions = new PngOptions())
                 {
                     // Set resolution to 300 DPI
-                    ResolutionSettings = new ResolutionSetting(300, 300),
+                    pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
 
-                    // Configure vector rasterization options
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    // Set vector rasterization options (page size based on original image)
+                    pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    },
+                        PageSize = image.Size
+                    };
 
                     // Export only the current page
-                    MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
-                };
+                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(pageIndex, 1));
 
-                // Save the current page as PNG
-                image.Save(outputPath, pngOptions);
+                    // Save the page as PNG
+                    image.Save(outputPath, pngOptions);
+                }
             }
         }
     }

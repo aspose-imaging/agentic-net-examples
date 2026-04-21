@@ -1,62 +1,52 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"c:\temp\shapes_output.png";
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
-        // Ensure output directory exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up PNG options with a FileCreateSource bound to the output file
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas (800x600)
-        using (Image image = Image.Create(pngOptions, 800, 600))
+        using (Aspose.Imaging.Image inputImage = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Initialize Graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            int width = inputImage.Width;
+            int height = inputImage.Height;
 
-            // Collection of drawing actions representing different shapes
-            var drawActions = new List<Action<Graphics>>
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Aspose.Imaging.Image canvas = Aspose.Imaging.Image.Create(pngOptions, width, height))
             {
-                // Draw a red line
-                g => g.DrawLine(new Pen(Color.Red, 3), new Point(50, 50), new Point(200, 50)),
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
 
-                // Draw a blue rectangle
-                g => g.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle(100, 100, 150, 100)),
+                graphics.DrawImage((Aspose.Imaging.RasterImage)inputImage, new Aspose.Imaging.Point(0, 0));
 
-                // Draw a green ellipse
-                g => g.DrawEllipse(new Pen(Color.Green, 2), new Rectangle(300, 200, 120, 80)),
+                graphics.DrawRectangle(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 3),
+                    new Aspose.Imaging.Rectangle(50, 50, 200, 100));
 
-                // Draw a purple polygon
-                g => g.DrawPolygon(new Pen(Color.Purple, 2), new[]
-                {
-                    new Point(400, 300),
-                    new Point(450, 350),
-                    new Point(400, 400),
-                    new Point(350, 350)
-                })
-            };
+                graphics.DrawEllipse(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3),
+                    new Aspose.Imaging.Rectangle(300, 200, 150, 150));
 
-            // Iterate over the collection and execute each drawing action
-            foreach (var action in drawActions)
-            {
-                action(graphics);
+                graphics.DrawLine(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 2),
+                    new Aspose.Imaging.Point(0, 0),
+                    new Aspose.Imaging.Point(width - 1, height - 1));
+
+                canvas.Save();
             }
-
-            // Save the image (output file is already bound)
-            image.Save();
         }
     }
 }

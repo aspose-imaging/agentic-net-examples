@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -20,63 +19,53 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+        using (var eps = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
         {
-            PngOptions pngOptions = new PngOptions();
-            VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+            var rasterOptions = new EpsRasterizationOptions
             {
-                PageWidth = epsImage.Width,
-                PageHeight = epsImage.Height,
-                BackgroundColor = Color.White
+                PageWidth = eps.Width,
+                PageHeight = eps.Height,
+                BackgroundColor = Color.Transparent
             };
-            pngOptions.VectorRasterizationOptions = rasterOptions;
-            epsImage.Save(tempPath, pngOptions);
-        }
 
-        using (RasterImage raster = (RasterImage)Image.Load(tempPath))
-        {
-            int width = raster.Width;
-            int height = raster.Height;
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
 
-            Graphics graphics = new Graphics(raster);
+            using (var ms = new MemoryStream())
+            {
+                eps.Save(ms, pngOptions);
+                ms.Position = 0;
 
-            LinearGradientBrush topBrush = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(0, height / 2),
-                Color.Transparent,
-                Color.Black);
-            graphics.FillRectangle(topBrush, new Rectangle(0, 0, width, height / 2));
+                using (var raster = (RasterImage)Image.Load(ms))
+                {
+                    var graphics = new Graphics(raster);
+                    int width = raster.Width;
+                    int height = raster.Height;
+                    int centerX = width / 2;
+                    int centerY = height / 2;
+                    int maxRadius = Math.Min(width, height) / 2;
 
-            LinearGradientBrush bottomBrush = new LinearGradientBrush(
-                new Point(0, height),
-                new Point(0, height / 2),
-                Color.Transparent,
-                Color.Black);
-            graphics.FillRectangle(bottomBrush, new Rectangle(0, height / 2, width, height / 2));
+                    // Draw concentric ellipses to simulate a vignette effect
+                    for (int i = 0; i < 10; i++)
+                    {
+                        double factor = (double)i / 9.0;
+                        int radius = maxRadius - (int)(maxRadius * factor);
+                        int alpha = (int)(255 * factor * 0.5); // Increase opacity towards the edges
+                        var pen = new Pen(Color.FromArgb(alpha, 0, 0, 0), 0);
+                        var rect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
+                        graphics.DrawEllipse(pen, rect);
+                    }
 
-            LinearGradientBrush leftBrush = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(width / 2, 0),
-                Color.Transparent,
-                Color.Black);
-            graphics.FillRectangle(leftBrush, new Rectangle(0, 0, width / 2, height));
+                    var finalOptions = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
 
-            LinearGradientBrush rightBrush = new LinearGradientBrush(
-                new Point(width, 0),
-                new Point(width / 2, 0),
-                Color.Transparent,
-                Color.Black);
-            graphics.FillRectangle(rightBrush, new Rectangle(width / 2, 0, width / 2, height));
-
-            PngOptions finalOptions = new PngOptions();
-            raster.Save(outputPath, finalOptions);
-        }
-
-        if (File.Exists(tempPath))
-        {
-            File.Delete(tempPath);
+                    raster.Save(outputPath, finalOptions);
+                }
+            }
         }
     }
 }

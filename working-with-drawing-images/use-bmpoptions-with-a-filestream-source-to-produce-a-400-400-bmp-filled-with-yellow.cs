@@ -1,12 +1,11 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Output file path (hard‑coded)
         string outputPath = @"C:\temp\output.bmp";
@@ -14,7 +13,7 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a FileStream for the output BMP
+        // Create a FileStream that will receive the BMP data
         using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
             // Configure BMP options with the stream as the source
@@ -22,13 +21,15 @@ class Program
             bmpOptions.Source = new StreamSource(stream);
 
             // Create a 400×400 BMP image bound to the stream
-            using (Image image = Image.Create(bmpOptions, 400, 400))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 400))
             {
-                // Fill the entire canvas with yellow
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.Yellow);
+                // Obtain a Graphics object for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Save the bound image
+                // Fill the entire canvas with yellow
+                graphics.Clear(Aspose.Imaging.Color.Yellow);
+
+                // Save the bound image (writes to the stream)
                 image.Save();
             }
         }

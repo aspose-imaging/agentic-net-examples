@@ -2,17 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\input\vector.cdr";
-        string tempPngPath = @"C:\temp\temp.png";
-        string outputPath = @"C:\output\embossed.tif";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.tif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,61 +23,38 @@ class Program
             return;
         }
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Rasterize vector image to high‑resolution PNG
+        // Load the vector drawing and rasterize it to a high‑resolution TIFF
         using (Image vectorImage = Image.Load(inputPath))
         {
-            int targetWidth = vectorImage.Width * 2;
-            int targetHeight = vectorImage.Height * 2;
+            // Configure TIFF save options with high DPI
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
 
-            var rasterOptions = new VectorRasterizationOptions
+            // Set vector rasterization options (required for vector sources)
+            var vectorRasterOptions = new VectorRasterizationOptions
             {
-                BackgroundColor = Color.White,
-                PageWidth = targetWidth,
-                PageHeight = targetHeight
+                PageSize = vectorImage.Size,
+                BackgroundColor = Color.White
             };
+            tiffOptions.VectorRasterizationOptions = vectorRasterOptions;
 
-            var pngOptions = new PngOptions
-            {
-                Source = new FileCreateSource(tempPngPath, false),
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            vectorImage.Save(tempPngPath, pngOptions);
+            // Save the rasterized image as TIFF
+            vectorImage.Save(outputPath, tiffOptions);
         }
 
-        // Load the rasterized PNG, apply emboss filter, and save as TIFF
-        using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+        // Re‑open the TIFF, apply an emboss filter, and save the result
+        using (Image img = Image.Load(outputPath))
         {
-            // Custom emboss kernel
-            double[,] embossKernel = new double[,]
-            {
-                { -2, -1, 0 },
-                { -1,  1, 1 },
-                {  0,  1, 2 }
-            };
+            TiffImage tiff = (TiffImage)img;
 
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
-            raster.Filter(raster.Bounds, filterOptions);
+            // Apply emboss filter using a predefined convolution kernel
+            tiff.Filter(tiff.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                BitsPerSample = new ushort[] { 8, 8, 8 },
-                Compression = TiffCompressions.Lzw,
-                Photometric = TiffPhotometrics.Rgb,
-                PlanarConfiguration = TiffPlanarConfigs.Contiguous
-            };
-
-            raster.Save(outputPath, tiffOptions);
-        }
-
-        // Clean up temporary PNG
-        if (File.Exists(tempPngPath))
-        {
-            try { File.Delete(tempPngPath); } catch { /* ignore cleanup errors */ }
+            // Overwrite the file with the filtered image
+            tiff.Save(outputPath);
         }
     }
 }

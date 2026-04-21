@@ -4,15 +4,14 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,23 +24,45 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EMF image
-        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        using (Image emfImage = Image.Load(inputPath))
         {
-            // NOTE: Aspose.Imaging does not provide a direct API to modify the opacity of existing vector
-            // line objects within an EMF. To achieve a semi‑transparent effect, one common approach is to
-            // rasterize the EMF onto a canvas with the desired opacity. Here we simply rasterize the EMF
-            // to PNG. If further opacity manipulation is required, additional pixel‑level processing can
-            // be performed on the resulting raster image.
-
-            // Create PNG save options
-            PngOptions pngOptions = new PngOptions
+            // Rasterize EMF to a temporary PNG
+            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+            var pngOptions = new PngOptions
             {
-                // Set the source to a file create source (required when using Image.Create, but also safe here)
-                Source = new FileCreateSource(outputPath, false)
+                VectorRasterizationOptions = new EmfRasterizationOptions
+                {
+                    PageSize = emfImage.Size,
+                    // Use a transparent background to keep original colors
+                    BackgroundColor = Color.Transparent
+                }
             };
+            emfImage.Save(tempPngPath, pngOptions);
 
-            // Save the EMF as PNG
-            emfImage.Save(outputPath, pngOptions);
+            // Load the rasterized PNG to adjust opacity
+            using (RasterImage pngImage = (RasterImage)Image.Load(tempPngPath))
+            {
+                // Iterate over each pixel and set its alpha to 80% of the original
+                for (int y = 0; y < pngImage.Height; y++)
+                {
+                    for (int x = 0; x < pngImage.Width; x++)
+                    {
+                        Color pixel = pngImage.GetPixel(x, y);
+                        byte newAlpha = (byte)(pixel.A * 0.8);
+                        Color newPixel = Color.FromArgb(newAlpha, pixel.R, pixel.G, pixel.B);
+                        pngImage.SetPixel(x, y, newPixel);
+                    }
+                }
+
+                // Save the final PNG with adjusted opacity
+                pngImage.Save(outputPath);
+            }
+
+            // Clean up temporary file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
+            }
         }
     }
 }

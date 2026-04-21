@@ -26,26 +26,31 @@ class Program
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Create a Graphics object for drawing
+            // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
 
-            // Build a GraphicsPath covering the whole image
+            // Create a graphics path
             GraphicsPath path = new GraphicsPath();
+
+            // Create a figure and add a rectangle shape
             Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(0, 0, image.Width, image.Height)));
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+
+            // Add the figure to the path
             path.AddFigure(figure);
 
-            // Create a semi‑transparent red SolidBrush
+            // Create a semi‑transparent red solid brush
             using (SolidBrush brush = new SolidBrush(Color.Red))
             {
-                brush.Opacity = 0.5f; // 50% opacity
-                // Fill the path with the brush (overlay effect)
+                brush.Opacity = 0.5f; // 0 = fully visible, 1 = fully opaque
+
+                // Fill the path with the brush
                 graphics.FillPath(brush, path);
             }
 
             // Save the modified image as PNG
-            PngOptions saveOptions = new PngOptions();
-            image.Save(outputPath, saveOptions);
+            PngOptions pngOptions = new PngOptions();
+            image.Save(outputPath, pngOptions);
         }
     }
 }

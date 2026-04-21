@@ -8,33 +8,40 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\output.png";
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        using (Image image = Image.Create(pngOptions, 400, 400))
+        using (Image image = Image.Load(inputPath))
         {
             Graphics graphics = new Graphics(image);
             graphics.Clear(Color.White);
 
-            GraphicsPath path = new GraphicsPath();
-            Figure figure = new Figure();
-            RectangleF rect = new RectangleF(50f, 50f, 300f, 300f);
-            figure.AddShape(new RectangleShape(rect));
-            path.AddFigure(figure);
+            GraphicsPath graphicsPath = new GraphicsPath();
 
-            using (LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Red, Color.Blue, 0f))
+            Figure figure = new Figure();
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+            graphicsPath.AddFigure(figure);
+
+            using (SolidBrush brush = new SolidBrush())
             {
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.FillPath(brush, path);
-                graphics.DrawPath(pen, path);
+                brush.Color = Color.LightBlue;
+                brush.Opacity = 100;
+                graphics.FillPath(brush, graphicsPath);
             }
 
-            image.Save();
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+            image.Save(outputPath, pngOptions);
         }
     }
 }

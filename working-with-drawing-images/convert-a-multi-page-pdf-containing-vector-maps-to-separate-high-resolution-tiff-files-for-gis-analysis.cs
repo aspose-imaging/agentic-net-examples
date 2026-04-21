@@ -8,59 +8,68 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input PDF path
+        // Input PDF path (hard‑coded)
         string inputPath = "Input\\maps.pdf";
 
-        // Validate input file existence
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the PDF document
-        using (Image image = Image.Load(inputPath))
+        // Output directory (hard‑coded)
+        string outputDirectory = "Output";
+
+        // Ensure output directory exists
+        if (!string.IsNullOrWhiteSpace(outputDirectory))
         {
-            // Ensure the loaded image supports multiple pages
-            IMultipageImage multipage = image as IMultipageImage;
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        // Load the PDF document
+        using (Image pdfImage = Image.Load(inputPath))
+        {
+            // Cast to multipage interface
+            IMultipageImage multipage = pdfImage as IMultipageImage;
             if (multipage == null)
             {
                 Console.Error.WriteLine("The input file is not a multipage vector image.");
                 return;
             }
 
-            // Prepare output directory
-            string outputDir = "Output";
-            Directory.CreateDirectory(outputDir);
+            int pageCount = multipage.PageCount;
 
-            // Iterate through each page of the PDF
-            for (int i = 0; i < multipage.PageCount; i++)
+            // Export each page to a separate high‑resolution TIFF
+            for (int i = 0; i < pageCount; i++)
             {
-                // Define output TIFF path for the current page
-                string outputPath = Path.Combine(outputDir, $"page_{i + 1}.tif");
+                string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
 
-                // Ensure the output directory exists (guard against null)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure the directory for this file exists
+                string outDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrWhiteSpace(outDir))
+                {
+                    Directory.CreateDirectory(outDir);
+                }
 
                 // Configure TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                // Set up vector rasterization to render the PDF page at high resolution
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                // Vector rasterization for high‑resolution output
+                tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
                     BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
+                    PageWidth = pdfImage.Width,
+                    PageHeight = pdfImage.Height,
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None
                 };
-                tiffOptions.VectorRasterizationOptions = vectorOptions;
 
-                // Export only the current page as a single-page TIFF
+                // Export only the current page
                 tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
 
-                // Save the page to TIFF
-                image.Save(outputPath, tiffOptions);
+                // Save the page as TIFF
+                pdfImage.Save(outputPath, tiffOptions);
             }
         }
     }

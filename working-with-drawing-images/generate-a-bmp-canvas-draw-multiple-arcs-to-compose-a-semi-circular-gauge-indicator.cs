@@ -6,46 +6,48 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Output BMP file path
         string outputPath = @"C:\temp\gauge.bmp";
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file source bound to the output path
-        Source source = new FileCreateSource(outputPath, false);
+        // Set up BMP options with a bound file source
+        Source outputSource = new FileCreateSource(outputPath, false);
+        BmpOptions bmpOptions = new BmpOptions() { Source = outputSource };
 
-        // BMP options with the source
-        BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-        // Canvas size (width x height)
         int width = 400;
-        int height = 200; // Semi‑circular gauge will be drawn within this area
+        int height = 300;
 
-        // Create the BMP canvas (bound image)
+        // Create the canvas bound to the output file
         using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
         {
             // Initialize graphics for drawing
             Graphics graphics = new Graphics(canvas);
-
-            // Clear background to white
             graphics.Clear(Color.White);
 
-            // Outer semi‑circular arc (black, thick)
-            Pen outerPen = new Pen(Color.Black, 4);
-            graphics.DrawArc(outerPen, new Rectangle(0, 0, width, height * 2), 180, 180);
+            // Define the rectangle that bounds the semi‑circular gauge
+            Rectangle gaugeRect = new Rectangle(50, 20, 300, 300);
 
-            // Inner semi‑circular arc (red, thinner)
-            Pen innerPen = new Pen(Color.Red, 2);
-            graphics.DrawArc(innerPen, new Rectangle(20, 20, width - 40, (height * 2) - 40), 180, 180);
+            // Background arc (light gray)
+            Pen backgroundPen = new Pen(Color.LightGray, 20);
+            graphics.DrawArc(backgroundPen, gaugeRect, 0, 180);
 
-            // Marker arc to indicate a value (blue, medium)
-            Pen markerPen = new Pen(Color.Blue, 2);
-            graphics.DrawArc(markerPen, new Rectangle(100, 20, width - 200, (height * 2) - 40), 180, 30);
+            // Red range (0° to 60°)
+            Pen redPen = new Pen(Color.Red, 20);
+            graphics.DrawArc(redPen, gaugeRect, 0, 60);
 
-            // Save the bound image to the specified BMP file
+            // Yellow range (60° to 120°)
+            Pen yellowPen = new Pen(Color.Yellow, 20);
+            graphics.DrawArc(yellowPen, gaugeRect, 60, 60);
+
+            // Green range (120° to 180°)
+            Pen greenPen = new Pen(Color.Green, 20);
+            graphics.DrawArc(greenPen, gaugeRect, 120, 60);
+
+            // Save the bound image
             canvas.Save();
         }
     }

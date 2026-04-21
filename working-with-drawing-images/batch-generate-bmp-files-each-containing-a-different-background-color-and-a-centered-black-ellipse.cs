@@ -8,50 +8,51 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define output files with their background colors
-        var outputs = new[]
-        {
-            new { Path = @"C:\temp\red.bmp", Bg = Color.Red },
-            new { Path = @"C:\temp\green.bmp", Bg = Color.Green },
-            new { Path = @"C:\temp\blue.bmp", Bg = Color.Blue },
-            new { Path = @"C:\temp\yellow.bmp", Bg = Color.Yellow },
-            new { Path = @"C:\temp\cyan.bmp", Bg = Color.Cyan }
-        };
+        // Output directory
+        string outputDir = "output";
+        Directory.CreateDirectory(outputDir);
 
-        const int width = 500;
-        const int height = 500;
-        const int ellipseWidth = 300;
-        const int ellipseHeight = 200;
+        // Image dimensions
+        int width = 400;
+        int height = 300;
 
-        foreach (var item in outputs)
+        // Background colors and corresponding file names
+        Aspose.Imaging.Color[] colors = { Aspose.Imaging.Color.Red, Aspose.Imaging.Color.Green, Aspose.Imaging.Color.Blue };
+        string[] fileNames = { "red.bmp", "green.bmp", "blue.bmp" };
+
+        for (int i = 0; i < colors.Length; i++)
         {
+            string outputPath = Path.Combine(outputDir, fileNames[i]);
+
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(item.Path));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options bound to the output file
-            Source src = new FileCreateSource(item.Path, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = src };
+            // Set up BMP options with a file source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a bound canvas
-            using (Image canvas = Image.Create(bmpOptions, width, height))
+            // Create the image (output file is already bound)
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(canvas);
+                // Create a Graphics instance for drawing
+                Graphics graphics = new Graphics(image);
 
-                // Fill the background with the specified color
-                graphics.Clear(item.Bg);
+                // Clear the canvas with the background color
+                graphics.Clear(colors[i]);
 
-                // Calculate centered ellipse rectangle
-                int x = (width - ellipseWidth) / 2;
-                int y = (height - ellipseHeight) / 2;
-                Rectangle ellipseRect = new Rectangle(x, y, ellipseWidth, ellipseHeight);
+                // Define a centered ellipse rectangle
+                int ellipseWidth = width / 2;
+                int ellipseHeight = height / 2;
+                int ellipseX = (width - ellipseWidth) / 2;
+                int ellipseY = (height - ellipseHeight) / 2;
+                Rectangle ellipseRect = new Rectangle(ellipseX, ellipseY, ellipseWidth, ellipseHeight);
 
-                // Draw a black ellipse
-                Pen blackPen = new Pen(Color.Black, 2);
-                graphics.DrawEllipse(blackPen, ellipseRect);
+                // Draw the black ellipse
+                Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
+                graphics.DrawEllipse(pen, ellipseRect);
 
-                // Save the bound image
-                canvas.Save();
+                // Save the image (file is already bound to the source)
+                image.Save();
             }
         }
     }

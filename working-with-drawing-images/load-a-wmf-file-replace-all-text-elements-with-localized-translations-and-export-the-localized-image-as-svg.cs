@@ -1,57 +1,39 @@
 using System;
 using System.IO;
+using System.Text;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\source.wmf";
-        string outputPath = @"C:\Images\localized_output.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.wmf";
+        string outputPath = @"C:\temp\output.svg";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WMF image
         using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
         {
-            // ------------------------------------------------------------
-            // NOTE: Aspose.Imaging does not expose a direct API to edit the
-            // text records inside a WMF file. In a real scenario you would
-            // iterate over wmfImage.Records, locate text objects and replace
-            // their string values with localized equivalents.
-            // The following placeholder demonstrates where such logic would
-            // be inserted.
-            // ------------------------------------------------------------
-            // Example placeholder for text replacement:
-            // foreach (var record in wmfImage.Records)
-            // {
-            //     if (record is WmfTextRecord textRecord)
-            //     {
-            //         string original = textRecord.Text;
-            //         string localized = Translate(original); // your translation method
-            //         textRecord.Text = localized;
-            //     }
-            // }
-
-            // Prepare SVG save options
+            // Prepare SVG save options (keep text as text for replacement)
             SvgOptions saveOptions = new SvgOptions
             {
-                // Keep text as text (set to false) so that the localized strings remain editable.
-                TextAsShapes = false
+                TextAsShapes = false // keep text as text nodes
             };
 
-            // Configure vector rasterization options required for SVG export
+            // Configure rasterization options
             WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
             {
                 BackgroundColor = Color.WhiteSmoke,
@@ -60,15 +42,30 @@ class Program
             };
             saveOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the localized image as SVG
-            wmfImage.Save(outputPath, saveOptions);
+            // Save to a memory stream to obtain SVG content as string
+            string svgContent;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                wmfImage.Save(ms, saveOptions);
+                svgContent = Encoding.UTF8.GetString(ms.ToArray());
+            }
+
+            // Simple localization dictionary (replace original text with translations)
+            var translations = new Dictionary<string, string>
+            {
+                { "Hello", "Bonjour" },
+                { "World", "Monde" }
+                // Add more key/value pairs as needed
+            };
+
+            // Perform text replacements
+            foreach (var kvp in translations)
+            {
+                svgContent = svgContent.Replace(kvp.Key, kvp.Value);
+            }
+
+            // Write the localized SVG to the output file
+            File.WriteAllText(outputPath, svgContent, Encoding.UTF8);
         }
     }
-
-    // Placeholder translation method – replace with actual localization logic.
-    // static string Translate(string text)
-    // {
-    //     // Example: return a dictionary lookup or call a translation service.
-    //     return text; // No-op for demonstration.
-    // }
 }

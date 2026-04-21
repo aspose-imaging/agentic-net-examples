@@ -2,46 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded output path
+        // Output BMP file path (hardcoded)
         string outputPath = @"C:\temp\vertical_lines.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a BMP image with desired dimensions
-        var bmpOptions = new BmpOptions
+        int width = 500;
+        int height = 500;
+        int lineCount = 10;
+
+        // Set BMP options with a file create source bound to the output path
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.BitsPerPixel = 24;
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Create the image canvas
+        using (Image image = Image.Create(bmpOptions, width, height))
         {
-            BitsPerPixel = 24 // 24‑bpp true color
-        };
+            // Initialize graphics for drawing
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.White);
 
-        int imageWidth = 800;
-        int imageHeight = 600;
+            // Pen for thin black lines
+            Pen pen = new Pen(Color.Black, 1);
 
-        using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
-        {
-            // Initialize graphics object for drawing
-            var graphics = new Graphics(image);
-
-            // Thin black pen
-            var pen = new Pen(Color.Black, 1);
-
-            // Draw ten equally spaced vertical lines
-            int lineCount = 10;
-            // Spacing calculated so lines are inside the image borders
-            int spacing = imageWidth / (lineCount + 1);
-            for (int i = 1; i <= lineCount; i++)
+            // Draw equally spaced vertical lines
+            for (int i = 0; i < lineCount; i++)
             {
-                int x = i * spacing;
-                graphics.DrawLine(pen, x, 0, x, imageHeight);
+                int x = (i + 1) * width / (lineCount + 1);
+                graphics.DrawLine(pen, x, 0, x, height);
             }
 
-            // Save the image to the specified path
-            image.Save(outputPath);
+            // Save the image (output path already bound)
+            image.Save();
         }
     }
 }

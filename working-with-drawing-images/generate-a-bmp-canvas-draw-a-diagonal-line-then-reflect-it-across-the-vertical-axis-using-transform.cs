@@ -8,38 +8,42 @@ class Program
 {
     static void Main()
     {
-        // Define output path
-        string outputPath = "output/output.bmp";
+        // Output file path
+        string outputPath = "Output\\diagonal_reflected.bmp";
 
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create file source for BMP output
+        // Create BMP canvas
         Source source = new FileCreateSource(outputPath, false);
-        BmpOptions bmpOptions = new BmpOptions() { Source = source };
+        BmpOptions options = new BmpOptions() { Source = source };
+        int width = 200;
+        int height = 200;
 
-        // Canvas size
-        int width = 400;
-        int height = 400;
-
-        // Create BMP canvas bound to the file source
-        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+        using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
         {
-            // Create graphics object for drawing
+            // Initialize graphics
             Graphics graphics = new Graphics(canvas);
+            graphics.Clear(Color.White);
 
-            // Draw original diagonal line (top-left to bottom-right)
-            Pen pen = new Pen(Color.Blue, 2);
+            // Pen for drawing
+            Pen pen = new Pen(Color.Black, 2);
+
+            // Draw original diagonal line
             graphics.DrawLine(pen, 0, 0, width, height);
 
-            // Apply horizontal reflection (mirror across vertical axis)
-            graphics.TranslateTransform(canvas.Width, 0);
-            graphics.ScaleTransform(-1, 1);
+            // Apply vertical axis reflection transform
+            // Matrix(a, b, c, d, e, f) corresponds to:
+            // [ a  c  e ]
+            // [ b  d  f ]
+            // [ 0  0  1 ]
+            // For horizontal reflection: a = -1, d = 1, e = width
+            graphics.MultiplyTransform(new Matrix(-1, 0, 0, 1, width, 0));
 
-            // Draw reflected diagonal line (will appear mirrored)
+            // Draw reflected diagonal line
             graphics.DrawLine(pen, 0, 0, width, height);
 
-            // Save the bound image
+            // Save the image (bound to the source)
             canvas.Save();
         }
     }

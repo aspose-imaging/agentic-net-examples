@@ -6,38 +6,36 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Input\sample.svg";
-        string outputPath = @"C:\Output\sample.pdf";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.svg";
+        string outputPath = "Output/sample.pdf";
 
-        // Verify that the input SVG file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists (creates it if necessary)
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options
-            var pdfOptions = new PdfOptions
+            // Configure PDF options with PDF/A compliance (PDF 1.7 compatible)
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                // Set PDF compliance to PDF 1.5 (closest to PDF 1.7 in Aspose.Imaging)
-                PdfCoreOptions = new PdfCoreOptions
+                pdfOptions.PdfCoreOptions = new PdfCoreOptions
                 {
-                    PdfCompliance = PdfComplianceVersion.Pdf15
-                }
-                // Fonts are embedded by default when converting from SVG
-            };
+                    PdfCompliance = PdfComplianceVersion.PdfA1b // PDF/A-1b is based on PDF 1.7
+                };
 
-            // Save the image as PDF with the specified options
-            image.Save(outputPath, pdfOptions);
+                // Save the SVG as PDF with embedded fonts
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

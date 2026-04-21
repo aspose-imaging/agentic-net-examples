@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
+        string inputPath = "input\\sample.bmp";
+        string outputPath = "output\\scaled.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,20 +22,19 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the BMP image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Create Graphics instance for drawing
+            // Create a Graphics instance for drawing
             Graphics graphics = new Graphics(image);
 
-            // Set high-quality bicubic interpolation before scaling
+            // Set high-quality bicubic interpolation for scaling operations
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-            // Apply scaling transform (e.g., 2x)
+            // Apply scaling transform (e.g., 2x scaling)
             graphics.ScaleTransform(2.0f, 2.0f);
 
-            // Draw a rectangle (scaled by the transform)
-            Pen pen = new Pen(Color.Blue, 5);
-            graphics.DrawRectangle(pen, new Rectangle(10, 10, 100, 50));
+            // Draw a rectangle shape after scaling
+            graphics.DrawRectangle(new Pen(Color.Blue, 3), new Rectangle(10, 10, 100, 50));
 
             // Save the modified image as BMP
             BmpOptions bmpOptions = new BmpOptions();

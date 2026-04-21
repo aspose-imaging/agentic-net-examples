@@ -2,30 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded output path
         string outputPath = @"C:\temp\arc_output.bmp";
+
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        using (Image image = Image.Create(bmpOptions, 400, 300))
+        // Create BMP options (24‑bit)
+        BmpOptions bmpOptions = new BmpOptions
         {
+            BitsPerPixel = 24
+        };
+
+        // Create a new 500x500 image
+        using (Image image = Image.Create(bmpOptions, 500, 500))
+        {
+            // Initialize graphics object for drawing
             Graphics graphics = new Graphics(image);
+
+            // Optional: clear background to white
             graphics.Clear(Color.White);
 
-            RectangleF rect = new RectangleF(50.5f, 30.5f, 200.75f, 150.25f);
-
+            // Pen with blue color and 2‑pixel width
             Pen pen = new Pen(Color.Blue, 2);
-            graphics.DrawArc(pen, rect, 0f, 180f);
 
-            image.Save();
+            // RectangleF with floating‑point coordinates for precise positioning
+            RectangleF rect = new RectangleF(50.5f, 50.5f, 300.75f, 200.25f);
+
+            // Draw an arc: start at 45°, sweep 270°
+            graphics.DrawArc(pen, rect, 45f, 270f);
+
+            // Save the resulting BMP image
+            image.Save(outputPath);
         }
     }
 }

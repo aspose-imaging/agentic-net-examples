@@ -3,47 +3,39 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path for the BMP image
-        string outputPath = @"c:\temp\ellipse_dash.bmp";
+        // Output file path
+        string outputPath = @"C:\temp\ellipse.bmp";
 
-        // Ensure the output directory exists (unconditional as required)
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create BMP options with 24 bits per pixel
-        BmpOptions bmpOptions = new BmpOptions
-        {
-            BitsPerPixel = 24,
-            Source = new FileCreateSource(outputPath, false) // false = not temporary
-        };
+        // Configure BMP options
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.BitsPerPixel = 24;
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create a new image of size 500x500
+        // Create a 500x500 image canvas
         using (Image image = Image.Create(bmpOptions, 500, 500))
         {
-            // Initialize graphics object for drawing
+            // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
 
-            // Clear background with a solid color (e.g., Wheat)
-            graphics.Clear(Color.Wheat);
+            // Fill background with a light gray color
+            graphics.Clear(Color.LightGray);
 
             // Create a pen with custom dash pattern
-            Pen dashPen = new Pen(Color.Blue, 3);
-            dashPen.DashPattern = new float[] { 10f, 5f, 2f, 5f }; // dash, space, dash, space
+            Pen pen = new Pen(Color.Blue, 3);
+            pen.DashPattern = new float[] { 5, 2 }; // dash length 5, gap 2
 
-            // Define the bounding rectangle for the ellipse
-            RectangleF ellipseRect = new RectangleF(100, 100, 300, 200);
+            // Draw an ellipse using the custom pen
+            graphics.DrawEllipse(pen, new Rectangle(100, 100, 300, 200));
 
-            // Draw the ellipse using the custom dash pen
-            graphics.DrawEllipse(dashPen, ellipseRect);
-
-            // Save changes to the file
+            // Save the image (output is already bound to the file)
             image.Save();
         }
     }

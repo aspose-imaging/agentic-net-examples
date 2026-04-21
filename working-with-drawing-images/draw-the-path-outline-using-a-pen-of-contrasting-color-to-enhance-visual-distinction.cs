@@ -2,49 +2,60 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\PathOutline.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
-        // Ensure the output directory exists
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a new PNG image with the specified dimensions
-        var pngOptions = new PngOptions();
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        // Load the input image
+        using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
         {
-            // Initialize graphics object for drawing
-            var graphics = new Graphics(image);
+            // Prepare PNG options with a bound output file
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Clear the background with a light color
-            graphics.Clear(Color.White);
+            // Create a new canvas with the same dimensions as the input
+            using (Image canvas = Image.Create(pngOptions, inputImage.Width, inputImage.Height))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(canvas);
 
-            // Build a graphics path containing a rectangle and an ellipse
-            var path = new GraphicsPath();
-            var figure = new Figure();
+                // Clear the canvas (optional, using a neutral background)
+                graphics.Clear(Color.White);
 
-            // Add a rectangle shape
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
+                // Build a graphics path
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
 
-            // Add an ellipse shape inside the rectangle
-            figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 300f, 300f)));
+                // Example shape: a rectangle covering part of the image
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, inputImage.Width - 100f, inputImage.Height - 100f)));
 
-            // Add the figure to the path
-            path.AddFigure(figure);
+                // Add the figure to the path
+                path.AddFigure(figure);
 
-            // Draw the path outline with a contrasting pen (black on white)
-            var pen = new Pen(Color.Black, 3);
-            graphics.DrawPath(pen, path);
+                // Draw the path outline with a contrasting pen (red color, 3-pixel width)
+                Pen outlinePen = new Pen(Color.Red, 3);
+                graphics.DrawPath(outlinePen, path);
 
-            // Save the resulting image
-            image.Save(outputPath);
+                // Save the canvas to the bound output file
+                canvas.Save();
+            }
         }
     }
 }

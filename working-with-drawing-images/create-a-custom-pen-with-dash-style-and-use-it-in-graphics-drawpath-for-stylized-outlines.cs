@@ -2,47 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
-        // Output file path (hard‑coded)
-        string outputPath = @"C:\Temp\styled_path.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\custompen_output.png";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure PNG options with a bound FileCreateSource
+        // Set up PNG options with a file source bound to the output path
         PngOptions pngOptions = new PngOptions();
         pngOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create a 500x500 image canvas
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        // Create a new image canvas
+        using (Image image = Image.Create(pngOptions, 400, 400))
         {
-            // Initialize Graphics for drawing on the image
+            // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.LightGray);
 
-            // Clear the canvas with white background
-            graphics.Clear(Color.White);
-
-            // Build a GraphicsPath containing a single rectangle figure
+            // Build a graphics path containing a rectangle shape
             GraphicsPath path = new GraphicsPath();
             Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 300f)));
             path.AddFigure(figure);
 
-            // Create a custom Pen with dash style and pattern
-            Pen dashPen = new Pen(Color.Blue, 5f);
-            dashPen.DashStyle = DashStyle.Dash;               // dashed line style
-            dashPen.DashPattern = new float[] { 10f, 5f };    // 10 units dash, 5 units space
+            // Create a custom pen with dash style
+            Pen pen = new Pen(Color.Blue, 5f);
+            pen.DashStyle = DashStyle.Dash;
 
-            // Draw the path using the custom dash pen
-            graphics.DrawPath(dashPen, path);
+            // Draw the path using the custom pen
+            graphics.DrawPath(pen, path);
 
-            // Save the image (output file already bound to the source)
+            // Save the image (output is already bound to the file source)
             image.Save();
         }
     }

@@ -1,18 +1,17 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = "input.emf";
+        string outputPath = "output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,42 +23,22 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Prepare LoadOptions with a custom font source that provides Arial
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource(
-            (object[] fontArgs) =>
-            {
-                var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                string fontsFolder = fontArgs.Length > 0 ? fontArgs[0]?.ToString() : string.Empty;
-                string arialPath = Path.Combine(fontsFolder, "arial.ttf");
-                if (File.Exists(arialPath))
-                {
-                    byte[] fontData = File.ReadAllBytes(arialPath);
-                    fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData("Arial", fontData));
-                }
-                return fonts.ToArray();
-            },
-            @"C:\Windows\Fonts"
-        );
-
-        // Load the EMF image with custom font handling
-        using (var emfImage = (Aspose.Imaging.FileFormats.Emf.EmfImage)Image.Load(inputPath, loadOptions))
+        // Load the EMF image
+        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
         {
-            // Set up SVG save options
-            var saveOptions = new SvgOptions
+            // Configure SVG save options
+            SvgOptions saveOptions = new SvgOptions
             {
-                // Keep text as text (default) so the new font is applied
+                // Keep text as text (default font will be used; Arial is the system default for many EMFs)
                 TextAsShapes = false
             };
 
-            // Configure rasterization options for EMF to SVG conversion
-            var rasterOptions = new EmfRasterizationOptions
+            // Configure rasterization options for the EMF source
+            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
             {
-                BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
+                BackgroundColor = Color.White,
                 PageSize = emfImage.Size,
-                RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                BorderX = 0,
-                BorderY = 0
+                RenderMode = EmfRenderMode.Auto
             };
 
             saveOptions.VectorRasterizationOptions = rasterOptions;

@@ -7,30 +7,30 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.pdf";
-        string outputPath = "output.svg";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Data\chart.pdf";
+        string outputPath = @"C:\Data\chart.svg";
 
-        // Verify input file exists
+        // Verify that the input PDF exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PDF document
+        // Load the PDF document (vector image)
         using (Image image = Image.Load(inputPath))
         {
-            // Configure SVG rasterization options to match the source size
+            // Configure rasterization to match the source page size
             var rasterOptions = new SvgRasterizationOptions
             {
                 PageSize = image.Size
             };
 
-            // Set SVG save options; render text as shapes to preserve labels and axes
+            // Set SVG export options – render text as shapes to keep labels
             var svgOptions = new SvgOptions
             {
                 VectorRasterizationOptions = rasterOptions,

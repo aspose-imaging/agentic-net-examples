@@ -3,75 +3,86 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputDir = "C:\\InputSvgs";
-        string outputDir = "C:\\OutputPngs";
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        if (!Directory.Exists(inputDir))
+        if (!Directory.Exists(inputDirectory))
         {
-            Directory.CreateDirectory(inputDir);
-            Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
             return;
         }
 
-        Directory.CreateDirectory(outputDir);
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
 
-        string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
-        foreach (string inputPath in svgFiles)
+        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
+        foreach (string inputPath in files)
         {
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
             string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDir, fileName + ".png");
+            string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image svgImage = Image.Load(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;
+                // Prepare PNG options for rasterization
+                PngOptions pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    BitDepth = 8,
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                var vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.Transparent,
+                    PageSize = new SizeF(svgImage.Width, svgImage.Height)
+                };
+                pngOptions.VectorRasterizationOptions = vectorOptions;
 
+                // Rasterize SVG to a temporary raster image
                 using (MemoryStream ms = new MemoryStream())
                 {
                     svgImage.Save(ms, pngOptions);
                     ms.Position = 0;
-
                     using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        int shadowOffset = 5;
-                        int canvasWidth = raster.Width + shadowOffset;
-                        int canvasHeight = raster.Height + shadowOffset;
+                        int offset = 5;
+                        int canvasWidth = raster.Width + offset;
+                        int canvasHeight = raster.Height + offset;
 
-                        PngOptions canvasOptions = new PngOptions();
-                        canvasOptions.Source = new FileCreateSource(outputPath, false);
-
-                        using (Image canvas = Image.Create(canvasOptions, canvasWidth, canvasHeight))
+                        // Create canvas with bound output file
+                        using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
                         {
-                            // Graphics does not implement IDisposable; do not wrap in using
+                            // Draw shadow and original image
                             Graphics graphics = new Graphics(canvas);
                             graphics.Clear(Color.Transparent);
 
-                            // Draw shadow rectangle
-                            using (SolidBrush shadowBrush = new SolidBrush(Color.Black))
+                            using (SolidBrush shadowBrush = new SolidBrush())
                             {
-                                shadowBrush.Opacity = 50; // 50% opacity
-                                graphics.FillRectangle(shadowBrush, shadowOffset, shadowOffset, raster.Width, raster.Height);
+                                shadowBrush.Color = Color.FromArgb(128, 0, 0, 0);
+                                graphics.FillRectangle(shadowBrush, offset, offset, raster.Width, raster.Height);
                             }
 
-                            // Draw original raster image on top
                             graphics.DrawImage(raster, new Point(0, 0));
 
                             // Save the final PNG

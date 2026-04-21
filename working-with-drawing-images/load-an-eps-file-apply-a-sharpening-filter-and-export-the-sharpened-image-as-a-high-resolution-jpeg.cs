@@ -2,17 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\sample_sharpened.jpg";
+        string inputPath = "input.eps";
+        string outputPath = "output.jpg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,20 +24,40 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image, apply sharpening filter, and save as high‑resolution JPEG
-        using (var image = (RasterImage)Image.Load(inputPath))
+        // Load EPS image
+        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
         {
-            // Apply sharpen filter to the whole image
-            image.Filter(image.Bounds, new SharpenFilterOptions(5, 4.0));
-
-            // Configure JPEG options for high quality
-            var jpegOptions = new JpegOptions
+            // Configure high‑resolution rasterization (e.g., 3× scaling)
+            var rasterOptions = new EpsRasterizationOptions
             {
-                Quality = 100
+                PageWidth = epsImage.Width * 3,
+                PageHeight = epsImage.Height * 3
             };
 
-            // Save the processed image
-            image.Save(outputPath, jpegOptions);
+            // Rasterize EPS to PNG in memory
+            using (var memoryStream = new MemoryStream())
+            {
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+                epsImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
+
+                // Load rasterized image
+                using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
+                {
+                    // Apply sharpening filter (kernel size 5, sigma 4.0)
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+                    // Save as high‑quality JPEG
+                    var jpegOptions = new JpegOptions
+                    {
+                        Quality = 100
+                    };
+                    raster.Save(outputPath, jpegOptions);
+                }
+            }
         }
     }
 }

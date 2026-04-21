@@ -8,8 +8,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "Input\\sample.jpg";
-        string outputPath = "Output\\scaled.png";
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,28 +21,28 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load source image as RasterImage
-        using (RasterImage srcImage = (RasterImage)Image.Load(inputPath))
+        // Load source image as raster image
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Define new dimensions (e.g., double size)
-            int newWidth = srcImage.Width * 2;
-            int newHeight = srcImage.Height * 2;
+            // Define scaling factor (e.g., 2x)
+            int scaledWidth = sourceImage.Width * 2;
+            int scaledHeight = sourceImage.Height * 2;
 
-            // Create destination image (PNG) with desired size
+            // Create a new canvas image with desired size
             PngOptions pngOptions = new PngOptions();
-            using (Image destImage = Image.Create(pngOptions, newWidth, newHeight))
+            using (Image canvas = Image.Create(pngOptions, scaledWidth, scaledHeight))
             {
-                // Initialize Graphics for the destination image
-                Graphics graphics = new Graphics(destImage);
+                // Initialize graphics for the canvas
+                Graphics graphics = new Graphics(canvas);
 
                 // Set high-quality bicubic interpolation for scaling
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                // Draw the source image scaled to the new dimensions
-                graphics.DrawImage(srcImage, new Rectangle(0, 0, newWidth, newHeight));
+                // Draw the source image onto the canvas, scaling it to fit
+                graphics.DrawImage(sourceImage, new Rectangle(0, 0, scaledWidth, scaledHeight));
 
-                // Save the resulting image
-                destImage.Save(outputPath, pngOptions);
+                // Save the resulting image to the output path
+                canvas.Save(outputPath, pngOptions);
             }
         }
     }

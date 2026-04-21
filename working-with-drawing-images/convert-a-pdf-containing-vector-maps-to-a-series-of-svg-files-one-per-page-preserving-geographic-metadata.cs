@@ -1,14 +1,12 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input PDF path
         string inputPath = "input.pdf";
         if (!File.Exists(inputPath))
         {
@@ -16,38 +14,60 @@ class Program
             return;
         }
 
-        string outputDir = "output";
-        Directory.CreateDirectory(outputDir);
-
-        using (Image image = Image.Load(inputPath))
+        // Load the PDF document
+        using (Aspose.Imaging.Image pdfImage = Aspose.Imaging.Image.Load(inputPath))
         {
-            IMultipageImage multipage = image as IMultipageImage;
-            if (multipage == null)
+            // Output directory for SVG files
+            string outputDir = "output";
+            Directory.CreateDirectory(outputDir);
+
+            // Check if the PDF is multipage
+            if (pdfImage is Aspose.Imaging.IMultipageImage multipage)
             {
-                Console.Error.WriteLine("The input PDF does not support multiple pages.");
-                return;
+                int pageCount = multipage.PageCount;
+                for (int i = 0; i < pageCount; i++)
+                {
+                    // Get the individual page image
+                    using (Aspose.Imaging.Image pageImage = multipage.Pages[i])
+                    {
+                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.svg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Configure SVG export options
+                        SvgOptions svgOptions = new SvgOptions
+                        {
+                            KeepMetadata = true,
+                            VectorRasterizationOptions = new VectorRasterizationOptions
+                            {
+                                PageWidth = pageImage.Width,
+                                PageHeight = pageImage.Height,
+                                BackgroundColor = Aspose.Imaging.Color.White
+                            }
+                        };
+
+                        // Save the page as an SVG file
+                        pageImage.Save(outputPath, svgOptions);
+                    }
+                }
             }
-
-            int pageCount = multipage.PageCount;
-
-            for (int i = 0; i < pageCount; i++)
+            else
             {
-                string outputPath = Path.Combine(outputDir, $"page_{i + 1}.svg");
+                // Single-page PDF handling
+                string outputPath = Path.Combine(outputDir, "page_1.svg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                SvgOptions exportOptions = new SvgOptions();
-                exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
-
-                if (image is VectorImage)
+                SvgOptions svgOptions = new SvgOptions
                 {
-                    var vectorOptions = new VectorRasterizationOptions();
-                    vectorOptions.BackgroundColor = Color.White;
-                    vectorOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-                    vectorOptions.SmoothingMode = SmoothingMode.None;
-                    exportOptions.VectorRasterizationOptions = vectorOptions;
-                }
+                    KeepMetadata = true,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = pdfImage.Width,
+                        PageHeight = pdfImage.Height,
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    }
+                };
 
-                image.Save(outputPath, exportOptions);
+                pdfImage.Save(outputPath, svgOptions);
             }
         }
     }

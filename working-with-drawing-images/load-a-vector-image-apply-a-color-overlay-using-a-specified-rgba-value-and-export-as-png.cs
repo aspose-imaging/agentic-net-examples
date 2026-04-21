@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -9,8 +11,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -22,47 +24,35 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the vector image (SVG)
+        // Load the vector image
         using (Image vectorImage = Image.Load(inputPath))
         {
-            // Set up rasterization options for SVG
-            var rasterOptions = new SvgRasterizationOptions
+            // Prepare rasterization options for PNG
+            PngOptions rasterOptions = new PngOptions();
+            rasterOptions.VectorRasterizationOptions = new VectorRasterizationOptions
             {
                 PageSize = vectorImage.Size
             };
 
-            // Configure PNG export options with rasterization
-            var pngExportOptions = new PngOptions
+            // Rasterize the vector image into a memory stream
+            using (MemoryStream ms = new MemoryStream())
             {
-                VectorRasterizationOptions = rasterOptions
-            };
+                vectorImage.Save(ms, rasterOptions);
+                ms.Position = 0;
 
-            // Rasterize SVG to PNG in memory
-            using (MemoryStream rasterStream = new MemoryStream())
-            {
-                vectorImage.Save(rasterStream, pngExportOptions);
-                rasterStream.Position = 0;
-
-                // Load the rasterized PNG as a RasterImage
-                using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
+                // Load the rasterized image
+                using (Image rasterImage = Image.Load(ms))
                 {
-                    // Create graphics for drawing
+                    // Apply color overlay using Graphics
                     Graphics graphics = new Graphics(rasterImage);
-
-                    // Define overlay color (RGBA)
-                    byte overlayAlpha = 128; // 0-255
-                    byte overlayRed = 255;
-                    byte overlayGreen = 0;
-                    byte overlayBlue = 0;
-                    var overlayColor = Aspose.Imaging.Color.FromArgb(overlayAlpha, overlayRed, overlayGreen, overlayBlue);
-
-                    // Apply color overlay using a semi‑transparent solid brush
+                    // Example RGBA overlay: 50% transparent red
+                    Color overlayColor = Color.FromArgb(128, 255, 0, 0);
                     using (SolidBrush brush = new SolidBrush(overlayColor))
                     {
                         graphics.FillRectangle(brush, rasterImage.Bounds);
                     }
 
-                    // Save the final image as PNG
+                    // Save the final PNG image
                     rasterImage.Save(outputPath, new PngOptions());
                 }
             }

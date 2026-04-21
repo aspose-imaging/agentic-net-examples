@@ -3,14 +3,15 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.png";
+        string inputPath = @"C:\Images\sample.svg";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,11 +23,11 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Desired dimensions for the rasterized PNG
-        int targetWidth = 800;   // custom width
-        int targetHeight = 600;  // custom height
+        // Desired output dimensions
+        int targetWidth = 800;
+        int targetHeight = 600;
 
-        // Load the SVG image from file
+        // Load SVG image from file
         using (SvgImage svgImage = new SvgImage(inputPath))
         {
             // Configure rasterization options with custom page size
@@ -35,13 +36,13 @@ class Program
                 PageSize = new Size(targetWidth, targetHeight)
             };
 
-            // Set up PNG save options and attach rasterization options
+            // Set PNG save options and attach rasterization options
             PngOptions pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the rasterized image to PNG
+            // Save rasterized PNG
             svgImage.Save(outputPath, pngOptions);
         }
     }

@@ -2,41 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\bezier_output.png";
-
-        // Ensure the output directory exists (unconditional)
+        // Define output file path and ensure its directory exists
+        string outputPath = "output/output.png";
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a PNG image of size 500x500
-        var pngOptions = new PngOptions();
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        // Create a file stream for the output image
+        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
-            // Initialize graphics object for drawing
-            var graphics = new Graphics(image);
+            // Set up PNG options with the stream source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new StreamSource(stream);
 
-            // Clear background to white
-            graphics.Clear(Color.White);
+            // Create a new image canvas (500x500) bound to the stream
+            using (Image image = Image.Create(pngOptions, 500, 500))
+            {
+                // Initialize graphics for drawing on the image
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-            // Define four points for the Bezier curve using Point structures
-            var pt1 = new Point(50, 400);   // Start point
-            var pt2 = new Point(150, 50);   // First control point
-            var pt3 = new Point(350, 50);   // Second control point
-            var pt4 = new Point(450, 400);  // End point
+                // Define a blue pen for the Bezier curve
+                Pen pen = new Pen(Color.Blue, 2);
 
-            // Create a blue pen with width 3
-            var pen = new Pen(Color.Blue, 3);
+                // Define four points for the high‑precision Bezier spline
+                Point pt1 = new Point(50, 250);
+                Point pt2 = new Point(150, 50);
+                Point pt3 = new Point(350, 450);
+                Point pt4 = new Point(450, 250);
 
-            // Draw the Bezier spline using the Point overload
-            graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
+                // Draw the Bezier curve using the Point overload
+                graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
 
-            // Save the image to the specified output path
-            image.Save(outputPath);
+                // Save the image (stream is already bound, so no path needed)
+                image.Save();
+            }
         }
     }
 }

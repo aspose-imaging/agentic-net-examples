@@ -10,54 +10,55 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
+        // Output file path (hard‑coded)
         string outputPath = @"C:\temp\traffic_light.bmp";
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set BMP options with file source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
+        // Configure BMP options with a bound file source
+        BmpOptions options = new BmpOptions();
+        options.BitsPerPixel = 24;
+        options.Source = new FileCreateSource(outputPath, false);
 
         // Define canvas size
-        int canvasWidth = 200;
-        int canvasHeight = 600;
+        int canvasWidth = 100;
+        int canvasHeight = 300;
 
-        // Create BMP canvas bound to the output file
-        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, canvasWidth, canvasHeight))
+        // Create the BMP image (bound to the output file)
+        using (Image image = Image.Create(options, canvasWidth, canvasHeight))
         {
             // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
-            graphics.Clear(Aspose.Imaging.Color.White);
+            Graphics graphics = new Graphics(image);
+
+            // Clear background (black)
+            graphics.Clear(Color.Black);
 
             // Circle parameters
-            int diameter = 150;
+            int diameter = 80;
             int offsetX = (canvasWidth - diameter) / 2;
-            int firstY = 30;   // Top circle (red)
-            int secondY = 210; // Middle circle (yellow)
-            int thirdY = 390;  // Bottom circle (green)
+            int[] offsetY = { 20, 110, 200 }; // top, middle, bottom positions
 
-            // Draw red circle
-            using (SolidBrush redBrush = new SolidBrush(Aspose.Imaging.Color.Red))
+            // Red light
+            using (SolidBrush redBrush = new SolidBrush(Color.Red))
             {
-                graphics.FillEllipse(redBrush, new Rectangle(offsetX, firstY, diameter, diameter));
+                graphics.FillEllipse(redBrush, new Rectangle(offsetX, offsetY[0], diameter, diameter));
             }
 
-            // Draw yellow circle
-            using (SolidBrush yellowBrush = new SolidBrush(Aspose.Imaging.Color.Yellow))
+            // Yellow light
+            using (SolidBrush yellowBrush = new SolidBrush(Color.Yellow))
             {
-                graphics.FillEllipse(yellowBrush, new Rectangle(offsetX, secondY, diameter, diameter));
+                graphics.FillEllipse(yellowBrush, new Rectangle(offsetX, offsetY[1], diameter, diameter));
             }
 
-            // Draw green circle
-            using (SolidBrush greenBrush = new SolidBrush(Aspose.Imaging.Color.Green))
+            // Green light
+            using (SolidBrush greenBrush = new SolidBrush(Color.Green))
             {
-                graphics.FillEllipse(greenBrush, new Rectangle(offsetX, thirdY, diameter, diameter));
+                graphics.FillEllipse(greenBrush, new Rectangle(offsetX, offsetY[2], diameter, diameter));
             }
 
             // Save the bound image
-            canvas.Save();
+            image.Save();
         }
     }
 }

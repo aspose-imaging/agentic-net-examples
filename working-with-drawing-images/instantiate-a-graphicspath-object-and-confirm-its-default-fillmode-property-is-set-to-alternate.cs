@@ -10,23 +10,27 @@ class Program
         string inputPath = @"C:\temp\input.tiff";
         string outputPath = @"C:\temp\output.tiff";
 
-        // Input path validation as required
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists as required
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Instantiate GraphicsPath
+        // Instantiate a GraphicsPath object
         GraphicsPath graphicsPath = new GraphicsPath();
 
-        // Verify that the default FillMode is Alternate
-        bool isDefaultAlternate = graphicsPath.FillMode == FillMode.Alternate;
-
-        // Output the verification result
-        Console.WriteLine($"Default FillMode is Alternate: {isDefaultAlternate}");
+        // Confirm the default FillMode is Alternate
+        if (graphicsPath.FillMode == FillMode.Alternate)
+        {
+            Console.WriteLine("Default FillMode is Alternate.");
+        }
+        else
+        {
+            Console.WriteLine($"Default FillMode is {graphicsPath.FillMode}.");
+        }
     }
 }

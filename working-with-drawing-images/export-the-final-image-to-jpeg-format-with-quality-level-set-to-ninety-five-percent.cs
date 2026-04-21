@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\input.bmp";
         string outputPath = @"C:\Images\output.jpg";
 
@@ -18,20 +18,20 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure JPEG save options with quality set to 95%
-            JpegOptions jpegOptions = new JpegOptions
+            // Set JPEG save options with quality set to 95%
+            JpegOptions saveOptions = new JpegOptions
             {
                 Quality = 95
             };
 
-            // Save the image as JPEG using the configured options
-            image.Save(outputPath, jpegOptions);
+            // Save the image as JPEG using the specified options
+            image.Save(outputPath, saveOptions);
         }
     }
 }
