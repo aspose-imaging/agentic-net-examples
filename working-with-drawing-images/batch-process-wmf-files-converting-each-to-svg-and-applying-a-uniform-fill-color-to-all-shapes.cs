@@ -8,49 +8,50 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input WMF files
-        string[] inputFiles = new[]
-        {
-            @"c:\temp\example1.wmf",
-            @"c:\temp\example2.wmf"
-        };
+        // Hard‑coded input directory and list of WMF files to process
+        string inputFolder = @"C:\Images\Input";
+        string[] inputFiles = new[] { "file1.wmf", "file2.wmf", "file3.wmf" };
 
-        // Desired uniform fill color for all shapes
-        Aspose.Imaging.Color uniformFillColor = Aspose.Imaging.Color.Blue;
+        // Uniform fill color that will be applied as the background during rasterization
+        Aspose.Imaging.Color uniformFillColor = Aspose.Imaging.Color.Red;
 
-        foreach (string inputPath in inputFiles)
+        foreach (var fileName in inputFiles)
         {
-            // Verify input file exists
+            // Build full input path
+            string inputPath = Path.Combine(inputFolder, fileName);
+
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                continue; // Skip to next file
             }
 
-            // Determine output SVG path (same folder, .svg extension)
+            // Determine output path (same folder, .svg extension)
             string outputPath = Path.ChangeExtension(inputPath, ".svg");
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WMF image
+            // Load the WMF image
             using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
                 // Prepare SVG save options
                 SvgOptions saveOptions = new SvgOptions
                 {
-                    TextAsShapes = true
+                    TextAsShapes = true // Render text as shapes
                 };
 
-                // Configure rasterization options with uniform fill color
-                WmfRasterizationOptions rasterizationOptions = new WmfRasterizationOptions
+                // Configure rasterization options with the uniform fill color
+                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
                 {
-                    BackgroundColor = uniformFillColor, // applies as fill color
-                    PageSize = wmfImage.Size,
+                    BackgroundColor = uniformFillColor, // Apply uniform fill
+                    PageSize = wmfImage.Size,           // Preserve original size
                     RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
                 };
 
-                saveOptions.VectorRasterizationOptions = rasterizationOptions;
+                // Attach rasterization options to the SVG options
+                saveOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save as SVG
                 wmfImage.Save(outputPath, saveOptions);
