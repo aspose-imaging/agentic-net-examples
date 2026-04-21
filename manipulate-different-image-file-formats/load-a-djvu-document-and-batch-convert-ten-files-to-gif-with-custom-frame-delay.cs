@@ -4,37 +4,62 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
-        string inputDir = "Input";
-        string outputDir = "Output";
+        string inputPath = "Input/sample.djvu";
+        string outputPath = "Output/animated.gif";
 
-        for (int i = 1; i <= 10; i++)
+        if (!File.Exists(inputPath))
         {
-            string inputPath = Path.Combine(inputDir, $"file{i}.djvu");
-            string outputPath = Path.Combine(outputDir, $"file{i}.gif");
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            if (!File.Exists(inputPath))
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        using (FileStream stream = File.OpenRead(inputPath))
+        using (DjvuImage djvu = new DjvuImage(stream))
+        {
+            int pagesToConvert = Math.Min(10, djvu.PageCount);
+            GifImage gif = null;
+
+            for (int i = 0; i < pagesToConvert; i++)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                var djvuPage = (DjvuPage)djvu.Pages[i];
+                if (!djvuPage.IsCached)
+                {
+                    djvuPage.CacheData();
+                }
+
+                int width = djvuPage.Width;
+                int height = djvuPage.Height;
+
+                var frame = new GifFrameBlock((ushort)width, (ushort)height);
+                frame.FrameTime = 200; // custom delay in milliseconds
+
+                Graphics graphics = new Graphics(frame);
+                graphics.DrawImage(djvuPage, new Rectangle(0, 0, width, height));
+
+                if (gif == null)
+                {
+                    gif = new GifImage(frame);
+                }
+                else
+                {
+                    gif.AddPage(frame);
+                }
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            if (gif != null)
             {
-                GifOptions gifOptions = new GifOptions
+                using (gif)
                 {
-                    LoopsCount = 0
-                    // If a frame delay property exists, set it here, e.g.,
-                    // DefaultFrameDelay = 100 // delay in hundredths of a second
-                };
-
-                djvu.Save(outputPath, gifOptions);
+                    gif.Save(outputPath, new GifOptions());
+                }
             }
         }
     }
