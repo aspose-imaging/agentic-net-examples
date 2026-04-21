@@ -2,47 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output locations
-        string inputPath = @"C:\temp\multipage.tif";
-        string outputDirectory = @"C:\temp\output";
-
-        // Verify the source file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.tif";
+            string outputDirectory = "output";
 
-        // Ensure the output directory exists (unconditional per requirements)
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the multi‑page TIFF
-        using (TiffImage multiPage = (TiffImage)Image.Load(inputPath))
-        {
-            // Iterate through each frame in the source TIFF
-            for (int i = 0; i < multiPage.Frames.Length; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                TiffFrame frame = multiPage.Frames[i];
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Build the output file name (preserving original order)
-                string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-                // Ensure the directory for the output file exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Create a new TiffImage containing the current frame
-                using (TiffImage singlePage = new TiffImage(frame))
+            // Load the multi‑page TIFF
+            using (TiffImage multiPageTiff = (TiffImage)Image.Load(inputPath))
+            {
+                // Iterate through each frame
+                for (int i = 0; i < multiPageTiff.Frames.Length; i++)
                 {
-                    // Save the single‑frame TIFF, preserving its metadata
-                    singlePage.Save(outputPath);
+                    // Get the current frame
+                    TiffFrame frame = multiPageTiff.Frames[i];
+
+                    // Create a new TiffImage containing only this frame
+                    using (TiffImage singlePageTiff = new TiffImage(frame))
+                    {
+                        // Build output file path
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the single‑page TIFF (metadata is preserved with the frame)
+                        singlePageTiff.Save(outputPath);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
