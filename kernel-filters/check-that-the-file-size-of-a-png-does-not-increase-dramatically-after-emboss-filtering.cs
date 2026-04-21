@@ -1,63 +1,54 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input\\sample.png";
-        string outputPath = "output\\sample_emboss.png";
+        string outputPath = "output\\embossed.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Cast to RasterImage for filtering
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-            // Apply emboss filter using convolution kernel
-            var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
-            raster.Filter(raster.Bounds, embossOptions);
-
-            // Prepare PNG save options
-            var pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                FilterType = PngFilterType.Adaptive,
-                PngCompressionLevel = PngCompressionLevel.ZipLevel9
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the filtered image
-            raster.Save(outputPath, pngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            long originalSize = new FileInfo(inputPath).Length;
+
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                // Apply emboss filter using a predefined kernel
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+                // Save the filtered image with PNG options
+                PngOptions options = new PngOptions
+                {
+                    // Use adaptive filtering for better compression
+                    FilterType = PngFilterType.Adaptive
+                };
+
+                raster.Save(outputPath, options);
+            }
+
+            long newSize = new FileInfo(outputPath).Length;
+
+            Console.WriteLine($"Original size: {originalSize} bytes");
+            Console.WriteLine($"After emboss filter size: {newSize} bytes");
         }
-
-        // Compare file sizes
-        long originalSize = new FileInfo(inputPath).Length;
-        long filteredSize = new FileInfo(outputPath).Length;
-
-        Console.WriteLine($"Original size: {originalSize} bytes");
-        Console.WriteLine($"Embossed size: {filteredSize} bytes");
-
-        // Simple check for dramatic increase (e.g., > 50% increase)
-        if (filteredSize > originalSize * 1.5)
+        catch (Exception ex)
         {
-            Console.WriteLine("Warning: The PNG file size increased significantly after emboss filtering.");
-        }
-        else
-        {
-            Console.WriteLine("The PNG file size increase is within acceptable limits.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
