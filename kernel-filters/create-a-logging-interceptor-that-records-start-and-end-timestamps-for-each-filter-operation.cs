@@ -1,49 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPathMedian = "output_median.png";
-        string outputPathGaussian = "output_gaussian.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.png";
+            string outputDirectory = "output";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(outputDirectory);
+
+            var filters = new (string Suffix, Aspose.Imaging.ImageFilters.FilterOptions.FilterOptionsBase Options)[]
+            {
+                ("Median", new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5)),
+                ("Bilateral", new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5)),
+                ("Gaussian", new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0)),
+                ("Sharpen", new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0))
+            };
+
+            foreach (var filter in filters)
+            {
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage rasterImage = (RasterImage)image;
+
+                    DateTime start = DateTime.Now;
+                    Console.WriteLine($"{filter.Suffix} filter start: {start:O}");
+
+                    rasterImage.Filter(rasterImage.Bounds, filter.Options);
+
+                    DateTime end = DateTime.Now;
+                    Console.WriteLine($"{filter.Suffix} filter end: {end:O}");
+                    Console.WriteLine($"{filter.Suffix} filter duration: {(end - start).TotalMilliseconds} ms");
+
+                    string outputPath = Path.Combine(outputDirectory, $"sample_{filter.Suffix}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    rasterImage.Save(outputPath);
+                }
+            }
         }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPathMedian));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPathGaussian));
-
-        // Load image and cast to RasterImage
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            RasterImage raster = (RasterImage)image;
-
-            // Apply Median filter with logging
-            DateTime startMedian = DateTime.Now;
-            Console.WriteLine($"Median filter start: {startMedian:O}");
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-            DateTime endMedian = DateTime.Now;
-            Console.WriteLine($"Median filter end: {endMedian:O}");
-            raster.Save(outputPathMedian, new PngOptions());
-
-            // Apply Gaussian blur filter with logging
-            DateTime startGaussian = DateTime.Now;
-            Console.WriteLine($"Gaussian blur filter start: {startGaussian:O}");
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-            DateTime endGaussian = DateTime.Now;
-            Console.WriteLine($"Gaussian blur filter end: {endGaussian:O}");
-            raster.Save(outputPathGaussian, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
