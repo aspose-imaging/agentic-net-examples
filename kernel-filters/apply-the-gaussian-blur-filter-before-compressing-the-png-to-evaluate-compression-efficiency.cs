@@ -9,46 +9,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.png";
-        string outputPath = @"C:\Temp\sample_blurred_compressed.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "c:\\temp\\sample.png";
+            string outputPath = "c:\\temp\\sample.GaussianBlur.Compressed.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to apply filters
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply Gaussian blur (kernel size 5, sigma 4.0) to the whole image
-            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            // Configure PNG save options with maximum compression
-            PngOptions pngOptions = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                CompressionLevel = 9,
-                FilterType = PngFilterType.Adaptive,
-                Progressive = true
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the blurred image using the configured options
-            rasterImage.Save(outputPath, pngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering
+                RasterImage raster = (RasterImage)image;
+
+                // Apply Gaussian blur (kernel size 5, sigma 4.0) to the whole image
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Configure PNG compression options
+                PngOptions pngOptions = new PngOptions
+                {
+                    CompressionLevel = 9,                     // Max compression
+                    FilterType = PngFilterType.Adaptive,      // Best filter for compression
+                    Progressive = true                        // Enable progressive loading
+                };
+
+                // Save the processed image with compression
+                raster.Save(outputPath, pngOptions);
+            }
         }
-
-        // Evaluate compression efficiency
-        long originalSize = new FileInfo(inputPath).Length;
-        long compressedSize = new FileInfo(outputPath).Length;
-        Console.WriteLine($"Original size: {originalSize} bytes");
-        Console.WriteLine($"Compressed (blurred) size: {compressedSize} bytes");
-        Console.WriteLine($"Size reduction: {originalSize - compressedSize} bytes");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
