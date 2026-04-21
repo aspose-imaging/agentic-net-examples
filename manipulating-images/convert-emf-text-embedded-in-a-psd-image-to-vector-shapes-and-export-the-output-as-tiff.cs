@@ -2,49 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.psd";
-        string outputPath = @"C:\Images\output.tif";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\input.psd";
+            string outputPath = @"C:\Images\output.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare TIFF save options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // If the source image contains vector data, configure rasterization options
-            if (image is VectorImage)
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-                tiffOptions.VectorRasterizationOptions = vectorOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save as TIFF
-            image.Save(outputPath, tiffOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PSD image
+            using (Image psdImage = Image.Load(inputPath))
+            {
+                // Prepare TIFF save options
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // If the PSD contains vector data, configure rasterization to render text as shapes
+                if (psdImage is VectorImage)
+                {
+                    var rasterOptions = new EmfRasterizationOptions
+                    {
+                        // Render text as shapes (Auto mode preserves vector text)
+                        RenderMode = EmfRenderMode.Auto,
+                        PageSize = psdImage.Size,
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    };
+                    tiffOptions.VectorRasterizationOptions = rasterOptions;
+                }
+
+                // Save the image as TIFF
+                psdImage.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
