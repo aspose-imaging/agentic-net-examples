@@ -3,64 +3,88 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
-        string tempPngPath = "temp.png";
-        string filteredPngPath = "filtered.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.svg";
+            string outputPath = "output.svg";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(filteredPngPath));
-
-        using (Image svgImage = Image.Load(inputPath))
-        {
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White,
-                PageSize = ((SvgImage)svgImage).Size,
-                SmoothingMode = SmoothingMode.AntiAlias,
-                TextRenderingHint = TextRenderingHint.AntiAlias
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            PngOptions pngOptions = new PngOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Temporary files for raster processing
+            string tempPng = "temp.png";
+            string filteredPng = "filtered.png";
+
+            // Load SVG and rasterize to PNG
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterOptions
-            };
-            svgImage.Save(tempPngPath, pngOptions);
-        }
+                SvgImage svgImage = (SvgImage)image;
 
-        using (Image tempImage = Image.Load(tempPngPath))
-        {
-            RasterImage raster = (RasterImage)tempImage;
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size
+                };
 
-            double[,] kernel = new double[,]
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                svgImage.Save(tempPng, pngOptions);
+            }
+
+            // Load rasterized PNG, apply custom convolution kernel, and save filtered PNG
+            using (RasterImage raster = (RasterImage)Image.Load(tempPng))
             {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
+                double[,] kernel = new double[,]
+                {
+                    { -1, -1, -1 },
+                    { -1,  9, -1 },
+                    { -1, -1, -1 }
+                };
 
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                raster.Save(filteredPng, new PngOptions());
+            }
 
-            raster.Save(filteredPngPath);
+            // Create a new SVG and embed the filtered raster image
+            using (Image image = Image.Load(inputPath))
+            {
+                SvgImage originalSvg = (SvgImage)image;
+                int width = originalSvg.Width;
+                int height = originalSvg.Height;
+                int dpi = 96;
+
+                var graphics = new SvgGraphics2D(width, height, dpi);
+
+                using (RasterImage filteredRaster = (RasterImage)Image.Load(filteredPng))
+                {
+                    graphics.DrawImage(filteredRaster, new Point(0, 0));
+                }
+
+                using (SvgImage finalSvg = graphics.EndRecording())
+                {
+                    finalSvg.Save(outputPath, new SvgOptions());
+                }
+            }
         }
-
-        using (Image originalSvg = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            SvgOptions exportOptions = new SvgOptions();
-
-            originalSvg.Save(outputPath, exportOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
