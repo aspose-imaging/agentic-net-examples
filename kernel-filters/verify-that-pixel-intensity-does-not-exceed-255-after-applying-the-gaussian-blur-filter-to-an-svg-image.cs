@@ -1,63 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage (Aspose.Imaging rasterizes the SVG on demand)
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply Gaussian blur filter (size = 5, sigma = 4.0)
-            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            // Verify that no pixel intensity exceeds 255
-            int[] argbPixels = rasterImage.LoadArgb32Pixels(rasterImage.Bounds);
-            bool intensityOk = true;
-            foreach (int argb in argbPixels)
+            if (!File.Exists(inputPath))
             {
-                // Extract R, G, B components (ignore Alpha)
-                int r = (argb >> 16) & 0xFF;
-                int g = (argb >> 8) & 0xFF;
-                int b = argb & 0xFF;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                if (r > 255 || g > 255 || b > 255)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var rasterOptions = new SvgRasterizationOptions { PageSize = image.Size };
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+
+                using (var memoryStream = new MemoryStream())
                 {
-                    intensityOk = false;
-                    break;
+                    image.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    using (Image rasterImg = Image.Load(memoryStream))
+                    {
+                        RasterImage rasterImage = (RasterImage)rasterImg;
+                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                        rasterImage.Save(outputPath, pngOptions);
+                    }
                 }
             }
-
-            if (!intensityOk)
-            {
-                Console.WriteLine("Pixel intensity exceeds 255 after Gaussian blur.");
-            }
-            else
-            {
-                Console.WriteLine("All pixel intensities are within the 0-255 range.");
-            }
-
-            // Save the processed image
-            rasterImage.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
