@@ -4,50 +4,73 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define output path
-        string outputPath = @"C:\Temp\IndexedCanvas.psd";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Prepare PSD options for an indexed image
-        PsdOptions psdOptions = new PsdOptions();
-        psdOptions.Source = new FileCreateSource(outputPath, false);
-        psdOptions.ColorMode = ColorModes.Indexed;
-        psdOptions.CompressionMethod = CompressionMethod.RLE;
-        psdOptions.Version = 6;
-        psdOptions.ChannelBitsCount = (short)8;   // 8 bits per channel
-        psdOptions.ChannelsCount = (short)1;     // single channel for indexed mode
-
-        // Define a simple palette (black, white, red, green, blue)
-        Color[] paletteColors = new Color[]
+        try
         {
-            Color.Black,
-            Color.White,
-            Color.Red,
-            Color.Green,
-            Color.Blue
-        };
-        psdOptions.Palette = new ColorPalette(paletteColors);
+            // Output PSD file path
+            string outputPath = @"C:\Temp\output.psd";
 
-        // Create a new PSD image with the specified options
-        using (Image image = Image.Create(psdOptions, 500, 500))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Define canvas size
+            int width = 500;
+            int height = 500;
+
+            // Create PSD options for an indexed image
+            PsdOptions psdOptions = new PsdOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                ColorMode = ColorModes.Indexed,
+                ChannelsCount = (short)1,
+                ChannelBitsCount = (short)8,
+                CompressionMethod = CompressionMethod.RLE,
+                // Simple palette with a few colors
+                Palette = new ColorPalette(new Color[]
+                {
+                    Color.Black,
+                    Color.White,
+                    Color.Red,
+                    Color.Green,
+                    Color.Blue
+                })
+            };
+
+            // Create the PSD canvas
+            using (Image image = Image.Create(psdOptions, width, height))
+            {
+                // Prepare graphics for drawing
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
+                // Define an ellipse shape within a rectangle
+                RectangleF ellipseRect = new RectangleF(100f, 100f, 300f, 200f);
+                EllipseShape ellipse = new EllipseShape(ellipseRect);
+
+                // Build a figure containing the ellipse
+                Figure figure = new Figure();
+                figure.AddShape(ellipse);
+
+                // Add the figure to a graphics path
+                GraphicsPath path = new GraphicsPath();
+                path.AddFigure(figure);
+
+                // Draw the ellipse outline with a black pen
+                Pen pen = new Pen(Color.Black, 3);
+                graphics.DrawPath(pen, path);
+
+                // Save the PSD file (source is already bound)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
         {
-            // Draw on the image
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
-
-            // Pen for the ellipse
-            Pen pen = new Pen(Color.Red, 5);
-            graphics.DrawEllipse(pen, new Rectangle(50, 50, 400, 300));
-
-            // Save the bound image (no need to pass options again)
-            image.Save();
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
