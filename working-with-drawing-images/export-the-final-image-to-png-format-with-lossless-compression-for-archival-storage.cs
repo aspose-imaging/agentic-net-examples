@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\input.jpg";
         string outputPath = @"C:\Images\output.png";
 
@@ -18,22 +18,20 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists (creates it if missing)
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PNG options for lossless archival storage
-            PngOptions pngOptions = new PngOptions
+            // Configure PNG export options for lossless archival storage
+            var pngOptions = new PngOptions
             {
                 // Use the default (lossless) compression level
-                PngCompressionLevel = PngOptions.DefaultCompressionLevel,
-                // Preserve original metadata
-                KeepMetadata = true
+                PngCompressionLevel = PngOptions.DefaultCompressionLevel
             };
 
-            // Save the image as PNG with the specified options
+            // Save the image as PNG using the specified options
             image.Save(outputPath, pngOptions);
         }
     }
