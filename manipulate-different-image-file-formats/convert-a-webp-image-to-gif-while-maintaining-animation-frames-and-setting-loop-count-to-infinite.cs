@@ -3,17 +3,16 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output.gif";
+        string inputPath = @"C:\Images\input_animation.webp";
+        string outputPath = @"C:\Images\output_animation.gif";
 
-        // Verify input file exists
+        // Check input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,17 +22,25 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the WebP image (animated)
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure GIF options with infinite loop
-            GifOptions gifOptions = new GifOptions
+            // Load the WebP image (may contain multiple frames)
+            using (Image webpImage = Image.Load(inputPath))
             {
-                LoopsCount = 0 // 0 means infinite looping
-            };
+                // Prepare GIF options to preserve all frames
+                var gifOptions = new GifOptions
+                {
+                    // Export full frames for each animation step
+                    FullFrame = true
+                };
 
-            // Save as animated GIF preserving frames
-            image.Save(outputPath, gifOptions);
+                // Save as animated GIF; Aspose.Imaging retains animation frames automatically
+                webpImage.Save(outputPath, gifOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
