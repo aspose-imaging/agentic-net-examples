@@ -5,48 +5,55 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\TiffInput";
+            string outputDirectory = @"C:\Images\WebpOutput";
 
-        if (!Directory.Exists(outputDirectory))
-        {
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDirectory);
-        }
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            // Get all TIFF files in the input directory
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
+            foreach (string inputPath in tiffFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}_{timestamp}.webp");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                using (WebPOptions options = new WebPOptions())
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    options.Lossless = true;
-                    options.Quality = 80f;
-                    image.Save(outputPath, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build output file name: original name + timestamp + .webp
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                string outputFileName = $"{fileNameWithoutExt}_{timestamp}.webp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image and save as WebP
+                using (Image image = Image.Load(inputPath))
+                {
+                    var webpOptions = new WebPOptions
+                    {
+                        // Example settings; adjust as needed
+                        Lossless = false,
+                        Quality = 80,
+                        KeepMetadata = true
+                    };
+
+                    image.Save(outputPath, webpOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
