@@ -2,58 +2,61 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\input\image1.psd",
-            @"C:\Images\input\image2.psd",
-            @"C:\Images\input\image3.psd"
-        };
-
-        string[] outputPaths = new string[]
-        {
-            @"C:\Images\output\image1.png",
-            @"C:\Images\output\image2.png",
-            @"C:\Images\output\image3.png"
-        };
-
-        // Process each file
-        for (int i = 0; i < inputPaths.Length; i++)
-        {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input PSD files and corresponding output PNG files
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\input1.psd",
+                @"C:\Images\input2.psd"
+            };
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
+            string[] outputPaths = new string[]
             {
-                Directory.CreateDirectory(outputDir);
-            }
+                @"C:\Images\output1.png",
+                @"C:\Images\output2.png"
+            };
 
-            // Load the PSD image
-            using (Image image = Image.Load(inputPath))
+            for (int i = 0; i < inputPaths.Length; i++)
             {
-                // Adjust brightness (increase by 50)
-                if (image is RasterImage rasterImage)
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    rasterImage.AdjustBrightness(50);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Save as PNG
-                image.Save(outputPath, new PngOptions());
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PSD image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Adjust brightness if the image supports raster operations
+                    if (image is RasterImage rasterImage)
+                    {
+                        // Increase brightness uniformly (value range: -255 to 255)
+                        rasterImage.AdjustBrightness(50);
+                    }
+
+                    // Save the brightened image as PNG
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
