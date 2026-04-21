@@ -9,44 +9,42 @@ class Program
     static void Main()
     {
         // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
+        string inputDir = @"C:\Images\Input";
+        string outputDir = @"C:\Images\Output";
 
-        // List of JPEG file names to process
+        // List of JPEG files to process
         string[] files = new string[]
         {
-            "photo1.jpg",
-            "photo2.jpg",
-            "photo3.jpg"
+            "image1.jpg",
+            "image2.jpg",
+            "image3.jpg"
         };
 
-        foreach (string fileName in files)
+        foreach (var fileName in files)
         {
-            // Build full input and output paths
-            string inputPath = Path.Combine(inputFolder, fileName);
-            string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(fileName) + "_progressive.jpg");
-
-            // Verify input file exists
+            // Build full input path and verify existence
+            string inputPath = Path.Combine(inputDir, fileName);
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Build full output path and ensure its directory exists
+            string outputPath = Path.Combine(outputDir, fileName);
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options for progressive compression
+                // Configure progressive JPEG save options
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    Quality = 100 // optional: set desired quality (1-100)
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 100 // optional quality setting
                 };
 
-                // Save the image with the specified options
+                // Save the image with progressive compression
                 image.Save(outputPath, saveOptions);
             }
         }
