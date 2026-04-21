@@ -9,36 +9,38 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define output directory and file path
-        string outputDir = "C:\\Temp";
-        string outputPath = Path.Combine(outputDir, "signed.bmp");
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Create a BMP canvas of size 200x200
-        Source source = new FileCreateSource(outputPath, false);
-        BmpOptions bmpOptions = new BmpOptions() { Source = source };
-        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 200, 200))
+        try
         {
-            // Embed a digital signature with the password "Secure123"
-            canvas.EmbedDigitalSignature("Secure123");
+            // Hardcoded output path
+            string outputPath = "output.bmp";
 
-            // Save the image (output file is already bound to the source)
-            canvas.Save();
+            // Ensure output directory exists (null-safe)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            // Create a bound BMP image (200x200)
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
+            int width = 200;
+            int height = 200;
+
+            using (BmpImage canvas = (BmpImage)Image.Create(options, width, height))
+            {
+                // Embed digital signature with password
+                canvas.EmbedDigitalSignature("Secure123");
+
+                // Verify the signature using the same password
+                bool isSigned = canvas.IsDigitalSigned("Secure123");
+                Console.WriteLine($"Signature verification result: {isSigned}");
+
+                // Save the image (bound source)
+                canvas.Save();
+            }
         }
-
-        // Verify that the image is digitally signed
-        if (!File.Exists(outputPath))
+        catch (Exception ex)
         {
-            Console.Error.WriteLine($"File not found: {outputPath}");
-            return;
-        }
-
-        using (RasterImage loadedImage = (RasterImage)Image.Load(outputPath))
-        {
-            bool isSigned = loadedImage.IsDigitalSigned("Secure123");
-            Console.WriteLine($"Is image digitally signed? {isSigned}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
