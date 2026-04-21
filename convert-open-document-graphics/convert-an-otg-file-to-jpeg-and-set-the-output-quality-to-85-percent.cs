@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = "input.otg";
-        string outputPath = "output\\converted.jpg";
+        string inputPath = @"C:\temp\sample.otg";
+        string outputPath = @"C:\temp\output.jpg";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -24,20 +24,21 @@ class Program
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare rasterization options for OTG vector content
-            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+            // Prepare JPEG save options with quality set to 85%
+            JpegOptions jpegOptions = new JpegOptions
             {
-                // Preserve original size
+                Quality = 85
+            };
+
+            // Configure rasterization options for vector to raster conversion
+            OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+            {
+                // Preserve original page size
                 PageSize = image.Size
             };
 
-            // Configure JPEG save options with quality 85%
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Quality = 85,
-                // Attach the rasterization options so the vector OTG is rasterized to JPEG
-                VectorRasterizationOptions = otgRasterizationOptions
-            };
+            // Assign rasterization options to the JPEG options
+            jpegOptions.VectorRasterizationOptions = otgRasterization;
 
             // Save the image as JPEG
             image.Save(outputPath, jpegOptions);

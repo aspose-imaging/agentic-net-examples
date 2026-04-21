@@ -1,6 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input\\sample.otg";
-        string outputPath = "output\\sample.png";
+        string inputPath = @"C:\Images\sample.otg";
+        string outputPath = @"C:\Images\sample.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,16 +25,18 @@ class Program
         // Measure conversion time
         Stopwatch sw = Stopwatch.StartNew();
 
-        // Load OTG image and save as PNG using rasterization options
+        // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            var pngOptions = new PngOptions();
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Prepare PNG save options with OTG rasterization settings
+            PngOptions pngOptions = new PngOptions();
+            OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
             {
-                PageSize = image.Size
+                PageSize = image.Size // Preserve original size
             };
-            pngOptions.VectorRasterizationOptions = otgRasterOptions;
+            pngOptions.VectorRasterizationOptions = otgRasterization;
 
+            // Save as PNG
             image.Save(outputPath, pngOptions);
         }
 

@@ -25,24 +25,24 @@ class Program
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options for OTG
-            var otgRasterizationOptions = new OtgRasterizationOptions
+            // Configure rasterization options for OTG to PDF conversion
+            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
             {
                 PageSize = image.Size
             };
 
-            // Set PDF save options with desired compression
-            var pdfOptions = new PdfOptions
+            // Set PDF-specific options, including compression level
+            PdfOptions pdfOptions = new PdfOptions
             {
                 VectorRasterizationOptions = otgRasterizationOptions,
                 PdfCoreOptions = new PdfCoreOptions
                 {
-                    // Example: use Flate compression for images inside the PDF
+                    // Example compression: Flate
                     Compression = PdfImageCompressionOptions.Flate
                 }
             };
 
-            // Save the image as PDF
+            // Save the image as PDF with the specified options
             image.Save(outputPath, pdfOptions);
         }
     }

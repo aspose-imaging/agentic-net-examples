@@ -12,40 +12,47 @@ class Program
         string bmpOutputPath = @"C:\Images\sample.bmp";
         string binaryOutputPath = @"C:\Images\sample_binary.bmp";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directories exist
+        // Ensure output directories exist before any save operation
         Directory.CreateDirectory(Path.GetDirectoryName(bmpOutputPath));
         Directory.CreateDirectory(Path.GetDirectoryName(binaryOutputPath));
 
-        // Load OTG image and save as BMP using rasterization options
+        // Load the OTG image
         using (Image otgImage = Image.Load(inputPath))
         {
-            var bmpOptions = new BmpOptions();
+            // Configure rasterization options for vector to raster conversion
             var otgRasterOptions = new OtgRasterizationOptions
             {
-                PageSize = otgImage.Size
+                PageSize = otgImage.Size // preserve original dimensions
             };
-            bmpOptions.VectorRasterizationOptions = otgRasterOptions;
 
+            // Set BMP save options and attach rasterization options
+            var bmpOptions = new BmpOptions
+            {
+                VectorRasterizationOptions = otgRasterOptions
+            };
+
+            // Save the rasterized image as BMP
             otgImage.Save(bmpOutputPath, bmpOptions);
         }
 
-        // Load the BMP, apply Otsu thresholding, and save the binary image
+        // Load the generated BMP as a raster image
         using (Image bmpImage = Image.Load(bmpOutputPath))
         {
-            var rasterImage = bmpImage as RasterImage;
-            if (rasterImage != null)
+            // Cast to RasterImage to access raster-specific methods
+            if (bmpImage is RasterImage rasterImage)
             {
+                // Apply Otsu threshold binarization
                 rasterImage.BinarizeOtsu();
 
-                var bmpOptions = new BmpOptions();
-                rasterImage.Save(binaryOutputPath, bmpOptions);
+                // Save the binary image as BMP
+                rasterImage.Save(binaryOutputPath);
             }
         }
     }

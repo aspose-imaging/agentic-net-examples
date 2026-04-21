@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -23,24 +24,39 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        using (Image otgImage = Image.Load(inputPath))
         {
-            // Cast to RasterImage to apply filters
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply a median filter with size 5 to the whole image
-            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-            // Prepare JPEG save options with rasterization for vector content
-            JpegOptions jpegOptions = new JpegOptions();
-            OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+            // Rasterize the OTG image to a raster format (PNG) using a memory stream
+            using (MemoryStream rasterStream = new MemoryStream())
             {
-                PageSize = image.Size
-            };
-            jpegOptions.VectorRasterizationOptions = otgRasterization;
+                // Set up rasterization options for OTG
+                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = otgImage.Size
+                };
 
-            // Save the processed image as JPEG
-            image.Save(outputPath, jpegOptions);
+                // Save the rasterized image to the memory stream as PNG
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+                otgImage.Save(rasterStream, pngOptions);
+                rasterStream.Position = 0; // Reset stream position for reading
+
+                // Load the rasterized image as a RasterImage
+                using (Image rasterImageBase = Image.Load(rasterStream))
+                {
+                    // Cast to RasterImage to access filtering functionality
+                    RasterImage rasterImage = (RasterImage)rasterImageBase;
+
+                    // Apply a median filter with size 5 to the entire image
+                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+                    // Save the filtered image as JPEG
+                    JpegOptions jpegOptions = new JpegOptions();
+                    rasterImage.Save(outputPath, jpegOptions);
+                }
+            }
         }
     }
 }

@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.otg";
-        string outputPath = "sample.bmp";
+        string inputPath = "input.otg";
+        string outputPath = "output.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -18,22 +18,23 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare BMP save options with OTG rasterization settings
-            BmpOptions bmpOptions = new BmpOptions();
-
-            // Set rasterization options to keep original size
-            OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
+            // Configure rasterization to keep original size
+            OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
             {
-                PageSize = image.Size // maintain original dimensions
+                PageSize = image.Size
             };
 
-            bmpOptions.VectorRasterizationOptions = otgRaster;
+            // Set BMP save options with the rasterization settings
+            BmpOptions bmpOptions = new BmpOptions
+            {
+                VectorRasterizationOptions = otgOptions
+            };
 
             // Save as BMP
             image.Save(outputPath, bmpOptions);

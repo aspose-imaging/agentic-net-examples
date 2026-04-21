@@ -9,7 +9,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Input\sample.odg";
+        string inputPath = @"C:\Temp\sample.odg";
         string outputPath = inputPath + ".pdf";
 
         // Verify that the input file exists

@@ -8,7 +8,7 @@ class Program
     static void Main()
     {
         // Hardcoded input path
-        string inputPath = @"C:\temp\sample.odg";
+        string inputPath = "sample.odg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,20 +20,17 @@ class Program
         // Load the ODG image
         using (Image odgImage = Image.Load(inputPath))
         {
-            // Prepare a memory stream for the PNG output
+            // Set PNG save options
+            var pngOptions = new PngOptions();
+
+            // Save the image to a memory stream in PNG format
             using (MemoryStream pngStream = new MemoryStream())
             {
-                // PNG save options (default settings)
-                PngOptions pngOptions = new PngOptions();
-
-                // Save the image as PNG into the memory stream
                 odgImage.Save(pngStream, pngOptions);
 
-                // Reset stream position if further processing is needed
-                pngStream.Position = 0;
-
-                // Example: output the size of the generated PNG data
-                Console.WriteLine($"PNG data length: {pngStream.Length} bytes");
+                // Example usage of the resulting PNG data
+                byte[] pngData = pngStream.ToArray();
+                Console.WriteLine($"PNG data size: {pngData.Length} bytes");
             }
         }
     }

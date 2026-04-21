@@ -1,24 +1,22 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        // Hardcoded list of input files (ODG and OTG)
+        string[] inputFiles = new[]
+        {
+            @"C:\Images\sample1.odg",
+            @"C:\Images\sample2.otg",
+            @"C:\Images\sample3.odg",
+            @"C:\Images\sample4.otg"
+        };
 
-        // Collect all ODG and OTG files
-        var allFiles = Directory.GetFiles(inputDirectory, "*.*")
-            .Where(f => f.EndsWith(".odg", StringComparison.OrdinalIgnoreCase) ||
-                        f.EndsWith(".otg", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
-
-        foreach (var inputPath in allFiles)
+        foreach (string inputPath in inputFiles)
         {
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,30 +25,34 @@ class Program
                 return;
             }
 
-            // Prepare output path with .svg extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+            // Determine output SVG path
+            string outputPath = inputPath + ".svg";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector image (ODG or OTG)
+            // Load the source image (ODG or OTG)
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options
-                using (SvgOptions svgOptions = new SvgOptions())
+                // Prepare SVG rasterization options preserving vector data
+                var svgRasterizationOptions = new SvgRasterizationOptions
                 {
-                    var rasterOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White
-                    };
-                    svgOptions.VectorRasterizationOptions = rasterOptions;
+                    PageSize = image.Size
+                };
 
-                    // Save as SVG preserving vectors
-                    image.Save(outputPath, svgOptions);
-                }
+                // Prepare SVG save options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = svgRasterizationOptions,
+                    // Keep vectors; no compression needed for lossless SVG
+                    Compress = false
+                };
+
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
             }
+
+            Console.WriteLine($"Converted '{inputPath}' to SVG at '{outputPath}'.");
         }
     }
 }

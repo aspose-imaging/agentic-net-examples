@@ -1,17 +1,16 @@
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.odg";
-        string outputPath = @"C:\temp\sample.png";
+        // Hardcoded input and output file paths
+        string inputPath = "sample.odg";
+        string outputPath = "sample.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,32 +20,21 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+        Directory.CreateDirectory(outputDir);
 
-        // Measure conversion time
+        // Start timing the conversion
         Stopwatch sw = Stopwatch.StartNew();
 
-        // Load ODG image
+        // Load the ODG image and save it as PNG
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare rasterization options for ODG
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = image.Size
-            };
-
-            // Prepare PNG save options and attach rasterization options
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save as PNG
+            PngOptions pngOptions = new PngOptions();
             image.Save(outputPath, pngOptions);
         }
 
+        // Stop timing and report duration
         sw.Stop();
-        Console.WriteLine($"Conversion completed in {sw.Elapsed.TotalMilliseconds} ms.");
+        Console.WriteLine($"Conversion completed in {sw.ElapsedMilliseconds} ms.");
     }
 }

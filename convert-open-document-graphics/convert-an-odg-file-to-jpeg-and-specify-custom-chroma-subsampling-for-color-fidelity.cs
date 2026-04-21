@@ -6,10 +6,14 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.odg";
-        string outputPath = "Output/sample.jpg";
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
+
+        string inputPath = Path.Combine(inputDirectory, "sample.odg");
+        string outputPath = Path.Combine(outputDirectory, "sample.jpg");
 
         if (!File.Exists(inputPath))
         {
@@ -23,15 +27,10 @@ class Program
         {
             using (JpegOptions jpegOptions = new JpegOptions())
             {
-                jpegOptions.ColorType = JpegCompressionColorMode.YCbCr;
-                jpegOptions.HorizontalSampling = new byte[] { 2, 1, 1 };
-                jpegOptions.VerticalSampling = new byte[] { 2, 1, 1 };
+                jpegOptions.HorizontalSampling = new byte[] { 2, 2, 2 };
+                jpegOptions.VerticalSampling = new byte[] { 2, 2, 2 };
                 jpegOptions.Quality = 90;
-                jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
+                jpegOptions.ColorType = JpegCompressionColorMode.YCbCr;
 
                 image.Save(outputPath, jpegOptions);
             }

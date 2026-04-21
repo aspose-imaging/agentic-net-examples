@@ -8,8 +8,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.odg");
-        string outputPath = Path.Combine("Output", "sample.pdf");
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputPath = Path.Combine(baseDir, "Input", "sample.odg");
+        string outputPath = Path.Combine(baseDir, "Output", "sample.pdf");
 
         if (!File.Exists(inputPath))
         {

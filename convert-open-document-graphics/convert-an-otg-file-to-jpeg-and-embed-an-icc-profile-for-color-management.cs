@@ -8,11 +8,8 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string inputPath = @"input\sample.otg";
-        string outputPath = @"output\converted.jpg";
-        string rgbProfilePath = @"profiles\rgb.icc";
-        string cmykProfilePath = @"profiles\cmyk.icc";
+        // Hardcoded input OTG file path
+        string inputPath = @"C:\Images\sample.otg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,45 +18,40 @@ class Program
             return;
         }
 
-        // Verify ICC profile files exist
-        if (!File.Exists(rgbProfilePath))
-        {
-            Console.Error.WriteLine($"File not found: {rgbProfilePath}");
-            return;
-        }
-        if (!File.Exists(cmykProfilePath))
-        {
-            Console.Error.WriteLine($"File not found: {cmykProfilePath}");
-            return;
-        }
+        // Hardcoded output JPEG file path
+        string outputPath = @"C:\Images\output.jpg";
 
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load OTG image
+        // Hardcoded ICC profile paths
+        string rgbIccPath = @"C:\Profiles\eciRGB_v2.icc";
+        string cmykIccPath = @"C:\Profiles\ISOcoated_v2_FullGamut4.icc";
+
+        // Load the OTG image
         using (Image otgImage = Image.Load(inputPath))
         {
-            // Prepare JPEG save options with ICC profiles
-            var jpegOptions = new JpegOptions
+            // Prepare rasterization options for vector to raster conversion
+            OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
             {
-                ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk
+                PageSize = otgImage.Size // Preserve original size
             };
 
-            // Set rasterization options for OTG vector content
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Configure JPEG save options with ICC profiles
+            JpegOptions jpegOptions = new JpegOptions
             {
-                PageSize = otgImage.Size
+                ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk,
+                VectorRasterizationOptions = rasterOptions
             };
-            jpegOptions.VectorRasterizationOptions = otgRasterOptions;
 
-            // Load ICC profiles into streams and assign to options
-            using (Stream rgbStream = File.OpenRead(rgbProfilePath))
-            using (Stream cmykStream = File.OpenRead(cmykProfilePath))
+            // Attach ICC profiles
+            using (Stream rgbProfileStream = File.OpenRead(rgbIccPath))
+            using (Stream cmykProfileStream = File.OpenRead(cmykIccPath))
             {
-                jpegOptions.RgbColorProfile = new StreamSource(rgbStream);
-                jpegOptions.CmykColorProfile = new StreamSource(cmykStream);
+                jpegOptions.RgbColorProfile = new StreamSource(rgbProfileStream);
+                jpegOptions.CmykColorProfile = new StreamSource(cmykProfileStream);
 
-                // Save as JPEG with embedded ICC profiles
+                // Save the image as JPEG with embedded profiles
                 otgImage.Save(outputPath, jpegOptions);
             }
         }

@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Input\sample.odg";
-        string outputPath = @"C:\Output\sample.pdf";
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample.pdf";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -25,17 +25,17 @@ class Program
         // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
-            // Set up rasterization options for ODG to PDF conversion
-            var rasterOptions = new OdgRasterizationOptions
+            // Configure rasterization options for ODG
+            OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
             {
                 BackgroundColor = Color.White,
-                PageSize = image.Size // preserve original size
+                PageSize = image.Size
             };
 
-            // Configure PDF save options and attach rasterization options
-            var pdfOptions = new PdfOptions
+            // Set up PDF save options with the rasterization settings
+            PdfOptions pdfOptions = new PdfOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
             // Save the image as a flattened PDF document

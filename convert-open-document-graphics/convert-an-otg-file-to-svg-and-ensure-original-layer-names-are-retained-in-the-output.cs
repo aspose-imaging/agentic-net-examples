@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -25,12 +24,12 @@ class Program
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG export options
+            // Prepare SVG save options
             var svgOptions = new SvgOptions
             {
-                // Preserve original metadata (including layer names)
+                // Preserve original metadata (including layer names if present)
                 KeepMetadata = true,
-                // Render text as text (not shapes) to keep original naming where possible
+                // Do not convert text to shapes; keep original text representation
                 TextAsShapes = false
             };
 

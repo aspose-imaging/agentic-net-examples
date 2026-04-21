@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -18,25 +19,29 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG export options with vector rasterization settings
+            // Configure SVG export options
             var svgOptions = new SvgOptions
             {
-                // Preserve vector data; no compression needed for lossless SVG
-                Compress = false,
-                // Set rasterization options to match the source image size
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                }
+                // Preserve original metadata
+                KeepMetadata = true,
+                // Do not compress; keep plain SVG
+                Compress = false
             };
 
-            // Save as SVG, preserving all vector layers and attributes
+            // Set vector rasterization options to retain vector data and page size
+            var vectorOptions = new SvgRasterizationOptions
+            {
+                PageSize = image.Size
+            };
+            svgOptions.VectorRasterizationOptions = vectorOptions;
+
+            // Save as SVG, preserving vector layers and attributes
             image.Save(outputPath, svgOptions);
         }
     }

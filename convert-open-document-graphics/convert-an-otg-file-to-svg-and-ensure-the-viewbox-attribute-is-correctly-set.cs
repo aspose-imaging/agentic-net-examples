@@ -24,15 +24,17 @@ class Program
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG export options with proper rasterization settings
-            var svgOptions = new SvgOptions
+            // Prepare SVG export options
+            var svgOptions = new SvgOptions();
+
+            // Configure OTG rasterization options to preserve page size (sets viewBox correctly)
+            var otgRasterOptions = new OtgRasterizationOptions
             {
-                // Set vector rasterization options; PageSize defines the viewBox in the resulting SVG
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                }
+                PageSize = image.Size // ensures viewBox matches the original dimensions
             };
+
+            // Assign rasterization options to SVG options
+            svgOptions.VectorRasterizationOptions = otgRasterOptions;
 
             // Save as SVG
             image.Save(outputPath, svgOptions);

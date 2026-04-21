@@ -1,58 +1,49 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample_8bit.bmp";
+        // Hardcoded relative input and output paths
+        string inputPath = Path.Combine("Input", "sample.odg");
+        string outputPath = Path.Combine("Output", "sample.bmp");
 
-        // Verify that the input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the ODG vector image
-        using (Image odgImage = Image.Load(inputPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Configure rasterization options for the ODG source
-            var rasterOptions = new OdgRasterizationOptions
-            {
-                // White background to avoid transparency issues
-                BackgroundColor = Color.White,
-                // Preserve the original size of the source image
-                PageSize = odgImage.Size
-            };
-
-            // Prepare BMP save options with an 8‑bit palette
+            // Configure BMP save options for 8‑bit palette
             var bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 8,
-                // Attach the rasterization options so the vector ODG is rasterized during save
-                VectorRasterizationOptions = rasterOptions
+                // Use a standard 8‑bit grayscale palette (suitable for size reduction)
+                Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false),
+                Compression = BitmapCompression.Rgb,
+                ResolutionSettings = new Aspose.Imaging.ResolutionSetting(96.0, 96.0),
+                // Rasterize the vector image onto a bitmap
+                VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                }
             };
 
-            // Generate a palette that best matches the rasterized image.
-            // First, rasterize the image to a temporary raster image using the same options.
-            using (RasterImage tempRaster = (RasterImage)odgImage)
-            {
-                // Obtain a palette covering up to 256 colors.
-                bmpOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(tempRaster, 256);
-            }
-
-            // Save the rasterized ODG as an 8‑bit BMP file
-            odgImage.Save(outputPath, bmpOptions);
+            // Save the rasterized BMP image
+            image.Save(outputPath, bmpOptions);
         }
     }
 }

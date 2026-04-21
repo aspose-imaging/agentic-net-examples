@@ -2,16 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\input\sample.odg";
+        string outputPath = @"C:\output\sample.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,23 +25,22 @@ class Program
         // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
+            // Configure rasterization options for ODG
+            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            {
+                BackgroundColor = Color.White,
+                PageSize = image.Size // preserve original size
+            };
+
             // Configure JPEG save options with 300 DPI resolution
             JpegOptions jpegOptions = new JpegOptions
             {
-                // Set DPI for the rasterized image
+                VectorRasterizationOptions = rasterOptions,
                 ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-
-                // Enable vector rasterization using ODG rasterization options
-                VectorRasterizationOptions = new OdgRasterizationOptions
-                {
-                    // Use the source image size as the page size
-                    PageSize = image.Size,
-                    // Optional: set background color if needed
-                    BackgroundColor = Color.White
-                }
+                ResolutionUnit = ResolutionUnit.Inch
             };
 
-            // Save the rasterized JPEG image
+            // Save the rasterized image as JPEG
             image.Save(outputPath, jpegOptions);
         }
     }

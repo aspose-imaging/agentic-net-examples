@@ -22,7 +22,7 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG image and convert to PDF with title metadata
+        // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
             // Set up rasterization options for ODG
@@ -32,13 +32,15 @@ class Program
                 PageSize = image.Size
             };
 
-            // Configure PDF save options and set document title
+            // Configure PDF save options
             PdfOptions pdfOptions = new PdfOptions
             {
                 VectorRasterizationOptions = rasterOptions,
-                PdfDocumentInfo = new PdfDocumentInfo()
+                PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo
+                {
+                    Title = "My Document Title"
+                }
             };
-            pdfOptions.PdfDocumentInfo.Title = "Converted ODG Document";
 
             // Save as PDF
             image.Save(outputPath, pdfOptions);

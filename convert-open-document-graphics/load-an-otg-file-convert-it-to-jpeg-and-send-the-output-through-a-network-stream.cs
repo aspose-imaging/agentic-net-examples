@@ -10,8 +10,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = @"C:\input\sample.otg";
+        string outputPath = @"C:\output\sample.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,20 +26,32 @@ class Program
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare JPEG save options with OTG rasterization settings
-            var jpegOptions = new JpegOptions();
-            var otgRaster = new OtgRasterizationOptions
+            // Configure JPEG save options with OTG rasterization
+            JpegOptions jpegOptions = new JpegOptions();
+            OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
             {
-                PageSize = image.Size // preserve original size
+                PageSize = image.Size
             };
             jpegOptions.VectorRasterizationOptions = otgRaster;
 
-            // Connect to a TCP server and send the JPEG data through the network stream
-            using (TcpClient client = new TcpClient("localhost", 5000))
-            using (NetworkStream netStream = client.GetStream())
+            // Save the converted JPEG to a memory stream
+            using (MemoryStream memory = new MemoryStream())
             {
-                // Save the image directly to the network stream in JPEG format
-                image.Save(netStream, jpegOptions);
+                image.Save(memory, jpegOptions);
+                memory.Position = 0; // Reset stream position for reading
+
+                // Send the JPEG data over a network stream
+                string host = "127.0.0.1";
+                int port = 9000;
+                using (TcpClient client = new TcpClient())
+                {
+                    client.Connect(host, port);
+                    using (NetworkStream netStream = client.GetStream())
+                    {
+                        memory.CopyTo(netStream);
+                        netStream.Flush();
+                    }
+                }
             }
         }
     }

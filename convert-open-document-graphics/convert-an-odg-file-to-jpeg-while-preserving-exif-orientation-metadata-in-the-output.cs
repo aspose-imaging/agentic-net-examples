@@ -2,14 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.odg";
-        string outputPath = "Output/sample.jpg";
+        string inputPath = "Input\\sample.odg";
+        string outputPath = "Output\\sample.jpg";
 
         if (!File.Exists(inputPath))
         {
@@ -19,21 +19,14 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        using (Aspose.Imaging.FileFormats.OpenDocument.OdgImage odgImage = (Aspose.Imaging.FileFormats.OpenDocument.OdgImage)Image.Load(inputPath))
         {
-            var odgImage = (OdgImage)image;
-
-            using (JpegOptions jpegOptions = new JpegOptions())
+            using (JpegOptions jpegOptions = new JpegOptions
             {
-                jpegOptions.KeepMetadata = true;
-                jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = odgImage.Width,
-                    PageHeight = odgImage.Height
-                };
-
-                image.Save(outputPath, jpegOptions);
+                KeepMetadata = true
+            })
+            {
+                odgImage.Save(outputPath, jpegOptions);
             }
         }
     }

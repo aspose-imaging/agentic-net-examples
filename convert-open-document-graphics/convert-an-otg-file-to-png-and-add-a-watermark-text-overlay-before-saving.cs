@@ -6,13 +6,13 @@ using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output paths
-        string inputPath = Path.Combine("Input", "sample.otg");
-        string outputPath = Path.Combine("Output", "sample.png");
+        // Hardcoded input and output paths
+        string inputPath = "input.otg";
+        string outputPath = "output.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,35 +22,43 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Convert OTG to PNG
+        // Load the OTG image
         using (Image otgImage = Image.Load(inputPath))
         {
-            using (var pngOptions = new PngOptions())
+            // Prepare PNG options with OTG rasterization settings
+            var pngOptions = new PngOptions();
+            var otgRasterOptions = new Aspose.Imaging.ImageOptions.OtgRasterizationOptions
             {
-                otgImage.Save(outputPath, pngOptions);
-            }
-        }
+                PageSize = otgImage.Size
+            };
+            pngOptions.VectorRasterizationOptions = otgRasterOptions;
 
-        // Add watermark text overlay
-        using (Image pngImage = Image.Load(outputPath))
-        {
-            // Cast to RasterImage for drawing
-            RasterImage rasterImage = (RasterImage)pngImage;
-
-            // Create graphics for the raster image
-            Graphics graphics = new Graphics(rasterImage);
-
-            // Define font and brush
-            Font font = new Font("Arial", 48);
-            using (var brush = new SolidBrush(Color.Yellow))
+            // Render OTG to PNG in memory
+            using (var memoryStream = new MemoryStream())
             {
-                // Position the watermark near the bottom-left corner
-                Point position = new Point(10, rasterImage.Height - 60);
-                graphics.DrawString("Watermark", font, brush, position);
-            }
+                otgImage.Save(memoryStream, pngOptions);
+                memoryStream.Position = 0;
 
-            // Save the image with the watermark
-            pngImage.Save(outputPath);
+                // Load the rendered PNG as a raster image for drawing
+                using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
+                {
+                    // Create graphics for drawing
+                    Graphics graphics = new Graphics(raster);
+
+                    // Define font and brush for the watermark
+                    Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 48);
+                    using (SolidBrush brush = new SolidBrush())
+                    {
+                        brush.Color = Aspose.Imaging.Color.Yellow;
+
+                        // Draw watermark text at the bottom-left corner
+                        graphics.DrawString("Watermark", font, brush, new Aspose.Imaging.Point(10, raster.Height - 60));
+                    }
+
+                    // Save the final PNG with watermark
+                    raster.Save(outputPath, pngOptions);
+                }
+            }
         }
     }
 }

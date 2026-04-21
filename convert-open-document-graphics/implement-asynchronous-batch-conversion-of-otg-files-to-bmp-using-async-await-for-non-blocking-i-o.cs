@@ -6,28 +6,6 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Entry point – async Main is supported in C# 7.1+
-    static async Task Main()
-    {
-        // Hard‑coded list of OTG files to process
-        string[] inputFiles = new[]
-        {
-            @"C:\Images\Input1.otg",
-            @"C:\Images\Input2.otg",
-            @"C:\Images\Input3.otg"
-        };
-
-        // Process each file sequentially (can be changed to parallel if needed)
-        foreach (string inputPath in inputFiles)
-        {
-            // Build output path with .bmp extension in the same folder
-            string outputPath = Path.ChangeExtension(inputPath, ".bmp");
-
-            // Perform conversion
-            await ConvertOtgToBmpAsync(inputPath, outputPath);
-        }
-    }
-
     // Asynchronous conversion of a single OTG file to BMP
     private static async Task ConvertOtgToBmpAsync(string inputPath, string outputPath)
     {
@@ -38,29 +16,44 @@ class Program
             return;
         }
 
-        // Ensure output directory exists (creates even if null – safe for root paths)
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the OTG image on a background thread (Aspose.Imaging API is synchronous)
+        // Load the OTG image without blocking the calling thread
         using (Image image = await Task.Run(() => Image.Load(inputPath)))
         {
-            // Prepare rasterization options for vector to raster conversion
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Prepare BMP save options with OTG rasterization settings
+            var bmpOptions = new BmpOptions();
+
+            var otgRaster = new OtgRasterizationOptions
             {
-                // Preserve original size
+                // Preserve original page size
                 PageSize = image.Size
             };
+            bmpOptions.VectorRasterizationOptions = otgRaster;
 
-            // Configure BMP save options and attach rasterization options
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = otgRasterOptions
-            };
-
-            // Save the image as BMP on a background thread
+            // Save the image as BMP without blocking the calling thread
             await Task.Run(() => image.Save(outputPath, bmpOptions));
         }
+    }
 
-        Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+    // Entry point
+    static async Task Main()
+    {
+        // Hard‑coded input and output directories
+        string inputDir = @"C:\InputOtg";
+        string outputDir = @"C:\OutputBmp";
+
+        // List of OTG files to process (hard‑coded)
+        string[] otgFiles = { "sample1.otg", "sample2.otg", "sample3.otg" };
+
+        foreach (var fileName in otgFiles)
+        {
+            string inputPath = Path.Combine(inputDir, fileName);
+            string outputFileName = Path.ChangeExtension(fileName, ".bmp");
+            string outputPath = Path.Combine(outputDir, outputFileName);
+
+            await ConvertOtgToBmpAsync(inputPath, outputPath);
+        }
     }
 }

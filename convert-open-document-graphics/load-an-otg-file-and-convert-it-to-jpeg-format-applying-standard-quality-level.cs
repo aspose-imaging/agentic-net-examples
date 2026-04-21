@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument; // For OtgImage if needed (Image.Load handles it)
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample_converted.jpg";
+        string outputPath = @"C:\Images\output\sample.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,15 +26,13 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Prepare JPEG save options with default quality
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Quality = 90 // standard quality level
-            };
+            JpegOptions jpegOptions = new JpegOptions();
 
-            // Configure vector rasterization for OTG to rasterize correctly
+            // Configure vector rasterization for OTG conversion
             OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
             {
-                PageSize = image.Size // preserve original size
+                // Preserve original size
+                PageSize = image.Size
             };
             jpegOptions.VectorRasterizationOptions = otgRasterization;
 

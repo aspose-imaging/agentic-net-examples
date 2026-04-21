@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.png";
+        string outputPath = @"C:\Images\Result\sample.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -27,30 +27,31 @@ class Program
         {
             // Prepare PNG save options with OTG rasterization settings
             var pngOptions = new PngOptions();
-            var otgRasterOptions = new OtgRasterizationOptions
+            var otgRaster = new OtgRasterizationOptions
             {
-                PageSize = otgImage.Size // preserve original size
+                // Preserve original page size
+                PageSize = otgImage.Size
             };
-            pngOptions.VectorRasterizationOptions = otgRasterOptions;
+            pngOptions.VectorRasterizationOptions = otgRaster;
 
-            // Rasterize OTG to PNG in memory
-            using (var memoryStream = new MemoryStream())
-            {
-                otgImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0; // reset stream for reading
+            // Save the rasterized image as PNG
+            otgImage.Save(outputPath, pngOptions);
+        }
 
-                // Load the rasterized PNG image
-                using (Image pngImage = Image.Load(memoryStream))
-                {
-                    // Apply gamma correction (example gamma = 2.2)
-                    if (pngImage is RasterImage raster)
-                    {
-                        raster.AdjustGamma(2.2f);
-                        // Save the final PNG with gamma applied
-                        raster.Save(outputPath);
-                    }
-                }
-            }
+        // Load the generated PNG to apply gamma correction
+        using (Image pngImage = Image.Load(outputPath))
+        {
+            // Cast to RasterImage to access AdjustGamma
+            var raster = (RasterImage)pngImage;
+
+            // Apply gamma correction (example gamma value)
+            raster.AdjustGamma(2.2f);
+
+            // Ensure the output directory exists (redundant but follows the rule)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Overwrite the PNG with gamma‑corrected data
+            pngImage.Save(outputPath);
         }
     }
 }

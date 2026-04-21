@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.odg";
-        string outputPath = "output\\output.png";
+        string inputPath = "sample.odg";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,26 +18,13 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the ODG image
+        // Load ODG image and save as PNG
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options for ODG to PNG conversion
-            var rasterOptions = new OdgRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = image.Size
-            };
-
-            // Set PNG save options and attach rasterization options
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the image as PNG
+            var pngOptions = new PngOptions();
             image.Save(outputPath, pngOptions);
         }
     }

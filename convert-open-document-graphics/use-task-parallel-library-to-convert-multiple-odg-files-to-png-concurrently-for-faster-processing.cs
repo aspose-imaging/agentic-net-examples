@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
@@ -8,15 +9,15 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded list of ODG files to convert
-        string[] inputFiles = new[]
+        // Hardcoded list of ODG input files
+        var inputFiles = new List<string>
         {
-            @"C:\Images\Input\file1.odg",
-            @"C:\Images\Input\file2.odg",
-            @"C:\Images\Input\file3.odg"
+            @"C:\Images\Input1.odg",
+            @"C:\Images\Input2.odg",
+            @"C:\Images\Input3.odg"
         };
 
-        // Process files in parallel
+        // Process each file in parallel
         Parallel.ForEach(inputFiles, inputPath =>
         {
             // Verify input file exists
@@ -26,34 +27,27 @@ class Program
                 return;
             }
 
-            // Determine output PNG path (same folder, same name with .png)
-            string outputPath = Path.ChangeExtension(inputPath, ".png");
+            // Determine output PNG path (same folder, same name with .png extension)
+            var outputPath = Path.ChangeExtension(inputPath, ".png");
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
+            // Load ODG image and save as PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for ODG
+                var pngOptions = new PngOptions();
+
+                // Set rasterization options for vector to raster conversion
                 var rasterOptions = new OdgRasterizationOptions
                 {
-                    // Preserve original size
                     PageSize = image.Size,
                     BackgroundColor = Color.White
                 };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Configure PNG save options
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
-
-            Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
         });
     }
 }

@@ -2,17 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageOptions; // for SvgOptions and OtgRasterizationOptions
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\sample.otg";
         string outputPath = @"C:\Images\sample.svg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,21 +24,21 @@ class Program
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG export options
-            var svgOptions = new SvgOptions();
-
-            // Configure vector rasterization to keep vector data intact
+            // Configure OTG rasterization options – keep original page size
             var otgRasterOptions = new OtgRasterizationOptions
             {
-                // Preserve original page size
                 PageSize = image.Size
             };
-            svgOptions.VectorRasterizationOptions = otgRasterOptions;
 
-            // Optional: keep text as text (not shapes) to retain vector quality
-            svgOptions.TextAsShapes = false;
+            // Set up SVG export options and attach the rasterization options
+            var svgOptions = new SvgOptions
+            {
+                VectorRasterizationOptions = otgRasterOptions,
+                // Preserve vector data (default behavior); TextAsShapes left as false
+                TextAsShapes = false
+            };
 
-            // Save as SVG
+            // Save the image as SVG
             image.Save(outputPath, svgOptions);
         }
     }
