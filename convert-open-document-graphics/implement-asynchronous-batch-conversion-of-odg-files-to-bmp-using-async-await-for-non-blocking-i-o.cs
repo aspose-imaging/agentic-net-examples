@@ -1,65 +1,70 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static async Task Main(string[] args)
+    // Asynchronous processing of a single ODG file to BMP
+    private static async Task ProcessFileAsync(string inputPath, string outputPath)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
         // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        await Task.Run(() =>
         {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all ODG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.odg");
-
-        foreach (string filePath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(filePath))
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                continue;
-            }
+                // Prepare BMP options with rasterization settings
+                var bmpOptions = new BmpOptions();
 
-            // Prepare output path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + ".bmp");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the ODG image asynchronously
-            using (Image image = await Task.Run(() => Image.Load(filePath)))
-            {
-                // Configure BMP save options with rasterization settings
-                using (BmpOptions bmpOptions = new BmpOptions())
+                // Configure vector rasterization for ODG
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    bmpOptions.VectorRasterizationOptions = new OdgRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageSize = image.Size
-                    };
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
+                };
+                bmpOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Save the image as BMP asynchronously
-                    await Task.Run(() => image.Save(outputPath, bmpOptions));
-                }
+                // Save as BMP
+                image.Save(outputPath, bmpOptions);
             }
+        });
+    }
 
-            Console.WriteLine($"Converted: {filePath} -> {outputPath}");
-        }
+    // Entry point
+    static async Task Main()
+    {
+        // Hardcoded input files and output directory
+        string[] inputFiles = new[]
+        {
+            @"C:\Input\sample1.odg",
+            @"C:\Input\sample2.odg",
+            @"C:\Input\sample3.odg"
+        };
+        string outputDirectory = @"C:\Output";
+
+        // Prepare tasks for batch conversion
+        var tasks = inputFiles.Select(inputPath =>
+        {
+            string outputPath = Path.Combine(
+                outputDirectory,
+                Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
+            return ProcessFileAsync(inputPath, outputPath);
+        }).ToArray();
+
+        // Await all conversions
+        await Task.WhenAll(tasks);
     }
 }
