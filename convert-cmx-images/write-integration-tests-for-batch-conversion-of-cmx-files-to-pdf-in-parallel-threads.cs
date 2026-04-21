@@ -1,56 +1,48 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        // Define relative input and output directories
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDir = Path.Combine(baseDir, "Input");
+        string outputDir = Path.Combine(baseDir, "Output");
 
-        if (!Directory.Exists(inputDirectory))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDir);
+
+        // Get all CMX files in the input directory
+        string[] files = Directory.GetFiles(inputDir, "*.cmx");
+
+        // Process each file in parallel
+        files.AsParallel().ForAll(inputPath =>
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        Directory.CreateDirectory(outputDirectory);
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.cmx");
-
-        foreach (var filePath in files)
-        {
-            if (!File.Exists(filePath))
+            // Verify the input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+            // Determine the output PDF path
+            string fileName = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDir, fileName + ".pdf");
 
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(filePath))
+            // Load the CMX image and save as PDF
+            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-
-                    image.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, pdfOptions);
             }
-        }
+        });
     }
 }
