@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.eps";
-        string outputPath = "preview.jpg";
+        string inputPath = "input.eps";
+        string outputPath = "output.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,20 +22,22 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load EPS image
-        using (var epsImage = (EpsImage)Image.Load(inputPath))
+        using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
         {
-            // Retrieve low‑resolution preview (default format)
-            Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.Default);
-            if (preview == null)
+            // Retrieve the default low‑resolution preview
+            var previewImage = epsImage.GetPreviewImage(Aspose.Imaging.FileFormats.Eps.EpsPreviewFormat.Default);
+            if (previewImage == null)
             {
                 Console.Error.WriteLine("No preview image found in the EPS file.");
                 return;
             }
 
-            // Save preview as JPEG
-            var jpegOptions = new JpegOptions();
-            preview.Save(outputPath, jpegOptions);
-            preview.Dispose();
+            // Save the preview as JPEG
+            using (previewImage)
+            {
+                var jpegOptions = new JpegOptions();
+                previewImage.Save(outputPath, jpegOptions);
+            }
         }
     }
 }
