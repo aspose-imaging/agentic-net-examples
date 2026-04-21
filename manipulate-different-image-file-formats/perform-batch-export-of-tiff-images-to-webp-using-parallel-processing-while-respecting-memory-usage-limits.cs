@@ -1,57 +1,65 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using Aspose.Imaging.FileFormats.Tiff;
+using System.Threading.Tasks;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
-        // Define input and output directories (relative to current directory)
-        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
-
-        // Ensure the directories exist
-        Directory.CreateDirectory(inputDirectory);
-        Directory.CreateDirectory(outputDirectory);
-
-        // Get all TIFF files in the input directory
-        string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-
-        // Process each TIFF file in parallel
-        System.Threading.Tasks.Parallel.ForEach(tiffFiles, inputPath =>
+        // Hardcoded input TIFF files and output directory
+        string[] inputFiles = new[]
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            @"C:\Images\Input1.tif",
+            @"C:\Images\Input2.tif",
+            @"C:\Images\Input3.tif"
+        };
+        string outputDirectory = @"C:\Images\WebPOutput";
+
+        try
+        {
+            // Ensure the output directory exists once (additional calls are safe)
+            Directory.CreateDirectory(outputDirectory);
+
+            // Limit parallelism to avoid excessive memory consumption
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+
+            Parallel.ForEach(inputFiles, parallelOptions, inputPath =>
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Build the output file path with .webp extension
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure the output directory exists (unconditional as required)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image with a memory usage hint (e.g., 50 MB)
-            var loadOptions = new Aspose.Imaging.LoadOptions { BufferSizeHint = 50 };
-
-            using (Aspose.Imaging.Image tiffImage = Aspose.Imaging.Image.Load(inputPath, loadOptions))
-            {
-                // Configure WebP export options
-                var webpOptions = new WebPOptions
+                // Verify input file existence
+                if (!File.Exists(inputPath))
                 {
-                    Lossless = false,   // Use lossy compression
-                    Quality = 80        // Quality level (0-100)
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image as WebP
-                tiffImage.Save(outputPath, webpOptions);
-            }
-        });
+                // Build output file path (same name with .webp extension)
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+
+                // Ensure the output directory exists (safe to call repeatedly)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image, set a page exporting action to release resources,
+                // and save it as WebP using default options.
+                using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+                {
+                    // Release page resources after each page is saved (helps memory usage)
+                    tiffImage.PageExportingAction = (index, page) =>
+                    {
+                        GC.Collect();
+                    };
+
+                    // Save as WebP; you can adjust options (e.g., Quality, Lossless) if needed
+                    tiffImage.Save(outputPath, new WebPOptions());
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
