@@ -1,59 +1,72 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text.Json;
 using Aspose.Imaging;
+using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.bmp";
-        string outputPath = "Output/metadata.json";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.json";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Retrieve EXIF data if present
+                ExifData exifData = image.Metadata?.ExifData;
+                var exifDictionary = new Dictionary<string, object?>();
+
+                if (exifData != null)
+                {
+                    // Use reflection to collect all readable properties
+                    PropertyInfo[] properties = exifData.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                    foreach (var prop in properties)
+                    {
+                        if (prop.CanRead)
+                        {
+                            try
+                            {
+                                object? value = prop.GetValue(exifData);
+                                if (value != null)
+                                {
+                                    exifDictionary[prop.Name] = value;
+                                }
+                            }
+                            catch
+                            {
+                                // Ignore properties that throw on get
+                            }
+                        }
+                    }
+                }
+
+                // Serialize the dictionary to JSON
+                string json = JsonSerializer.Serialize(exifDictionary, new JsonSerializerOptions { WriteIndented = true });
+
+                // Write JSON to the output file
+                File.WriteAllText(outputPath, json);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Use dynamic to access ExifData without compile‑time type constraints
-            var exif = (image as dynamic).ExifData as Aspose.Imaging.Exif.ExifData;
-
-            string json;
-
-            if (exif != null)
-            {
-                json = "{";
-
-                // General EXIF fields
-                json += $"\"ExifVersion\":\"{exif.ExifVersion}\",";
-
-                // Cast to JPEG EXIF for additional fields (many BMP files store JPEG‑compatible EXIF)
-                var jpegExif = exif as Aspose.Imaging.Exif.JpegExifData;
-                if (jpegExif != null)
-                {
-                    json += $"\"Make\":\"{jpegExif.Make}\",";
-                    json += $"\"Model\":\"{jpegExif.Model}\",";
-                    json += $"\"Orientation\":\"{jpegExif.Orientation}\",";
-                }
-
-                // Remove trailing comma if present
-                if (json.EndsWith(","))
-                {
-                    json = json.Substring(0, json.Length - 1);
-                }
-
-                json += "}";
-            }
-            else
-            {
-                json = "{}";
-            }
-
-            File.WriteAllText(outputPath, json);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
