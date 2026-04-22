@@ -7,38 +7,44 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded list of animated WebP files to convert
-        string[] inputFiles = new string[]
+        try
         {
-            @"C:\Images\anim1.webp",
-            @"C:\Images\anim2.webp"
-        };
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputWebp";
+            string outputDir = @"C:\OutputApng";
 
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Get all animated WEBP files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.webp");
+
+            foreach (string inputPath in inputFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Determine output path (same folder, .png extension)
-            string outputPath = Path.ChangeExtension(inputPath, ".png");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the animated WebP image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Save as APNG, preserving metadata (including frame timing)
-                var apngOptions = new ApngOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    KeepMetadata = true
-                };
-                image.Save(outputPath, apngOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                // Build the output file path with .png extension (APNG)
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the animated WEBP and save it as APNG, preserving frames and timing
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, new ApngOptions());
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
