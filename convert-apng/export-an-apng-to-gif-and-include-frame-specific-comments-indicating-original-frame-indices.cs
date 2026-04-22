@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "animation.apng");
-        string outputPath = Path.Combine("Output", "converted.gif");
+        string inputPath = "Input\\animation.apng";
+        string outputPath = "Output\\animation.gif";
 
         if (!File.Exists(inputPath))
         {
@@ -20,33 +20,39 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        try
         {
-            int frameCount = apng.PageCount;
-            if (frameCount == 0)
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine("APNG contains no frames.");
-                return;
-            }
+                ushort width = (ushort)apng.Width;
+                ushort height = (ushort)apng.Height;
 
-            ApngFrame firstApngFrame = (ApngFrame)apng.Pages[0];
-            var firstBlock = new GifFrameBlock((ushort)firstApngFrame.Width, (ushort)firstApngFrame.Height);
-            Graphics gFirst = new Graphics(firstBlock);
-            gFirst.DrawImage(firstApngFrame, new Point(0, 0));
-
-            using (GifImage gif = new GifImage(firstBlock))
-            {
-                for (int i = 1; i < frameCount; i++)
+                using (GifFrameBlock firstBlock = new GifFrameBlock(width, height))
                 {
-                    ApngFrame apngFrame = (ApngFrame)apng.Pages[i];
-                    var block = new GifFrameBlock((ushort)apngFrame.Width, (ushort)apngFrame.Height);
-                    Graphics g = new Graphics(block);
-                    g.DrawImage(apngFrame, new Point(0, 0));
-                    gif.AddPage(block);
-                }
+                    Graphics graphics = new Graphics(firstBlock);
+                    using (RasterImage firstFrame = (RasterImage)apng.Pages[0])
+                    {
+                        graphics.DrawImage(firstFrame, new Point(0, 0));
+                    }
 
-                gif.Save(outputPath);
+                    using (GifImage gif = new GifImage(firstBlock))
+                    {
+                        for (int i = 1; i < apng.PageCount; i++)
+                        {
+                            using (RasterImage frame = (RasterImage)apng.Pages[i])
+                            {
+                                gif.AddPage(frame);
+                            }
+                        }
+
+                        gif.Save(outputPath);
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
