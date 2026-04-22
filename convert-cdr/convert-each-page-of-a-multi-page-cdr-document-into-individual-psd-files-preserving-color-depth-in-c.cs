@@ -9,54 +9,61 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input CDR file path
-        string inputPath = "sample.cdr";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.cdr";
 
-        // Output directory for PSD pages
-        string outputDir = "output";
-        Directory.CreateDirectory(outputDir);
-
-        // Load the multi‑page CDR document
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
-        {
-            int pageCount = cdr.PageCount;
-
-            for (int i = 0; i < pageCount; i++)
+            if (!File.Exists(inputPath))
             {
-                using (CdrImagePage page = (CdrImagePage)cdr.Pages[i])
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            {
+                int pageIndex = 0;
+                foreach (Image img in cdr.Pages)
                 {
-                    page.CacheData(); // optional caching
-
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.psd");
-                    // Ensure the directory exists before saving
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Prepare PSD save options preserving color depth
-                    PsdOptions psdOptions = new PsdOptions
+                    using (CdrImagePage page = (CdrImagePage)img)
                     {
-                        CompressionMethod = CompressionMethod.RLE,
-                        Version = 6
-                    };
+                        string outputPath = Path.Combine("output", $"page_{pageIndex}.psd");
+                        string outputDir = Path.GetDirectoryName(outputPath);
+                        if (!string.IsNullOrWhiteSpace(outputDir))
+                        {
+                            Directory.CreateDirectory(outputDir);
+                        }
 
-                    int bitsPerPixel = page.BitsPerPixel;          // total bits per pixel
-                    short channelBits = 8;                         // typical bits per channel
-                    short channels = (short)(bitsPerPixel / channelBits);
-                    if (channels == 0) channels = 1;               // fallback for unexpected values
+                        PsdOptions psdOptions = new PsdOptions
+                        {
+                            CompressionMethod = CompressionMethod.RLE,
+                            Version = 6,
+                            ColorMode = page.BitsPerPixel <= 8 ? ColorModes.Grayscale : ColorModes.Rgb
+                        };
 
-                    psdOptions.ChannelBitsCount = channelBits;
-                    psdOptions.ChannelsCount = channels;
-                    psdOptions.ColorMode = (channels == 1) ? ColorModes.Grayscale : ColorModes.Rgb;
+                        int bitsPerPixel = page.BitsPerPixel;
+                        int channels = bitsPerPixel == 32 ? 4 : (bitsPerPixel == 24 ? 3 : 1);
+                        psdOptions.ChannelsCount = (short)channels;
+                        psdOptions.ChannelBitsCount = (short)(bitsPerPixel / channels);
 
-                    // Save the page as an individual PSD file
-                    page.Save(outputPath, psdOptions);
+                        VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                        {
+                            PageWidth = page.Width,
+                            PageHeight = page.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        };
+                        psdOptions.VectorRasterizationOptions = vectorOptions;
+
+                        page.Save(outputPath, psdOptions);
+                    }
+
+                    pageIndex++;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
