@@ -2,71 +2,89 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.apng";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.apng";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image svgImage = Image.Load(inputPath))
-        {
-            SvgImage svg = (SvgImage)svgImage;
-            int width = svg.Width;
-            int height = svg.Height;
-
-            using (MemoryStream rasterStream = new MemoryStream())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Temporary rasterized PNG path
+            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+
+            // Load SVG and rasterize to PNG
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svg.Size
+                    PageSize = svgImage.Size
                 };
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
-                svg.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0;
+                svgImage.Save(tempPngPath, pngOptions);
+            }
 
-                using (RasterImage baseFrame = (RasterImage)Image.Load(rasterStream))
+            // Load the rasterized PNG as a RasterImage
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                // Create APNG options
+                var apngOptions = new ApngOptions
                 {
-                    const int animationDurationMs = 1000;
-                    const int frameDurationMs = 100;
-                    int frameCount = animationDurationMs / frameDurationMs;
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100, // 100 ms per frame
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
 
-                    ApngOptions apngOptions = new ApngOptions
+                // Create APNG image canvas
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, raster.Width, raster.Height))
+                {
+                    apng.RemoveAllFrames();
+
+                    int frameCount = 10;
+                    for (int i = 0; i < frameCount; i++)
                     {
-                        Source = new FileCreateSource(outputPath, false),
-                        DefaultFrameTime = (uint)frameDurationMs,
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
+                        // Add the base raster frame
+                        apng.AddFrame(raster);
 
-                    using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
-                    {
-                        apng.RemoveAllFrames();
-
-                        for (int i = 0; i < frameCount; i++)
-                        {
-                            apng.AddFrame(baseFrame);
-                        }
-
-                        apng.Save();
+                        // Adjust gamma to create a simple fade animation
+                        ApngFrame lastFrame = (ApngFrame)apng.Pages[apng.PageCount - 1];
+                        float gamma = (float)i / (frameCount - 1);
+                        lastFrame.AdjustGamma(gamma);
                     }
+
+                    // Save the APNG file
+                    apng.Save();
                 }
             }
+
+            // Clean up temporary file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
