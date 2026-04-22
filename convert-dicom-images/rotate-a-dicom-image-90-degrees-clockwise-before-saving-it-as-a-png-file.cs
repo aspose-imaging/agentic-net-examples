@@ -1,36 +1,46 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.dcm";
-        string outputPath = "Output/rotated.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "sample.dcm";
+            string outputPath = "sample_rotated.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DICOM image, rotate, and save as PNG
-        using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Rotate 90 degrees clockwise, resize proportionally, black background
-            dicomImage.Rotate(90f, true, Aspose.Imaging.Color.Black);
-
-            // Save rotated image as PNG
-            using (PngOptions pngOptions = new PngOptions())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                dicomImage.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to DicomImage to access DICOM-specific methods
+                DicomImage dicomImage = (DicomImage)image;
+
+                // Rotate 90 degrees clockwise without flipping
+                dicomImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                // Save the rotated image as PNG
+                dicomImage.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

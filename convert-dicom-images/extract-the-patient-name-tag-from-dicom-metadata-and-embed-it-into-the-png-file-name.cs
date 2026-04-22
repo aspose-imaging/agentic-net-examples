@@ -6,46 +6,54 @@ using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input\\sample.dcm";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.dcm";
 
-        // Load DICOM image
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
-        {
-            // Attempt to extract Patient Name from metadata via reflection
-            string patientName = "UnknownPatient";
-            var metadata = dicomImage.Metadata;
-            if (metadata != null)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                var prop = metadata.GetType().GetProperty("PatientName");
-                if (prop != null)
-                {
-                    var value = prop.GetValue(metadata) as string;
-                    if (!string.IsNullOrEmpty(value))
-                    {
-                        patientName = value;
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Prepare output path with patient name embedded
-            string outputFileName = $"{patientName}.png";
-            string outputPath = Path.Combine("Output", outputFileName);
-
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDirectory = "Output";
+            Directory.CreateDirectory(outputDirectory);
 
-            // Save DICOM image as PNG
-            dicomImage.Save(outputPath, new PngOptions());
+            // Load DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                DicomImage dicomImage = (DicomImage)image;
+
+                // Use a default patient name (metadata extraction not supported in this version)
+                string patientName = "Unknown";
+
+                // Sanitize patient name for file name
+                foreach (char c in Path.GetInvalidFileNameChars())
+                {
+                    patientName = patientName.Replace(c.ToString(), "_");
+                }
+
+                // Build output file path with patient name embedded
+                string outputPath = Path.Combine(outputDirectory, $"Image_{patientName}.png");
+
+                // Ensure output directory for the file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save as PNG
+                using (var pngOptions = new PngOptions())
+                {
+                    dicomImage.Save(outputPath, pngOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

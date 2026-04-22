@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.CoreExceptions.ImageFormats;
 
 class Program
 {
@@ -12,57 +13,77 @@ class Program
         string inputDir = @"C:\InputDicom";
         string outputDir = @"C:\OutputPng";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Get all DICOM files in the input directory
-        string[] dicomFiles = Directory.GetFiles(inputDir, "*.dcm");
-
-        foreach (string inputPath in dicomFiles)
+        try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            try
+            // Process each DICOM file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.dcm"))
             {
-                // Open the DICOM file as a stream
-                using (FileStream stream = File.OpenRead(inputPath))
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Load the DICOM image
-                    using (DicomImage dicomImage = new DicomImage(stream))
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Prepare output file name (base name without extension)
+                string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, baseName + ".png");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                try
+                {
+                    // Load the DICOM image using the provided load rule
+                    using (Image image = Image.Load(inputPath))
                     {
-                        // Iterate through each page and save as PNG
-                        foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                        // If the loaded image is a multi‑page DICOM, save each page separately
+                        DicomImage dicomImage = image as DicomImage;
+                        if (dicomImage != null)
                         {
-                            // Build output file name: originalname_page{index}.png
-                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{dicomPage.Index}.png";
-                            string outputPath = Path.Combine(outputDir, outputFileName);
-
-                            // Ensure the output directory exists (unconditional as per rules)
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save the page as PNG
-                            dicomPage.Save(outputPath, new PngOptions());
+                            int pageIndex = 0;
+                            foreach (DicomPage page in dicomImage.DicomPages)
+                            {
+                                string pageOutputPath = Path.Combine(outputDir, $"{baseName}_{pageIndex}.png");
+                                Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
+                                page.Save(pageOutputPath, new PngOptions());
+                                pageIndex++;
+                            }
+                        }
+                        else
+                        {
+                            // Single‑page fallback: save directly as PNG
+                            image.Save(outputPath, new PngOptions());
                         }
                     }
                 }
+                catch (DicomImageException ex)
+                {
+                    // Gracefully skip corrupted DICOM files
+                    Console.Error.WriteLine($"Skipping corrupted DICOM file: {inputPath}. Reason: {ex.Message}");
+                    continue;
+                }
+                catch (PngImageException ex)
+                {
+                    // Handle PNG saving issues without stopping the batch
+                    Console.Error.WriteLine($"Error saving PNG for file: {inputPath}. Reason: {ex.Message}");
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    // Catch any other unexpected errors for this file
+                    Console.Error.WriteLine($"Unexpected error processing file {inputPath}: {ex.Message}");
+                    continue;
+                }
             }
-            catch (DicomImageException ex)
-            {
-                // Gracefully skip corrupted DICOM files
-                Console.Error.WriteLine($"Skipping corrupted file: {inputPath}. Reason: {ex.Message}");
-                continue;
-            }
-            catch (Exception ex)
-            {
-                // Handle any other unexpected errors without stopping the batch
-                Console.Error.WriteLine($"Error processing file: {inputPath}. Reason: {ex.Message}");
-                continue;
-            }
+        }
+        catch (Exception ex)
+        {
+            // Global error handling
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
