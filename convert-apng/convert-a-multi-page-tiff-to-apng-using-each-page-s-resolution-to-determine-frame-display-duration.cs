@@ -3,66 +3,80 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/multipage.tif";
-        string outputPath = "output/animation.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the multi‑page TIFF
-        using (Image tiffImage = Image.Load(inputPath))
-        {
-            if (tiffImage is IMultipageImage multipage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑page TIFF
+            using (Image tiffImage = Image.Load(inputPath))
+            {
+                TiffImage tiff = (TiffImage)tiffImage;
+                TiffFrame[] frames = tiff.Frames;
+
+                if (frames.Length == 0)
+                {
+                    Console.Error.WriteLine("No frames found in the TIFF image.");
+                    return;
+                }
+
                 // Prepare APNG creation options
                 ApngOptions apngOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Use the first page to define canvas size
-                using (RasterImage firstPage = (RasterImage)multipage.Pages[0])
+                // Create an APNG image using the dimensions of the first frame
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    apngOptions,
+                    frames[0].Width,
+                    frames[0].Height))
                 {
-                    using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, firstPage.Width, firstPage.Height))
+                    // Remove the default single frame
+                    apngImage.RemoveAllFrames();
+
+                    // Add each TIFF frame as an APNG frame
+                    foreach (TiffFrame tiffFrame in frames)
                     {
-                        // Remove the default frame that exists upon creation
-                        apngImage.RemoveAllFrames();
+                        // Cast the frame to RasterImage (TiffFrame derives from RasterImage)
+                        RasterImage raster = (RasterImage)tiffFrame;
 
-                        // Add each TIFF page as a frame, setting duration based on resolution
-                        for (int i = 0; i < multipage.PageCount; i++)
-                        {
-                            using (RasterImage page = (RasterImage)multipage.Pages[i])
-                            {
-                                apngImage.AddFrame(page);
+                        // Determine frame duration based on resolution (example: area / 1000, minimum 100 ms)
+                        uint frameDuration = Math.Max(100u, (uint)(raster.Width * raster.Height / 1000));
 
-                                // Retrieve the frame just added
-                                ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        // Set the default frame time for the next added frame
+                        apngImage.DefaultFrameTime = frameDuration;
 
-                                // Example: duration inversely proportional to horizontal DPI
-                                uint duration = (uint)(1000.0 / page.HorizontalResolution);
-                                frame.FrameTime = (int)duration;
-                            }
-                        }
-
-                        // Save the resulting APNG
-                        apngImage.Save();
+                        // Add the frame to the APNG
+                        apngImage.AddFrame(raster);
                     }
+
+                    // Save the APNG file
+                    apngImage.Save();
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
