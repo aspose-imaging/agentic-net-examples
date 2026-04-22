@@ -6,51 +6,50 @@ using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.png";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR file
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-        {
-            // Guard against empty documents
-            if (cdrImage.PageCount == 0)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The CDR file contains no pages.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Get the first (single) page
-            CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure rasterization to preserve transparency
-            var rasterOptions = new CdrRasterizationOptions
+            // Load the CDR image
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                BackgroundColor = Color.Transparent,   // keep transparent background
-                PageWidth = page.Width,
-                PageHeight = page.Height
-            };
+                // Cache data to avoid repeated loading
+                cdr.CacheData();
 
-            // PNG save options using the rasterization settings
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
+                // Configure PNG options with vector rasterization to preserve transparency
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                        // No background color set to keep transparency
+                    }
+                };
 
-            // Save the page as PNG
-            page.Save(outputPath, pngOptions);
+                // Save the CDR as PNG
+                cdr.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
