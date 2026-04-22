@@ -1,35 +1,59 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.dcm";
-        string outputPath = "Output/sample.png";
+        // Hardcoded paths
+        string inputPath = "sample.dcm";
+        string outputPath = "output.png";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to DicomImage (safe because we loaded a DICOM file)
+                using (DicomImage dicomImage = (DicomImage)image)
+                {
+                    // Save first page as PNG (single‑page DICOMs have one page)
+                    dicomImage.Save(outputPath, new PngOptions());
+                }
+            }
+
+            // Compare file sizes
+            long inputSize = new FileInfo(inputPath).Length;
+            long outputSize = new FileInfo(outputPath).Length;
+
+            Console.WriteLine($"Input DICOM size: {inputSize} bytes");
+            Console.WriteLine($"Output PNG size: {outputSize} bytes");
+
+            if (outputSize == 0)
+            {
+                Console.Error.WriteLine("Conversion failed: output file is empty.");
+            }
+            else
+            {
+                Console.WriteLine("Conversion succeeded.");
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (DicomImage dicom = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
+        catch (Exception ex)
         {
-            PngOptions options = new PngOptions();
-            dicom.Save(outputPath, options);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        long inputSize = new FileInfo(inputPath).Length;
-        long outputSize = new FileInfo(outputPath).Length;
-
-        Console.WriteLine($"Input DICOM size: {inputSize} bytes");
-        Console.WriteLine($"Output PNG size: {outputSize} bytes");
-        Console.WriteLine($"Size difference: {outputSize - inputSize} bytes");
     }
 }
