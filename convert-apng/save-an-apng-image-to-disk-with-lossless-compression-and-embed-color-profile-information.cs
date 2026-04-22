@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
@@ -12,29 +13,36 @@ class Program
         string inputPath = "input.png";
         string outputPath = "output.apng";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            ApngOptions options = new ApngOptions
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                ColorType = PngColorType.TruecolorWithAlpha,
-                PngCompressionLevel = PngCompressionLevel.ZipLevel9
-            };
-
-            using (Aspose.Imaging.FileFormats.Apng.ApngImage apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
-            {
-                apng.RemoveAllFrames();
-                apng.AddFrame(sourceImage);
-                apng.Save();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            {
+                ApngOptions createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    PngCompressionLevel = PngCompressionLevel.ZipLevel9
+                };
+
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                {
+                    apngImage.RemoveAllFrames();
+                    apngImage.AddFrame(sourceImage);
+                    apngImage.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
