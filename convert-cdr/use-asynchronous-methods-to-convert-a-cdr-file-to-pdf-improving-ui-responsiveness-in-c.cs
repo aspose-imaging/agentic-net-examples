@@ -2,58 +2,61 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
-    // Entry point
-    static async Task Main()
+    static async Task Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputDirectory = @"C:\Images\PdfOutput";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded relative paths
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the CDR image with default load options
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath, new CdrLoadOptions()))
-        {
-            // Iterate through each page in the CDR document
-            for (int i = 0; i < cdrImage.Pages.Length; i++)
+            // Input validation
+            if (!File.Exists(inputPath))
             {
-                // Prepare output PDF file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{i}.pdf");
-
-                // Ensure the directory for the output file exists (unconditional as required)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Retrieve the specific page
-                var page = (CdrImagePage)cdrImage.Pages[i];
-
-                // Configure PDF options with rasterization settings matching the page size
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        PageWidth = page.Width,
-                        PageHeight = page.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
-
-                // Save the page to PDF asynchronously to keep UI responsive
-                await Task.Run(() => page.Save(outputPath, pdfOptions));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Perform conversion on a background thread
+            await Task.Run(() =>
+            {
+                // Load CDR with progress reporting
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath, new LoadOptions
+                {
+                    ProgressEventHandler = info => Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
+                }))
+                {
+                    // Configure PDF export options with rasterization settings
+                    var pdfOptions = new PdfOptions
+                    {
+                        ProgressEventHandler = info => Console.WriteLine($"Export {info.EventType} : {info.Value}/{info.MaxValue}"),
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None,
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+
+                    // Save as PDF
+                    cdr.Save(outputPath, pdfOptions);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
