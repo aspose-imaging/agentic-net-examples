@@ -6,34 +6,40 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.png";
+        string inputPath = "sample.cdr";
+        string outputPath = "output.png";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
-        {
-            var pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                PngCompressionLevel = PngCompressionLevel.ZipLevel9,
-                ColorType = PngColorType.TruecolorWithAlpha,
-                VectorRasterizationOptions = new CdrRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            PngOptions pngOptions = new PngOptions
+            {
+                CompressionLevel = 9
             };
 
-            cdr.Save(outputPath, pngOptions);
+            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                pngOptions.VectorRasterizationOptions = new CdrRasterizationOptions
+                {
+                    PageWidth = cdr.Width,
+                    PageHeight = cdr.Height
+                };
+
+                cdr.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

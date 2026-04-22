@@ -3,67 +3,65 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define relative input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputCdrFiles";
+            string outputDirectory = @"C:\OutputJpgFiles";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
-        }
 
-        // Get all CDR files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+            // Get all CDR files in the input directory
+            string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in cdrFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Build output file name with timestamp
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-            string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}_{timestamp}.jpg");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image and convert to JPEG
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
-            {
-                JpegOptions jpegOptions = new JpegOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                cdr.Save(outputPath, jpegOptions);
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                {
+                    // Cache all pages to avoid repeated loading
+                    cdrImage.CacheData();
+                    foreach (CdrImagePage page in cdrImage.Pages)
+                    {
+                        page.CacheData();
+
+                        // Prepare output file name with timestamp
+                        string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                        string outputFileName = $"{baseName}_{timestamp}.jpg";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Set JPEG save options
+                        JpegOptions jpegOptions = new JpegOptions
+                        {
+                            Quality = 90
+                        };
+
+                        // Save the page as JPEG
+                        page.Save(outputPath, jpegOptions);
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

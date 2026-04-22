@@ -1,38 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cdr";
-        string outputPath = "output/output.jpg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample_resized.jpg";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR file
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            {
+                // Resize the image to 1024×768 pixels
+                cdrImage.Resize(1024, 768);
+
+                // Save the resized image as JPEG
+                cdrImage.Save(outputPath, new JpegOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load CDR image, resize, and save as JPEG
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Resize to 1024x768 pixels
-            cdr.Resize(1024, 768);
-
-            // JPEG save options
-            JpegOptions jpegOptions = new JpegOptions();
-
-            // Save the resized image as JPEG
-            cdr.Save(outputPath, jpegOptions);
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

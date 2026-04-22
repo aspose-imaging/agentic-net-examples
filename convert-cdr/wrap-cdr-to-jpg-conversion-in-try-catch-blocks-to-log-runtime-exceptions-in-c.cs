@@ -1,37 +1,52 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.jpg";
-
-        if (!File.Exists(inputPath))
+        // Global exception handling to prevent crashes
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\output.jpg";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
-        {
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            cdr.Save(outputPath, jpegOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Conversion specific exception handling
+            try
+            {
+                // Load the CDR file
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Set JPEG save options (default settings)
+                    JpegOptions jpegOptions = new JpegOptions();
+
+                    // Save the image as JPEG
+                    image.Save(outputPath, jpegOptions);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log any errors that occur during conversion
+                Console.Error.WriteLine($"Conversion error: {ex.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log any unexpected errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

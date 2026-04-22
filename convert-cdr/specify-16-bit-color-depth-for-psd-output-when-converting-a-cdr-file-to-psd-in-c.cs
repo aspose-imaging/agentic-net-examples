@@ -2,48 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.psd";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample_output.psd";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            CdrImage cdr = image as CdrImage;
-            if (cdr == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Input file is not a CDR image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            PsdOptions psdOptions = new PsdOptions
-            {
-                ChannelBitsCount = (short)16,
-                ChannelsCount = (short)3,
-                ColorMode = ColorModes.Rgb,
-                CompressionMethod = CompressionMethod.Raw,
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height
-                }
-            };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            cdr.Save(outputPath, psdOptions);
+            // Load the CDR file
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD options for 16‑bit per channel
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    ChannelBitsCount = 16,                     // 16 bits per channel
+                    ChannelsCount = 4,                         // RGBA channels
+                    ColorMode = ColorModes.Rgb,                // RGB color mode
+                    CompressionMethod = CompressionMethod.Raw // No compression
+                };
+
+                // Save as PSD with the specified options
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

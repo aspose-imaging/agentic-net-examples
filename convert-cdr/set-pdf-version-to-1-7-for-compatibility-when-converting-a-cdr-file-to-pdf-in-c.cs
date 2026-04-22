@@ -2,16 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.pdf";
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\output\sample.pdf";
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -23,25 +23,29 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR image and convert to PDF with PDF 1.7 compatibility
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            var pdfOptions = new PdfOptions
+            // Load the CDR image
+            using (var image = (CdrImage)Image.Load(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
+                // Configure PDF options with PDF compliance (closest to PDF 1.7)
+                var pdfOptions = new PdfOptions
                 {
-                    // Setting compliance that aligns with PDF 1.7 compatibility
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                },
-                VectorRasterizationOptions = new CdrRasterizationOptions
-                {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    Positioning = PositioningTypes.DefinedByDocument
-                }
-            };
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        // Aspose.Imaging currently provides Pdf15, PdfA1a, PdfA1b.
+                        // Pdf15 is used here as the available option for PDF 1.x compliance.
+                        PdfCompliance = PdfComplianceVersion.Pdf15
+                    }
+                };
 
-            image.Save(outputPath, pdfOptions);
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

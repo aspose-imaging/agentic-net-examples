@@ -1,37 +1,45 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "sample.cdr";
+        string inputPath = "input.cdr";
         string outputPath = "output.png";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
-        {
-            PngOptions pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                PngCompressionLevel = PngCompressionLevel.ZipLevel9,
-                VectorRasterizationOptions = new CdrRasterizationOptions
-                {
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            cdr.Save(outputPath, pngOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                PngOptions options = new PngOptions
+                {
+                    PngCompressionLevel = PngCompressionLevel.ZipLevel9,
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
+                    }
+                };
+
+                cdr.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

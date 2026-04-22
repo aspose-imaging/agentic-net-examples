@@ -3,35 +3,49 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.cdr";
         string outputPath = "output.jpg";
 
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+        try
         {
-            var jpegOptions = new JpegOptions
+            // Load the CDR file
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                Quality = 90,
-                VectorRasterizationOptions = new CdrRasterizationOptions
+                // Configure JPEG options with quality 90 and rasterization settings
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height
-                }
-            };
+                    Quality = 90,
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
+                    }
+                };
 
-            cdr.Save(outputPath, jpegOptions);
+                // Save the rasterized image as JPEG
+                cdr.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
