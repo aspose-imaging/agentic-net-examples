@@ -6,51 +6,45 @@ using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input APNG file path
-        string inputPath = @"C:\Images\animation.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputDir = "output";
 
-        // Directory where extracted frames will be saved
-        string outputDirectory = @"C:\Images\Frames";
-
-        // Ensure the output directory exists (unconditional as per requirements)
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the APNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to ApngImage to access frames
-            ApngImage apngImage = image as ApngImage;
-            if (apngImage == null)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The provided file is not a valid APNG image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Iterate through each frame (page) and save as a separate PNG file
-            for (int i = 0; i < apngImage.PageCount; i++)
-            {
-                // Retrieve the frame as a RasterImage
-                using (RasterImage frame = (RasterImage)apngImage.Pages[i])
-                {
-                    // Build output file path for the current frame
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.png");
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-                    // Ensure the directory for the output file exists (unconditional)
+            // Load the animated APNG
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            {
+                int frameIndex = 0;
+                foreach (var page in apng.Pages)
+                {
+                    string outputPath = Path.Combine(outputDir, $"frame_{frameIndex}.png");
+
+                    // Ensure the directory for each output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the frame as PNG
-                    frame.Save(outputPath, new PngOptions());
+                    // Save the current frame as a PNG file
+                    page.Save(outputPath, new PngOptions());
+
+                    frameIndex++;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
