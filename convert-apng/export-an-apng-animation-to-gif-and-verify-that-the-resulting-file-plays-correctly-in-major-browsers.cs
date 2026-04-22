@@ -8,39 +8,45 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputPath = "output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputPath = "output.gif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the APNG animation
-        using (Image apngImage = Image.Load(inputPath))
-        {
-            // Save as GIF animation
-            apngImage.Save(outputPath, new GifOptions());
-        }
-
-        // Simple verification: load the saved GIF and check it has multiple frames
-        using (Image gifImage = Image.Load(outputPath))
-        {
-            // PageCount indicates number of frames in a multipage image
-            if (gifImage.PageCount > 1)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine("GIF conversion successful: animation contains multiple frames.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            else
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the APNG image
+            using (Image apngImage = Image.Load(inputPath))
             {
-                Console.WriteLine("Warning: GIF conversion may have lost animation frames.");
+                // Save as GIF using default options
+                apngImage.Save(outputPath, new GifOptions());
             }
+
+            // Verify the resulting GIF
+            using (Image gifImage = Image.Load(outputPath))
+            {
+                if (gifImage is GifImage gif && gif.PageCount > 1)
+                {
+                    Console.WriteLine("GIF verification succeeded: animation contains multiple frames.");
+                }
+                else
+                {
+                    Console.WriteLine("GIF verification failed: animation does not contain multiple frames.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
