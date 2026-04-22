@@ -1,67 +1,75 @@
 using System;
 using System.IO;
-using System.Threading;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
-class DicomToPngService
+class Program
 {
-    // Hardcoded input (watch) and output directories
-    private const string WatchFolder = @"C:\DICOMInput";
-    private const string OutputFolder = @"C:\PNGOutput";
+    // Hardcoded input and output directories
+    private static readonly string inputFolder = @"C:\DicomInput";
+    private static readonly string outputFolder = @"C:\PngOutput";
 
     static void Main()
     {
-        // Ensure the output directory exists
-        Directory.CreateDirectory(OutputFolder);
+        try
+        {
+            // Ensure output base directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        // Set up a watcher for new DICOM files (*.dcm)
-        var watcher = new FileSystemWatcher(WatchFolder, "*.dcm");
-        watcher.Created += OnCreated;
-        watcher.EnableRaisingEvents = true;
+            // Set up a watcher for new DICOM files
+            var watcher = new FileSystemWatcher(inputFolder, "*.dcm");
+            watcher.Created += OnCreated;
+            watcher.EnableRaisingEvents = true;
 
-        Console.WriteLine("Monitoring folder for new DICOM files. Press Enter to exit.");
-        Console.ReadLine(); // Keep the application running
+            // Keep the application running
+            Console.WriteLine("Monitoring folder for DICOM files. Press Enter to exit.");
+            Console.ReadLine();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 
     private static void OnCreated(object sender, FileSystemEventArgs e)
     {
-        // Small delay to allow the file to be fully written
-        Thread.Sleep(500);
-        ProcessDicomFile(e.FullPath);
-    }
-
-    private static void ProcessDicomFile(string inputPath)
-    {
-        // Verify the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Open the DICOM file as a stream
-        using (Stream stream = File.OpenRead(inputPath))
-        {
-            // Load the DICOM image
-            using (DicomImage dicomImage = new DicomImage(stream))
+            // Verify the file exists before processing
+            if (!File.Exists(e.FullPath))
             {
-                // Iterate through each page in the DICOM image
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                Console.Error.WriteLine($"File not found: {e.FullPath}");
+                return;
+            }
+
+            // Open the DICOM file as a stream
+            using (Stream stream = File.OpenRead(e.FullPath))
+            {
+                // Load the DICOM image from the stream
+                using (var dicomImage = new DicomImage(stream))
                 {
-                    // Build the output PNG file name: <originalName>.<pageIndex>.png
-                    string baseName = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputFileName = $"{baseName}.{dicomPage.Index}.png";
-                    string outputPath = Path.Combine(OutputFolder, outputFileName);
+                    // Process each page in the DICOM image
+                    foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                    {
+                        // Build the output PNG file path
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(e.Name)}.{dicomPage.Index}.png";
+                        string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                    // Ensure the output directory exists (unconditional per requirements)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as PNG
-                    dicomPage.Save(outputPath, new PngOptions());
+                        // Save the page as PNG
+                        dicomPage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+
+            Console.WriteLine($"Converted DICOM file '{e.Name}' to PNG images.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error processing file '{e.FullPath}': {ex.Message}");
         }
     }
 }
