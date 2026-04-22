@@ -1,65 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.jpg";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\temp\input.cdr";
+        string outputPath = @"C:\temp\output.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR image and convert to JPEG
-        using (Image image = Image.Load(inputPath))
-        {
-            JpegOptions jpegOptions = new JpegOptions();
-
-            // Set rasterization options for vector images
-            if (image is VectorImage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save as JPEG
-            image.Save(outputPath, jpegOptions);
-        }
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Verify the output file exists and has non‑zero size
-        if (File.Exists(outputPath))
-        {
-            FileInfo info = new FileInfo(outputPath);
-            if (info.Length > 0)
+            // Load the CDR image from a stream
+            using (FileStream stream = File.OpenRead(inputPath))
             {
-                Console.WriteLine($"Conversion succeeded. Output size: {info.Length} bytes.");
+                var loadOptions = new LoadOptions(); // default load options
+                using (CdrImage cdrImage = new CdrImage(stream, loadOptions))
+                {
+                    // Prepare JPEG save options (default quality)
+                    var jpegOptions = new JpegOptions();
+
+                    // Save the image as JPEG
+                    cdrImage.Save(outputPath, jpegOptions);
+                }
+            }
+
+            // Verify the JPEG file was created and has non‑zero size
+            if (File.Exists(outputPath) && new FileInfo(outputPath).Length > 0)
+            {
+                Console.WriteLine("JPG file created successfully and is non‑zero size.");
             }
             else
             {
-                Console.WriteLine("Conversion failed: output file is empty.");
+                Console.Error.WriteLine("Failed to create JPG or file is empty.");
             }
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine("Conversion failed: output file not found.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
