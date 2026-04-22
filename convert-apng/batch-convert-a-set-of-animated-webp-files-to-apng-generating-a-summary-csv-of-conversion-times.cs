@@ -1,70 +1,66 @@
 using System;
 using System.IO;
+using System.Diagnostics;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure directories exist
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add .webp files and rerun.");
-            return;
-        }
-
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all WebP files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.webp");
-
-        // Prepare CSV lines
-        List<string> csvLines = new List<string>();
-        csvLines.Add("InputFile,OutputFile,DurationMs");
-
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
+            // Hardcoded input and output directories
+            string inputDir = @"C:\WebpInput";
+            string outputDir = @"C:\ApngOutput";
+            string csvPath = Path.Combine(outputDir, "summary.csv");
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDir);
+            // Ensure directory for CSV exists
+            Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
 
-            // Measure conversion time
-            DateTime startTime = DateTime.Now;
+            // Prepare CSV header
+            List<string> csvLines = new List<string>();
+            csvLines.Add("FileName,ConversionTimeMs");
 
-            using (Image image = Image.Load(inputPath))
+            // Process each WEBP file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.webp"))
             {
-                image.Save(outputPath, new ApngOptions());
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png"); // APNG saved as .png
+
+                // Ensure output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                Stopwatch sw = Stopwatch.StartNew();
+
+                // Load WEBP and save as APNG using Aspose.Imaging
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, new ApngOptions());
+                }
+
+                sw.Stop();
+
+                // Record conversion time
+                csvLines.Add($"{fileNameWithoutExt},{sw.ElapsedMilliseconds}");
             }
 
-            double durationMs = (DateTime.Now - startTime).TotalMilliseconds;
-
-            // Add entry to CSV
-            csvLines.Add($"{Path.GetFileName(inputPath)},{outputFileName},{durationMs:F2}");
+            // Write summary CSV
+            File.WriteAllLines(csvPath, csvLines);
         }
-
-        // Write summary CSV
-        string csvPath = Path.Combine(outputDirectory, "summary.csv");
-        Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
-        File.WriteAllLines(csvPath, csvLines);
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
