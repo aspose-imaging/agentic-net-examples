@@ -7,26 +7,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
         string outputPath = "output.gif";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            // Load the APNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save as animated GIF, preserving frame order
+                image.Save(outputPath, new GifOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the APNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Save as an animated GIF, preserving the original frame order
-            var gifOptions = new GifOptions();
-            image.Save(outputPath, gifOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
