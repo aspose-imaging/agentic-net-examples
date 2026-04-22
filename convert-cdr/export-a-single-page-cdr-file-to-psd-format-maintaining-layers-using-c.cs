@@ -1,35 +1,47 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.cdr";
-        string outputPath = "sample.psd";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.psd";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            PsdOptions exportOptions = new PsdOptions();
-            exportOptions.VectorRasterizationOptions = new CdrRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                PageWidth = image.Width,
-                PageHeight = image.Height
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, exportOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                var exportOptions = new PsdOptions
+                {
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    }
+                };
+
+                cdr.Save(outputPath, exportOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
