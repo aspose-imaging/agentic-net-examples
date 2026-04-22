@@ -9,30 +9,44 @@ class Program
     static void Main(string[] args)
     {
         string inputPath = "input.webp";
-        string outputPath = "output.apng.png";
+        string outputPath = "output.apng";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            var webp = (WebPImage)image;
-
-            var newPalette = new ColorPalette(new Color[]
+            if (!File.Exists(inputPath))
             {
-                Color.FromRgb(255, 0, 0), // Red
-                Color.FromRgb(0, 255, 0), // Green
-                Color.FromRgb(0, 0, 255)  // Blue
-            });
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            webp.Palette = newPalette;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            webp.Save(outputPath, new ApngOptions());
+            using (Image image = Image.Load(inputPath))
+            {
+                WebPImage webp = image as WebPImage;
+                if (webp == null)
+                {
+                    Console.Error.WriteLine("Failed to load WebP image.");
+                    return;
+                }
+
+                var newPalette = new ColorPalette(new Color[]
+                {
+                    Color.Black,
+                    Color.White,
+                    Color.Red,
+                    Color.Green,
+                    Color.Blue
+                });
+                webp.Palette = newPalette;
+
+                ApngOptions options = new ApngOptions();
+                webp.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
