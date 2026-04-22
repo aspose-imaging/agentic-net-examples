@@ -1,48 +1,46 @@
 using System;
-using System.Drawing;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\input\sample.cdr";
-        string outputPath = @"C:\output\sample.pdf";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input\\sample.cdr";
+            string outputPath = "Output\\sample.pdf";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the multi‑page CDR document
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare PDF export options
-            PdfOptions pdfOptions = new PdfOptions();
-
-            // Set custom A4 page size (595 x 842 points)
-            pdfOptions.PageSize = new SizeF(595f, 842f);
-
-            // Configure rasterization options for CDR vector content
-            CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                Positioning = PositioningTypes.DefinedByDocument
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the entire CDR document as a PDF with A4 pages
-            image.Save(outputPath, pdfOptions);
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions();
+
+                // Set custom A4 page size (595 x 842 points)
+                pdfOptions.PageSize = new Aspose.Imaging.SizeF(595f, 842f);
+
+                var rasterOptions = new CdrRasterizationOptions
+                {
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                    PageSize = new Aspose.Imaging.SizeF(595f, 842f)
+                };
+
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
