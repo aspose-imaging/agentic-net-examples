@@ -2,40 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded relative input and output paths
-        string inputPath = Path.Combine("Input", "sample.cdr");
-        string outputPath = Path.Combine("Output", "sample.pdf");
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/sample.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR file
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PDF save options with CDR rasterization settings
-            var pdfOptions = new PdfOptions();
-            var rasterOptions = new CdrRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                Positioning = PositioningTypes.DefinedByDocument
-            };
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as PDF; fonts used in the CDR are embedded automatically
-            image.Save(outputPath, pdfOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions();
+
+                var rasterOptions = new CdrRasterizationOptions
+                {
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument,
+                    BackgroundColor = Color.White
+                };
+
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
