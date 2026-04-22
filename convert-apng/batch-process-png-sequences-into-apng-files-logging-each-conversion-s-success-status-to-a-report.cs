@@ -3,113 +3,77 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Batch definitions: each entry contains the folder with PNG frames and the target APNG file.
-        var batches = new[]
+        try
         {
-            new { InputFolder = @"C:\Images\Seq1", OutputFile = @"C:\Output\seq1.apng" },
-            new { InputFolder = @"C:\Images\Seq2", OutputFile = @"C:\Output\seq2.apng" }
-        };
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+            string reportPath = Path.Combine(outputDirectory, "report.txt");
 
-        // Report file path (hard‑coded).
-        string reportPath = @"C:\Output\conversion_report.txt";
-        Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
+            // Ensure output directory exists for report and later saves
+            Directory.CreateDirectory(outputDirectory);
 
-        using (var reportWriter = new StreamWriter(reportPath, false))
-        {
-            foreach (var batch in batches)
+            // Get all PNG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            using (StreamWriter reportWriter = new StreamWriter(reportPath, append: true))
             {
-                // Verify that the input folder exists.
-                if (!Directory.Exists(batch.InputFolder))
+                foreach (string inputPath in files)
                 {
-                    Console.Error.WriteLine($"Folder not found: {batch.InputFolder}");
-                    reportWriter.WriteLine($"{batch.InputFolder} -> {batch.OutputFile}: Failed (folder not found)");
-                    continue;
-                }
-
-                // Collect PNG files and sort them to preserve sequence order.
-                var pngFiles = Directory.GetFiles(batch.InputFolder, "*.png");
-                Array.Sort(pngFiles);
-
-                if (pngFiles.Length == 0)
-                {
-                    reportWriter.WriteLine($"{batch.InputFolder} -> {batch.OutputFile}: Failed (no PNG files)");
-                    continue;
-                }
-
-                // Ensure the output directory exists (unconditional per requirements).
-                Directory.CreateDirectory(Path.GetDirectoryName(batch.OutputFile));
-
-                // Verify each input file exists using the mandated pattern.
-                bool allFilesExist = true;
-                foreach (var file in pngFiles)
-                {
-                    if (!File.Exists(file))
+                    if (!File.Exists(inputPath))
                     {
-                        Console.Error.WriteLine($"File not found: {file}");
-                        allFilesExist = false;
-                        break;
-                    }
-                }
-                if (!allFilesExist)
-                {
-                    reportWriter.WriteLine($"{batch.InputFolder} -> {batch.OutputFile}: Failed (missing PNG file)");
-                    continue;
-                }
-
-                try
-                {
-                    // Load the first frame to obtain image dimensions.
-                    string firstFile = pngFiles[0];
-                    if (!File.Exists(firstFile))
-                    {
-                        Console.Error.WriteLine($"File not found: {firstFile}");
-                        reportWriter.WriteLine($"{batch.InputFolder} -> {batch.OutputFile}: Failed (first PNG missing)");
+                        Console.Error.WriteLine($"File not found: {inputPath}");
                         continue;
                     }
 
-                    using (RasterImage firstFrame = (RasterImage)Image.Load(firstFile))
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".apng";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    try
                     {
-                        // Configure APNG creation options.
-                        var createOptions = new ApngOptions
+                        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
                         {
-                            Source = new FileCreateSource(batch.OutputFile, false),
-                            DefaultFrameTime = 100, // 100 ms per frame.
-                            ColorType = PngColorType.TruecolorWithAlpha
-                        };
-
-                        // Create the APNG image with the dimensions of the first frame.
-                        using (ApngImage apng = (ApngImage)Image.Create(createOptions, firstFrame.Width, firstFrame.Height))
-                        {
-                            // Remove the default single frame.
-                            apng.RemoveAllFrames();
-
-                            // Add each PNG as a frame.
-                            foreach (var file in pngFiles)
+                            ApngOptions createOptions = new ApngOptions
                             {
-                                using (RasterImage frame = (RasterImage)Image.Load(file))
-                                {
-                                    apng.AddFrame(frame);
-                                }
+                                Source = new FileCreateSource(outputPath, false),
+                                DefaultFrameTime = 100, // 100 ms per frame
+                                ColorType = PngColorType.TruecolorWithAlpha
+                            };
+
+                            using (ApngImage apngImage = (ApngImage)Image.Create(
+                                createOptions,
+                                sourceImage.Width,
+                                sourceImage.Height))
+                            {
+                                apngImage.RemoveAllFrames();
+                                apngImage.AddFrame(sourceImage);
+                                apngImage.Save();
                             }
-
-                            // Save the assembled APNG.
-                            apng.Save();
                         }
-                    }
 
-                    reportWriter.WriteLine($"{batch.InputFolder} -> {batch.OutputFile}: Success");
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Error processing {batch.InputFolder}: {ex.Message}");
-                    reportWriter.WriteLine($"{batch.InputFolder} -> {batch.OutputFile}: Failed ({ex.Message})");
+                        reportWriter.WriteLine($"{DateTime.Now}: SUCCESS - Converted '{inputPath}' to '{outputPath}'.");
+                        Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        reportWriter.WriteLine($"{DateTime.Now}: FAILURE - '{inputPath}' -> '{outputPath}'. Error: {ex.Message}");
+                        Console.Error.WriteLine($"Error processing '{inputPath}': {ex.Message}");
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
