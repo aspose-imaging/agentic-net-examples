@@ -8,44 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = "input.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputDir = "output";
 
-        // Load the APNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to ApngImage to access frames
-            ApngImage apngImage = image as ApngImage;
-            if (apngImage == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded file is not an APNG image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Iterate through each frame
-            for (int i = 0; i < apngImage.PageCount; i++)
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the APNG image
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                // Extract the frame as a RasterImage
-                using (RasterImage frame = (RasterImage)apngImage.Pages[i])
+                // JPEG save options
+                JpegOptions jpegOptions = new JpegOptions();
+
+                // Export each frame as a separate JPEG file
+                for (int i = 0; i < apng.PageCount; i++)
                 {
-                    // Build output file name with frame index
-                    string outputPath = $"frame_{i}.jpg";
+                    string outPath = Path.Combine(outputDir, $"frame_{i}.jpg");
+                    // Ensure directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outPath));
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                    // Save the frame as JPEG
-                    JpegOptions jpegOptions = new JpegOptions();
-                    frame.Save(outputPath, jpegOptions);
+                    // Save the current frame
+                    apng.Pages[i].Save(outPath, jpegOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
