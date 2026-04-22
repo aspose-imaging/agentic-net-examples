@@ -3,60 +3,93 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputDicom";
+            string outputDirectory = @"C:\OutputPng";
 
-        if (!Directory.Exists(outputDirectory))
-        {
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
-        }
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+            // Get all DICOM files in the input directory
+            string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
 
-        foreach (string inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            // Progress reporter using IProgress
+            IProgress<ProgressEventHandlerInfo> progress = new Progress<ProgressEventHandlerInfo>(info =>
+                Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
+            );
+
+            foreach (string inputPath in dicomFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            using (DicomImage dicom = (DicomImage)Image.Load(
-                inputPath,
-                new LoadOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    ProgressEventHandler = info => Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
-                }))
-            {
-                foreach (var page in dicom.DicomPages)
-                {
-                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    var pngOptions = new PngOptions
+                // Prepare output file path (one PNG per DICOM file; multi‑page handled later)
+                string baseFileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, baseFileName + ".png");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load options with progress callback
+                var loadOptions = new LoadOptions
+                {
+                    ProgressEventHandler = info => progress.Report(info)
+                };
+
+                // Load the DICOM image
+                using (var dicomImage = (DicomImage)Image.Load(inputPath, loadOptions))
+                {
+                    // If the DICOM image has multiple pages, save each page separately
+                    if (dicomImage.PageCount > 1)
                     {
-                        ProgressEventHandler = info => Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
-                    };
+                        int pageIndex = 0;
+                        foreach (var page in dicomImage.DicomPages)
+                        {
+                            string pageOutputPath = Path.Combine(
+                                outputDirectory,
+                                $"{baseFileName}_page{pageIndex}.png"
+                            );
 
-                    page.Save(outputPath, pngOptions);
+                            // Ensure directory exists for each page file
+                            Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
+
+                            var pngOptions = new PngOptions
+                            {
+                                ProgressEventHandler = info => progress.Report(info)
+                            };
+
+                            page.Save(pageOutputPath, pngOptions);
+                            pageIndex++;
+                        }
+                    }
+                    else
+                    {
+                        // Single‑page DICOM: save directly
+                        var pngOptions = new PngOptions
+                        {
+                            ProgressEventHandler = info => progress.Report(info)
+                        };
+
+                        dicomImage.Save(outputPath, pngOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
