@@ -3,17 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.jpg";
+        string inputPath = @"C:\Temp\sample.cdr";
+        string outputPath = @"C:\Temp\output.jpg";
 
-        // Validate input file existence
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,29 +23,28 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load CDR file into a memory stream
-        byte[] fileBytes = File.ReadAllBytes(inputPath);
-        using (MemoryStream memoryStream = new MemoryStream(fileBytes))
+        try
         {
-            // Load the CDR image from the memory stream
-            using (CdrImage cdrImage = (CdrImage)Image.Load(memoryStream))
+            // Load the CDR file into a memory stream
+            using (MemoryStream inputStream = new MemoryStream(File.ReadAllBytes(inputPath)))
             {
-                // Prepare JPEG export options with rasterization settings
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdrImage.Width,
-                        PageHeight = cdrImage.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
+                // Initialize load options for CDR
+                CdrLoadOptions loadOptions = new CdrLoadOptions();
 
-                // Save directly to JPEG without intermediate files
-                cdrImage.Save(outputPath, jpegOptions);
+                // Create CdrImage from the memory stream
+                using (CdrImage cdrImage = new CdrImage(inputStream, loadOptions))
+                {
+                    // Prepare JPEG save options (default settings)
+                    JpegOptions jpegOptions = new JpegOptions();
+
+                    // Save directly to the output JPG file
+                    cdrImage.Save(outputPath, jpegOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
