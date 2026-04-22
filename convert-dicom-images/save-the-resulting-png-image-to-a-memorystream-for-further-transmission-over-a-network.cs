@@ -2,30 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.png";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image from the input file
+            using (Image image = Image.Load(inputPath))
+            {
+                // Create PNG save options (default settings)
+                PngOptions pngOptions = new PngOptions();
+
+                // Optional: save the PNG to a file path
+                image.Save(outputPath, pngOptions);
+
+                // Save the PNG image to a MemoryStream for network transmission
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    image.Save(memoryStream, pngOptions);
+                    // Reset stream position if it will be read later
+                    memoryStream.Position = 0;
+
+                    // Example output: report the size of the PNG data
+                    Console.WriteLine($"PNG image saved to memory stream, size: {memoryStream.Length} bytes");
+                }
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        var fileInfo = new FileInfo(outputPath);
-        Console.WriteLine($"PNG file size in bytes: {fileInfo.Length}");
     }
 }
