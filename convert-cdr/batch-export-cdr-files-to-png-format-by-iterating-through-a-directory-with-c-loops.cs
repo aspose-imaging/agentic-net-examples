@@ -12,41 +12,45 @@ class Program
         string inputDirectory = @"C:\InputCdr";
         string outputDirectory = @"C:\OutputPng";
 
-        // Get all CDR files in the input directory
-        foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.cdr"))
+        try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Get all CDR files in the input directory
+            string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            foreach (string inputPath in cdrFiles)
             {
-                // Ensure all pages are cached to avoid lazy loading during save
-                foreach (CdrImagePage page in cdrImage.Pages)
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    page.CacheData();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Export each page to a separate PNG file
-                for (int pageIndex = 0; pageIndex < cdrImage.PageCount; pageIndex++)
+                // Load the CDR image
+                using (CdrImage image = (CdrImage)Image.Load(inputPath))
                 {
-                    CdrImagePage page = (CdrImagePage)cdrImage.Pages[pageIndex];
+                    // Iterate through each page of the CDR document
+                    for (int pageIndex = 0; pageIndex < image.PageCount; pageIndex++)
+                    {
+                        // Retrieve the specific page
+                        CdrImagePage page = (CdrImagePage)image.Pages[pageIndex];
 
-                    // Build the output file path
-                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}.page{pageIndex}.png";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                        // Build the output PNG file path
+                        string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + $"_page{pageIndex}.png";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as PNG
-                    page.Save(outputPath, new PngOptions());
+                        // Save the page as PNG
+                        page.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
