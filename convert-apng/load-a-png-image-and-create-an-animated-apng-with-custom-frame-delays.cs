@@ -10,56 +10,52 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output_animation.png";
+        string outputPath = "output.apng";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists (safeguard against null/empty)
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        // Load the source PNG image as a raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Configure APNG creation options
-            ApngOptions createOptions = new ApngOptions
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 200, // default frame duration (ms) if not overridden per frame
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            // Create the APNG image with the same dimensions as the source
-            using (ApngImage apngImage = (ApngImage)Image.Create(
-                createOptions,
-                sourceImage.Width,
-                sourceImage.Height))
-            {
-                // Remove the initial frame that exists by default
-                apngImage.RemoveAllFrames();
-
-                // Define custom frame delays (in milliseconds)
-                uint[] frameDelays = new uint[] { 100, 200, 300, 400, 500 };
-
-                // Add frames with the specified delays
-                foreach (uint delay in frameDelays)
-                {
-                    apngImage.AddFrame(sourceImage, delay);
-                }
-
-                // Save the animated APNG to the bound output file
-                apngImage.Save();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            {
+                ApngOptions createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100,
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    NumPlays = 0
+                };
+
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    createOptions,
+                    sourceImage.Width,
+                    sourceImage.Height))
+                {
+                    apngImage.RemoveAllFrames();
+
+                    int[] frameDelays = new int[] { 100, 200, 300, 200, 100 };
+
+                    foreach (int delay in frameDelays)
+                    {
+                        apngImage.AddFrame(sourceImage);
+                        ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        frame.FrameTime = delay;
+                    }
+
+                    apngImage.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

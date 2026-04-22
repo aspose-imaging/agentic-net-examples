@@ -7,34 +7,42 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = "sample.apng";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input path
+            string inputPath = "sample.apng";
 
-        // Load the image using Aspose.Imaging
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to ApngImage to access APNG‑specific properties
-            ApngImage apng = image as ApngImage;
-            if (apng == null)
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine("The specified file is not a valid APNG image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Loop count (NumPlays): 0 means infinite looping
-            int loopCount = apng.NumPlays;
-            // Total number of frames in the animation
-            int frameCount = apng.PageCount;
+            // Load the image using Aspose.Imaging
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to ApngImage to access APNG-specific properties
+                ApngImage apng = image as ApngImage;
+                if (apng == null)
+                {
+                    Console.Error.WriteLine("The file is not a valid APNG image.");
+                    return;
+                }
 
-            Console.WriteLine($"Loop count (NumPlays): {(loopCount == 0 ? "Infinite" : loopCount.ToString())}");
-            Console.WriteLine($"Total frames: {frameCount}");
+                // Retrieve loop count (NumPlays) and total frame count (PageCount)
+                int loopCount = apng.NumPlays;
+                int frameCount = apng.PageCount;
+
+                // Display the metadata
+                Console.WriteLine($"Loop count (NumPlays): {loopCount}");
+                Console.WriteLine($"Total frame count (PageCount): {frameCount}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Output any unexpected errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

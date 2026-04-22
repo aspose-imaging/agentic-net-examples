@@ -7,38 +7,45 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputSvgs";
-        string outputDirectory = @"C:\OutputApngs";
-
-        // Ensure the output root directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Retrieve all SVG files in the input directory
-        string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
-
-        foreach (string inputPath in svgFiles)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputSvgs";
+            string outputFolder = @"C:\OutputApngs";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Get all SVG files in the input folder
+            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
+
+            foreach (string inputPath in svgFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Determine the output file path (APNG uses .png extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Ensure the output directory exists (covers subfolders if any)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the SVG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Save as APNG with default frame time
+                    image.Save(outputPath, new ApngOptions());
+                }
             }
-
-            // Build the output file path (same name with .png extension for APNG)
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Ensure the directory for the output file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Save as APNG using default frame delay
-                image.Save(outputPath, new ApngOptions());
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

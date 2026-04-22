@@ -5,31 +5,53 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.tif";
-        string outputPath = "output/output.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.tif";
+            string outputPath = @"C:\Images\output.tif";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
-        {
-            int frameIndex = 0;
-            foreach (TiffFrame frame in tiff.Frames)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                double avgDpi = (frame.HorizontalResolution + frame.VerticalResolution) / 2.0;
-                int durationMs = (int)(1000 / avgDpi);
-                Console.WriteLine($"Frame {frameIndex}: DPI={avgDpi:F2}, Duration={durationMs} ms");
-                frameIndex++;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            tiff.Save(outputPath);
+            // Load the multi‑page TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Iterate through each frame and set resolution based on its dimensions
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                {
+                    // Make the current frame active
+                    tiffImage.ActiveFrame = tiffImage.Frames[i];
+
+                    // Example logic: higher resolution for larger frames
+                    if (tiffImage.ActiveFrame.Width > 1000 || tiffImage.ActiveFrame.Height > 1000)
+                    {
+                        tiffImage.HorizontalResolution = 300; // DPI
+                        tiffImage.VerticalResolution = 300;
+                    }
+                    else
+                    {
+                        tiffImage.HorizontalResolution = 150;
+                        tiffImage.VerticalResolution = 150;
+                    }
+                }
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified TIFF
+                tiffImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

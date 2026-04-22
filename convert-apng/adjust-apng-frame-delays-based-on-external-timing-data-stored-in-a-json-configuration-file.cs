@@ -3,97 +3,94 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputImagePath = "input.png";
-        string jsonConfigPath = "config.json";
-        string outputPath = "output.apng";
+        try
+        {
+            // Hardcoded paths
+            string inputImagePath = "input.png";
+            string jsonConfigPath = "config.json";
+            string outputPath = "output\\animation.apng";
 
-        // Validate input files
-        if (!File.Exists(inputImagePath))
-        {
-            Console.Error.WriteLine($"File not found: {inputImagePath}");
-            return;
-        }
-        if (!File.Exists(jsonConfigPath))
-        {
-            Console.Error.WriteLine($"File not found: {jsonConfigPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        // Read and parse frame times from JSON (simple numeric extraction)
-        string jsonContent = File.ReadAllText(jsonConfigPath);
-        List<uint> frameTimes = new List<uint>();
-        string numberBuffer = "";
-        foreach (char ch in jsonContent)
-        {
-            if (char.IsDigit(ch))
+            // Input validation
+            if (!File.Exists(inputImagePath))
             {
-                numberBuffer += ch;
+                Console.Error.WriteLine($"File not found: {inputImagePath}");
+                return;
             }
-            else
+            if (!File.Exists(jsonConfigPath))
             {
-                if (numberBuffer.Length > 0)
+                Console.Error.WriteLine($"File not found: {jsonConfigPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Parse frame durations from JSON (expected format: {"frames":[100,200,150]})
+            string json = File.ReadAllText(jsonConfigPath);
+            int bracketStart = json.IndexOf('[');
+            int bracketEnd = json.IndexOf(']');
+            List<uint> frameDurations = new List<uint>();
+            if (bracketStart >= 0 && bracketEnd > bracketStart)
+            {
+                string numbers = json.Substring(bracketStart + 1, bracketEnd - bracketStart - 1);
+                string[] parts = numbers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string part in parts)
                 {
-                    if (uint.TryParse(numberBuffer, out uint value))
+                    if (uint.TryParse(part.Trim(), out uint value))
                     {
-                        frameTimes.Add(value);
+                        frameDurations.Add(value);
                     }
-                    numberBuffer = "";
                 }
             }
-        }
-        if (numberBuffer.Length > 0 && uint.TryParse(numberBuffer, out uint lastValue))
-        {
-            frameTimes.Add(lastValue);
-        }
 
-        if (frameTimes.Count == 0)
-        {
-            Console.Error.WriteLine("No frame times found in configuration.");
-            return;
-        }
-
-        // Load source raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputImagePath))
-        {
-            // Create APNG options
-            ApngOptions createOptions = new ApngOptions
+            if (frameDurations.Count == 0)
             {
-                Source = new FileCreateSource(outputPath, false),
-                ColorType = PngColorType.TruecolorWithAlpha,
-                DefaultFrameTime = frameTimes[0] // fallback default
-            };
+                Console.Error.WriteLine("No frame durations found in configuration.");
+                return;
+            }
 
-            // Create APNG image canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+            // Load source raster image
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputImagePath))
             {
-                // Remove the default initial frame
-                apngImage.RemoveAllFrames();
-
-                // Add frames with specific durations
-                foreach (uint frameTime in frameTimes)
+                // Create APNG options
+                ApngOptions createOptions = new ApngOptions
                 {
-                    apngImage.AddFrame(sourceImage, frameTime);
-                }
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    DefaultFrameTime = 0 // will be overridden per frame
+                };
 
-                // Save the APNG
-                apngImage.Save();
+                // Create APNG image bound to output file
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    createOptions,
+                    sourceImage.Width,
+                    sourceImage.Height))
+                {
+                    // Remove the default initial frame
+                    apngImage.RemoveAllFrames();
+
+                    // Add frames with specific durations
+                    foreach (uint frameTime in frameDurations)
+                    {
+                        apngImage.AddFrame(sourceImage, frameTime);
+                    }
+
+                    // Save the APNG (output already bound via FileCreateSource)
+                    apngImage.Save();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

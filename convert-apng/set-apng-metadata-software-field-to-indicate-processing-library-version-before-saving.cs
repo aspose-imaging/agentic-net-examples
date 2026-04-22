@@ -1,49 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.apng";
-        string outputPath = @"C:\temp\output.apng";
+        string inputPath = "input.png";
+        string outputPath = "output.apng";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the APNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to ApngImage to access APNG-specific members
-            ApngImage apngImage = image as ApngImage;
-            if (apngImage == null)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded file is not a valid APNG image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Create PNG metadata and set the Software field
-            PngMetadata pngMetadata = new PngMetadata
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                Software = "Aspose.Imaging v2.0"
-            };
+                ApngOptions createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 70,
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
 
-            // Apply the metadata to the APNG image
-            apngImage.TrySetMetadata(pngMetadata);
-
-            // Save the modified APNG image
-            apngImage.Save(outputPath);
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                {
+                    apngImage.RemoveAllFrames();
+                    apngImage.AddFrame(sourceImage);
+                    apngImage.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

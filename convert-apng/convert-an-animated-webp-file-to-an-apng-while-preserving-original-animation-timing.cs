@@ -8,24 +8,31 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Temp\animation.webp";
+        string outputPath = @"C:\Temp\animation_apng.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the animated WebP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save as APNG preserving original frame timing
+                image.Save(outputPath, new ApngOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the animated WebP image and save it as APNG preserving timing
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // ApngOptions without explicit timing will keep original frame durations
-            image.Save(outputPath, new ApngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

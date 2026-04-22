@@ -10,56 +10,53 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/multipage.tif";
-        string outputPath = "Output/animation.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.tif";
+            string outputPath = "output.apng";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the multi‑page TIFF
-        using (Image tiffImage = Image.Load(inputPath))
-        {
-            if (tiffImage is IMultipageImage multipageImage)
+            if (!File.Exists(inputPath))
             {
-                // Obtain dimensions from the first page
-                RasterImage firstPage = (RasterImage)multipageImage.Pages[0];
-                int width = firstPage.Width;
-                int height = firstPage.Height;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Prepare APNG creation options
-                ApngOptions apngOptions = new ApngOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image tiffImage = Image.Load(inputPath))
+            {
+                if (tiffImage is IMultipageImage multipage)
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
-
-                // Create the APNG canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
-                {
-                    apngImage.RemoveAllFrames();
-
-                    // Add each TIFF page as a frame with a unique delay
-                    for (int i = 0; i < multipageImage.PageCount; i++)
+                    ApngOptions createOptions = new ApngOptions
                     {
-                        using (RasterImage page = (RasterImage)multipageImage.Pages[i])
-                        {
-                            uint frameDelay = (uint)((i + 1) * 100);
-                            apngImage.AddFrame(page, frameDelay);
-                        }
-                    }
+                        Source = new FileCreateSource(outputPath, false),
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
 
-                    // Save the APNG (output path already bound via FileCreateSource)
-                    apngImage.Save();
+                    using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, tiffImage.Width, tiffImage.Height))
+                    {
+                        apngImage.RemoveAllFrames();
+
+                        for (int i = 0; i < multipage.PageCount; i++)
+                        {
+                            Image page = multipage.Pages[i];
+                            RasterImage rasterPage = (RasterImage)page;
+                            uint frameDelay = (uint)((i + 1) * 100); // unique delay per frame (ms)
+                            apngImage.AddFrame(rasterPage, frameDelay);
+                        }
+
+                        apngImage.Save();
+                    }
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded image is not a multipage image.");
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
