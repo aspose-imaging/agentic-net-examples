@@ -3,46 +3,63 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input APNG file and output directory
-        string inputPath = Path.Combine("Input", "animation.apng");
-        string outputDirectory = "Output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputDirectory = "output";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the APNG image
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
-        {
-            int frameCount = apng.PageCount;
-
-            for (int i = 0; i < frameCount; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Get the current frame as a raster image
-                using (RasterImage frame = (RasterImage)apng.Pages[i])
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the APNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to ApngImage to access frames
+                ApngImage apng = image as ApngImage;
+                if (apng == null)
                 {
-                    // Build output BMP file path
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.bmp");
+                    Console.Error.WriteLine("The loaded image is not an APNG.");
+                    return;
+                }
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                int frameCount = apng.PageCount;
 
-                    // Save the frame as BMP
-                    BmpOptions bmpOptions = new BmpOptions();
-                    frame.Save(outputPath, bmpOptions);
+                // Iterate through each frame and save as BMP
+                for (int i = 0; i < frameCount; i++)
+                {
+                    // Retrieve the frame as a RasterImage
+                    using (RasterImage frame = (RasterImage)apng.Pages[i])
+                    {
+                        // Build output file path
+                        string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.bmp");
+
+                        // Ensure the directory for this output path exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the frame as BMP using default options
+                        BmpOptions bmpOptions = new BmpOptions();
+                        frame.Save(outputPath, bmpOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
