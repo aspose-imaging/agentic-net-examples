@@ -34,7 +34,7 @@ jobs:
           if [ -f "index.json" ]; then
             VERSION=$(python3 -c "import json,sys; d=json.load(open('index.json')); print(d.get('package_version',''))" 2>/dev/null || true)
           fi
-          VERSION="${VERSION:-26.2.0}"
+          VERSION="${VERSION:-26.3.0}"
           echo "nuget_version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Using Aspose.Imaging $VERSION"
 
