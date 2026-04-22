@@ -3,44 +3,54 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.cdr";
-        string outputPath = "output.psd";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.cdr";
+            string outputPath = "output.psd";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR file
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-        {
-            // Prepare PSD save options
-            PsdOptions psdOptions = new PsdOptions();
-
-            // Set resolution to 300 DPI for print quality
-            psdOptions.ResolutionSettings = new ResolutionSetting(300.0, 300.0);
-
-            // For vector images, define rasterization options
-            if (cdrImage is VectorImage)
+            if (!File.Exists(inputPath))
             {
-                // Use default vector rasterization options with white background
-                psdOptions.VectorRasterizationOptions = (VectorRasterizationOptions)cdrImage.GetDefaultOptions(
-                    new object[] { Color.White, cdrImage.Width, cdrImage.Height });
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save as PSD with the specified options
-            cdrImage.Save(outputPath, psdOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (var cdr = (CdrImage)Image.Load(inputPath))
+            {
+                using (var ms = new MemoryStream())
+                {
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
+                    using (var raster = (RasterImage)Image.Load(ms))
+                    {
+                        var psdOptions = new PsdOptions
+                        {
+                            ResolutionSettings = new ResolutionSetting(300, 300)
+                        };
+                        raster.Save(outputPath, psdOptions);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
