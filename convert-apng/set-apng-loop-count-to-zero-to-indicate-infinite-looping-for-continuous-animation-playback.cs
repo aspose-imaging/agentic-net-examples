@@ -2,53 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.webp";
+            string outputPath = "output/output.png";
 
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        // Load source raster image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Configure APNG options with infinite looping
-            ApngOptions options = new ApngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                NumPlays = 0, // 0 indicates infinite looping
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            // Create APNG image canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
-            {
-                // Remove default frame and add the source frame
-                apngImage.RemoveAllFrames();
-                apngImage.AddFrame(sourceImage);
-
-                // Save the APNG image
-                apngImage.Save();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure APNG options for infinite looping
+                var apngOptions = new ApngOptions
+                {
+                    NumPlays = 0 // 0 indicates infinite looping
+                };
+
+                // Save as APNG with the specified options
+                image.Save(outputPath, apngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
