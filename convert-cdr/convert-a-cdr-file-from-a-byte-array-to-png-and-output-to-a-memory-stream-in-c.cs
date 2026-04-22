@@ -3,35 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output\\output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Example byte array containing CDR data.
+            // Replace with actual CDR file bytes.
+            byte[] cdrData = new byte[0];
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-        {
-            var pngOptions = new PngOptions
+            using (MemoryStream inputStream = new MemoryStream(cdrData))
             {
-                VectorRasterizationOptions = new CdrRasterizationOptions
+                using (CdrImage cdrImage = new CdrImage(inputStream, new LoadOptions()))
                 {
-                    PageWidth = cdrImage.Width,
-                    PageHeight = cdrImage.Height
-                }
-            };
+                    // Ensure the image data is fully loaded.
+                    cdrImage.CacheData();
 
-            cdrImage.Save(outputPath, pngOptions);
-            Console.WriteLine($"Converted {inputPath} to {outputPath}");
+                    using (MemoryStream outputStream = new MemoryStream())
+                    {
+                        PngOptions pngOptions = new PngOptions();
+
+                        // Save the CDR image as PNG into the memory stream.
+                        cdrImage.Save(outputStream, pngOptions);
+
+                        // Output the size of the generated PNG data.
+                        Console.WriteLine($"PNG data size: {outputStream.Length} bytes");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
