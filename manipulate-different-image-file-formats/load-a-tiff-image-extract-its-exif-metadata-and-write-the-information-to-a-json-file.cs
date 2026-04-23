@@ -3,7 +3,6 @@ using System.IO;
 using System.Text.Json;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.Exif;
 
 class Program
 {
@@ -28,7 +27,7 @@ class Program
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access EXIF data
+                // Cast to TiffImage to access ExifData
                 TiffImage tiffImage = image as TiffImage;
                 if (tiffImage == null)
                 {
@@ -36,19 +35,13 @@ class Program
                     return;
                 }
 
-                // Retrieve EXIF metadata
-                ExifData exifData = tiffImage.ExifData;
-                if (exifData == null)
-                {
-                    Console.Error.WriteLine("No EXIF data found in the TIFF image.");
-                    return;
-                }
+                // Extract EXIF metadata
+                var exifData = tiffImage.ExifData;
 
-                // Serialize EXIF data to JSON
-                var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize(exifData, jsonOptions);
+                // Serialize EXIF data to JSON (indented for readability)
+                string json = JsonSerializer.Serialize(exifData, new JsonSerializerOptions { WriteIndented = true });
 
-                // Write JSON to output file
+                // Write JSON to the output file
                 File.WriteAllText(outputPath, json);
             }
         }
