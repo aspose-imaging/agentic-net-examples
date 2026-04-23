@@ -1,56 +1,67 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Define input and output directories (relative to current directory)
-        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
-
-        // Get all DjVu files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
-
-        int processed = 0;
-        foreach (string inputPath in files)
+        static void Main(string[] args)
         {
-            // Stop after processing thirty files
-            if (processed >= 30)
-                break;
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                string baseDir = Directory.GetCurrentDirectory();
+                string inputDir = Path.Combine(baseDir, "Input");
+                string outputDir = Path.Combine(baseDir, "Output");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(outputDir);
+
+                // Prepare list of 30 DjVu files
+                var inputFiles = new List<string>();
+                for (int i = 1; i <= 30; i++)
+                {
+                    inputFiles.Add(Path.Combine(inputDir, $"file{i}.djvu"));
+                }
+
+                foreach (var inputPath in inputFiles)
+                {
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
+
+                    // Load DjVu document
+                    using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+                    {
+                        int pageIndex = 0;
+                        foreach (var page in djvuImage.Pages)
+                        {
+                            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                            string outputPath = Path.Combine(outputDir, $"{fileNameWithoutExt}_page{pageIndex}.tiff");
+
+                            // Ensure output directory for this file exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save page as TIFF
+                            using (var tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default))
+                            {
+                                page.Save(outputPath, tiffOptions);
+                            }
+
+                            pageIndex++;
+                        }
+                    }
+                }
             }
-
-            // Prepare output path with .tif extension
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".tif");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DjVu document from file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            catch (Exception ex)
             {
-                // Configure TIFF save options (default format)
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Export all pages of the DjVu document to a multi‑page TIFF
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-                // Save the TIFF file
-                djvuImage.Save(outputPath, tiffOptions);
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-
-            processed++;
         }
     }
 }
