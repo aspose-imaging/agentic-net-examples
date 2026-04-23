@@ -9,32 +9,35 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDir = @"C:\Images\Input";
+        string outputDir = @"C:\Images\Output";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDir);
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\InputWebp";
-            string outputDir = @"C:\Images\OutputTiff";
+            // Get all WebP files in the input directory
+            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp", SearchOption.TopDirectoryOnly);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Process each WebP file in the input directory
-            foreach (string fileName in Directory.GetFiles(inputDir, "*.webp"))
+            foreach (string inputPath in webpFiles)
             {
-                string inputPath = fileName;
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".tif");
-
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure the output directory for this file exists
+                // Build the output path with .tiff extension, preserving the original filename
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".tiff");
+
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load WebP image and save as TIFF
+                // Load the WebP image and save it as TIFF
                 using (WebPImage webPImage = new WebPImage(inputPath))
                 {
                     var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
