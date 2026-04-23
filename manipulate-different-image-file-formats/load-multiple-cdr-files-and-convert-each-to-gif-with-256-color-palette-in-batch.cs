@@ -1,61 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Batch processing directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hard‑coded input and output directories
+            string inputDirectory = @"C:\InputCdr";
+            string outputDirectory = @"C:\OutputGif";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all CDR files in the input directory
+            string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Process only CDR files
-            if (!inputPath.EndsWith(".cdr", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in cdrFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                var gifOptions = new GifOptions
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                image.Save(outputPath, gifOptions);
+                // Build the output GIF path (same file name, .gif extension)
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".gif");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                {
+                    // Prepare GIF save options for a 256‑color palette
+                    GifOptions gifOptions = new GifOptions
+                    {
+                        // Palette correction builds the best matching 256‑color palette
+                        DoPaletteCorrection = true,
+                        // ColorResolution = bits per pixel - 1; 7 => 8 bits => 256 colors
+                        ColorResolution = 7
+                    };
+
+                    // Save the image (all pages will be exported as animated frames if present)
+                    cdrImage.Save(outputPath, gifOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
