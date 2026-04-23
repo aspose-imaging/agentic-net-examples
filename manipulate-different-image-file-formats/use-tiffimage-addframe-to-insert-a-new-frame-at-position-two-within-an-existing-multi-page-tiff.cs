@@ -9,35 +9,36 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output.tif";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the existing multi‑page TIFF
+            // Load the existing multi‑page TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Determine dimensions from the first frame (assumes all frames share size)
-                int width = tiffImage.ActiveFrame.Width;
-                int height = tiffImage.ActiveFrame.Height;
-
-                // Create a new blank frame with default options
+                // Define options for the new frame
                 TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
+                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                frameOptions.Photometric = TiffPhotometrics.Rgb;
+                frameOptions.Compression = TiffCompressions.None;
 
-                // Insert the new frame at position two (index 1, zero‑based)
-                tiffImage.InsertFrame(1, newFrame);
+                // Create a new blank frame (e.g., 100x100 pixels)
+                TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
+
+                // Insert the new frame at position index 2 (third position)
+                tiffImage.InsertFrame(2, newFrame);
 
                 // Save the modified TIFF to the output path
                 tiffImage.Save(outputPath);
