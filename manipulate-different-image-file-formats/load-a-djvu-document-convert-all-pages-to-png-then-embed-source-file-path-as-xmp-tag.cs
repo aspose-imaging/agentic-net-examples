@@ -1,49 +1,44 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDirectory = @"C:\temp\output";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.djvu";
 
-        // Ensure output directory exists (unconditional as required)
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load DjVu document from a file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            // Prepare XMP metadata containing the source file path
-            string xmpData = $"<x:xmpmeta xmlns:x='adobe:ns:meta/'><rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'><rdf:Description rdf:about='' xmlns:dc='http://purl.org/dc/elements/1.1/'><dc:source>{inputPath}</dc:source></rdf:Description></rdf:RDF></x:xmpmeta>";
-
-            // Iterate through each page and save as PNG with XMP tag
-            foreach (DjvuPage page in djvuImage.Pages)
+            if (!File.Exists(inputPath))
             {
-                // Embed XMP metadata into the page
-                page.XmpData = xmpData;
-
-                // Build output file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"sample.{page.PageNumber}.png");
-
-                // Ensure the directory for the output file exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the page as PNG
-                page.Save(outputPath, new PngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            {
+                foreach (DjvuPage page in djvuImage.Pages)
+                {
+                    string outputPath = Path.Combine("Output", $"page_{page.PageNumber}.png");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    PngOptions options = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    page.Save(outputPath, options);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
