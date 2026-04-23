@@ -3,51 +3,51 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample_cropped.gif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to EmfImage to access Crop method
+                EmfImage emfImage = (EmfImage)image;
+
+                // Define the central 400x400 rectangle
+                int cropWidth = 400;
+                int cropHeight = 400;
+                int left = (emfImage.Width - cropWidth) / 2;
+                int top = (emfImage.Height - cropHeight) / 2;
+                var cropArea = new Aspose.Imaging.Rectangle(left, top, cropWidth, cropHeight);
+
+                // Crop the image
+                emfImage.Crop(cropArea);
+
+                // Save the cropped image as GIF
+                var gifOptions = new GifOptions();
+                emfImage.Save(outputPath, gifOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load EMF image, crop central 400x400 region, and save as GIF
-        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            const int targetWidth = 400;
-            const int targetHeight = 400;
-
-            // Calculate top-left corner for central crop
-            int left = (emfImage.Width - targetWidth) / 2;
-            int top = (emfImage.Height - targetHeight) / 2;
-
-            // Adjust if source image is smaller than target size
-            if (left < 0) left = 0;
-            if (top < 0) top = 0;
-            int cropWidth = Math.Min(targetWidth, emfImage.Width);
-            int cropHeight = Math.Min(targetHeight, emfImage.Height);
-
-            // Define cropping rectangle
-            Rectangle cropRect = new Rectangle(left, top, cropWidth, cropHeight);
-
-            // Perform cropping
-            emfImage.Crop(cropRect);
-
-            // Save the cropped image as GIF
-            GifOptions gifOptions = new GifOptions();
-            emfImage.Save(outputPath, gifOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
