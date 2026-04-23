@@ -12,7 +12,7 @@ class Program
         string inputPath = @"C:\Images\input.emf";
         string outputPath = @"C:\Images\output.emf";
 
-        // Ensure the input file exists
+        // Check that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,20 +27,23 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options (page size matches the source image)
+                // Prepare rasterization options (e.g., set page size to original image size)
                 EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
-                    PageSize = image.Size
+                    PageSize = image.Size,
+                    // Additional quality settings can be adjusted here
+                    // For example, you could set TextRenderingHint, SmoothingMode, etc.
                 };
 
-                // Configure EMF save options, enabling compression for better quality/size
+                // Configure EMF save options
                 EmfOptions saveOptions = new EmfOptions
                 {
                     VectorRasterizationOptions = rasterOptions,
-                    Compress = true
+                    // Example of controlling compression (true for smaller size, false for higher fidelity)
+                    Compress = false
                 };
 
-                // Save the image using the specified options
+                // Save the image using the EMF options
                 image.Save(outputPath, saveOptions);
             }
         }
