@@ -2,40 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "largeImage.jpg";
-        string outputPath = "thumbnail.jpg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "largeImage.jpg";
+            string outputPath = "Output/thumbnail.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image with a memory buffer limit (e.g., 50 MB)
-        using (Image image = Image.Load(inputPath, new LoadOptions { BufferSizeHint = 50 }))
-        {
-            // Resize to 200x200 pixels using nearest‑neighbour resampling
-            image.Resize(200, 200, ResizeType.NearestNeighbourResample);
-
-            // Prepare JPEG save options (optional quality setting)
-            JpegOptions jpegOptions = new JpegOptions
+            if (!File.Exists(inputPath))
             {
-                Quality = 90
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the thumbnail
-            image.Save(outputPath, jpegOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath, new LoadOptions { BufferSizeHint = 100 }))
+            {
+                if (!image.IsCached) image.CacheData();
+
+                image.Resize(200, 200, ResizeType.NearestNeighbourResample);
+
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = 90,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
