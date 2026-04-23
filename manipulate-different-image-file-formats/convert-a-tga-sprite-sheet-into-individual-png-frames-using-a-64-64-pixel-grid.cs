@@ -2,65 +2,61 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tga";
-        string outputDir = "output_frames";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "sprite_sheet.tga";
+            string outputDirectory = "Frames";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Load the TGA sprite sheet
-        using (RasterImage spriteSheet = (RasterImage)Image.Load(inputPath))
-        {
-            int frameWidth = 64;
-            int frameHeight = 64;
-
-            int columns = spriteSheet.Width / frameWidth;
-            int rows = spriteSheet.Height / frameHeight;
-
-            for (int row = 0; row < rows; row++)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                for (int col = 0; col < columns; col++)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the TGA sprite sheet as a raster image
+            using (RasterImage sheet = (RasterImage)Image.Load(inputPath))
+            {
+                const int frameWidth = 64;
+                const int frameHeight = 64;
+
+                int columns = sheet.Width / frameWidth;
+                int rows = sheet.Height / frameHeight;
+                int frameIndex = 0;
+
+                for (int row = 0; row < rows; row++)
                 {
-                    // Build output file path for the current frame
-                    string outputPath = Path.Combine(outputDir, $"frame_{row}_{col}.png");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Create a bound PNG canvas
-                    Source source = new FileCreateSource(outputPath, false);
-                    PngOptions pngOptions = new PngOptions() { Source = source };
-                    using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, frameWidth, frameHeight))
+                    for (int col = 0; col < columns; col++)
                     {
-                        // Define source rectangle within the sprite sheet
-                        Rectangle srcRect = new Rectangle(col * frameWidth, row * frameHeight, frameWidth, frameHeight);
+                        // Build output file path for the current frame
+                        string outputPath = Path.Combine(outputDirectory, $"frame_{frameIndex:D4}.png");
 
-                        // Load pixel data from the sprite sheet
-                        int[] pixels = spriteSheet.LoadArgb32Pixels(srcRect);
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save pixel data to the new PNG canvas
-                        canvas.SaveArgb32Pixels(new Rectangle(0, 0, frameWidth, frameHeight), pixels);
+                        // Define the region to extract
+                        var region = new Rectangle(col * frameWidth, row * frameHeight, frameWidth, frameHeight);
 
-                        // Save the bound image (no path needed)
-                        canvas.Save();
+                        // Save the region as a PNG file
+                        sheet.Save(outputPath, new PngOptions(), region);
+
+                        frameIndex++;
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
