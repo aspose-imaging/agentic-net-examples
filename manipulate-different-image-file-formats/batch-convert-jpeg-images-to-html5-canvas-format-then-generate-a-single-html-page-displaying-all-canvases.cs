@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Text;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -8,80 +8,74 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDir = "InputImages";
-        string outputDir = "CanvasOutputs";
-        string finalHtmlPath = Path.Combine(outputDir, "CombinedCanvas.html");
-
-        // Ensure input directory exists (create if missing)
-        if (!Directory.Exists(inputDir))
+        try
         {
-            Directory.CreateDirectory(inputDir);
-            Console.WriteLine($"Input directory created at: {inputDir}. Add JPEG files and rerun.");
-            return;
-        }
+            string inputDir = "Input";
+            string outputDir = "Output";
+            string masterHtmlPath = Path.Combine(outputDir, "index.html");
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Collect all JPEG files (both .jpg and .jpeg)
-        string[] jpgFiles = Directory.GetFiles(inputDir, "*.jpg");
-        string[] jpegFiles = Directory.GetFiles(inputDir, "*.jpeg");
-        string[] allFiles = new string[jpgFiles.Length + jpegFiles.Length];
-        jpgFiles.CopyTo(allFiles, 0);
-        jpegFiles.CopyTo(allFiles, jpgFiles.Length);
-
-        var sb = new StringBuilder();
-
-        foreach (string inputPath in allFiles)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Prepare canvas output path
-            string canvasFileName = Path.GetFileNameWithoutExtension(inputPath) + ".html";
-            string canvasPath = Path.Combine(outputDir, canvasFileName);
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            // Ensure directory for canvas file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
+            // Collect canvas snippets
+            List<string> canvasSnippets = new List<string>();
 
-            // Load JPEG image and save as HTML5 Canvas (only the canvas tag)
-            using (Image image = Image.Load(inputPath))
+            // Get JPEG files (both .jpg and .jpeg)
+            string[] jpgFiles = Directory.GetFiles(inputDir, "*.jpg");
+            string[] jpegFiles = Directory.GetFiles(inputDir, "*.jpeg");
+            List<string> allFiles = new List<string>();
+            allFiles.AddRange(jpgFiles);
+            allFiles.AddRange(jpegFiles);
+
+            foreach (string inputPath in allFiles)
             {
-                var options = new Html5CanvasOptions
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    FullHtmlPage = false
-                };
-                image.Save(canvasPath, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string canvasFileName = Path.GetFileNameWithoutExtension(inputPath) + ".html";
+                string canvasPath = Path.Combine(outputDir, canvasFileName);
+
+                // Ensure directory for canvas file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
+
+                // Load JPEG and save as HTML5 Canvas (only canvas tag)
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(canvasPath, new Html5CanvasOptions { FullHtmlPage = false });
+                }
+
+                // Read the generated canvas snippet
+                string canvasHtml = File.ReadAllText(canvasPath);
+                canvasSnippets.Add(canvasHtml);
             }
 
-            // Append canvas tag to the combined HTML
-            string canvasTag = File.ReadAllText(canvasPath);
-            sb.AppendLine(canvasTag);
+            // Build the master HTML page
+            string bodyContent = string.Join(Environment.NewLine, canvasSnippets);
+            string masterHtml = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Canvas Gallery</title></head><body>"
+                                + bodyContent
+                                + "</body></html>";
+
+            // Ensure directory for master HTML exists
+            Directory.CreateDirectory(Path.GetDirectoryName(masterHtmlPath));
+
+            // Write the master HTML file
+            File.WriteAllText(masterHtmlPath, masterHtml);
         }
-
-        // Build the final HTML page containing all canvases
-        string finalHtml = @"<!DOCTYPE html>
-<html>
-<head>
-    <meta charset=""UTF-8"">
-    <title>Combined Canvases</title>
-</head>
-<body>
-" + sb.ToString() + @"
-</body>
-</html>";
-
-        // Ensure directory for final HTML exists
-        Directory.CreateDirectory(Path.GetDirectoryName(finalHtmlPath));
-
-        // Write the combined HTML page
-        File.WriteAllText(finalHtmlPath, finalHtml);
-
-        Console.WriteLine($"Combined HTML page created at: {finalHtmlPath}");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
