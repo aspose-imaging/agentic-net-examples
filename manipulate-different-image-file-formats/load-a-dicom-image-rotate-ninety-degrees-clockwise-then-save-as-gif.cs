@@ -3,30 +3,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.gif";
+        string inputPath = "input\\sample.dcm";
+        string outputPath = "output\\rotated.gif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            {
+                // Rotate 90 degrees clockwise, resize proportionally, white background
+                dicomImage.Rotate(90f, true, Color.White);
+
+                // Save as GIF
+                var gifOptions = new GifOptions();
+                dicomImage.Save(outputPath, gifOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the DICOM image, rotate 90 degrees clockwise, and save as GIF
-        using (var dicomImage = (DicomImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            dicomImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-            dicomImage.Save(outputPath, new GifOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
