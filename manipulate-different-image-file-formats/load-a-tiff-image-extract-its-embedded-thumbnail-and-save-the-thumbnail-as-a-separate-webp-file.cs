@@ -1,18 +1,18 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "thumbnail.webp";
+
         try
         {
-            string inputPath = "Input/sample.tif";
-            string outputPath = "Output/thumbnail.webp";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,16 +21,15 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Tiff.TiffImage tiff = (Aspose.Imaging.FileFormats.Tiff.TiffImage)Aspose.Imaging.Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                var frame = tiff.Frames[0];
-                using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)frame)
-                {
-                    int thumbWidth = 150;
-                    int thumbHeight = 150;
-                    raster.Resize(thumbWidth, thumbHeight, Aspose.Imaging.ResizeType.NearestNeighbourResample);
-                    raster.Save(outputPath, new WebPOptions());
-                }
+                int thumbWidth = 200;
+                int thumbHeight = 200;
+
+                tiff.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
+
+                WebPOptions options = new WebPOptions();
+                tiff.Save(outputPath, options);
             }
         }
         catch (Exception ex)
