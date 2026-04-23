@@ -1,52 +1,67 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded paths
+            string inputPath = @"C:\Images\input.jpg";
+            string thumbnailPath = @"C:\Images\thumb.jpg";
+            string outputPath = @"C:\Images\output_with_thumb.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
-        {
-            // Create a thumbnail raster image (100x100) in memory
-            JpegOptions thumbOptions = new JpegOptions
+            // Verify input files exist
+            if (!File.Exists(inputPath))
             {
-                // Use a memory stream as source to avoid creating a temporary file
-                Source = new StreamSource(new MemoryStream(), false)
-            };
-
-            using (RasterImage thumbnail = (RasterImage)Image.Create(thumbOptions, 100, 100))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+            if (!File.Exists(thumbnailPath))
             {
-                // Fill the thumbnail with a solid red color
-                Graphics graphics = new Graphics(thumbnail);
-                SolidBrush brush = new SolidBrush(Color.Red);
-                graphics.FillRectangle(brush, thumbnail.Bounds);
-
-                // Assign the thumbnail to the EXIF data
-                jpegImage.ExifData.Thumbnail = thumbnail;
+                Console.Error.WriteLine($"File not found: {thumbnailPath}");
+                return;
             }
 
-            // Save the modified JPEG image
-            jpegImage.Save(outputPath);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the main JPEG image
+            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+            {
+                // Load the thumbnail image (any raster image format)
+                using (RasterImage thumbImage = (RasterImage)Image.Load(thumbnailPath))
+                {
+                    // Assign the thumbnail to the EXIF data
+                    jpegImage.ExifData.Thumbnail = thumbImage;
+                }
+
+                // Save the image with the new EXIF thumbnail
+                jpegImage.Save(outputPath);
+            }
+
+            // Verify that the thumbnail was written
+            using (JpegImage savedImage = (JpegImage)Image.Load(outputPath))
+            {
+                JpegExifData exif = savedImage.ExifData as JpegExifData;
+                if (exif != null && exif.Thumbnail != null)
+                {
+                    Console.WriteLine("Thumbnail successfully added.");
+                    Console.WriteLine($"Thumbnail size: {exif.Thumbnail.Width}x{exif.Thumbnail.Height}");
+                }
+                else
+                {
+                    Console.WriteLine("Thumbnail not found in saved image.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

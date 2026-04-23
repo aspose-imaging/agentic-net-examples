@@ -2,14 +2,13 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.wmf";
-        string outputPath = "output.png";
+        string inputPath = "Input\\sample.wmf";
+        string outputPath = "Output\\sample.png";
 
         if (!File.Exists(inputPath))
         {
@@ -23,11 +22,10 @@ class Program
         {
             using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new VectorRasterizationOptions
+                var rasterOptions = new WmfRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.Transparent,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
+                    PageSize = image.Size,
+                    BackgroundColor = Color.Transparent
                 };
 
                 var pngOptions = new PngOptions

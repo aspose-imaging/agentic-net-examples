@@ -10,14 +10,16 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\InputGifs";
-            string outputDir = @"C:\OutputWebp";
+            string inputDirectory = @"C:\InputGifs";
+            string outputDirectory = @"C:\OutputWebp";
 
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output directory exists (creates parent if needed)
+            Directory.CreateDirectory(outputDirectory);
 
-            // Process each GIF file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDir, "*.gif"))
+            // Get all GIF files in the input directory
+            string[] gifFiles = Directory.GetFiles(inputDirectory, "*.gif");
+
+            foreach (string inputPath in gifFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -27,24 +29,24 @@ class Program
                 }
 
                 // Build the corresponding output WebP file path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".webp");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory for this file exists
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the GIF (including all animation frames)
+                // Load the GIF (which may contain multiple frames)
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure WebP options – keep all frames, set desired quality
+                    // Configure WebP options – keep all frames, default quality
                     var webpOptions = new WebPOptions
                     {
-                        // MultiPageOptions left null to include all frames
+                        // Example settings; adjust as needed
                         Lossless = false,
                         Quality = 80
                     };
 
-                    // Save as animated WebP, preserving frame order
+                    // Save as animated WebP preserving frame order
                     image.Save(outputPath, webpOptions);
                 }
             }

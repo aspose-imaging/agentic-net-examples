@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 
@@ -9,16 +8,19 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\InputEmf";
-        string outputDir = @"C:\OutputSvg";
-
         try
         {
-            // Get all EMF files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.emf");
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputEmf";
+            string outputDir = @"C:\OutputSvg";
 
-            foreach (string inputPath in files)
+            // Ensure the output root directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Get all EMF files in the input directory
+            string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
+
+            foreach (string inputPath in emfFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -28,33 +30,30 @@ class Program
                 }
 
                 // Build output SVG path
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".svg");
 
-                // Ensure output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EMF image
+                // Load the EMF image
                 using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    // Set up SVG save options
+                    // Configure SVG save options
                     SvgOptions saveOptions = new SvgOptions
                     {
-                        TextAsShapes = true
+                        TextAsShapes = true, // render text as shapes
+                        VectorRasterizationOptions = new EmfRasterizationOptions
+                        {
+                            BackgroundColor = Color.WhiteSmoke,
+                            PageSize = emfImage.Size,
+                            RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                            BorderX = 0,
+                            BorderY = 0
+                        }
                     };
 
-                    // Configure rasterization options for EMF
-                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                    {
-                        BackgroundColor = Color.WhiteSmoke,
-                        PageSize = emfImage.Size,
-                        RenderMode = EmfRenderMode.Auto,
-                        BorderX = 0,
-                        BorderY = 0
-                    };
-
-                    saveOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save as SVG (embedded images are stored as Base64 by default)
+                    // Save as SVG; embedded raster images are encoded as Base64 by default
                     emfImage.Save(outputPath, saveOptions);
                 }
             }

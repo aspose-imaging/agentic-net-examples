@@ -4,6 +4,7 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -22,29 +23,30 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the corrupted TIFF with recovery options
-            var loadOptions = new LoadOptions
+            // Prepare load options for second recovery mode
+            LoadOptions loadOptions = new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
             };
 
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath, loadOptions))
+            // Load the corrupted TIFF with recovery options
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath, loadOptions))
             {
-                // Verify integrity of recovered frames
-                Console.WriteLine($"Recovered frame count: {tiff.Frames.Length}");
-                for (int i = 0; i < tiff.Frames.Length; i++)
+                // Verify integrity: output number of recovered frames and their dimensions
+                int frameCount = tiffImage.Frames.Length;
+                Console.WriteLine($"Recovered frames: {frameCount}");
+                for (int i = 0; i < frameCount; i++)
                 {
-                    var frame = tiff.Frames[i];
-                    Console.WriteLine($"Frame {i}: {frame.Width}x{frame.Height}");
+                    var frame = tiffImage.Frames[i];
+                    Console.WriteLine($"Frame {i + 1}: {frame.Width}x{frame.Height}");
                 }
 
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Save the recovered TIFF
-                var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiff.Save(outputPath, saveOptions);
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)

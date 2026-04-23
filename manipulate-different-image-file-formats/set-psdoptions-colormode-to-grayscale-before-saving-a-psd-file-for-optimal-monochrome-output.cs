@@ -10,24 +10,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = "input.jpg";
             string outputPath = "output\\output.psd";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD saving options
+                // Configure PSD save options
                 PsdOptions psdOptions = new PsdOptions
                 {
                     // Set color mode to Grayscale for monochrome output

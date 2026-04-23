@@ -8,39 +8,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.psd";
-
-        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.psd";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to work with palettes
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Create PSD save options
-                PsdOptions psdOptions = new PsdOptions();
+                // Create a 256‑color palette from the source image
+                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
 
-                // Generate a 256‑color palette from the source image
-                psdOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256);
+                // Configure PSD save options and assign the palette
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    Palette = palette,
+                    // Use indexed (bitmap) color mode for palettized PSD
+                    ColorMode = ColorModes.Bitmap
+                };
 
-                // Optional: set color mode to indexed (Bitmap) for palettized PSD
-                psdOptions.ColorMode = ColorModes.Bitmap;
-
-                // Save the image as an indexed PSD using the generated palette
+                // Save the image as an indexed PSD
                 image.Save(outputPath, psdOptions);
             }
         }

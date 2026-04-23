@@ -12,9 +12,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input GIF path
             string inputPath = "input.gif";
-            string outputFolder = "ExtractedFrames";
+
+            // Hardcoded output folder for PNG frames
+            string outputFolder = "output_frames";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -34,7 +36,7 @@ class Program
                 for (int i = 0; i < frameCount; i++)
                 {
                     // Build output file path for each frame
-                    string outputPath = Path.Combine(outputFolder, $"frame_{i}.png");
+                    string outputPath = Path.Combine(outputFolder, $"frame_{i + 1}.png");
 
                     // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -42,7 +44,7 @@ class Program
                     // Configure PNG options to export a single frame
                     PngOptions pngOptions = new PngOptions
                     {
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
                     };
 
                     // Save the current frame as PNG

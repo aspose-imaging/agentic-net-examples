@@ -1,60 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputWebPPath = "input.webp";
-        string outputBmpPath = "output.bmp";
-        string outputTiffPath = "output.tif";
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputWebPPath))
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.webp";
+            string bmpPath = "Output/sample.bmp";
+            string tiffPath = "Output/sample.tiff";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputWebPPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputBmpPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tiffPath));
 
-            // Load WebP image
-            using (WebPImage webPImage = new WebPImage(inputWebPPath))
+            // Load WebP image and save as BMP
+            using (WebPImage webpImage = new WebPImage(inputPath))
             {
-                // Convert to BMP (24‑bpp, RGB compression, 96 DPI)
-                using (BmpImage bmpImage = new BmpImage(
-                    webPImage,
-                    24,
-                    BitmapCompression.Rgb,
-                    96.0,
-                    96.0))
+                using (BmpOptions bmpOptions = new BmpOptions())
                 {
-                    // Save BMP file
-                    bmpImage.Save(outputBmpPath);
+                    webpImage.Save(bmpPath, bmpOptions);
+                }
+            }
 
-                    // Prepare TIFF options with LZW compression
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        Compression = TiffCompressions.Lzw,
-                        BitsPerSample = new ushort[] { 8, 8, 8 },
-                        ByteOrder = TiffByteOrder.BigEndian,
-                        Photometric = TiffPhotometrics.Rgb,
-                        PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                    };
-
-                    // Save as TIFF using the same image data
-                    bmpImage.Save(outputTiffPath, tiffOptions);
+            // Load the BMP image and save as TIFF with LZW compression
+            using (Image bmpImage = Image.Load(bmpPath))
+            {
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    tiffOptions.Compression = TiffCompressions.Lzw;
+                    bmpImage.Save(tiffPath, tiffOptions);
                 }
             }
         }

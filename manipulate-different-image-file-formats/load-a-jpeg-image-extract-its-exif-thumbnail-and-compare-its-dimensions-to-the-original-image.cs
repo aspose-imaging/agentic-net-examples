@@ -9,60 +9,57 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.jpg";
-        string thumbOutputPath = @"C:\Images\thumbnail.jpg";
-        string reportOutputPath = @"C:\Images\thumbnail_report.txt";
+        string inputPath = "sample.jpg";
+        string outputPath = "thumbnail_output.jpg";
 
-        // Input file existence check
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(thumbOutputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(reportOutputPath));
-
-        // Load JPEG image
-        using (JpegImage jpeg = new JpegImage(inputPath))
-        {
-            // Original image dimensions
-            int originalWidth = jpeg.Width;
-            int originalHeight = jpeg.Height;
-
-            // Extract EXIF thumbnail
-            RasterImage thumbnail = jpeg.ExifData?.Thumbnail;
-
-            if (thumbnail == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine("No EXIF thumbnail present in the image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Use the thumbnail within a using block to ensure disposal
-            using (thumbnail)
+            // Load the JPEG image
+            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Thumbnail dimensions
-                int thumbWidth = thumbnail.Width;
-                int thumbHeight = thumbnail.Height;
+                // Original image dimensions
+                int originalWidth = jpegImage.Width;
+                int originalHeight = jpegImage.Height;
 
-                // Compare dimensions
-                bool sameSize = originalWidth == thumbWidth && originalHeight == thumbHeight;
+                // Access EXIF data and retrieve the thumbnail
+                JpegExifData jpegExifData = jpegImage.ExifData as JpegExifData;
+                if (jpegExifData == null || jpegExifData.Thumbnail == null)
+                {
+                    Console.WriteLine("No EXIF thumbnail found in the image.");
+                }
+                else
+                {
+                    // The thumbnail is a RasterImage; ensure proper disposal
+                    using (RasterImage thumbnail = jpegExifData.Thumbnail)
+                    {
+                        // Thumbnail dimensions
+                        int thumbWidth = thumbnail.Width;
+                        int thumbHeight = thumbnail.Height;
 
-                string report = $"Original: {originalWidth}x{originalHeight}, " +
-                                $"Thumbnail: {thumbWidth}x{thumbHeight}, " +
-                                $"Same size: {sameSize}";
+                        // Output dimension comparison
+                        Console.WriteLine($"Original dimensions: {originalWidth}x{originalHeight}");
+                        Console.WriteLine($"Thumbnail dimensions: {thumbWidth}x{thumbHeight}");
 
-                // Output comparison result
-                Console.WriteLine(report);
+                        // Ensure output directory exists before saving
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the thumbnail as a separate JPEG file
-                thumbnail.Save(thumbOutputPath);
-
-                // Write the comparison report to a text file
-                File.WriteAllText(reportOutputPath, report);
+                        // Save the thumbnail to the output path
+                        thumbnail.Save(outputPath);
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Catch any runtime exceptions and report them
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

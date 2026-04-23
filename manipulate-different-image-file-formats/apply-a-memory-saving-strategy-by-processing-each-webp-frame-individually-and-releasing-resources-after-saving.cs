@@ -10,54 +10,44 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input WebP file path
             string inputPath = "input.webp";
-            string outputDir = "output_frames";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Directory to store extracted frames
+            string outputDir = "output_frames";
             Directory.CreateDirectory(outputDir);
 
-            // Determine the number of frames in the WebP image
-            int frameCount;
-            using (WebPImage tempImage = new WebPImage(inputPath))
+            // Load the WebP image
+            using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                if (tempImage is IMultipageImage multipage && multipage.PageCount > 0)
+                // Check if the image has multiple frames
+                if (webPImage is IMultipageImage multipageImage)
                 {
-                    frameCount = multipage.PageCount;
+                    int frameCount = multipageImage.PageCount;
+                    for (int i = 0; i < frameCount; i++)
+                    {
+                        // Retrieve the frame and cast to RasterImage
+                        using (RasterImage rasterFrame = (RasterImage)multipageImage.Pages[i])
+                        {
+                            string outputPath = Path.Combine(outputDir, $"frame_{i}.png");
+                            // Ensure the output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            // Save the frame as PNG
+                            rasterFrame.Save(outputPath, new PngOptions());
+                        }
+                    }
                 }
                 else
                 {
-                    frameCount = 1; // Single-frame image
-                }
-            }
-
-            // Process each frame individually
-            for (int i = 0; i < frameCount; i++)
-            {
-                string outputPath = Path.Combine(outputDir, $"frame_{i}.png");
-
-                // Ensure the directory for the current output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the WebP image anew for each frame to release memory after saving
-                using (WebPImage webPImage = new WebPImage(inputPath))
-                {
-                    // Configure options to export only the current frame
-                    var multiPageOptions = new MultiPageOptions(new IntRange(i, 1));
-                    var pngOptions = new PngOptions
-                    {
-                        MultiPageOptions = multiPageOptions
-                    };
-
-                    // Save the current frame as PNG
-                    webPImage.Save(outputPath, pngOptions);
+                    // Single-frame WebP: save as a single PNG
+                    string outputPath = Path.Combine(outputDir, "frame_0.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    webPImage.Save(outputPath, new PngOptions());
                 }
             }
         }

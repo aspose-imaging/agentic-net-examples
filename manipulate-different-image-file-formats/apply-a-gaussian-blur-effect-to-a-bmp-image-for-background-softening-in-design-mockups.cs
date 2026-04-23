@@ -7,31 +7,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "C:\\Images\\input.bmp";
+            string outputPath = "C:\\Images\\output_gaussian.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to use the Filter method
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply Gaussian blur to the entire image (radius 5, sigma 4.0)
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage raster = (RasterImage)image;
-
-            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            // Save the processed image
-            raster.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

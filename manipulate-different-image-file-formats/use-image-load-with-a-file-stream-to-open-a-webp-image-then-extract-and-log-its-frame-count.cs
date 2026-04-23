@@ -2,15 +2,13 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.png";
+        // Hardcoded input path
+        string inputPath = @"c:\temp\test.webp";
 
         try
         {
@@ -21,34 +19,29 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Open a file stream for the WebP image
             using (FileStream stream = File.OpenRead(inputPath))
             {
                 // Load the image from the stream
                 using (Image image = Image.Load(stream))
                 {
-                    // Cast to WebPImage to access PageCount (frame count)
+                    // Cast to WebPImage to access WebP‑specific properties
                     WebPImage webPImage = image as WebPImage;
                     if (webPImage != null)
                     {
-                        int frameCount = webPImage.PageCount;
-                        Console.WriteLine($"Frame count: {frameCount}");
-
-                        // Optionally save the first frame to PNG
-                        webPImage.Save(outputPath, new PngOptions());
+                        // Log the number of frames (pages) in the WebP image
+                        Console.WriteLine($"Frame count (PageCount): {webPImage.PageCount}");
                     }
                     else
                     {
-                        Console.Error.WriteLine("Loaded image is not a WebP image.");
+                        Console.WriteLine("The loaded image is not a WebP image.");
                     }
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

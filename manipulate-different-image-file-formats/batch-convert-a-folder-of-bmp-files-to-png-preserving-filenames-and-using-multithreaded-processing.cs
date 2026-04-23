@@ -14,9 +14,6 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
-
             // Get all BMP files in the input folder
             string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp", SearchOption.TopDirectoryOnly);
 
@@ -30,20 +27,17 @@ class Program
                     return;
                 }
 
-                // Determine output file path with .png extension
-                string fileName = Path.GetFileNameWithoutExtension(bmpPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".png");
+                // Build output PNG path preserving the filename
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(bmpPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
 
-                // Ensure the output directory exists (unconditional)
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP image
+                // Load BMP and save as PNG
                 using (Image image = Image.Load(bmpPath))
                 {
-                    // Set PNG save options
                     var pngOptions = new PngOptions();
-
-                    // Save as PNG
                     image.Save(outputPath, pngOptions);
                 }
             });

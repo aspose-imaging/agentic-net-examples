@@ -8,28 +8,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\sample.dcm";
-        string outputPath = "output\\flipped.png";
+        // Hardcoded input and output file paths
+        string inputPath = "sample.dcm";
+        string outputPath = "sample_flipped.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input DICOM file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the DICOM image, flip it vertically, and save as PNG
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
+            {
+                // Flip vertically (no rotation, only vertical flip)
+                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+
+                // Save the transformed image as PNG
+                image.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DICOM image, flip vertically, and save as PNG
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Flip vertically
-            dicomImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-            // Save the transformed image as PNG
-            dicomImage.Save(outputPath, new PngOptions());
+            // Output any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

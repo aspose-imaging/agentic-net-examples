@@ -1,60 +1,69 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input BMP files
-        string[] inputPaths = new[]
+        try
         {
-            @"c:\temp\image1.bmp",
-            @"c:\temp\image2.bmp",
-            @"c:\temp\image3.bmp"
-        };
-
-        // Hard‑coded output multi‑page TIFF file
-        string outputPath = @"c:\temp\output.tif";
-
-        // Verify each input file exists
-        foreach (string inputPath in inputPaths)
-        {
-            if (!File.Exists(inputPath))
+            // Hardcoded input BMP file paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-        }
+                @"C:\Images\image1.bmp",
+                @"C:\Images\image2.bmp",
+                @"C:\Images\image3.bmp"
+            };
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Hardcoded output TIFF file path
+            string outputPath = @"C:\Images\output.tif";
 
-        // Load the first BMP and create the initial TIFF image
-        using (Image firstBmp = Image.Load(inputPaths[0]))
-        {
-            // Create a TIFF frame from the first BMP
-            TiffFrame firstFrame = new TiffFrame((RasterImage)firstBmp);
-
-            // Create a TIFF image containing the first frame
-            using (TiffImage tiffImage = new TiffImage(firstFrame))
+            // Verify each input file exists
+            foreach (var inputPath in inputPaths)
             {
-                // Process remaining BMP files and add them as frames
-                for (int i = 1; i < inputPaths.Length; i++)
+                if (!File.Exists(inputPath))
                 {
-                    using (Image bmp = Image.Load(inputPaths[i]))
-                    {
-                        TiffFrame frame = new TiffFrame((RasterImage)bmp);
-                        tiffImage.AddFrame(frame);
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
+            }
 
-                // Save the multi‑page TIFF to the specified path
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load BMP images and convert each to a TiffFrame
+            var frames = new List<TiffFrame>();
+            foreach (var inputPath in inputPaths)
+            {
+                using (Image bmpImage = Image.Load(inputPath))
+                {
+                    // Ensure the loaded image is a raster image
+                    var raster = bmpImage as RasterImage;
+                    if (raster == null)
+                    {
+                        Console.Error.WriteLine($"Unsupported image format: {inputPath}");
+                        return;
+                    }
+
+                    // Create a TiffFrame from the raster image
+                    var frame = new TiffFrame(raster);
+                    frames.Add(frame);
+                }
+            }
+
+            // Create a multi‑page TIFF image from the collected frames
+            using (TiffImage tiffImage = new TiffImage(frames.ToArray()))
+            {
+                // Save the resulting TIFF
                 tiffImage.Save(outputPath);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

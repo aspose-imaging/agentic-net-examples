@@ -1,43 +1,45 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input DjVu file and output folder
         string inputPath = "sample.djvu";
-        string outputFolder = "Output";
+        string outputFolder = "output";
 
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(outputFolder);
 
-        // Load DjVu document
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
+        try
         {
-            // Get all pages as DjvuPage objects
-            var pages = djvuImage.Pages.Cast<DjvuPage>().ToArray();
-
-            // Convert each page to PNG in parallel
-            Parallel.ForEach(pages, page =>
+            using (Stream stream = File.OpenRead(inputPath))
             {
-                string outputPath = Path.Combine(outputFolder, $"page_{page.PageNumber}.png");
-                // Ensure directory for each output file (safety)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                page.Save(outputPath, new PngOptions());
-            });
+                using (DjvuImage djvuImage = new DjvuImage(stream))
+                {
+                    var pages = djvuImage.Pages;
+                    System.Threading.Tasks.Parallel.ForEach(pages, page =>
+                    {
+                        var djvuPage = (DjvuPage)page;
+                        string outPath = Path.Combine(outputFolder, $"page_{djvuPage.PageNumber}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                        djvuPage.Save(outPath, new PngOptions());
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

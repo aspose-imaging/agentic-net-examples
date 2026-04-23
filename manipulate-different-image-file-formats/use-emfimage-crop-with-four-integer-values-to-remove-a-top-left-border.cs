@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\sample_cropped.png";
+        string outputPath = @"C:\Images\output\sample_cropped.png";
 
         try
         {
@@ -27,20 +27,21 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access the specific Crop overload
+                // Cast to EmfImage to access EMF‑specific methods
                 EmfImage emfImage = (EmfImage)image;
 
-                // Define border sizes to remove from the top-left corner
-                int leftShift = 50;   // pixels to remove from the left side
-                int rightShift = 0;   // no removal from the right side
-                int topShift = 30;    // pixels to remove from the top side
-                int bottomShift = 0;  // no removal from the bottom side
+                // Define border sizes to remove (left, right, top, bottom)
+                int leftShift = 10;   // remove 10 pixels from the left
+                int rightShift = 0;   // keep right side unchanged
+                int topShift = 10;    // remove 10 pixels from the top
+                int bottomShift = 0;  // keep bottom side unchanged
 
                 // Crop the image using shift values
                 emfImage.Crop(leftShift, rightShift, topShift, bottomShift);
 
                 // Save the cropped image as PNG
-                emfImage.Save(outputPath, new PngOptions());
+                PngOptions pngOptions = new PngOptions();
+                emfImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

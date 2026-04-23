@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Linq;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -13,7 +13,6 @@ class Program
             string inputDir = "Input";
             string outputDir = "Output";
 
-            // Ensure input directory exists
             if (!Directory.Exists(inputDir))
             {
                 Directory.CreateDirectory(inputDir);
@@ -21,56 +20,56 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDir))
+            string[] files = Directory.GetFiles(inputDir);
+            foreach (string filePath in files)
             {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            var files = Directory.GetFiles(inputDir, "*.*")
-                .Where(f => f.EndsWith(".emf", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".wmf", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-
-            foreach (var inputPath in files)
-            {
-                if (!File.Exists(inputPath))
+                string extension = Path.GetExtension(filePath);
+                if (!extension.Equals(".emf", StringComparison.OrdinalIgnoreCase) &&
+                    !extension.Equals(".wmf", StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
 
-                // Ensure output directory for this file exists
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filePath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(filePath))
                 {
-                    // Prepare PNG options with uniform DPI
-                    PngOptions pngOptions = new PngOptions();
-                    pngOptions.ResolutionSettings = new ResolutionSetting(300, 300); // uniform DPI
+                    VectorRasterizationOptions vectorOptions;
 
-                    // Set appropriate vector rasterization options based on file type
-                    if (inputPath.EndsWith(".emf", StringComparison.OrdinalIgnoreCase))
+                    if (image is EmfImage)
                     {
-                        var rasterOptions = new EmfRasterizationOptions
+                        var emfOptions = new EmfRasterizationOptions
                         {
-                            BackgroundColor = Color.White,
-                            PageSize = image.Size
+                            PageSize = image.Size,
+                            BackgroundColor = Aspose.Imaging.Color.White
                         };
-                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                        vectorOptions = emfOptions;
                     }
-                    else // .wmf
+                    else if (image is WmfImage)
                     {
-                        var rasterOptions = new WmfRasterizationOptions
+                        var wmfOptions = new WmfRasterizationOptions
                         {
-                            BackgroundColor = Color.White,
-                            PageSize = image.Size
+                            PageSize = image.Size,
+                            BackgroundColor = Aspose.Imaging.Color.White
                         };
-                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                        vectorOptions = wmfOptions;
                     }
+                    else
+                    {
+                        continue;
+                    }
+
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = vectorOptions
+                    };
 
                     image.Save(outputPath, pngOptions);
                 }

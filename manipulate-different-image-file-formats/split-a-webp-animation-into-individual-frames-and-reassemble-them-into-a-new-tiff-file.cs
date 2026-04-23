@@ -12,45 +12,68 @@ class Program
     {
         try
         {
-            string inputPath = "input.webp";
-            string outputPath = "output.tif";
+            // Hardcoded input and output paths
+            string inputPath = "Input\\animation.webp";
+            string outputPath = "Output\\result.tif";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WebPImage webp = new WebPImage(inputPath))
+            // Load the animated WebP image
+            using (WebPImage webpImage = new WebPImage(inputPath))
             {
-                IMultipageImage multipage = webp as IMultipageImage;
+                // Cast to multipage interface to access frames
+                IMultipageImage multipage = webpImage as IMultipageImage;
                 if (multipage == null || multipage.PageCount == 0)
                 {
-                    Console.Error.WriteLine("No frames found in the WebP animation.");
+                    Console.Error.WriteLine("The WebP image does not contain any frames.");
                     return;
                 }
 
-                RasterImage firstFrame = (RasterImage)multipage.Pages[0];
+                // Get dimensions from the first frame
+                RasterImage firstFrame = multipage.Pages[0] as RasterImage;
+                if (firstFrame == null)
+                {
+                    Console.Error.WriteLine("Unable to retrieve the first frame as a raster image.");
+                    return;
+                }
                 int width = firstFrame.Width;
                 int height = firstFrame.Height;
 
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+                // Prepare TIFF options
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                 {
-                    tiff.SavePixels(tiff.ActiveFrame.Bounds, firstFrame.LoadPixels(firstFrame.Bounds));
-
-                    for (int i = 1; i < multipage.PageCount; i++)
+                    // Create a new TIFF image canvas
+                    using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
                     {
-                        tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
-                        tiff.ActiveFrame = tiff.Frames[i];
-                        RasterImage frame = (RasterImage)multipage.Pages[i];
-                        tiff.SavePixels(tiff.ActiveFrame.Bounds, frame.LoadPixels(frame.Bounds));
-                    }
+                        // Iterate through each WebP frame and copy its pixels to the TIFF
+                        for (int i = 0; i < multipage.PageCount; i++)
+                        {
+                            RasterImage frame = multipage.Pages[i] as RasterImage;
+                            if (frame == null)
+                                continue;
 
-                    tiff.Save(outputPath);
+                            // Add a new frame to the TIFF after the first one
+                            if (i > 0)
+                            {
+                                tiffImage.AddFrame(new TiffFrame(tiffOptions, width, height));
+                            }
+
+                            // Copy pixel data
+                            var pixels = frame.LoadPixels(frame.Bounds);
+                            tiffImage.Frames[i].SavePixels(tiffImage.Frames[i].Bounds, pixels);
+                        }
+
+                        // Save the assembled TIFF file
+                        tiffImage.Save(outputPath);
+                    }
                 }
             }
         }

@@ -6,34 +6,41 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output/output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output_baseline.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure JPEG options with Baseline compression
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                CompressionType = JpegCompressionMode.Baseline,
-                Quality = 90 // optional quality setting
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as JPEG using the configured options
-            image.Save(outputPath, jpegOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Set up JPEG save options with Baseline compression
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    CompressionType = JpegCompressionMode.Baseline,
+                    Quality = 90 // typical quality setting
+                };
+
+                // Save the image using the configured options
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

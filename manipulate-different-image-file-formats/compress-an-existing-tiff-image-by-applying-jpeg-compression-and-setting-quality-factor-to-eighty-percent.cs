@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\source.tif";
-            string outputPath = @"C:\Images\compressed.tif";
+            string inputPath = @"C:\Images\input.tif";
+            string outputPath = @"C:\Images\output_compressed.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,7 +26,7 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the existing TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
                 // Configure TIFF options for JPEG compression with 80% quality
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)

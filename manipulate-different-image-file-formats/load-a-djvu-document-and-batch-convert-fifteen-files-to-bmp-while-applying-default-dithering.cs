@@ -8,35 +8,59 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output directories
-        string inputDir = @"C:\Input";
-        string outputDir = @"C:\Output";
-
-        // Process fifteen DjVu files named file1.djvu … file15.djvu
-        for (int i = 1; i <= 15; i++)
+        try
         {
-            string inputPath = Path.Combine(inputDir, $"file{i}.djvu");
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input directory and output directory
+            string inputDir = @"C:\Input";
+            string outputDir = @"C:\Output";
+
+            // List of fifteen DjVu files to process
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                "file1.djvu", "file2.djvu", "file3.djvu", "file4.djvu", "file5.djvu",
+                "file6.djvu", "file7.djvu", "file8.djvu", "file9.djvu", "file10.djvu",
+                "file11.djvu", "file12.djvu", "file13.djvu", "file14.djvu", "file15.djvu"
+            };
 
-            string outputPath = Path.Combine(outputDir, $"file{i}.bmp");
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the DjVu document, apply default dithering, and save as BMP
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+            for (int i = 0; i < inputFiles.Length; i++)
             {
-                // Apply default Floyd‑Steinberg dithering with 8‑bit palette
-                djvuImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+                string inputPath = Path.Combine(inputDir, inputFiles[i]);
 
-                // Save the processed image as BMP
-                djvuImage.Save(outputPath, new BmpOptions());
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Open the DjVu document
+                using (FileStream stream = File.OpenRead(inputPath))
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                {
+                    // Apply default dithering (Floyd‑Steinberg, 8‑bit palette)
+                    djvuImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+
+                    // Save each page as a separate BMP file
+                    int pageIndex = 0;
+                    foreach (DjvuPage page in djvuImage.Pages)
+                    {
+                        string outputPath = Path.Combine(outputDir,
+                            $"output_{i + 1}_page{pageIndex}.bmp");
+
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as BMP
+                        page.Save(outputPath, new BmpOptions());
+
+                        pageIndex++;
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

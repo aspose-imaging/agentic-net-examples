@@ -1,50 +1,53 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input DjVu file path
-        string inputPath = @"C:\Temp\sample.djvu";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Hardcoded output directory for GIF files
-        string outputDir = @"C:\Temp\GifOutput";
-
-        // Ensure the output directory exists (creates parent directories as needed)
-        Directory.CreateDirectory(outputDir);
-
-        // Load the DjVu document from a file stream
-        using (FileStream inputStream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
-        {
-            // Prepare GIF save options with interlacing enabled
-            GifOptions gifOptions = new GifOptions
+            // Input DjVu file
+            string inputPath = "Input/sample.djvu";
+            if (!File.Exists(inputPath))
             {
-                Interlaced = true
-            };
-
-            // Iterate through each page and save as an interlaced GIF
-            foreach (DjvuPage page in djvuImage.Pages)
-            {
-                string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.gif");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the page as GIF using the specified options
-                page.Save(outputPath, gifOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Load DjVu document
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            {
+                // Iterate through all pages
+                for (int i = 0; i < djvu.PageCount; i++)
+                {
+                    // Current page as an Image
+                    Image page = djvu.Pages[i];
+
+                    // Output GIF path for this page
+                    string outputPath = $"Output/page_{i + 1}.gif";
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Configure GIF options with interlacing enabled
+                    GifOptions gifOptions = new GifOptions
+                    {
+                        Interlaced = true
+                    };
+
+                    // Save the page as GIF
+                    page.Save(outputPath, gifOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

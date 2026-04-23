@@ -1,61 +1,46 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.svg";
-        string fontFolderPath = @"C:\Fonts";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.svg";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource((obj) =>
+        try
         {
-            string fontsPath = obj.Length > 0 ? obj[0]?.ToString() : string.Empty;
-            var customFonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+            // Configure font substitution: use a default fallback font
+            FontSettings.DefaultFontName = "Arial";
 
-            if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+            // Optionally, point to a folder containing additional fonts
+            // FontSettings.SetFontsFolder(Environment.GetFolderPath(Environment.SpecialFolder.Fonts));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                foreach (var fontFile in Directory.GetFiles(fontsPath))
-                {
-                    byte[] fontData = File.ReadAllBytes(fontFile);
-                    string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                    customFonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontData));
-                }
+                // Save as SVG, the configured FontSettings will be applied automatically
+                var svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
             }
-
-            return customFonts.ToArray();
-        }, fontFolderPath);
-
-        using (Image image = Image.Load(inputPath, loadOptions))
+        }
+        catch (Exception ex)
         {
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height
-            };
-
-            var svgSaveOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                TextAsShapes = false
-            };
-
-            image.Save(outputPath, svgSaveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -6,49 +6,50 @@ using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input\";
+            string outputDir = @"C:\Images\Output\";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            // Retrieve all DNG files from the input directory
+            string[] dngFiles = Directory.GetFiles(inputDir, "*.dng");
 
-        foreach (string inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in dngFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                DngImage dngImage = (DngImage)image;
-
-                using (JpegOptions jpegOptions = new JpegOptions())
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    jpegOptions.Quality = 85;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Construct the output JPEG file path
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the DNG image and save it as JPEG with quality 85
+                using (Image image = Image.Load(inputPath))
+                {
+                    DngImage dngImage = (DngImage)image;
+                    JpegOptions jpegOptions = new JpegOptions
+                    {
+                        Quality = 85
+                    };
                     dngImage.Save(outputPath, jpegOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

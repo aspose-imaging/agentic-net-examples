@@ -6,48 +6,45 @@ using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.emf";
+        string outputPath = "output.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\input.emf";
-            string outputPath = @"C:\Temp\output.svg";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG save options with embedded resources
-                var svgOptions = new SvgOptions
+                EmfImage emfImage = (EmfImage)image;
+
+                SvgOptions saveOptions = new SvgOptions
                 {
-                    TextAsShapes = true,
-                    VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
-                        PageSize = emfImage.Size,
-                        RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                        BorderX = 50,
-                        BorderY = 50
-                    }
+                    TextAsShapes = true
                 };
 
-                // Save to a memory stream
-                using (var memoryStream = new MemoryStream())
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
-                    emfImage.Save(memoryStream, svgOptions);
+                    BackgroundColor = Color.WhiteSmoke,
+                    PageSize = emfImage.Size,
+                    RenderMode = EmfRenderMode.Auto,
+                    BorderX = 0,
+                    BorderY = 0
+                };
 
-                    // Optionally write the SVG data to a file for later use
-                    File.WriteAllBytes(outputPath, memoryStream.ToArray());
+                saveOptions.VectorRasterizationOptions = rasterOptions;
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    emfImage.Save(memoryStream, saveOptions);
+                    // The SVG data is now in memoryStream and can be used later.
                 }
             }
         }

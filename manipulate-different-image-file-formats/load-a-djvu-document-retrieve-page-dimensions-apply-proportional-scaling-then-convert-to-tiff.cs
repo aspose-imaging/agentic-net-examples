@@ -1,32 +1,47 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.djvu";
-        string outputPath = "Output\\scaled.tiff";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.djvu";
+            string outputPath = "output/output.tiff";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document
+            using (DjvuImage djvu = (DjvuImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Retrieve original dimensions
+                int originalWidth = djvu.Width;
+                int originalHeight = djvu.Height;
+
+                // Apply proportional scaling (double the width, height adjusts automatically)
+                djvu.ResizeWidthProportionally(originalWidth * 2, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+
+                // Save the result as TIFF
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                djvu.Save(outputPath, tiffOptions);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            int originalWidth = djvu.Width;
-            int newWidth = originalWidth * 2;
-            djvu.ResizeWidthProportionally(newWidth, ResizeType.NearestNeighbourResample);
-            djvu.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

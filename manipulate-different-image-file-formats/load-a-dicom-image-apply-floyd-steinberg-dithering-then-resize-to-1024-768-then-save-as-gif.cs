@@ -9,31 +9,38 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "Input\\sample.dcm";
-        string outputPath = "Output\\result.gif";
+        string inputPath = "input.dcm";
+        string outputPath = "output.gif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            {
+                // Apply Floyd‑Steinberg dithering (1‑bit palette)
+                dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+
+                // Resize to 1024×768 using nearest‑neighbour resampling
+                dicomImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+
+                // Save the result as a GIF
+                GifOptions gifOptions = new GifOptions();
+                dicomImage.Save(outputPath, gifOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DICOM image, apply dithering, resize, and save as GIF
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Apply Floyd‑Steinberg dithering with 8‑bit palette (null palette uses default)
-            dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
-
-            // Resize to 1024x768 using nearest‑neighbour resampling
-            dicomImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
-
-            // Save as GIF
-            GifOptions gifOptions = new GifOptions();
-            dicomImage.Save(outputPath, gifOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Exif;
 
 class Program
@@ -9,49 +10,69 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.jpg";
-        string thumbnailPath = @"C:\Images\sample_thumbnail.jpg";
+        string inputPath = "input.jpg";
+        string thumbnailOutputPath = "output\\thumbnail.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists before saving
-        Directory.CreateDirectory(Path.GetDirectoryName(thumbnailPath));
-
-        // Load the JPEG image
-        using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
-        {
-            // Original image dimensions
-            int originalWidth = jpeg.Width;
-            int originalHeight = jpeg.Height;
-
-            // Retrieve the EXIF thumbnail (may be null)
-            RasterImage thumbnail = jpeg.ExifData?.Thumbnail;
-
-            if (thumbnail == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine("No EXIF thumbnail present in the image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Save the thumbnail to a file for size comparison
-            thumbnail.Save(thumbnailPath);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(thumbnailOutputPath));
 
-            // Thumbnail dimensions
-            int thumbWidth = thumbnail.Width;
-            int thumbHeight = thumbnail.Height;
+            // Load the JPEG image
+            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+            {
+                // Original image dimensions
+                int originalWidth = jpegImage.Width;
+                int originalHeight = jpegImage.Height;
 
-            // File sizes in bytes
-            long originalFileSize = new FileInfo(inputPath).Length;
-            long thumbnailFileSize = new FileInfo(thumbnailPath).Length;
+                // Access EXIF data and retrieve the thumbnail
+                JpegExifData jpegExifData = jpegImage.ExifData as JpegExifData;
+                if (jpegExifData == null || jpegExifData.Thumbnail == null)
+                {
+                    Console.WriteLine("No EXIF thumbnail found in the image.");
+                    return;
+                }
 
-            // Output comparison results
-            Console.WriteLine($"Original image: {originalWidth}x{originalHeight}, {originalFileSize} bytes");
-            Console.WriteLine($"Thumbnail image: {thumbWidth}x{thumbHeight}, {thumbnailFileSize} bytes");
+                using (RasterImage thumbnail = jpegExifData.Thumbnail)
+                {
+                    // Thumbnail dimensions
+                    int thumbWidth = thumbnail.Width;
+                    int thumbHeight = thumbnail.Height;
+
+                    // Compare sizes and output the result
+                    Console.WriteLine($"Original image size:  {originalWidth}x{originalHeight}");
+                    Console.WriteLine($"Thumbnail image size: {thumbWidth}x{thumbHeight}");
+
+                    if (thumbWidth < originalWidth && thumbHeight < originalHeight)
+                    {
+                        Console.WriteLine("Thumbnail is smaller than the original image.");
+                    }
+                    else if (thumbWidth == originalWidth && thumbHeight == originalHeight)
+                    {
+                        Console.WriteLine("Thumbnail size matches the original image size.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Thumbnail is larger than the original image (unexpected).");
+                    }
+
+                    // Save the thumbnail to a file
+                    JpegOptions options = new JpegOptions();
+                    thumbnail.Save(thumbnailOutputPath, options);
+                    Console.WriteLine($"Thumbnail saved to: {thumbnailOutputPath}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,46 +8,50 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\highres.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\highres.png";
         string outputPath = @"C:\Images\canvas.html";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported cleanly
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Prepare output directory
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the high‑resolution image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Define scaling factor to fit the desired viewport (e.g., 0.5 = 50%)
+                float scaleFactor = 0.5f;
+
+                // Configure HTML5 Canvas export options
+                var canvasOptions = new Html5CanvasOptions
+                {
+                    // Generate a full HTML page (set to false to export only the <canvas> tag)
+                    FullHtmlPage = true,
+
+                    // Set vector rasterization options with scaling
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        ScaleX = scaleFactor,
+                        ScaleY = scaleFactor
+                    }
+                };
+
+                // Save the image as an HTML5 Canvas file
+                image.Save(outputPath, canvasOptions);
+            }
         }
-
-        // Ensure the output directory exists (creates it if missing)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image (vector format such as SVG)
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options with scaling to fit the target viewport
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                // Example scaling factor; adjust as needed for your viewport
-                ScaleX = 0.5f,
-                ScaleY = 0.5f,
-                // Optional: preserve original size as page size
-                PageSize = ((SvgImage)image).Size,
-                // Optional: set background color if needed
-                BackgroundColor = Color.White
-            };
-
-            // Set up HTML5 Canvas export options
-            var canvasOptions = new Html5CanvasOptions
-            {
-                // Export a full HTML page (set to false to embed only the <canvas> tag)
-                FullHtmlPage = true,
-                // Assign the rasterization options defined above
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the image as an HTML5 Canvas file
-            image.Save(outputPath, canvasOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

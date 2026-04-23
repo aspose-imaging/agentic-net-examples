@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging;
 
 class Program
 {
@@ -12,6 +12,10 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\bigimage.tif";
+            string outputPath1 = @"C:\Images\quadrant_1.png";
+            string outputPath2 = @"C:\Images\quadrant_2.png";
+            string outputPath3 = @"C:\Images\quadrant_3.png";
+            string outputPath4 = @"C:\Images\quadrant_4.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,35 +30,34 @@ class Program
                 int halfWidth = image.Width / 2;
                 int halfHeight = image.Height / 2;
 
-                // Define bounds for the four quadrants
-                var quadrants = new[]
-                {
-                    new { Name = "quadrant1.png", Bounds = new Rectangle(0, 0, halfWidth, halfHeight) },                     // Top‑Left
-                    new { Name = "quadrant2.png", Bounds = new Rectangle(halfWidth, 0, halfWidth, halfHeight) },            // Top‑Right
-                    new { Name = "quadrant3.png", Bounds = new Rectangle(0, halfHeight, halfWidth, halfHeight) },          // Bottom‑Left
-                    new { Name = "quadrant4.png", Bounds = new Rectangle(halfWidth, halfHeight, halfWidth, halfHeight) }   // Bottom‑Right
-                };
+                // Define the four quadrants
+                var rect1 = new Rectangle(0, 0, halfWidth, halfHeight);                     // Top‑Left
+                var rect2 = new Rectangle(halfWidth, 0, halfWidth, halfHeight);            // Top‑Right
+                var rect3 = new Rectangle(0, halfHeight, halfWidth, halfHeight);           // Bottom‑Left
+                var rect4 = new Rectangle(halfWidth, halfHeight, halfWidth, halfHeight);  // Bottom‑Right
 
-                // Output directory
-                string outputDir = @"C:\Images\output";
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(outputDir);
-
-                // PNG save options
+                // Prepare PNG save options (default options are sufficient)
                 var pngOptions = new PngOptions();
 
-                // Save each quadrant
-                foreach (var q in quadrants)
+                // Helper to save a quadrant
+                void SaveQuadrant(string outputPath, Rectangle bounds)
                 {
-                    string outputPath = Path.Combine(outputDir, q.Name);
+                    // Ensure the output directory exists
+                    string dir = Path.GetDirectoryName(outputPath) ?? ".";
+                    Directory.CreateDirectory(dir);
 
-                    // Ensure the directory for this output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the specified rectangle as a PNG file
-                    image.Save(outputPath, pngOptions, q.Bounds);
+                    // Save the specified rectangle to a PNG file
+                    using (FileStream outStream = File.Open(outputPath, FileMode.Create))
+                    {
+                        image.Save(outStream, pngOptions, bounds);
+                    }
                 }
+
+                // Save each quadrant
+                SaveQuadrant(outputPath1, rect1);
+                SaveQuadrant(outputPath2, rect2);
+                SaveQuadrant(outputPath3, rect3);
+                SaveQuadrant(outputPath4, rect4);
             }
         }
         catch (Exception ex)

@@ -1,48 +1,40 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.webp";
-        string outputPath = "output/output.webp";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputPath = "output.webp";
 
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the WebP image
             using (WebPImage image = new WebPImage(inputPath))
             {
-                // Cache data for better performance
-                if (!image.IsCached) image.CacheData();
-
-                // Desired crop size
-                int cropWidth = 200;
-                int cropHeight = 200;
-
-                // Calculate top-left corner to center the crop region
-                int x = (image.Width - cropWidth) / 2;
-                int y = (image.Height - cropHeight) / 2;
-
-                // Adjust if the image is smaller than the desired crop size
-                if (x < 0) x = 0;
-                if (y < 0) y = 0;
-                int actualCropWidth = Math.Min(cropWidth, image.Width);
-                int actualCropHeight = Math.Min(cropHeight, image.Height);
+                // Determine central 200x200 crop rectangle
+                int cropSize = 200;
+                int left = (image.Width - cropSize) / 2;
+                int top = (image.Height - cropSize) / 2;
+                Rectangle rect = new Rectangle(left, top, cropSize, cropSize);
 
                 // Perform cropping
-                var rect = new Rectangle(x, y, actualCropWidth, actualCropHeight);
                 image.Crop(rect);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
                 // Save with default options
                 image.Save(outputPath);

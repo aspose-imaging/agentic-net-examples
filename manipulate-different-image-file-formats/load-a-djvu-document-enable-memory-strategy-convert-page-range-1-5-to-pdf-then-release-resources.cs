@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.pdf";
+        string inputPath = @"C:\Data\sample.djvu";
+        string outputPath = @"C:\Data\output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,26 +22,39 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DjVu document with a memory‑friendly load option
-        using (FileStream stream = File.OpenRead(inputPath))
+        try
         {
+            // Configure memory strategy (buffer size hint)
             LoadOptions loadOptions = new LoadOptions
             {
-                // Limit internal buffers to 1 MB (enables memory strategy)
-                BufferSizeHint = 1 * 1024 * 1024
+                // Example: limit internal buffers to 5 MB
+                BufferSizeHint = 5 * 1024 * 1024
             };
 
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+            // Open the DjVu file stream
+            using (Stream stream = File.OpenRead(inputPath))
             {
-                // Prepare PDF save options and specify pages 1‑5
-                PdfOptions pdfOptions = new PdfOptions
+                // Load DjVu document with the specified load options
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
                 {
-                    MultiPageOptions = new DjvuMultiPageOptions(new int[] { 1, 2, 3, 4, 5 })
-                };
+                    // Define page range 1‑5 (zero‑based indexes 0‑4)
+                    int[] pages = new int[] { 0, 1, 2, 3, 4 };
+                    DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pages);
 
-                // Save the selected pages as a PDF file
-                djvuImage.Save(outputPath, pdfOptions);
+                    // Set up PDF saving options with the page range
+                    PdfOptions pdfOptions = new PdfOptions
+                    {
+                        MultiPageOptions = multiPageOptions
+                    };
+
+                    // Save selected pages as a single PDF file
+                    djvuImage.Save(outputPath, pdfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

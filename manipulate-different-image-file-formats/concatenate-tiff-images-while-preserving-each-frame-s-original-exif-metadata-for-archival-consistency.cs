@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 
@@ -7,19 +8,17 @@ class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string[] inputPaths = new string[]
+        {
+            @"C:\Images\input1.tif",
+            @"C:\Images\input2.tif",
+            @"C:\Images\input3.tif"
+        };
+        string outputPath = @"C:\Images\output.tif";
+
         try
         {
-            // Hard‑coded input TIFF files to be concatenated
-            string[] inputPaths = new[]
-            {
-                @"C:\Images\part1.tif",
-                @"C:\Images\part2.tif",
-                @"C:\Images\part3.tif"
-            };
-
-            // Hard‑coded output file
-            string outputPath = @"C:\Images\combined.tif";
-
             // Verify each input file exists
             foreach (string inputPath in inputPaths)
             {
@@ -30,28 +29,47 @@ class Program
                 }
             }
 
-            // Load the first TIFF image – it will become the base of the combined image
-            TiffImage combinedImage = (TiffImage)Image.Load(inputPaths[0]);
-
-            // Append the remaining TIFF images frame‑by‑frame
-            for (int i = 1; i < inputPaths.Length; i++)
-            {
-                using (TiffImage src = (TiffImage)Image.Load(inputPaths[i]))
-                {
-                    // Add all frames from the source image to the combined image.
-                    // This also copies each frame's EXIF metadata.
-                    combinedImage.Add(src);
-                }
-            }
-
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the multi‑page TIFF preserving metadata
-            combinedImage.Save(outputPath);
+            // Load the first TIFF to initialise the result image
+            using (TiffImage firstTiff = Image.Load(inputPaths[0]) as TiffImage)
+            {
+                if (firstTiff == null)
+                {
+                    Console.Error.WriteLine($"Failed to load TIFF: {inputPaths[0]}");
+                    return;
+                }
 
-            // Dispose the combined image
-            combinedImage.Dispose();
+                // Create a new TiffImage using the first frame of the first source
+                using (TiffImage result = new TiffImage(firstTiff.Frames[0]))
+                {
+                    // Add remaining frames from the first source (if any)
+                    for (int i = 1; i < firstTiff.Frames.Length; i++)
+                    {
+                        result.AddFrame(firstTiff.Frames[i]);
+                    }
+
+                    // Process the rest of the input files
+                    for (int idx = 1; idx < inputPaths.Length; idx++)
+                    {
+                        using (TiffImage src = Image.Load(inputPaths[idx]) as TiffImage)
+                        {
+                            if (src == null)
+                            {
+                                Console.Error.WriteLine($"Failed to load TIFF: {inputPaths[idx]}");
+                                continue;
+                            }
+
+                            // Add all frames from the current source TIFF
+                            result.Add(src);
+                        }
+                    }
+
+                    // Save the concatenated multi‑page TIFF
+                    result.Save(outputPath);
+                }
+            }
         }
         catch (Exception ex)
         {

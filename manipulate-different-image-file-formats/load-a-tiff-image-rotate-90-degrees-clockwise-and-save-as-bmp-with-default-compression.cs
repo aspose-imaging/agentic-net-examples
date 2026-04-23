@@ -1,19 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.tif";
-            string outputPath = @"C:\temp\output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,17 +26,13 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Cast to TiffImage to access RotateFlip
-                if (image is TiffImage tiffImage)
-                {
-                    // Rotate 90 degrees clockwise without flipping
-                    tiffImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                }
+                // Rotate 90 degrees clockwise without changing canvas size
+                tiffImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save as BMP using default options (default compression)
-                image.Save(outputPath, new BmpOptions());
+                // Save as BMP with default options
+                tiffImage.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)

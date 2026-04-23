@@ -1,44 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "preview.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "sample.eps";
+            string outputPath = "output/preview.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the EPS image
-        using (var epsImage = (EpsImage)Image.Load(inputPath))
-        {
-            // Retrieve the preview image (default format)
-            using (Image preview = epsImage.GetPreviewImage())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                if (preview == null)
-                {
-                    Console.Error.WriteLine("No preview image found in the EPS file.");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Save the preview image as PNG
-                preview.Save(outputPath, new PngOptions());
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            {
+                // Retrieve the preview image (default format)
+                using (Image preview = epsImage.GetPreviewImage())
+                {
+                    if (preview != null)
+                    {
+                        // Save preview as PNG
+                        preview.Save(outputPath, new PngOptions());
+                        Console.WriteLine($"Preview image saved to: {outputPath}");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("No preview image found in the EPS file.");
+                    }
+                }
             }
         }
-
-        Console.WriteLine($"Preview image saved to: {outputPath}");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

@@ -1,69 +1,59 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.odg";
-        string outputPath = "output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure custom font source
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource(GetFontSource, "fonts"); // "fonts" folder contains required fonts
-
-        // Load ODG image with custom fonts
-        using (var image = Image.Load(inputPath, loadOptions))
-        {
-            // Set up ODG rasterization options (used for vector formats like PDF)
-            var odgRasterOptions = new OdgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White,
-                PageSize = image.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Configure PDF save options with the rasterization settings
-            var pdfOptions = new PdfOptions
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure font substitution:
+            // Use a default font name that will be used when the original font is missing
+            Aspose.Imaging.FontSettings.DefaultFontName = "Arial";
+
+            // Optionally add system font folders so Aspose.Imaging can locate substitute fonts
+            string[] systemFontFolders = Aspose.Imaging.FontSettings.GetDefaultFontsFolders();
+            Aspose.Imaging.FontSettings.SetFontsFolders(systemFontFolders, true);
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = odgRasterOptions
-            };
+                // Set up rasterization options for ODG conversion
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageSize = image.Size
+                };
 
-            // Save the image to PDF, substituting missing fonts with the provided ones
-            image.Save(outputPath, pdfOptions);
-        }
-    }
+                // Prepare PNG save options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-    // Custom font provider delegate
-    private static Aspose.Imaging.CustomFontHandler.CustomFontData[] GetFontSource(params object[] args)
-    {
-        string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-        var fontDataList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-
-        if (Directory.Exists(fontsPath))
-        {
-            foreach (var fontFile in Directory.GetFiles(fontsPath))
-            {
-                string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                byte[] fontBytes = File.ReadAllBytes(fontFile);
-                fontDataList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                // Save the image, applying the font substitution settings
+                image.Save(outputPath, pngOptions);
             }
         }
-
-        return fontDataList.ToArray();
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

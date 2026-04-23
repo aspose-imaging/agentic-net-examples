@@ -6,42 +6,48 @@ using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = @"C:\temp\sample.jpg";
+        string inputPath = "input.jpg";
 
-        // Verify the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the JPEG image
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        try
         {
-            // Access EXIF data
-            JpegExifData exifData = image.ExifData as JpegExifData;
-
-            // Header for the console table
-            Console.WriteLine("{0,-35} {1}", "Tag", "Value");
-            Console.WriteLine(new string('-', 70));
-
-            if (exifData != null && exifData.Properties != null)
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Iterate over all EXIF properties
-                foreach (var prop in exifData.Properties)
+                ExifData exifData = image.ExifData;
+
+                if (exifData == null)
                 {
-                    string tagName = prop.Name;
-                    string tagValue = prop.Value != null ? prop.Value.ToString() : "null";
-                    Console.WriteLine("{0,-35} {1}", tagName, tagValue);
+                    Console.WriteLine("No EXIF data found.");
+                    return;
                 }
+
+                Console.WriteLine("EXIF Tags:");
+                Console.WriteLine(new string('-', 60));
+                Console.WriteLine("{0,-30} {1}", "Tag", "Value");
+                Console.WriteLine(new string('-', 60));
+
+                foreach (ExifProperties tag in Enum.GetValues(typeof(ExifProperties)))
+                {
+                    object value = exifData.GetTagValue(tag);
+                    if (value != null)
+                    {
+                        Console.WriteLine("{0,-30} {1}", tag, value);
+                    }
+                }
+
+                Console.WriteLine(new string('-', 60));
             }
-            else
-            {
-                Console.WriteLine("No EXIF data found in the image.");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

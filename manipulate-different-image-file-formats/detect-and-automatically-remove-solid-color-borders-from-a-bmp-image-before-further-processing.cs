@@ -1,123 +1,121 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                if (!image.IsCached)
+                    image.CacheData();
+
+                int width = image.Width;
+                int height = image.Height;
+
+                Aspose.Imaging.Color borderColor = image.GetPixel(0, 0);
+
+                int leftShift = 0;
+                for (int x = 0; x < width; x++)
+                {
+                    bool columnMatches = true;
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (!image.GetPixel(x, y).Equals(borderColor))
+                        {
+                            columnMatches = false;
+                            break;
+                        }
+                    }
+                    if (!columnMatches)
+                    {
+                        leftShift = x;
+                        break;
+                    }
+                }
+
+                int rightShift = 0;
+                for (int x = width - 1; x >= 0; x--)
+                {
+                    bool columnMatches = true;
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (!image.GetPixel(x, y).Equals(borderColor))
+                        {
+                            columnMatches = false;
+                            break;
+                        }
+                    }
+                    if (!columnMatches)
+                    {
+                        rightShift = width - 1 - x;
+                        break;
+                    }
+                }
+
+                int topShift = 0;
+                for (int y = 0; y < height; y++)
+                {
+                    bool rowMatches = true;
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (!image.GetPixel(x, y).Equals(borderColor))
+                        {
+                            rowMatches = false;
+                            break;
+                        }
+                    }
+                    if (!rowMatches)
+                    {
+                        topShift = y;
+                        break;
+                    }
+                }
+
+                int bottomShift = 0;
+                for (int y = height - 1; y >= 0; y--)
+                {
+                    bool rowMatches = true;
+                    for (int x = 0; x < width; x++)
+                    {
+                        if (!image.GetPixel(x, y).Equals(borderColor))
+                        {
+                            rowMatches = false;
+                            break;
+                        }
+                    }
+                    if (!rowMatches)
+                    {
+                        bottomShift = height - 1 - y;
+                        break;
+                    }
+                }
+
+                image.Crop(leftShift, rightShift, topShift, bottomShift);
+
+                BmpOptions saveOptions = new BmpOptions();
+                image.Save(outputPath, saveOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (BmpImage bmp = (BmpImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Determine the border color (assume top‑left pixel)
-            var borderColor = bmp.GetPixel(0, 0);
-
-            int left = 0, right = bmp.Width - 1;
-            int top = 0, bottom = bmp.Height - 1;
-
-            // Find left border
-            for (int x = 0; x < bmp.Width; x++)
-            {
-                bool columnIsBorder = true;
-                for (int y = 0; y < bmp.Height; y++)
-                {
-                    if (bmp.GetPixel(x, y) != borderColor)
-                    {
-                        columnIsBorder = false;
-                        break;
-                    }
-                }
-                if (!columnIsBorder)
-                {
-                    left = x;
-                    break;
-                }
-            }
-
-            // Find right border
-            for (int x = bmp.Width - 1; x >= 0; x--)
-            {
-                bool columnIsBorder = true;
-                for (int y = 0; y < bmp.Height; y++)
-                {
-                    if (bmp.GetPixel(x, y) != borderColor)
-                    {
-                        columnIsBorder = false;
-                        break;
-                    }
-                }
-                if (!columnIsBorder)
-                {
-                    right = x;
-                    break;
-                }
-            }
-
-            // Find top border
-            for (int y = 0; y < bmp.Height; y++)
-            {
-                bool rowIsBorder = true;
-                for (int x = 0; x < bmp.Width; x++)
-                {
-                    if (bmp.GetPixel(x, y) != borderColor)
-                    {
-                        rowIsBorder = false;
-                        break;
-                    }
-                }
-                if (!rowIsBorder)
-                {
-                    top = y;
-                    break;
-                }
-            }
-
-            // Find bottom border
-            for (int y = bmp.Height - 1; y >= 0; y--)
-            {
-                bool rowIsBorder = true;
-                for (int x = 0; x < bmp.Width; x++)
-                {
-                    if (bmp.GetPixel(x, y) != borderColor)
-                    {
-                        rowIsBorder = false;
-                        break;
-                    }
-                }
-                if (!rowIsBorder)
-                {
-                    bottom = y;
-                    break;
-                }
-            }
-
-            // Compute the cropping rectangle
-            int cropWidth = right - left + 1;
-            int cropHeight = bottom - top + 1;
-            var cropRect = new Rectangle(left, top, cropWidth, cropHeight);
-
-            // Crop the image to remove solid borders
-            bmp.Crop(cropRect);
-
-            // Save the processed image
-            bmp.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.webp";
+        string outputPath = @"C:\Images\output_resized.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.webp";
-            string outputPath = @"c:\temp\output.webp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,21 +22,23 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image from a byte array
-            byte[] imageData = File.ReadAllBytes(inputPath);
-            using (MemoryStream ms = new MemoryStream(imageData))
+            byte[] imageBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(imageBytes))
             using (WebPImage webPImage = new WebPImage(ms))
             {
-                // Resize to 1024x768 using nearest neighbour resampling
-                webPImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+                // Resize to 1024 x 768 using bilinear resampling
+                webPImage.Resize(1024, 768, ResizeType.BilinearResample);
 
-                // Save with lossless compression
-                var saveOptions = new WebPOptions
+                // Prepare lossless WebP save options
+                WebPOptions saveOptions = new WebPOptions
                 {
                     Lossless = true
                 };
+
+                // Save the resized image with lossless compression
                 webPImage.Save(outputPath, saveOptions);
             }
         }

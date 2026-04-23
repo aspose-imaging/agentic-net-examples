@@ -1,34 +1,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.dcm";
-        string outputPath = "sample.tif";
-
         try
         {
+            string inputPath = "input.djvu";
+            string outputPath = "output.tiff";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvu = new DjvuImage(stream))
             {
-                dicomImage.BinarizeFixed(128);
+                foreach (Image page in djvu.Pages)
+                {
+                    ((DjvuPage)page).RotateFlip(RotateFlipType.RotateNoneFlipX);
+                }
 
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                dicomImage.Save(outputPath, tiffOptions);
+                djvu.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

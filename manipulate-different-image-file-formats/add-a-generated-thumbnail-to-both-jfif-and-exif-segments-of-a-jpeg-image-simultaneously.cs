@@ -1,47 +1,55 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Exif;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
-        {
-            if (!jpegImage.IsCached)
-                jpegImage.CacheData();
-
-            using (MemoryStream ms = new MemoryStream())
+            if (!File.Exists(inputPath))
             {
-                jpegImage.Save(ms, new JpegOptions());
-                ms.Position = 0;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                using (RasterImage thumbnail = (RasterImage)Image.Load(ms))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (JpegImage image = new JpegImage(inputPath))
+            {
+                if (image.ExifData == null)
                 {
-                    thumbnail.Resize(100, 100);
-                    jpegImage.ExifData.Thumbnail = thumbnail;
+                    image.ExifData = new JpegExifData();
+                }
 
-                    if (jpegImage.Jfif == null)
-                        jpegImage.Jfif = new JFIFData();
+                if (image.Jfif == null)
+                {
+                    image.Jfif = new JFIFData();
+                }
 
-                    jpegImage.Jfif.Thumbnail = thumbnail;
+                using (JpegImage thumb = new JpegImage(100, 100))
+                {
+                    Graphics graphics = new Graphics(thumb);
+                    SolidBrush brush = new SolidBrush(Color.Blue);
+                    graphics.FillRectangle(brush, thumb.Bounds);
 
-                    jpegImage.Save(outputPath);
+                    image.ExifData.Thumbnail = thumb;
+                    image.Jfif.Thumbnail = thumb;
+
+                    image.Save(outputPath);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

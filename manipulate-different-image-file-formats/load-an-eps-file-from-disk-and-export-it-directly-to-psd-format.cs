@@ -2,36 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.eps";
-        string outputPath = @"C:\Temp\output.psd";
+        // Hardcoded input and output file paths
+        string inputPath = "input.eps";
+        string outputPath = "output/output.psd";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS image and save as PSD
-        using (Image image = Image.Load(inputPath))
-        {
-            var psdOptions = new PsdOptions
+            // Verify that the input EPS file exists
+            if (!File.Exists(inputPath))
             {
-                CompressionMethod = CompressionMethod.RLE,
-                ColorMode = ColorModes.Rgb
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, psdOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                // Create default PSD save options
+                var psdOptions = new PsdOptions();
+
+                // Save the image as PSD
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

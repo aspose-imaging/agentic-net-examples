@@ -1,40 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputPath = "Output\\output.gif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DICOM image
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+            {
+                // Crop 10 pixels from each side
+                dicom.Crop(10, 10, 10, 10);
+
+                // Rotate 45 degrees clockwise, resize proportionally, white background
+                dicom.Rotate(45f, true, Color.White);
+
+                // Flip horizontally
+                dicom.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                // Save as GIF
+                GifOptions gifOptions = new GifOptions();
+                dicom.Save(outputPath, gifOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DICOM image
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Crop the image (example rectangle)
-            var cropRect = new Rectangle(10, 10, 200, 200);
-            dicomImage.Crop(cropRect);
-
-            // Rotate and flip the image
-            dicomImage.RotateFlip(RotateFlipType.Rotate90FlipX);
-
-            // Save as GIF
-            dicomImage.Save(outputPath, new GifOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

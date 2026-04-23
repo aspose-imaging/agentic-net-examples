@@ -8,32 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.jpg";
-        string outputPath = @"C:\Images\output.cmyk.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output_cmyk.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare JPEG save options with CMYK color type
-            var saveOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorType = JpegCompressionColorMode.Cmyk
-                // Additional options (e.g., Quality) can be set here if needed
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as CMYK JPEG
-            image.Save(outputPath, saveOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            {
+                // Configure save options to use CMYK color type
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    ColorType = JpegCompressionColorMode.Cmyk
+                };
+
+                // Save the image as CMYK JPEG
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

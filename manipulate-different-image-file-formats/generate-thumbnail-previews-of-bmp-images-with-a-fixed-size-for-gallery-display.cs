@@ -1,54 +1,52 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "thumb.bmp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "thumbnails\\output_thumb.bmp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the BMP image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Work with raster image for resizing
-            Aspose.Imaging.RasterImage raster = image as Aspose.Imaging.RasterImage;
-            if (raster == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Loaded image is not a raster image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Cache data for better performance
-            if (!raster.IsCached)
-                raster.CacheData();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Fixed thumbnail size
-            int thumbWidth = 150;
-            int thumbHeight = 150;
-
-            // Resize using nearest neighbor resampling
-            raster.Resize(thumbWidth, thumbHeight, Aspose.Imaging.ResizeType.NearestNeighbourResample);
-
-            // Save as BMP with default options (24 bpp)
-            BmpOptions saveOptions = new BmpOptions
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
             {
-                BitsPerPixel = 24
-            };
+                // Cast to RasterImage for resizing
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-            image.Save(outputPath, saveOptions);
+                // Resize to fixed thumbnail size (150x150) using nearest neighbour resampling
+                int thumbWidth = 150;
+                int thumbHeight = 150;
+                raster.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
+
+                // Save the thumbnail as BMP using BmpOptions
+                BmpOptions saveOptions = new BmpOptions();
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

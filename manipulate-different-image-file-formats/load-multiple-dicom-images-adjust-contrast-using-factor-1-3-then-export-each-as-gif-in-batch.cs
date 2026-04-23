@@ -8,44 +8,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DICOM file paths
-        string[] inputPaths = new string[]
+        try
         {
-            "input1.dcm",
-            "input2.dcm",
-            "input3.dcm"
-        };
+            // Hardcoded input and output file paths
+            string[] inputPaths = {
+                @"C:\Images\Input1.dcm",
+                @"C:\Images\Input2.dcm"
+            };
 
-        // Hardcoded output directory
-        string outputDir = "output";
+            string[] outputPaths = {
+                @"C:\Images\Output1.gif",
+                @"C:\Images\Output2.gif"
+            };
 
-        foreach (var inputPath in inputPaths)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Process each file
+            for (int i = 0; i < inputPaths.Length; i++)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
 
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
-            {
-                DicomImage dicomImage = (DicomImage)image;
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Adjust contrast; factor 1.3 approximated as a +30 value
-                dicomImage.AdjustContrast(30f);
-
-                // Build output file path (GIF format)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
-                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the adjusted image as GIF
-                dicomImage.Save(outputPath, new GifOptions());
+                // Load DICOM image, adjust contrast, and save as GIF
+                using (Image image = Image.Load(inputPath))
+                {
+                    DicomImage dicomImage = (DicomImage)image;
+                    // Increase contrast by 30 (approx. 1.3 factor)
+                    dicomImage.AdjustContrast(30f);
+                    dicomImage.Save(outputPath, new GifOptions());
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

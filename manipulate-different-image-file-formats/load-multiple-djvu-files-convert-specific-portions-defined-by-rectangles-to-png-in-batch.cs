@@ -1,74 +1,66 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all DjVu files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
-
-        // Define the rectangles to export (example rectangle)
-        Aspose.Imaging.Rectangle[] exportRectangles = new Aspose.Imaging.Rectangle[]
-        {
-            new Aspose.Imaging.Rectangle(0, 0, 500, 500)
-        };
-
-        foreach (string filePath in files)
-        {
-            // Check if the file exists
-            if (!File.Exists(filePath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                continue;
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
             }
 
-            // Load DjVu image from file stream
-            using (FileStream stream = File.OpenRead(filePath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            if (!Directory.Exists(outputDirectory))
             {
-                // Iterate through each page
-                for (int i = 0; i < djvuImage.PageCount; i++)
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
+
+            foreach (string filePath in files)
+            {
+                if (!File.Exists(filePath))
                 {
-                    var page = djvuImage.Pages[i];
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    continue;
+                }
 
-                    // Export each defined rectangle
-                    foreach (var rect in exportRectangles)
+                using (Stream stream = File.OpenRead(filePath))
+                {
+                    using (DjvuImage djvuImage = new DjvuImage(stream))
                     {
-                        string outputFileName = $"{Path.GetFileNameWithoutExtension(filePath)}_page{i + 1}_region.png";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the specified region as PNG
-                        using (PngOptions options = new PngOptions())
+                        int pageCount = djvuImage.PageCount;
+                        for (int i = 0; i < pageCount; i++)
                         {
-                            page.Save(outputPath, options, rect);
+                            Rectangle exportArea = new Rectangle(0, 0, 200, 200);
+                            PngOptions options = new PngOptions();
+                            options.MultiPageOptions = new DjvuMultiPageOptions(i, exportArea);
+
+                            string outputFileName = $"{Path.GetFileNameWithoutExtension(filePath)}_page{i}.png";
+                            string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            djvuImage.Save(outputPath, options);
                         }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,57 +1,53 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input\\sample.emf";
-        string outputPath = "Output\\sample.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\input.emf";
+            string outputPath = @"C:\Temp\output.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        var loadOptions = new LoadOptions();
-        string fontsFolder = "Fonts";
-        loadOptions.AddCustomFontSource(fontArgs =>
-        {
-            string path = fontArgs.Length > 0 ? fontArgs[0]?.ToString() : string.Empty;
-            var list = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                foreach (var file in Directory.GetFiles(path))
-                {
-                    byte[] data = File.ReadAllBytes(file);
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    list.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            return list.ToArray();
-        }, fontsFolder);
 
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            using (var pdfOptions = new PdfOptions())
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                // Configure rasterization options for EMF
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
+                    PageSize = image.Size,               // Preserve original size
+                    BackgroundColor = Color.White        // White background
                 };
 
+                // Configure PDF export options
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    UseOriginalImageResolution = false // Use default high resolution
+                };
+
+                // Save as high‑resolution PDF with embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

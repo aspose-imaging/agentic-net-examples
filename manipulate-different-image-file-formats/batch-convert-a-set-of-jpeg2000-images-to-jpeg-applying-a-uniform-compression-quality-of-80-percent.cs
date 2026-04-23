@@ -1,60 +1,55 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Set up input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (var file in files)
-        {
-            // Process only JPEG2000 files
-            string ext = Path.GetExtension(file).ToLowerInvariant();
-            if (ext != ".jp2" && ext != ".j2k")
-                continue;
-
-            string inputPath = file;
-            string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(Path.GetFileName(file), ".jpg"));
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load JPEG2000 image and save as JPEG with quality 80
-            using (Jpeg2000Image jp2Image = new Jpeg2000Image(inputPath))
+            // Get all JPEG2000 files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.jp2");
+
+            foreach (string inputPath in inputFiles)
             {
-                var jpegOptions = new JpegOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Quality = 80
-                };
-                jp2Image.Save(outputPath, jpegOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build output path with .jpg extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load JPEG2000 image and save as JPEG with quality 80
+                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(inputPath))
+                {
+                    JpegOptions jpegOptions = new JpegOptions
+                    {
+                        Quality = 80
+                    };
+                    jpeg2000Image.Save(outputPath, jpegOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

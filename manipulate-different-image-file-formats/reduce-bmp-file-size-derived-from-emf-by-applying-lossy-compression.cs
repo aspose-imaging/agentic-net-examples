@@ -12,7 +12,7 @@ class Program
         string inputPath = @"C:\Images\input.emf";
         string outputPath = @"C:\Images\output.bmp";
 
-        // Verify input file exists
+        // Path safety checks
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,25 +22,32 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Set up rasterization options for EMF to bitmap conversion
-            var rasterOptions = new EmfRasterizationOptions
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                PageSize = image.Size
-            };
+                // Set up rasterization options for vector to raster conversion
+                var rasterOptions = new EmfRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-            // Configure BMP save options with lossy compression (8 bpp, RGB compression)
-            var bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 8,
-                Compression = BitmapCompression.Rgb,
-                VectorRasterizationOptions = rasterOptions
-            };
+                // Configure BMP save options with lossy settings (8‑bpp palette)
+                var bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 8, // Reduce color depth to 8 bits per pixel
+                    Compression = BitmapCompression.Rgb, // Use simple RGB compression
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-            // Save the rasterized BMP image
-            image.Save(outputPath, bmpOptions);
+                // Save the rasterized BMP image
+                image.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
