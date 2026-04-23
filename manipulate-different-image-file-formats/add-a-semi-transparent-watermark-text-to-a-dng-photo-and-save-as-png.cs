@@ -10,43 +10,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.dng";
         string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DngImage dng = (DngImage)Image.Load(inputPath))
+            {
+                // Create graphics object for drawing
+                Graphics graphics = new Graphics(dng);
+
+                // Define semi‑transparent white brush
+                SolidBrush brush = new SolidBrush();
+                brush.Color = Color.FromArgb(128, 255, 255, 255); // 50% opacity
+
+                // Define font for watermark text
+                Font font = new Font("Arial", 48);
+
+                // Draw watermark text at desired position
+                graphics.DrawString("Watermark", font, brush, new PointF(10, 10));
+
+                // Save the result as PNG
+                PngOptions pngOptions = new PngOptions();
+                dng.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to DngImage (inherits RasterCachedImage -> RasterImage)
-            DngImage dngImage = (DngImage)image;
-            RasterImage raster = (RasterImage)dngImage;
-
-            // Create graphics object for drawing
-            Graphics graphics = new Graphics(raster);
-
-            // Define semi‑transparent white brush (50% opacity)
-            SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 255, 255));
-
-            // Define font for watermark text
-            Font font = new Font("Arial", 48);
-
-            // Position watermark near bottom‑right corner
-            float x = raster.Width - 250; // adjust as needed
-            float y = raster.Height - 70; // adjust as needed
-            graphics.DrawString("Watermark", font, brush, new PointF(x, y));
-
-            // Save the result as PNG
-            raster.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
