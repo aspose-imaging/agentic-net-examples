@@ -12,7 +12,8 @@ class Program
         try
         {
             string inputPath = "input.tif";
-            string outputPath = "output.tif";
+            string newFramePath = "newframe.jpg";
+            string outputPath = "output/output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -20,30 +21,23 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
+            if (!File.Exists(newFramePath))
             {
-                Directory.CreateDirectory(outputDir);
+                Console.Error.WriteLine($"File not found: {newFramePath}");
+                return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (RasterImage jpegImage = (RasterImage)Image.Load(newFramePath))
             {
                 TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
                 frameOptions.Compression = TiffCompressions.Jpeg;
-                frameOptions.Photometric = TiffPhotometrics.Rgb;
-                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
 
-                TiffFrame newFrame = new TiffFrame(frameOptions, 200, 200);
+                TiffFrame newFrame = new TiffFrame(jpegImage, frameOptions);
                 tiffImage.AddFrame(newFrame);
-
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.Compression = TiffCompressions.Jpeg;
-                saveOptions.Photometric = TiffPhotometrics.Rgb;
-                saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                saveOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-                tiffImage.Save(outputPath, saveOptions);
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
