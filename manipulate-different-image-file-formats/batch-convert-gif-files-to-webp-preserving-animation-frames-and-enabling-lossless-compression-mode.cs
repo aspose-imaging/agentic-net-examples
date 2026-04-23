@@ -10,15 +10,18 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputGifs";
-            string outputDirectory = @"C:\OutputWebp";
+            string inputDirectory = @"C:\Images\GifInput";
+            string outputDirectory = @"C:\Images\WebpOutput";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all GIF files in the input directory
             string[] gifFiles = Directory.GetFiles(inputDirectory, "*.gif");
 
             foreach (string inputPath in gifFiles)
             {
-                // Verify that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,21 +29,24 @@ class Program
                 }
 
                 // Build the output file path with .webp extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
 
-                // Ensure the output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the GIF (including animation frames) and save as lossless WebP
+                // Load the GIF image (preserves animation frames)
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Configure WebP options for lossless compression
                     var webpOptions = new WebPOptions
                     {
                         Lossless = true,
-                        Quality = 100 // Maximum quality for lossless compression
+                        // Quality can be set; for lossless it influences compression efficiency
+                        Quality = 100
                     };
 
+                    // Save as animated WebP
                     image.Save(outputPath, webpOptions);
                 }
 
