@@ -7,52 +7,59 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input EMF file path
-        string inputPath = "input.emf";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input EMF file path
+            string inputPath = "input.emf";
 
-        // Load the EMF document
-        using (Image image = Image.Load(inputPath))
-        {
-            // Base output directory for PNG files
-            string outputDir = "output";
-            Directory.CreateDirectory(outputDir); // Unconditional directory creation
-
-            // Common PNG save options with vector rasterization settings
-            PngOptions pngOptions = new PngOptions();
-            var vectorOptions = new EmfRasterizationOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size,
-                BackgroundColor = Color.White
-            };
-            pngOptions.VectorRasterizationOptions = vectorOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Check if the image supports multiple pages
-            IMultipageImage multipage = image as IMultipageImage;
-            if (multipage != null && multipage.PageCount > 0)
+            // Load the EMF document
+            using (Image image = Image.Load(inputPath))
             {
-                // Export each page to a separate PNG file
-                for (int i = 0; i < multipage.PageCount; i++)
+                // Prepare vector rasterization options for PNG conversion
+                var vectorOptions = new EmfRasterizationOptions
                 {
-                    // Export only the current page
-                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+                    PageSize = image.Size,
+                    BackgroundColor = Color.White
+                };
 
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Determine page count (EMF is typically single-page, but handle multipage if present)
+                var multipage = image as IMultipageImage;
+                int pageCount = multipage?.PageCount ?? 1;
+
+                // Export each page to a separate PNG file
+                for (int i = 0; i < pageCount; i++)
+                {
+                    string outputPath = $"output_page_{i + 1}.png";
+
+                    // Ensure output directory exists
+                    string outputDir = Path.GetDirectoryName(outputPath);
+                    if (!string.IsNullOrWhiteSpace(outputDir))
+                    {
+                        Directory.CreateDirectory(outputDir);
+                    }
+
+                    // Configure PNG options with per-page MultiPageOptions
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = vectorOptions,
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
+                    };
+
+                    // Save the current page as PNG
                     image.Save(outputPath, pngOptions);
                 }
             }
-            else
-            {
-                // Single-page EMF: save as a single PNG
-                string outputPath = Path.Combine(outputDir, "page_1.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                image.Save(outputPath, pngOptions);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
