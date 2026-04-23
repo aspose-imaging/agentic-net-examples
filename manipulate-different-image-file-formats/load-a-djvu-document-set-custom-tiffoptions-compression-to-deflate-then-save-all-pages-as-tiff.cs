@@ -9,30 +9,37 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.djvu";
-        string outputPath = "sample.tif";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.djvu";
+            string outputPath = @"c:\temp\sample.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Configure TIFF save options with Deflate compression
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                saveOptions.Compression = TiffCompressions.Deflate;
+
+                // Save all pages as a multi‑page TIFF file
+                djvuImage.Save(outputPath, saveOptions);
+            }
         }
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the DjVu document from a file stream
-        using (Stream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
+        catch (Exception ex)
         {
-            // Configure TIFF save options with Deflate compression
-            TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-            saveOptions.Compression = TiffCompressions.Deflate;
-
-            // Save all pages of the DjVu document as a multi‑page TIFF file
-            djvuImage.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
