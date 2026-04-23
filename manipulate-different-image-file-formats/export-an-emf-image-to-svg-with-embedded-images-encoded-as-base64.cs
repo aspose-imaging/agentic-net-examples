@@ -3,14 +3,13 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "C:\\temp\\input.emf";
-        string outputPath = "C:\\temp\\output.svg";
+        string inputPath = @"C:\temp\input.emf";
+        string outputPath = @"C:\temp\output.svg";
 
         try
         {
@@ -24,14 +23,14 @@ class Program
 
             using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
             {
-                SvgOptions saveOptions = new SvgOptions
+                var saveOptions = new SvgOptions
                 {
                     TextAsShapes = true
                 };
 
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    BackgroundColor = Color.WhiteSmoke,
+                    BackgroundColor = Color.White,
                     PageSize = emfImage.Size,
                     RenderMode = EmfRenderMode.Auto,
                     BorderX = 0,
