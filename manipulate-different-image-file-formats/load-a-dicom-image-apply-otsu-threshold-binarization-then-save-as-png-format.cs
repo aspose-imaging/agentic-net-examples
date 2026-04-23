@@ -12,27 +12,35 @@ class Program
         string inputPath = @"c:\temp\sample.dicom";
         string outputPath = @"c:\temp\sample.BinarizeOtsu.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to DicomImage to access DICOM-specific methods
+                DicomImage dicomImage = (DicomImage)image;
+
+                // Apply Otsu threshold binarization
+                dicomImage.BinarizeOtsu();
+
+                // Save the result as PNG
+                dicomImage.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DICOM image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to DicomImage to access DICOM-specific methods
-            DicomImage dicomImage = (DicomImage)image;
-
-            // Apply Otsu threshold binarization
-            dicomImage.BinarizeOtsu();
-
-            // Save the result as PNG
-            dicomImage.Save(outputPath, new PngOptions());
+            // Report any unexpected errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
