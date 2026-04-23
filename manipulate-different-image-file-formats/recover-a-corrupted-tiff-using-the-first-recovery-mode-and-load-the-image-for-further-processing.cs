@@ -9,38 +9,31 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input\\corrupted.tif";
+        string outputPath = "output\\recovered.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Corrupted.tif";
-            string outputPath = "Recovered.tif";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set load options to use the first recovery mode (ConsistentRecover)
-            LoadOptions loadOptions = new LoadOptions
+            var loadOptions = new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
             };
 
-            // Load the corrupted TIFF with recovery options
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath, loadOptions))
+            using (TiffImage image = (TiffImage)Image.Load(inputPath, loadOptions))
             {
-                // Further processing can be done here (e.g., inspect dimensions)
-                Console.WriteLine($"Recovered image size: {tiff.Width}x{tiff.Height}");
+                // Further processing can be done here.
 
-                // Save the recovered image
-                tiff.Save(outputPath);
+                var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
