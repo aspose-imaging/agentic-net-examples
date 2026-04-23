@@ -1,18 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tga";
-        string outputPath = "output.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.tga";
+            string outputPath = "output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,25 +22,27 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the TGA image
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (TgaImage tgaImage = (TgaImage)Image.Load(inputPath))
             {
-                // Preserve the original bits per pixel
-                int bitsPerPixel = raster.BitsPerPixel;
+                // Preserve original bit depth and resolution
+                int bitsPerPixel = tgaImage.BitsPerPixel;
+                double horizontalResolution = tgaImage.HorizontalResolution;
+                double verticalResolution = tgaImage.VerticalResolution;
 
-                // Create a BMP image with the same bit depth and resolution
-                using (BmpImage bmp = new BmpImage(
-                    raster,
+                // Create a BMP image from the TGA raster data
+                using (BmpImage bmpImage = new BmpImage(
+                    tgaImage,
                     (ushort)bitsPerPixel,
                     BitmapCompression.Rgb,
-                    raster.HorizontalResolution,
-                    raster.VerticalResolution))
+                    horizontalResolution,
+                    verticalResolution))
                 {
-                    // Save as BMP, preserving alpha channel if present
-                    bmp.Save(outputPath);
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the BMP image, preserving alpha channel if present
+                    bmpImage.Save(outputPath);
                 }
             }
         }
