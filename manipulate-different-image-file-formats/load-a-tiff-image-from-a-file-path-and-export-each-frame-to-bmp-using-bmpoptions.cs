@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded input TIFF path
+            // Hardcoded input TIFF file path
             string inputPath = @"C:\Images\input.tif";
 
             // Verify input file exists
@@ -20,12 +20,6 @@ class Program
                 return;
             }
 
-            // Hardcoded output directory for BMP frames
-            string outputDir = @"C:\Images\Frames";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
@@ -33,13 +27,18 @@ class Program
                 TiffImage tiffImage = image as TiffImage;
                 if (tiffImage == null)
                 {
-                    Console.Error.WriteLine("Loaded image is not a TIFF image.");
+                    Console.Error.WriteLine("The loaded image is not a TIFF image.");
                     return;
                 }
 
+                // Hardcoded output directory for BMP frames
+                string outputDir = @"C:\Images\Frames";
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(outputDir);
+
                 // Iterate through each frame and save as BMP
-                TiffFrame[] frames = tiffImage.Frames;
-                for (int i = 0; i < frames.Length; i++)
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
                     // Build output file path for the current frame
                     string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.bmp");
@@ -47,9 +46,9 @@ class Program
                     // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Export the frame to BMP using default BmpOptions
+                    // Save the frame using BMP options
                     BmpOptions bmpOptions = new BmpOptions();
-                    frames[i].Save(outputPath, bmpOptions);
+                    tiffImage.Frames[i].Save(outputPath, bmpOptions);
                 }
             }
         }
