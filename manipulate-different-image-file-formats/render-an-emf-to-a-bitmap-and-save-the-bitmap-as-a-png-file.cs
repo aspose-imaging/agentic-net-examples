@@ -1,18 +1,16 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\input.emf";
-            string outputPath = @"C:\Temp\output.png";
+            string inputPath = "input.emf";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,20 +23,23 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EMF image
-            using (Image emfImage = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Prepare PNG save options with rasterization settings
+                // Configure rasterization options for the EMF vector image
+                var rasterOptions = new EmfRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    BackgroundColor = Aspose.Imaging.Color.White
+                };
+
+                // Set PNG save options and attach rasterization options
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = emfImage.Size,
-                        BackgroundColor = Color.White // optional background
-                    }
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save the rendered bitmap as PNG
-                emfImage.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
