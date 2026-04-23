@@ -1,8 +1,9 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -11,9 +12,9 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "sample.djvu";
-        string outputPath = "output.tif";
+        string outputPath = "odd_pages_output.tif";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,26 +24,37 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DjVu document from a file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
+        try
         {
-            // Prepare TIFF save options
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Compression = Aspose.Imaging.FileFormats.Tiff.Enums.TiffCompressions.Deflate;
-            // Example: set bits per sample to 1 (B/W) if needed
-            tiffOptions.BitsPerSample = new ushort[] { 1 };
+            // Load the DjVu document from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Determine indices of odd‑numbered pages (1‑based odd => 0‑based even)
+                List<int> oddPageIndices = new List<int>();
+                for (int i = 0; i < djvuImage.PageCount; i++)
+                {
+                    if (i % 2 == 0) // page numbers 1,3,5,... correspond to indices 0,2,4,...
+                    {
+                        oddPageIndices.Add(i);
+                    }
+                }
 
-            // Select only odd‑numbered pages (1‑based) using an IntRange.
-            // DjVu pages are zero‑based, so start at 0 and step by 2.
-            var oddPagesRange = new IntRange(0, djvuImage.PageCount - 1, 2);
-            var multiPageOptions = new DjvuMultiPageOptions(oddPagesRange);
+                // Configure TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Deflate;
+                tiffOptions.BitsPerSample = new ushort[] { 1 };
 
-            // Assign the multi‑page options to the TIFF options
-            tiffOptions.MultiPageOptions = multiPageOptions;
+                // Specify the pages to export using DjvuMultiPageOptions
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(oddPageIndices.ToArray());
 
-            // Save the selected pages as a multi‑frame TIFF file
-            djvuImage.Save(outputPath, tiffOptions);
+                // Save selected pages as a multi‑page TIFF
+                djvuImage.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
