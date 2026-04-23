@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -10,8 +11,12 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Input\TiffFiles";
-            string outputDirectory = @"C:\Output\WebPFiles";
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
+
+            // Ensure the output directory exists (will be called for each file as required)
+            // This call is also safe if the directory already exists.
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all TIFF files in the input directory
             string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
@@ -25,19 +30,21 @@ class Program
                     return;
                 }
 
-                // Build output file name with timestamp suffix
-                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_" + timestamp + ".webp";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the TIFF image and save it as WebP
-                using (Image image = Image.Load(inputPath))
+                // Load the TIFF image
+                using (Image tiffImage = Image.Load(inputPath))
                 {
-                    // Save using default WebP options
-                    image.Save(outputPath, new WebPOptions());
+                    // Build output file name with timestamp suffix
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                    string outputFileName = $"{fileNameWithoutExt}_{timestamp}.webp";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure the directory for the output file exists (unconditional as per rules)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as WebP using default options
+                    WebPOptions webpOptions = new WebPOptions();
+                    tiffImage.Save(outputPath, webpOptions);
                 }
             }
         }
