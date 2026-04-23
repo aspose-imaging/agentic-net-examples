@@ -1,35 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.cdr";
+        string outputPath = "output\\result.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CorelDRAW file
+            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            {
+                // Resize to 1024x768 pixels
+                image.Resize(1024, 768);
+
+                // Save as PNG using default PNG options
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CorelDRAW file, resize, and save as PNG
-        using (CdrImage image = (CdrImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Resize to 1024x768 using the default resampling method
-            image.Resize(1024, 768);
-
-            // Save the image as PNG with default options
-            image.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
