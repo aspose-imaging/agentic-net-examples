@@ -8,42 +8,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input\\sample.jp2";
-        string outputPath = "Output\\compressed.jp2";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.jp2";
+            string outputPath = "Output\\sample_lossless.jp2";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the original JPEG2000 image
-        using (Jpeg2000Image original = new Jpeg2000Image(inputPath))
-        {
-            // Get original file size
-            long originalSize = new FileInfo(inputPath).Length;
-
-            // Save with lossless compression (default)
-            using (Jpeg2000Options options = new Jpeg2000Options())
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Explicitly set lossless mode (Irreversible = false)
-                options.Irreversible = false;
-                original.Save(outputPath, options);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Get compressed file size
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the original JPEG2000 image
+            using (Jpeg2000Image image = new Jpeg2000Image(inputPath))
+            {
+                // Set up lossless compression options (default is lossless)
+                Jpeg2000Options options = new Jpeg2000Options
+                {
+                    Irreversible = false // explicit lossless mode
+                };
+
+                // Save the image with lossless compression
+                image.Save(outputPath, options);
+            }
+
+            // Compare file sizes
+            long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
-            // Output size comparison
             Console.WriteLine($"Original size: {originalSize} bytes");
             Console.WriteLine($"Compressed size: {compressedSize} bytes");
-            double ratio = (double)compressedSize / originalSize * 100;
-            Console.WriteLine($"Compression ratio: {ratio:F2}%");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
