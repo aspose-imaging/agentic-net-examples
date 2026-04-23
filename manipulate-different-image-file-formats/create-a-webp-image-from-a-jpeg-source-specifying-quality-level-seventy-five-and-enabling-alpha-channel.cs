@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = "C:\\temp\\source.jpg";
             string outputPath = "C:\\temp\\output.webp";
 
-            // Verify that the source JPEG exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,11 +26,11 @@ class Program
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure WebP options: lossy compression, quality 75, alpha channel support is inherent to WebP
+                // Configure WebP options: quality 75, enable alpha (lossless = false allows alpha in lossy mode)
                 var webpOptions = new WebPOptions
                 {
-                    Lossless = false,   // lossy compression
-                    Quality = 75f       // quality level 75
+                    Lossless = false,
+                    Quality = 75f
                 };
 
                 // Save the image as WebP with the specified options
@@ -39,7 +39,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
