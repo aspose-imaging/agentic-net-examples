@@ -1,73 +1,56 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = Path.Combine("Output", "Thumbnails");
-
-        // Ensure input and output directories exist
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
-            return;
-        }
-
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all JPEG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
-        foreach (string filePath in files)
-        {
-            // Process only .jpg or .jpeg extensions
-            string extension = Path.GetExtension(filePath).ToLowerInvariant();
-            if (extension != ".jpg" && extension != ".jpeg")
-                continue;
-
-            // Validate input file existence
-            if (!File.Exists(filePath))
-            {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                return;
-            }
-
-            // Build output thumbnail path
-            string outputPath = Path.Combine(outputDirectory,
-                Path.GetFileNameWithoutExtension(filePath) + "_thumb.jpg");
+            // Hardcoded input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output\\Thumbnails";
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load the image, create thumbnail, and save
-            using (Image image = Image.Load(filePath))
+            // Get all JPEG files (both .jpg and .jpeg) in the input directory
+            string[] allFiles = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            foreach (string inputPath in allFiles)
             {
-                RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                    raster.CacheData();
-
-                // Define thumbnail width and compute proportional height
-                int thumbWidth = 150;
-                int thumbHeight = (int)(raster.Height * (thumbWidth / (double)raster.Width));
-
-                raster.Resize(thumbWidth, thumbHeight);
-
-                JpegOptions jpegOptions = new JpegOptions
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    Quality = 80
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                raster.Save(outputPath, jpegOptions);
+                // Build output file path (same name with _thumb suffix)
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_thumb.jpg");
+
+                // Ensure the output subdirectory exists (redundant but satisfies rule)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the image, resize to thumbnail size, and save
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Resize to 150x150 pixels thumbnail
+                    image.Resize(150, 150);
+                    // Save the thumbnail as JPEG
+                    image.Save(outputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
