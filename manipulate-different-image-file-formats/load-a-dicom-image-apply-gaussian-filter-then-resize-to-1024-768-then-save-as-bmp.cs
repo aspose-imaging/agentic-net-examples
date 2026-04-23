@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -12,29 +13,37 @@ class Program
         string inputPath = "input.dcm";
         string outputPath = "output.bmp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                DicomImage dicomImage = (DicomImage)image;
+
+                // Apply Gaussian blur filter to the whole image
+                dicomImage.Filter(dicomImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Resize to 1024x768 using nearest neighbour resampling
+                dicomImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+
+                // Save as BMP
+                BmpOptions bmpOptions = new BmpOptions();
+                dicomImage.Save(outputPath, bmpOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DICOM image
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Apply Gaussian blur filter to the entire image
-            dicomImage.Filter(
-                dicomImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-            // Resize to 1024x768 using Lanczos resampling
-            dicomImage.Resize(1024, 768, ResizeType.LanczosResample);
-
-            // Save the processed image as BMP
-            dicomImage.Save(outputPath, new BmpOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
