@@ -9,28 +9,55 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.cmx";
-        string outputPath = @"C:\temp\sample_rotated.emf";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cmx";
+            string outputPath = @"C:\Images\sample_rotated.emf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CMX image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to CmxImage to access vector-specific methods
+                var cmxImage = image as CmxImage;
+                if (cmxImage == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a CMX image.");
+                    return;
+                }
+
+                // Rotate 90 degrees clockwise
+                cmxImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                // Set up EMF rasterization options (page size matches the rotated image)
+                var emfRasterOptions = new EmfRasterizationOptions
+                {
+                    PageSize = cmxImage.Size
+                };
+
+                // Create EMF save options with the rasterization settings
+                var emfOptions = new EmfOptions
+                {
+                    VectorRasterizationOptions = emfRasterOptions
+                };
+
+                // Save the rotated image as EMF
+                cmxImage.Save(outputPath, emfOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image, rotate it, and save as EMF
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Rotate 90 degrees clockwise without flipping
-            cmxImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-            // Save the rotated image as EMF using default options
-            cmxImage.Save(outputPath, new EmfOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
