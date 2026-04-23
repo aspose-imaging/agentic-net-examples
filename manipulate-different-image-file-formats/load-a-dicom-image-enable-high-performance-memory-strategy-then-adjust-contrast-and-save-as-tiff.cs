@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -23,17 +24,34 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DICOM image with high‑performance memory strategy
-        var loadOptions = new LoadOptions { BufferSizeHint = 256 * 1024 }; // 256 KB buffer
-        using (var stream = File.OpenRead(inputPath))
-        using (var dicomImage = new DicomImage(stream, loadOptions))
+        try
         {
-            // Adjust contrast (value in range [-100, 100])
-            dicomImage.AdjustContrast(50f);
+            // Open DICOM file stream with high‑performance memory strategy
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                var loadOptions = new LoadOptions
+                {
+                    // Example buffer size hint (256 KB)
+                    BufferSizeHint = 256 * 1024
+                };
 
-            // Save the result as TIFF
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            dicomImage.Save(outputPath, tiffOptions);
+                // Load DICOM image
+                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
+                {
+                    // Adjust contrast (value range: -100 to 100)
+                    dicomImage.AdjustContrast(50f);
+
+                    // Prepare TIFF save options
+                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                    // Save as TIFF
+                    dicomImage.Save(outputPath, tiffOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
