@@ -2,40 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input_animation.webp";
-        string outputPath = @"C:\Images\output_animation.gif";
-
-        // Check input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the WebP image (may contain multiple frames)
-            using (Image webpImage = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.webp";
+            string outputPath = "output/output.gif";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Prepare GIF options to preserve all frames
-                var gifOptions = new GifOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists (unconditional call as required)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WebP image (may contain animation frames)
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure GIF options: infinite loop
+                GifOptions gifOptions = new GifOptions
                 {
-                    // Export full frames for each animation step
-                    FullFrame = true
+                    LoopsCount = 0 // 0 means infinite looping
                 };
 
-                // Save as animated GIF; Aspose.Imaging retains animation frames automatically
-                webpImage.Save(outputPath, gifOptions);
+                // Save as animated GIF preserving frames
+                image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
