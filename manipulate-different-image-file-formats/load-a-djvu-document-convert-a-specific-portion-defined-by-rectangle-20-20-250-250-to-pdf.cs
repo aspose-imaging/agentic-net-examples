@@ -1,44 +1,41 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.pdf";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.djvu";
+            string outputPath = "output.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DjVu document
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Define the export rectangle (x, y, width, height)
-            var exportArea = new Aspose.Imaging.Rectangle(20, 20, 250, 250);
-
-            // Configure DjVu multi-page options for the first page and the export area
-            var djvuOptions = new DjvuMultiPageOptions(0, exportArea);
-
-            // Set up PDF save options with the DjVu multi-page options
-            var pdfOptions = new PdfOptions
+            if (!File.Exists(inputPath))
             {
-                MultiPageOptions = djvuOptions
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the specified portion as a PDF
-            image.Save(outputPath, pdfOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            {
+                Rectangle exportArea = new Rectangle(20, 20, 250, 250);
+                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(0, exportArea);
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    MultiPageOptions = multiPageOptions
+                };
+
+                djvuImage.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
