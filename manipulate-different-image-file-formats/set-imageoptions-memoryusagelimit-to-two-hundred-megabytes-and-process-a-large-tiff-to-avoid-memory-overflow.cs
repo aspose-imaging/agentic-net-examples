@@ -2,42 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.BigTiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output.bigtiff";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\large.tif";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            using (Image srcImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                TiffImage srcTiff = (TiffImage)srcImage;
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                BigTiffOptions options = new BigTiffOptions(TiffExpectedFormat.Default);
+                options.Source = new FileCreateSource(outputPath, false);
 
-            // Load the TIFF with a memory buffer limit of 200 MB
-            var loadOptions = new LoadOptions
-            {
-                BufferSizeHint = 200 // limit internal buffers to 200 MB
-            };
-
-            using (Image image = Image.Load(inputPath, loadOptions))
-            {
-                // Save the image as PNG, also respecting the 200 MB buffer limit
-                var pngOptions = new PngOptions
+                using (BigTiffImage bigTiff = (BigTiffImage)Image.Create(options, srcTiff.Width, srcTiff.Height))
                 {
-                    BufferSizeHint = 200
-                };
+                    bigTiff.RemoveFrame(0);
 
-                image.Save(outputPath, pngOptions);
+                    foreach (TiffFrame frame in srcTiff.Frames)
+                    {
+                        bigTiff.AddFrame(TiffFrame.CopyFrame(frame));
+                    }
+
+                    bigTiff.Save();
+                }
             }
         }
         catch (Exception ex)
