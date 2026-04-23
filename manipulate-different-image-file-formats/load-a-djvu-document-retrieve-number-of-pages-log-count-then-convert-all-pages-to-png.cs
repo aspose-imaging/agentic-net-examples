@@ -8,36 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDir = @"C:\temp\output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output directory
+            string inputPath = @"c:\temp\sample.djvu";
+            string outputDir = @"c:\temp\";
 
-        // Open the DjVu file from a stream
-        using (Stream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            // Log total number of pages
-            Console.WriteLine($"Total pages: {djvuImage.PageCount}");
-
-            // Iterate through each page and save as PNG
-            foreach (DjvuPage djvuPage in djvuImage.Pages)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Build output file name based on page number
-                string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.png");
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the page as PNG
-                djvuPage.Save(outputPath, new PngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Open the DjVu document from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Log the total number of pages
+                Console.WriteLine($"Page count: {djvuImage.PageCount}");
+
+                // Iterate through each page and save as PNG
+                foreach (DjvuPage djvuPage in djvuImage.Pages)
+                {
+                    // Build output file name
+                    string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.png");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as PNG
+                    djvuPage.Save(outputPath, new PngOptions());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
