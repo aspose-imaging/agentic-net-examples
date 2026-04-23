@@ -6,28 +6,27 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.jpg";
         string outputPath = @"C:\Images\output_resized.jpg";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                const int maxWidth = 1200;
-
                 // Determine new dimensions while preserving aspect ratio
+                const int maxWidth = 1200;
                 int newWidth = image.Width;
                 int newHeight = image.Height;
 
