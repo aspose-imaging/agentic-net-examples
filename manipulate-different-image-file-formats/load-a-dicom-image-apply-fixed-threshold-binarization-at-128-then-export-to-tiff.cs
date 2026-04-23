@@ -9,29 +9,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.dcm";
-        string outputPath = "Output/sample.tiff";
+        string inputPath = "sample.dcm";
+        string outputPath = "sample.tif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            {
+                dicomImage.BinarizeFixed(128);
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                dicomImage.Save(outputPath, tiffOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DICOM image, apply binarization, and save as TIFF
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            DicomImage dicomImage = (DicomImage)image;
-            dicomImage.BinarizeFixed(128); // Fixed threshold binarization at 128
-
-            // Configure TIFF options (default format)
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            dicomImage.Save(outputPath, tiffOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
