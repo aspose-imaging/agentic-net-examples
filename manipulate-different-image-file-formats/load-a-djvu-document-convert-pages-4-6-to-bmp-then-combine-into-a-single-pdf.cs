@@ -4,67 +4,106 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input DjVu file
-        string inputPath = "sample.djvu";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded paths
+            string inputPath = "sample.djvu";
+            string bmpOutputDir = "bmp_pages";
+            string pdfOutputPath = "combined.pdf";
 
-        // Directory for temporary BMP files
-        string bmpOutputDir = "bmp_pages";
-        Directory.CreateDirectory(bmpOutputDir);
-
-        // List to hold loaded BMP images
-        var bmpImages = new List<Image>();
-
-        // Load DjVu document
-        using (FileStream stream = File.OpenRead(inputPath))
-        {
-            using (DjvuImage djvu = new DjvuImage(stream))
+            // Validate input file
+            if (!File.Exists(inputPath))
             {
-                // Zero‑based indexes for pages 4‑6
-                int[] pageIndexes = new int[] { 3, 4, 5 };
-                foreach (int idx in pageIndexes)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(bmpOutputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfOutputPath));
+
+            // Load DjVu document
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Save pages 4‑6 as BMP (zero‑based indexes 3,4,5)
+                for (int i = 3; i <= 5 && i < djvuImage.Pages.Length; i++)
                 {
-                    if (idx < 0 || idx >= djvu.PageCount)
-                        continue; // Skip invalid indexes
-
-                    string bmpPath = Path.Combine(bmpOutputDir, $"page_{idx + 1}.bmp");
-                    // Ensure the directory for the BMP exists (already created above)
-                    djvu.Pages[idx].Save(bmpPath, new BmpOptions());
-
-                    // Load the saved BMP for PDF creation
-                    Image bmpImg = Image.Load(bmpPath);
-                    bmpImages.Add(bmpImg);
+                    string bmpPath = Path.Combine(bmpOutputDir, $"page{i + 1}.bmp");
+                    Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
+                    djvuImage.Pages[i].Save(bmpPath, new BmpOptions());
                 }
             }
-        }
 
-        // Combine BMP pages into a single PDF
-        if (bmpImages.Count > 0)
-        {
-            string pdfOutputPath = "combined.pdf";
-            string pdfDir = Path.GetDirectoryName(pdfOutputPath);
-            if (!string.IsNullOrWhiteSpace(pdfDir))
-                Directory.CreateDirectory(pdfDir);
-
-            using (Image pdf = Image.Create(bmpImages.ToArray(), true))
+            // Collect BMP sizes
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            List<string> bmpPaths = new List<string>();
+            foreach (string file in Directory.GetFiles(bmpOutputDir, "*.bmp"))
             {
-                pdf.Save(pdfOutputPath, new PdfOptions());
+                bmpPaths.Add(file);
+                using (RasterImage img = (RasterImage)Image.Load(file))
+                {
+                    sizes.Add(img.Size);
+                }
+            }
+
+            if (sizes.Count == 0)
+            {
+                Console.Error.WriteLine("No BMP pages were generated.");
+                return;
+            }
+
+            // Calculate canvas size (vertical stacking)
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (var sz in sizes)
+            {
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                canvasHeight += sz.Height;
+            }
+
+            // Temporary JPEG canvas (required for PDF saving)
+            string tempJpegPath = Path.Combine(Path.GetTempPath(), "temp_canvas.jpg");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
+            Source tempSource = new FileCreateSource(tempJpegPath, true);
+            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            {
+                int offsetY = 0;
+                foreach (string bmpPath in bmpPaths)
+                {
+                    using (RasterImage bmp = (RasterImage)Image.Load(bmpPath))
+                    {
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, bmp.Width, bmp.Height);
+                        canvas.SaveArgb32Pixels(bounds, bmp.LoadArgb32Pixels(bmp.Bounds));
+                        offsetY += bmp.Height;
+                    }
+                }
+
+                // Save combined PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                canvas.Save(pdfOutputPath, pdfOptions);
+            }
+
+            // Cleanup temporary JPEG file
+            if (File.Exists(tempJpegPath))
+            {
+                try { File.Delete(tempJpegPath); } catch { }
             }
         }
-
-        // Dispose loaded BMP images
-        foreach (var img in bmpImages)
+        catch (Exception ex)
         {
-            img.Dispose();
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
