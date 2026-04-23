@@ -9,36 +9,44 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Input\sample.cmx";
-        string outputPath = @"C:\Output\sample.pdf";
+        string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PDF export options with vector rasterization settings for CMX
-            PdfOptions pdfOptions = new PdfOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new CmxRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CMX image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PDF export options
+                var pdfOptions = new PdfOptions();
+
+                // Set vector rasterization options specific to CMX
+                var rasterOptions = new CmxRasterizationOptions
                 {
-                    // Preserve vector fidelity and embed fonts where possible
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.AntiAlias,
                     Positioning = PositioningTypes.DefinedByDocument
-                }
-            };
+                };
 
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save the image as PDF with vector fidelity
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
