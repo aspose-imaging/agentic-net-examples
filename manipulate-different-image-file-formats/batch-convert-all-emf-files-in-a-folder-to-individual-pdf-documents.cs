@@ -5,52 +5,45 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input, and output directories (relative paths)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputEmf";
+            string outputFolder = @"C:\OutputPdf";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all EMF files in the input folder
+            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
 
-        // Get all EMF files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in emfFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the corresponding PDF output path
+                string outputPath = Path.Combine(outputFolder,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the EMF image and save it as PDF
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, new PdfOptions());
+                }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
-
-            // Build the output PDF path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-            // Ensure the output directory exists (unconditional call)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EMF image and save as PDF
-            using (Image image = Image.Load(inputPath))
-            {
-                image.Save(outputPath, new PdfOptions());
-            }
-
-            Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
