@@ -2,43 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the multipage TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-            {
-                // Set page exporting action to release resources after each page is saved
-                tiffImage.PageExportingAction = delegate (int index, Image page)
-                {
-                    // Example operation: rotate each page 90 degrees (optional)
-                    ((RasterImage)page).Rotate(90);
-                    // Force garbage collection to free memory of previous pages
-                    GC.Collect();
-                };
+            // Hardcoded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
-                // Save the processed image using default TIFF options
-                tiffImage.Save(outputPath);
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multipage TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to TiffImage to access PageExportingAction (inherited from RasterCachedMultipageImage)
+                if (image is TiffImage tiffImage)
+                {
+                    // Set page exporting action to release resources after each page is saved
+                    tiffImage.PageExportingAction = delegate (int index, Image page)
+                    {
+                        // Force garbage collection to free memory from previous pages
+                        GC.Collect();
+
+                        // Optional per-page processing can be added here
+                        // Example: ((RasterImage)page).Rotate(90);
+                    };
+
+                    // Save the image using sequential export (pages are released after each save)
+                    tiffImage.Save(outputPath);
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded image is not a TIFF image.");
+                }
             }
         }
         catch (Exception ex)
