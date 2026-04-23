@@ -10,58 +10,57 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Set up base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add DICOM files and rerun.");
-            return;
-        }
+            // Set up input and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Process only DICOM files
-            if (!Path.GetExtension(inputPath).Equals(".dcm", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Determine output TIFF path
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tif";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure the output directory exists (unconditional call)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DICOM, apply Otsu threshold, and save as TIFF
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                DicomImage dicomImage = (DicomImage)image;
-                dicomImage.BinarizeOtsu();
-
-                // Save using TIFF options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                dicomImage.Save(outputPath, tiffOptions);
+                Directory.CreateDirectory(outputDirectory);
             }
+
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Prepare output path with .tiff extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tiff";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load DICOM image, apply Otsu threshold, and save as TIFF
+                using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+                {
+                    dicomImage.BinarizeOtsu();
+
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    dicomImage.Save(outputPath, tiffOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
