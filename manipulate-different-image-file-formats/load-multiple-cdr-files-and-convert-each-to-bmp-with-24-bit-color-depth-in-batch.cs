@@ -1,70 +1,70 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output directories (relative paths)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all CDR files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input CDR files
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\sample1.cdr",
+                @"C:\Images\sample2.cdr",
+                @"C:\Images\sample3.cdr"
+            };
 
-            // Prepare output path with .bmp extension
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
+            // Hardcoded output directory
+            string outputDir = @"C:\Images\Converted";
 
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            foreach (string inputPath in inputFiles)
             {
-                // Configure BMP options with 24‑bit color depth
-                BmpOptions bmpOptions = new BmpOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    BitsPerPixel = 24,
-                    // Set vector rasterization options for proper rendering
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image as BMP
-                cdr.Save(outputPath, bmpOptions);
+                // Build output BMP path (same name, .bmp extension)
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                {
+                    // Ensure at least one page exists
+                    if (cdrImage.Pages.Length == 0)
+                    {
+                        Console.Error.WriteLine($"No pages found in: {inputPath}");
+                        continue;
+                    }
+
+                    // Use the first page for conversion
+                    using (RasterImage page = (RasterImage)cdrImage.Pages[0])
+                    {
+                        // Create a 24‑bpp BMP image from the raster page
+                        using (BmpImage bmpImage = new BmpImage(page, 24, BitmapCompression.Rgb, 96.0, 96.0))
+                        {
+                            // Save the BMP file
+                            bmpImage.Save(outputPath);
+                        }
+                    }
+                }
+
+                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
