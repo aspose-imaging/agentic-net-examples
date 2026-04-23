@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "C:\\Images\\input.bmp";
-        string outputPath = "C:\\Images\\output.webp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output.webp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,23 +21,21 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Set WebP conversion options (quality 80)
+                // Save as WebP with quality 80 (lossy)
                 var webpOptions = new WebPOptions
                 {
-                    Quality = 80f,
-                    Lossless = false
+                    Lossless = false,
+                    Quality = 80f
                 };
-
-                // Save as WebP
                 image.Save(outputPath, webpOptions);
             }
 
-            // Compare file sizes
+            // Verify file size reduction
             long originalSize = new FileInfo(inputPath).Length;
             long webpSize = new FileInfo(outputPath).Length;
 
@@ -45,9 +43,13 @@ class Program
             Console.WriteLine($"Converted WebP size: {webpSize} bytes");
 
             if (webpSize < originalSize)
-                Console.WriteLine("File size reduced after conversion.");
+            {
+                Console.WriteLine("File size reduction verified.");
+            }
             else
-                Console.WriteLine("File size not reduced after conversion.");
+            {
+                Console.WriteLine("No size reduction detected.");
+            }
         }
         catch (Exception ex)
         {
