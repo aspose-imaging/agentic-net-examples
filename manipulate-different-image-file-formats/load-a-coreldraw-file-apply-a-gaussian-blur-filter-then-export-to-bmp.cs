@@ -4,44 +4,53 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string intermediatePath = @"C:\Images\intermediate.bmp";
-        string outputPath = @"C:\Images\output.bmp";
+        string inputPath = "input\\sample.cdr";
+        string outputPath = "output\\result.bmp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CorelDRAW (CDR) file
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            {
+                // Save the CDR image to a memory stream as BMP
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    cdrImage.Save(ms, new BmpOptions());
+                    ms.Position = 0; // Reset stream position for reading
+
+                    // Load the BMP from the memory stream as a raster image
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                    {
+                        // Apply Gaussian blur filter to the entire image
+                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                        // Save the processed image to the final BMP file
+                        rasterImage.Save(outputPath, new BmpOptions());
+                    }
+                }
+            }
         }
-
-        // Ensure directories for intermediate and final output exist
-        Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CorelDRAW (CDR) file and export it to a BMP file
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            BmpOptions bmpExportOptions = new BmpOptions();
-            cdrImage.Save(intermediatePath, bmpExportOptions);
-        }
-
-        // Load the intermediate BMP as a raster image
-        using (RasterImage rasterImage = (RasterImage)Image.Load(intermediatePath))
-        {
-            // Apply Gaussian blur filter to the entire image
-            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
-            rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-            // Save the processed image as BMP
-            BmpOptions bmpSaveOptions = new BmpOptions();
-            rasterImage.Save(outputPath, bmpSaveOptions);
+            // Output any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
