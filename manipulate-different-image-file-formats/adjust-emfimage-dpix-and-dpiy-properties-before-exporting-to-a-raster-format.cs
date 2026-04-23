@@ -1,9 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -22,17 +19,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                using (PngOptions pngOptions = new PngOptions())
-                {
-                    var rasterOptions = new EmfRasterizationOptions();
-                    rasterOptions.BackgroundColor = Color.White;
-                    rasterOptions.PageSize = emfImage.Size;
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                    emfImage.Save(outputPath, pngOptions);
-                }
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
