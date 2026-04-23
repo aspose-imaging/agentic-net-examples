@@ -8,14 +8,14 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputEmf";
-        string outputDirectory = @"C:\OutputSvg";
-
         try
         {
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputEmf";
+            string outputDir = @"C:\OutputSvg";
+
             // Get all EMF files in the input directory
-            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
+            string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
 
             foreach (string inputPath in emfFiles)
             {
@@ -26,10 +26,9 @@ class Program
                     return;
                 }
 
-                // Determine the output SVG file path
-                string outputPath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                // Build the output SVG file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -37,29 +36,25 @@ class Program
                 // Load the EMF image and convert it to SVG
                 using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    // Configure SVG save options
+                    // Set up SVG save options
                     SvgOptions saveOptions = new SvgOptions
                     {
                         TextAsShapes = true
                     };
 
-                    // Configure rasterization options specific to EMF
+                    // Configure rasterization options for EMF
                     EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                     {
-                        // Preserve original page size
+                        BackgroundColor = Color.WhiteSmoke,
                         PageSize = emfImage.Size,
-                        // Optional: set background color
-                        BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
-                        // Render mode (auto selects EMF or WMF)
-                        RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                        // Optional margins
+                        RenderMode = EmfRenderMode.Auto,
                         BorderX = 0,
                         BorderY = 0
                     };
 
                     saveOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Save the image as SVG
+                    // Save the SVG file
                     emfImage.Save(outputPath, saveOptions);
                 }
             }
