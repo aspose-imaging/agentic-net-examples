@@ -6,62 +6,67 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input DjVu files
-        string[] inputFiles = new string[]
+        try
         {
-            @"C:\Input\doc1.djvu",
-            @"C:\Input\doc2.djvu"
-        };
+            // Directory setup
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Hardcoded output base directory
-        string outputBaseDir = @"C:\Output";
-
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Create a subdirectory for each source file's pages
-            string sourceName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputDir = Path.Combine(outputBaseDir, sourceName);
-            Directory.CreateDirectory(outputDir); // Ensure directory exists
-
-            // Load DjVu with a memory buffer hint (e.g., 1 MB)
-            using (FileStream stream = File.OpenRead(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                LoadOptions loadOptions = new LoadOptions
-                {
-                    BufferSizeHint = 1 * 1024 * 1024 // 1 MB
-                };
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
+                // Process only DjVu files
+                if (!inputPath.EndsWith(".djvu", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (!File.Exists(inputPath))
                 {
-                    int pageIndex = 0;
-                    foreach (var page in djvuImage.Pages)
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Load DjVu with memory buffer hint
+                using (FileStream stream = File.OpenRead(inputPath))
+                {
+                    var loadOptions = new LoadOptions { BufferSizeHint = 1 * 1024 * 1024 };
+                    using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
                     {
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.gif");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as an interlaced GIF
-                        GifOptions gifOptions = new GifOptions
+                        int pageIndex = 0;
+                        foreach (DjvuPage page in djvuImage.Pages)
                         {
-                            Interlaced = true
-                        };
-                        page.Save(outputPath, gifOptions);
+                            string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                            string outputPath = Path.Combine(outputDirectory, $"{baseName}_page{pageIndex}.gif");
 
-                        pageIndex++;
+                            // Ensure output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            var gifOptions = new GifOptions { Interlaced = true };
+                            page.Save(outputPath, gifOptions);
+                            pageIndex++;
+                        }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
