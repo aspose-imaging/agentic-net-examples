@@ -9,30 +9,37 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputPath = @"C:\temp\sample.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.djvu";
+            string outputPath = "output\\result.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document from file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Prepare TIFF save options with default settings
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                saveOptions.MultiPageOptions = new DjvuMultiPageOptions(); // all pages will be saved
+
+                // Save all pages as a multipage TIFF
+                djvuImage.Save(outputPath, saveOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DjVu document from a file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
+        catch (Exception ex)
         {
-            // Prepare TIFF save options with default multi-page settings (all pages)
-            TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-            saveOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-            // Save all pages as a multipage TIFF file
-            djvuImage.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
