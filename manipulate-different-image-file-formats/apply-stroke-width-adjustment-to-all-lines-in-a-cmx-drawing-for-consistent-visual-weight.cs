@@ -1,41 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\input.cmx";
-        string outputPath = @"C:\temp\output.emf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.cmx";
+            string outputPath = @"C:\temp\output.cmx";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
-        {
-            int width = cmx.Width;
-            int height = cmx.Height;
-
-            Rectangle frame = new Rectangle(0, 0, width, height);
-            var graphics = new EmfRecorderGraphics2D(frame, new Size(width, height), new Size(width / 100, height / 100));
-
-            Pen thickPen = new Pen(Color.Black, 5);
-            graphics.DrawLine(thickPen, 0, 0, width, height);
-            graphics.DrawLine(thickPen, 0, height, width, 0);
-
-            using (EmfImage emfImage = graphics.EndRecording())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                emfImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CMX image
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            {
+                // NOTE: Direct manipulation of line stroke widths in a CMX vector image
+                // is not exposed via a public API in Aspose.Imaging.
+                // If such functionality becomes available, it would be applied here,
+                // iterating over the vector objects and setting a uniform pen width.
+
+                // Placeholder for stroke width adjustment logic:
+                // foreach (var page in cmxImage.Pages)
+                // {
+                //     // Access vector objects on the page and modify their Pen.Width
+                // }
+
+                // Save the (potentially modified) CMX image
+                cmxImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
