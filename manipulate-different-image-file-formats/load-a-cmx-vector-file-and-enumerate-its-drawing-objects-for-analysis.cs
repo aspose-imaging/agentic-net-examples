@@ -5,11 +5,10 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Data\sample.cmx";
-        string outputPath = @"C:\Data\analysis\output.txt";
+        // Hardcoded input path
+        string inputPath = "sample.cmx";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -18,46 +17,34 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image
-        using (CmxImage image = (CmxImage)Image.Load(inputPath))
+        try
         {
-            // Access the CMX document
-            var document = image.Document;
-
-            // Write analysis results
-            using (var writer = new StreamWriter(outputPath))
+            // Load the CMX vector file
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                writer.WriteLine($"CMX Document Analysis for: {inputPath}");
-                writer.WriteLine($"Page count: {document.Pages.Count}");
-                writer.WriteLine();
+                // Cache data for faster access
+                cmx.CacheData();
 
+                // Enumerate pages (drawing objects) in the CMX file
                 int pageIndex = 0;
-                foreach (var page in document.Pages)
+                foreach (CmxImagePage page in cmx.Pages)
                 {
-                    writer.WriteLine($"Page {pageIndex}: {page.GetType().Name}");
+                    // Cache each page's data
+                    page.CacheData();
 
-                    // List public properties of the page
-                    var properties = page.GetType().GetProperties();
-                    foreach (var prop in properties)
-                    {
-                        try
-                        {
-                            var value = prop.GetValue(page);
-                            writer.WriteLine($"  {prop.Name} = {value}");
-                        }
-                        catch
-                        {
-                            // Ignore properties that throw
-                        }
-                    }
-
-                    writer.WriteLine();
+                    Console.WriteLine($"Page {pageIndex}:");
+                    Console.WriteLine($"  Width: {page.Width} px");
+                    Console.WriteLine($"  Height: {page.Height} px");
+                    Console.WriteLine($"  BitsPerPixel: {page.BitsPerPixel}");
+                    Console.WriteLine($"  Size: {page.Size.Width}x{page.Size.Height}");
+                    // Additional analysis of drawing objects can be added here if API provides such collections
                     pageIndex++;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
