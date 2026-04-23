@@ -1,48 +1,52 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\corrupted.tif";
-        string outputPath = @"C:\Images\recovered.tif";
+        string inputPath = "input.tif";
+        string outputPath = "output\\recovered.tif";
 
-        // Ensure any runtime exception is reported cleanly
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            var loadOptions = new LoadOptions
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Color.White
+            };
 
-            // Load the TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            Console.WriteLine("Loading image with recovery options...");
+
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
-                Console.WriteLine($"Loaded TIFF image from '{inputPath}'.");
-                Console.WriteLine($"Number of frames detected: {tiffImage.Frames.Length}");
+                Console.WriteLine("Image loaded.");
 
-                // Log each frame's dimensions
-                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                if (image is TiffImage tiffImage)
                 {
-                    var frame = tiffImage.Frames[i];
-                    Console.WriteLine($"Frame {i + 1}: Width={frame.Width}, Height={frame.Height}");
+                    Console.WriteLine($"Number of frames: {tiffImage.Frames.Length}");
+                }
+                else
+                {
+                    Console.WriteLine("Loaded image is not a TIFF.");
                 }
 
-                // Attempt to reconstruct missing frames (Aspose.Imaging automatically
-                // tries to recover frames when loading; additional custom logic could be added here)
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the recovered image
-                tiffImage.Save(outputPath);
-                Console.WriteLine($"Recovered TIFF saved to '{outputPath}'.");
+                Console.WriteLine("Saving recovered image...");
+                image.Save(outputPath);
+                Console.WriteLine($"Image saved to {outputPath}");
             }
         }
         catch (Exception ex)
