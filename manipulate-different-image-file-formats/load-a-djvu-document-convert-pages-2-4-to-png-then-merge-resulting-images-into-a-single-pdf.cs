@@ -1,73 +1,84 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
-        string pdfPath = Path.Combine(outputDirectory, "merged.pdf");
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.djvu";
+            string outputPdfPath = "output.pdf";
+            string tempPngPath = "merged.png";
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-        Directory.CreateDirectory(outputDirectory);
-
-        // List to hold generated PNG file paths
-        List<string> pngPaths = new List<string>();
-
-        // Load DjVu document and export pages 2‑4 as PNG
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            foreach (DjvuPage djvuPage in djvuImage.Pages)
+            if (!File.Exists(inputPath))
             {
-                int pageNumber = djvuPage.PageNumber;
-                if (pageNumber >= 2 && pageNumber <= 4)
-                {
-                    string pngPath = Path.Combine(outputDirectory, $"page_{pageNumber}.png");
-                    // Save the page as PNG
-                    djvuPage.Save(pngPath, new PngOptions());
-                    pngPaths.Add(pngPath);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-        }
 
-        // Merge the PNG images into a single PDF
-        if (pngPaths.Count > 0)
-        {
-            // Load the first PNG to start the PDF document
-            using (Image pdfDocument = Image.Load(pngPaths[0]))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath) ?? ".");
+
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvu = new DjvuImage(stream))
             {
-                PdfOptions pdfOptions = new PdfOptions();
+                List<string> pngPaths = new List<string>();
 
-                // Append remaining PNGs as additional pages
-                for (int i = 1; i < pngPaths.Count; i++)
+                foreach (DjvuPage page in djvu.Pages)
                 {
-                    using (Image pageImage = Image.Load(pngPaths[i]))
+                    if (page.PageNumber >= 2 && page.PageNumber <= 4)
                     {
-                        // Add the page to the PDF document
-                        pdfDocument.Save(pdfPath, pdfOptions);
-                        // Note: Aspose.Imaging automatically handles multi‑page PDF creation
-                        // when saving subsequent images with the same PdfOptions.
+                        string pngPath = $"page_{page.PageNumber}.png";
+                        Directory.CreateDirectory(Path.GetDirectoryName(pngPath) ?? ".");
+                        page.Save(pngPath, new PngOptions());
+                        pngPaths.Add(pngPath);
                     }
                 }
 
-                // Save the final PDF (covers the case of a single page as well)
-                pdfDocument.Save(pdfPath, pdfOptions);
+                List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+                foreach (string p in pngPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(p))
+                    {
+                        sizes.Add(img.Size);
+                    }
+                }
+
+                int canvasWidth = sizes.Max(s => s.Width);
+                int canvasHeight = sizes.Sum(s => s.Height);
+
+                Source canvasSource = new FileCreateSource(tempPngPath, false);
+                PngOptions canvasOptions = new PngOptions() { Source = canvasSource };
+                using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
+                {
+                    int offsetY = 0;
+                    foreach (string p in pngPaths)
+                    {
+                        using (RasterImage img = (RasterImage)Image.Load(p))
+                        {
+                            Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
+                            canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                            offsetY += img.Height;
+                        }
+                    }
+
+                    PdfOptions pdfOptions = new PdfOptions();
+                    canvas.Save(outputPdfPath, pdfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
