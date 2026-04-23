@@ -3,35 +3,44 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output paths (relative)
-        string inputPath = "Input/sample.djvu";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/animation.gif";
 
-        string outputPath = "Output/animation.gif";
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DjVu document
-        using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-        {
-            // Set up GIF options with page range 1‑3
-            var gifOptions = new GifOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                MultiPageOptions = new DjvuMultiPageOptions(new IntRange(1, 3))
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as animated GIF
-            djvu.Save(outputPath, gifOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document from file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Configure GIF options with page range 1‑3 (inclusive)
+                GifOptions gifOptions = new GifOptions();
+                // DjvuMultiPageOptions uses zero‑based indexing; pages 1‑3 correspond to indexes 0‑2
+                gifOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(0, 2));
+
+                // Save selected pages as an animated GIF
+                djvuImage.Save(outputPath, gifOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
