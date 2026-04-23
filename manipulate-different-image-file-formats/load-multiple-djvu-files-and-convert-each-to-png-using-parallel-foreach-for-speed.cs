@@ -2,58 +2,64 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu files
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Images\Input\document1.djvu",
-            @"C:\Images\Input\document2.djvu",
-            @"C:\Images\Input\document3.djvu"
-        };
-
-        // Hardcoded output directory
-        string outputDirectory = @"C:\Images\Output";
-
-        // Process each DjVu file in parallel
-        Parallel.ForEach(inputFiles, inputPath =>
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input DjVu files
+            string[] inputFiles = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Input\sample1.djvu",
+                @"C:\Input\sample2.djvu"
+            };
 
-            // Ensure the output directory exists (unconditional)
-            Directory.CreateDirectory(outputDirectory);
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Output";
 
-            // Open the DjVu file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            // Process each DjVu file in parallel
+            Parallel.ForEach(inputFiles, inputPath =>
             {
-                // Load the DjVu document
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Iterate through each page
-                    foreach (DjvuPage djvuPage in djvuImage.Pages)
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists (creates if missing)
+                Directory.CreateDirectory(outputDirectory);
+
+                // Open the DjVu file stream
+                using (FileStream stream = File.OpenRead(inputPath))
+                {
+                    // Load DjVu image from stream
+                    using (DjvuImage djvuImage = new DjvuImage(stream))
                     {
-                        // Build output file name: originalname_page{PageNumber}.png
-                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{djvuPage.PageNumber}.png";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+                        // Iterate through each page
+                        foreach (DjvuPage djvuPage in djvuImage.Pages)
+                        {
+                            // Build output file name: <originalname>_page<Number>.png
+                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{djvuPage.PageNumber}.png";
+                            string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                        // Ensure the directory for the output file exists (unconditional)
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            // Ensure the directory for the output file exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the page as PNG
-                        djvuPage.Save(outputPath, new PngOptions());
+                            // Save the page as PNG
+                            djvuPage.Save(outputPath, new PngOptions());
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
