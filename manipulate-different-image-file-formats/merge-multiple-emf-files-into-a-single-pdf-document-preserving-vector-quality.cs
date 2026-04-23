@@ -1,72 +1,66 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input EMF files
-        string[] inputPaths = new[]
+        try
         {
-            "input1.emf",
-            "input2.emf",
-            "input3.emf"
-        };
-
-        // Hardcoded output PDF file
-        string outputPath = "merged.pdf";
-
-        // Validate each input file
-        foreach (string path in inputPaths)
-        {
-            if (!File.Exists(path))
+            // Hardcoded input EMF file paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
-            }
-        }
+                "input1.emf",
+                "input2.emf",
+                "input3.emf"
+            };
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Collect sizes of all EMF images
-        List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-        foreach (string path in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            // Validate each input file
+            foreach (string inputPath in inputPaths)
             {
-                sizes.Add(img.Size);
-            }
-        }
-
-        // Calculate canvas size (horizontal stitching)
-        int canvasWidth = sizes.Sum(s => s.Width);
-        int canvasHeight = sizes.Max(s => s.Height);
-
-        // Create an unbound raster canvas (JPEG image) to hold merged content
-        JpegOptions canvasOptions = new JpegOptions();
-        using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
-        {
-            int offsetX = 0;
-            foreach (string path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                if (!File.Exists(inputPath))
                 {
-                    // Copy pixels from EMF rasterized image onto the canvas
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
             }
 
-            // Save the merged canvas as a PDF
-            canvas.Save(outputPath);
+            // Hardcoded output PDF path
+            string outputPath = "merged.pdf";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load each EMF image
+            List<Image> loadedImages = new List<Image>();
+            foreach (string inputPath in inputPaths)
+            {
+                Image img = Image.Load(inputPath);
+                loadedImages.Add(img);
+            }
+
+            // Create a multipage image from the loaded EMF images
+            using (Image multipage = Image.Create(loadedImages.ToArray(), true))
+            {
+                // Save the multipage image as a PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                multipage.Save(outputPath, pdfOptions);
+            }
+
+            // Dispose loaded images
+            foreach (Image img in loadedImages)
+            {
+                img.Dispose();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
