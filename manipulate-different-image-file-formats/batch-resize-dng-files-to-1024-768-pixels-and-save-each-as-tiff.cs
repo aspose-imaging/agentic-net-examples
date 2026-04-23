@@ -10,44 +10,36 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input and output directories (relative paths)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Get all DNG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.dng");
-
-        foreach (string inputPath in files)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.dng");
+
+            foreach (string inputPath in files)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Determine the output TIFF path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".tif");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the DNG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to DngImage for raw image operations
-                DngImage dng = (DngImage)image;
-
-                // Resize to 1024x768 using nearest neighbour resampling
-                dng.Resize(1024, 768, ResizeType.NearestNeighbourResample);
-
-                // Prepare TIFF save options
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                if (!File.Exists(inputPath))
                 {
-                    // Save the resized image as TIFF
-                    dng.Save(outputPath, tiffOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".tif");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (DngImage dng = (DngImage)Image.Load(inputPath))
+                {
+                    dng.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+                    dng.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
