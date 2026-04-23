@@ -1,44 +1,39 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "C:\\input.emf";
-            string outputPath = "C:\\output.pdf";
-            string fontFolder = "C:\\fonts";
+            // Hard‑coded input EMF file, output PDF file and custom fonts folder
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample.pdf";
+            string fontsFolder = @"C:\CustomFonts";
 
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource(GetFontSource, fontFolder);
+            // Register the custom fonts folder so that missing fonts are resolved and embedded
+            FontSettings.SetFontsFolder(fontsFolder);
 
-            using (Image image = Image.Load(inputPath, loadOptions))
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+                // Prepare PDF save options (fonts will be embedded automatically if found)
+                var pdfOptions = new PdfOptions();
 
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = vectorOptions
-                };
-
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -46,27 +41,5 @@ class Program
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
-    }
-
-    private static Aspose.Imaging.CustomFontHandler.CustomFontData[] GetFontSource(params object[] args)
-    {
-        string fontsPath = string.Empty;
-        if (args.Length > 0)
-        {
-            fontsPath = args[0]?.ToString();
-        }
-
-        var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-        {
-            foreach (var fontFile in Directory.GetFiles(fontsPath))
-            {
-                byte[] fontBytes = File.ReadAllBytes(fontFile);
-                string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
-            }
-        }
-
-        return result.ToArray();
     }
 }
