@@ -10,42 +10,40 @@ class Program
     {
         try
         {
-            // Define batch items: input BMP, output PSD, desired compression method
-            var batch = new (string inputPath, string outputPath, CompressionMethod compression)[]
+            // Define the batch of BMP files and the desired PSD compression for each.
+            // Input and output paths are hard‑coded string literals.
+            var jobs = new[]
             {
-                (@"C:\Images\sample1.bmp", @"C:\Output\sample1_Raw.psd", CompressionMethod.Raw),
-                (@"C:\Images\sample2.bmp", @"C:\Output\sample2_RLE.psd", CompressionMethod.RLE),
-                // Add more entries as needed
+                new { Input = @"C:\Images\sample1.bmp", Output = @"C:\Output\sample1_Raw.psd", Compression = CompressionMethod.Raw },
+                new { Input = @"C:\Images\sample2.bmp", Output = @"C:\Output\sample2_RLE.psd", Compression = CompressionMethod.RLE },
+                new { Input = @"C:\Images\sample3.bmp", Output = @"C:\Output\sample3_Raw.psd", Compression = CompressionMethod.Raw }
             };
 
-            foreach (var (inputPath, outputPath, compression) in batch)
+            foreach (var job in jobs)
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                // Verify that the input file exists.
+                if (!File.Exists(job.Input))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {job.Input}");
                     return;
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure the output directory exists (creates it if necessary).
+                Directory.CreateDirectory(Path.GetDirectoryName(job.Output));
 
-                // Load BMP image
-                using (Image image = Image.Load(inputPath))
+                // Load the BMP image.
+                using (Image image = Image.Load(job.Input))
                 {
-                    // Prepare PSD save options with the specified compression
+                    // Configure PSD save options with the specified compression method.
                     var psdOptions = new PsdOptions
                     {
-                        CompressionMethod = compression,
-                        // Optional: set other options such as ColorMode if needed
-                        ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
+                        CompressionMethod = job.Compression,
+                        // Optional: keep other defaults (e.g., ColorMode, Version).
                     };
 
-                    // Save as PSD
-                    image.Save(outputPath, psdOptions);
+                    // Save the image as PSD using the configured options.
+                    image.Save(job.Output, psdOptions);
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}' using {compression} compression.");
             }
         }
         catch (Exception ex)
