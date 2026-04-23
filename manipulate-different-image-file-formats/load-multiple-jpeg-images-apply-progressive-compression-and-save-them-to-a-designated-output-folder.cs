@@ -8,45 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\Images\Input";
-        string outputDir = @"C:\Images\Output";
+        // Hard‑coded input and output directories
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
 
-        // List of JPEG files to process
-        string[] files = new string[]
+        try
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
-        };
+            // Get all JPEG files in the input folder
+            string[] inputFiles = Directory.GetFiles(inputFolder, "*.jpg");
 
-        foreach (var fileName in files)
-        {
-            // Build full input path and verify existence
-            string inputPath = Path.Combine(inputDir, fileName);
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in inputFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Build full output path and ensure its directory exists
-            string outputPath = Path.Combine(outputDir, fileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure progressive JPEG save options
-                JpegOptions saveOptions = new JpegOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    CompressionType = JpegCompressionMode.Progressive,
-                    Quality = 100 // optional quality setting
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image with progressive compression
-                image.Save(outputPath, saveOptions);
+                // Build the corresponding output path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + "_progressive.jpg");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the source image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Configure JPEG options for progressive compression
+                    JpegOptions saveOptions = new JpegOptions
+                    {
+                        CompressionType = JpegCompressionMode.Progressive,
+                        Quality = 100 // optional: set desired quality (1‑100)
+                    };
+
+                    // Save the image with the specified options
+                    image.Save(outputPath, saveOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
