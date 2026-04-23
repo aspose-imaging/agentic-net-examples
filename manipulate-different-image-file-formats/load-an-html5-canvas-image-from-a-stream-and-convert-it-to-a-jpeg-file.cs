@@ -7,32 +7,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.html";
-        string outputPath = @"C:\Temp\output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\canvas.html";
+            string outputPath = @"C:\temp\canvas.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the HTML5 Canvas image from a file stream
-        using (FileStream inputStream = File.OpenRead(inputPath))
-        using (Image image = Image.Load(inputStream))
-        {
-            // Prepare JPEG save options (default settings)
-            JpegOptions jpegOptions = new JpegOptions();
-
-            // Save the image as JPEG to a file stream
-            using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                image.Save(outputStream, jpegOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the HTML5 Canvas image from a file stream
+            using (FileStream inputStream = File.OpenRead(inputPath))
+            {
+                using (Image image = Image.Load(inputStream))
+                {
+                    // Save the image as JPEG
+                    JpegOptions jpegOptions = new JpegOptions();
+                    image.Save(outputPath, jpegOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
