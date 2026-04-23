@@ -8,47 +8,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\output\cropped.png";
+        string outputPath = @"C:\Images\sample_cropped.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access EMF-specific members
-                EmfImage emfImage = image as EmfImage;
-                if (emfImage == null)
-                {
-                    Console.Error.WriteLine("The loaded file is not a valid EMF image.");
-                    return;
-                }
+                // Cast to EmfImage to access the Crop method
+                EmfImage emfImage = (EmfImage)image;
 
                 // Define the cropping rectangle (x, y, width, height)
-                // Adjust these values to the desired region
-                int x = 100;      // left coordinate
-                int y = 50;       // top coordinate
-                int width = 200;  // rectangle width
-                int height = 150; // rectangle height
-                Rectangle cropArea = new Rectangle(x, y, width, height);
+                var cropArea = new Aspose.Imaging.Rectangle(100, 50, 300, 200);
 
-                // Perform the crop operation
+                // Crop the image to the specified rectangle
                 emfImage.Crop(cropArea);
 
                 // Save the cropped image as PNG
-                PngOptions pngOptions = new PngOptions();
-                emfImage.Save(outputPath, pngOptions);
+                emfImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
