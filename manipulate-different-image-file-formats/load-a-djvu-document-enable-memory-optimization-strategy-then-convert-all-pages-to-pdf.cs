@@ -6,35 +6,48 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.djvu";
-        string outputPath = "Output/output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input DjVu file path
+            string inputPath = @"C:\Temp\sample.djvu";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load DjVu document with memory optimization (buffer size hint)
+            LoadOptions loadOptions = new LoadOptions
+            {
+                // Example: limit internal buffers to 1 MB
+                BufferSizeHint = 1 * 1024 * 1024
+            };
+
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+            {
+                // Iterate through each page and save as PDF
+                foreach (DjvuPage djvuPage in djvuImage.Pages)
+                {
+                    // Construct output PDF file path for the current page
+                    string outputDirectory = @"C:\Temp\PdfOutput";
+                    string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.pdf");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as PDF
+                    djvuPage.Save(outputPath, new PdfOptions());
+                }
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set memory optimization options
-        var loadOptions = new LoadOptions
+        catch (Exception ex)
         {
-            BufferSizeHint = 1 * 1024 * 1024 // 1 MB buffer
-        };
-
-        // Load DjVu document with memory optimization
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
-        {
-            // Convert all pages to PDF
-            var pdfOptions = new PdfOptions();
-            djvuImage.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
