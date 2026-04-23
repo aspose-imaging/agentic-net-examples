@@ -5,62 +5,56 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputTiffs";
+            string outputDirectory = @"C:\OutputJpegs";
+
+            // Get all TIFF files in the input directory (both .tif and .tiff)
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
+            string[] tiffFilesAlt = Directory.GetFiles(inputDirectory, "*.tiff");
+            string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
+            tiffFiles.CopyTo(allTiffFiles, 0);
+            tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
+
+            foreach (string inputPath in allTiffFiles)
+            {
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build output path with .jpg extension
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load TIFF image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Set JPEG options with 90% quality
+                    JpegOptions jpegOptions = new JpegOptions
+                    {
+                        Quality = 90
+                    };
+
+                    // Save as JPEG
+                    image.Save(outputPath, jpegOptions);
+                }
+
+                // Log successful conversion
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+            }
         }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
+        catch (Exception ex)
         {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Process only TIFF files
-            string ext = Path.GetExtension(inputPath);
-            if (!ext.Equals(".tif", StringComparison.OrdinalIgnoreCase) &&
-                !ext.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Build output path with .jpg extension
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image and convert to JPEG
-            using (Image image = Image.Load(inputPath))
-            using (JpegOptions jpegOptions = new JpegOptions())
-            {
-                jpegOptions.Quality = 90;
-                image.Save(outputPath, jpegOptions);
-            }
-
-            Console.WriteLine($"Converted {inputPath} to {outputPath}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
