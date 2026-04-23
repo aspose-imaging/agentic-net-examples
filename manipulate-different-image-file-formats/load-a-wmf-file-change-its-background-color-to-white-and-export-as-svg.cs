@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.wmf";
-        string outputPath = @"C:\temp\output.svg";
+        string inputPath = @"C:\Images\sample.wmf";
+        string outputPath = @"C:\Images\sample.svg";
 
         try
         {
