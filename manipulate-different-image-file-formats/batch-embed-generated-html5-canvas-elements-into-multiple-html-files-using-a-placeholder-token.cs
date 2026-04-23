@@ -9,79 +9,68 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input SVG files
-        string[] svgInputPaths = {
-            @"C:\Images\Sample1.svg",
-            @"C:\Images\Sample2.svg"
-        };
-
-        // Corresponding HTML template files containing the placeholder {{CANVAS_PLACEHOLDER}}
-        string[] htmlTemplatePaths = {
-            @"C:\Templates\Page1.html",
-            @"C:\Templates\Page2.html"
-        };
-
-        // Output HTML files where the canvas will be embedded
-        string[] htmlOutputPaths = {
-            @"C:\Output\Result1.html",
-            @"C:\Output\Result2.html"
-        };
-
-        // Placeholder token to be replaced with the generated canvas tag
-        const string placeholderToken = "{{CANVAS_PLACEHOLDER}}";
-
-        // Process each pair (SVG → HTML template → output)
-        for (int i = 0; i < svgInputPaths.Length; i++)
+        try
         {
-            string svgPath = svgInputPaths[i];
-            string templatePath = htmlTemplatePaths[i];
-            string outputPath = htmlOutputPaths[i];
+            // Hard‑coded input vector images, HTML templates and output files
+            string[] vectorPaths = { "input1.svg", "input2.svg" };
+            string[] templatePaths = { "template1.html", "template2.html" };
+            string[] outputPaths = { "output1.html", "output2.html" };
+            const string placeholder = "{{CANVAS_PLACEHOLDER}}";
 
-            // Verify SVG input file exists
-            if (!File.Exists(svgPath))
+            for (int i = 0; i < vectorPaths.Length; i++)
             {
-                Console.Error.WriteLine($"File not found: {svgPath}");
-                return;
-            }
+                string vectorPath = vectorPaths[i];
+                string templatePath = templatePaths[i];
+                string outputPath = outputPaths[i];
 
-            // Verify HTML template file exists
-            if (!File.Exists(templatePath))
-            {
-                Console.Error.WriteLine($"File not found: {templatePath}");
-                return;
-            }
-
-            // Load the SVG image
-            using (Image image = Image.Load(svgPath))
-            {
-                // Prepare options to generate only the canvas tag (no full HTML page)
-                var canvasOptions = new Html5CanvasOptions
+                // Verify input files exist
+                if (!File.Exists(vectorPath))
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions(),
-                    FullHtmlPage = false,
-                    CanvasTagId = $"canvas_{i}"
-                };
-
-                // Save the canvas HTML to a memory stream
-                string canvasHtml;
-                using (var ms = new MemoryStream())
+                    Console.Error.WriteLine($"File not found: {vectorPath}");
+                    return;
+                }
+                if (!File.Exists(templatePath))
                 {
-                    image.Save(ms, canvasOptions);
-                    canvasHtml = Encoding.UTF8.GetString(ms.ToArray());
+                    Console.Error.WriteLine($"File not found: {templatePath}");
+                    return;
                 }
 
-                // Read the HTML template
-                string templateContent = File.ReadAllText(templatePath);
-
-                // Replace the placeholder with the generated canvas HTML
-                string resultContent = templateContent.Replace(placeholderToken, canvasHtml);
-
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Write the final HTML file
-                File.WriteAllText(outputPath, resultContent);
+                // Load the vector image (e.g., SVG)
+                using (Image image = Image.Load(vectorPath))
+                {
+                    // Prepare HTML5 Canvas options – generate only the canvas tag
+                    var canvasOptions = new Html5CanvasOptions
+                    {
+                        FullHtmlPage = false,
+                        CanvasTagId = $"canvas{i + 1}",
+                        VectorRasterizationOptions = new SvgRasterizationOptions()
+                    };
+
+                    // Save canvas HTML to a memory stream
+                    string canvasHtml;
+                    using (var ms = new MemoryStream())
+                    {
+                        image.Save(ms, canvasOptions);
+                        canvasHtml = Encoding.UTF8.GetString(ms.ToArray());
+                    }
+
+                    // Load the HTML template
+                    string templateContent = File.ReadAllText(templatePath, Encoding.UTF8);
+
+                    // Replace the placeholder token with the generated canvas HTML
+                    string resultHtml = templateContent.Replace(placeholder, canvasHtml);
+
+                    // Write the final HTML file
+                    File.WriteAllText(outputPath, resultHtml, Encoding.UTF8);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
