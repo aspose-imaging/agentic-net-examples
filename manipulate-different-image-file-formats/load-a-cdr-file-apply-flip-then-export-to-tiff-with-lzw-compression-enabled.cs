@@ -23,23 +23,27 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Apply a flip operation (horizontal flip in this example)
-            if (image is CdrImage cdrImage)
+            // Load the CDR image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
+                // Apply a horizontal flip
                 cdrImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                // Prepare TIFF save options with LZW compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Compression = TiffCompressions.Lzw
+                };
+
+                // Save as TIFF
+                cdrImage.Save(outputPath, tiffOptions);
             }
-
-            // Configure TIFF save options with LZW compression
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                Compression = TiffCompressions.Lzw
-            };
-
-            // Save the transformed image as TIFF
-            image.Save(outputPath, tiffOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
