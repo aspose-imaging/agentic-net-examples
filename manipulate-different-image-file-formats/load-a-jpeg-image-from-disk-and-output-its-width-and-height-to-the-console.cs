@@ -1,27 +1,35 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-public class Program
+class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input path
-        string inputPath = "sample.jpg";
+        string inputPath = @"C:\temp\sample.jpg";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the JPEG image using the constructor that accepts a file path
+            using (JpegImage jpegImage = new JpegImage(inputPath))
+            {
+                // Output image dimensions
+                Console.WriteLine($"Width: {jpegImage.Width}");
+                Console.WriteLine($"Height: {jpegImage.Height}");
+            }
         }
-
-        // Load the JPEG image and output its dimensions
-        using (JpegImage jpeg = new JpegImage(inputPath))
+        catch (Exception ex)
         {
-            Console.WriteLine($"Width: {jpeg.Width}");
-            Console.WriteLine($"Height: {jpeg.Height}");
+            // Report any unexpected errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
