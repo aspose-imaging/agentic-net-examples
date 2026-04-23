@@ -3,41 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "sample.djvu";
+            string outputPath = "output.bmp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DjVu document from file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            // Define the rectangle area to extract (0,0,400,400)
-            Rectangle area = new Rectangle(0, 0, 400, 400);
-
-            // Configure BMP save options with DjVu multi‑page options for the first page and the defined area
-            BmpOptions bmpOptions = new BmpOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                MultiPageOptions = new DjvuMultiPageOptions(0, area)
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the extracted portion as BMP
-            djvuImage.Save(outputPath, bmpOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Use the first page of the document
+                var page = djvuImage.Pages[0];
+
+                // Define the rectangle area to extract (0,0,400,400)
+                var bounds = new Rectangle(0, 0, 400, 400);
+
+                // BMP save options
+                var bmpOptions = new BmpOptions();
+
+                // Save the specified portion as BMP
+                page.Save(outputPath, bmpOptions, bounds);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
