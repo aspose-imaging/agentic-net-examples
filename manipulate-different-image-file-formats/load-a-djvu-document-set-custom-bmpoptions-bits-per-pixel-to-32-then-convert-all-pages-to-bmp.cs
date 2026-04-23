@@ -1,51 +1,62 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input DjVu file path
-        string inputPath = @"C:\Temp\sample.djvu";
-
-        // Hardcoded output directory for BMP files
-        string outputDirectory = @"C:\Temp\DjvuToBmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input DjVu file path
+            string inputPath = "input.djvu";
 
-        // Ensure the output directory exists (creates parent directories if needed)
-        Directory.CreateDirectory(outputDirectory);
-
-        // Open the DjVu document from a file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            // Iterate through each page in the DjVu document
-            foreach (DjvuPage page in djvuImage.Pages)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Build the output BMP file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.bmp");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Configure BMP save options with 32 bits per pixel
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    BitsPerPixel = 32
-                };
-
-                // Save the current page as a BMP file using the specified options
-                page.Save(outputPath, bmpOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Output directory for BMP files
+            string outputDir = "output";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load DjVu document from file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                int pageIndex = 0;
+                foreach (Image page in djvuImage.Pages)
+                {
+                    // Construct output file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex + 1}.bmp");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (page)
+                    {
+                        // Configure BMP options
+                        BmpOptions bmpOptions = new BmpOptions
+                        {
+                            BitsPerPixel = 32
+                        };
+
+                        // Save the page as BMP
+                        page.Save(outputPath, bmpOptions);
+                    }
+
+                    pageIndex++;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
