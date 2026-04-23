@@ -9,44 +9,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input DjVu file path
-        string inputPath = "sample.djvu";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input DjVu file path
+            string inputPath = "sample.djvu";
 
-        // Hardcoded output directory for PNG pages
-        string outputDirectory = "Output";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Open the DjVu file as a stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        {
-            // Load DjVu image from the stream
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Iterate through each page in the DjVu document
-                foreach (DjvuPage page in djvuImage.Pages)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Open the DjVu file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                // Load DjVu image from stream
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Rotate the page 90 degrees clockwise, resize proportionally, white background
-                    page.Rotate(90f, true, Color.White);
+                    // Iterate through each page
+                    foreach (DjvuPage page in djvuImage.Pages)
+                    {
+                        // Rotate the page 90 degrees clockwise, resize proportionally, white background
+                        page.Rotate(90f, true, Color.White);
 
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                        // Prepare output PNG file path for the current page
+                        string outputPath = $"page_{page.PageNumber}.png";
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                    // Save the rotated page as PNG
-                    page.Save(outputPath, new PngOptions());
+                        // Save the rotated page as PNG
+                        page.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
