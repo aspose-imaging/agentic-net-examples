@@ -8,30 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.dng";
-        string outputPath = @"C:\temp\sample_gamma.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "c:\\temp\\sample.dng";
+            string outputPath = "c:\\temp\\sample.gamma.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to DngImage for DNG-specific handling
+                DngImage dngImage = (DngImage)image;
+
+                // Apply gamma correction (2.2 for all channels)
+                dngImage.AdjustGamma(2.2f);
+
+                // Save the result as PNG
+                dngImage.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DNG image, apply gamma correction, and save as PNG
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            DngImage dngImage = (DngImage)image;
-
-            // Adjust gamma to 2.2 for all channels
-            dngImage.AdjustGamma(2.2f);
-
-            // Export to PNG with default options
-            dngImage.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
