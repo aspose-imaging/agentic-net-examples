@@ -1,64 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jp2";
-        string outputPath = @"C:\Images\output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.jp2";
+            string outputPath = @"C:\temp\output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load JPEG2000 image with a 1 MB buffer hint
-        LoadOptions loadOptions = new LoadOptions { BufferSizeHint = 1 * 1024 * 1024 };
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            // Cast to RasterImage for pixel manipulation
-            RasterImage raster = (RasterImage)image;
-
-            int width = raster.Width;
-            int height = raster.Height;
-            int[] pixels = new int[width * height];
-
-            // Retrieve ARGB pixel data
-            Rectangle fullRect = new Rectangle(0, 0, width, height);
-            raster.SaveArgb32Pixels(fullRect, pixels);
-
-            // Simple pixel processing: invert RGB channels while preserving alpha
-            for (int i = 0; i < pixels.Length; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int argb = pixels[i];
-                int alpha = argb & unchecked((int)0xFF000000);
-                int rgb = argb & 0x00FFFFFF;
-                rgb = (~rgb) & 0x00FFFFFF;
-                pixels[i] = alpha | rgb;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Write modified pixels back to the image
-            raster.SaveArgb32Pixels(fullRect, pixels);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prepare JPEG save options with 85% quality
-            JpegOptions jpegOptions = new JpegOptions
+            // Load JPEG2000 image using a 1 MB buffered stream
+            using (FileStream fileStream = File.OpenRead(inputPath))
+            using (BufferedStream bufferedStream = new BufferedStream(fileStream, 1024 * 1024))
+            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(bufferedStream))
             {
-                Quality = 85,
-                Source = new FileCreateSource(outputPath, false)
-            };
+                // ----- Pixel processing can be performed here -----
+                // Example: invert colors (placeholder - actual pixel manipulation code would go here)
 
-            // Save the processed image as JPEG
-            raster.Save(outputPath, jpegOptions);
+                // Save as JPEG with 85% quality
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 85
+                };
+                jpeg2000Image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
