@@ -10,33 +10,38 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = "Sample.eps";
-        string outputPath = "output/Sample.pdf";
+        string inputPath = "input.eps";
+        string outputPath = "output/output.pdf";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image
-        using (var image = (EpsImage)Image.Load(inputPath))
-        {
-            // Set PDF options with PDF/A‑1b compliance
-            var pdfOptions = new PdfOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as a PDF file
-            image.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image and convert to PDF/A-1b
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions
+                {
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b // Set PDF/A-1b compliance
+                    }
+                };
+
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
