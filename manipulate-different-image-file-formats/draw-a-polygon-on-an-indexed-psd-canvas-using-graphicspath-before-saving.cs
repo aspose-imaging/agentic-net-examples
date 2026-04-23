@@ -2,68 +2,82 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define output path
-        string outputPath = @"C:\Temp\output.psd";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure PSD options for indexed color mode
-        PsdOptions psdOptions = new PsdOptions();
-        psdOptions.Source = new FileCreateSource(outputPath, false);
-        psdOptions.ColorMode = ColorModes.Indexed;
-        psdOptions.CompressionMethod = CompressionMethod.RLE;
-        psdOptions.ChannelsCount = (short)1;          // Indexed uses a single channel
-        psdOptions.ChannelBitsCount = (short)8;      // 8 bits per palette entry
-        psdOptions.Version = 6;                      // PSD version
-
-        // Create a simple grayscale palette (256 colors)
-        Color[] paletteColors = new Color[256];
-        for (int i = 0; i < 256; i++)
+        try
         {
-            paletteColors[i] = Color.FromArgb(255, i, i, i);
-        }
-        psdOptions.Palette = new ColorPalette(paletteColors);
+            // Output PSD file path (hard‑coded)
+            string outputPath = @"C:\temp\output.psd";
 
-        // Create a blank PSD image (500x500)
-        using (Image image = Image.Create(psdOptions, 500, 500))
-        {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a GraphicsPath and a Figure
-            GraphicsPath path = new GraphicsPath();
-            Figure figure = new Figure();
-
-            // Define polygon points
-            PointF[] polygonPoints = new PointF[]
+            // Create a simple palette for the indexed image
+            Color[] paletteColors = new Color[]
             {
-                new PointF(100f, 100f),
-                new PointF(400f, 100f),
-                new PointF(250f, 400f)
+                Color.Black,
+                Color.White,
+                Color.Red,
+                Color.Green,
+                Color.Blue,
+                Color.Yellow,
+                Color.Cyan,
+                Color.Magenta
+            };
+            ColorPalette palette = new ColorPalette(paletteColors);
+
+            // Configure PSD options for an indexed canvas
+            PsdOptions psdOptions = new PsdOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                ColorMode = ColorModes.Indexed,
+                CompressionMethod = CompressionMethod.RLE,
+                ChannelBitsCount = (short)8,
+                ChannelsCount = (short)1,
+                Palette = palette,
+                Version = 6
             };
 
-            // Add a PolygonShape to the figure
-            figure.AddShape(new PolygonShape(polygonPoints));
+            // Create a 500x500 indexed PSD image
+            using (Image image = Image.Create(psdOptions, 500, 500))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(paletteColors[0]);
 
-            // Add the figure to the path
-            path.AddFigure(figure);
+                // Define polygon vertices
+                PointF[] polygonPoints = new PointF[]
+                {
+                    new PointF(100f, 100f),
+                    new PointF(400f, 100f),
+                    new PointF(250f, 400f)
+                };
 
-            // Draw the polygon with a blue pen
-            Pen pen = new Pen(Color.Blue, 2);
-            graphics.DrawPath(pen, path);
+                // Create a figure and add a closed polygon shape
+                Figure figure = new Figure();
+                figure.AddShape(new PolygonShape(polygonPoints, true));
 
-            // Save the PSD image (output is already bound to the file)
-            image.Save();
+                // Build a graphics path containing the figure
+                GraphicsPath path = new GraphicsPath();
+                path.AddFigure(figure);
+
+                // Draw the polygon outline
+                Pen pen = new Pen(Color.White, 2);
+                graphics.DrawPath(pen, path);
+
+                // Save the image (output file is already bound to the source)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
