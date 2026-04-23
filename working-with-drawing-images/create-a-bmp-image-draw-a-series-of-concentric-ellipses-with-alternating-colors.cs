@@ -6,12 +6,12 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define output path
+        // Output file path (hardcoded)
         string outputPath = @"c:\temp\concentric_ellipses.bmp";
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Set BMP options
@@ -19,43 +19,35 @@ class Program
         bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Canvas size
-        int width = 500;
-        int height = 500;
-
-        // Create image bound to the output file
-        using (Image image = Image.Create(bmpOptions, width, height))
+        // Create the image canvas
+        using (Image image = Image.Create(bmpOptions, 500, 500))
         {
-            // Initialize graphics
+            // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
-            graphics.Clear(Aspose.Imaging.Color.White);
+            graphics.Clear(Color.White);
 
             // Parameters for concentric ellipses
-            int ellipseCount = 10;
-            int marginStep = 20;
-            Aspose.Imaging.Color[] colors = new Aspose.Imaging.Color[]
+            int centerX = 250;
+            int centerY = 250;
+            int maxRadius = 200;
+            int step = 20;
+            bool useBlue = true;
+
+            // Draw ellipses with alternating colors
+            for (int radius = maxRadius; radius > 0; radius -= step)
             {
-                Aspose.Imaging.Color.Red,
-                Aspose.Imaging.Color.Blue
-            };
+                Color ellipseColor = useBlue ? Color.Blue : Color.Red;
+                Pen pen = new Pen(ellipseColor, 2);
 
-            // Draw ellipses from outermost to innermost
-            for (int i = 0; i < ellipseCount; i++)
-            {
-                int margin = i * marginStep;
-                int ellipseWidth = width - 2 * margin;
-                int ellipseHeight = height - 2 * margin;
-                int x = margin;
-                int y = margin;
+                int left = centerX - radius;
+                int top = centerY - radius;
+                int diameter = radius * 2;
 
-                // Alternate colors
-                Aspose.Imaging.Color penColor = colors[i % colors.Length];
-                Pen pen = new Pen(penColor, 2);
-
-                graphics.DrawEllipse(pen, x, y, ellipseWidth, ellipseHeight);
+                graphics.DrawEllipse(pen, left, top, diameter, diameter);
+                useBlue = !useBlue;
             }
 
-            // Save the image (already bound to the file)
+            // Save the image (output path already bound)
             image.Save();
         }
     }

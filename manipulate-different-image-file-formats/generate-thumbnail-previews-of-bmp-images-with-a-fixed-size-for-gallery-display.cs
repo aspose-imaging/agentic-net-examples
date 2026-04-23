@@ -7,37 +7,46 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.bmp";
-        string outputPath = @"C:\Images\thumbnails\thumb.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "thumbnails\\output_thumb.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for resizing
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
+                // Resize to fixed thumbnail size (150x150) using nearest neighbour resampling
+                int thumbWidth = 150;
+                int thumbHeight = 150;
+                raster.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
+
+                // Save the thumbnail as BMP using BmpOptions
+                BmpOptions saveOptions = new BmpOptions();
+                image.Save(outputPath, saveOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Desired thumbnail dimensions
-        const int thumbWidth = 150;
-        const int thumbHeight = 150;
-
-        // Load BMP image, resize, and save as thumbnail
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cache data for better performance
-            if (!raster.IsCached)
-                raster.CacheData();
-
-            // Resize to fixed thumbnail size (default nearest neighbour resample)
-            raster.Resize(thumbWidth, thumbHeight);
-
-            // Save using default BMP options
-            BmpOptions saveOptions = new BmpOptions();
-            raster.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

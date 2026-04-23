@@ -8,32 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\test.dng";
-        string outputPath = @"c:\temp\test_white.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\input.dng";
+            string outputPath = @"c:\temp\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                DngImage dngImage = (DngImage)image;
+
+                // Set background color to white
+                dngImage.HasBackgroundColor = true;
+                dngImage.BackgroundColor = Color.White;
+
+                // Save as PNG
+                dngImage.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to DngImage to access DNG-specific properties
-            DngImage dngImage = (DngImage)image;
-
-            // Set background color to white
-            dngImage.BackgroundColor = Aspose.Imaging.Color.White;
-            dngImage.HasBackgroundColor = true;
-
-            // Save as PNG
-            dngImage.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

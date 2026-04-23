@@ -6,34 +6,34 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Input and output paths
-        string inputPath = "Input\\sample.djvu";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\sample.pdf";
 
-        string outputPath = "Output\\output.pdf";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DjVu image
-        using (Aspose.Imaging.FileFormats.Djvu.DjvuImage djvuImage = (Aspose.Imaging.FileFormats.Djvu.DjvuImage)Image.Load(inputPath))
-        {
-            // Configure PDF options with author metadata
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                pdfOptions.PdfDocumentInfo.Author = "Custom Author";
-
-                // Export all pages
-                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-                // Save as PDF
-                djvuImage.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions
+                {
+                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Custom Author" }
+                };
+
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

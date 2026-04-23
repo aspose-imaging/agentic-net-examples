@@ -1,47 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDirectory = @"C:\temp\output";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.djvu";
+            string outputDir = "output";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the DjVu document from a file stream
-        using (Stream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            // Iterate through all pages
-            foreach (DjvuPage djvuPage in djvuImage.Pages)
+            if (!File.Exists(inputPath))
             {
-                // Process only even‑numbered pages
-                if (djvuPage.PageNumber % 2 != 0)
-                    continue;
-
-                // Build the output file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page.{djvuPage.PageNumber}.png");
-
-                // Ensure the directory for the output file exists (unconditional as required)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the page as PNG
-                djvuPage.Save(outputPath, new PngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                using (DjvuImage djvuImage = new DjvuImage(stream))
+                {
+                    int pageCount = djvuImage.PageCount;
+                    for (int i = 0; i < pageCount; i++)
+                    {
+                        // Process only even-numbered pages (1-based indexing)
+                        if ((i + 1) % 2 != 0)
+                            continue;
+
+                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Select the current page using IntRange
+                        IntRange range = new IntRange(i, i);
+                        DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(range);
+
+                        // Configure PNG save options with the page selection
+                        PngOptions pngOptions = new PngOptions();
+                        pngOptions.MultiPageOptions = multiPageOptions;
+
+                        // Save the selected page as PNG
+                        djvuImage.Save(outputPath, pngOptions);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

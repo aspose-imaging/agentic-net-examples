@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
 
@@ -9,62 +9,50 @@ class Program
     static void Main()
     {
         // Hardcoded input folder containing PNG files generated from CDR files
-        string inputFolder = @"C:\Images\FromCdr";
+        string inputFolder = @"C:\Images\CDR_PNGs";
         // Hardcoded output report file path
-        string outputReportPath = @"C:\Images\Report\AlphaChannelReport.csv";
+        string outputReport = @"C:\Images\AlphaReport.txt";
 
-        // Verify input folder exists
-        if (!Directory.Exists(inputFolder))
+        try
         {
-            Console.Error.WriteLine($"Folder not found: {inputFolder}");
-            return;
-        }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputReport));
 
-        // Ensure the output directory exists (creates it unconditionally)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputReportPath));
+            // Prepare a StringBuilder for the summary report
+            StringBuilder reportBuilder = new StringBuilder();
+            reportBuilder.AppendLine("FileName,HasAlpha");
 
-        // Collect report lines
-        List<string> reportLines = new List<string>();
-        reportLines.Add("FileName,HasAlpha"); // header
+            // Get all PNG files in the input folder
+            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png", SearchOption.TopDirectoryOnly);
 
-        // Process each PNG file in the input folder
-        foreach (string filePath in Directory.GetFiles(inputFolder, "*.png"))
-        {
-            // Verify the file exists before loading
-            if (!File.Exists(filePath))
+            foreach (string pngPath in pngFiles)
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                return;
-            }
-
-            try
-            {
-                using (Image image = Image.Load(filePath))
+                // Verify the input file exists
+                if (!File.Exists(pngPath))
                 {
-                    // Cast to PngImage to access HasAlpha property (fallback to RasterImage)
-                    bool hasAlpha = false;
-                    if (image is PngImage pngImage)
-                    {
-                        hasAlpha = pngImage.HasAlpha;
-                    }
-                    else if (image is RasterImage rasterImage)
-                    {
-                        hasAlpha = rasterImage.HasAlpha;
-                    }
+                    Console.Error.WriteLine($"File not found: {pngPath}");
+                    return;
+                }
 
-                    string fileName = Path.GetFileName(filePath);
-                    reportLines.Add($"{fileName},{hasAlpha}");
+                // Load the PNG image
+                using (Image image = Image.Load(pngPath))
+                {
+                    // Cast to PngImage to access HasAlpha property
+                    PngImage pngImage = (PngImage)image;
+                    bool hasAlpha = pngImage.HasAlpha;
+
+                    // Append result to the report
+                    string fileName = Path.GetFileName(pngPath);
+                    reportBuilder.AppendLine($"{fileName},{hasAlpha}");
                 }
             }
-            catch (Exception ex)
-            {
-                // Log loading errors but continue processing other files
-                Console.Error.WriteLine($"Error processing '{filePath}': {ex.Message}");
-            }
-        }
 
-        // Write the summary report
-        File.WriteAllLines(outputReportPath, reportLines);
-        Console.WriteLine($"Alpha channel verification completed. Report saved to: {outputReportPath}");
+            // Write the summary report to the output file
+            File.WriteAllText(outputReport, reportBuilder.ToString());
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

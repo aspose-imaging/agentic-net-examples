@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.svg";
-        string outputPath = @"C:\Images\sample_blurred.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,19 +21,54 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image, apply Gaussian blur, and save the result
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage to use the Filter method
-            RasterImage rasterImage = (RasterImage)image;
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Attempt to treat the loaded image as a raster image
+                RasterImage rasterImage = image as RasterImage;
 
-            // Apply Gaussian blur with kernel size 11 and sigma 4.5 to the whole image
-            rasterImage.Filter(
-                rasterImage.Bounds,
-                new GaussianBlurFilterOptions(11, 4.5));
+                // If the image is not already rasterized, rasterize it by saving to a temporary raster format
+                if (rasterImage == null)
+                {
+                    // Save the vector image to a temporary PNG to obtain a raster representation
+                    string tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+                    image.Save(tempPath);
+                    using (Image tempImage = Image.Load(tempPath))
+                    {
+                        rasterImage = tempImage as RasterImage;
+                        if (rasterImage == null)
+                        {
+                            Console.Error.WriteLine("Failed to rasterize the SVG image.");
+                            return;
+                        }
 
-            // Save the processed image
-            rasterImage.Save(outputPath);
+                        // Apply Gaussian blur filter
+                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(11, 4.5));
+
+                        // Save the processed image to the final output path
+                        rasterImage.Save(outputPath);
+                    }
+                    // Clean up temporary file
+                    if (File.Exists(tempPath))
+                    {
+                        File.Delete(tempPath);
+                    }
+                }
+                else
+                {
+                    // Apply Gaussian blur filter directly
+                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(11, 4.5));
+
+                    // Save the processed image
+                    rasterImage.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

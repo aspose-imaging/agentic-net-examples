@@ -2,51 +2,63 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input directory containing EMF files
-        string inputDir = "C:\\Images";
-
-        // Get all EMF files in the directory
-        string[] files = Directory.GetFiles(inputDir, "*.emf");
-
-        foreach (var inputPath in files)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded directory containing EMF files
+            string inputDirectory = @"C:\EmfImages";
+
+            // Get all EMF files in the directory
+            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (string inputPath in emfFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists (overwrites original)
-            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
-
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to EmfImage to access vector-specific methods
-                EmfImage emf = (EmfImage)image;
-
-                // Define integer crop bounds (e.g., trim 10 pixels from each side)
-                int cropX = 10;
-                int cropY = 10;
-                int cropWidth = emf.Width - 2 * cropX;
-                int cropHeight = emf.Height - 2 * cropY;
-
-                // Perform cropping only if resulting dimensions are valid
-                if (cropWidth > 0 && cropHeight > 0)
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Rectangle rect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
-                    emf.Crop(rect);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Overwrite the original file with the cropped image
-                emf.Save();
+                // Load the EMF image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to EmfImage to access cropping functionality
+                    EmfImage emfImage = image as EmfImage;
+                    if (emfImage == null)
+                    {
+                        Console.Error.WriteLine($"Unable to load EMF image: {inputPath}");
+                        continue;
+                    }
+
+                    // Define cropping rectangle (e.g., 10 pixels inset from each side)
+                    int left = 10;
+                    int top = 10;
+                    int width = Math.Max(0, emfImage.Width - left * 2);
+                    int height = Math.Max(0, emfImage.Height - top * 2);
+                    var cropRect = new Rectangle(left, top, width, height);
+
+                    // Perform the crop
+                    emfImage.Crop(cropRect);
+
+                    // Ensure the output directory exists (same as input directory)
+                    string outputDir = Path.GetDirectoryName(inputPath);
+                    Directory.CreateDirectory(outputDir);
+
+                    // Overwrite the original file with the cropped image
+                    emfImage.Save(inputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

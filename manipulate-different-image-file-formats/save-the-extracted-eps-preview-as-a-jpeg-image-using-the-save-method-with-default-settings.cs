@@ -7,35 +7,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/sample.eps";
-        string outputPath = "output/preview.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output file paths
+            string inputPath = "sample.eps";
+            string outputPath = "preview.jpg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            {
+                // Retrieve the raster preview image (default format)
+                var previewImage = epsImage.GetPreviewImage();
+
+                if (previewImage == null)
+                {
+                    Console.Error.WriteLine("No preview image found in the EPS file.");
+                    return;
+                }
+
+                // Save the preview image as JPEG using default settings
+                previewImage.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS image
-        using (var epsImage = (EpsImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Retrieve the preview image (default format)
-            var preview = epsImage.GetPreviewImage();
-
-            if (preview != null)
-            {
-                // Save preview as JPEG with default settings
-                preview.Save(outputPath);
-            }
-            else
-            {
-                Console.Error.WriteLine("No preview image found in the EPS file.");
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -6,13 +6,13 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\sample.jpg";
+        string inputPath = "input.wmf";
+        string outputPath = "output.jpg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,24 +22,23 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load WMF image
+        // Load WMF image and convert to progressive JPEG
         using (Image image = Image.Load(inputPath))
         {
-            // Set up rasterization options for WMF
-            var rasterOptions = new WmfRasterizationOptions
+            JpegOptions jpegOptions = new JpegOptions
             {
-                PageSize = image.Size
+                // Enable progressive encoding
+                CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
+                // Set desired quality (1-100)
+                Quality = 90,
+                // Rasterize vector WMF using appropriate options
+                VectorRasterizationOptions = new WmfRasterizationOptions
+                {
+                    PageSize = image.Size
+                }
             };
 
-            // Configure JPEG options with progressive compression
-            var jpegOptions = new JpegOptions
-            {
-                CompressionType = JpegCompressionMode.Progressive,
-                Quality = 100,
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save as progressive JPEG
+            // Save the image as JPEG with the specified options
             image.Save(outputPath, jpegOptions);
         }
     }

@@ -8,40 +8,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.emf";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        // Wrap the whole logic to catch unexpected exceptions
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\input.emf";
+            string outputPath = @"C:\temp\output.emf";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to EmfImage for EMF-specific operations
-            EmfImage emfImage = image as EmfImage;
-            if (emfImage == null)
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded file is not a valid EMF image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare EMF save options (default options are sufficient for this example)
-            EmfOptions saveOptions = new EmfOptions();
+            // Ensure the output directory exists (creates it if missing)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open a file stream for the output file
-            using (FileStream outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+            // Load the source image (EMF or any supported format)
+            using (Image image = Image.Load(inputPath))
             {
-                // Save the EMF image directly to the stream
-                emfImage.Save(outputStream, saveOptions);
+                // Prepare EMF save options (default settings)
+                EmfOptions emfOptions = new EmfOptions();
+
+                // Open a file stream for the output file
+                using (FileStream outStream = File.Open(outputPath, FileMode.Create))
+                {
+                    // Save the image directly to the stream using EMF options
+                    image.Save(outStream, emfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

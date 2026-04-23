@@ -8,7 +8,7 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.jpg";
         string outputPath = @"C:\Images\output.png";
 
@@ -22,21 +22,18 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure PNG export options for 24‑bit (Truecolor) lossless storage
-        var pngOptions = new PngOptions
-        {
-            // 8 bits per channel → 24‑bit total (no alpha)
-            BitDepth = 8,
-            ColorType = PngColorType.Truecolor,
-            // Optional: maximum compression while keeping it lossless
-            CompressionLevel = 9,
-            // Optional: enable progressive loading
-            Progressive = true
-        };
-
-        // Load the source image and save it as PNG with the specified options
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
+            // Configure PNG export options for 24‑bit truecolor (8 bits per channel)
+            var pngOptions = new PngOptions
+            {
+                BitDepth = 8, // 8 bits per channel
+                ColorType = PngColorType.Truecolor, // 24‑bit RGB
+                CompressionLevel = 9 // maximum compression (still lossless)
+            };
+
+            // Save the image as PNG with the specified options
             image.Save(outputPath, pngOptions);
         }
     }

@@ -1,76 +1,55 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputPngs";
-        string outputDirectory = @"C:\OutputPdfs";
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        // Hardcoded list of PNG files to convert
+        string[] inputPaths = new string[]
         {
-            Console.Error.WriteLine($"Input directory does not exist: {inputDirectory}");
-            return;
-        }
+            @"C:\Images\image1.png",
+            @"C:\Images\image2.png",
+            @"C:\Images\image3.png"
+        };
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
+        // Path for the aggregated PDF file
+        string aggregatedPdfPath = @"C:\Output\combined.pdf";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(aggregatedPdfPath));
+
+        // Shared memory stream that will hold all PDF data
+        using (MemoryStream sharedStream = new MemoryStream())
         {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files (will filter PNGs later)
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        // List to hold PDF byte arrays for later compression
-        List<byte[]> pdfByteList = new List<byte[]>();
-
-        foreach (string filePath in files)
-        {
-            // Process only PNG files
-            if (!filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            // Verify input file exists
-            if (!File.Exists(filePath))
+            foreach (string inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                return;
-            }
-
-            // Determine output PDF path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
-
-            // Ensure output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load PNG image
-            using (Image image = Image.Load(filePath))
-            {
-                // Prepare PDF options
-                using (PdfOptions pdfOptions = new PdfOptions())
+                // Verify the input PNG exists
+                if (!File.Exists(inputPath))
                 {
-                    // Save PDF to a shared MemoryStream (as byte array)
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        image.Save(ms, pdfOptions);
-                        pdfByteList.Add(ms.ToArray());
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Also save PDF to file
-                    image.Save(outputPath, pdfOptions);
+                // Load the PNG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Set up PDF export options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the image as PDF into the shared stream
+                    image.Save(sharedStream, pdfOptions);
                 }
             }
-        }
 
-        // At this point pdfByteList contains all PDFs in memory for further processing/compression
-        // Example placeholder for later compression logic:
-        // CompressPdfs(pdfByteList);
+            // Write the aggregated PDF data to the final file
+            sharedStream.Position = 0;
+            using (FileStream fileStream = new FileStream(aggregatedPdfPath, FileMode.Create, FileAccess.Write))
+            {
+                sharedStream.CopyTo(fileStream);
+            }
+        }
     }
 }

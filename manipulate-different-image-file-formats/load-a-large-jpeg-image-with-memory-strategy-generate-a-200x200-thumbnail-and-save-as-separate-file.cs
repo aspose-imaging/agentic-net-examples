@@ -6,30 +6,38 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = @"C:\Images\large.jpg";
-        string outputPath = @"C:\Images\thumbnail.jpg";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "largeImage.jpg";
+            string outputPath = "Output/thumbnail.jpg";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath, new LoadOptions { BufferSizeHint = 50 }))
-        {
-            image.Resize(200, 200, ResizeType.NearestNeighbourResample);
-
-            JpegOptions jpegOptions = new JpegOptions
+            if (!File.Exists(inputPath))
             {
-                Quality = 90,
-                Source = new FileCreateSource(outputPath, false)
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, jpegOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath, new LoadOptions { BufferSizeHint = 100 }))
+            {
+                if (!image.IsCached) image.CacheData();
+
+                image.Resize(200, 200, ResizeType.NearestNeighbourResample);
+
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = 90,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

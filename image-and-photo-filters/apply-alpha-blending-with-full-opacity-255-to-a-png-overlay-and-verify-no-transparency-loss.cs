@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -9,11 +10,11 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string backgroundPath = "input_background.png";
-        string overlayPath = "input_overlay.png";
+        string backgroundPath = "background.png";
+        string overlayPath = "overlay.png";
         string outputPath = "output.png";
 
-        // Verify input files exist
+        // Validate input files
         if (!File.Exists(backgroundPath))
         {
             Console.Error.WriteLine($"File not found: {backgroundPath}");
@@ -28,24 +29,44 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load background image
+        // Load background and overlay images
         using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
+        using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
         {
-            // Load overlay image
-            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
-            {
-                // Blend overlay onto background at (0,0) with full opacity (255)
-                background.Blend(new Point(0, 0), overlay, 255);
-            }
+            // Apply full opacity blending (255) at origin (0,0)
+            background.Blend(new Point(0, 0), overlay, 255);
 
-            // Prepare PNG save options with file source
-            PngOptions options = new PngOptions
+            // Save blended result as PNG
+            PngOptions pngOptions = new PngOptions
             {
                 Source = new FileCreateSource(outputPath, false)
             };
+            background.Save(outputPath, pngOptions);
+        }
 
-            // Save the blended image
-            background.Save(outputPath, options);
+        // Verify that the saved image retains full opacity (no transparency loss)
+        using (RasterImage result = (RasterImage)Image.Load(outputPath))
+        {
+            int[] pixels = result.LoadArgb32Pixels(result.Bounds);
+            bool transparencyLost = false;
+            foreach (int argb in pixels)
+            {
+                byte alpha = (byte)(argb >> 24);
+                if (alpha != 255)
+                {
+                    transparencyLost = true;
+                    break;
+                }
+            }
+
+            if (transparencyLost)
+            {
+                Console.Error.WriteLine("Transparency loss detected in the blended image.");
+            }
+            else
+            {
+                Console.WriteLine("Blending completed successfully with full opacity; no transparency loss.");
+            }
         }
     }
 }

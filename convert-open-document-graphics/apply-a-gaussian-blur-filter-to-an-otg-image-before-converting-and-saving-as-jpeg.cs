@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.jpg";
+        string outputPath = @"C:\Images\sample_blur.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,30 +25,35 @@ class Program
         // Load the OTG image
         using (Image otgImage = Image.Load(inputPath))
         {
-            // Rasterize the OTG image to a raster format (PNG) in memory
-            using (var memoryStream = new MemoryStream())
+            // Prepare rasterization options for converting OTG to a raster format (PNG)
+            var rasterizationOptions = new OtgRasterizationOptions
             {
-                var pngOptions = new PngOptions();
-                // Set rasterization options for OTG
-                var otgRasterization = new OtgRasterizationOptions
+                PageSize = otgImage.Size
+            };
+
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterizationOptions
+            };
+
+            // Rasterize OTG to a memory stream as PNG
+            using (var rasterStream = new MemoryStream())
+            {
+                otgImage.Save(rasterStream, pngOptions);
+                rasterStream.Position = 0; // Reset stream position for reading
+
+                // Load the rasterized image
+                using (Image rasterImage = Image.Load(rasterStream))
                 {
-                    PageSize = otgImage.Size // preserve original size
-                };
-                pngOptions.VectorRasterizationOptions = otgRasterization;
+                    // Cast to RasterImage to apply filters
+                    var raster = (RasterImage)rasterImage;
 
-                // Save rasterized image to memory stream
-                otgImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0; // reset stream position for reading
+                    // Apply Gaussian blur filter (size = 5, sigma = 4.0) to the whole image
+                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Load the rasterized image as RasterImage
-                using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
-                {
-                    // Apply Gaussian blur filter to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                    // Save the processed image as JPEG
+                    // Save the filtered image as JPEG
                     var jpegOptions = new JpegOptions();
-                    rasterImage.Save(outputPath, jpegOptions);
+                    raster.Save(outputPath, jpegOptions);
                 }
             }
         }

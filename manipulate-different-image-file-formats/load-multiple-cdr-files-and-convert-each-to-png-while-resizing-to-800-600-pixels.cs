@@ -8,41 +8,50 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input CDR files
-        string[] inputPaths = {
-            @"C:\Images\sample1.cdr",
-            @"C:\Images\sample2.cdr"
-        };
-
-        foreach (string inputPath in inputPaths)
+        try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputCdr";
+            string outputDir = @"C:\OutputPng";
+
+            // List of CDR files to process
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Path.Combine(inputDir, "file1.cdr"),
+                Path.Combine(inputDir, "file2.cdr")
+                // Add more file paths as needed
+            };
 
-            // Determine output PNG path (same folder, same name, .png extension)
-            string outputPath = Path.ChangeExtension(inputPath, ".png");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            foreach (var inputPath in inputFiles)
             {
-                // Process each page (CorelDRAW files can be multipage)
-                foreach (CdrImagePage page in cdrImage.Pages)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Resize page to 800x600 pixels
-                    page.Resize(800, 600);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Save the resized page as PNG
-                    PngOptions pngOptions = new PngOptions();
-                    page.Save(outputPath, pngOptions);
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                {
+                    // Resize to 800x600 pixels
+                    cdrImage.Resize(800, 600);
+
+                    // Prepare output file path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                    string outputPath = Path.Combine(outputDir, outputFileName);
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as PNG
+                    cdrImage.Save(outputPath, new PngOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,36 +8,53 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input TIFF file
-        string inputPath = "input.tif";
-
-        // Verify the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input TIFF file path
+            string inputPath = @"C:\Images\input.tif";
 
-        // Load the multi‑frame TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            // Directory where BMP frames will be saved
-            string outputDir = "output";
-            // Ensure the output directory exists (unconditional per requirements)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputDir));
-
-            // Export each frame to a separate BMP file
-            for (int i = 0; i < tiffImage.Frames.Length; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                var frame = tiffImage.Frames[i];
-                string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.bmp");
-
-                // Ensure the directory for this file exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the frame using BMP options
-                frame.Save(outputPath, new BmpOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to TiffImage to access frames
+                TiffImage tiffImage = image as TiffImage;
+                if (tiffImage == null)
+                {
+                    Console.Error.WriteLine("The loaded image is not a TIFF image.");
+                    return;
+                }
+
+                // Hardcoded output directory for BMP frames
+                string outputDir = @"C:\Images\Frames";
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(outputDir);
+
+                // Iterate through each frame and save as BMP
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                {
+                    // Build output file path for the current frame
+                    string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.bmp");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the frame using BMP options
+                    BmpOptions bmpOptions = new BmpOptions();
+                    tiffImage.Frames[i].Save(outputPath, bmpOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

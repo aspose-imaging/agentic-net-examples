@@ -7,63 +7,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input, output, and fonts folder paths
-        string inputPath = "C:\\Input\\sample.emf";
-        string outputPath = "C:\\Output\\sample.pdf";
-        string fontsFolder = "C:\\Fonts";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input EMF file, output PDF file and custom fonts folder
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample.pdf";
+            string fontsFolder = @"C:\CustomFonts";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure custom font source
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource(GetFontSource, fontsFolder);
-
-        // Load EMF image with custom fonts
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            // Set vector rasterization options for PDF conversion
-            var vectorOptions = new EmfRasterizationOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size,
-                BackgroundColor = Color.White,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            var pdfOptions = new PdfOptions
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Register the custom fonts folder so that missing fonts are resolved and embedded
+            FontSettings.SetFontsFolder(fontsFolder);
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = vectorOptions
-            };
+                // Prepare PDF save options (fonts will be embedded automatically if found)
+                var pdfOptions = new PdfOptions();
 
-            // Save as PDF with embedded fonts
-            image.Save(outputPath, pdfOptions);
-        }
-    }
-
-    // Custom font provider delegate
-    private static Aspose.Imaging.CustomFontHandler.CustomFontData[] GetFontSource(params object[] args)
-    {
-        string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-        var fonts = new System.Collections.Generic.List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-
-        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-        {
-            foreach (var file in Directory.GetFiles(fontsPath))
-            {
-                string fontName = Path.GetFileNameWithoutExtension(file);
-                byte[] fontData = File.ReadAllBytes(file);
-                fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontData));
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
-
-        return fonts.ToArray();
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

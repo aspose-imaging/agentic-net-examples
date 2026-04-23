@@ -3,61 +3,70 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Input\sample.wmf";
-        string outputPath = @"C:\Output\sample.png";
-        string fontFolderPath = @"C:\Fonts";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input, output and font folder paths
+            string inputPath = @"C:\input\sample.wmf";
+            string outputPath = @"C:\output\sample.png";
+            string fontFolderPath = @"C:\fonts";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource(GetFontSource, fontFolderPath);
-
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            var rasterOptions = new WmfRasterizationOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            var pngOptions = new PngOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set up custom font source using a lambda
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((args) =>
             {
-                VectorRasterizationOptions = rasterOptions
-            };
+                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+                {
+                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    {
+                        byte[] fontBytes = File.ReadAllBytes(fontFile);
+                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                        result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    }
+                }
+                return result.ToArray();
+            }, fontFolderPath);
 
-            image.Save(outputPath, pngOptions);
-        }
-    }
-
-    static Aspose.Imaging.CustomFontHandler.CustomFontData[] GetFontSource(params object[] args)
-    {
-        string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-        var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-
-        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-        {
-            foreach (var fontFile in Directory.GetFiles(fontsPath))
+            // Load WMF image with custom fonts
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
-                byte[] fontBytes = File.ReadAllBytes(fontFile);
-                string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                // Set up vector rasterization options for proper rendering
+                var vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
+
+                // Configure PNG save options
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = vectorOptions
+                };
+
+                // Save as PNG
+                image.Save(outputPath, pngOptions);
             }
         }
-
-        return result.ToArray();
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

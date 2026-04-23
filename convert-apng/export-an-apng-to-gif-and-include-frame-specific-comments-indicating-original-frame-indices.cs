@@ -1,17 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.apng";
-        string outputPath = "output.gif";
+        string inputPath = "Input\\animation.apng";
+        string outputPath = "Output\\animation.gif";
 
         if (!File.Exists(inputPath))
         {
@@ -21,20 +20,39 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        try
         {
-            // Add frame index as a text overlay on each frame before saving
-            apng.PageExportingAction = (pageIndex, pageImage) =>
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                Graphics graphics = new Graphics(pageImage);
-                Font font = new Font("Arial", 12);
-                SolidBrush brush = new SolidBrush(Color.Yellow);
-                graphics.DrawString($"Frame {pageIndex}", font, brush, new Point(5, 5));
-                // No disposal of Graphics, Font, or Brush as per rules
-            };
+                ushort width = (ushort)apng.Width;
+                ushort height = (ushort)apng.Height;
 
-            GifOptions gifOptions = new GifOptions();
-            apng.Save(outputPath, gifOptions);
+                using (GifFrameBlock firstBlock = new GifFrameBlock(width, height))
+                {
+                    Graphics graphics = new Graphics(firstBlock);
+                    using (RasterImage firstFrame = (RasterImage)apng.Pages[0])
+                    {
+                        graphics.DrawImage(firstFrame, new Point(0, 0));
+                    }
+
+                    using (GifImage gif = new GifImage(firstBlock))
+                    {
+                        for (int i = 1; i < apng.PageCount; i++)
+                        {
+                            using (RasterImage frame = (RasterImage)apng.Pages[i])
+                            {
+                                gif.AddPage(frame);
+                            }
+                        }
+
+                        gif.Save(outputPath);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

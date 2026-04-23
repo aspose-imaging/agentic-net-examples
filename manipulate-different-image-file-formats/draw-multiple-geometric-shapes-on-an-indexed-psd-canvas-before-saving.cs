@@ -3,64 +3,78 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path for the PSD file
-        string outputPath = @"C:\temp\output.psd";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create PSD options with a file create source
-        var psdOptions = new PsdOptions
+        try
         {
-            Source = new FileCreateSource(outputPath, false)
-        };
+            // Hardcoded paths
+            string outputPath = @"C:\temp\indexed_output.psd";
 
-        // Create a new PSD image with indexed color (8 bits per pixel)
-        using (Image image = Image.Create(psdOptions, 800, 600))
-        {
-            // Initialize graphics for drawing
-            var graphics = new Graphics(image);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Clear the canvas with a light gray background
-            graphics.Clear(Color.LightGray);
+            // Configure PSD options for an indexed image
+            PsdOptions psdOptions = new PsdOptions();
+            psdOptions.Source = new FileCreateSource(outputPath, false);
+            psdOptions.ColorMode = ColorModes.Indexed;
+            psdOptions.ChannelBitsCount = (short)8; // 8 bits per channel
+            psdOptions.ChannelsCount = (short)1;    // Indexed uses a single channel
+            psdOptions.CompressionMethod = CompressionMethod.RLE;
 
-            // Create a graphics path to hold multiple figures
-            var graphicsPath = new GraphicsPath();
-
-            // First figure: rectangle and ellipse
-            var figure1 = new Figure();
-            figure1.AddShape(new RectangleShape(new RectangleF(100f, 100f, 300f, 200f)));
-            figure1.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 150f)));
-
-            // Second figure: polygon (triangle) and a closed polyline
-            var figure2 = new Figure();
-            figure2.AddShape(new PolygonShape(new[]
+            // Assign a palette (required for indexed mode)
+            psdOptions.Palette = new ColorPalette(new Color[]
             {
-                new PointF(500f, 100f),
-                new PointF(650f, 250f),
-                new PointF(500f, 400f)
-            }, true));
+                Color.Red,
+                Color.Green,
+                Color.Blue,
+                Color.White,
+                Color.Black
+            });
 
-            // Add the figures to the path
-            graphicsPath.AddFigures(new[] { figure1, figure2 });
+            // Create the PSD image canvas
+            using (Image image = Image.Create(psdOptions, 500, 500))
+            {
+                // Create graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-            // Draw the combined path with a black pen
-            graphics.DrawPath(new Pen(Color.Black, 3), graphicsPath);
+                // Clear background
+                graphics.Clear(Color.Wheat);
 
-            // Optionally fill one of the shapes (the rectangle) with a semi‑transparent brush
-            var fillBrush = new SolidBrush(Color.FromArgb(128, Color.CornflowerBlue));
-            graphics.FillRectangle(fillBrush, new Rectangle(100, 100, 300, 200));
+                // Draw various shapes
+                graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 50, 200, 150));
+                graphics.DrawEllipse(new Pen(Color.Blue, 2), new Rectangle(300, 50, 150, 150));
+                graphics.DrawLine(new Pen(Color.Red, 2), new Point(50, 300), new Point(450, 300));
+                graphics.DrawPolygon(new Pen(Color.Green, 2), new[]
+                {
+                    new Point(100, 350),
+                    new Point(150, 400),
+                    new Point(200, 350),
+                    new Point(250, 400),
+                    new Point(300, 350)
+                });
+                graphics.DrawArc(new Pen(Color.Purple, 2), new Rectangle(350, 350, 100, 100), 0, 270);
+                graphics.DrawPie(new Pen(Color.Orange, 2), new Rectangle(50, 350, 100, 100), 45, 90);
+                graphics.DrawBezier(new Pen(Color.Brown, 2),
+                    new Point(200, 400), new Point(250, 350), new Point(300, 450), new Point(350, 400));
+                graphics.DrawCurve(new Pen(Color.Gray, 2), new[]
+                {
+                    new Point(400, 350),
+                    new Point(420, 380),
+                    new Point(440, 360),
+                    new Point(460, 390)
+                });
 
-            // Save the PSD image
-            image.Save();
+                // Save the PSD image (output path already bound)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

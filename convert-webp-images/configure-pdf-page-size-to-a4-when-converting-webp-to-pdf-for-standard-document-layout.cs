@@ -1,17 +1,15 @@
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "C:\\temp\\input.webp";
-        string outputPath = "C:\\temp\\output.pdf";
+        // Define relative input and output paths
+        string inputPath = "Input\\sample.webp";
+        string outputPath = "Output\\sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,16 +22,15 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the WebP image
-        using (WebPImage webPImage = new WebPImage(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options with A4 page size (595 x 842 points)
-            PdfOptions pdfOptions = new PdfOptions
+            // Configure PDF options with A4 page size (595x842 points at 72 DPI)
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                PageSize = new SizeF(595f, 842f)
-            };
-
-            // Save the image as PDF
-            webPImage.Save(outputPath, pdfOptions);
+                pdfOptions.PageSize = new SizeF(595f, 842f);
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

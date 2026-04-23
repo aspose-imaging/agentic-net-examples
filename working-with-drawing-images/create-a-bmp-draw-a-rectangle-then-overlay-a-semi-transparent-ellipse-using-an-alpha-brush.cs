@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
@@ -9,39 +10,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define output path (hardcoded)
+        // Output file path (hardcoded)
         string outputPath = @"c:\temp\output.bmp";
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create BMP options with 32 bits per pixel to support alpha
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 32;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
+        // Create a file source for the BMP image
+        Source source = new FileCreateSource(outputPath, false);
 
-        // Create a new BMP image with desired dimensions
+        // Set BMP options (24 bits per pixel)
+        BmpOptions bmpOptions = new BmpOptions()
+        {
+            Source = source,
+            BitsPerPixel = 24
+        };
+
+        // Create a BMP canvas of size 400x300
         using (Image image = Image.Create(bmpOptions, 400, 300))
         {
             // Initialize Graphics for drawing
             Graphics graphics = new Graphics(image);
 
-            // Clear background to white
+            // Optional: clear background to white
             graphics.Clear(Color.White);
 
-            // Draw a black rectangle
-            graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 50, 200, 150));
+            // Draw a blue rectangle
+            Pen rectPen = new Pen(Color.Blue, 3);
+            graphics.DrawRectangle(rectPen, new Rectangle(50, 50, 300, 200));
 
-            // Create a semi‑transparent red brush (opacity 0.5)
-            using (SolidBrush ellipseBrush = new SolidBrush(Color.Red))
+            // Overlay a semi‑transparent red ellipse
+            using (SolidBrush ellipseBrush = new SolidBrush(Color.Red) { Opacity = 0.5f })
             {
-                ellipseBrush.Opacity = 0.5f; // 0 = fully visible, 1 = fully opaque
-
-                // Fill an ellipse over the rectangle
-                graphics.FillEllipse(ellipseBrush, new Rectangle(100, 80, 200, 150));
+                graphics.FillEllipse(ellipseBrush, new Rectangle(150, 100, 200, 150));
             }
 
-            // Save the image (file is already bound via FileCreateSource)
+            // Save the bound image to the specified path
             image.Save();
         }
     }

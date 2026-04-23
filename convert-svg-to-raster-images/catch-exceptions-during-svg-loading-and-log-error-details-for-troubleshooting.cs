@@ -1,18 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.CoreExceptions.ImageFormats;
-using Aspose.Imaging.CoreExceptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string outputPath = "output\\result.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,41 +20,27 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load SVG image from file stream
-            using (Stream stream = File.OpenRead(inputPath))
-            using (SvgImage svgImage = new SvgImage(stream))
+            // Load SVG with load options
+            using (Image image = Image.Load(inputPath, new Aspose.Imaging.ImageLoadOptions.SvgLoadOptions()))
             {
-                // Set up rasterization options for SVG
-                var rasterizationOptions = new SvgRasterizationOptions();
-
-                // Configure PNG save options with rasterization
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save rasterized image to PNG
-                svgImage.Save(outputPath, pngOptions);
+                // Save as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
-        catch (SvgImageException ex)
+        catch (Aspose.Imaging.CoreExceptions.ImageFormats.SvgImageException ex)
         {
             // Log SVG-specific loading errors
-            Console.Error.WriteLine($"SVG load error: {ex.Message}");
-        }
-        catch (ImageLoadException ex)
-        {
-            // Log generic image loading errors
-            Console.Error.WriteLine($"Image load error: {ex.Message}");
+            Console.Error.WriteLine($"SVG loading error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            // Log any other unexpected errors
-            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+            // Log any other errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

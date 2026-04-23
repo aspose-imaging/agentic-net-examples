@@ -8,33 +8,32 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = Path.Combine("templates", "sample.svg");
-        string outputPath = Path.Combine("output", "sample.png");
+        string inputPath = "templates/sample.svg";
+        string outputPath = "output/sample.png";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
+        // Load the SVG image using Aspose.Imaging.Image.Load
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare rasterization options for PNG output
-            var rasterizationOptions = new SvgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
+            // Set up rasterization options for SVG to PNG conversion
+            var rasterizationOptions = new SvgRasterizationOptions();
+
+            // Configure PNG save options with the rasterization settings
             var pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the rasterized image
+            // Save the rasterized image to the output path
             image.Save(outputPath, pngOptions);
         }
     }

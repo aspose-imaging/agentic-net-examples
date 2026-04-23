@@ -8,7 +8,7 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\temp\sample.odg";
         string outputPath = @"C:\temp\sample.bmp";
 
@@ -25,21 +25,13 @@ class Program
         // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to the specific OdgImage type
-            OdgImage odgImage = (OdgImage)image;
-
-            // Prepare BMP save options with rasterization settings that preserve original size
-            var bmpOptions = new BmpOptions
+            // Prepare BMP save options with vector rasterization to keep original size
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Optional: set bits per pixel (24‑bpp is a common choice)
-                BitsPerPixel = 24,
-                // Configure vector rasterization to match the source dimensions
                 VectorRasterizationOptions = new OdgRasterizationOptions
                 {
-                    // Preserve original dimensions
-                    PageSize = odgImage.Size,
-                    // Set a background color if needed (white in this case)
-                    BackgroundColor = Color.White
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size // preserve original dimensions
                 }
             };
 

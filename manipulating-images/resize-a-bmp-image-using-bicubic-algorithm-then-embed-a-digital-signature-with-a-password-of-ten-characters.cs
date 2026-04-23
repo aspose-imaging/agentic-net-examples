@@ -1,43 +1,47 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                using (RasterImage raster = (RasterImage)image)
+                {
+                    if (!raster.IsCached)
+                        raster.CacheData();
+
+                    int newWidth = raster.Width / 2;
+                    int newHeight = raster.Height / 2;
+                    raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                    string password = "Passw0rd10";
+                    raster.EmbedDigitalSignature(password);
+
+                    raster.Save(outputPath, new BmpOptions());
+                }
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage for raster operations
-            var raster = (Aspose.Imaging.RasterImage)image;
-
-            // Cache data for performance
-            if (!raster.IsCached)
-                raster.CacheData();
-
-            // Resize using Bicubic (CubicConvolution) algorithm
-            raster.Resize(800, 600, Aspose.Imaging.ResizeType.CubicConvolution);
-
-            // Embed digital signature with a 10-character password
-            raster.EmbedDigitalSignature("Passw0rd12");
-
-            // Save the processed image as BMP
-            raster.Save(outputPath, new BmpOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

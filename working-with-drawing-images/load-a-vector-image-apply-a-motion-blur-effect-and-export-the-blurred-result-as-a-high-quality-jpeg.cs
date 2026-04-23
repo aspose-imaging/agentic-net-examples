@@ -1,17 +1,15 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input/input.svg";
-        string tempPath = "temp/temp.png";
-        string outputPath = "output/output.jpg";
+        string inputPath = "input.svg";
+        string outputPath = "output.jpg";
 
         if (!File.Exists(inputPath))
         {
@@ -19,33 +17,39 @@ class Program
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image vectorImage = Image.Load(inputPath))
+        using (Aspose.Imaging.Image vectorImage = Aspose.Imaging.Image.Load(inputPath))
         {
+            var rasterOptions = new SvgRasterizationOptions
+            {
+                PageWidth = vectorImage.Width,
+                PageHeight = vectorImage.Height,
+                BackgroundColor = Aspose.Imaging.Color.White
+            };
+
             var pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageWidth = vectorImage.Width,
-                    PageHeight = vectorImage.Height,
-                    BackgroundColor = Color.White
-                }
+                VectorRasterizationOptions = rasterOptions
             };
-            vectorImage.Save(tempPath, pngOptions);
-        }
 
-        using (Image rasterImage = Image.Load(tempPath))
-        {
-            var raster = (RasterImage)rasterImage;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
-
-            var jpegOptions = new JpegOptions
+            using (var rasterStream = new MemoryStream())
             {
-                Quality = 95
-            };
-            raster.Save(outputPath, jpegOptions);
+                vectorImage.Save(rasterStream, pngOptions);
+                rasterStream.Position = 0;
+
+                using (Aspose.Imaging.Image rasterImage = Aspose.Imaging.Image.Load(rasterStream))
+                {
+                    var raster = (Aspose.Imaging.RasterImage)rasterImage;
+
+                    var jpegOptions = new JpegOptions
+                    {
+                        Quality = 95
+                    };
+
+                    raster.Save(outputPath, jpegOptions);
+                }
+            }
         }
     }
 }

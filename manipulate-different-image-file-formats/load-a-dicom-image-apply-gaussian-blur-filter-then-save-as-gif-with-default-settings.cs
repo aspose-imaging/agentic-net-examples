@@ -1,40 +1,44 @@
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = "input.dcm";
         string outputPath = "output.gif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input DICOM file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage raster = (RasterImage)image;
+
+                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the processed image as a GIF (format inferred from extension)
+                raster.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the DICOM image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to DicomImage to access DICOM-specific methods
-            DicomImage dicomImage = (DicomImage)image;
-
-            // Apply Gaussian blur filter to the whole image
-            dicomImage.Filter(dicomImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            // Save the processed image as GIF with default options
-            dicomImage.Save(outputPath, new GifOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

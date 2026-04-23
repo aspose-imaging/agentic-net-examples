@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Data\map.pdf";
-        string outputPath = @"C:\Data\map.svg";
+        string inputPath = @"C:\Data\MapDocument.pdf";
+        string outputPath = @"C:\Data\MapDocument.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,20 +21,20 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PDF document
+        // Load the PDF document (vector image)
         using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options to match source size
+            // Prepare rasterization options – keep the original page size
             var rasterOptions = new SvgRasterizationOptions
             {
                 PageSize = image.Size
             };
 
-            // Configure SVG save options, preserving metadata (including geographic coordinates)
+            // Prepare SVG save options, preserving metadata (e.g., geographic coordinates)
             var svgOptions = new SvgOptions
             {
-                KeepMetadata = true,
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterOptions,
+                KeepMetadata = true
             };
 
             // Save as SVG

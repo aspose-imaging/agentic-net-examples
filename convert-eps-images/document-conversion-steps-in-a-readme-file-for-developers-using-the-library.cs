@@ -1,118 +1,57 @@
 using System;
 using System.IO;
+using System.Text;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define the output path for the README file (relative to the current directory)
-        string outputPath = Path.Combine("Output", "README.md");
+        // Hardcoded input, output, and README file paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.jpg";
+        string readmePath = @"C:\temp\README.md";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // README content describing common conversion steps with Aspose.Imaging
-        string readmeContent = @"# Aspose.Imaging Conversion Guide
-
-## Introduction
-This guide provides developers with step‑by‑step instructions for common image conversion tasks using the Aspose.Imaging library for .NET.
-
-## Prerequisites
-- Add a reference to the Aspose.Imaging NuGet package.
-- Include the required namespaces in your code (e.g., `using Aspose.Imaging;`, `using Aspose.Imaging.ImageOptions;`, `using Aspose.Imaging.Sources;`).
-
-## Basic Format Conversion
-```csharp
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-
-// Load the source image
-using (Image image = Image.Load(""Input/sample.jpg""))
-{
-    // Save to PNG format
-    image.Save(""Output/sample.png"", new PngOptions());
-}
-```
-
-## Converting to PDF
-```csharp
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-
-// Load the source image
-using (Image image = Image.Load(""Input/sample.png""))
-{
-    var pdfOptions = new PdfOptions
-    {
-        PdfDocumentInfo = new PdfDocumentInfo()
-    };
-    image.Save(""Output/sample.pdf"", pdfOptions);
-}
-```
-
-## Multi‑Page Vector to TIFF
-```csharp
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-
-// Load a multi‑page vector image (e.g., CDR)
-using (Image image = Image.Load(""Input/multipage.cdr""))
-{
-    var exportOptions = new TiffOptions(TiffExpectedFormat.Default)
-    {
-        MultiPageOptions = new MultiPageOptions(new IntRange(0, 2)) // Export first two pages
-    };
-
-    if (image is VectorImage)
-    {
-        exportOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            BackgroundColor = Color.White,
-            PageWidth = image.Width,
-            PageHeight = image.Height,
-            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-            SmoothingMode = SmoothingMode.None
-        };
-    }
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-    image.Save(""Output/multipage.tif"", exportOptions);
-}
-```
+        // Ensure the directories for output and README exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(readmePath));
 
-## Creating an Image from Scratch
-```csharp
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+        // Load the source image using Aspose.Imaging
+        using (Image image = Image.Load(inputPath))
+        {
+            // Prepare JPEG options for the target format
+            var jpegOptions = new JpegOptions();
 
-// Define image size
-int width = 800;
-int height = 600;
+            // Save the image to the output path with the specified options
+            image.Save(outputPath, jpegOptions);
+        }
 
-// Create a blank PNG image
-var pngOptions = new PngOptions
-{
-    Source = new FileCreateSource(Path.Combine(""Output"", ""blank.png""), false)
-};
+        // Build the README content that documents the conversion steps
+        var sb = new StringBuilder();
+        sb.AppendLine("# Image Conversion Guide");
+        sb.AppendLine();
+        sb.AppendLine("This guide demonstrates how to use Aspose.Imaging to convert an image from PNG to JPEG.");
+        sb.AppendLine();
+        sb.AppendLine("## Steps");
+        sb.AppendLine("1. **Load the source image** using `Image.Load`.");
+        sb.AppendLine("2. **Create the appropriate options** for the target format (e.g., `JpegOptions`).");
+        sb.AppendLine("3. **Save the image** to the desired output path with `image.Save(outputPath, options)`. ");
+        sb.AppendLine("4. Ensure the output directory exists before saving.");
+        sb.AppendLine();
+        sb.AppendLine($"**Input file:** `{inputPath}`");
+        sb.AppendLine($"**Output file:** `{outputPath}`");
 
-using (Image canvas = Image.Create(pngOptions, width, height))
-{
-    // Perform drawing operations here (e.g., using Graphics)
-    canvas.Save(); // Saves to the path defined in FileCreateSource
-}
-```
+        // Write the README file to disk
+        File.WriteAllText(readmePath, sb.ToString());
 
-## Notes
-- Always wrap `Image` objects in `using` blocks to ensure proper disposal.
-- When saving to a file, use the appropriate `*Options` class from `Aspose.Imaging.ImageOptions`.
-- For vector rasterization, construct `VectorRasterizationOptions` directly; do **not** cast the result of `GetDefaultOptions`.
-- Use `Directory.CreateDirectory` before writing any output file to avoid `DirectoryNotFoundException`.
-
----";
-
-        // Write the README content to the output file
-        File.WriteAllText(outputPath, readmeContent);
+        Console.WriteLine("Conversion completed and README generated.");
     }
 }

@@ -3,41 +3,35 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.cmx";
-        string outputPath = "output.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.cmx";
+        string outputPath = @"C:\temp\output.tif";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        byte[] cmxData = File.ReadAllBytes(inputPath);
-        using (var memoryStream = new MemoryStream(cmxData))
-        using (CmxImage cmxImage = (CmxImage)Image.Load(memoryStream))
+        // Load CMX image from memory stream
+        byte[] cmxBytes = File.ReadAllBytes(inputPath);
+        using (var cmxStream = new MemoryStream(cmxBytes))
+        using (Image cmxImage = Image.Load(cmxStream))
         {
-            using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-            {
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = cmxImage.Width,
-                    PageHeight = cmxImage.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-                tiffOptions.VectorRasterizationOptions = vectorOptions;
+            // Prepare TIFF save options
+            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                cmxImage.Save(outputPath, tiffOptions);
-            }
+            // Save the image as TIFF directly to the output path
+            cmxImage.Save(outputPath, tiffOptions);
         }
     }
 }

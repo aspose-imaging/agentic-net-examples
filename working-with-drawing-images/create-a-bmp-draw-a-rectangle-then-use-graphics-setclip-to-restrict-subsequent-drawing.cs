@@ -3,35 +3,45 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main()
     {
+        // Define output BMP path
         string outputPath = @"c:\temp\output.bmp";
+
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Configure BMP options with file source
         BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
+        bmpOptions.BitsPerPixel = 24;
 
-        using (Image canvas = Image.Create(bmpOptions, 500, 500))
+        // Create a 400x300 BMP image bound to the file source
+        using (Image image = Image.Create(bmpOptions, 400, 300))
         {
-            Graphics graphics = new Graphics(canvas);
+            // Initialize graphics for drawing
+            Graphics graphics = new Graphics(image);
+
+            // Clear background to white
             graphics.Clear(Color.White);
 
-            Pen rectPen = new Pen(Color.Blue, 5);
-            graphics.DrawRectangle(rectPen, new Rectangle(50, 50, 200, 150));
+            // Draw a red rectangle covering the whole canvas
+            Pen redPen = new Pen(Color.Red, 5);
+            graphics.DrawRectangle(redPen, new Rectangle(0, 0, image.Width, image.Height));
 
-            graphics.Clip = new Region(new Rectangle(60, 60, 180, 130));
+            // Set clipping region to a smaller rectangle (100,50,200,150)
+            // Subsequent drawing will be limited to this area
+            graphics.Clip = new Region(new Rectangle(100, 50, 200, 150));
 
-            using (SolidBrush redBrush = new SolidBrush(Color.Red))
-            {
-                graphics.FillRectangle(redBrush, new Rectangle(0, 0, 500, 500));
-            }
+            // Draw a blue rectangle that will be clipped by the region
+            Pen bluePen = new Pen(Color.Blue, 5);
+            graphics.DrawRectangle(bluePen, new Rectangle(50, 30, 300, 200));
 
-            canvas.Save();
+            // Save the bound image (file is already associated with the source)
+            image.Save();
         }
     }
 }

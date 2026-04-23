@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"input.otg";
-        string outputPath = @"output\result.png";
+        string inputPath = @"C:\Temp\sample.otg";
+        string outputPath = @"C:\Temp\sample.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -33,7 +33,7 @@ class Program
                 PngOptions pngOptions = new PngOptions();
                 OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size // preserve original size
+                    PageSize = image.Size
                 };
                 pngOptions.VectorRasterizationOptions = otgRasterization;
 

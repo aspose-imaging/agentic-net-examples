@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Xml;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
@@ -10,10 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.svg";
+        string inputPath = Path.Combine("Input", "sample.bmp");
+        string outputPath = Path.Combine("Output", "output.svg");
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,50 +25,21 @@ class Program
         // Load the BMP image
         using (Image bmpImage = Image.Load(inputPath))
         {
-            // Cast to RasterImage for drawing
-            var raster = bmpImage as RasterImage;
-            if (raster == null)
-            {
-                Console.Error.WriteLine("Failed to load raster image.");
-                return;
-            }
+            // Create an SVG canvas with custom size (viewbox)
+            int svgWidth = 500;   // custom width
+            int svgHeight = 500;  // custom height
+            int dpi = 96;
 
-            // Create an SVG graphics context with the same dimensions as the BMP
-            int width = raster.Width;
-            int height = raster.Height;
-            int dpi = 96; // standard screen DPI
-
-            var graphics = new SvgGraphics2D(width, height, dpi);
+            SvgGraphics2D graphics = new SvgGraphics2D(svgWidth, svgHeight, dpi);
 
             // Draw the BMP onto the SVG canvas
-            graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
+            graphics.DrawImage((RasterImage)bmpImage, new Point(0, 0), new Size(svgWidth, svgHeight));
 
-            // Finalize SVG recording and obtain the SvgImage instance
+            // Finalize SVG image
             using (SvgImage svgImage = graphics.EndRecording())
             {
-                // Save the SVG to a memory stream first
-                using (var memoryStream = new MemoryStream())
-                {
-                    svgImage.Save(memoryStream);
-                    memoryStream.Position = 0;
-
-                    // Load the SVG XML for manipulation
-                    var xmlDoc = new XmlDocument();
-                    xmlDoc.Load(memoryStream);
-
-                    // Set a custom viewBox attribute (example values)
-                    XmlElement root = xmlDoc.DocumentElement;
-                    if (root != null)
-                    {
-                        root.SetAttribute("viewBox", "0 0 200 200");
-                    }
-
-                    // Write the modified SVG XML to the output file
-                    using (var fileStream = File.Create(outputPath))
-                    {
-                        xmlDoc.Save(fileStream);
-                    }
-                }
+                // Save the SVG file
+                svgImage.Save(outputPath);
             }
         }
     }

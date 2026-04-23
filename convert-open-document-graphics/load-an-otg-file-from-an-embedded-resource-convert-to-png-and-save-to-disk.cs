@@ -3,21 +3,22 @@ using System.IO;
 using System.Reflection;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = "ConvertedImage.png";
+        // Output file path (hard‑coded literal)
+        string outputPath = Path.Combine("Output", "sample.png");
 
-        // Embedded resource name (adjust namespace and file name as needed)
-        const string resourceName = "MyApp.Resources.Sample.otg";
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load OTG image from embedded resource
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
+        // Load the OTG file from an embedded resource
+        // Adjust the resource name to match the actual embedded file
+        string resourceName = "MyNamespace.Resources.sample.otg";
+        using (Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
         {
             if (resourceStream == null)
             {
@@ -25,22 +26,22 @@ class Program
                 return;
             }
 
-            // Load the OTG image from the stream
-            using (Image otgImage = Image.Load(resourceStream))
+            // Load the image from the stream
+            using (Image image = Image.Load(resourceStream))
             {
-                // Configure PNG save options with OTG rasterization
-                var pngOptions = new PngOptions();
-                var otgRasterization = new OtgRasterizationOptions
+                // Prepare PNG save options
+                using (PngOptions pngOptions = new PngOptions())
                 {
-                    PageSize = otgImage.Size // Preserve original size
-                };
-                pngOptions.VectorRasterizationOptions = otgRasterization;
+                    // Configure vector rasterization for OTG conversion
+                    OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                    {
+                        PageSize = image.Size // Preserve original size
+                    };
+                    pngOptions.VectorRasterizationOptions = otgOptions;
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the image as PNG
-                otgImage.Save(outputPath, pngOptions);
+                    // Save the converted PNG image
+                    image.Save(outputPath, pngOptions);
+                }
             }
         }
     }

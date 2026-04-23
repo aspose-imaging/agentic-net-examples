@@ -1,55 +1,65 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
-        {
-            var rasterOptions = new SvgRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                PageSize = svgImage.Size
-            };
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            using (var memoryStream = new MemoryStream())
-            {
-                svgImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Aspose.Imaging.Image rasterImageContainer = Aspose.Imaging.Image.Load(memoryStream))
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    var rasterImage = (Aspose.Imaging.RasterImage)rasterImageContainer;
+                    PageSize = svgImage.Size
+                };
 
-                    double[,] sobelKernel = new double[,]
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    using (Image rasterImg = Image.Load(memoryStream))
                     {
-                        { -1, 0, 1 },
-                        { -2, 0, 2 },
-                        { -1, 0, 1 }
-                    };
+                        var raster = (RasterImage)rasterImg;
 
-                    var convolutionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(sobelKernel);
-                    rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
+                        double[,] sobelVertical = new double[,]
+                        {
+                            { -1, 0, 1 },
+                            { -2, 0, 2 },
+                            { -1, 0, 1 }
+                        };
 
-                    rasterImage.Save(outputPath, new PngOptions());
+                        var convOptions = new ConvolutionFilterOptions(sobelVertical);
+                        raster.Filter(raster.Bounds, convOptions);
+                        raster.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

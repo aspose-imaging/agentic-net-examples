@@ -10,56 +10,52 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output_animation.png";
+        string outputPath = "output.apng";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the source PNG image
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Animation parameters
-            const int animationDuration = 1000; // total duration in ms
-            const int frameDuration = 200;      // each frame duration in ms
-
-            // Create APNG options with custom frame delay
-            ApngOptions createOptions = new ApngOptions
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = (uint)frameDuration,
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            // Create the APNG canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(
-                createOptions,
-                sourceImage.Width,
-                sourceImage.Height))
-            {
-                int numOfFrames = animationDuration / frameDuration;
-                if (numOfFrames < 1) numOfFrames = 1;
-
-                // Remove the default frame
-                apngImage.RemoveAllFrames();
-
-                // Add frames with the specified delay
-                for (int i = 0; i < numOfFrames; i++)
-                {
-                    apngImage.AddFrame(sourceImage, (uint)frameDuration);
-                }
-
-                // Save the animated APNG (output is already bound via FileCreateSource)
-                apngImage.Save();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            {
+                ApngOptions createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100,
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    NumPlays = 0
+                };
+
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    createOptions,
+                    sourceImage.Width,
+                    sourceImage.Height))
+                {
+                    apngImage.RemoveAllFrames();
+
+                    int[] frameDelays = new int[] { 100, 200, 300, 200, 100 };
+
+                    foreach (int delay in frameDelays)
+                    {
+                        apngImage.AddFrame(sourceImage);
+                        ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        frame.FrameTime = delay;
+                    }
+
+                    apngImage.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

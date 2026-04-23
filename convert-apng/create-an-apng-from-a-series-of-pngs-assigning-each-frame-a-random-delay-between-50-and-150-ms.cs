@@ -10,63 +10,65 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input PNG file paths
-        string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
-        // Hardcoded output APNG file path
-        string outputPath = "output_animation.apng";
-
-        // Verify each input file exists
-        foreach (var path in inputPaths)
+        try
         {
-            if (!File.Exists(path))
+            // Hardcoded input PNG file paths
+            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
+
+            // Verify each input file exists
+            foreach (var path in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
+            }
+
+            // Hardcoded output APNG path
+            string outputPath = "output\\animation.apng";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load first frame to obtain dimensions
+            using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
+            {
+                int width = first.Width;
+                int height = first.Height;
+
+                // Set up APNG creation options
+                ApngOptions createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                // Create APNG image bound to the output file
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+                {
+                    apngImage.RemoveAllFrames();
+
+                    Random rnd = new Random();
+
+                    // Add each frame with a random delay between 50 and 150 ms
+                    foreach (var path in inputPaths)
+                    {
+                        using (RasterImage frame = (RasterImage)Image.Load(path))
+                        {
+                            uint delay = (uint)rnd.Next(50, 151); // Upper bound is exclusive
+                            apngImage.AddFrame(frame, delay);
+                        }
+                    }
+
+                    // Save the APNG (output file already bound via FileCreateSource)
+                    apngImage.Save();
+                }
             }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Random generator for frame delays (50‑150 ms)
-        Random rnd = new Random();
-
-        // Load the first image to obtain canvas size
-        using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+        catch (Exception ex)
         {
-            int width = firstImage.Width;
-            int height = firstImage.Height;
-
-            // Set up APNG creation options
-            ApngOptions createOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            // Create the APNG canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
-            {
-                // Remove the default frame
-                apngImage.RemoveAllFrames();
-
-                // Add the first frame with a random delay
-                int delay = rnd.Next(50, 151); // Upper bound exclusive
-                apngImage.AddFrame(firstImage, (uint)delay);
-
-                // Add remaining frames
-                for (int i = 1; i < inputPaths.Length; i++)
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
-                    {
-                        int frameDelay = rnd.Next(50, 151);
-                        apngImage.AddFrame(img, (uint)frameDelay);
-                    }
-                }
-
-                // Save the APNG file
-                apngImage.Save();
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

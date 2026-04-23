@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.psd";
+        string inputPath = "input.png";
+        string outputPath = "output.psd";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,35 +19,38 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage to work with pixel data
-            RasterImage raster = (RasterImage)image;
-
-            // Create a palette with the 64 most frequent colors from the source image
-            IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 64);
-
-            // Configure PSD save options
-            PsdOptions psdOptions = new PsdOptions
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Standard 8 bits per channel
-                ChannelBitsCount = 8,
-                // RGB channels
-                ChannelsCount = 3,
-                // Use RGB color mode
-                ColorMode = ColorModes.Rgb,
-                // No compression (RAW)
-                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
-                // Assign the generated palette
-                Palette = palette
-            };
+                // Cast to RasterImage to access pixel data
+                RasterImage raster = (RasterImage)image;
 
-            // Save the image as an indexed PSD
-            image.Save(outputPath, psdOptions);
+                // Generate a 64‑color palette from the source image
+                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 64);
+
+                // Configure PSD save options
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    // Assign the generated palette
+                    Palette = palette,
+                    // Use 8 bits per channel (standard for PSD)
+                    ChannelBitsCount = 8,
+                    // Set color mode; palette will be applied to indexed data
+                    ColorMode = ColorModes.Rgb
+                };
+
+                // Save the image as an indexed PSD
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

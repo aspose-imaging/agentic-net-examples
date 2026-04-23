@@ -7,25 +7,32 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input/sample.dcm";
-        string outputPath = "Output/output.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.dcm";
+            string outputPath = "Output\\output.tif";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            {
+                dicomImage.BinarizeOtsu();
+
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                dicomImage.Save(outputPath, tiffOptions);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+        catch (Exception ex)
         {
-            DicomImage dicomImage = (DicomImage)image;
-            dicomImage.BinarizeOtsu();
-            dicomImage.Save(outputPath, tiffOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,78 +1,83 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Base directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input and output directories exist
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Process only EMF or WMF files
-            string extension = Path.GetExtension(inputPath).ToLowerInvariant();
-            if (extension != ".emf" && extension != ".wmf")
+            string[] files = Directory.GetFiles(inputDir);
+            foreach (string filePath in files)
             {
-                continue;
-            }
-
-            // Determine output path
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the vector image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Prepare PNG options with vector rasterization settings
-                using (PngOptions pngOptions = new PngOptions())
+                string extension = Path.GetExtension(filePath);
+                if (!extension.Equals(".emf", StringComparison.OrdinalIgnoreCase) &&
+                    !extension.Equals(".wmf", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Uniform DPI (e.g., 300x300)
-                    pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                    continue;
+                }
 
-                    // Configure vector rasterization
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
+
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filePath) + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(filePath))
+                {
+                    VectorRasterizationOptions vectorOptions;
+
+                    if (image is EmfImage)
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    };
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
+                        var emfOptions = new EmfRasterizationOptions
+                        {
+                            PageSize = image.Size,
+                            BackgroundColor = Aspose.Imaging.Color.White
+                        };
+                        vectorOptions = emfOptions;
+                    }
+                    else if (image is WmfImage)
+                    {
+                        var wmfOptions = new WmfRasterizationOptions
+                        {
+                            PageSize = image.Size,
+                            BackgroundColor = Aspose.Imaging.Color.White
+                        };
+                        vectorOptions = wmfOptions;
+                    }
+                    else
+                    {
+                        continue;
+                    }
 
-                    // Save as PNG
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = vectorOptions
+                    };
+
                     image.Save(outputPath, pngOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,27 +1,42 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main()
     {
-        string outputPath = "output\\output.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\sample.subpixel.bmp";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        BmpOptions bmpOptions = new BmpOptions
+        // Load the BMP image
+        using (BmpImage bmp = new BmpImage(inputPath))
         {
-            BitsPerPixel = 24
-        };
+            // Create a Graphics object for drawing
+            Graphics graphics = new Graphics(bmp);
 
-        using (Image image = Image.Create(bmpOptions, 200, 200))
-        {
-            Graphics graphics = new Graphics(image);
+            // Define a pen (blue, 1 pixel wide)
             Pen pen = new Pen(Color.Blue, 1);
-            graphics.DrawLine(pen, 10.5f, 20.5f, 180.3f, 150.7f);
-            image.Save(outputPath, bmpOptions);
+
+            // Draw a line with sub‑pixel (floating‑point) coordinates
+            // Example: from (20.3, 30.7) to (200.8, 150.2)
+            graphics.DrawLine(pen, 20.3f, 30.7f, 200.8f, 150.2f);
+
+            // Save the modified image
+            bmp.Save(outputPath);
         }
     }
 }

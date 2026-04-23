@@ -11,10 +11,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.djvu";
-        string outputPath = @"c:\temp\odd_pages.tif";
+        string inputPath = "sample.djvu";
+        string outputPath = "odd_pages_output.tif";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,32 +24,37 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DjVu document from a file stream
-        using (Stream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
+        try
         {
-            // Determine odd‑numbered pages (page numbers start at 1, so indexes 0,2,4,...)
-            int pageCount = djvuImage.PageCount;
-            List<int> oddPageIndexes = new List<int>();
-            for (int i = 0; i < pageCount; i++)
+            // Load the DjVu document from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                if (i % 2 == 0) // even index => odd page number
+                // Determine indices of odd‑numbered pages (1‑based odd => 0‑based even)
+                List<int> oddPageIndices = new List<int>();
+                for (int i = 0; i < djvuImage.PageCount; i++)
                 {
-                    oddPageIndexes.Add(i);
+                    if (i % 2 == 0) // page numbers 1,3,5,... correspond to indices 0,2,4,...
+                    {
+                        oddPageIndices.Add(i);
+                    }
                 }
+
+                // Configure TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Deflate;
+                tiffOptions.BitsPerSample = new ushort[] { 1 };
+
+                // Specify the pages to export using DjvuMultiPageOptions
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(oddPageIndices.ToArray());
+
+                // Save selected pages as a multi‑page TIFF
+                djvuImage.Save(outputPath, tiffOptions);
             }
-
-            // Configure TIFF save options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Compression = TiffCompressions.Deflate;
-            // Example: set 1‑bit per sample for B/W output (optional)
-            tiffOptions.BitsPerSample = new ushort[] { 1 };
-
-            // Specify the pages to export using DjvuMultiPageOptions
-            tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(oddPageIndexes.ToArray());
-
-            // Save selected pages to a multi‑page TIFF file
-            djvuImage.Save(outputPath, tiffOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -10,8 +10,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Input\LargeFile.eps";
-        string outputPath = @"C:\Output\LargeFile.pdf";
+        string inputPath = @"C:\Temp\LargeInput.eps";
+        string outputPath = @"C:\Temp\Converted\LargeOutput.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,10 +20,10 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image with a buffer size hint to limit memory usage (acts like tiling)
+        // Load EPS with a buffer size hint to limit memory usage (tiling-like behavior)
         var loadOptions = new EpsLoadOptions
         {
             BufferSizeHint = 10 * 1024 * 1024 // 10 MB buffer hint
@@ -31,25 +31,23 @@ class Program
 
         using (var epsImage = (EpsImage)Image.Load(inputPath, loadOptions))
         {
-            // Configure rasterization options; setting a modest page size helps keep memory low
-            var rasterOptions = new EpsRasterizationOptions
-            {
-                PageWidth = 1024,   // tile width in pixels
-                PageHeight = 1024,  // tile height in pixels
-                BackgroundColor = Color.White
-            };
-
-            // Set up PDF options with the rasterization settings
+            // Configure PDF options
             var pdfOptions = new PdfOptions
             {
-                VectorRasterizationOptions = rasterOptions,
                 PdfCoreOptions = new PdfCoreOptions
                 {
                     PdfCompliance = PdfComplianceVersion.PdfA1b
+                },
+                // Optional: set rasterization options if you want to control page size
+                VectorRasterizationOptions = new EpsRasterizationOptions
+                {
+                    PageWidth = epsImage.Width,   // preserve original width
+                    PageHeight = epsImage.Height, // preserve original height
+                    BackgroundColor = Color.White
                 }
             };
 
-            // Save the EPS as PDF using the configured options
+            // Save the EPS as PDF
             epsImage.Save(outputPath, pdfOptions);
         }
     }

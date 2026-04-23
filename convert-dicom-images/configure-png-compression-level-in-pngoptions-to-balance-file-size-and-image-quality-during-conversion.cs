@@ -2,44 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\source.jpg";
-        string outputPath = @"C:\Images\converted.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPath = @"C:\Images\Converted\sample.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PNG save options with a balanced compression level (e.g., 6)
-            var pngOptions = new PngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Progressive PNG loading (optional)
-                Progressive = true,
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Use truecolor with alpha for full colour fidelity
-                ColorType = PngColorType.TruecolorWithAlpha,
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set compression level: 0 (none) – 9 (max). 6 offers a good trade‑off.
-                CompressionLevel = 6
-            };
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PNG options with a balanced compression level (0-9)
+                var pngOptions = new PngOptions
+                {
+                    // CompressionLevel 6 provides a good trade‑off between size and speed
+                    CompressionLevel = 6,
+                    // Optional: keep progressive loading enabled
+                    Progressive = true
+                };
 
-            // Save the image as PNG using the configured options
-            image.Save(outputPath, pngOptions);
+                // Save the image as PNG using the configured options
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

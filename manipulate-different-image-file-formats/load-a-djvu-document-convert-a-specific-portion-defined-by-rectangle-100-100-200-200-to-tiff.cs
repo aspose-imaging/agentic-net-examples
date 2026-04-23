@@ -3,29 +3,49 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.djvu";
-        string outputPath = "output.tiff";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Define input and output paths
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/portion.tiff";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            {
+                // Define export rectangle (x, y, width, height)
+                Rectangle exportArea = new Rectangle(100, 100, 200, 200);
+
+                // Configure TIFF save options
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    // Export only the first page (index 0) with the specified area
+                    tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(0, exportArea);
+
+                    // Save the selected portion as TIFF
+                    djvuImage.Save(outputPath, tiffOptions);
+                }
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            var exportArea = new Rectangle(100, 100, 200, 200);
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(0, exportArea);
-            djvuImage.Save(outputPath, tiffOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

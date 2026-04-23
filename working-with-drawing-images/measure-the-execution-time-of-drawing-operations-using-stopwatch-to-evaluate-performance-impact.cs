@@ -1,57 +1,65 @@
 using System;
 using System.IO;
-using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
+        // Define output path (hard‑coded)
         string outputPath = @"C:\temp\output.png";
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up PNG options with a file create source
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        // Create a file stream for the output image
+        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.Wheat);
+            // Set PNG options with the stream as source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new StreamSource(stream);
 
-            // Measure drawing performance
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
-            // Draw a line
-            graphics.DrawLine(new Pen(Color.Black, 2), new Point(50, 50), new Point(450, 450));
-
-            // Draw a rectangle
-            graphics.DrawRectangle(new Pen(Color.Red, 3), new Rectangle(100, 100, 300, 200));
-
-            // Draw an ellipse
-            graphics.DrawEllipse(new Pen(Color.Blue, 2), new Rectangle(150, 150, 200, 100));
-
-            // Draw a string with a solid brush
-            using (SolidBrush textBrush = new SolidBrush())
+            // Create a 500x500 image
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                textBrush.Color = Color.DarkGreen;
-                graphics.DrawString("Performance Test", new Font("Arial", 24), textBrush, new PointF(200, 250));
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
+
+                // Clear background
+                graphics.Clear(Color.Wheat);
+
+                // Start timing
+                var stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
+
+                // Draw a diagonal line
+                graphics.DrawLine(new Pen(Color.Black, 2), new Point(50, 50), new Point(450, 450));
+
+                // Fill a rectangle with a solid brush
+                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(100, 100, 200, 150));
+                }
+
+                // Draw an ellipse
+                graphics.DrawEllipse(new Pen(Color.Red, 3), new Rectangle(150, 200, 100, 100));
+
+                // Draw a text string
+                using (SolidBrush textBrush = new SolidBrush(Color.DarkGreen))
+                {
+                    graphics.DrawString("Performance Test", new Font("Arial", 24), textBrush, new PointF(120, 350));
+                }
+
+                // Stop timing
+                stopwatch.Stop();
+                Console.WriteLine($"Drawing time: {stopwatch.ElapsedMilliseconds} ms");
+
+                // Save the image (stream is already bound)
+                image.Save();
             }
-
-            // Stop timing
-            stopwatch.Stop();
-            Console.WriteLine($"Drawing operations took {stopwatch.ElapsedMilliseconds} ms.");
-
-            // Save the image (file is already bound to the output path)
-            image.Save();
         }
     }
 }

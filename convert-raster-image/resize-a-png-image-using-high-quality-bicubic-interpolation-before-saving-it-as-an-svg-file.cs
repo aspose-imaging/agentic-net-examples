@@ -2,47 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output.svg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
+        // Load the PNG image, resize with high‑quality bicubic interpolation, and save as SVG
         using (Image image = Image.Load(inputPath))
         {
-            // Define new dimensions (example: double the size)
-            int newWidth = image.Width * 2;
-            int newHeight = image.Height * 2;
+            // Desired dimensions (example: 400x400)
+            int newWidth = 400;
+            int newHeight = 400;
 
-            // Resize using high‑quality bicubic interpolation
+            // High‑quality bicubic interpolation
             image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
 
-            // Prepare SVG save options with rasterization settings
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    // Set page size to match the resized image dimensions
-                    PageSize = image.Size
-                }
-            };
-
             // Save the resized image as SVG
+            var svgOptions = new SvgOptions();
             image.Save(outputPath, svgOptions);
         }
     }

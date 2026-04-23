@@ -2,48 +2,66 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define output path (ensure it includes a directory)
-        string outputPath = "output\\created.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a BMP image, fill with a gradient, embed a valid digital signature, and save
-        using (BmpImage bmp = new BmpImage(200, 200))
+        try
         {
-            for (int y = 0; y < bmp.Height; y++)
+            // Hardcoded output path
+            string outputPath = "output.bmp";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Create a new BMP image (100x100 pixels, 24 bits per pixel)
+            var bmpOptions = new BmpOptions { BitsPerPixel = 24 };
+            using (Image image = Image.Create(bmpOptions, 100, 100))
             {
-                for (int x = 0; x < bmp.Width; x++)
+                // Cast to RasterImage to access digital signature methods
+                RasterImage raster = (RasterImage)image;
+
+                // Embed a digital signature with a strong password
+                raster.EmbedDigitalSignature("StrongPassword123");
+
+                // Save the signed image
+                raster.Save(outputPath);
+            }
+
+            // Verify the file exists before loading
+            if (!File.Exists(outputPath))
+            {
+                Console.Error.WriteLine($"File not found: {outputPath}");
+                return;
+            }
+
+            // Load the image to attempt a signature with a short password
+            using (Image loadedImage = Image.Load(outputPath))
+            {
+                RasterImage raster = (RasterImage)loadedImage;
+                try
                 {
-                    int hue = (255 * x) / bmp.Width;
-                    bmp.SetPixel(x, y, Color.FromArgb(255, hue, 0, 0));
+                    // Attempt to embed with a short password (expected to fail)
+                    raster.EmbedDigitalSignature("12");
+                }
+                catch (DigitalSignatureException ex)
+                {
+                    // Expected exception for an invalid/short password
+                    Console.WriteLine($"Caught DigitalSignatureException: {ex.Message}");
+                }
+                catch (ImageException ex)
+                {
+                    // Fallback for other image-related errors
+                    Console.WriteLine($"Caught ImageException: {ex.Message}");
                 }
             }
-
-            // Embed digital signature with a valid password
-            bmp.EmbedDigitalSignature("secure123");
-
-            // Save the image using BMP options
-            bmp.Save(outputPath, new BmpOptions());
         }
-
-        // Reload the saved image and attempt to embed a signature with an invalid short password
-        using (RasterImage img = (RasterImage)Image.Load(outputPath))
+        catch (Exception ex)
         {
-            try
-            {
-                img.EmbedDigitalSignature("123");
-            }
-            catch (Aspose.Imaging.CoreExceptions.ImageException ex)
-            {
-                Console.WriteLine($"HANDLED: {ex.Message}");
-            }
+            // Global error handling
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

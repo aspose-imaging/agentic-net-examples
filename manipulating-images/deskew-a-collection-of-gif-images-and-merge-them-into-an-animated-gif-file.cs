@@ -3,70 +3,77 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input GIF paths
-        string[] inputPaths = { "input1.gif", "input2.gif", "input3.gif" };
-        // Hardcoded output GIF path
-        string outputPath = "output.gif";
-
-        // Verify each input file exists
-        foreach (var path in inputPaths)
+        try
         {
-            if (!File.Exists(path))
+            // Hardcoded input GIF paths
+            string[] inputPaths = { "input1.gif", "input2.gif", "input3.gif" };
+            // Hardcoded output GIF path
+            string outputPath = "output.gif";
+
+            // Verify each input file exists
+            foreach (string inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
-            }
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the first GIF to create the output canvas
-        using (GifImage firstGif = (GifImage)Image.Load(inputPaths[0]))
-        {
-            // Deskew the first GIF
-            firstGif.NormalizeAngle(false, Color.White);
-
-            // Create the output GIF with the size of the first frame
-            using (GifImage outputGif = new GifImage(new GifFrameBlock((ushort)firstGif.Width, (ushort)firstGif.Height)))
-            {
-                // Add all frames from the first GIF
-                foreach (var page in firstGif.Pages)
+                if (!File.Exists(inputPath))
                 {
-                    outputGif.AddPage((RasterImage)page);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
+            }
 
-                // Process remaining GIFs
-                for (int i = 1; i < inputPaths.Length; i++)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+            GifImage canvas = null;
+            bool first = true;
+
+            foreach (string inputPath in inputPaths)
+            {
+                // Load GIF image
+                GifImage gif = (GifImage)Image.Load(inputPath);
+                try
                 {
-                    using (GifImage gif = (GifImage)Image.Load(inputPaths[i]))
-                    {
-                        // Deskew each GIF
-                        gif.NormalizeAngle(false, Color.White);
+                    // Deskew the GIF (no resize, white background)
+                    gif.NormalizeAngle(false, Color.White);
 
-                        // Add all frames from the current GIF
-                        foreach (var page in gif.Pages)
-                        {
-                            outputGif.AddPage((RasterImage)page);
-                        }
+                    if (first)
+                    {
+                        // Use the first processed GIF as the canvas
+                        canvas = gif;
+                        first = false;
+                    }
+                    else
+                    {
+                        // Append subsequent GIFs as new pages
+                        canvas.AddPage(gif);
+                        gif.Dispose(); // Dispose after adding
                     }
                 }
-
-                // Prepare GIF save options (infinite loop)
-                GifOptions options = new GifOptions
+                catch
                 {
-                    LoopsCount = 0
-                };
-
-                // Save the merged animated GIF
-                outputGif.Save(outputPath, options);
+                    gif.Dispose();
+                    throw;
+                }
             }
+
+            if (canvas == null)
+            {
+                Console.Error.WriteLine("No GIF images were processed.");
+                return;
+            }
+
+            // Save the merged animated GIF
+            GifOptions gifOptions = new GifOptions();
+            canvas.Save(outputPath, gifOptions);
+            canvas.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

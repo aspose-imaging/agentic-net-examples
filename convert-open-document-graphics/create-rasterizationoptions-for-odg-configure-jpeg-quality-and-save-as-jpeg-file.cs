@@ -19,23 +19,23 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists (creates it if necessary)
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the ODG vector image
         using (Image image = Image.Load(inputPath))
         {
-            // Set up rasterization options specific to ODG
+            // Configure rasterization options for ODG
             OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
             {
-                BackgroundColor = Color.White,          // white background
-                PageSize = image.Size                    // preserve original size
+                BackgroundColor = Color.White,
+                PageSize = image.Size // preserve aspect ratio if needed
             };
 
             // Configure JPEG save options, including quality
             JpegOptions jpegOptions = new JpegOptions
             {
-                Quality = 90,                           // JPEG quality (1‑100)
+                Quality = 90, // value between 1 and 100
                 VectorRasterizationOptions = rasterOptions
             };
 

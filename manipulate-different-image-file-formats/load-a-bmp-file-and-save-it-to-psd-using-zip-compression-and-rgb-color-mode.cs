@@ -6,36 +6,40 @@ using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.bmp";
-        string outputPath = @"C:\Images\output.psd";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.bmp";
+            string outputPath = "Output/output.psd";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PSD save options
-            PsdOptions psdOptions = new PsdOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Use RAW compression (no compression) – closest to ZIP in this context
-                CompressionMethod = CompressionMethod.Raw,
-                // Set color mode to RGB
-                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as PSD with the specified options
-            image.Save(outputPath, psdOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD options: RGB color mode
+                var psdOptions = new PsdOptions
+                {
+                    ColorMode = ColorModes.Rgb
+                };
+
+                // Save as PSD
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

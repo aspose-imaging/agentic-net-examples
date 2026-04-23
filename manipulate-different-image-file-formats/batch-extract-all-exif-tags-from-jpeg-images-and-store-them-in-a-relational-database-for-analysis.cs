@@ -1,82 +1,61 @@
 using System;
 using System.IO;
-using System.Linq;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Default input directory containing JPEG files
+            string inputDirectory = "InputImages";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Log file path for EXIF data
+            string logFilePath = "Output\\exif_log.txt";
+            Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Process only JPEG files
-            string ext = Path.GetExtension(inputPath).ToLowerInvariant();
-            if (ext != ".jpg" && ext != ".jpeg")
-                continue;
-
-            if (!File.Exists(inputPath))
+            using (var logWriter = new StreamWriter(logFilePath, append: true))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
-            {
-                var exifData = image.ExifData;
-                if (exifData == null)
-                    continue;
-
-                string csvFileName = Path.GetFileNameWithoutExtension(inputPath) + "_exif.csv";
-                string csvPath = Path.Combine(outputDirectory, csvFileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
-
-                using (var writer = new StreamWriter(csvPath))
+                // Process each JPEG file in the input directory
+                foreach (var filePath in Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly))
                 {
-                    // Write header
-                    writer.WriteLine("Tag,Value");
+                    string ext = Path.GetExtension(filePath).ToLowerInvariant();
+                    if (ext != ".jpg" && ext != ".jpeg")
+                        continue;
 
-                    var properties = exifData.GetType().GetProperties()
-                                            .Where(p => p.CanRead && p.GetIndexParameters().Length == 0);
-
-                    foreach (var prop in properties)
+                    if (!File.Exists(filePath))
                     {
-                        try
-                        {
-                            object value = prop.GetValue(exifData);
-                            string valueStr = value != null ? value.ToString() : "";
-                            // Escape commas in value
-                            if (valueStr.Contains(","))
-                                valueStr = $"\"{valueStr}\"";
+                        Console.Error.WriteLine($"File not found: {filePath}");
+                        return;
+                    }
 
-                            writer.WriteLine($"{prop.Name},{valueStr}");
-                        }
-                        catch
+                    // Load the JPEG image
+                    using (Aspose.Imaging.FileFormats.Jpeg.JpegImage image = (Aspose.Imaging.FileFormats.Jpeg.JpegImage)Aspose.Imaging.Image.Load(filePath))
+                    {
+                        var exifData = image.ExifData;
+                        if (exifData == null)
+                            continue;
+
+                        // Cast to JpegExifData to access the collection of tags
+                        var jpegExif = exifData as Aspose.Imaging.Exif.JpegExifData;
+                        if (jpegExif == null)
+                            continue;
+
+                        // Write each EXIF tag to the log file
+                        foreach (var tag in jpegExif.Properties)
                         {
-                            // Ignore any property that throws
+                            string tagId = tag.TagId.ToString();
+                            string tagValue = tag.Value?.ToString() ?? string.Empty;
+                            logWriter.WriteLine($"Image: {filePath}, TagId: {tagId}, TagValue: {tagValue}");
                         }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,48 +1,80 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "template.png";
-        string outputPath = "smoothed.png";
+        string outputPath = "output/output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG template
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
-
-            // Define a 3x3 averaging kernel (each weight = 1/9)
-            double[,] kernel = new double[3, 3]
+            // Load the PNG template
+            using (Image image = Image.Load(inputPath))
             {
-                { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
-                { 1.0 / 9, 1.0 / 9, 1.0 / 9 },
-                { 1.0 / 9, 1.0 / 9, 1.0 / 9 }
-            };
+                // Cast to RasterImage for pixel operations
+                RasterImage raster = (RasterImage)image;
 
-            // Apply the custom convolution filter to the entire image
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                // Capture pixel data before filtering
+                int[] beforePixels = raster.LoadArgb32Pixels(raster.Bounds);
 
-            // Save the smoothed image
-            raster.Save(outputPath);
+                // Create a 3x3 averaging kernel (each weight = 1/9)
+                double[,] kernel = new double[3, 3];
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        kernel[i, j] = 1.0 / 9.0;
+                    }
+                }
+
+                // Apply the custom convolution filter
+                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, convOptions);
+
+                // Capture pixel data after filtering
+                int[] afterPixels = raster.LoadArgb32Pixels(raster.Bounds);
+
+                // Verify that smoothing changed pixel values
+                bool changed = false;
+                int length = Math.Min(beforePixels.Length, afterPixels.Length);
+                for (int i = 0; i < length; i++)
+                {
+                    if (beforePixels[i] != afterPixels[i])
+                    {
+                        changed = true;
+                        break;
+                    }
+                }
+
+                if (changed)
+                {
+                    Console.WriteLine("Smoothing applied: pixel values have changed.");
+                }
+                else
+                {
+                    Console.WriteLine("No change detected after applying the filter.");
+                }
+
+                // Save the resulting image
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
+            }
         }
-
-        // Simple verification message
-        Console.WriteLine("Custom averaging kernel applied and image saved.");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

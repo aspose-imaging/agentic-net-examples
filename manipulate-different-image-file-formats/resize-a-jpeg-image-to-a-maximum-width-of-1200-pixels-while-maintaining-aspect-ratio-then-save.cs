@@ -1,52 +1,54 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.jpg";
-        string outputPath = "output\\resized.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output_resized.jpg";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Determine new dimensions while preserving aspect ratio
-            const int maxWidth = 1200;
-            int newWidth = image.Width;
-            int newHeight = image.Height;
-
-            if (image.Width > maxWidth)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                double scale = (double)maxWidth / image.Width;
-                newWidth = maxWidth;
-                newHeight = (int)(image.Height * scale);
-
-                // Resize the image using nearest neighbour resampling
-                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Prepare JPEG save options (optional quality setting)
-            JpegOptions saveOptions = new JpegOptions
-            {
-                Quality = 90
-            };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the resized image
-            image.Save(outputPath, saveOptions);
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Determine new dimensions while preserving aspect ratio
+                const int maxWidth = 1200;
+                int newWidth = image.Width;
+                int newHeight = image.Height;
+
+                if (image.Width > maxWidth)
+                {
+                    newWidth = maxWidth;
+                    newHeight = (int)Math.Round((double)image.Height * maxWidth / image.Width);
+                }
+
+                // Resize only if needed
+                if (newWidth != image.Width || newHeight != image.Height)
+                {
+                    image.Resize(newWidth, newHeight);
+                }
+
+                // Save the resized image
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

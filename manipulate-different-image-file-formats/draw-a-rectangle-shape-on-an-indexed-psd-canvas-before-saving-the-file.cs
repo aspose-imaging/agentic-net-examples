@@ -9,36 +9,38 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"C:\temp\output.psd";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        Source source = new FileCreateSource(outputPath, false);
-
-        PsdOptions psdOptions = new PsdOptions();
-        psdOptions.Source = source;
-        psdOptions.ColorMode = ColorModes.Indexed;
-        psdOptions.CompressionMethod = CompressionMethod.RLE;
-        psdOptions.ChannelsCount = (short)1;
-        psdOptions.ChannelBitsCount = (short)8;
-        psdOptions.Version = 6;
-
-        Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[]
+        try
         {
-            Aspose.Imaging.Color.Black,
-            Aspose.Imaging.Color.White,
-            Aspose.Imaging.Color.Red,
-            Aspose.Imaging.Color.Green,
-            Aspose.Imaging.Color.Blue
-        };
-        psdOptions.Palette = new ColorPalette(paletteColors);
+            string outputPath = "output.psd";
 
-        using (RasterImage canvas = (RasterImage)Image.Create(psdOptions, 400, 300))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Configure PSD options for an indexed color image
+            PsdOptions options = new PsdOptions();
+            options.Source = new FileCreateSource(outputPath, false);
+            options.ColorMode = ColorModes.Indexed;
+            options.ChannelBitsCount = (short)8;
+            options.ChannelsCount = (short)1;
+            // Simple palette with black and white entries
+            options.Palette = new ColorPalette(new Color[] { Color.Black, Color.White });
+
+            int width = 200;
+            int height = 200;
+
+            using (Image psdImage = Image.Create(options, width, height))
+            {
+                Graphics graphics = new Graphics(psdImage);
+                graphics.Clear(Color.White);
+                // Draw a rectangle on the PSD canvas
+                graphics.DrawRectangle(new Pen(Color.Black, 1), new Rectangle(50, 50, 100, 80));
+
+                // Save the PSD (output is already bound to the file)
+                psdImage.Save();
+            }
+        }
+        catch (Exception ex)
         {
-            Graphics graphics = new Graphics(canvas);
-            graphics.DrawRectangle(
-                new Pen(Aspose.Imaging.Color.Blue, 3),
-                new Rectangle(50, 50, 200, 150));
-            canvas.Save();
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

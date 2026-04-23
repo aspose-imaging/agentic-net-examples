@@ -6,33 +6,44 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.djvu";
-        string outputPath = "sample_cropped.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "sample.djvu";
+            string outputPath = "output.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Use the first page of the document
+                var page = djvuImage.Pages[0];
+
+                // Define the rectangle area to extract (0,0,400,400)
+                var bounds = new Rectangle(0, 0, 400, 400);
+
+                // BMP save options
+                var bmpOptions = new BmpOptions();
+
+                // Save the specified portion as BMP
+                page.Save(outputPath, bmpOptions, bounds);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DjVu document
-        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Define the crop rectangle (0,0,400,400)
-            Rectangle cropArea = new Rectangle(0, 0, 400, 400);
-
-            // Crop the DjVu image to the specified area
-            djvuImage.Crop(cropArea);
-
-            // Save the cropped portion as BMP
-            djvuImage.Save(outputPath, new BmpOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

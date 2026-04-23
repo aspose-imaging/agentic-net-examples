@@ -24,17 +24,20 @@ class Program
         // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare SVG export options
+            // Prepare SVG export options with rasterization settings
+            var rasterizationOptions = new SvgRasterizationOptions
+            {
+                // Use the original image size for the SVG page
+                PageSize = image.Size,
+                // Optional: set background to white to avoid transparency issues
+                BackgroundColor = Color.White
+            };
+
             var svgOptions = new SvgOptions
             {
-                // Disable compression; the default saving already produces a compact XML
-                Compress = false,
-                // Set rasterization options to match the source image size
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
-                }
+                VectorRasterizationOptions = rasterizationOptions,
+                // Compress = false (default) keeps the SVG as plain XML, which is already minimal
+                Compress = false
             };
 
             // Save the image as SVG

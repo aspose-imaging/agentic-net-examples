@@ -1,19 +1,21 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        // Hardcoded input and output directories
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
+        // Ensure input directory exists before enumerating files
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
@@ -21,44 +23,44 @@ class Program
             return;
         }
 
+        // Ensure output directory exists
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
         }
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+        // Get all PNG files in the input directory
+        string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
 
-        foreach (string inputPath in files)
+        foreach (string inputPath in pngFiles)
         {
+            // Validate each input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            if (!Path.GetExtension(inputPath).Equals(".png", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
+            // Prepare output JPEG path
             string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
             string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
 
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                int blurSize = 5;
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.GetBlurBox(blurSize)));
 
-                using (JpegOptions jpegOptions = new JpegOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                })
-                {
-                    image.Save(outputPath, jpegOptions);
-                }
+                // Apply a blur box filter (size 5) using ConvolutionFilterOptions
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5));
+                raster.Filter(raster.Bounds, blurOptions);
+
+                // Save the processed image as JPEG
+                var jpegOptions = new JpegOptions();
+                raster.Save(outputPath, jpegOptions);
             }
         }
     }

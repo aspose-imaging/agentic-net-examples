@@ -23,13 +23,12 @@ class Program
 
         using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Create first selection and union with second selection
-            MagicWandTool
-                .Select(image, new MagicWandSettings(120, 100))
-                .Union(new MagicWandSettings(200, 150))
-                .Apply();
+            ImageBitMask combinedMask = MagicWandTool
+                .Select(image, new MagicWandSettings(100, 100))
+                .Union(new MagicWandSettings(200, 200));
 
-            // Save the image with the combined mask applied
+            combinedMask.Apply();
+
             image.Save(outputPath, new PngOptions
             {
                 ColorType = PngColorType.TruecolorWithAlpha

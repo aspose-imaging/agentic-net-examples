@@ -2,77 +2,61 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.tif";
+            string outputPath = "output.apng";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the multi‑page TIFF
-        using (Image tiffImage = Image.Load(inputPath))
-        {
-            // Cast to multipage interface
-            if (tiffImage is IMultipageImage multipage)
+            if (!File.Exists(inputPath))
             {
-                // Prepare APNG creation options with bound output file
-                ApngOptions apngOptions = new ApngOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image tiffImage = Image.Load(inputPath))
+            {
+                if (tiffImage is IMultipageImage multipage)
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
-
-                // Assume all pages have the same dimensions as the first page
-                int width = tiffImage.Width;
-                int height = tiffImage.Height;
-
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
-                {
-                    // Remove the default empty frame
-                    apngImage.RemoveAllFrames();
-
-                    // Add each TIFF page as a frame with a unique delay
-                    for (int i = 0; i < multipage.PageCount; i++)
+                    ApngOptions createOptions = new ApngOptions
                     {
-                        // Retrieve the page image
-                        Image page = multipage.Pages[i];
+                        Source = new FileCreateSource(outputPath, false),
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
 
-                        // Cast to RasterImage for adding as a frame
-                        RasterImage rasterPage = (RasterImage)page;
+                    using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, tiffImage.Width, tiffImage.Height))
+                    {
+                        apngImage.RemoveAllFrames();
 
-                        // Example unique delay: (i + 1) * 100 ms
-                        uint frameDelay = (uint)((i + 1) * 100);
+                        for (int i = 0; i < multipage.PageCount; i++)
+                        {
+                            Image page = multipage.Pages[i];
+                            RasterImage rasterPage = (RasterImage)page;
+                            uint frameDelay = (uint)((i + 1) * 100); // unique delay per frame (ms)
+                            apngImage.AddFrame(rasterPage, frameDelay);
+                        }
 
-                        // Add the frame with the specified delay
-                        apngImage.AddFrame(rasterPage, frameDelay);
-
-                        // Dispose the page image after use
-                        page.Dispose();
+                        apngImage.Save();
                     }
-
-                    // Save the APNG (output file is already bound via FileCreateSource)
-                    apngImage.Save();
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded image is not a multipage image.");
                 }
             }
-            else
-            {
-                Console.Error.WriteLine("The loaded image is not a multipage image.");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

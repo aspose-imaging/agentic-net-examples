@@ -1,51 +1,47 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.jpg";
+        // Hard‑coded input and output paths
+        string inputPath = "input.emf";
+        string outputPath = "output\\converted.jpg";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EMF image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to EmfImage to access EMF‑specific properties
-            EmfImage emfImage = (EmfImage)image;
-
-            // Configure rasterization options with a custom background color
+            // Prepare rasterization options with a custom background color
             EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
             {
-                // Set the desired background color (e.g., white)
-                BackgroundColor = Aspose.Imaging.Color.White,
-                // Use the original EMF size as the page size
-                PageSize = emfImage.Size
+                // Use the original image size as the page size
+                PageSize = image.Size,
+                // Set desired background color (e.g., LightGray)
+                BackgroundColor = Aspose.Imaging.Color.LightGray
             };
 
-            // Configure JPEG save options and attach the rasterization options
+            // Prepare JPEG save options and attach rasterization options
             JpegOptions jpegOptions = new JpegOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the image as JPEG with the specified background color
-            emfImage.Save(outputPath, jpegOptions);
+            // Save the image as JPEG with the specified background
+            image.Save(outputPath, jpegOptions);
         }
     }
 }

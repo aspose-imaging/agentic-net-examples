@@ -5,56 +5,49 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Base directory of the application
-        string baseDir = Directory.GetCurrentDirectory();
-        // Input and output directories (relative to baseDir)
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input\";
+            string outputDir = @"C:\Images\Output\";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory);
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // List of image files to process
+            string[] files = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                "image1.jpg",
+                "image2.png",
+                "image3.bmp"
+            };
 
-            // Determine output file path (same name, .png extension)
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image, resize proportionally to width 400, and save as PNG
-            using (Image image = Image.Load(inputPath))
+            foreach (string fileName in files)
             {
-                // Resize width to 400 pixels, preserving aspect ratio
-                image.ResizeWidthProportionally(400, ResizeType.NearestNeighbourResample);
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputDir, fileName);
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".png");
 
-                // Save the resized image as PNG
-                image.Save(outputPath, new PngOptions());
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load, resize proportionally to width 400, and save as PNG
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.ResizeWidthProportionally(400, ResizeType.NearestNeighbourResample);
+                    image.Save(outputPath, new PngOptions());
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

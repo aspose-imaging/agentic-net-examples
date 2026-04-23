@@ -1,47 +1,62 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded relative paths
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CdrImage image = (CdrImage)Image.Load(inputPath))
-        {
-            if (image == null)
+            // Input validation
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Failed to load CDR image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            CdrImagePage page = (CdrImagePage)image.Pages[0];
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Perform conversion on a background thread
+            await Task.Run(() =>
             {
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                // Load CDR with progress reporting
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath, new LoadOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
-                };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                    ProgressEventHandler = info => Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
+                }))
+                {
+                    // Configure PDF export options with rasterization settings
+                    var pdfOptions = new PdfOptions
+                    {
+                        ProgressEventHandler = info => Console.WriteLine($"Export {info.EventType} : {info.Value}/{info.MaxValue}"),
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None,
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
 
-                image.Save(outputPath, pdfOptions);
-            }
+                    // Save as PDF
+                    cdr.Save(outputPath, pdfOptions);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

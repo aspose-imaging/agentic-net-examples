@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -8,29 +7,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define output path (hardcoded)
-        string outputPath = @"c:\temp\output.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up PNG options with a FileCreateSource bound to the output file
-        PngOptions pngOptions = new PngOptions();
+        // Set up PNG options with a FileCreateSource (binds the image to the file)
+        var pngOptions = new PngOptions();
         pngOptions.Source = new FileCreateSource(outputPath, false);
 
         // Create a new image canvas (500x500)
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
         {
-            // Initialize Graphics for the created image
-            Graphics graphics = new Graphics(image);
+            // Initialize Graphics from the created image
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Set smoothing mode to AntiAlias for smoother edges
-            graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            // Enable anti-aliasing for smoother edges
+            graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
 
-            // (Optional) Clear the canvas with a background color
-            graphics.Clear(Color.White);
+            // Optional: clear the canvas with a white background
+            graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Save the image (output file is already bound via FileCreateSource)
+            // Save the image (already bound to the output file)
             image.Save();
         }
     }

@@ -9,31 +9,39 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.djvu";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
-        {
-            int pageIndex = 0;
-            foreach (var page in djvuImage.Pages)
+            string inputPath = "Input/sample.djvu";
+            if (!File.Exists(inputPath))
             {
-                PngOptions pngOptions = new PngOptions
-                {
-                    FilterType = PngFilterType.Sub
-                };
-
-                string outputPath = $"Output/page_{pageIndex}.png";
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                page.Save(outputPath, pngOptions);
-                pageIndex++;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            string outputDir = "Output";
+
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                using (DjvuImage djvuImage = new DjvuImage(stream))
+                {
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        FilterType = PngFilterType.Sub
+                    };
+
+                    foreach (Image page in djvuImage.Pages)
+                    {
+                        DjvuPage djvuPage = (DjvuPage)page;
+                        string outputPath = Path.Combine(outputDir, $"page_{djvuPage.PageNumber}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        djvuPage.Save(outputPath, pngOptions);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,47 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cmx";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\input.cmx";
+            string outputPath = @"C:\Temp\output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to CmxImage to access specific properties
-            CmxImage cmxImage = (CmxImage)image;
-
-            // Set background to fully transparent
-            cmxImage.HasBackgroundColor = true;
-            cmxImage.BackgroundColor = Aspose.Imaging.Color.Transparent;
-
-            // Prepare PNG save options with rasterization settings
-            var pngOptions = new PngOptions();
-            var cmxRasterOptions = new CmxRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Aspose.Imaging.Color.Transparent
-            };
-            pngOptions.VectorRasterizationOptions = cmxRasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as PNG preserving the alpha channel
-            cmxImage.Save(outputPath, pngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CMX image
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            {
+                // Set background to fully transparent
+                cmxImage.BackgroundColor = Aspose.Imaging.Color.Transparent;
+                cmxImage.HasBackgroundColor = true; // indicate that a background color is defined (transparent)
+
+                // Prepare PNG save options with alpha channel support
+                PngOptions pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                // Save as PNG with transparency
+                cmxImage.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

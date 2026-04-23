@@ -2,81 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\source.png";
-        string outputPath = @"C:\temp\output.psd";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string outputPath = "output.psd";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Source source = new FileCreateSource(outputPath, false);
 
-        // Load source image to obtain dimensions
-        using (Image sourceImage = Image.Load(inputPath))
-        {
-            int width = sourceImage.Width;
-            int height = sourceImage.Height;
-
-            // Create a custom palette (red and green)
-            Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[]
+            PsdOptions options = new PsdOptions
             {
-                Aspose.Imaging.Color.Red,
-                Aspose.Imaging.Color.Green
-            };
-            IColorPalette customPalette = new ColorPalette(paletteColors);
-
-            // Configure PSD options for indexed-like image
-            PsdOptions psdOptions = new PsdOptions
-            {
-                // Set the source to create the file
-                Source = new FileCreateSource(outputPath, false),
-
-                // Use 8 bits per channel and 3 channels (RGB)
-                ChannelBitsCount = 8,
-                ChannelsCount = 3,
-
-                // Set color mode to RGB (palette will be applied)
-                ColorMode = ColorModes.Rgb,
-
-                // Assign the custom palette
-                Palette = customPalette,
-
-                // Use RLE compression (optional)
-                CompressionMethod = CompressionMethod.RLE,
-
-                // Default PSD version
-                Version = 6
-            };
-
-            // Create a new PSD image with the specified options
-            using (Image psdImage = Image.Create(psdOptions, width, height))
-            {
-                // Fill the image with a simple gradient using the custom palette colors
-                Graphics graphics = new Graphics(psdImage);
-                LinearGradientBrush gradientBrush = new LinearGradientBrush(
-                    new Point(0, 0),
-                    new Point(width, height),
+                Source = source,
+                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Indexed,
+                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                Version = 6,
+                Palette = new ColorPalette(new Aspose.Imaging.Color[]
+                {
                     Aspose.Imaging.Color.Red,
-                    Aspose.Imaging.Color.Green);
-                graphics.FillRectangle(gradientBrush, psdImage.Bounds);
+                    Aspose.Imaging.Color.Green,
+                    Aspose.Imaging.Color.Blue,
+                    Aspose.Imaging.Color.Black,
+                    Aspose.Imaging.Color.White
+                }),
+                ChannelsCount = (short)1,
+                ChannelBitsCount = (short)8
+            };
 
-                // Save the PSD image
-                psdImage.Save();
+            int canvasWidth = 200;
+            int canvasHeight = 200;
+
+            using (Image canvas = Image.Create(options, canvasWidth, canvasHeight))
+            {
+                canvas.Save();
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

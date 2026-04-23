@@ -1,47 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define paths
-        string outputPath = "output\\signed_image.png";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a PNG image with alpha channel
-        using (PngImage png = new PngImage(200, 200, PngColorType.TruecolorWithAlpha))
+        try
         {
-            // Fill the image with a semi‑transparent gradient
-            using (LinearGradientBrush gradient = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(png.Width, png.Height),
-                Color.Blue,
-                Color.Transparent))
+            // Define output path
+            string outputPath = "output.png";
+
+            // Ensure output directory exists (unconditional per requirements)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create PNG image with alpha channel
+            PngOptions options = new PngOptions
             {
-                Graphics graphics = new Graphics(png);
-                graphics.FillRectangle(gradient, png.Bounds);
+                ColorType = PngColorType.TruecolorWithAlpha,
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            // Image dimensions must be at least 200x200 for digital signature
+            using (Image image = Image.Create(options, 200, 200))
+            {
+                // Embed digital signature with a valid password
+                RasterImage raster = (RasterImage)image;
+                raster.EmbedDigitalSignature("secure123");
+
+                // Save the image (bound to FileCreateSource)
+                image.Save();
             }
 
-            // Embed a digital signature
-            string password = "secret";
-            png.EmbedDigitalSignature(password);
+            // Verify the digital signature after saving
+            if (!File.Exists(outputPath))
+            {
+                Console.Error.WriteLine($"File not found: {outputPath}");
+                return;
+            }
 
-            // Save the image
-            png.Save(outputPath);
+            using (Image loadedImage = Image.Load(outputPath))
+            {
+                RasterImage loadedRaster = (RasterImage)loadedImage;
+                bool isSigned = loadedRaster.IsDigitalSigned("secure123");
+                Console.WriteLine($"Signature verification: {(isSigned ? "Valid" : "Invalid")}");
+            }
         }
-
-        // Verify the digital signature
-        using (Image img = Image.Load(outputPath))
+        catch (Exception ex)
         {
-            var raster = (RasterCachedImage)img;
-            bool isSigned = raster.IsDigitalSigned("secret");
-            Console.WriteLine($"Signature verification result: {isSigned}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

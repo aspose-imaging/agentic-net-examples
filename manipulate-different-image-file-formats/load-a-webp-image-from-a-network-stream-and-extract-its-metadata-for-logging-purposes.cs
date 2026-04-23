@@ -1,35 +1,64 @@
 using System;
 using System.IO;
+using System.Net.Http;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "sample.webp";
-        string outputPath = "output/metadata.txt";
+        // Hardcoded paths (not used for input stream, but required by the task)
+        string inputUrl = "https://example.com/sample.webp";
+        string outputPath = @"C:\Temp\WebPMetadata.txt";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Download the WebP image into a memory stream
+            using (HttpClient httpClient = new HttpClient())
+            using (Stream networkStream = httpClient.GetStreamAsync(inputUrl).Result)
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                networkStream.CopyTo(memoryStream);
+                memoryStream.Position = 0; // Reset stream position for reading
+
+                // Load the WebP image from the stream
+                using (WebPImage webPImage = new WebPImage(memoryStream))
+                {
+                    // Extract basic metadata
+                    string format = webPImage.FileFormat.ToString();
+                    int width = webPImage.Width;
+                    int height = webPImage.Height;
+
+                    // Attempt to retrieve original EXIF data via original options
+                    string exifInfo = "No EXIF data";
+                    ImageOptionsBase originalOptions = webPImage.GetOriginalOptions();
+                    if (originalOptions is WebPOptions webPOptions && webPOptions.ExifData != null)
+                    {
+                        exifInfo = webPOptions.ExifData.ToString();
+                    }
+
+                    // Prepare log message
+                    string log = $"WebP Image Metadata:{Environment.NewLine}" +
+                                 $"Format: {format}{Environment.NewLine}" +
+                                 $"Dimensions: {width}x{height}{Environment.NewLine}" +
+                                 $"EXIF: {exifInfo}{Environment.NewLine}";
+
+                    // Output to console
+                    Console.WriteLine(log);
+
+                    // Save metadata to a file
+                    File.WriteAllText(outputPath, log);
+                }
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (var webPImage = new WebPImage(inputPath))
+        catch (Exception ex)
         {
-            var exifData = webPImage.ExifData;
-            var xmpData = webPImage.XmpData;
-            var genericMetadata = webPImage.Metadata;
-
-            var log = "WebP Image Metadata:" + Environment.NewLine;
-            log += "ExifData: " + (exifData != null ? exifData.ToString() : "None") + Environment.NewLine;
-            log += "XmpData: " + (xmpData != null ? xmpData.ToString() : "None") + Environment.NewLine;
-            log += "Generic Metadata: " + (genericMetadata != null ? genericMetadata.ToString() : "None") + Environment.NewLine;
-
-            Console.WriteLine(log);
-            File.WriteAllText(outputPath, log);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

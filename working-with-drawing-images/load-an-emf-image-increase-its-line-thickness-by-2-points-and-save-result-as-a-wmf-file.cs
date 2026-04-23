@@ -4,7 +4,6 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
 
 class Program
 {
@@ -27,24 +26,42 @@ class Program
         // Load the EMF image
         using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
         {
-            // Attempt to increase line thickness for each record that contains a Pen
+            // Create a graphics object that contains all records from the EMF
+            var graphics = Aspose.Imaging.FileFormats.Emf.Graphics.EmfRecorderGraphics2D.FromEmfImage(emfImage);
+
+            // Increase line thickness by 2 points for every pen found in the records
             foreach (var record in emfImage.Records)
             {
-                var penProperty = record.GetType().GetProperty("Pen");
-                if (penProperty != null)
+                // Use dynamic to attempt accessing a Pen property if it exists
+                dynamic dynRecord = record;
+                try
                 {
-                    var pen = penProperty.GetValue(record) as Pen;
-                    if (pen != null)
+                    if (dynRecord.Pen != null)
                     {
-                        // Increase the pen width by 2 points
-                        pen.Width += 2;
+                        dynRecord.Pen.Width += 2;
                     }
+                }
+                catch
+                {
+                    // Record does not contain a Pen; ignore
                 }
             }
 
-            // Save the modified image as WMF
-            var wmfOptions = new WmfOptions();
-            emfImage.Save(outputPath, wmfOptions);
+            // Finalize the modified EMF image
+            using (EmfImage modifiedEmf = graphics.EndRecording())
+            {
+                // Prepare WMF save options
+                var wmfOptions = new WmfOptions
+                {
+                    VectorRasterizationOptions = new WmfRasterizationOptions
+                    {
+                        PageSize = modifiedEmf.Size
+                    }
+                };
+
+                // Save the modified image as WMF
+                modifiedEmf.Save(outputPath, wmfOptions);
+            }
         }
     }
 }

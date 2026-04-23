@@ -2,61 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\circles.bmp";
+        // Define output path
+        string outputPath = "output/output.bmp";
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up BMP options with a bound file source
-        Source source = new FileCreateSource(outputPath, false);
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = source;
+        // Set BMP options with file source
+        var bmpOptions = new BmpOptions();
+        bmpOptions.Source = new FileCreateSource(outputPath);
 
-        int width = 400;
-        int height = 400;
-
-        // Create the BMP image (bound to the file)
-        using (Image image = Image.Create(bmpOptions, width, height))
+        // Create a 400x400 BMP image
+        using (Image image = Image.Create(bmpOptions, 400, 400))
         {
             // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
-
-            // Clear background to white
             graphics.Clear(Color.White);
 
-            // Draw first semi‑transparent red circle
-            using (SolidBrush brush1 = new SolidBrush())
+            // Draw first overlapping circle (red, 50% opacity)
+            using (SolidBrush brush1 = new SolidBrush(Color.Red))
             {
-                brush1.Color = Color.Red;
-                brush1.Opacity = 0.5f; // 50% opacity
+                brush1.Opacity = 0.5f;
                 graphics.FillEllipse(brush1, new Rectangle(50, 50, 200, 200));
             }
 
-            // Draw second semi‑transparent green circle overlapping the first
-            using (SolidBrush brush2 = new SolidBrush())
+            // Draw second overlapping circle (blue, 40% opacity)
+            using (SolidBrush brush2 = new SolidBrush(Color.Blue))
             {
-                brush2.Color = Color.Green;
-                brush2.Opacity = 0.5f;
-                graphics.FillEllipse(brush2, new Rectangle(150, 150, 200, 200));
+                brush2.Opacity = 0.4f;
+                graphics.FillEllipse(brush2, new Rectangle(150, 100, 200, 200));
             }
 
-            // Draw third semi‑transparent blue circle overlapping the others
-            using (SolidBrush brush3 = new SolidBrush())
+            // Draw third overlapping circle (green, 30% opacity)
+            using (SolidBrush brush3 = new SolidBrush(Color.Green))
             {
-                brush3.Color = Color.Blue;
-                brush3.Opacity = 0.5f;
-                graphics.FillEllipse(brush3, new Rectangle(100, 200, 200, 200));
+                brush3.Opacity = 0.3f;
+                graphics.FillEllipse(brush3, new Rectangle(100, 150, 200, 200));
             }
 
-            // Save the bound image (no need to specify options again)
+            // Save the image (file is already bound via FileCreateSource)
             image.Save();
         }
     }

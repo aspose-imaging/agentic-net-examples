@@ -8,43 +8,32 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample_filtered.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = "sample.odg";
+        string outputPath = "result.jpg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the ODG image
-        using (Image odgImage = Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Rasterize ODG to PNG in memory
-            using (MemoryStream pngStream = new MemoryStream())
-            {
-                var pngOptions = new PngOptions();
-                odgImage.Save(pngStream, pngOptions);
-                pngStream.Position = 0;
+            // Cast to RasterImage to apply raster filters
+            RasterImage rasterImage = (RasterImage)image;
 
-                // Load the rasterized image
-                using (Image rasterImage = Image.Load(pngStream))
-                {
-                    var raster = (RasterImage)rasterImage;
+            // Apply a median filter with a size of 5 to the entire image
+            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                    // Apply median filter with size 5 to the whole image
-                    raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-
-                    // Save the filtered image as JPEG
-                    var jpegOptions = new JpegOptions();
-                    raster.Save(outputPath, jpegOptions);
-                }
-            }
+            // Save the processed image as JPEG
+            JpegOptions jpegOptions = new JpegOptions();
+            rasterImage.Save(outputPath, jpegOptions);
         }
     }
 }

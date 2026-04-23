@@ -2,73 +2,75 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.tif";
-        string outputPath = @"C:\Images\result.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.tif";
+            string emfOutputPath = "output.emf";
+            string pngOutputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (Image tiffImage = Image.Load(inputPath))
-        {
-            int width = tiffImage.Width;
-            int height = tiffImage.Height;
-
-            // Create an EMF recorder with the same size as the TIFF
-            Aspose.Imaging.Rectangle frame = new Aspose.Imaging.Rectangle(0, 0, width, height);
-            Size deviceSize = new Size(width, height);
-            Size deviceSizeMm = new Size(width / 100, height / 100); // approximate mm size
-
-            EmfRecorderGraphics2D emfGraphics = new EmfRecorderGraphics2D(frame, deviceSize, deviceSizeMm);
-
-            // Draw the TIFF onto the EMF canvas
-            using (RasterImage raster = (RasterImage)tiffImage)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                emfGraphics.DrawImage(
-                    raster,
-                    new Aspose.Imaging.Rectangle(0, 0, width, height),   // destination rectangle
-                    new Aspose.Imaging.Rectangle(0, 0, width, height),   // source rectangle
-                    GraphicsUnit.Pixel);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Draw text as vector shapes onto the EMF
-            Font textFont = new Font("Arial", 48, FontStyle.Regular);
-            emfGraphics.DrawString("Sample Text", textFont, Color.DarkRed, 50, 50);
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(emfOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
 
-            // Finalize EMF recording
-            using (EmfImage emfImage = emfGraphics.EndRecording())
+            // Load the TIFF image
+            using (Image tiffImage = Image.Load(inputPath))
             {
-                // Prepare PNG options with vector rasterization to preserve vector text
-                PngOptions pngOptions = new PngOptions();
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                // Configure EMF rasterization options to render text as vector shapes
+                EmfRasterizationOptions emfRasterOptions = new EmfRasterizationOptions
+                {
+                    PageSize = tiffImage.Size,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    BackgroundColor = Color.White
+                };
+
+                // Set up EMF save options
+                EmfOptions emfOptions = new EmfOptions
+                {
+                    VectorRasterizationOptions = emfRasterOptions
+                };
+
+                // Save the TIFF content as EMF (vector format)
+                tiffImage.Save(emfOutputPath, emfOptions);
+            }
+
+            // Load the generated EMF image
+            using (EmfImage emfImage = (EmfImage)Image.Load(emfOutputPath))
+            {
+                // Configure PNG rasterization options to rasterize the EMF vector data
+                VectorRasterizationOptions pngRasterOptions = new VectorRasterizationOptions
                 {
                     PageSize = emfImage.Size,
-                    BackgroundColor = Color.White,
-                    RenderMode = EmfRenderMode.Auto
+                    BackgroundColor = Color.White
                 };
-                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the EMF as PNG
-                emfImage.Save(outputPath, pngOptions);
+                // Set up PNG save options
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = pngRasterOptions
+                };
+
+                // Save the EMF as a PNG file
+                emfImage.Save(pngOutputPath, pngOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -3,46 +3,55 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output BMP file path (hard‑coded)
-        string outputPath = @"C:\temp\polygon.bmp";
+        // Hardcoded output path
+        string outputPath = @"c:\temp\output.bmp";
 
-        // Ensure the output directory exists
+        // Ensure the output directory exists (unconditional)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set BMP options and bind the output file
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a 400x400 image canvas
-        using (Image image = Image.Create(bmpOptions, 400, 400))
+        // Set up BMP options for a 24‑bit image
+        BmpOptions bmpOptions = new BmpOptions
         {
-            // Initialize graphics for drawing
+            BitsPerPixel = 24,
+            // The FileCreateSource tells Aspose.Imaging to create the file at the specified path
+            Source = new FileCreateSource(outputPath, false)
+        };
+
+        // Create a new 500x500 BMP image
+        using (Image image = Image.Create(bmpOptions, 500, 500))
+        {
+            // Initialize graphics object for drawing
             Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
 
-            // Create a pen with custom line join style
-            Pen pen = new Pen(Color.Blue, 3);
-            pen.LineJoin = LineJoin.Bevel; // custom join (e.g., Bevel)
+            // Fill background with a light color
+            graphics.Clear(Color.Wheat);
 
-            // Define polygon vertices
-            Point[] polygonPoints = new Point[]
+            // Define the vertices of the polygon
+            PointF[] polygonPoints = new PointF[]
             {
-                new Point(50, 300),
-                new Point(200, 50),
-                new Point(350, 300),
-                new Point(50, 200)
+                new PointF(50, 50),
+                new PointF(450, 50),
+                new PointF(450, 450),
+                new PointF(50, 450)
             };
 
-            // Draw the connected polygon
+            // Create a pen with custom line join style (Bevel) and a width of 5 pixels
+            Pen pen = new Pen(Color.Blue, 5)
+            {
+                LineJoin = LineJoin.Bevel
+            };
+
+            // Draw the connected polygon using the pen
             graphics.DrawPolygon(pen, polygonPoints);
 
-            // Save the image (file is already bound via FileCreateSource)
+            // Persist changes to the file
             image.Save();
         }
     }

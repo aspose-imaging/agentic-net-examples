@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -24,19 +25,18 @@ class Program
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Set up rasterization options for OTG to PNG conversion
-            var otgRasterizationOptions = new OtgRasterizationOptions
+            // Prepare PNG save options with progressive (interlaced) encoding
+            PngOptions pngOptions = new PngOptions
             {
-                // Preserve original page size
-                PageSize = image.Size
-            };
-
-            // Configure PNG options with progressive (interlaced) encoding
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = otgRasterizationOptions,
                 Progressive = true
             };
+
+            // Configure rasterization options for OTG vector content
+            OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
+            {
+                PageSize = image.Size
+            };
+            pngOptions.VectorRasterizationOptions = otgRaster;
 
             // Save the image as PNG with interlacing enabled
             image.Save(outputPath, pngOptions);

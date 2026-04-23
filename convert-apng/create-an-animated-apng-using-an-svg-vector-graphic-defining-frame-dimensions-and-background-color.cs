@@ -10,65 +10,74 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input SVG and output APNG paths
-        string inputPath = "input.svg";
-        string outputPath = "output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded paths
+            string inputPath = "input.svg";
+            string tempRasterPath = "temp.png";
+            string outputPath = "output.apng";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG vector graphic
-        using (Image svgImage = Image.Load(inputPath))
-        {
-            int width = svgImage.Width;
-            int height = svgImage.Height;
-
-            // Configure APNG creation options
-            ApngOptions createOptions = new ApngOptions
+            // Validate input file
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 200, // frame duration in milliseconds
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            // Create the APNG canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
-            {
-                // Set background color for the canvas
-                apngImage.BackgroundColor = Color.White;
-
-                // Remove the default single frame
-                apngImage.RemoveAllFrames();
-
-                const int frameCount = 5;
-
-                // Add frames by rasterizing the SVG each time
-                for (int i = 0; i < frameCount; i++)
-                {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        // Render SVG to a raster image (PNG) in memory
-                        svgImage.Save(ms, new PngOptions());
-                        ms.Position = 0;
-
-                        // Load the rasterized image
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
-                        {
-                            apngImage.AddFrame(raster);
-                        }
-                    }
-                }
-
-                // Save the APNG (output file is already bound via FileCreateSource)
-                apngImage.Save();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath) ?? ".");
+
+            // Load SVG vector image
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                // Rasterize SVG to PNG
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Color.White
+                    }
+                };
+                svgImage.Save(tempRasterPath, pngOptions);
+            }
+
+            // Load rasterized PNG as source frame
+            using (RasterImage sourceImage = (RasterImage)Image.Load(tempRasterPath))
+            {
+                // Create APNG options with output binding
+                var createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 200, // 200 ms per frame
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                // Create APNG image canvas
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                {
+                    // Remove default frame
+                    apngImage.RemoveAllFrames();
+
+                    // Define number of frames
+                    int frameCount = 5;
+
+                    // Add frames (same image for simplicity)
+                    for (int i = 0; i < frameCount; i++)
+                    {
+                        apngImage.AddFrame(sourceImage);
+                    }
+
+                    // Save the APNG (output already bound via FileCreateSource)
+                    apngImage.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

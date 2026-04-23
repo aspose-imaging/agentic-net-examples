@@ -1,15 +1,15 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.gif";
-        string outputPath = "output.webp";
+        string inputPath = "Input/animation.gif";
+        string outputPath = "Output/animation.webp";
 
         if (!File.Exists(inputPath))
         {
@@ -19,23 +19,24 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Aspose.Imaging.Image gif = Aspose.Imaging.Image.Load(inputPath))
+        try
         {
-            var webpOptions = new WebPOptions();
-
-            var gifImg = gif as GifImage;
-            if (gifImg != null)
+            using (Image gifImage = Image.Load(inputPath))
             {
-                webpOptions.AnimLoopCount = (ushort)gifImg.LoopsCount;
-            }
+                // Prepare WebP options; animation loop count can be set if needed.
+                WebPOptions webpOptions = new WebPOptions
+                {
+                    // Default loop count (0 = infinite) – adjust if source GIF loop count is known.
+                    AnimLoopCount = 0
+                };
 
-            var multipage = gif as Aspose.Imaging.IMultipageImage;
-            if (multipage != null)
-            {
-                webpOptions.MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(0, multipage.PageCount));
+                // Save GIF as animated WebP, preserving frames and delays.
+                gifImage.Save(outputPath, webpOptions);
             }
-
-            gif.Save(outputPath, webpOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

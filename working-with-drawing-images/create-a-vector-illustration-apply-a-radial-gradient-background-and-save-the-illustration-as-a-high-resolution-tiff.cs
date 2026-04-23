@@ -2,64 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output path for the high‑resolution TIFF
-        string outputPath = @"C:\Temp\vector_illustration.tif";
-
-        // Ensure the output directory exists
+        string outputPath = @"C:\Temp\VectorIllustration.tif";
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Configure TIFF options
         TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
         tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
         tiffOptions.Photometric = TiffPhotometrics.Rgb;
         tiffOptions.Compression = TiffCompressions.Lzw;
         tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-        tiffOptions.ByteOrder = TiffByteOrder.LittleEndian;
+        tiffOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Desired image size (high resolution)
         int width = 2000;
         int height = 2000;
 
-        // Create the TIFF image bound to the output file
         using (Image image = Image.Create(tiffOptions, width, height))
         {
-            Graphics graphics = new Graphics(image);
+            SolidBrush bgBrush = new SolidBrush(Color.White);
+            Graphics bgGraphics = new Graphics(image);
+            bgGraphics.FillRectangle(bgBrush, new Rectangle(0, 0, width, height));
 
-            // Fill background with solid white brush
-            using (SolidBrush backgroundBrush = new SolidBrush(Color.White))
-            {
-                graphics.FillRectangle(backgroundBrush, image.Bounds);
-            }
-
-            // Create a vector illustration using GraphicsPath
-            GraphicsPath path = new GraphicsPath();
             Figure figure = new Figure();
+            figure.AddShape(new RectangleShape(new RectangleF(200f, 200f, 1600f, 1600f)));
+            figure.AddShape(new EllipseShape(new RectangleF(500f, 500f, 1000f, 1000f)));
 
-            // Add a rectangle shape
-            figure.AddShape(new RectangleShape(new RectangleF(400f, 400f, 800f, 800f)));
-
-            // Add an ellipse shape
-            figure.AddShape(new EllipseShape(new RectangleF(1200f, 400f, 800f, 800f)));
-
-            // Add the figure to the path
+            GraphicsPath path = new GraphicsPath();
             path.AddFigure(figure);
 
-            // Draw the vector path with a red pen
-            Pen redPen = new Pen(Color.Red, 5);
-            graphics.DrawPath(redPen, path);
+            Pen pen = new Pen(Color.DarkBlue, 10);
+            Graphics drawGraphics = new Graphics(image);
+            drawGraphics.DrawPath(pen, path);
+            drawGraphics.DrawLine(pen, new Point(200, 200), new Point(1800, 1800));
 
-            // Save the image (output file is already bound)
             image.Save();
         }
     }

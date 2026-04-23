@@ -11,7 +11,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.bmp";
+        string outputPath = @"C:\Images\sample_filtered.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,34 +26,32 @@ class Program
         // Load the OTG image
         using (Image otgImage = Image.Load(inputPath))
         {
-            // Set up rasterization options for vector to raster conversion
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Prepare BMP options with vector rasterization for OTG
+            BmpOptions rasterizationOptions = new BmpOptions
             {
-                PageSize = otgImage.Size
-            };
-
-            // BMP save options with the rasterization settings
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = otgRasterOptions
-            };
-
-            // Rasterize the OTG image into a memory stream
-            using (var memoryStream = new MemoryStream())
-            {
-                otgImage.Save(memoryStream, bmpOptions);
-                memoryStream.Position = 0; // Reset stream position for reading
-
-                // Load the rasterized image from the memory stream
-                using (Image rasterImageContainer = Image.Load(memoryStream))
+                VectorRasterizationOptions = new OtgRasterizationOptions
                 {
-                    var rasterImage = (RasterImage)rasterImageContainer;
+                    PageSize = otgImage.Size
+                }
+            };
 
-                    // Apply a median filter with size 5 to the whole image
-                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+            // Rasterize OTG to a memory stream
+            using (MemoryStream rasterStream = new MemoryStream())
+            {
+                otgImage.Save(rasterStream, rasterizationOptions);
+                rasterStream.Position = 0; // Reset stream position for reading
 
-                    // Save the filtered raster image as BMP
-                    rasterImage.Save(outputPath);
+                // Load the rasterized image as a RasterImage
+                using (Image rasterImage = Image.Load(rasterStream))
+                {
+                    RasterImage raster = (RasterImage)rasterImage;
+
+                    // Apply median filter with size 5 to the whole image
+                    raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                    // Save the filtered image as BMP
+                    BmpOptions saveOptions = new BmpOptions();
+                    raster.Save(outputPath, saveOptions);
                 }
             }
         }

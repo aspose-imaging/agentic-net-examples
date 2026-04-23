@@ -2,44 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.psd";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.psd";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            PsdOptions exportOptions = new PsdOptions();
-
-            if (image is IMultipageImage multipage && multipage.PageCount > 0)
+            if (!File.Exists(inputPath))
             {
-                exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            if (image is VectorImage)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                exportOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                var psdOptions = new PsdOptions
                 {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    BackgroundColor = Color.White
+                    MultiPageOptions = null,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
-            }
 
-            image.Save(outputPath, exportOptions);
+                cdr.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

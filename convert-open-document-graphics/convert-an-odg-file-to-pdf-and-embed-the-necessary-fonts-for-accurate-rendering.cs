@@ -2,14 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Input\sample.odg";
-        string outputPath = @"C:\Output\sample.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Data\sample.odg";
+        string outputPath = @"C:\Data\Result\sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,24 +22,30 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Optional: specify custom fonts folder to embed fonts during rasterization
+        // Adjust the path to a folder that contains the required TrueType fonts
+        string fontsFolder = @"C:\Windows\Fonts";
+        FontSettings.SetFontsFolder(fontsFolder);
+        FontSettings.UpdateFonts();
+
         // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
             // Configure rasterization options for ODG
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
             {
                 BackgroundColor = Color.White,
-                PageSize = image.Size
+                PageSize = image.Size // Preserve original page size
             };
 
-            // Set up PDF save options with the rasterization options
-            PdfOptions pdfOptions = new PdfOptions
+            // Set up PDF save options and attach rasterization options
+            PdfOptions pdfSaveOptions = new PdfOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            // Save the image as PDF (fonts will be embedded automatically)
-            image.Save(outputPath, pdfOptions);
+            // Save the image as PDF with embedded fonts
+            image.Save(outputPath, pdfSaveOptions);
         }
     }
 }

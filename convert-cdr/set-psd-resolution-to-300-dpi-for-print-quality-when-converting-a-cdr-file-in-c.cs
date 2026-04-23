@@ -4,48 +4,53 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.cdr";
-        string outputPath = "output.psd";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.cdr";
+            string outputPath = "output.psd";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR vector image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare PSD save options with 300 DPI resolution
-            PsdOptions psdOptions = new PsdOptions
+            if (!File.Exists(inputPath))
             {
-                // Set resolution to 300 DPI for both axes
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Define color mode (optional, default is RGB)
-                ColorMode = ColorModes.Rgb,
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Rasterize the vector CDR using its dimensions
-                VectorRasterizationOptions = new CdrRasterizationOptions
+            using (var cdr = (CdrImage)Image.Load(inputPath))
+            {
+                using (var ms = new MemoryStream())
                 {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
+                    using (var raster = (RasterImage)Image.Load(ms))
+                    {
+                        var psdOptions = new PsdOptions
+                        {
+                            ResolutionSettings = new ResolutionSetting(300, 300)
+                        };
+                        raster.Save(outputPath, psdOptions);
+                    }
                 }
-            };
-
-            // Save the image as PSD with the specified options
-            image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

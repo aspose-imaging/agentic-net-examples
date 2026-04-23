@@ -9,22 +9,30 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.tga";
-        if (!File.Exists(inputPath))
+        string outputPath = "output\\output.png";
+
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TGA image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Save as PNG preserving alpha channel
+                image.Save(outputPath, new PngOptions());
+            }
         }
-
-        string outputPath = "output.png";
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the TGA image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Save as PNG preserving the alpha channel
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

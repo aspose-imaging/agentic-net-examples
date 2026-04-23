@@ -1,70 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Input and output directories (relative to the executable location)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputCdr";
+        string outputDirectory = @"C:\OutputPng";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Get all CDR files in the input directory
-        string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
-
-        foreach (string cdrFile in cdrFiles)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(cdrFile))
-            {
-                Console.Error.WriteLine($"File not found: {cdrFile}");
-                continue;
-            }
+            // Get all CDR files in the input directory
+            string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(cdrFile))
+            foreach (string inputPath in cdrFiles)
             {
-                // Cache the whole document to avoid repeated loading
-                cdrImage.CacheData();
-
-                int pageIndex = 0;
-                foreach (var pageObj in cdrImage.Pages)
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Each page is a CdrImagePage
-                    var page = (CdrImagePage)pageObj;
-                    page.CacheData();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Build the output PNG file path
-                    string baseName = Path.GetFileNameWithoutExtension(cdrFile);
-                    string outputPath = Path.Combine(outputDirectory, $"{baseName}_page{pageIndex}.png");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure PNG export with vector rasterization options
-                    PngOptions pngOptions = new PngOptions
+                // Load the CDR image
+                using (CdrImage image = (CdrImage)Image.Load(inputPath))
+                {
+                    // Iterate through each page of the CDR document
+                    for (int pageIndex = 0; pageIndex < image.PageCount; pageIndex++)
                     {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None,
-                            PageWidth = page.Width,
-                            PageHeight = page.Height
-                        }
-                    };
+                        // Retrieve the specific page
+                        CdrImagePage page = (CdrImagePage)image.Pages[pageIndex];
 
-                    // Save the current page as PNG
-                    page.Save(outputPath, pngOptions);
+                        // Build the output PNG file path
+                        string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + $"_page{pageIndex}.png";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    pageIndex++;
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as PNG
+                        page.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

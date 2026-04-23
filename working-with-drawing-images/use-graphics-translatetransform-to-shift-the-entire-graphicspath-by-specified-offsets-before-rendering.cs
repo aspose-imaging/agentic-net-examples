@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -9,42 +11,41 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        string outputPath = "output.png";
+
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the input image as a raster image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        // Create a new PNG image canvas
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
+
+        using (Image image = Image.Create(pngOptions, 400, 400))
         {
-            // Cache data for better performance
-            if (!image.IsCached) image.CacheData();
-
-            // Initialize Graphics for drawing
+            // Initialize graphics for the image
             Graphics graphics = new Graphics(image);
             graphics.Clear(Color.White);
 
-            // Create a GraphicsPath with a rectangle shape
+            // Build a graphics path with a rectangle shape
             GraphicsPath path = new GraphicsPath();
             Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 100f, 100f)));
             path.AddFigure(figure);
 
-            // Apply translation to shift the entire path
+            // Shift the entire path by the specified offsets
             graphics.TranslateTransform(100f, 50f);
 
             // Draw the translated path
-            graphics.DrawPath(new Pen(Color.Blue, 3), path);
+            graphics.DrawPath(new Pen(Color.Blue, 2), path);
 
-            // Save the modified image
-            image.Save(outputPath);
+            // Save the image (FileCreateSource binds the output file)
+            image.Save();
         }
     }
 }

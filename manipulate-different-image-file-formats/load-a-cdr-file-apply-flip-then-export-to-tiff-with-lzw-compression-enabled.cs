@@ -23,28 +23,27 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to CdrImage to access RotateFlip
-            CdrImage cdrImage = image as CdrImage;
-            if (cdrImage == null)
+            // Load the CDR image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine("Loaded image is not a CDR file.");
-                return;
+                // Apply a horizontal flip
+                cdrImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                // Prepare TIFF save options with LZW compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Compression = TiffCompressions.Lzw
+                };
+
+                // Save as TIFF
+                cdrImage.Save(outputPath, tiffOptions);
             }
-
-            // Apply a horizontal flip
-            cdrImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-            // Prepare TIFF save options with LZW compression
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                Compression = TiffCompressions.Lzw
-            };
-
-            // Save as TIFF
-            cdrImage.Save(outputPath, tiffOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

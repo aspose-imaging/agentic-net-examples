@@ -3,52 +3,58 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Animation.gif";
-        string outputFolder = "Frames";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input GIF path
+            string inputPath = "input.gif";
 
-        // Ensure the output folder exists
-        Directory.CreateDirectory(outputFolder);
+            // Hardcoded output folder for PNG frames
+            string outputFolder = "output_frames";
 
-        // Load the animated GIF
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to GifImage to access frames/pages
-            GifImage gif = image as GifImage;
-            if (gif == null)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not a GIF.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Iterate through each frame
-            for (int i = 0; i < gif.PageCount; i++)
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Load the animated GIF
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Extract the frame as a RasterImage
-                using (RasterImage frame = (RasterImage)gif.Pages[i])
+                int frameCount = gif.PageCount;
+
+                for (int i = 0; i < frameCount; i++)
                 {
-                    // Build output file path
-                    string outputPath = Path.Combine(outputFolder, $"frame_{i}.png");
+                    // Build output file path for each frame
+                    string outputPath = Path.Combine(outputFolder, $"frame_{i + 1}.png");
 
                     // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the frame as PNG
-                    frame.Save(outputPath, new PngOptions());
+                    // Configure PNG options to export a single frame
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
+                    };
+
+                    // Save the current frame as PNG
+                    gif.Save(outputPath, pngOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

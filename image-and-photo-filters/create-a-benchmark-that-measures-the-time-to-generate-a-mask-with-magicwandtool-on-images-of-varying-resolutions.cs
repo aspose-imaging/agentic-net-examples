@@ -1,54 +1,59 @@
 using System;
 using System.IO;
-using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main()
     {
-        // Hardcoded input and output file paths for different resolutions
-        string[] inputPaths = { "input_small.png", "input_medium.png", "input_large.png" };
-        string[] outputPaths = { "output_small.png", "output_medium.png", "output_large.png" };
-
-        for (int i = 0; i < inputPaths.Length; i++)
+        try
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
-
-            // Verify input file exists
+            string inputPath = "input.png";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = "output";
+            Directory.CreateDirectory(outputDir);
 
-            // Start timing
-            Stopwatch sw = Stopwatch.StartNew();
-
-            // Load image, apply MagicWand mask, and save result
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            var resolutions = new (int width, int height)[]
             {
-                // Use the image centre as the seed point for the magic wand
-                int seedX = image.Width / 2;
-                int seedY = image.Height / 2;
+                (640, 480),
+                (1280, 720),
+                (1920, 1080)
+            };
 
-                // Create mask and apply it to the image
-                MagicWandTool.Select(image, new MagicWandSettings(seedX, seedY)).Apply();
+            foreach (var (width, height) in resolutions)
+            {
+                string outputPath = Path.Combine(outputDir, $"mask_{width}x{height}.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the masked image as PNG with alpha channel
-                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    image.Resize(width, height, ResizeType.NearestNeighbourResample);
+
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+
+                    MagicWandTool
+                        .Select(image, new MagicWandSettings(width / 2, height / 2))
+                        .Apply();
+
+                    sw.Stop();
+
+                    image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+
+                    Console.WriteLine($"Resolution {width}x{height}: {sw.ElapsedMilliseconds} ms");
+                }
             }
-
-            sw.Stop();
-            Console.WriteLine($"Processed {inputPath} in {sw.ElapsedMilliseconds} ms");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

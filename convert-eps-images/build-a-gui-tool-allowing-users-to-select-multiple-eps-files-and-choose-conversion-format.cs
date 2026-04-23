@@ -4,18 +4,13 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories (relative to the current directory)
+        // Define base, input and output directories (relative paths)
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
@@ -34,97 +29,60 @@ class Program
             Directory.CreateDirectory(outputDirectory);
         }
 
-        // Get all EPS files in the input directory
-        string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
-        if (epsFiles.Length == 0)
+        // Get all files from the input directory
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+        if (files.Length == 0)
         {
-            Console.WriteLine("No EPS files found in the Input directory.");
+            Console.WriteLine("No files found in the input directory.");
             return;
         }
 
-        // Prompt user to select target format
-        Console.WriteLine("Select output format:");
-        Console.WriteLine("1 - PNG");
-        Console.WriteLine("2 - JPEG");
-        Console.WriteLine("3 - BMP");
-        Console.WriteLine("4 - GIF");
-        Console.WriteLine("5 - TIFF");
-        Console.WriteLine("6 - PDF");
-        Console.WriteLine("7 - WEBP");
-        Console.Write("Enter the number of the desired format: ");
-        string choice = Console.ReadLine();
+        // Ask user for desired output format
+        Console.WriteLine("Enter desired output format (png, jpg, pdf):");
+        string format = Console.ReadLine()?.Trim().ToLowerInvariant();
 
-        // Determine options and file extension based on user choice
-        ImageOptionsBase options;
-        string extension;
-        switch (choice)
+        // Validate format selection
+        if (format != "png" && format != "jpg" && format != "pdf")
         {
-            case "1":
-                options = new PngOptions();
-                extension = ".png";
-                break;
-            case "2":
-                options = new JpegOptions();
-                extension = ".jpg";
-                break;
-            case "3":
-                options = new BmpOptions();
-                extension = ".bmp";
-                break;
-            case "4":
-                options = new GifOptions();
-                extension = ".gif";
-                break;
-            case "5":
-                options = new TiffOptions(TiffExpectedFormat.Default);
-                extension = ".tiff";
-                break;
-            case "6":
-                options = new PdfOptions();
-                extension = ".pdf";
-                break;
-            case "7":
-                options = new WebPOptions();
-                extension = ".webp";
-                break;
-            default:
-                Console.WriteLine("Invalid selection.");
-                return;
+            Console.Error.WriteLine("Unsupported format selected.");
+            return;
         }
 
-        // Process each EPS file
-        foreach (string epsPath in epsFiles)
+        foreach (string inputPath in files)
         {
-            // Verify input file exists
-            if (!File.Exists(epsPath))
+            // Verify the input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {epsPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 continue;
             }
 
-            // Build output file path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(epsPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + extension);
+            // Build output file path with new extension
+            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "." + format;
+            string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-            // Ensure output directory exists
+            // Ensure the output directory exists (unconditional as per safety rule)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image and save in selected format
-            using (Image image = Image.Load(epsPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to EpsImage for clarity (full name used to avoid extra using)
-                var epsImage = image as Aspose.Imaging.FileFormats.Eps.EpsImage;
-                if (epsImage == null)
+                switch (format)
                 {
-                    Console.Error.WriteLine($"Failed to load EPS image: {epsPath}");
-                    continue;
+                    case "png":
+                        image.Save(outputPath, new PngOptions());
+                        break;
+                    case "jpg":
+                        image.Save(outputPath, new JpegOptions());
+                        break;
+                    case "pdf":
+                        image.Save(outputPath, new PdfOptions());
+                        break;
                 }
-
-                // Save using the chosen options
-                epsImage.Save(outputPath, options);
             }
 
-            Console.WriteLine($"Converted '{Path.GetFileName(epsPath)}' to '{Path.GetFileName(outputPath)}'.");
+            Console.WriteLine($"Converted '{Path.GetFileName(inputPath)}' to '{outputFileName}'.");
         }
 
         Console.WriteLine("Conversion process completed.");

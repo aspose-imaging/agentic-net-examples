@@ -1,59 +1,61 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded collection of input image paths
-        var inputPaths = new List<string>
+        try
         {
-            @"C:\Images\sample1.tif",
-            @"C:\Images\sample2.tif",
-            @"C:\Images\sample3.tif"
-        };
-
-        // Corresponding output PNG paths
-        var outputPaths = new List<string>
-        {
-            @"C:\Processed\sample1.png",
-            @"C:\Processed\sample2.png",
-            @"C:\Processed\sample3.png"
-        };
-
-        // Iterate over the collection
-        for (int i = 0; i < inputPaths.Count; i++)
-        {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
+                "input1.cdr",
+                "input2.svg",
+                "input3.png"
+            };
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            foreach (string inputPath in inputPaths)
             {
-                // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)image;
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Apply the 3x3 sharpen filter using SharpenFilterOptions (size 3, sigma 0)
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 0));
+                string outputDirectory = "Output";
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Save as PNG preserving any raster data
-                var pngOptions = new PngOptions();
-                rasterImage.Save(outputPath, pngOptions);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    if (image is RasterImage raster)
+                    {
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+                    }
+
+                    var pngOptions = new PngOptions();
+
+                    if (image is VectorImage)
+                    {
+                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        };
+                    }
+
+                    image.Save(outputPath, pngOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

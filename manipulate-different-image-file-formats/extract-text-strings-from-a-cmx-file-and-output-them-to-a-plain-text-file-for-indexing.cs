@@ -2,35 +2,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Cmx.ObjectModel;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Data\sample.cmx";
-        string outputPath = @"C:\Data\output.txt";
+        string inputPath = "input.cmx";
+        string outputPath = "output\\extracted.txt";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            {
+                var document = image.Document;
+                string extractedText = document?.ToString() ?? string.Empty;
+                File.WriteAllText(outputPath, extractedText);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image
-        using (CmxImage image = (CmxImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Retrieve the document and convert it to string
-            CmxDocument document = image.Document;
-            string textContent = document.ToString();
-
-            // Write extracted text to the output file
-            File.WriteAllText(outputPath, textContent);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,12 +8,12 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define relative input and output directories
+        // Set up base, input, and output directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure input directory exists; if not, create it and exit
+        // Ensure input directory exists
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
@@ -28,49 +28,45 @@ class Program
         }
 
         // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory);
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
         foreach (string inputPath in files)
         {
-            // Verify the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build the output PDF path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+            // Prepare output PDF path
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
-            // Ensure the output directory for this file exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the vector image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF options with embedded fonts and PDF version 1.6 (using closest compliance setting)
-                using (PdfOptions pdfOptions = new PdfOptions())
+                // Configure PDF options with PDF version 1.6 (using PDF/A-1b compliance as an example)
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    // Set PDF core options (closest to PDF 1.6 compliance)
-                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
+                    PdfCoreOptions = new PdfCoreOptions
                     {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b // Approximation for PDF version requirement
-                    };
-
-                    // Configure vector rasterization to preserve fonts as shapes
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    },
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
                         PageHeight = image.Height,
                         TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                         SmoothingMode = SmoothingMode.None
-                    };
+                    }
+                };
 
-                    // Save the image as PDF
-                    image.Save(outputPath, pdfOptions);
-                }
+                // Save the image as PDF with embedded fonts
+                image.Save(outputPath, pdfOptions);
             }
         }
     }

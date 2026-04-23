@@ -24,19 +24,22 @@ class Program
         // Load the PNG image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for pixel operations
+            // Cast to RasterImage for raster operations
             RasterImage raster = (RasterImage)image;
 
-            // Resize to 640x480 (default NearestNeighbourResample)
+            // Resize to 640x480 using default nearest neighbour resample
             raster.Resize(640, 480);
 
-            // Apply Gaussian blur with radius 5 and sigma 4.0
+            // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
             raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-            // Prepare SVG save options
-            SvgOptions svgOptions = new SvgOptions();
+            // Prepare SVG save options with default rasterization settings
+            SvgOptions svgOptions = new SvgOptions
+            {
+                VectorRasterizationOptions = new SvgRasterizationOptions()
+            };
 
-            // Save the blurred image as SVG
+            // Save the processed image as SVG
             raster.Save(outputPath, svgOptions);
         }
     }

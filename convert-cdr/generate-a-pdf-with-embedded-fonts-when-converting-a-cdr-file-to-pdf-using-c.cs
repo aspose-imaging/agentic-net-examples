@@ -1,60 +1,47 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.cdr");
-        string outputPath = Path.Combine("Output", "sample.cdr.pdf");
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/sample.pdf";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load CDR with custom fonts
-        var loadOptions = new Aspose.Imaging.ImageLoadOptions.CdrLoadOptions();
-        loadOptions.AddCustomFontSource((args) =>
-        {
-            string fontsPath = "";
-            if (args.Length > 0 && args[0] != null)
-                fontsPath = args[0].ToString();
-
-            var fontList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-            if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+            if (!File.Exists(inputPath))
             {
-                foreach (var file in Directory.GetFiles(fontsPath))
-                {
-                    byte[] data = File.ReadAllBytes(file);
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    fontList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            return fontList.ToArray();
-        }, "Fonts");
 
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            var pdfOptions = new PdfOptions();
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var rasterOptions = new CdrRasterizationOptions
+            using (Image image = Image.Load(inputPath))
             {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                Positioning = PositioningTypes.DefinedByDocument
-            };
+                var pdfOptions = new PdfOptions();
 
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+                var rasterOptions = new CdrRasterizationOptions
+                {
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument,
+                    BackgroundColor = Color.White
+                };
 
-            image.Save(outputPath, pdfOptions);
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

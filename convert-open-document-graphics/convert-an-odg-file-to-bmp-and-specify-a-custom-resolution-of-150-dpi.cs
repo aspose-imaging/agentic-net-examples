@@ -3,15 +3,14 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\temp\sample.odg";
-        string outputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\sample_150dpi.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,44 +19,24 @@ class Program
             return;
         }
 
-        // Ensure output directory exists before any save operation
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        using (Image odgImage = Image.Load(inputPath))
         {
-            // Cast to OdgImage to access specific features if needed
-            OdgImage odgImage = (OdgImage)image;
-
-            // Set up rasterization options for vector to raster conversion
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
-            {
-                // Use the original image size as the page size
-                PageSize = odgImage.Size,
-                // Optional: set background color
-                BackgroundColor = Color.White
-            };
-
-            // Configure BMP save options and attach rasterization options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the rasterized image as BMP
-            odgImage.Save(outputPath, bmpOptions);
+            // Save it as BMP (default resolution)
+            odgImage.Save(outputPath, new BmpOptions());
         }
 
-        // Load the saved BMP to adjust its resolution
-        using (Image bmpImage = Image.Load(outputPath))
+        // Reload the BMP to adjust its resolution
+        using (BmpImage bmpImage = (BmpImage)Image.Load(outputPath))
         {
-            BmpImage bmp = (BmpImage)bmpImage;
+            // Set custom resolution to 150 DPI
+            bmpImage.SetResolution(150.0, 150.0);
 
-            // Set custom resolution to 150 DPI for both axes
-            bmp.SetResolution(150.0, 150.0);
-
-            // Save the BMP again (overwrites the previous file)
-            bmp.Save(outputPath);
+            // Save the BMP with the new resolution (overwrite)
+            bmpImage.Save(outputPath);
         }
     }
 }

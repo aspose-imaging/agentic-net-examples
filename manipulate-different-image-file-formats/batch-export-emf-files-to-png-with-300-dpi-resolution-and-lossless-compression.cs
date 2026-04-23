@@ -2,61 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-        foreach (var inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in files)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".png");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                var vectorOptions = new VectorRasterizationOptions
+                if (!File.Exists(inputPath))
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageSize = image.Size,
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                using (var pngOptions = new PngOptions())
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
-                    pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-                    pngOptions.PngCompressionLevel = PngCompressionLevel.ZipLevel9;
+                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = emfImage.Size,
+                        BackgroundColor = Color.White
+                    };
 
-                    image.Save(outputPath, pngOptions);
+                    using (PngOptions pngOptions = new PngOptions())
+                    {
+                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                        pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                        emfImage.Save(outputPath, pngOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -5,49 +5,44 @@ using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputDir = "output";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.tif";
+            string outputDir = "output";
 
-        Directory.CreateDirectory(outputDir);
-
-        using (var tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            int frameCount = tiffImage.Frames.Length;
-            for (int i = 0; i < frameCount; i++)
+            if (!File.Exists(inputPath))
             {
-                var frame = tiffImage.Frames[i];
-                tiffImage.ActiveFrame = frame;
-                var pathResources = frame.PathResources;
-                if (pathResources == null || pathResources.Count == 0)
-                    continue;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
-                    pathResources.ToArray(),
-                    frame.Size);
+            Directory.CreateDirectory(outputDir);
 
-                int width = frame.Width;
-                int height = frame.Height;
-                var svgGraphics = new SvgGraphics2D(width, height, 96);
-                var graphics = new Graphics(svgGraphics);
-                graphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
-
-                using (var svgImage = svgGraphics.EndRecording())
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                int frameIndex = 0;
+                foreach (TiffFrame frame in tiffImage.Frames)
                 {
-                    string outputPath = Path.Combine(outputDir, $"frame_{i}.svg");
+                    string outputPath = Path.Combine(outputDir, $"frame{frameIndex}.svg");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    svgImage.Save(outputPath);
+
+                    var svgGraphics = new SvgGraphics2D(frame.Width, frame.Height, 96);
+                    using (SvgImage svgImage = svgGraphics.EndRecording())
+                    {
+                        svgImage.Save(outputPath);
+                    }
+
+                    frameIndex++;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

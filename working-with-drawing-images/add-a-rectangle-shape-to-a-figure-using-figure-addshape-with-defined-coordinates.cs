@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
@@ -9,27 +8,26 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\output.png";
+        string outputPath = @"output\output.bmp";
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
+        BmpOptions bmpOptions = new BmpOptions();
+        bmpOptions.BitsPerPixel = 24;
+        bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
         {
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+            graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-            GraphicsPath graphicsPath = new GraphicsPath();
+            Aspose.Imaging.GraphicsPath graphicPath = new Aspose.Imaging.GraphicsPath();
+            Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-            Figure figure = new Figure();
-            RectangleF rect = new RectangleF(100f, 100f, 300f, 200f);
-            figure.AddShape(new RectangleShape(rect));
+            figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 200f, 150f)));
 
-            graphicsPath.AddFigure(figure);
+            graphicPath.AddFigure(figure);
 
-            Pen pen = new Pen(Color.Black, 2);
-            graphics.DrawPath(pen, graphicsPath);
+            graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicPath);
 
             image.Save();
         }

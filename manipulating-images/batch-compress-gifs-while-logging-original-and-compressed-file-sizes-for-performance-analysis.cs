@@ -5,64 +5,58 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Batch directory setup (must be included exactly as specified)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = "C:\\InputGifs";
+            string outputFolder = "C:\\OutputGifs";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            // Get all GIF files in the input folder
+            string[] gifFiles = Directory.GetFiles(inputFolder, "*.gif");
 
-        foreach (string filePath in files)
-        {
-            // Process only GIF files
-            if (!filePath.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            string inputPath = filePath;
-
-            // Input file existence check
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in gifFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputPath = Path.Combine(outputDirectory,
-                Path.GetFileNameWithoutExtension(filePath) + "_compressed.gif");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load GIF and save with compression
-            using (Image image = Image.Load(inputPath))
-            {
-                GifOptions options = new GifOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Use lossy compression (MaxDiff > 0)
-                    MaxDiff = 80
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                image.Save(outputPath, options);
+                // Build the output file path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + "_compressed.gif");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the GIF image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Configure lossy compression options
+                    GifOptions options = new GifOptions
+                    {
+                        MaxDiff = 80 // Recommended value for optimal lossy compression
+                    };
+
+                    // Save the compressed GIF
+                    image.Save(outputPath, options);
+                }
+
+                // Log original and compressed file sizes
+                long originalSize = new FileInfo(inputPath).Length;
+                long compressedSize = new FileInfo(outputPath).Length;
+                Console.WriteLine($"File: {Path.GetFileName(inputPath)} | Original: {originalSize} bytes | Compressed: {compressedSize} bytes");
             }
-
-            // Log original and compressed sizes
-            long originalSize = new FileInfo(inputPath).Length;
-            long compressedSize = new FileInfo(outputPath).Length;
-            Console.WriteLine($"Processed {Path.GetFileName(filePath)}: original {originalSize} bytes, compressed {compressedSize} bytes.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

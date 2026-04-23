@@ -6,44 +6,57 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
+        string inputPath = "Input/sample.djvu";
+        string outputDirectory = "Output";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        // Open the DjVu file stream
-        using (Stream stream = File.OpenRead(inputPath))
+        try
         {
-            // Load the DjVu document
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Prepare GIF save options with interlacing enabled
-                GifOptions gifOptions = new GifOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Open the DjVu file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                // Load DjVu image
+                using (DjvuImage djvu = new DjvuImage(stream))
                 {
-                    Interlaced = true
-                };
+                    // Iterate through each page
+                    for (int i = 0; i < djvu.PageCount; i++)
+                    {
+                        // Get the current page
+                        Image page = djvu.Pages[i];
 
-                // Iterate through each page and save as GIF
-                foreach (DjvuPage page in djvuImage.Pages)
-                {
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
+                        // Build output path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.gif");
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as a GIF using the specified options
-                    page.Save(outputPath, gifOptions);
+                        // Configure GIF options with interlacing enabled
+                        GifOptions gifOptions = new GifOptions
+                        {
+                            Interlaced = true
+                        };
+
+                        // Save the page as a GIF file
+                        page.Save(outputPath, gifOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

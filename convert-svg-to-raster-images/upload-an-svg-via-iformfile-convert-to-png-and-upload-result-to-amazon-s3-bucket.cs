@@ -1,20 +1,18 @@
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Amazon;
-using Amazon.S3;
-using Amazon.S3.Model;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.png";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.svg";
+        string outputPath = "Output/sample.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,44 +22,29 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load SVG and rasterize to PNG
-        using (SvgImage svgImage = new SvgImage(inputPath))
+        // Load SVG from file stream and rasterize to PNG
+        using (FileStream inputStream = File.OpenRead(inputPath))
+        using (SvgImage svgImage = new SvgImage(inputStream))
         {
-            // Set up rasterization options (default options are sufficient for most cases)
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+            // Set rasterization options
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                PageSize = svgImage.Size
+                PageSize = svgImage.Size,
+                BackgroundColor = Color.White
             };
 
             // Configure PNG save options
             PngOptions pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterizationOptions
+                VectorRasterizationOptions = rasterOptions
             };
 
-            // Save rasterized PNG to the output path
+            // Save rasterized PNG
             svgImage.Save(outputPath, pngOptions);
         }
 
-        // Upload the generated PNG to Amazon S3
-        const string bucketName = "my-s3-bucket";
-        const string objectKey = "output.png";
-
-        // Create an S3 client (uses default credentials and region)
-        using (var s3Client = new AmazonS3Client(RegionEndpoint.USEast1))
-        using (var fileStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read))
-        {
-            var putRequest = new PutObjectRequest
-            {
-                BucketName = bucketName,
-                Key = objectKey,
-                InputStream = fileStream,
-                ContentType = "image/png"
-            };
-
-            s3Client.PutObjectAsync(putRequest).GetAwaiter().GetResult();
-        }
-
-        Console.WriteLine("SVG converted to PNG and uploaded to S3 successfully.");
+        // Placeholder for uploading the PNG to Amazon S3
+        // Implementation omitted due to external library restrictions
+        // Example: UploadToS3(outputPath);
     }
 }

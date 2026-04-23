@@ -1,55 +1,53 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.gif";
-        string outputPath = @"C:\temp\output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
 
-        // Ensure output directory exists (unconditional)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image from the input file
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to GifImage to access the Rotate method
-            GifImage gifImage = image as GifImage;
-            if (gifImage == null)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not a GIF image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Rotate 30 degrees clockwise, resize proportionally, with black background
-            gifImage.Rotate(30f, true, Color.Black);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prepare a memory stream to hold the GIF data
+            // Create a memory stream to hold the GIF data
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                // Save the rotated image to the memory stream using default GIF options
-                GifOptions gifOptions = new GifOptions();
-                gifImage.Save(memoryStream, gifOptions);
+                // Load the GIF image
+                using (GifImage image = (GifImage)Aspose.Imaging.Image.Load(inputPath))
+                {
+                    // Rotate 30 degrees, resize proportionally, black background
+                    image.Rotate(30f, true, Aspose.Imaging.Color.Black);
 
-                // Write the memory stream contents to the output file
+                    // Save the rotated image to the memory stream in GIF format
+                    GifOptions saveOptions = new GifOptions();
+                    image.Save(memoryStream, saveOptions);
+                }
+
+                // Optionally write the memory stream to a file for verification
                 memoryStream.Position = 0;
                 using (FileStream fileStream = new FileStream(outputPath, FileMode.Create))
                 {
                     memoryStream.CopyTo(fileStream);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

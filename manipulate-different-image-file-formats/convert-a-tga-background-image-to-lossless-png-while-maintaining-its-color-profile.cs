@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,30 +9,36 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.tga";
-        string outputPath = "output\\converted.png";
+        string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TGA image
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
-        {
-            // Prepare PNG options to keep metadata (color profile) and use lossless truecolor with alpha
-            var pngOptions = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                KeepMetadata = true
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as lossless PNG
-            image.Save(outputPath, pngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TGA image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Prepare PNG save options to keep metadata (color profile)
+                var pngOptions = new PngOptions
+                {
+                    KeepMetadata = true
+                };
+
+                // Save as lossless PNG
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

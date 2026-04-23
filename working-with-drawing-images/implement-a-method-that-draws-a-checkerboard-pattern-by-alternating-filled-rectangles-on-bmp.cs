@@ -2,53 +2,56 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path
-        string outputPath = @"C:\temp\checkerboard.bmp";
+        // Hardcoded output path
+        string outputPath = "output/checkerboard.bmp";
 
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Image dimensions and checkerboard settings
-        int width = 400;
-        int height = 400;
-        int squaresPerSide = 8;
-        int squareSize = width / squaresPerSide;
+        // Define image dimensions and checkerboard parameters
+        int imageWidth = 400;
+        int imageHeight = 400;
+        int cellSize = 50; // size of each square
 
-        // Configure BMP options with FileCreateSource
+        // Set up BMP options with a file create source
         BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
         // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, width, height))
+        using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
         {
-            // Create graphics object for drawing
+            // Initialize Graphics for drawing
             Graphics graphics = new Graphics(image);
 
-            // Draw checkerboard squares
-            for (int row = 0; row < squaresPerSide; row++)
+            // Prepare brushes for the two colors
+            using (SolidBrush blackBrush = new SolidBrush(Color.Black))
+            using (SolidBrush whiteBrush = new SolidBrush(Color.White))
             {
-                for (int col = 0; col < squaresPerSide; col++)
+                // Loop through rows and columns to draw squares
+                for (int y = 0; y < imageHeight; y += cellSize)
                 {
-                    int x = col * squareSize;
-                    int y = row * squareSize;
-                    Aspose.Imaging.Color fillColor = ((row + col) % 2 == 0) ? Aspose.Imaging.Color.White : Aspose.Imaging.Color.Black;
-
-                    using (SolidBrush brush = new SolidBrush(fillColor))
+                    for (int x = 0; x < imageWidth; x += cellSize)
                     {
-                        graphics.FillRectangle(brush, new Rectangle(x, y, squareSize, squareSize));
+                        // Choose brush based on position parity
+                        SolidBrush brush = ((x / cellSize) + (y / cellSize)) % 2 == 0 ? blackBrush : whiteBrush;
+
+                        // Define rectangle for the current cell
+                        Rectangle rect = new Rectangle(x, y, cellSize, cellSize);
+
+                        // Fill the rectangle
+                        graphics.FillRectangle(brush, rect);
                     }
                 }
             }
 
-            // Save the image (output path already bound via FileCreateSource)
+            // Save the image (output is already bound to the file)
             image.Save();
         }
     }

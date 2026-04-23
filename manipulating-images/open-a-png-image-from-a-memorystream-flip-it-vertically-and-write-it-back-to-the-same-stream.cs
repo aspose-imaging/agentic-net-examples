@@ -6,35 +6,57 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Create a simple 1x1 PNG image in a memory buffer
-        byte[] pngData;
-        using (var tempStream = new MemoryStream())
+        // Hardcoded input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
+        try
         {
-            using (var png = new PngImage(1, 1, PngColorType.TruecolorWithAlpha))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Set a single red pixel (ARGB)
-                png.SaveArgb32Pixels(new Rectangle(0, 0, 1, 1), new int[] { unchecked((int)0xFFFF0000) });
-                png.Save(tempStream, new PngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            pngData = tempStream.ToArray();
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG file into a memory stream
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                // Read file bytes into the stream
+                byte[] fileBytes = File.ReadAllBytes(inputPath);
+                memoryStream.Write(fileBytes, 0, fileBytes.Length);
+                memoryStream.Position = 0; // Reset for reading
+
+                // Load image from the memory stream
+                using (Image image = Image.Load(memoryStream))
+                {
+                    // Flip the image vertically
+                    image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+
+                    // Prepare the stream for saving (clear previous data)
+                    memoryStream.SetLength(0);
+                    memoryStream.Position = 0;
+
+                    // Save the modified image back into the same memory stream as PNG
+                    image.Save(memoryStream, new PngOptions());
+                }
+
+                // Write the resulting stream to the output file
+                memoryStream.Position = 0;
+                using (FileStream outFile = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                {
+                    memoryStream.CopyTo(outFile);
+                }
+            }
         }
-
-        // Load the PNG from the memory stream
-        using (var stream = new MemoryStream(pngData))
+        catch (Exception ex)
         {
-            using (Image image = Image.Load(stream))
-            {
-                // Flip the image vertically
-                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-                // Overwrite the original data in the same stream
-                stream.Position = 0;
-                image.Save(stream, new PngOptions());
-            }
-
-            Console.WriteLine($"Flipped image size: {stream.Length} bytes");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

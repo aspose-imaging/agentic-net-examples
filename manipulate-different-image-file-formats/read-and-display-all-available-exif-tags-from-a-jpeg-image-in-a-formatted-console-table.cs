@@ -6,69 +6,48 @@ using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = @"C:\Images\sample.jpg";
+        string inputPath = "input.jpg";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load JPEG image
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        try
         {
-            var exif = image.ExifData;
-            if (exif == null)
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                Console.WriteLine("No EXIF data found.");
-                return;
-            }
+                ExifData exifData = image.ExifData;
 
-            Console.WriteLine("EXIF Tags");
-            Console.WriteLine(new string('-', 80));
-            Console.WriteLine("{0,-20} {1}", "Tag", "Value");
-            Console.WriteLine(new string('-', 80));
-
-            // Iterate over generic EXIF properties collection if available
-            if (exif.Properties != null)
-            {
-                foreach (var prop in exif.Properties)
+                if (exifData == null)
                 {
-                    // Attempt to retrieve TagId and Value via reflection
-                    var tagIdProp = prop.GetType().GetProperty("TagId");
-                    var valueProp = prop.GetType().GetProperty("Value");
-                    string tag = tagIdProp != null ? tagIdProp.GetValue(prop).ToString() : prop.ToString();
-                    string value = valueProp != null ? valueProp.GetValue(prop)?.ToString() : "";
-                    Console.WriteLine("{0,-20} {1}", tag, value);
+                    Console.WriteLine("No EXIF data found.");
+                    return;
                 }
-            }
 
-            // Additionally display known EXIF fields via reflection
-            var exifType = typeof(ExifData);
-            foreach (var p in exifType.GetProperties())
-            {
-                if (p.Name == "Properties") continue; // Skip collection already processed
-                var val = p.GetValue(exif);
-                if (val != null)
-                {
-                    Console.WriteLine("{0,-20} {1}", p.Name, val);
-                }
-            }
+                Console.WriteLine("EXIF Tags:");
+                Console.WriteLine(new string('-', 60));
+                Console.WriteLine("{0,-30} {1}", "Tag", "Value");
+                Console.WriteLine(new string('-', 60));
 
-            // Display maker notes if present
-            if (exif.MakerNotes != null)
-            {
-                Console.WriteLine("\nMaker Notes");
-                Console.WriteLine(new string('-', 80));
-                foreach (var note in exif.MakerNotes)
+                foreach (ExifProperties tag in Enum.GetValues(typeof(ExifProperties)))
                 {
-                    Console.WriteLine("Name = {0}, Value = {1}", note.Name, note.Value);
+                    object value = exifData.GetTagValue(tag);
+                    if (value != null)
+                    {
+                        Console.WriteLine("{0,-30} {1}", tag, value);
+                    }
                 }
+
+                Console.WriteLine(new string('-', 60));
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

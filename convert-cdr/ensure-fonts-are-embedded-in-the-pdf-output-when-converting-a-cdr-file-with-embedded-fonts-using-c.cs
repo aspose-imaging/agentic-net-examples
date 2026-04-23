@@ -1,58 +1,54 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = Path.Combine("Input", "sample.cdr");
-        string outputPath = Path.Combine("Output", "sample.pdf");
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.cdr";
+            string outputPath = "Output\\sample.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        string fontsFolder = Path.Combine("Fonts");
-
-        var cdrLoadOptions = new Aspose.Imaging.ImageLoadOptions.CdrLoadOptions();
-        cdrLoadOptions.AddCustomFontSource((object[] args) =>
-        {
-            string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-            var list = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-            if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                foreach (var fontFile in Directory.GetFiles(fontsPath))
-                {
-                    byte[] fontBytes = File.ReadAllBytes(fontFile);
-                    string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                    list.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            return list.ToArray();
-        }, fontsFolder);
 
-        using (Image image = Image.Load(inputPath, cdrLoadOptions))
-        {
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load CDR with default load options (fonts embedded automatically)
+            var loadOptions = new Aspose.Imaging.ImageLoadOptions.CdrLoadOptions();
+
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
-                var rasterOptions = new CdrRasterizationOptions();
-                rasterOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-                rasterOptions.SmoothingMode = SmoothingMode.None;
-                rasterOptions.Positioning = PositioningTypes.DefinedByDocument;
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions();
 
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                // Configure rasterization to preserve embedded fonts
+                var rasterizationOptions = new CdrRasterizationOptions
+                {
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument,
+                    BackgroundColor = Color.White
+                };
 
+                pdfOptions.VectorRasterizationOptions = rasterizationOptions;
+
+                // Save as PDF with embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

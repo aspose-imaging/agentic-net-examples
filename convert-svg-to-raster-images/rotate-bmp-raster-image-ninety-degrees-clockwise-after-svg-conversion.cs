@@ -3,54 +3,58 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input SVG and intermediate/output BMP paths
-        string inputSvgPath = @"C:\Images\input.svg";
-        string intermediateBmpPath = @"C:\Images\temp.bmp";
-        string outputBmpPath = @"C:\Images\output_rotated.bmp";
+        // Hardcoded input SVG path
+        string inputSvgPath = @"C:\temp\input.svg";
 
-        // Verify input SVG exists
+        // Verify input file exists
         if (!File.Exists(inputSvgPath))
         {
             Console.Error.WriteLine($"File not found: {inputSvgPath}");
             return;
         }
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(intermediateBmpPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputBmpPath));
+        // Temporary BMP path (result of SVG conversion)
+        string tempBmpPath = @"C:\temp\temp.bmp";
 
-        // Load SVG, rasterize and save as BMP (intermediate file)
+        // Ensure directory for temporary BMP exists
+        Directory.CreateDirectory(Path.GetDirectoryName(tempBmpPath));
+
+        // Load SVG and save as BMP
         using (Image svgImage = Image.Load(inputSvgPath))
         {
-            // Set rasterization options based on SVG size
-            var rasterizationOptions = new SvgRasterizationOptions
-            {
-                PageSize = svgImage.Size
-            };
-
-            // Save as BMP using BmpOptions with the rasterization settings
             var bmpOptions = new BmpOptions
             {
-                VectorRasterizationOptions = rasterizationOptions
+                BitsPerPixel = 24 // 24‑bpp BMP
             };
-
-            svgImage.Save(intermediateBmpPath, bmpOptions);
+            svgImage.Save(tempBmpPath, bmpOptions);
         }
 
-        // Load the BMP, rotate 90 degrees clockwise, and save final result
-        using (BmpImage bmpImage = new BmpImage(intermediateBmpPath))
-        {
-            // Rotate 90 degrees clockwise without flipping
-            bmpImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+        // Final rotated BMP output path
+        string outputBmpPath = @"C:\temp\rotated.bmp";
 
-            // Save rotated BMP
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputBmpPath));
+
+        // Load the BMP, rotate 90° clockwise, and save
+        using (BmpImage bmpImage = new BmpImage(tempBmpPath))
+        {
+            bmpImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
             bmpImage.Save(outputBmpPath);
+        }
+
+        // Optional: clean up temporary file
+        try
+        {
+            File.Delete(tempBmpPath);
+        }
+        catch
+        {
+            // Ignore any errors during cleanup
         }
     }
 }

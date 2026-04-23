@@ -11,44 +11,55 @@ class Program
         // Hardcoded input SVG file path
         string inputPath = "input.svg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Hardcoded directory where extracted JPEGs will be saved
+        string outputDirectory = "extracted_images";
+
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Hardcoded output directory for extracted images
-        string outputDir = "extracted_images";
-
-        // Ensure the output directory exists (unconditional)
-        Directory.CreateDirectory(outputDir);
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to VectorImage to access embedded images
-            var vectorImage = (VectorImage)image;
-
-            // Retrieve embedded raster images
-            EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
-
-            int index = 0;
-            foreach (var embedded in embeddedImages)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Ensure each embedded image is disposed properly
-                using (embedded)
-                {
-                    // Build output file path (JPEG)
-                    string outputPath = Path.Combine(outputDir, $"image{index++}.jpg");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                    // Ensure the directory for the output file exists (unconditional)
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the SVG (or any vector) image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to VectorImage to access embedded images
+                var vectorImage = image as VectorImage;
+                if (vectorImage == null)
+                {
+                    Console.Error.WriteLine("The provided file is not a vector image.");
+                    return;
+                }
+
+                // Retrieve embedded raster images
+                EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
+
+                int index = 0;
+                foreach (EmbeddedImage embedded in embeddedImages)
+                {
+                    // Build output file path for each extracted image
+                    string outputPath = Path.Combine(outputDirectory, $"image{index++}.jpg");
+
+                    // Ensure the directory for the output file exists (unconditional as required)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the embedded image as JPEG
-                    embedded.Image.Save(outputPath, new JpegOptions());
+                    // Save the embedded raster image as JPEG
+                    using (embedded)
+                    {
+                        embedded.Image.Save(outputPath, new JpegOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

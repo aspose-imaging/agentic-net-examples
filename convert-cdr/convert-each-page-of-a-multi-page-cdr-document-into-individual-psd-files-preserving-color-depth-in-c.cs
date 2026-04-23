@@ -9,84 +9,61 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input CDR file path
-        string inputPath = "input.cdr";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.cdr";
 
-        // Load the CDR document
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
-        {
-            // Iterate through each page of the CDR document
-            for (int i = 0; i < cdr.PageCount; i++)
+            if (!File.Exists(inputPath))
             {
-                // Retrieve the page and ensure its data is cached
-                using (CdrImagePage page = (CdrImagePage)cdr.Pages[i])
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            {
+                int pageIndex = 0;
+                foreach (Image img in cdr.Pages)
                 {
-                    page.CacheData();
-
-                    // Determine color depth information
-                    int bitsPerPixel = page.BitsPerPixel;
-                    ColorModes colorMode;
-                    short channelsCount;
-                    short channelBitsCount;
-
-                    if (bitsPerPixel == 1)
+                    using (CdrImagePage page = (CdrImagePage)img)
                     {
-                        colorMode = ColorModes.Bitmap;
-                        channelsCount = 1;
-                        channelBitsCount = 1;
+                        string outputPath = Path.Combine("output", $"page_{pageIndex}.psd");
+                        string outputDir = Path.GetDirectoryName(outputPath);
+                        if (!string.IsNullOrWhiteSpace(outputDir))
+                        {
+                            Directory.CreateDirectory(outputDir);
+                        }
+
+                        PsdOptions psdOptions = new PsdOptions
+                        {
+                            CompressionMethod = CompressionMethod.RLE,
+                            Version = 6,
+                            ColorMode = page.BitsPerPixel <= 8 ? ColorModes.Grayscale : ColorModes.Rgb
+                        };
+
+                        int bitsPerPixel = page.BitsPerPixel;
+                        int channels = bitsPerPixel == 32 ? 4 : (bitsPerPixel == 24 ? 3 : 1);
+                        psdOptions.ChannelsCount = (short)channels;
+                        psdOptions.ChannelBitsCount = (short)(bitsPerPixel / channels);
+
+                        VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                        {
+                            PageWidth = page.Width,
+                            PageHeight = page.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        };
+                        psdOptions.VectorRasterizationOptions = vectorOptions;
+
+                        page.Save(outputPath, psdOptions);
                     }
-                    else if (bitsPerPixel <= 8)
-                    {
-                        colorMode = ColorModes.Grayscale;
-                        channelsCount = 1;
-                        channelBitsCount = (short)bitsPerPixel;
-                    }
-                    else if (bitsPerPixel <= 24)
-                    {
-                        colorMode = ColorModes.Rgb;
-                        channelsCount = 3;
-                        channelBitsCount = (short)(bitsPerPixel / 3);
-                    }
-                    else // Assume 32‑bit (e.g., RGBA)
-                    {
-                        colorMode = ColorModes.Rgb;
-                        channelsCount = 4;
-                        channelBitsCount = (short)(bitsPerPixel / 4);
-                    }
 
-                    // Prepare output PSD file path
-                    string outputPath = Path.Combine(".", $"page_{i + 1}.psd");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure PSD save options
-                    PsdOptions psdOptions = new PsdOptions
-                    {
-                        ColorMode = colorMode,
-                        ChannelsCount = channelsCount,
-                        ChannelBitsCount = channelBitsCount,
-                        CompressionMethod = CompressionMethod.RLE
-                    };
-
-                    // Set vector rasterization options for the page
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-                    {
-                        PageWidth = page.Width,
-                        PageHeight = page.Height,
-                        BackgroundColor = Color.White,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                    psdOptions.VectorRasterizationOptions = vectorOptions;
-
-                    // Save the page as an individual PSD file
-                    page.Save(outputPath, psdOptions);
+                    pageIndex++;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

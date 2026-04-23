@@ -1,76 +1,74 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.jpg";
+            string outputDir = "output";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        while (true)
-        {
-            Console.Write("Enter feather radius (or press Enter to exit): ");
-            string line = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(line))
-                break;
-
-            if (!int.TryParse(line, out int featherRadius) || featherRadius < 0)
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine("Invalid radius. Please enter a non‑negative integer.");
-                continue;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Temporary file for export options source
-            string tempMaskPath = Path.Combine(Path.GetTempPath(), "mask_temp.png");
-            // Ensure temp directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(tempMaskPath));
+            Directory.CreateDirectory(outputDir);
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            while (true)
             {
-                var options = new GraphCutMaskingOptions
-                {
-                    FeatheringRadius = featherRadius,
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    ExportOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource(tempMaskPath, false)
-                    },
-                    BackgroundReplacementColor = Color.Transparent
-                };
+                Console.Write("Enter feather radius (or press Enter to exit): ");
+                string line = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(line))
+                    break;
 
-                using (MaskingResult results = new ImageMasking(image).Decompose(options))
-                using (RasterImage resultImage = (RasterImage)results[1].GetImage())
+                if (!int.TryParse(line, out int radius))
                 {
-                    resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    Console.WriteLine("Invalid number.");
+                    continue;
+                }
+
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    var options = new GraphCutMaskingOptions
+                    {
+                        FeatheringRadius = radius,
+                        Method = SegmentationMethod.GraphCut,
+                        Decompose = false,
+                        ExportOptions = new PngOptions
+                        {
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new StreamSource(new MemoryStream())
+                        },
+                        BackgroundReplacementColor = Color.Transparent
+                    };
+
+                    using (MaskingResult results = new ImageMasking(image).Decompose(options))
+                    {
+                        using (RasterImage foreground = (RasterImage)results[1].GetImage())
+                        {
+                            string outputPath = Path.Combine(outputDir, $"preview_{radius}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                            Console.WriteLine($"Saved preview to {outputPath}");
+                        }
+                    }
                 }
             }
-
-            // Clean up temporary file
-            if (File.Exists(tempMaskPath))
-                File.Delete(tempMaskPath);
-
-            Console.WriteLine($"Mask preview saved to {outputPath} with feather radius {featherRadius}.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

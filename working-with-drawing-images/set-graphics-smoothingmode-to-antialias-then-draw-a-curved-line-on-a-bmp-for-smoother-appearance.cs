@@ -2,37 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string outputPath = @"C:\temp\curved_line.bmp";
+        // Hardcoded output path
+        string outputPath = "output\\curved.bmp";
 
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
+        // Create a new BMP image with desired dimensions
+        var bmpOptions = new BmpOptions();
         using (Image image = Image.Create(bmpOptions, 500, 500))
         {
-            Graphics graphics = new Graphics(image);
+            // Initialize graphics object for drawing
+            var graphics = new Graphics(image);
+
+            // Enable anti-aliasing for smoother curves
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            Pen pen = new Pen(Color.Blue, 3);
-
-            Point[] points = new Point[]
+            // Define points for the curved line
+            Point[] curvePoints = new Point[]
             {
                 new Point(50, 250),
                 new Point(150, 50),
-                new Point(350, 450),
+                new Point(250, 250),
+                new Point(350, 50),
                 new Point(450, 250)
             };
 
-            graphics.DrawCurve(pen, points);
+            // Create a pen with desired color and width
+            var pen = new Pen(Color.Blue, 3);
 
-            image.Save();
+            // Draw the curved line
+            graphics.DrawCurve(pen, curvePoints);
+
+            // Save the image to the specified path
+            image.Save(outputPath);
         }
     }
 }

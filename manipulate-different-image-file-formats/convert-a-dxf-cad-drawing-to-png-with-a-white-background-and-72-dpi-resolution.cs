@@ -7,39 +7,40 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.dxf";
         string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DXF vector image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PNG export options
-            var pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                // Set resolution to 72 DPI
-                ResolutionSettings = new ResolutionSetting(72, 72),
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Configure vector rasterization (background and page size)
-                VectorRasterizationOptions = new VectorRasterizationOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                PngOptions options = new PngOptions
+                {
+                    ResolutionSettings = new ResolutionSetting(72, 72)
+                };
+
+                VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = image.Size
-                }
-            };
+                };
 
-            // Save as PNG with the specified options
-            image.Save(outputPath, pngOptions);
+                options.VectorRasterizationOptions = rasterOptions;
+
+                image.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

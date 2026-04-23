@@ -7,8 +7,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input BMP file path
-        string inputPath = @"C:\temp\input.bmp";
+        // Hardcoded input BMP path (relative to the working directory)
+        string inputPath = "Input/sample.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -17,28 +17,18 @@ class Program
             return;
         }
 
-        // Set up a simple HTTP listener
-        var listener = new System.Net.HttpListener();
-        listener.Prefixes.Add("http://localhost:8080/");
-        listener.Start();
-        Console.WriteLine("Listening on http://localhost:8080/ ...");
-
-        // Wait for a single request
-        var context = listener.GetContext();
-        var response = context.Response;
-        response.ContentType = "application/pdf";
-
-        // Load BMP image and save as PDF directly to the response stream
+        // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            image.Save(response.OutputStream, new PdfOptions());
+            // Prepare PDF export options
+            var pdfOptions = new PdfOptions();
+
+            // In a real web application, replace this stream with HttpResponse.OutputStream
+            using (Stream responseStream = Console.OpenStandardOutput())
+            {
+                // Write the PDF directly to the response stream
+                image.Save(responseStream, pdfOptions);
+            }
         }
-
-        // Complete the response
-        response.OutputStream.Close();
-        response.Close();
-
-        // Stop the listener
-        listener.Stop();
     }
 }

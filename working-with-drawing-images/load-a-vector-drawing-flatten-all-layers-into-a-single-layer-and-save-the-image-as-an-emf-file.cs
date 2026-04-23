@@ -2,41 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input_vector.svg";
-        string outputPath = @"C:\Images\output.emf";
+        // Hardcoded input and output paths
+        string inputPath = "input.emf";
+        string outputPath = "output.emf";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the vector drawing
+        // Load the vector image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare rasterization options for EMF output
+            // Create vector rasterization options manually
             var vectorOptions = new EmfRasterizationOptions
             {
-                PageSize = image.Size // Preserve original size
+                PageSize = image.Size
             };
 
-            var saveOptions = new EmfOptions
+            // Set up EMF export options
+            var exportOptions = new EmfOptions
             {
                 VectorRasterizationOptions = vectorOptions
             };
 
-            // Save the flattened image as EMF
-            image.Save(outputPath, saveOptions);
+            // Save as flattened EMF
+            image.Save(outputPath, exportOptions);
         }
     }
 }

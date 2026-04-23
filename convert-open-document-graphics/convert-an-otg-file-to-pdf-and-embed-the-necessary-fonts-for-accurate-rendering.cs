@@ -1,49 +1,65 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\input\sample.otg";
-        string outputPath = @"C:\output\sample.pdf";
+        // Hardcoded input, output, and fonts directories
+        string inputPath = Path.Combine("Input", "sample.otg");
+        string outputPath = Path.Combine("Output", "sample.pdf");
+        string fontsPath = Path.Combine("Fonts");
 
-        // Verify that the input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        // Load options with custom font source
+        var loadOptions = new LoadOptions();
+        loadOptions.AddCustomFontSource(args =>
         {
-            // Configure rasterization options for OTG → PDF conversion
-            OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+            var fontDataList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+            if (Directory.Exists(fontsPath))
             {
-                PageSize = image.Size,               // Preserve original page size
-                BackgroundColor = Color.White        // Optional: set a white background
+                foreach (var fontFile in Directory.GetFiles(fontsPath))
+                {
+                    byte[] data = File.ReadAllBytes(fontFile);
+                    string name = Path.GetFileNameWithoutExtension(fontFile);
+                    fontDataList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                }
+            }
+            return fontDataList.ToArray();
+        }, fontsPath);
+
+        // Load the OTG image with the custom fonts
+        using (Image image = Image.Load(inputPath, loadOptions))
+        {
+            // Configure rasterization options for OTG
+            var otgRasterOptions = new OtgRasterizationOptions
+            {
+                PageSize = image.Size,
+                BackgroundColor = Color.White,
+                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = SmoothingMode.None
             };
 
-            // Set up PDF save options and attach the rasterization options
-            PdfOptions pdfOptions = new PdfOptions
+            // Set up PDF save options
+            var pdfOptions = new PdfOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = otgRasterOptions
             };
 
-            // Font embedding is handled automatically by Aspose.Imaging.
-            // If custom fonts are required, configure FontSettings here, e.g.:
-            // FontSettings.SetFontsFolder(@"C:\MyFonts");
-            // FontSettings.DefaultFontName = "Arial";
-
-            // Save the image as PDF
+            // Save as PDF
             image.Save(outputPath, pdfOptions);
         }
     }

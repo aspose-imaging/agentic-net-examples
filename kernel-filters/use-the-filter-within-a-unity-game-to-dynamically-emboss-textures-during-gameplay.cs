@@ -1,44 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Textures\input.png";
-        string outputPath = @"C:\Textures\output_emboss.png";
+        // Hard‑coded input and output paths
+        string inputPath = "Assets/Textures/source.png";
+        string outputPath = "Assets/Textures/embossed.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the source file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image using Aspose.Imaging
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering methods
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply the 3x3 emboss convolution kernel to the whole image
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            RasterImage raster = (RasterImage)image;
-
-            // Create emboss filter using a predefined convolution kernel
-            double[,] embossKernel = ConvolutionFilter.Emboss3x3;
-            var filterOptions = new ConvolutionFilterOptions(embossKernel);
-
-            // Apply the emboss filter to the whole image
-            raster.Filter(raster.Bounds, filterOptions);
-
-            // Save the processed image as PNG
-            var saveOptions = new PngOptions();
-            raster.Save(outputPath, saveOptions);
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

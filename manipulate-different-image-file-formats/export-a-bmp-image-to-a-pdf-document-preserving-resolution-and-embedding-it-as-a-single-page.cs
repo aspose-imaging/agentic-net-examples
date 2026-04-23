@@ -7,32 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PDF export options
-            PdfOptions pdfOptions = new PdfOptions
+            // Verify that the input BMP file exists
+            if (!File.Exists(inputPath))
             {
-                // Preserve the original DPI resolution of the BMP image
-                UseOriginalImageResolution = true
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as a single‑page PDF
-            image.Save(outputPath, pdfOptions);
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PDF export options
+                var pdfOptions = new PdfOptions
+                {
+                    // Preserve the original DPI resolution of the BMP image
+                    UseOriginalImageResolution = true
+                };
+
+                // Save the image as a single‑page PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

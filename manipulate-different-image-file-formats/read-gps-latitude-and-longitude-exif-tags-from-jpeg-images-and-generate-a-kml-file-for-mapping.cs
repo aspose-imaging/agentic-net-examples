@@ -1,135 +1,99 @@
 using System;
 using System.IO;
-using System.Text;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Exif;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input folder and output KML file paths
-        string inputFolder = @"C:\Images";
-        string outputPath = @"C:\Images\output.kml";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Collect all JPEG files in the input folder
-        string[] jpegFiles = Directory.GetFiles(inputFolder, "*.jpg");
-
-        // Prepare a list to hold KML placemark entries
-        List<string> placemarks = new List<string>();
-
-        foreach (string inputPath in jpegFiles)
+        try
         {
-            // Verify the input file exists
+            // Hardcoded input and output paths
+            string inputPath = "C:\\Images\\photo.jpg";
+            string outputPath = "C:\\Output\\photo.kml";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the JPEG image
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load JPEG image
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
                 // Access EXIF data
-                var exif = image.ExifData;
+                JpegExifData exif = image.ExifData as JpegExifData;
                 if (exif == null)
-                    continue; // No EXIF data, skip this image
+                {
+                    Console.Error.WriteLine("No EXIF data found in the image.");
+                    return;
+                }
 
-                // Retrieve GPS latitude and longitude values and their references
-                var latRef = exif.GPSLatitudeRef;      // Expected "N" or "S"
-                var lonRef = exif.GPSLongitudeRef;     // Expected "E" or "W"
-                var latitude = exif.GPSLatitude;       // May be double or array of rationals
-                var longitude = exif.GPSLongitude;     // May be double or array of rationals
+                // Retrieve GPS tags
+                var latRef = exif.GPSLatitudeRef;
+                var lonRef = exif.GPSLongitudeRef;
+                var latValues = exif.GPSLatitude;   // Expected to be an array of three rational numbers (degrees, minutes, seconds)
+                var lonValues = exif.GPSLongitude; // Same as above
 
-                // If any GPS component is missing, skip this image
-                if (latRef == null || lonRef == null || latitude == null || longitude == null)
-                    continue;
+                if (latValues == null || lonValues == null || latRef == null || lonRef == null)
+                {
+                    Console.Error.WriteLine("GPS information is missing in the EXIF data.");
+                    return;
+                }
 
-                // Convert latitude and longitude to decimal degrees
-                double latDecimal = ConvertToDecimalDegrees(latitude);
-                double lonDecimal = ConvertToDecimalDegrees(longitude);
+                // Convert rational GPS values to decimal degrees
+                double ConvertToDecimal(object[] rationalValues, string reference)
+                {
+                    // Each element is expected to be a Rational (numerator/denominator)
+                    // Aspose.Imaging represents rational numbers as double for simplicity
+                    // If the type is not double, attempt to parse
+                    double degrees = 0, minutes = 0, seconds = 0;
 
-                // Apply reference direction (negative for South or West)
-                if (latRef.Equals("S", StringComparison.OrdinalIgnoreCase))
-                    latDecimal = -latDecimal;
-                if (lonRef.Equals("W", StringComparison.OrdinalIgnoreCase))
-                    lonDecimal = -lonDecimal;
+                    if (rationalValues.Length >= 1 && double.TryParse(rationalValues[0].ToString(), out double d))
+                        degrees = d;
+                    if (rationalValues.Length >= 2 && double.TryParse(rationalValues[1].ToString(), out double m))
+                        minutes = m;
+                    if (rationalValues.Length >= 3 && double.TryParse(rationalValues[2].ToString(), out double s))
+                        seconds = s;
 
-                // Build a KML placemark for this image
-                string fileName = Path.GetFileName(inputPath);
-                string placemark = $@"
-    <Placemark>
-        <name>{EscapeXml(fileName)}</name>
-        <Point>
-            <coordinates>{lonDecimal.ToString(System.Globalization.CultureInfo.InvariantCulture)},{latDecimal.ToString(System.Globalization.CultureInfo.InvariantCulture)},0</coordinates>
-        </Point>
-    </Placemark>";
-                placemarks.Add(placemark);
+                    double decimalDeg = Math.Abs(degrees) + minutes / 60.0 + seconds / 3600.0;
+                    // Apply sign based on reference (N/S, E/W)
+                    if (reference.Equals("S", StringComparison.OrdinalIgnoreCase) ||
+                        reference.Equals("W", StringComparison.OrdinalIgnoreCase))
+                    {
+                        decimalDeg = -decimalDeg;
+                    }
+                    return decimalDeg;
+                }
+
+                double latitude = ConvertToDecimal((object[])latValues, latRef);
+                double longitude = ConvertToDecimal((object[])lonValues, lonRef);
+
+                // Build KML content
+                string kml = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                             $"<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n" +
+                             $"  <Document>\n" +
+                             $"    <Placemark>\n" +
+                             $"      <name>{Path.GetFileNameWithoutExtension(inputPath)}</name>\n" +
+                             $"      <Point><coordinates>{longitude},{latitude},0</coordinates></Point>\n" +
+                             $"    </Placemark>\n" +
+                             $"  </Document>\n" +
+                             $"</kml>";
+
+                // Write KML file
+                File.WriteAllText(outputPath, kml);
+                Console.WriteLine($"KML file created at: {outputPath}");
             }
         }
-
-        // Assemble the final KML document
-        StringBuilder kmlBuilder = new StringBuilder();
-        kmlBuilder.AppendLine(@"<?xml version=""1.0"" encoding=""UTF-8""?>");
-        kmlBuilder.AppendLine(@"<kml xmlns=""http://www.opengis.net/kml/2.2"">");
-        kmlBuilder.AppendLine(@"<Document>");
-        foreach (var pm in placemarks)
+        catch (Exception ex)
         {
-            kmlBuilder.AppendLine(pm);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-        kmlBuilder.AppendLine(@"</Document>");
-        kmlBuilder.AppendLine(@"</kml>");
-
-        // Write the KML content to the output file
-        File.WriteAllText(outputPath, kmlBuilder.ToString());
-    }
-
-    // Helper to convert GPS rational values (degrees, minutes, seconds) to decimal degrees
-    private static double ConvertToDecimalDegrees(object gpsValue)
-    {
-        // Aspose.Imaging may return the GPS value as a double, or as an array of three rationals.
-        // This method handles both cases.
-
-        if (gpsValue is double d)
-        {
-            return d;
-        }
-
-        // Attempt to treat it as an array of three numbers (degrees, minutes, seconds)
-        if (gpsValue is System.Collections.IEnumerable enumerable)
-        {
-            double[] parts = new double[3];
-            int i = 0;
-            foreach (var part in enumerable)
-            {
-                if (i >= 3) break;
-                if (part is double pd)
-                    parts[i] = pd;
-                else if (part is int pi)
-                    parts[i] = pi;
-                else if (part is long pl)
-                    parts[i] = pl;
-                else
-                    parts[i] = Convert.ToDouble(part);
-                i++;
-            }
-            if (i == 3)
-            {
-                return parts[0] + parts[1] / 60.0 + parts[2] / 3600.0;
-            }
-        }
-
-        // Fallback: return 0 if conversion fails
-        return 0.0;
-    }
-
-    // Simple XML escaping for element content
-    private static string EscapeXml(string text)
-    {
-        return System.Security.SecurityElement.Escape(text);
     }
 }

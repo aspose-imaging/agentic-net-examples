@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,7 +11,7 @@ class Program
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,27 +21,31 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
-
-            // Create Emboss3x3 convolution filter options
-            var embossFilter = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
-
-            // Apply the filter to the entire image
-            raster.Filter(raster.Bounds, embossFilter);
-
-            // Prepare PNG save options and preserve metadata (including color profile)
-            var saveOptions = new PngOptions
+            // Load the PNG image as a RasterImage
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                KeepMetadata = true
-            };
+                // Create Emboss3x3 filter options
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
 
-            // Save the processed image
-            raster.Save(outputPath, saveOptions);
+                // Apply the filter to the entire image
+                raster.Filter(raster.Bounds, filterOptions);
+
+                // Prepare PNG save options preserving metadata (color profile)
+                var pngOptions = new PngOptions
+                {
+                    KeepMetadata = true
+                };
+
+                // Save the processed image
+                raster.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

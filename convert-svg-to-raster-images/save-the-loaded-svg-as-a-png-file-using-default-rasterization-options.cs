@@ -1,36 +1,42 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        // Load SVG from file stream and rasterize to PNG
+        using (Stream stream = File.OpenRead(inputPath))
+        using (SvgImage svgImage = new SvgImage(stream))
         {
-            var svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
+            // Default rasterization options
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
 
-            var rasterOptions = new SvgRasterizationOptions();
-
-            var pngOptions = new PngOptions
+            // PNG save options with rasterization settings
+            PngOptions saveOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = rasterizationOptions
             };
 
-            svgImage.Save(outputPath, pngOptions);
+            // Save the rasterized image
+            svgImage.Save(outputPath, saveOptions);
         }
     }
 }

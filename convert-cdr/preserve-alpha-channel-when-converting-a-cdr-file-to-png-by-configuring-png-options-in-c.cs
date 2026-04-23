@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -9,10 +10,10 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.png";
+        string inputPath = "sample.cdr";
+        string outputPath = "sample.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,21 +23,30 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR vector image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure PNG options to preserve alpha channel
-            using (PngOptions pngOptions = new PngOptions())
+            // Load the CDR vector image
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
-                pngOptions.VectorRasterizationOptions = new CdrRasterizationOptions
+                // Configure PNG options to preserve alpha channel
+                PngOptions options = new PngOptions
                 {
-                    BackgroundColor = Color.Transparent
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height,
+                        BackgroundColor = Color.Transparent
+                    }
                 };
 
-                // Save as PNG with the configured options
-                image.Save(outputPath, pngOptions);
+                // Save as PNG with the specified options
+                cdr.Save(outputPath, options);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

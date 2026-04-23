@@ -1,55 +1,55 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded paths
+            string inputPath = @"c:\temp\source.tif";   // placeholder input
+            string outputPath = @"c:\temp\scanned_output.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Input validation
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Load existing TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            // Create options for the new frame
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure options for a CCITT Group 4 compressed B/W frame
             TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions.BitsPerSample = new ushort[] { 1 }; // 1 bit per pixel (B/W)
-            frameOptions.ByteOrder = TiffByteOrder.LittleEndian;
-            frameOptions.Compression = TiffCompressions.CcittFax4; // CCITT Group 4
-            frameOptions.Photometric = TiffPhotometrics.MinIsBlack; // 0 = black, 1 = white
+            frameOptions.Compression = TiffCompressions.CcittFax4;          // Group 4
+            frameOptions.Photometric = TiffPhotometrics.MinIsBlack;        // 0 = black, 1 = white
+            frameOptions.BitsPerSample = new ushort[] { 1 };               // 1‑bit per pixel
+            frameOptions.ByteOrder = TiffByteOrder.LittleEndian;           // typical for fax
 
-            // Define custom dimensions for the new frame
-            int frameWidth = 1200;
-            int frameHeight = 1800;
-
-            // Create the new TIFF frame
-            TiffFrame newFrame = new TiffFrame(frameOptions, frameWidth, frameHeight);
-
-            // Add the new frame to the TIFF image
-            tiffImage.AddFrame(newFrame);
+            // Create a frame with custom dimensions
+            int frameWidth = 1024;   // custom width
+            int frameHeight = 768;   // custom height
+            TiffFrame frame = new TiffFrame(frameOptions, frameWidth, frameHeight);
 
             // Set DPI values for scanning quality
-            tiffImage.HorizontalResolution = 300f; // 300 DPI horizontal
-            tiffImage.VerticalResolution = 300f;   // 300 DPI vertical
+            frame.HorizontalResolution = 300; // 300 DPI horizontal
+            frame.VerticalResolution = 300;   // 300 DPI vertical
 
-            // Save the modified TIFF image
-            tiffImage.Save(outputPath);
+            // Assemble the TIFF image and save
+            using (TiffImage tiffImage = new TiffImage(frame))
+            {
+                tiffImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

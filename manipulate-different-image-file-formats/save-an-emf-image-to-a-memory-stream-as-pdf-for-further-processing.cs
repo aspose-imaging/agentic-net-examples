@@ -7,31 +7,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
+        // Hardcoded input and output paths
         string inputPath = @"C:\Temp\input.emf";
+        string outputPath = @"C:\Temp\output.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Load the EMF image
-        using (Image emfImage = Image.Load(inputPath))
-        {
-            // Prepare a memory stream to hold the PDF data
-            using (MemoryStream pdfStream = new MemoryStream())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Create PDF save options (default settings)
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Save the EMF image to the memory stream as PDF
-                emfImage.Save(pdfStream, pdfOptions);
-
-                // Example processing: output the size of the generated PDF
-                Console.WriteLine($"PDF generated in memory. Size: {pdfStream.Length} bytes");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (Image emfImage = Image.Load(inputPath))
+            {
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions();
+
+                // Save to a memory stream as PDF
+                using (MemoryStream pdfStream = new MemoryStream())
+                {
+                    emfImage.Save(pdfStream, pdfOptions);
+
+                    // Example of further processing: write the PDF bytes to a file
+                    File.WriteAllBytes(outputPath, pdfStream.ToArray());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

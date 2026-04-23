@@ -1,45 +1,47 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.svg";
+        string inputPath = "Input/sample.tif";
+        string outputPath = "Output/clipPath.svg";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the TIFF image
-        using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+        try
         {
-            // Convert clipping path resources to a GraphicsPath
-            var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter
-                .ToGraphicsPath(tiff.ActiveFrame.PathResources.ToArray(), tiff.ActiveFrame.Size);
-
-            // Create an SVG image with the same dimensions as the TIFF frame
-            var svgOptions = new SvgOptions();
-            using (Image svgImage = Image.Create(svgOptions, tiff.Width, tiff.Height))
+            using (var tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Draw the extracted path onto the SVG canvas
-                Graphics graphics = new Graphics(svgImage);
-                graphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
+                // Convert clipping path resources to a GraphicsPath
+                var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter
+                    .ToGraphicsPath(tiffImage.ActiveFrame.PathResources.ToArray(),
+                                    tiffImage.ActiveFrame.Size);
 
-                // Save the SVG file
-                svgImage.Save(outputPath, svgOptions);
+                // Create an SVG canvas and draw the path
+                var svgGraphics = new SvgGraphics2D(tiffImage.Width, tiffImage.Height, 96);
+                svgGraphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
+
+                // Finalize SVG image
+                using (var svgImage = svgGraphics.EndRecording())
+                {
+                    svgImage.Save(outputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

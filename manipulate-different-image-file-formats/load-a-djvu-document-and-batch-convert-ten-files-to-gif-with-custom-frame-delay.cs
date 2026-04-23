@@ -3,39 +3,52 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Gif;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
-        string inputDir = "Input";
-        string outputDir = "Output";
-
-        for (int i = 1; i <= 10; i++)
+        try
         {
-            string inputPath = Path.Combine(inputDir, $"file{i}.djvu");
-            string outputPath = Path.Combine(outputDir, $"file{i}.gif");
+            // Define input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            if (!File.Exists(inputPath))
+            // Process ten DjVu files
+            for (int i = 1; i <= 10; i++)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-            {
-                GifOptions gifOptions = new GifOptions
+                string inputPath = Path.Combine(inputDirectory, $"file{i}.djvu");
+                if (!File.Exists(inputPath))
                 {
-                    LoopsCount = 0
-                    // If a frame delay property exists, set it here, e.g.,
-                    // DefaultFrameDelay = 100 // delay in hundredths of a second
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                djvu.Save(outputPath, gifOptions);
+                string outputPath = Path.Combine(outputDirectory, $"file{i}.gif");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load DjVu image
+                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+                {
+                    // Configure GIF options with custom frame delay (200 ms)
+                    var gifOptions = new GifOptions
+                    {
+                        MultiPageOptions = new MultiPageOptions
+                        {
+                            Mode = MultiPageMode.TimeInterval,
+                            TimeInterval = new TimeInterval(0, 200) // delay in milliseconds
+                        },
+                        LoopsCount = 0 // infinite looping
+                    };
+
+                    // Save as GIF
+                    djvu.Save(outputPath, gifOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

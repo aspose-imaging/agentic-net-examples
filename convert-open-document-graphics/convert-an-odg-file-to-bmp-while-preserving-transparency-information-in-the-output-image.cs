@@ -2,14 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.odg";
-        string outputPath = @"C:\temp\sample.bmp";
+        string inputPath = @"C:\temp\input.odg";
+        string outputPath = @"C:\temp\output.bmp";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -22,13 +23,24 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the ODG image
-        using (Image odgImage = Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Prepare BMP save options (default compression Bitfields preserves transparency)
+            // Configure BMP options – default compression (Bitfields) preserves transparency
             BmpOptions bmpOptions = new BmpOptions();
 
-            // Save the image as BMP preserving alpha channel
-            odgImage.Save(outputPath, bmpOptions);
+            // Set rasterization options for vector ODG content
+            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            {
+                // Transparent background to keep alpha channel
+                BackgroundColor = Aspose.Imaging.Color.Transparent,
+                // Preserve original image size
+                PageSize = image.Size
+            };
+
+            bmpOptions.VectorRasterizationOptions = rasterOptions;
+
+            // Save the image as BMP with transparency
+            image.Save(outputPath, bmpOptions);
         }
     }
 }

@@ -4,62 +4,61 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.svg";
-        string outputPath = "output\\filtered.png";
+        string outputPath = "output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image svgImage = Image.Load(inputPath))
+        try
         {
-            // Prepare rasterization options for SVG
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Load SVG image
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                PageSize = svgImage.Size
-            };
+                // Set up rasterization options for PNG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = svgImage.Size;
 
-            // Prepare PNG save options with the rasterization settings
-            PngOptions pngSaveOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Rasterize SVG to a memory stream
-            using (MemoryStream rasterStream = new MemoryStream())
-            {
-                svgImage.Save(rasterStream, pngSaveOptions);
-                rasterStream.Position = 0;
-
-                // Load the rasterized image as a RasterImage
-                using (Image rasterImageContainer = Image.Load(rasterStream))
+                // Rasterize SVG to a memory stream
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    RasterImage rasterImage = (RasterImage)rasterImageContainer;
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                    // Create convolution kernel using GetBlurMotion (size 10, angle 120)
-                    double[,] kernel = ConvolutionFilter.GetBlurMotion(10, 120.0);
+                    // Load rasterized image
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                    {
+                        // Create convolution kernel using GetBlurMotion (size=10, angle=120)
+                        double[,] kernel = ConvolutionFilter.GetBlurMotion(10, 120.0);
+                        ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
 
-                    // Apply the convolution filter
-                    ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
-                    rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                        // Apply filter to the entire image
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                    // Save the filtered raster image as PNG
-                    rasterImage.Save(outputPath, new PngOptions());
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the filtered image as PNG
+                        rasterImage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

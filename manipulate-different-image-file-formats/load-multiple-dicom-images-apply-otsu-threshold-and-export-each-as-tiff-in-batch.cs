@@ -3,45 +3,64 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories (relative paths)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Get all DICOM files in the input directory
-        string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
-
-        foreach (string inputPath in dicomFiles)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Set up input and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Prepare output file path with .tif extension
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".tif");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the DICOM image, apply Otsu threshold, and save as TIFF
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                DicomImage dicomImage = (DicomImage)image;
-                dicomImage.BinarizeOtsu();
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Prepare output path with .tiff extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tiff";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load DICOM image, apply Otsu threshold, and save as TIFF
+                using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+                {
+                    dicomImage.BinarizeOtsu();
+
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                     dicomImage.Save(outputPath, tiffOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,9 +8,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\vector.svg";
-        string outputPath = @"C:\Images\Resized\vector_resized.jpg";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.jpg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,35 +19,34 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the vector image
         using (Image image = Image.Load(inputPath))
         {
-            // Desired maximum dimensions while preserving aspect ratio
-            const int maxWidth = 800;
-            const int maxHeight = 800;
+            // Desired maximum dimensions for the resized image
+            int maxWidth = 1024;
+            int maxHeight = 768;
 
-            // Calculate scaling factor
-            double widthScale = (double)maxWidth / image.Width;
-            double heightScale = (double)maxHeight / image.Height;
-            double scale = Math.Min(widthScale, heightScale);
-            if (scale > 1) scale = 1; // Do not upscale beyond original size
+            // Compute scaling factor while preserving aspect ratio
+            double widthRatio = (double)maxWidth / image.Width;
+            double heightRatio = (double)maxHeight / image.Height;
+            double scale = Math.Min(widthRatio, heightRatio);
 
             int newWidth = (int)(image.Width * scale);
             int newHeight = (int)(image.Height * scale);
 
-            // Resize while maintaining aspect ratio
-            image.Resize(newWidth, newHeight);
+            // Resize using a high‑quality resampling method
+            image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
 
-            // Prepare JPEG save options with 90% quality
+            // Configure JPEG export options with 90 % quality
             JpegOptions jpegOptions = new JpegOptions
             {
                 Quality = 90
             };
 
-            // Save as high‑quality JPEG
+            // Save the resized image as JPEG
             image.Save(outputPath, jpegOptions);
         }
     }

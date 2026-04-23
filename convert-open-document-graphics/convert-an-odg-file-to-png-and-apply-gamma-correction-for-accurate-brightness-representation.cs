@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -9,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample_converted.png";
+        string outputPath = @"C:\Images\sample.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,27 +22,21 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG image and rasterize it to PNG
+        // Load the ODG image and save it as PNG
         using (Image odgImage = Image.Load(inputPath))
         {
-            // Save as PNG using default PNG options
             odgImage.Save(outputPath, new PngOptions());
         }
 
-        // Load the newly created PNG to apply gamma correction
+        // Load the newly created PNG, apply gamma correction, and overwrite the file
         using (Image pngImage = Image.Load(outputPath))
         {
             // Cast to RasterImage to access AdjustGamma
-            if (pngImage is RasterImage rasterImage)
+            if (pngImage is RasterImage raster)
             {
                 // Apply gamma correction (example gamma value 2.2)
-                rasterImage.AdjustGamma(2.2f);
-                // Overwrite the PNG with gamma‑corrected data
-                rasterImage.Save(outputPath);
-            }
-            else
-            {
-                Console.Error.WriteLine("Loaded image is not a raster image; cannot apply gamma correction.");
+                raster.AdjustGamma(2.2f);
+                raster.Save(outputPath, new PngOptions());
             }
         }
     }

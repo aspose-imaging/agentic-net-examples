@@ -5,40 +5,48 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input\\sample.webp";
-        string outputPath = "Output\\result.pdf";
-        string tempPath = "Output\\temp_quality.webp";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.pdf";
 
-        // Validate input file existence
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directories exist
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-        // Load the original WebP image and re‑save it with the desired quality
-        using (Image image = Image.Load(inputPath))
+        // Desired quality for the intermediate WebP encoding (0‑100)
+        const float desiredQuality = 80f;
+
+        // Load the original WebP image
+        using (Image originalImage = Image.Load(inputPath))
         {
+            // Re‑encode the image with the specified quality into a memory stream
             var webpOptions = new WebPOptions
             {
-                Lossless = false,   // Use lossy compression
-                Quality = 80        // Adjust quality (0‑100)
+                Lossless = false,
+                Quality = desiredQuality
             };
-            image.Save(tempPath, webpOptions);
-        }
 
-        // Load the quality‑adjusted WebP and convert it to PDF
-        using (Image adjusted = Image.Load(tempPath))
-        {
-            var pdfOptions = new PdfOptions();
-            adjusted.Save(outputPath, pdfOptions);
+            using (var tempStream = new MemoryStream())
+            {
+                originalImage.Save(tempStream, webpOptions);
+                tempStream.Position = 0; // Reset stream for reading
+
+                // Load the re‑encoded image from the memory stream
+                using (Image reencodedImage = Image.Load(tempStream))
+                {
+                    // Save the image as PDF
+                    var pdfOptions = new PdfOptions(); // Default PDF options
+                    reencodedImage.Save(outputPath, pdfOptions);
+                }
+            }
         }
     }
 }

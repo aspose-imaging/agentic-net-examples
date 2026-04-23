@@ -8,25 +8,14 @@ class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        string inputDirectory = "Input";
+        string outputDirectory = "Output";
 
-        if (!Directory.Exists(inputDirectory))
-        {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+        Directory.CreateDirectory(outputDirectory);
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+        string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
+        foreach (string inputPath in svgFiles)
         {
             if (!File.Exists(inputPath))
             {
@@ -34,7 +23,9 @@ class Program
                 return;
             }
 
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image image = Image.Load(inputPath))
@@ -45,6 +36,14 @@ class Program
                     {
                         PdfCompliance = PdfComplianceVersion.PdfA1b
                     };
+
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+
                     image.Save(outputPath, pdfOptions);
                 }
             }

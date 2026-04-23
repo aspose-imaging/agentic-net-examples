@@ -1,16 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Png; // For PNG support if needed
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,37 +20,30 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the input image
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Create a Graphics instance for drawing
+            // Create a Graphics object for drawing
             Graphics graphics = new Graphics(image);
 
-            // Clear the canvas (optional)
-            graphics.Clear(Color.White);
-
-            // Create a GraphicsPath and add a rectangle shape
+            // Build a simple GraphicsPath (a rectangle in this example)
             GraphicsPath path = new GraphicsPath();
             Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
             path.AddFigure(figure);
 
-            // Draw the original path with a thin black pen
-            graphics.DrawPath(new Pen(Color.Black, 1), path);
-
-            // Widen the path by 3 pixels using a thick pen (for hit testing)
-            Pen widenPen = new Pen(Color.Red, 3);
+            // Widen the path by 3 pixels using a thick pen (used for hit testing)
+            Pen widenPen = new Pen(Aspose.Imaging.Color.Black, 3);
             path.Widen(widenPen);
 
-            // Draw the widened path with a blue pen to visualize the result
-            graphics.DrawPath(new Pen(Color.Blue, 1), path);
+            // Optionally draw the widened path to visualize the result
+            graphics.DrawPath(new Pen(Aspose.Imaging.Color.Red, 1), path);
 
-            // Save the modified image as PNG
-            PngOptions pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the modified image
+            image.Save(outputPath);
         }
     }
 }

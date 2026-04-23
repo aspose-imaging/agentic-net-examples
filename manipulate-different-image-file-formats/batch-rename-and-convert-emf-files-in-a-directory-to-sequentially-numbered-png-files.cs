@@ -2,49 +2,73 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
-
-        string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
-        int counter = 1;
-
-        foreach (string emfPath in emfFiles)
+        try
         {
-            if (!File.Exists(emfPath))
+            // Define input and output directories (relative paths)
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            // Validate input directory
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {emfPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            string outputPath = Path.Combine(outputDirectory, $"{counter}.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(emfPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
             {
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                {
-                    PageSize = image.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
-                };
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                using (PngOptions pngOptions = new PngOptions
+            // Get all EMF files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+
+            // Process each file and convert to sequential PNG
+            for (int i = 0; i < files.Length; i++)
+            {
+                string inputPath = files[i];
+
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    VectorRasterizationOptions = rasterOptions
-                })
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build output path with sequential numbering (1.png, 2.png, ...)
+                string outputPath = Path.Combine(outputDirectory, $"{i + 1}.png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the EMF image
+                using (Image image = Image.Load(inputPath))
                 {
+                    // Configure PNG options with vector rasterization
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageSize = image.Size
+                        }
+                    };
+
+                    // Save as PNG
                     image.Save(outputPath, pngOptions);
                 }
             }
-
-            counter++;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

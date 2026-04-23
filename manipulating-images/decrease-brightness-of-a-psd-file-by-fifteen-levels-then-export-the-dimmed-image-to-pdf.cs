@@ -5,30 +5,48 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.psd");
-        string outputPath = Path.Combine("Output", "dimmed.pdf");
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.psd";
+            string outputPath = "Output/dimmed.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = image as RasterImage;
-            if (raster != null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                if (!raster.IsCached) raster.CacheData();
-                raster.AdjustBrightness(-15);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            PdfOptions pdfOptions = new PdfOptions();
-            image.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for brightness adjustment
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
+                // Decrease brightness by 15 levels
+                raster.AdjustBrightness(-15);
+
+                // Save the adjusted image as PDF
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 
@@ -8,29 +7,35 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\input.bmp";
-        string outputPath = @"c:\temp\output.webp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output.webp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image and save it as lossless WebP
-        using (BmpImage bmpImage = new BmpImage(inputPath))
-        {
-            var webpOptions = new WebPOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Lossless = true
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            bmpImage.Save(outputPath, webpOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load BMP image
+            using (BmpImage bmpImage = new BmpImage(inputPath))
+            {
+                // Set lossless WebP options
+                var webpOptions = new WebPOptions { Lossless = true };
+
+                // Save as WebP
+                bmpImage.Save(outputPath, webpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

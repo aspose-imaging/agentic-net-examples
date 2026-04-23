@@ -1,96 +1,107 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input CDR files
-        string[] inputPaths = new[]
+        try
         {
-            @"C:\Images\input1.cdr",
-            @"C:\Images\input2.cdr",
-            @"C:\Images\input3.cdr"
-        };
+            // Hardcoded input CDR files
+            string[] inputPaths = {
+                "input1.cdr",
+                "input2.cdr",
+                "input3.cdr"
+            };
 
-        // Hard‑coded output multipage TIFF
-        string outputPath = @"C:\Images\output.tif";
+            // Hardcoded output TIFF file
+            string outputPath = "output\\merged.tif";
 
-        // Verify each input file exists
-        foreach (var inputPath in inputPaths)
-        {
-            if (!File.Exists(inputPath))
+            // Verify input files exist
+            foreach (var inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Temporary folder for intermediate TIFF files
-        string tempDir = @"C:\Images\temp";
-        Directory.CreateDirectory(tempDir);
-
-        // Collect all adjusted frames
-        List<TiffFrame> adjustedFrames = new List<TiffFrame>();
-
-        // Process each CDR file
-        foreach (var inputPath in inputPaths)
-        {
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-            {
-                // Iterate through all pages of the CDR document
-                foreach (CdrImagePage page in cdrImage.Pages)
+                if (!File.Exists(inputPath))
                 {
-                    // Save the page as a temporary TIFF file
-                    string tempTiffPath = Path.Combine(tempDir, Guid.NewGuid().ToString() + ".tif");
-                    page.Save(tempTiffPath, new TiffOptions(TiffExpectedFormat.Default));
-
-                    // Load the temporary TIFF, adjust contrast, and store its frame
-                    using (TiffImage tiffImage = (TiffImage)Image.Load(tempTiffPath))
-                    {
-                        // Adjust contrast (example value: 50)
-                        tiffImage.AdjustContrast(50f);
-
-                        // Keep the adjusted frame for later merging
-                        adjustedFrames.Add(tiffImage.ActiveFrame);
-                    }
-
-                    // Optionally delete the temporary file
-                    try { File.Delete(tempTiffPath); } catch { /* ignore cleanup errors */ }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
             }
-        }
 
-        // Ensure we have at least one frame to create the final TIFF
-        if (adjustedFrames.Count == 0)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Collect raster frames from each CDR
+            List<TiffFrame> frames = new List<TiffFrame>();
+
+            foreach (var cdrPath in inputPaths)
+            {
+                using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
+                {
+                    // Rasterize CDR to PNG in memory
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        PngOptions pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = new VectorRasterizationOptions
+                            {
+                                PageWidth = cdr.Width,
+                                PageHeight = cdr.Height
+                            }
+                        };
+                        cdr.Save(ms, pngOptions);
+                        ms.Position = 0;
+
+                        // Load raster image from memory
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            // Create a TIFF frame from the raster image
+                            TiffFrame frame = new TiffFrame(raster);
+                            frames.Add(frame);
+                        }
+                    }
+                }
+            }
+
+            if (frames.Count == 0)
+            {
+                Console.Error.WriteLine("No frames were created.");
+                return;
+            }
+
+            // Create TIFF image with appropriate options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            {
+                Source = new FileCreateSource(outputPath, false),
+                Photometric = TiffPhotometrics.Rgb,
+                BitsPerSample = new ushort[] { 8, 8, 8 }
+            };
+
+            // Use dimensions of the first frame for the canvas
+            using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, frames[0].Width, frames[0].Height))
+            {
+                // Remove the default empty frame
+                tiff.RemoveFrame(0);
+
+                // Add all processed frames
+                foreach (var frame in frames)
+                {
+                    tiff.AddFrame(frame);
+                }
+
+                // Save the multipage TIFF
+                tiff.Save();
+            }
+        }
+        catch (Exception ex)
         {
-            Console.Error.WriteLine("No frames were processed.");
-            return;
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Create the final multipage TIFF using the first frame
-        TiffImage finalTiff = new TiffImage(adjustedFrames[0]);
-
-        // Append remaining frames
-        for (int i = 1; i < adjustedFrames.Count; i++)
-        {
-            finalTiff.AddFrame(adjustedFrames[i]);
-        }
-
-        // Save the merged multipage TIFF
-        finalTiff.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
-
-        // Cleanup
-        finalTiff.Dispose();
     }
 }

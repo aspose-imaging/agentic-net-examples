@@ -2,61 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded paths (no argument validation)
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_signed.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string outputPath = "output/signed.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Four‑character password for the digital signature
-        string password = "ABCD";
-
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage (or RasterCachedImage) to access signature methods
-            if (image is RasterImage rasterImage)
+            // Create a 1024x1024 PNG image with TruecolorWithAlpha
+            using (PngImage png = new PngImage(1024, 1024, PngColorType.TruecolorWithAlpha))
             {
-                // Embed the digital signature using the password
-                rasterImage.EmbedDigitalSignature(password);
+                // Embed digital signature using a four‑character password
+                string password = "ABCD";
+                png.EmbedDigitalSignature(password);
 
-                // Save the signed image
-                rasterImage.Save(outputPath);
+                // Save the image
+                PngOptions saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                png.Save(outputPath, saveOptions);
             }
-            else
+
+            // Verify the digital signature
+            string inputPath = outputPath;
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Loaded image is not a raster image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-        }
 
-        // Reload the saved image to verify the signature
-        using (Image signedImage = Image.Load(outputPath))
+            using (RasterImage loaded = (RasterImage)Image.Load(inputPath))
+            {
+                bool isSigned = loaded.IsDigitalSigned("ABCD");
+                Console.WriteLine($"Signature verification result: {isSigned}");
+            }
+        }
+        catch (Exception ex)
         {
-            if (signedImage is RasterImage rasterSigned)
-            {
-                bool isSigned = rasterSigned.IsDigitalSigned(password);
-                Console.WriteLine(isSigned
-                    ? "Digital signature successfully embedded and verified."
-                    : "Digital signature verification failed.");
-            }
-            else
-            {
-                Console.Error.WriteLine("Saved image is not a raster image.");
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

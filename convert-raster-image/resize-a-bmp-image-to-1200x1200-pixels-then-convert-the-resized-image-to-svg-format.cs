@@ -7,35 +7,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.svg";
+        string inputPath = "input.bmp";
+        string outputPath = "output.svg";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load BMP, resize, and save as SVG
-        using (Image image = Image.Load(inputPath))
+        using (RasterImage image = (RasterImage)Image.Load(inputPath))
         {
-            // Resize to 1200x1200 pixels
+            if (!image.IsCached) image.CacheData();
+
             image.Resize(1200, 1200);
 
-            // Prepare SVG export options with rasterization settings
-            var svgOptions = new SvgOptions();
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+            rasterOptions.PageSize = image.Size;
+
+            SvgOptions svgOptions = new SvgOptions();
             svgOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the resized image as SVG
             image.Save(outputPath, svgOptions);
         }
     }

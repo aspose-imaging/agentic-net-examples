@@ -7,41 +7,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.psd";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.psd";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage for pixel manipulation
-            RasterImage raster = image as RasterImage;
-            if (raster == null)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Failed to load raster image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Cache image data if not already cached
-            if (!raster.IsCached)
-                raster.CacheData();
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Lower contrast by 20% (negative value reduces contrast)
-            raster.AdjustContrast(-20f);
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached) raster.CacheData();
+                raster.AdjustContrast(-20f); // lower contrast by 20%
 
-            // Save the adjusted image as PNG
-            PngOptions pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

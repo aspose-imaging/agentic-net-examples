@@ -1,14 +1,17 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.PathResources;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         string inputPath = "input.tif";
-        string outputFolder = "output_paths";
+        string outputDir = "output_paths";
 
         if (!File.Exists(inputPath))
         {
@@ -16,28 +19,36 @@ class Program
             return;
         }
 
-        Directory.CreateDirectory(outputFolder);
+        Directory.CreateDirectory(outputDir);
 
-        using (Aspose.Imaging.FileFormats.Tiff.TiffImage tiff = (Aspose.Imaging.FileFormats.Tiff.TiffImage)Aspose.Imaging.Image.Load(inputPath))
+        try
         {
-            var pathResources = tiff.ActiveFrame.PathResources;
-            for (int i = 0; i < pathResources.Count; i++)
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                var pathResource = pathResources[i];
-                var graphicsPath = Aspose.Imaging.FileFormats.Tiff.PathResources.PathResourceConverter.ToGraphicsPath(
-                    new[] { pathResource },
-                    tiff.ActiveFrame.Size);
-
-                using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Create(new SvgOptions(), tiff.Width, tiff.Height))
+                var pathResources = tiffImage.ActiveFrame.PathResources;
+                int index = 0;
+                foreach (var pathResource in pathResources)
                 {
-                    var graphics = new Aspose.Imaging.Graphics(svgImage);
-                    graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1), graphicsPath);
+                    var graphicsPath = PathResourceConverter.ToGraphicsPath(new[] { pathResource }, tiffImage.ActiveFrame.Size);
 
-                    string outputPath = Path.Combine(outputFolder, $"Path_{i}.svg");
+                    var svgOptions = new SvgOptions();
+                    string outputPath = Path.Combine(outputDir, $"path_{index}.svg");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    svgImage.Save(outputPath);
+
+                    using (Image svgImage = Image.Create(svgOptions, tiffImage.ActiveFrame.Width, tiffImage.ActiveFrame.Height))
+                    {
+                        var graphics = new Graphics(svgImage);
+                        graphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
+                        svgImage.Save(outputPath);
+                    }
+
+                    index++;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

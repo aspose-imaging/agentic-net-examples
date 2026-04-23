@@ -11,9 +11,9 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.gif";
-        string outputPath = "output.gif";
+        string outputPath = "output_corrected.gif";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,34 +27,27 @@ class Program
             Directory.CreateDirectory(outputDir);
         }
 
-        // Load the source GIF
-        using (GifImage gif = (GifImage)Image.Load(inputPath))
+        try
         {
-            // Process each frame to deskew
-            for (int i = 0; i < gif.PageCount; i++)
+            // Load the GIF image
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Set the active frame
-                gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-
-                // Cache data for performance
-                if (!gif.IsCached)
+                // Deskew each frame
+                for (int i = 0; i < gif.PageCount; i++)
                 {
-                    gif.CacheData();
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                    // NormalizeAngle(false, backgroundColor) deskews the active frame
+                    gif.NormalizeAngle(false, Color.White);
                 }
 
-                // Determine skew angle
-                float skewAngle = gif.GetSkewAngle();
-
-                // Rotate to correct the skew if needed
-                if (Math.Abs(skewAngle) > 0.01f)
-                {
-                    // Rotate opposite to the skew angle, resize proportionally, fill background with white
-                    gif.Rotate(-skewAngle, true, Color.White);
-                }
+                // Save the corrected animated GIF
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
-
-            // Save the corrected animated GIF
-            gif.Save(outputPath, new GifOptions());
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

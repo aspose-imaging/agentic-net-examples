@@ -3,70 +3,80 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        Directory.CreateDirectory(string.IsNullOrEmpty(outputDir) ? "." : outputDir);
-
-        // Load the multi‑page TIFF
-        using (Image tiffImage = Image.Load(inputPath))
-        {
-            if (tiffImage is IMultipageImage multipage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Use the first page to define canvas size
-                using (RasterImage firstPage = (RasterImage)multipage.Pages[0])
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑page TIFF
+            using (Image tiffImage = Image.Load(inputPath))
+            {
+                TiffImage tiff = (TiffImage)tiffImage;
+                TiffFrame[] frames = tiff.Frames;
+
+                if (frames.Length == 0)
                 {
-                    int canvasWidth = firstPage.Width;
-                    int canvasHeight = firstPage.Height;
+                    Console.Error.WriteLine("No frames found in the TIFF image.");
+                    return;
+                }
 
-                    // Prepare APNG creation options
-                    ApngOptions apngOptions = new ApngOptions
+                // Prepare APNG creation options
+                ApngOptions apngOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Create an APNG image using the dimensions of the first frame
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    apngOptions,
+                    frames[0].Width,
+                    frames[0].Height))
+                {
+                    // Remove the default single frame
+                    apngImage.RemoveAllFrames();
+
+                    // Add each TIFF frame as an APNG frame
+                    foreach (TiffFrame tiffFrame in frames)
                     {
-                        Source = new FileCreateSource(outputPath, false),
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
+                        // Cast the frame to RasterImage (TiffFrame derives from RasterImage)
+                        RasterImage raster = (RasterImage)tiffFrame;
 
-                    // Create the APNG image
-                    using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, canvasWidth, canvasHeight))
-                    {
-                        apngImage.RemoveAllFrames();
+                        // Determine frame duration based on resolution (example: area / 1000, minimum 100 ms)
+                        uint frameDuration = Math.Max(100u, (uint)(raster.Width * raster.Height / 1000));
 
-                        // Iterate through each TIFF page
-                        for (int i = 0; i < multipage.PageCount; i++)
-                        {
-                            using (RasterImage page = (RasterImage)multipage.Pages[i])
-                            {
-                                apngImage.AddFrame(page);
-                                ApngFrame addedFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        // Set the default frame time for the next added frame
+                        apngImage.DefaultFrameTime = frameDuration;
 
-                                double avgResolution = (page.HorizontalResolution + page.VerticalResolution) / 2.0;
-                                uint frameDuration = (uint)(avgResolution * 10);
-                                addedFrame.FrameTime = (int)frameDuration;
-                            }
-                        }
-
-                        // Save the resulting APNG
-                        apngImage.Save();
+                        // Add the frame to the APNG
+                        apngImage.AddFrame(raster);
                     }
+
+                    // Save the APNG file
+                    apngImage.Save();
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

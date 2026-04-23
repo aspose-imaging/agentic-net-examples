@@ -18,12 +18,12 @@ class Program
             return;
         }
 
-        // Build output PSD file path using custom pattern: <original name>_converted.psd
+        // Build custom output PSD file name: original name + "_converted.psd"
         string outputDirectory = @"C:\Images\Converted";
         string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_converted.psd";
         string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-        // Ensure output directory exists (unconditional)
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EPS image
@@ -32,12 +32,13 @@ class Program
             // Configure PSD saving options
             PsdOptions psdOptions = new PsdOptions
             {
-                CompressionMethod = CompressionMethod.RLE,          // Use RLE compression
-                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale, // Grayscale color mode
-                Version = 6                                          // PSD version 6
+                // Example settings – adjust as needed
+                CompressionMethod = CompressionMethod.RLE,
+                ColorMode = ColorModes.Rgb,
+                // Keep default version (6) and other defaults
             };
 
-            // Save the image as PSD with the specified options
+            // Save as PSD using the custom output path and options
             image.Save(outputPath, psdOptions);
         }
 

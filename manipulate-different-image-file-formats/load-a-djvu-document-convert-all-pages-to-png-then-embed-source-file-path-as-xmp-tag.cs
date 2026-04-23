@@ -3,42 +3,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input/sample.djvu";
-        string outputDirectory = "Output";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.djvu";
 
-        Directory.CreateDirectory(outputDirectory);
-
-        using (FileStream stream = File.OpenRead(inputPath))
-        {
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            if (!File.Exists(inputPath))
             {
-                int pageIndex = 0;
-                foreach (Image page in djvuImage.Pages)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            {
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
+                    string outputPath = Path.Combine("Output", $"page_{page.PageNumber}.png");
+
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    PngOptions options = new PngOptions();
-
-                    using (page)
+                    PngOptions options = new PngOptions
                     {
-                        page.Save(outputPath, options);
-                    }
-
-                    pageIndex++;
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    page.Save(outputPath, options);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

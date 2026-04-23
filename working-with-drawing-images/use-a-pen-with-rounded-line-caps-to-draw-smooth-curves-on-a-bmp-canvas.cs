@@ -2,54 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path
-        string outputPath = @"C:\temp\output.bmp";
+        // Output BMP file path (hard‑coded)
+        string outputPath = @"C:\temp\smooth_curve.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create BMP options with a file source
+        // Set up BMP options with a bound file source
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Define canvas size
-        int canvasWidth = 500;
-        int canvasHeight = 300;
+        // Canvas dimensions
+        int width = 800;
+        int height = 600;
 
-        // Create the BMP canvas (bound to the output file)
-        using (Image canvas = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+        // Create the image bound to the output file
+        using (Image image = Image.Create(bmpOptions, width, height))
         {
             // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
+            Graphics graphics = new Graphics(image);
             graphics.Clear(Color.White);
 
-            // Create a pen with rounded line caps for smooth curves
-            Pen pen = new Pen(Color.Blue, 5);
+            // Pen with rounded line caps for smooth curves
+            Pen pen = new Pen(Color.Blue, 4);
             pen.SetLineCap(LineCap.Round, LineCap.Round, DashCap.Flat);
 
-            // Define points for the smooth curve
-            Point[] curvePoints = new Point[]
+            // Points defining the curve
+            Point[] points = new Point[]
             {
-                new Point(50, 200),
-                new Point(150, 50),
-                new Point(250, 200),
-                new Point(350, 50),
-                new Point(450, 200)
+                new Point(100, 500),
+                new Point(200, 100),
+                new Point(400, 300),
+                new Point(600, 150),
+                new Point(700, 450)
             };
 
-            // Draw the curve
-            graphics.DrawCurve(pen, curvePoints);
+            // Draw the smooth curve
+            graphics.DrawCurve(pen, points);
 
             // Save the bound image
-            canvas.Save();
+            image.Save();
         }
     }
 }

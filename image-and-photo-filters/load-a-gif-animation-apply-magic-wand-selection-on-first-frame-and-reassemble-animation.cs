@@ -1,47 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.gif";
-        string outputPath = "output.gif";
+        // Hardcoded input and output paths
+        string inputPath = "Animation.gif";
+        string outputPath = "ProcessedAnimation.gif";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        string outputDir = Path.GetDirectoryName(outputPath);
-        Directory.CreateDirectory(outputDir);
-
-        using (GifImage gif = (GifImage)Image.Load(inputPath))
-        {
-            if (gif.PageCount == 0)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The GIF contains no frames.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Set the first frame as active
-            gif.ActiveFrame = (GifFrameBlock)gif.Pages[0];
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Apply Magic Wand selection on the active frame
-            MagicWandTool
-                .Select((RasterImage)gif, new MagicWandSettings(10, 10) { Threshold = 100 })
-                .Apply();
+            // Load the GIF animation
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            {
+                // Access the first frame (page) of the GIF
+                RasterImage firstFrame = (RasterImage)gif.Pages[0];
 
-            // Save the modified GIF animation
-            GifOptions options = new GifOptions();
-            gif.Save(outputPath, options);
+                // Apply Magic Wand selection on the first frame
+                // Example: select area around pixel (120,100) with default threshold
+                MagicWandTool
+                    .Select(firstFrame, new MagicWandSettings(120, 100))
+                    .Apply();
+
+                // Save the modified GIF animation
+                gif.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

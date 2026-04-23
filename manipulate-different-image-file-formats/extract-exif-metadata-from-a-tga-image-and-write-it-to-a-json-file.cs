@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Text.Json;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tga;
-using Aspose.Imaging.Exif;
 
 class Program
 {
@@ -15,47 +14,57 @@ class Program
         string inputPath = "input.tga";
         string outputPath = "output.json";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the TGA image
-        using (TgaImage image = (TgaImage)Image.Load(inputPath))
-        {
-            // Access EXIF data
-            var exif = image.ExifData;
-
-            // Convert EXIF properties to a dictionary for JSON serialization
-            var exifDict = new Dictionary<string, object>();
-
-            if (exif != null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Type exifType = exif.GetType();
-                foreach (PropertyInfo prop in exifType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the TGA image
+            using (TgaImage image = (TgaImage)Image.Load(inputPath))
+            {
+                // Access EXIF data
+                var exif = image.ExifData;
+                if (exif == null)
+                {
+                    Console.WriteLine("No EXIF data found.");
+                    return;
+                }
+
+                // Convert EXIF properties to a dictionary for JSON serialization
+                var dict = new Dictionary<string, object>();
+                foreach (PropertyInfo prop in exif.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
                     try
                     {
-                        object value = prop.GetValue(exif);
-                        exifDict[prop.Name] = value;
+                        var value = prop.GetValue(exif);
+                        if (value != null)
+                        {
+                            dict[prop.Name] = value;
+                        }
                     }
                     catch
                     {
-                        // Ignore properties that cannot be read
+                        // Ignore properties that throw on get
                     }
                 }
+
+                // Serialize to JSON with indentation
+                string json = JsonSerializer.Serialize(dict, new JsonSerializerOptions { WriteIndented = true });
+
+                // Write JSON to the output file
+                File.WriteAllText(outputPath, json);
             }
-
-            // Serialize dictionary to JSON
-            string json = JsonSerializer.Serialize(exifDict, new JsonSerializerOptions { WriteIndented = true });
-
-            // Write JSON to output file
-            File.WriteAllText(outputPath, json);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

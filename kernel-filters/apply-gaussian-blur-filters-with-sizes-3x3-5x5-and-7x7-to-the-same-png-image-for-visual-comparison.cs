@@ -5,37 +5,57 @@ using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input PNG path
-        string inputPath = "input.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input PNG image path
+            string inputPath = @"C:\Images\sample.png";
 
-        // Define kernel sizes and corresponding sigma values
-        int[] kernelSizes = { 3, 5, 7 };
-        double[] sigmas = { 1.0, 2.0, 3.0 };
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        for (int i = 0; i < kernelSizes.Length; i++)
-        {
-            // Construct output path for each filtered image
-            string outputPath = $"output_gaussian_{kernelSizes[i]}x{kernelSizes[i]}.png";
+            // Define output paths for each kernel size
+            string outputPath3 = @"C:\Images\sample.GaussianBlur_3x3.png";
+            string outputPath5 = @"C:\Images\sample.GaussianBlur_5x5.png";
+            string outputPath7 = @"C:\Images\sample.GaussianBlur_7x7.png";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath3));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath5));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath7));
 
-            // Load the source image, apply Gaussian blur, and save the result
+            // Apply 3x3 Gaussian blur (size = 3, sigma = 1.0)
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(kernelSizes[i], sigmas[i]));
-                raster.Save(outputPath);
+                RasterImage rasterImage = (RasterImage)image;
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(3, 1.0));
+                rasterImage.Save(outputPath3);
             }
+
+            // Apply 5x5 Gaussian blur (size = 5, sigma = 2.0)
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage rasterImage = (RasterImage)image;
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 2.0));
+                rasterImage.Save(outputPath5);
+            }
+
+            // Apply 7x7 Gaussian blur (size = 7, sigma = 3.0)
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage rasterImage = (RasterImage)image;
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(7, 3.0));
+                rasterImage.Save(outputPath7);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

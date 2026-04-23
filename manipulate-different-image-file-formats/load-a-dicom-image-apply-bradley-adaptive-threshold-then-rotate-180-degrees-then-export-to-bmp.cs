@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.dcm";
-        string outputPath = "output.bmp";
+        string outputPath = "output\\result.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,20 +22,24 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load DICOM image, apply Bradley threshold, rotate, and save as BMP
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            DicomImage dicomImage = (DicomImage)image;
+            // Load the DICOM image
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            {
+                // Apply Bradley adaptive thresholding (example parameters)
+                dicomImage.BinarizeBradley(brightnessDifference: 5, windowSize: 10);
 
-            // Apply Bradley adaptive threshold (brightnessDifference = 5, windowSize = 10)
-            dicomImage.BinarizeBradley(5, 10);
+                // Rotate the image 180 degrees
+                dicomImage.RotateFlip(RotateFlipType.Rotate180FlipNone);
 
-            // Rotate 180 degrees without resizing, using black background
-            dicomImage.Rotate(180f, false, Color.Black);
-
-            // Save as BMP
-            BmpOptions bmpOptions = new BmpOptions();
-            dicomImage.Save(outputPath, bmpOptions);
+                // Save the result as BMP
+                dicomImage.Save(outputPath, new BmpOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

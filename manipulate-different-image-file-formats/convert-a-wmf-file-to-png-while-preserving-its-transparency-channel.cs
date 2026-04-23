@@ -2,44 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.wmf";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "Input\\sample.wmf";
+        string outputPath = "Output\\sample.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the WMF image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure rasterization to keep transparency
-            var rasterOptions = new WmfRasterizationOptions
+            using (Image image = Image.Load(inputPath))
             {
-                PageSize = image.Size,
-                BackgroundColor = Aspose.Imaging.Color.Transparent
-            };
+                var rasterOptions = new WmfRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    BackgroundColor = Color.Transparent
+                };
 
-            // Set PNG save options with the rasterization settings
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-            // Save as PNG preserving transparency
-            image.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

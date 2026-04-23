@@ -10,10 +10,10 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.svg");
-        string outputPath = Path.Combine("Output", "sample.png");
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,19 +23,22 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load SVG and rasterize to PNG
+        // Load the SVG image
         using (Image image = Image.Load(inputPath))
         {
-            var rasterOptions = new SvgRasterizationOptions
+            // Configure rasterization options for SVG
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
                 PageSize = image.Size
             };
 
-            var pngOptions = new PngOptions
+            // Configure PNG save options and attach rasterization options
+            PngOptions pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
+            // Save the rasterized PNG
             image.Save(outputPath, pngOptions);
         }
     }

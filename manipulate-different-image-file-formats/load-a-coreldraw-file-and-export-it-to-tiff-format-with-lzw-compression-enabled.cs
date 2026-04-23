@@ -2,43 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "C:\\Images\\sample.cdr";
-        string outputPath = "C:\\Images\\output.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = @"C:\input\sample.cdr";
+            string outputPath = @"C:\output\sample.tif";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image cdrImage = Image.Load(inputPath))
-        {
-            using (MemoryStream ms = new MemoryStream())
+            if (!File.Exists(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-                cdrImage.Save(ms, pngOptions);
-                ms.Position = 0;
-
-                using (RasterImage raster = (RasterImage)Image.Load(ms))
-                {
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                    tiffOptions.Compression = TiffCompressions.Lzw;
-                    tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                    tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-                    raster.Save(outputPath, tiffOptions);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            {
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb)
+                {
+                    Compression = TiffCompressions.Lzw,
+                    BitsPerSample = new ushort[] { 8, 8, 8 },
+                    Photometric = TiffPhotometrics.Rgb,
+                    PlanarConfiguration = TiffPlanarConfigs.Contiguous,
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
+                    }
+                };
+
+                cdr.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

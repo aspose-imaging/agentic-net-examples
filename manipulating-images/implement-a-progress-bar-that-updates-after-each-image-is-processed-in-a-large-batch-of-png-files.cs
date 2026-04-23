@@ -2,56 +2,78 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "InputImages";
-        string outputDirectory = "OutputImages";
-
-        // Get all PNG files in the input directory
-        string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
-        int totalFiles = pngFiles.Length;
-
-        if (totalFiles == 0)
+        try
         {
-            Console.WriteLine("No PNG files found in the input directory.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
-        for (int i = 0; i < totalFiles; i++)
-        {
-            string inputPath = pngFiles[i];
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Verify input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
                 return;
             }
 
-            // Determine output path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            // Get all PNG files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png", SearchOption.AllDirectories);
+            int totalFiles = inputFiles.Length;
+            if (totalFiles == 0)
             {
-                // Save using default PNG options
-                var options = new PngOptions();
-                image.Save(outputPath, options);
+                Console.WriteLine("No PNG files found to process.");
+                return;
             }
 
-            // Update progress bar
-            int processed = i + 1;
-            int percent = processed * 100 / totalFiles;
-            Console.WriteLine($"Processed {processed}/{totalFiles} ({percent}%)");
-        }
+            // Process each file
+            for (int i = 0; i < totalFiles; i++)
+            {
+                string inputPath = inputFiles[i];
 
-        Console.WriteLine("Batch processing completed.");
+                // Input file existence check
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Determine output path preserving relative structure
+                string relativePath = Path.GetRelativePath(inputDirectory, inputPath);
+                string outputPath = Path.Combine(outputDirectory, relativePath);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Set progressive option for PNG saving
+                    var pngOptions = new PngOptions
+                    {
+                        Progressive = true,
+                        // Optional: you can set other options like CompressionLevel if desired
+                        CompressionLevel = 9
+                    };
+
+                    // Save the image with progressive PNG options
+                    image.Save(outputPath, pngOptions);
+                }
+
+                // Update simple progress bar
+                Console.Write($"\rProcessed {i + 1}/{totalFiles} files");
+            }
+
+            // Move to next line after progress bar completes
+            Console.WriteLine("\nProcessing completed.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

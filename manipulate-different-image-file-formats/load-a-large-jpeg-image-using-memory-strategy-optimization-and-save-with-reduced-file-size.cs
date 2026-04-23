@@ -9,35 +9,45 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\large_input.jpg";
-        string outputPath = @"C:\Images\output\large_output.jpg";
+        string inputPath = @"C:\temp\large.jpg";
+        string outputPath = @"C:\temp\large_optimized.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image with memory‑strategy optimization
-        var loadOptions = new LoadOptions { BufferSizeHint = 10 * 1024 * 1024 }; // 10 MB buffer
-
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            // Configure JPEG save options to reduce file size
-            var jpegOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Quality = 75, // Reduce quality to lower size
-                CompressionType = JpegCompressionMode.Progressive,
-                ColorType = JpegCompressionColorMode.Grayscale,
-                BufferSizeHint = 5 * 1024 * 1024 // 5 MB buffer for saving
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image with the specified options
-            image.Save(outputPath, jpegOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG with a memory‑usage hint (e.g., 100 MB)
+            var loadOptions = new LoadOptions { BufferSizeHint = 100 };
+
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                // Configure JPEG save options to reduce file size
+                var saveOptions = new JpegOptions
+                {
+                    // Lower quality reduces size (range 1‑100)
+                    Quality = 60,
+                    // Use progressive compression for better web loading
+                    CompressionType = JpegCompressionMode.Progressive,
+                    // Optional: reduce bits per channel if acceptable
+                    BitsPerChannel = 8
+                };
+
+                // Save the optimized JPEG
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

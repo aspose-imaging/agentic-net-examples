@@ -1,68 +1,67 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input DjVu files
-        string[] inputPaths = {
-            @"C:\Data\sample1.djvu",
-            @"C:\Data\sample2.djvu"
-        };
-
-        // Corresponding output PDF files
-        string[] outputPaths = {
-            @"C:\Data\sample1.pdf",
-            @"C:\Data\sample2.pdf"
-        };
-
-        // Page indexes to export for each file (1‑based as required by Aspose)
-        int[][] pagesToExport = {
-            new int[] { 1, 2, 3 },   // pages for sample1.djvu
-            new int[] { 2, 4 }       // pages for sample2.djvu
-        };
-
-        for (int i = 0; i < inputPaths.Length; i++)
+        try
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
+            // Hard‑coded input and output file paths
+            string[] inputPaths = { "input1.djvu", "input2.djvu" };
+            string[] outputPaths = { "output1.pdf", "output2.pdf" };
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Low‑memory loading options (e.g., 1 MB buffer)
-            LoadOptions loadOptions = new LoadOptions
-            {
-                BufferSizeHint = 1 * 1024 * 1024
+            // Define page indexes to export for each file (1‑based indexes)
+            int[][] pagesToExport = {
+                new int[] { 1, 2, 3 },   // pages for input1.djvu
+                new int[] { 2, 3, 4 }    // pages for input2.djvu
             };
 
-            // Load DjVu document with the low‑memory strategy
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+            for (int i = 0; i < inputPaths.Length; i++)
             {
-                // Define which pages to export
-                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pagesToExport[i]);
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
 
-                // Prepare PDF saving options and attach the page selection
-                PdfOptions pdfOptions = new PdfOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    MultiPageOptions = multiPageOptions
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Low‑memory loading options (e.g., 1 MB buffer)
+                var loadOptions = new LoadOptions
+                {
+                    BufferSizeHint = 1 * 1024 * 1024
                 };
 
-                // Save selected pages as a single PDF file
-                djvuImage.Save(outputPath, pdfOptions);
+                // Load the DjVu document with the specified options
+                using (FileStream stream = File.OpenRead(inputPath))
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+                {
+                    // Configure which pages to export
+                    var multiPageOptions = new DjvuMultiPageOptions(pagesToExport[i]);
+
+                    // Set up PDF saving options and attach the page selection
+                    var pdfOptions = new PdfOptions
+                    {
+                        MultiPageOptions = multiPageOptions
+                    };
+
+                    // Save the selected pages as a PDF file
+                    djvuImage.Save(outputPath, pdfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

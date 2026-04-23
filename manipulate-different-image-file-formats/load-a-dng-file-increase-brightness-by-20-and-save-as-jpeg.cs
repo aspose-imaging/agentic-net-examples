@@ -6,32 +6,40 @@ using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.dng";
-        string outputPath = @"C:\temp\output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.dng";
+            string outputPath = "output/output.jpg";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                DngImage dng = (DngImage)image;
+
+                // Increase brightness by approximately 20% (51 out of 255)
+                dng.AdjustBrightness(51);
+
+                // Save as JPEG with default options
+                JpegOptions jpegOptions = new JpegOptions();
+                dng.Save(outputPath, jpegOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            DngImage dngImage = (DngImage)image;
-
-            // Increase brightness by ~20% (51 out of 255)
-            dngImage.AdjustBrightness(51);
-
-            // Save the result as JPEG
-            dngImage.Save(outputPath, new JpegOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

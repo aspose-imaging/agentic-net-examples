@@ -1,9 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -11,28 +8,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
-        {
-            MagicWandTool.Select(image, new MagicWandSettings(100, 100))
-                .GetFeathered(new FeatheringSettings { Size = 5 })
-                .Apply();
-
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
-            image.Save(outputPath, tiffOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Apply magic wand selection, feather the mask with radius 5, and apply it
+                MagicWandTool.Select(image, new MagicWandSettings(0, 0))
+                    .GetFeathered(new FeatheringSettings { Size = 5 })
+                    .Apply();
+
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

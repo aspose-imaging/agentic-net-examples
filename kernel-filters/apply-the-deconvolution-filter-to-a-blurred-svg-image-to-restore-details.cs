@@ -9,38 +9,53 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.svg";
-        string outputPath = "output/output.png";
+        string outputPath = "output.png";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image vectorImage = Image.Load(inputPath))
+        // Load the SVG image
+        using (Image svgImage = Image.Load(inputPath))
         {
-            var svgRasterOptions = new SvgRasterizationOptions
+            // Rasterize SVG to a memory stream as PNG
+            using (MemoryStream rasterStream = new MemoryStream())
             {
-                PageSize = vectorImage.Size
-            };
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = svgRasterOptions
-            };
+                // Set up rasterization options
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
+                };
 
-            using (var memoryStream = new MemoryStream())
-            {
-                vectorImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0;
+                // Configure PNG save options with vector rasterization
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                using (Image rasterImageContainer = Image.Load(memoryStream))
+                // Save rasterized image to memory stream
+                svgImage.Save(rasterStream, pngOptions);
+                rasterStream.Position = 0;
+
+                // Load rasterized image as RasterImage
+                using (Image rasterImageContainer = Image.Load(rasterStream))
                 {
                     RasterImage rasterImage = (RasterImage)rasterImageContainer;
 
-                    rasterImage.Save(outputPath, pngOptions);
+                    // Apply deconvolution filter (Gauss-Wiener) to restore details
+                    rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
+
+                    // Save the processed image as PNG
+                    rasterImage.Save(outputPath, new PngOptions());
                 }
             }
         }

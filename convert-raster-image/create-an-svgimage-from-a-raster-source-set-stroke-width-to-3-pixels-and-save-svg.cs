@@ -8,9 +8,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\sample.png";
-        string outputPath = "output\\result.svg";
+        // Hardcoded input raster image path and output SVG path
+        string inputPath = "input.bmp";
+        string outputPath = "output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,29 +22,28 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load raster image
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        // Load the raster image
+        using (Image image = Image.Load(inputPath))
         {
+            RasterImage raster = (RasterImage)image;
+
             int width = raster.Width;
             int height = raster.Height;
-            int dpi = 96; // Standard DPI
+            int dpi = 96; // standard screen DPI
 
-            // Create SVG graphics canvas
+            // Create an SVG graphics canvas with the same dimensions as the raster image
             SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-            // Set stroke width to 3 pixels using a pen
-            Pen pen = new Pen(Color.Black, 3);
-
-            // Draw a rectangle border with the specified pen
-            graphics.DrawRectangle(pen, 0, 0, width, height);
-
-            // Optionally embed the raster image into the SVG
+            // Draw the raster image onto the SVG canvas
             graphics.DrawImage(raster, new Point(0, 0));
 
-            // Finalize SVG image
+            // Set stroke width to 3 pixels and draw a rectangle border around the image
+            Pen borderPen = new Pen(Color.Black, 3);
+            graphics.DrawRectangle(borderPen, 0, 0, width, height);
+
+            // Finalize the SVG image and save it
             using (SvgImage svgImage = graphics.EndRecording())
             {
-                // Save SVG to the output path
                 svgImage.Save(outputPath);
             }
         }

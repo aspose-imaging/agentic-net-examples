@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output_lzw.tif";
+        string outputPath = @"C:\temp\output.tif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,12 +25,15 @@ class Program
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure TIFF save options with LZW compression
+            // Configure TIFF save options with LZW compression and predictor
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
             tiffOptions.Compression = TiffCompressions.Lzw;
-            tiffOptions.Predictor = TiffPredictor.Horizontal; // improves LZW size for continuous-tone images
+            tiffOptions.Predictor = TiffPredictor.Horizontal;
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
 
-            // Save the image as TIFF using the configured options
+            // Save the image as TIFF with the specified options
             image.Save(outputPath, tiffOptions);
         }
 
@@ -38,16 +41,16 @@ class Program
         long originalSize = new FileInfo(inputPath).Length;
         long tiffSize = new FileInfo(outputPath).Length;
 
-        Console.WriteLine($"Original size: {originalSize} bytes");
-        Console.WriteLine($"TIFF (LZW) size: {tiffSize} bytes");
+        Console.WriteLine($"Original file size: {originalSize} bytes");
+        Console.WriteLine($"TIFF file size: {tiffSize} bytes");
 
         if (tiffSize < originalSize)
         {
-            Console.WriteLine("File size reduced after LZW compression.");
+            Console.WriteLine("File size reduction achieved.");
         }
         else
         {
-            Console.WriteLine("File size not reduced after LZW compression.");
+            Console.WriteLine("No size reduction (or increase) observed.");
         }
     }
 }

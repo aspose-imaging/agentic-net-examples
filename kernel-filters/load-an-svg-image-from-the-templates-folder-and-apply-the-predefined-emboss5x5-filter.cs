@@ -4,59 +4,65 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "templates/input.svg";
-        string outputPath = "output/filtered.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "templates/input.svg";
+            string outputPath = "output/output_embossed.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image svgImage = Image.Load(inputPath))
-        {
-            // Set up rasterization options for SVG
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                PageSize = svgImage.Size,
-                BackgroundColor = Color.White
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Set up PNG save options with the rasterization options
-            PngOptions pngOptions = new PngOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterOptions
-            };
+                SvgImage svgImage = (SvgImage)image;
 
-            // Rasterize SVG to a memory stream
-            using (MemoryStream ms = new MemoryStream())
-            {
-                svgImage.Save(ms, pngOptions);
-                ms.Position = 0;
-
-                // Load the rasterized image
-                using (Image rasterImageContainer = Image.Load(ms))
+                // Set up rasterization options for PNG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    RasterImage rasterImage = (RasterImage)rasterImageContainer;
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
+                };
 
-                    // Apply the predefined Emboss5x5 filter
-                    rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                    // Save the filtered image
-                    rasterImage.Save(outputPath);
+                // Rasterize SVG to a memory stream
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    // Load rasterized image
+                    using (Image rasterImageContainer = Image.Load(ms))
+                    {
+                        RasterImage rasterImage = (RasterImage)rasterImageContainer;
+
+                        // Apply Emboss5x5 filter
+                        rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+
+                        // Save the filtered image
+                        rasterImage.Save(outputPath);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

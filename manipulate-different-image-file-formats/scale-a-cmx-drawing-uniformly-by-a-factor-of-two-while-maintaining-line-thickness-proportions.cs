@@ -5,13 +5,13 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.cmx";
-        string outputPath = "output.cmx";
+        string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\sample_scaled.cmx";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,12 +21,25 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CMX drawing, resize uniformly by factor of 2, and save
-        using (CmxImage image = (CmxImage)Image.Load(inputPath))
+        try
         {
-            // Scale width and height by 2, preserving line thickness proportionally
-            image.Resize(image.Width * 2, image.Height * 2, ResizeType.NearestNeighbourResample);
-            image.Save(outputPath);
+            // Load the CMX image
+            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            {
+                // Calculate new dimensions (scale uniformly by factor of 2)
+                int newWidth = image.Width * 2;
+                int newHeight = image.Height * 2;
+
+                // Resize the image; this scales the drawing and line thickness proportionally
+                image.Resize(newWidth, newHeight);
+
+                // Save the scaled image
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

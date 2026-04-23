@@ -1,47 +1,46 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.bmp";
+        // Hardcoded input and output paths
+        string inputPath = "sample.bmp";
         string outputPath = "output.svg";
 
-        // Verify that the input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image
-        using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
+        // Load BMP image
+        using (Aspose.Imaging.Image bmpImage = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Create an SVG graphics context with the same dimensions as the BMP
-            int dpi = 96;
-            SvgGraphics2D graphics = new SvgGraphics2D(bmp.Width, bmp.Height, dpi);
+            int width = bmpImage.Width;
+            int height = bmpImage.Height;
 
-            // Draw the raster image onto the SVG canvas
-            graphics.DrawImage(bmp, new Point(0, 0), new Size(bmp.Width, bmp.Height));
+            // Create SVG graphics canvas
+            var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, 96);
 
-            // Set stroke width for vector paths (e.g., a rectangle border around the image)
-            Pen borderPen = new Pen(Color.Black, 5); // 5-pixel-wide stroke
-            graphics.DrawRectangle(borderPen, 0, 0, bmp.Width, bmp.Height);
+            // Set stroke width for vector paths (draw a rectangle border)
+            var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 5);
+            graphics.DrawRectangle(pen, 0, 0, width, height);
 
-            // Finalize the SVG image
-            using (SvgImage svgImage = graphics.EndRecording())
+            // Draw the raster BMP onto the SVG canvas
+            var raster = (Aspose.Imaging.RasterImage)bmpImage;
+            graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
+
+            // Finalize SVG image and save
+            using (Aspose.Imaging.FileFormats.Svg.SvgImage svgImage = graphics.EndRecording())
             {
-                // Save the customized SVG
                 svgImage.Save(outputPath);
             }
         }

@@ -2,18 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define base, input, and output directories (relative paths)
+        // Base directories (relative to the current working directory)
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure input directory exists; if not, create it and exit
+        // Ensure the input directory exists; create it if missing and exit
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
@@ -21,38 +20,34 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+        // Ensure the output directory exists
+        Directory.CreateDirectory(outputDirectory);
 
-        // Get all WMF files in the input directory
+        // Retrieve all WMF files in the input folder
         string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
 
         foreach (string inputPath in files)
         {
-            // Validate input file existence
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
-            // Prepare output path with .bmp extension
+            // Build the output BMP file path (same name, .bmp extension)
             string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
             string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
 
             // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WMF image and save as BMP preserving dimensions
-            using (WmfImage image = (WmfImage)Image.Load(inputPath))
+            // Load the WMF image and save it as BMP preserving original dimensions
+            using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, new BmpOptions());
+                BmpOptions bmpOptions = new BmpOptions();
+                image.Save(outputPath, bmpOptions);
             }
-
-            Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
         }
     }
 }

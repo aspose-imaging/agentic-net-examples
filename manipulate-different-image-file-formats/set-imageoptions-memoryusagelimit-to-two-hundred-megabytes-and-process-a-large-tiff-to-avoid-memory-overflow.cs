@@ -3,44 +3,50 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.BigTiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\large_input.tif";
-        string outputPath = @"C:\Images\large_output.tif";
+        string inputPath = "input.tif";
+        string outputPath = "output.bigtiff";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the large TIFF with a memory limit of 200 MB
-        var loadOptions = new LoadOptions
+        try
         {
-            BufferSizeHint = 200 // memory limit in megabytes
-        };
-
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            // Example processing: no operation, just re-save
-            // (Insert any image manipulation here if needed)
-
-            // Prepare save options with the same memory limit
-            var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
+            using (Image srcImage = Image.Load(inputPath))
             {
-                BufferSizeHint = 200 // memory limit in megabytes
-            };
+                TiffImage srcTiff = (TiffImage)srcImage;
 
-            // Save the processed image
-            image.Save(outputPath, saveOptions);
+                BigTiffOptions options = new BigTiffOptions(TiffExpectedFormat.Default);
+                options.Source = new FileCreateSource(outputPath, false);
+
+                using (BigTiffImage bigTiff = (BigTiffImage)Image.Create(options, srcTiff.Width, srcTiff.Height))
+                {
+                    bigTiff.RemoveFrame(0);
+
+                    foreach (TiffFrame frame in srcTiff.Frames)
+                    {
+                        bigTiff.AddFrame(TiffFrame.CopyFrame(frame));
+                    }
+
+                    bigTiff.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

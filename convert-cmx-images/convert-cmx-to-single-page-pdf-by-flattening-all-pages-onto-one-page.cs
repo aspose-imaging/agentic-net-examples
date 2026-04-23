@@ -1,18 +1,21 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cmx;
+using System.Collections.Generic;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\sample_flattened.pdf";
+        string inputPath = "input.cmx";
+        string outputPath = "output.pdf";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,30 +23,54 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir);
 
-        // Load the CMX document
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+        // Load CMX image
+        using (Aspose.Imaging.FileFormats.Cmx.CmxImage cmxImage = (Aspose.Imaging.FileFormats.Cmx.CmxImage)Aspose.Imaging.Image.Load(inputPath))
         {
-            // Prepare PDF export options
-            var pdfOptions = new PdfOptions
+            // Collect page sizes
+            List<Aspose.Imaging.Size> pageSizes = new List<Aspose.Imaging.Size>();
+            foreach (Aspose.Imaging.Image page in cmxImage.Pages)
             {
-                // Export all pages; they will be rasterized onto a single PDF page
-                MultiPageOptions = null,
-                // Set rasterization options to flatten vector content
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    // Use the size of the first page as the PDF page size
-                    PageWidth = cmxImage.Width,
-                    PageHeight = cmxImage.Height,
-                    BackgroundColor = Color.White,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                }
-            };
+                pageSizes.Add(page.Size);
+            }
 
-            // Save the flattened PDF
-            cmxImage.Save(outputPath, pdfOptions);
+            // Determine canvas dimensions (vertical stacking)
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (var sz in pageSizes)
+            {
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                canvasHeight += sz.Height;
+            }
+
+            // Create an unbound raster canvas (JPEG format)
+            JpegOptions canvasOptions = new JpegOptions() { Quality = 100 };
+            using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(canvasOptions, canvasWidth, canvasHeight))
+            {
+                int offsetY = 0;
+                foreach (Aspose.Imaging.Image page in cmxImage.Pages)
+                {
+                    // Rasterize the page to a PNG in memory
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        page.Save(ms, new PngOptions());
+                        ms.Position = 0;
+                        using (Aspose.Imaging.RasterImage pageRaster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(ms))
+                        {
+                            // Copy page pixels onto the canvas
+                            Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, pageRaster.Width, pageRaster.Height);
+                            canvas.SaveArgb32Pixels(bounds, pageRaster.LoadArgb32Pixels(pageRaster.Bounds));
+                            offsetY += pageRaster.Height;
+                        }
+                    }
+                }
+
+                // Save the combined canvas as a single‑page PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                canvas.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

@@ -1,37 +1,45 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input/input.png";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            double[,] sobelKernel = new double[,]
+            {
+                { -1, -2, -1 },
+                { 0, 0, 0 },
+                { 1, 2, 1 }
+            };
+
+            var filterOptions = new ConvolutionFilterOptions(sobelKernel, 1.0, 0);
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                image.Filter(image.Bounds, filterOptions);
+                image.Save(outputPath, new PngOptions());
+            }
         }
-
-        string outputPath = "output/output.png";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        double[,] sobelKernel = new double[,]
+        catch (Exception ex)
         {
-            { -1, 0, 1 },
-            { -2, 0, 2 },
-            { -1, 0, 1 }
-        };
-
-        double factor = 1.0;
-        int bias = 0;
-
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(sobelKernel, factor, bias);
-            raster.Filter(raster.Bounds, options);
-            raster.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

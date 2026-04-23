@@ -8,38 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_high_compression.jpg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.jpg";
+            string outputPath = @"C:\temp\output_compressed.jpg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure JPEG save options for high compression (low quality)
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = 10, // Quality range 1-100, lower means higher compression
+                    CompressionType = JpegCompressionMode.Baseline
+                };
+
+                // Save the compressed image
+                image.Save(outputPath, saveOptions);
+            }
+
+            // Estimate quality impact by comparing file sizes
+            long originalSize = new FileInfo(inputPath).Length;
+            long compressedSize = new FileInfo(outputPath).Length;
+            double reductionPercent = 100.0 * (originalSize - compressedSize) / originalSize;
+
+            Console.WriteLine($"Original size: {originalSize} bytes");
+            Console.WriteLine($"Compressed size: {compressedSize} bytes");
+            Console.WriteLine($"Size reduction: {reductionPercent:F2}%");
+            Console.WriteLine($"Applied JPEG quality setting: 10 (high compression)");
         }
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure JPEG save options for high compression (low quality)
-        JpegOptions jpegOptions = new JpegOptions
+        catch (Exception ex)
         {
-            // Low quality value (1-100) results in higher compression
-            Quality = 10,
-            // Optional: use progressive compression mode
-            CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-            // Keep other defaults (e.g., BitsPerChannel = 8)
-        };
-
-        // Load the source image, apply any processing if needed, and save with the options
-        using (Image image = Image.Load(inputPath))
-        {
-            // No additional processing in this example
-            image.Save(outputPath, jpegOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Inform the user about the applied compression level
-        Console.WriteLine($"Image saved with high compression (Quality={jpegOptions.Quality}) to: {outputPath}");
     }
 }

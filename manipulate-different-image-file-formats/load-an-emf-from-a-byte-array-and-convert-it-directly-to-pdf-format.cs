@@ -5,32 +5,39 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\input.emf";
-        string outputPath = @"C:\Temp\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Temp\input.emf";
+            string outputPath = @"C:\Temp\output.pdf";
 
-        // Read EMF file into a byte array
-        byte[] emfBytes = File.ReadAllBytes(inputPath);
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Load EMF image from byte array
-        using (MemoryStream ms = new MemoryStream(emfBytes))
-        using (Image image = Image.Load(ms))
-        {
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save directly to PDF
-            PdfOptions pdfOptions = new PdfOptions();
-            image.Save(outputPath, pdfOptions);
+            // Load the EMF image from a byte array
+            byte[] emfBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(emfBytes))
+            using (Image image = Image.Load(ms))
+            {
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions();
+
+                // Convert and save the image directly to PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

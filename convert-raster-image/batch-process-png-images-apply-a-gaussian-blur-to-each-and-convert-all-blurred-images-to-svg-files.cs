@@ -8,47 +8,53 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output directories
-        string inputDir = @"C:\Images\Input\";
-        string outputDir = @"C:\Images\Output\";
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // List of PNG files to process (add or remove names as needed)
-        string[] pngFiles = new[]
+        if (!Directory.Exists(inputDirectory))
         {
-            "image1.png",
-            "image2.png",
-            "image3.png"
-        };
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
+            return;
+        }
 
-        foreach (string fileName in pngFiles)
+        if (!Directory.Exists(outputDirectory))
         {
-            // Build full input path and verify existence
-            string inputPath = Path.Combine(inputDir, fileName);
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+        foreach (var inputPath in files)
+        {
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                continue;
             }
 
-            // Load the PNG image
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
+                // Apply Gaussian blur to the entire image
                 RasterImage raster = (RasterImage)image;
-
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Prepare SVG output path
-                string outputFileName = Path.GetFileNameWithoutExtension(fileName) + ".svg";
-                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 // Save the blurred image as SVG
-                SvgOptions svgOptions = new SvgOptions();
-                image.Save(outputPath, svgOptions);
+                using (SvgOptions svgOptions = new SvgOptions())
+                {
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    svgOptions.VectorRasterizationOptions = vectorOptions;
+                    image.Save(outputPath, svgOptions);
+                }
             }
         }
     }

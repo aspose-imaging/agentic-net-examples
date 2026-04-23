@@ -2,68 +2,93 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.apng";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        const int animationDuration = 1000; // milliseconds
-        const int frameDuration = 100; // milliseconds per frame
-        int numFrames = animationDuration / frameDuration;
-
-        using (Image vectorImage = Image.Load(inputPath))
-        {
-            int width = vectorImage.Width;
-            int height = vectorImage.Height;
-
-            ApngOptions apngCreateOptions = new ApngOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = (uint)frameDuration,
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            using (ApngImage apngImage = (ApngImage)Image.Create(apngCreateOptions, width, height))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image svgImage = Image.Load(inputPath))
             {
-                apngImage.RemoveAllFrames();
+                int width = svgImage.Width;
+                int height = svgImage.Height;
 
-                for (int i = 0; i < numFrames; i++)
+                // Rasterize SVG to a raster image in memory (PNG)
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    float angle = i * 360f / numFrames;
-
-                    using (MemoryStream ms = new MemoryStream())
+                    PngOptions pngOptions = new PngOptions
                     {
-                        PngOptions pngOptions = new PngOptions
+                        VectorRasterizationOptions = new SvgRasterizationOptions
                         {
-                            VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = vectorImage.Size }
-                        };
-                        vectorImage.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        using (RasterImage frameRaster = (RasterImage)Image.Load(ms))
-                        {
-                            frameRaster.Rotate(angle, true, Color.Transparent);
-                            apngImage.AddFrame(frameRaster);
+                            PageWidth = width,
+                            PageHeight = height,
+                            BackgroundColor = Color.White
                         }
+                    };
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    // Animation settings
+                    const int animationDuration = 2000; // total duration in ms
+                    const int frameDuration = 100;      // each frame duration in ms
+                    int numFrames = animationDuration / frameDuration;
+
+                    // Create APNG with desired options
+                    ApngOptions apngCreateOptions = new ApngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false),
+                        DefaultFrameTime = (uint)frameDuration,
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+
+                    using (ApngImage apng = (ApngImage)Image.Create(apngCreateOptions, width, height))
+                    {
+                        apng.RemoveAllFrames();
+
+                        for (int i = 0; i < numFrames; i++)
+                        {
+                            // Reload the base raster image for each frame
+                            ms.Position = 0;
+                            using (RasterImage frame = (RasterImage)Image.Load(ms))
+                            {
+                                // Compute rotation angle for this frame
+                                float angle = (float)(360.0 * i / numFrames);
+                                // Rotate the frame around its center
+                                frame.Rotate(angle, true, Color.Transparent);
+                                // Add the rotated frame to the APNG
+                                apng.AddFrame(frame);
+                            }
+                        }
+
+                        // Save the animated PNG
+                        apng.Save();
                     }
                 }
-
-                apngImage.Save();
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

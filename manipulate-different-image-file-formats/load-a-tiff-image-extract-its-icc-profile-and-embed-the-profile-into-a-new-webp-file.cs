@@ -2,49 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input\\sample.tif";
-        string outputPath = "Output\\sample.webp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.tif";
+            string outputPath = "Output/output.webp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (Image tiffImage = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access pixel data
-            RasterImage raster = tiffImage as RasterImage;
-            if (raster == null)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not a raster image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Create WebP options and preserve metadata (including ICC profile)
-            WebPOptions webpOptions = new WebPOptions
-            {
-                KeepMetadata = true
-            };
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a WebP image from the raster image
-            using (WebPImage webpImage = new WebPImage(raster))
+            using (Image image = Image.Load(inputPath))
             {
-                // Save the WebP image with the specified options
-                webpImage.Save(outputPath, webpOptions);
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("TIFF image is not a raster image.");
+                    return;
+                }
+
+                using (WebPOptions options = new WebPOptions { KeepMetadata = true })
+                {
+                    raster.Save(outputPath, options);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

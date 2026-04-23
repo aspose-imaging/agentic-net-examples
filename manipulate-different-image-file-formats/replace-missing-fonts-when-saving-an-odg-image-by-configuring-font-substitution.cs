@@ -7,45 +7,53 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.fodg";
-        string outputPath = "output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure font substitution:
+            // Use a default font name that will be used when the original font is missing
+            Aspose.Imaging.FontSettings.DefaultFontName = "Arial";
+
+            // Optionally add system font folders so Aspose.Imaging can locate substitute fonts
+            string[] systemFontFolders = Aspose.Imaging.FontSettings.GetDefaultFontsFolders();
+            Aspose.Imaging.FontSettings.SetFontsFolders(systemFontFolders, true);
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Set up rasterization options for ODG conversion
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageSize = image.Size
+                };
+
+                // Prepare PNG save options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the image, applying the font substitution settings
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure font substitution
-        // Folder that contains replacement fonts (must exist and contain .ttf files)
-        string substituteFontsFolder = "fonts";
-        Aspose.Imaging.FontSettings.SetFontsFolder(substituteFontsFolder);
-        // Optional: set a default font name to use when a specific font is missing
-        Aspose.Imaging.FontSettings.DefaultFontName = "Arial";
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Set up rasterization options for ODG to PDF conversion
-            var rasterizationOptions = new OdgRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = image.Size
-            };
-
-            // Set up PDF save options using the rasterization options
-            var pdfOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Save the image to PDF, missing fonts will be substituted
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

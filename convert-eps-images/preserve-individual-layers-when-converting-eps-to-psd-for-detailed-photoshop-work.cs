@@ -3,46 +3,48 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Temp\sample.eps";
         string outputPath = @"C:\Temp\sample_converted.psd";
 
-        // Verify that the input EPS file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image
+        // Load EPS image
         using (Image image = Image.Load(inputPath))
         {
             // Prepare PSD save options
             var psdOptions = new PsdOptions
             {
-                // Example: use RAW (no compression) and RGB color mode
-                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
+                // Example: use RLE compression and RGB color mode
+                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
                 ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                // Preserve layers if the source supports multipage (each page becomes a layer)
+                // Preserve layers by exporting each page as a separate layer (if multipage)
                 MultiPageOptions = null
             };
 
-            // If the source image is a multipage vector image, export pages as layers
+            // If the EPS contains multiple pages, export them as layers
             if (image is IMultipageImage multipage && multipage.PageCount > 1)
             {
-                // Export all pages as separate layers
+                // Export all pages; each page becomes a layer in the PSD
                 psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
             }
 
-            // Save the image as PSD, preserving layers
+            // Save as PSD preserving layers
             image.Save(outputPath, psdOptions);
         }
     }

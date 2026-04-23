@@ -7,21 +7,18 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded collection of EPS input files
-        string[] inputFiles = new string[]
+        // Hardcoded input EPS files collection
+        string[] epsFiles = new string[]
         {
             @"C:\Images\Input1.eps",
             @"C:\Images\Input2.eps",
             @"C:\Images\Input3.eps"
         };
 
-        // Output directory (hardcoded)
+        // Hardcoded output directory
         string outputDir = @"C:\Images\Converted";
 
-        // Ensure the output directory exists (unconditional as per rules)
-        Directory.CreateDirectory(outputDir);
-
-        foreach (string inputPath in inputFiles)
+        foreach (string inputPath in epsFiles)
         {
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -30,28 +27,21 @@ class Program
                 return;
             }
 
-            // Build output file path with .psd extension
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".psd";
-            string outputPath = Path.Combine(outputDir, outputFileName);
+            // Determine output PSD path
+            string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".psd");
 
-            // Ensure the directory for the output file exists (unconditional)
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
             using (Image image = Image.Load(inputPath))
             {
                 // Prepare PSD save options
-                var psdOptions = new PsdOptions
-                {
-                    // Example: set PSD version to PSD (default)
-                    PsdVersion = Aspose.Imaging.FileFormats.Psd.PsdVersion.Psd
-                };
+                var psdOptions = new PsdOptions();
 
                 // Save as PSD
                 image.Save(outputPath, psdOptions);
             }
-
-            Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
         }
     }
 }

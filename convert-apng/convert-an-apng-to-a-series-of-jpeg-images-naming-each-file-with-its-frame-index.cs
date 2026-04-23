@@ -8,41 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputDirectory = "output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputDir = "output";
 
-        // Ensure output directory exists (creates parent directories if needed)
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the APNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to ApngImage to access frames
-            ApngImage apngImage = (ApngImage)image;
-
-            // Iterate through each frame
-            for (int i = 0; i < apngImage.PageCount; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Get the frame as a RasterImage
-                RasterImage frame = (RasterImage)apngImage.Pages[i];
-
-                // Build output file path with frame index
-                string outputPath = Path.Combine(outputDirectory, $"frame_{i}.jpg");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the frame as JPEG
-                frame.Save(outputPath, new JpegOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the APNG image
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            {
+                // JPEG save options
+                JpegOptions jpegOptions = new JpegOptions();
+
+                // Export each frame as a separate JPEG file
+                for (int i = 0; i < apng.PageCount; i++)
+                {
+                    string outPath = Path.Combine(outputDir, $"frame_{i}.jpg");
+                    // Ensure directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+
+                    // Save the current frame
+                    apng.Pages[i].Save(outPath, jpegOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

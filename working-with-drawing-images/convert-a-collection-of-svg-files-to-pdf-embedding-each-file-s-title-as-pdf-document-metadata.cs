@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Xml.Linq;
+using System.Xml;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
@@ -12,24 +12,13 @@ class Program
         // Hardcoded collection of SVG input files
         string[] inputFiles = new[]
         {
-            @"C:\SvgInput\image1.svg",
-            @"C:\SvgInput\image2.svg",
-            @"C:\SvgInput\image3.svg"
+            @"C:\SvgFiles\image1.svg",
+            @"C:\SvgFiles\image2.svg",
+            @"C:\SvgFiles\image3.svg"
         };
 
-        // Corresponding PDF output files (same folder, .pdf extension)
-        string[] outputFiles = new[]
+        foreach (string inputPath in inputFiles)
         {
-            @"C:\PdfOutput\image1.pdf",
-            @"C:\PdfOutput\image2.pdf",
-            @"C:\PdfOutput\image3.pdf"
-        };
-
-        for (int i = 0; i < inputFiles.Length; i++)
-        {
-            string inputPath = inputFiles[i];
-            string outputPath = outputFiles[i];
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -37,43 +26,43 @@ class Program
                 return;
             }
 
+            // Determine output PDF path (same folder, same name with .pdf extension)
+            string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Extract title from SVG (if present)
-            string title = ExtractSvgTitle(inputPath);
+            // Extract title from SVG (fallback to file name without extension if not found)
+            string title = Path.GetFileNameWithoutExtension(inputPath);
+            try
+            {
+                XmlDocument svgDoc = new XmlDocument();
+                svgDoc.Load(inputPath);
+                XmlNode titleNode = svgDoc.SelectSingleNode("//title");
+                if (titleNode != null && !string.IsNullOrWhiteSpace(titleNode.InnerText))
+                {
+                    title = titleNode.InnerText.Trim();
+                }
+            }
+            catch
+            {
+                // If any error occurs while reading the SVG, keep the default title
+            }
 
-            // Load SVG image
+            // Load SVG image and save as PDF with title metadata
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF options and set document metadata
                 var pdfOptions = new PdfOptions();
 
-                // Create and assign PDF document info with title metadata
-                var docInfo = new PdfDocumentInfo();
-                docInfo.Title = title ?? Path.GetFileNameWithoutExtension(inputPath);
-                pdfOptions.PdfDocumentInfo = docInfo;
+                // Set PDF document metadata
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+                {
+                    Title = title
+                };
 
-                // Save as PDF
+                // Save to PDF
                 image.Save(outputPath, pdfOptions);
             }
-        }
-    }
-
-    // Helper method to read the <title> element from an SVG file
-    static string ExtractSvgTitle(string svgPath)
-    {
-        try
-        {
-            XDocument doc = XDocument.Load(svgPath);
-            XNamespace svgNs = "http://www.w3.org/2000/svg";
-            XElement titleElement = doc.Root.Element(svgNs + "title");
-            return titleElement?.Value.Trim();
-        }
-        catch
-        {
-            // If any error occurs (e.g., malformed XML), return null
-            return null;
         }
     }
 }

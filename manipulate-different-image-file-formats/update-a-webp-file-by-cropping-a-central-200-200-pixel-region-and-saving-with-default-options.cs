@@ -1,42 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\input.webp";
-        string outputPath = @"c:\temp\output_cropped.webp";
+        // Hardcoded input and output paths
+        string inputPath = "input.webp";
+        string outputPath = "output.webp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the WebP image
+            using (WebPImage image = new WebPImage(inputPath))
+            {
+                // Determine central 200x200 crop rectangle
+                int cropSize = 200;
+                int left = (image.Width - cropSize) / 2;
+                int top = (image.Height - cropSize) / 2;
+                Rectangle rect = new Rectangle(left, top, cropSize, cropSize);
+
+                // Perform cropping
+                image.Crop(rect);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Save with default options
+                image.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WebP image
-        using (WebPImage webPImage = new WebPImage(inputPath))
+        catch (Exception ex)
         {
-            // Determine central 200x200 rectangle
-            int cropWidth = 200;
-            int cropHeight = 200;
-            int left = (webPImage.Width - cropWidth) / 2;
-            int top = (webPImage.Height - cropHeight) / 2;
-
-            // Crop the image
-            webPImage.Crop(new Rectangle(left, top, cropWidth, cropHeight));
-
-            // Save with default WebP options
-            webPImage.Save(outputPath, new WebPOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

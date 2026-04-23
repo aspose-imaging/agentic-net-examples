@@ -1,40 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input CMX file paths
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\temp\input1.cmx",
-            @"C:\temp\input2.cmx",
-            @"C:\temp\input3.cmx"
-        };
-
-        // Hardcoded output CMX file path
-        string outputPath = @"C:\temp\merged.cmx";
-
-        // Verify each input file exists
-        foreach (var inputPath in inputPaths)
-        {
-            if (!File.Exists(inputPath))
+            // Hardcoded input CMX file paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                @"C:\Images\file1.cmx",
+                @"C:\Images\file2.cmx",
+                @"C:\Images\file3.cmx"
+            };
+
+            // Verify each input file exists
+            foreach (string inputPath in inputPaths)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+            }
+
+            // Hardcoded output path
+            string outputPath = @"C:\Images\merged_output.pdf";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create a multipage image from the CMX files
+            using (Image multipageImage = Image.Create(inputPaths))
+            {
+                // Save the combined image as PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                multipageImage.Save(outputPath, pdfOptions);
             }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a multipage image from the CMX files (preserves layer order)
-        using (Image merged = Image.Create(inputPaths))
+        catch (Exception ex)
         {
-            // Save the merged CMX drawing
-            merged.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

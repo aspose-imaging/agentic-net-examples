@@ -9,35 +9,37 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputPath = @"C:\temp\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.djvu";
+            string outputPath = @"c:\temp\sample.tif";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Load the DjVu document from a file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        {
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
                 // Configure TIFF save options with Deflate compression
                 TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
                 saveOptions.Compression = TiffCompressions.Deflate;
 
-                // Use DjvuMultiPageOptions to export all pages into a multi‑page TIFF
-                saveOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-                // Save all pages as a single TIFF file
+                // Save all pages as a multi‑page TIFF file
                 djvuImage.Save(outputPath, saveOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

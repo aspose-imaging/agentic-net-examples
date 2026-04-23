@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -10,92 +10,62 @@ class Program
     static void Main(string[] args)
     {
         // Single‑page CMX to TIFF conversion
-        string singleInputPath = @"C:\TestData\single.cmx";
-        string singleOutputPath = @"C:\TestOutput\single.tif";
+        string inputSingle = "Input\\single.cmx";
+        string outputSingle = "Output\\single.tif";
 
-        if (!File.Exists(singleInputPath))
+        if (!File.Exists(inputSingle))
         {
-            Console.Error.WriteLine($"File not found: {singleInputPath}");
+            Console.Error.WriteLine($"File not found: {inputSingle}");
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(singleOutputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputSingle));
 
-        using (Image cmxImage = Image.Load(singleInputPath))
+        using (Image image = Image.Load(inputSingle))
         {
-            using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+            // Prepare TIFF options with vector rasterization settings
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
             {
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = cmxImage.Width,
-                    PageHeight = cmxImage.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-                tiffOptions.VectorRasterizationOptions = vectorOptions;
+                BackgroundColor = Color.White,
+                PageWidth = image.Width,
+                PageHeight = image.Height
+            };
 
-                cmxImage.Save(singleOutputPath, tiffOptions);
-            }
+            image.Save(outputSingle, tiffOptions);
         }
 
-        // Multi‑page CMX to TIFF conversion (export first two pages)
-        string multiInputPath = @"C:\TestData\multi.cmx";
-        string multiOutputPath = @"C:\TestOutput\multi.tif";
+        // Multi‑page CMX to TIFF conversion
+        string inputMulti = "Input\\multi.cmx";
+        string outputMulti = "Output\\multi.tif";
 
-        if (!File.Exists(multiInputPath))
+        if (!File.Exists(inputMulti))
         {
-            Console.Error.WriteLine($"File not found: {multiInputPath}");
+            Console.Error.WriteLine($"File not found: {inputMulti}");
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(multiOutputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputMulti));
 
-        using (Image cmxMultiImage = Image.Load(multiInputPath))
+        using (Image image = Image.Load(inputMulti))
         {
-            using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+            // Export all pages if the source is multipage
+            if (image is IMultipageImage multipage && multipage.PageCount > 0)
             {
-                // Export only first two pages if the image has more than two pages
-                if (cmxMultiImage is IMultipageImage multipage && multipage.PageCount > 2)
-                {
-                    tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 2));
-                }
-
-                // Vector rasterization options for CMX (vector) image
-                if (cmxMultiImage is VectorImage)
-                {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageWidth = cmxMultiImage.Width,
-                        PageHeight = cmxMultiImage.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                    tiffOptions.VectorRasterizationOptions = vectorOptions;
-                }
-
-                cmxMultiImage.Save(multiOutputPath, tiffOptions);
+                tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
             }
-        }
 
-        // Simple verification
-        if (File.Exists(singleOutputPath))
-        {
-            Console.WriteLine("Single‑page conversion succeeded.");
-        }
-        else
-        {
-            Console.Error.WriteLine("Single‑page conversion failed.");
-        }
+            // Vector rasterization settings for CMX pages
+            tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+            {
+                BackgroundColor = Color.White,
+                PageWidth = image.Width,
+                PageHeight = image.Height
+            };
 
-        if (File.Exists(multiOutputPath))
-        {
-            Console.WriteLine("Multi‑page conversion succeeded.");
-        }
-        else
-        {
-            Console.Error.WriteLine("Multi‑page conversion failed.");
+            image.Save(outputMulti, tiffOptions);
         }
     }
 }

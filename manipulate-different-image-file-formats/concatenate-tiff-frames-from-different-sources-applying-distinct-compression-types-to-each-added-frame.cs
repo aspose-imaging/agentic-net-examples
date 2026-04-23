@@ -9,57 +9,61 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath1 = @"c:\temp\source1.tif";
-        string inputPath2 = @"c:\temp\source2.tif";
-        string outputPath = @"c:\temp\combined.tif";
-
-        // Verify first input file exists
-        if (!File.Exists(inputPath1))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath1}");
-            return;
+            // Hardcoded input file paths
+            string inputPath1 = @"C:\Images\frame1.tif";
+            string inputPath2 = @"C:\Images\frame2.tif";
+
+            // Hardcoded output file path
+            string outputPath = @"C:\Images\combined.tif";
+
+            // Verify that each input file exists
+            if (!File.Exists(inputPath1))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Define options for the first frame (LZW compression)
+            TiffOptions options1 = new TiffOptions(TiffExpectedFormat.Default);
+            options1.Compression = TiffCompressions.Lzw;
+            options1.BitsPerSample = new ushort[] { 8, 8, 8 };
+            options1.Photometric = TiffPhotometrics.Rgb;
+            options1.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+            // Define options for the second frame (CCITT Group 3 Fax compression)
+            TiffOptions options2 = new TiffOptions(TiffExpectedFormat.Default);
+            options2.Compression = TiffCompressions.CcittFax3;
+            options2.BitsPerSample = new ushort[] { 1 };
+            options2.Photometric = TiffPhotometrics.MinIsBlack;
+            options2.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+            // Load each source image as a TiffFrame using its specific options
+            TiffFrame frame1 = new TiffFrame(inputPath1, options1);
+            TiffFrame frame2 = new TiffFrame(inputPath2, options2);
+
+            // Create a new multi‑frame TIFF image starting with the first frame
+            using (TiffImage tiffImage = new TiffImage(frame1))
+            {
+                // Append the second frame
+                tiffImage.AddFrame(frame2);
+
+                // Save the combined TIFF to the output path
+                tiffImage.Save(outputPath);
+            }
         }
-
-        // Verify second input file exists
-        if (!File.Exists(inputPath2))
+        catch (Exception ex)
         {
-            Console.Error.WriteLine($"File not found: {inputPath2}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create TiffOptions for the first frame (LZW compression)
-        TiffOptions options1 = new TiffOptions(TiffExpectedFormat.Default)
-        {
-            BitsPerSample = new ushort[] { 8, 8, 8 },
-            ByteOrder = TiffByteOrder.BigEndian,
-            Compression = TiffCompressions.Lzw,
-            Photometric = TiffPhotometrics.Rgb,
-            PlanarConfiguration = TiffPlanarConfigs.Contiguous
-        };
-
-        // Create TiffOptions for the second frame (CCITT Group 3 Fax compression, 1-bit B/W)
-        TiffOptions options2 = new TiffOptions(TiffExpectedFormat.Default)
-        {
-            BitsPerSample = new ushort[] { 1 },
-            ByteOrder = TiffByteOrder.LittleEndian,
-            Compression = TiffCompressions.CcittFax3,
-            Photometric = TiffPhotometrics.MinIsBlack,
-            PlanarConfiguration = TiffPlanarConfigs.Contiguous
-        };
-
-        // Load frames from the source files with the specified options
-        TiffFrame frame1 = new TiffFrame(inputPath1, options1);
-        TiffFrame frame2 = new TiffFrame(inputPath2, options2);
-
-        // Create a multi-frame TIFF image and add the frames
-        using (TiffImage tiffImage = new TiffImage(frame1))
-        {
-            tiffImage.AddFrame(frame2);
-            tiffImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

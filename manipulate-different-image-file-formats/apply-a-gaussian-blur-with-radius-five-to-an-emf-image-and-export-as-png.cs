@@ -3,46 +3,51 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.emf";
+            string intermediatePath = @"C:\Images\temp.png";
+            string outputPath = @"C:\Images\output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image emfImage = Image.Load(inputPath))
-        {
-            using (MemoryStream ms = new MemoryStream())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Rasterize EMF to PNG in memory
-                PngOptions rasterizeOptions = new PngOptions();
-                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions();
-                vectorOptions.PageSize = emfImage.Size;
-                rasterizeOptions.VectorRasterizationOptions = vectorOptions;
-
-                emfImage.Save(ms, rasterizeOptions);
-                ms.Position = 0;
-
-                using (RasterImage raster = (RasterImage)Image.Load(ms))
-                {
-                    // Apply Gaussian blur with radius 5 and sigma 4.0
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                    // Save the blurred image as PNG
-                    PngOptions saveOptions = new PngOptions();
-                    raster.Save(outputPath, saveOptions);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure directories exist for intermediate and final output
+            Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image and rasterize it to a temporary PNG
+            using (Image emfImage = Image.Load(inputPath))
+            {
+                // Save as PNG using default rasterization options
+                emfImage.Save(intermediatePath, new PngOptions());
+            }
+
+            // Load the rasterized PNG, apply Gaussian blur, and save the final PNG
+            using (Image img = Image.Load(intermediatePath))
+            {
+                RasterImage rasterImage = (RasterImage)img;
+
+                // Apply Gaussian blur with radius 5 and sigma 4.0
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the blurred image as PNG
+                rasterImage.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

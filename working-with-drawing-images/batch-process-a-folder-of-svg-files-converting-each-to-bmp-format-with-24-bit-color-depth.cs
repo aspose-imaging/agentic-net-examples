@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -7,7 +8,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define base, input and output directories
+        // Define base, input, and output directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
@@ -16,7 +17,7 @@ class Program
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
             return;
         }
 
@@ -31,7 +32,7 @@ class Program
 
         foreach (string inputPath in files)
         {
-            // Verify input file exists
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -39,28 +40,29 @@ class Program
             }
 
             // Determine output BMP path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
+            string outputFileName = Path.ChangeExtension(Path.GetFileName(inputPath), ".bmp");
+            string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-            // Ensure output directory for this file exists
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare vector rasterization options
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // Prepare BMP options with 24-bit color depth
+                // Configure BMP options with 24-bit color depth
                 using (BmpOptions bmpOptions = new BmpOptions())
                 {
                     bmpOptions.BitsPerPixel = 24;
-                    bmpOptions.VectorRasterizationOptions = vectorOptions;
 
-                    // Save as BMP
+                    // Set vector rasterization options to render the SVG
+                    bmpOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+
+                    // Save the image as BMP
                     image.Save(outputPath, bmpOptions);
                 }
             }

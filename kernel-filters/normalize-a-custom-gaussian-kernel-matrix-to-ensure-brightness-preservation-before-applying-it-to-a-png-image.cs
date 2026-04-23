@@ -1,71 +1,53 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Define a custom Gaussian kernel (example 3x3)
-        double[,] kernel = new double[,]
-        {
-            { 1, 2, 1 },
-            { 2, 4, 2 },
-            { 1, 2, 1 }
-        };
-
-        // Normalize kernel to preserve brightness (sum should be 1)
-        double sum = 0;
-        for (int y = 0; y < kernel.GetLength(0); y++)
-        {
-            for (int x = 0; x < kernel.GetLength(1); x++)
+            if (!File.Exists(inputPath))
             {
-                sum += kernel[y, x];
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-        }
 
-        if (sum != 0)
-        {
-            for (int y = 0; y < kernel.GetLength(0); y++)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Define a custom Gaussian kernel
+            double[,] kernel = new double[,]
             {
-                for (int x = 0; x < kernel.GetLength(1); x++)
-                {
-                    kernel[y, x] /= sum;
-                }
-            }
-        }
-
-        // Load image, apply custom convolution filter, and save
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-
-            // Apply the normalized kernel
-            raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-            // Save result as PNG
-            PngOptions options = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
+                { 1, 2, 1 },
+                { 2, 4, 2 },
+                { 1, 2, 1 }
             };
-            raster.Save(outputPath, options);
+
+            // Normalize the kernel to preserve brightness
+            double sum = 0;
+            foreach (double v in kernel)
+                sum += v;
+
+            double[,] normalizedKernel = new double[kernel.GetLength(0), kernel.GetLength(1)];
+            for (int i = 0; i < kernel.GetLength(0); i++)
+                for (int j = 0; j < kernel.GetLength(1); j++)
+                    normalizedKernel[i, j] = kernel[i, j] / sum;
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                // Apply the normalized Gaussian kernel
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(normalizedKernel));
+                raster.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

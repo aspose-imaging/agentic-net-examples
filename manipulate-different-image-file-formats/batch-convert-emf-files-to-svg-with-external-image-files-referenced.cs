@@ -6,70 +6,65 @@ using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Set up input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        // Wrap the entire processing in a try/catch to handle unexpected errors gracefully.
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hard‑coded input and output directories.
+            string inputDirectory = @"C:\InputEmf";
+            string outputDirectory = @"C:\OutputSvg";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all EMF files in the input directory.
+            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
 
-        // Get all EMF files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-        foreach (var inputPath in files)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in emfFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Prepare output path with .svg extension
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".svg");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load EMF image and convert to SVG
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
-            {
-                // Set up SVG save options
-                SvgOptions saveOptions = new SvgOptions
+                // Verify that the input file exists.
+                if (!File.Exists(inputPath))
                 {
-                    TextAsShapes = true
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Configure rasterization options for EMF
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                // Build the corresponding SVG output path.
+                string outputPath = Path.Combine(
+                    outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+
+                // Ensure the output directory exists.
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the EMF image.
+                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    BackgroundColor = Color.WhiteSmoke,
-                    PageSize = emfImage.Size,
-                    RenderMode = EmfRenderMode.Auto,
-                    BorderX = 0,
-                    BorderY = 0
-                };
+                    // Prepare SVG save options.
+                    SvgOptions saveOptions = new SvgOptions
+                    {
+                        TextAsShapes = true
+                    };
 
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+                    // Configure rasterization options for EMF.
+                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                    {
+                        BackgroundColor = Color.WhiteSmoke,
+                        PageSize = emfImage.Size,
+                        RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                        BorderX = 0,
+                        BorderY = 0
+                    };
 
-                // Save as SVG
-                emfImage.Save(outputPath, saveOptions);
+                    saveOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Save the image as SVG.
+                    emfImage.Save(outputPath, saveOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Output any unexpected error message.
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

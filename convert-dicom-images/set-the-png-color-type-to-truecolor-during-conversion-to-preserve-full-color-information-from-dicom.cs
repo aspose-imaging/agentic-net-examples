@@ -8,32 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.dcm";
-        string outputPath = @"C:\Images\output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.dcm";
+        string outputPath = "output.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-        Directory.CreateDirectory(outputDir);
-
-        // Load the DICOM image
-        using (Image dicomImage = Image.Load(inputPath))
-        {
-            // Configure PNG options with Truecolor color type
-            var pngOptions = new PngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorType = PngColorType.Truecolor
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PNG using the specified options
-            dicomImage.Save(outputPath, pngOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PNG options with Truecolor color type
+                var pngOptions = new PngOptions
+                {
+                    ColorType = PngColorType.Truecolor
+                };
+
+                // Save the image as PNG using the specified options
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

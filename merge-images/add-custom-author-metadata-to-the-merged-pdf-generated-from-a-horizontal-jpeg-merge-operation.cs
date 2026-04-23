@@ -7,91 +7,89 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input JPEG files (modify paths as needed)
-        string[] inputPaths = new string[]
+        try
         {
-            "input1.jpg",
-            "input2.jpg",
-            "input3.jpg"
-        };
-
-        // Validate each input file exists
-        foreach (string path in inputPaths)
-        {
-            if (!File.Exists(path))
+            // Hardcoded input JPEG paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {path}");
-                return;
-            }
-        }
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
 
-        // Output PDF path
-        string outputPath = "merged.pdf";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Temporary JPEG canvas file (intermediate)
-        string tempCanvasPath = "temp_canvas.jpg";
-        Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
-
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (string path in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(path))
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
-                sizes.Add(img.Size);
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
             }
-        }
 
-        // Calculate canvas dimensions for horizontal merge
-        int canvasWidth = sizes.Sum(s => s.Width);
-        int canvasHeight = sizes.Max(s => s.Height);
+            // Hardcoded output PDF path
+            string outputPath = "merged.pdf";
 
-        // Create temporary JPEG canvas bound to tempCanvasPath
-        Source tempSource = new FileCreateSource(tempCanvasPath, false);
-        JpegOptions jpegOptions = new JpegOptions()
-        {
-            Source = tempSource,
-            Quality = 100
-        };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-        {
-            // Merge images horizontally onto the canvas
-            int offsetX = 0;
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
+                    sizes.Add(img.Size);
                 }
             }
 
-            // Prepare PDF options with custom author metadata
-            PdfOptions pdfOptions = new PdfOptions();
-            pdfOptions.PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo()
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
+
+            // Temporary JPEG file to hold the merged image
+            string tempJpegPath = "temp_merged.jpg";
+            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
+            Source tempSource = new FileCreateSource(tempJpegPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
+
+            // Create JPEG canvas and merge images horizontally
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
-                Author = "Custom Author"
-            };
+                int offsetX = 0;
+                foreach (string path in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
+                }
 
-            // Save the canvas as PDF with metadata
-            canvas.Save(outputPath, pdfOptions);
+                // Save the merged JPEG to the temporary file
+                canvas.Save();
+            }
+
+            // Load the merged JPEG and save as PDF with custom author metadata
+            using (JpegImage mergedJpeg = (JpegImage)Image.Load(tempJpegPath))
+            {
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo()
+                {
+                    Author = "Custom Author"
+                };
+                mergedJpeg.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Optionally delete the temporary canvas file
-        if (File.Exists(tempCanvasPath))
+        catch (Exception ex)
         {
-            File.Delete(tempCanvasPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

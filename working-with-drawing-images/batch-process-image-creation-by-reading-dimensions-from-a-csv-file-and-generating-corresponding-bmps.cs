@@ -1,69 +1,60 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input CSV path and output directory
-        string csvPath = @"C:\temp\dimensions.csv";
-        string outputFolder = @"C:\temp\output";
+        // Hardcoded input CSV file path
+        string inputPath = "dimensions.csv";
 
-        // Validate input CSV existence
-        if (!File.Exists(csvPath))
+        // Verify input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.Error.WriteLine($"File not found: {csvPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputFolder);
+        // Hardcoded output directory
+        string outputDir = "output";
 
         // Read all lines from CSV
-        string[] lines = File.ReadAllLines(csvPath);
-        int index = 0;
+        string[] lines = File.ReadAllLines(inputPath);
+        int index = 1;
 
         foreach (string line in lines)
         {
             if (string.IsNullOrWhiteSpace(line))
                 continue;
 
-            // Expected CSV format: width,height[,filename]
+            // Expect format: width,height
             string[] parts = line.Split(',');
             if (parts.Length < 2)
-                continue; // skip malformed lines
+                continue;
 
-            if (!int.TryParse(parts[0].Trim(), out int width) ||
-                !int.TryParse(parts[1].Trim(), out int height))
-                continue; // skip lines with invalid numbers
+            int width = int.Parse(parts[0].Trim());
+            int height = int.Parse(parts[1].Trim());
 
-            // Determine output file name
-            string fileName = parts.Length >= 3 && !string.IsNullOrWhiteSpace(parts[2])
-                ? parts[2].Trim()
-                : $"image_{index}.bmp";
+            // Build output file path
+            string outputPath = Path.Combine(outputDir, $"image_{index}.bmp");
 
-            string outputPath = Path.Combine(outputFolder, fileName);
-
-            // Ensure directory for this output file exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create source bound to the output file
+            // Create BMP options with file source
             Source source = new FileCreateSource(outputPath, false);
-
-            // Set BMP options with the source
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-            // Create a raster canvas with specified dimensions
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+            BmpOptions options = new BmpOptions()
             {
-                // Optionally, fill the canvas with a default color (white)
-                // canvas.SaveArgb32Pixels(canvas.Bounds, new Aspose.Imaging.Color[width * height]);
+                Source = source,
+                BitsPerPixel = 24
+            };
 
-                // Save the bound image
+            // Create canvas and save
+            using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
+            {
                 canvas.Save();
             }
 

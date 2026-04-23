@@ -7,33 +7,38 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input JPEG file path
-        string inputPath = "Input/sample.jpg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "sample.jpg";
+            string outputPath = "resolution.txt";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (Image image = Image.Load(inputPath))
+            {
+                JpegImage jpegImage = image as JpegImage;
+                if (jpegImage == null)
+                {
+                    Console.Error.WriteLine("The file is not a JPEG image.");
+                    return;
+                }
+
+                double horizontalResolution = jpegImage.HorizontalResolution;
+                double verticalResolution = jpegImage.VerticalResolution;
+
+                string record = $"HorizontalResolution={horizontalResolution},VerticalResolution={verticalResolution}";
+                File.WriteAllText(outputPath, record);
+            }
         }
-
-        // Hardcoded output file path (simulating a database record)
-        string outputPath = "Output/resolution.txt";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image and access its EXIF resolution tags
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            double horizontalResolution = image.HorizontalResolution;
-            double verticalResolution = image.VerticalResolution;
-
-            // Create a simple record string
-            string record = $"HorizontalResolution={horizontalResolution},VerticalResolution={verticalResolution}";
-
-            // Write the record to the output file
-            File.WriteAllText(outputPath, record);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

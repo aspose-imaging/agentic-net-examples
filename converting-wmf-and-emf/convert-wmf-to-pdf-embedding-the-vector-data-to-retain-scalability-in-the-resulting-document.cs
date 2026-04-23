@@ -6,40 +6,39 @@ using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.wmf");
-        string outputPath = Path.Combine("Output", "sample.pdf");
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\input.wmf";
+        string outputPath = @"C:\Temp\output.pdf";
 
-        // Validate input file existence
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load WMF image and convert to PDF preserving vector data
-        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+        // Load the WMF image
+        using (Image image = Image.Load(inputPath))
         {
-            // Set up vector rasterization options for WMF
-            var rasterOptions = new WmfRasterizationOptions
+            // Configure vector rasterization to preserve scalability
+            var vectorOptions = new WmfRasterizationOptions
             {
-                BackgroundColor = Color.White,
-                PageSize = wmfImage.Size
+                PageSize = image.Size
             };
 
-            // Configure PDF options with the vector rasterization settings
+            // Set PDF save options with the vector rasterization configuration
             var pdfOptions = new PdfOptions
             {
-                VectorRasterizationOptions = rasterOptions
+                VectorRasterizationOptions = vectorOptions
             };
 
-            // Save as PDF
-            wmfImage.Save(outputPath, pdfOptions);
+            // Save as PDF, embedding the vector data
+            image.Save(outputPath, pdfOptions);
         }
     }
 }

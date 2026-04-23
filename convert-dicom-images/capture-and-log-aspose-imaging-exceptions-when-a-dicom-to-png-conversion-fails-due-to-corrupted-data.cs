@@ -3,59 +3,52 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.CoreExceptions.ImageFormats;
-using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output locations
         string inputPath = "input.dcm";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputDirectory = "output";
 
         try
         {
-            // Load the DICOM image
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // For each DICOM page, save as PNG (here we handle the first page)
-                foreach (var dicomPage in dicomImage.DicomPages)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists before any save operation
+            Directory.CreateDirectory(outputDirectory);
+
+            // Open the DICOM file as a stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                // Load the DICOM image from the stream
+                using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    // Save the page as PNG
-                    dicomPage.Save(outputPath, new PngOptions());
-                    // If only the first page is needed, break after saving
-                    break;
+                    // Iterate through each page in the DICOM image
+                    foreach (var dicomPage in dicomImage.DicomPages)
+                    {
+                        // Build the output PNG file path
+                        string outputPath = Path.Combine(outputDirectory, $"page_{dicomPage.Index}.png");
+
+                        // Ensure the directory for the output file exists (redundant but follows rule)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as PNG using Aspose.Imaging's PngOptions
+                        dicomPage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
-        // Capture specific Aspose.Imaging exceptions
-        catch (DicomImageException ex)
-        {
-            Console.Error.WriteLine($"Dicom image error: {ex.Message}");
-        }
-        catch (ImageSaveException ex)
-        {
-            Console.Error.WriteLine($"Image save error: {ex.Message}");
-        }
-        catch (PngImageException ex)
-        {
-            Console.Error.WriteLine($"PNG image error: {ex.Message}");
-        }
-        // Capture any other unexpected exceptions
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+            // Log any exception, including Aspose.Imaging specific ones
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

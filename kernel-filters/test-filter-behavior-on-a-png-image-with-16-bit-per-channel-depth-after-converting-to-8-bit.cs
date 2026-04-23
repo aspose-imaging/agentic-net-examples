@@ -1,62 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample16bit.png";
+        string inputPath = @"C:\temp\input16bit.png";
+        string outputDir = @"C:\temp\output\";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the 16‑bit PNG image
-        using (PngImage pngImage = new PngImage(inputPath))
+        try
         {
-            // Define the filter types to test
-            PngFilterType[] filterTypes = new PngFilterType[]
+            // Load the 16‑bit PNG image
+            using (Image image = Image.Load(inputPath))
             {
-                PngFilterType.None,
-                PngFilterType.Up,
-                PngFilterType.Sub,
-                PngFilterType.Paeth,
-                PngFilterType.Avg,
-                PngFilterType.Adaptive
-            };
-
-            foreach (PngFilterType filter in filterTypes)
-            {
-                // Prepare PNG save options: convert to 8‑bit per channel and apply the current filter
-                PngOptions saveOptions = new PngOptions
+                // Iterate over all available PNG filter types
+                foreach (PngFilterType filter in Enum.GetValues(typeof(PngFilterType)))
                 {
-                    BitDepth = 8,                                 // Convert to 8‑bit per channel
-                    ColorType = PngColorType.TruecolorWithAlpha, // Keep truecolor with alpha
-                    FilterType = filter,
-                    CompressionLevel = 9,                         // Max compression (optional)
-                    Progressive = true                            // Optional progressive loading
-                };
+                    // Prepare PNG save options: convert to 8‑bit and apply the current filter
+                    PngOptions saveOptions = new PngOptions
+                    {
+                        BitDepth = 8,                                 // Convert to 8‑bit per channel
+                        FilterType = filter,                          // Current filter type
+                        ColorType = PngColorType.TruecolorWithAlpha, // Preserve alpha channel
+                        CompressionLevel = 9,                         // Maximum compression
+                        Progressive = false                           // No progressive loading needed for this test
+                    };
 
-                // Build output file path
-                string outputPath = $@"c:\temp\output_{filter}.png";
+                    // Build output file path and ensure its directory exists
+                    string outputPath = Path.Combine(outputDir, $"output_{filter}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Save the image with the specified options
+                    image.Save(outputPath, saveOptions);
 
-                // Save the image with the specified options
-                pngImage.Save(outputPath, saveOptions);
-
-                // Optionally, report the file size
-                FileInfo info = new FileInfo(outputPath);
-                Console.WriteLine($"Filter: {filter}, Output size: {info.Length} bytes");
+                    // Report the resulting file size
+                    long fileSize = new FileInfo(outputPath).Length;
+                    Console.WriteLine($"Filter {filter}: output size {fileSize} bytes.");
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,71 +1,64 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Define input and output directories relative to the current directory
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputSvgs";
+            string outputDir = @"C:\OutputPngs";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all SVG files in the input directory
+            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
 
-        // Get all SVG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-
-        foreach (var filePath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(filePath))
+            foreach (var inputPath in svgFiles)
             {
-                Console.Error.WriteLine($"File not found: {filePath}");
-                return;
-            }
-
-            // Prepare output file path with .png extension
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + ".png");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image, remove background, and rasterize to PNG
-            using (Image image = Image.Load(filePath))
-            {
-                if (image is VectorImage vectorImage)
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                using (PngOptions pngOptions = new PngOptions())
+                // Build the output PNG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the SVG image
+                using (SvgImage svgImage = new SvgImage(inputPath))
                 {
-                    VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+                    // Remove any background from the SVG
+                    svgImage.RemoveBackground();
+
+                    // Configure rasterization options
+                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                     {
-                        BackgroundColor = Aspose.Imaging.Color.Transparent,
-                        PageSize = image.Size
+                        PageSize = svgImage.Size
                     };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                    image.Save(outputPath, pngOptions);
+                    // Configure PNG save options
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterizationOptions
+                    };
+
+                    // Save the rasterized PNG
+                    svgImage.Save(outputPath, pngOptions);
                 }
             }
-
-            Console.WriteLine($"Processed: {Path.GetFileName(filePath)} -> {Path.GetFileName(outputPath)}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

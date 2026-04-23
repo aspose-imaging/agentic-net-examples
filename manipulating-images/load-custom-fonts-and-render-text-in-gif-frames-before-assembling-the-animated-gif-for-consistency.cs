@@ -9,88 +9,101 @@ using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input paths
-        string fontFolderPath = "fonts";
-        string[] framePaths = { "frame1.png", "frame2.png", "frame3.png" };
-        string outputPath = "output.gif";
+        string inputFolder = @"C:\InputFrames";
+        string fontFolder = @"C:\Fonts";
+        string outputPath = @"C:\Output\animated.gif";
 
-        // Verify font folder
-        if (!Directory.Exists(fontFolderPath))
+        if (!Directory.Exists(inputFolder))
         {
-            Console.Error.WriteLine($"Folder not found: {fontFolderPath}");
+            Console.Error.WriteLine($"Folder not found: {inputFolder}");
             return;
         }
 
-        // Verify each frame file
-        foreach (var path in framePaths)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        try
         {
-            if (!File.Exists(path))
+            var frameFiles = Directory.GetFiles(inputFolder);
+            if (frameFiles.Length == 0)
             {
-                Console.Error.WriteLine($"File not found: {path}");
+                Console.Error.WriteLine("No frame files found.");
                 return;
             }
-        }
 
-        // Prepare LoadOptions with custom fonts
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource((args) =>
-        {
-            string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-            var list = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-            if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((args) =>
             {
-                foreach (var fontFile in Directory.GetFiles(fontsPath))
+                var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (args.Length > 0)
                 {
-                    byte[] fontBytes = File.ReadAllBytes(fontFile);
-                    string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                    list.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                    string fontsPath = args[0]?.ToString() ?? string.Empty;
+                    if (Directory.Exists(fontsPath))
+                    {
+                        foreach (var fontFile in Directory.GetFiles(fontsPath))
+                        {
+                            byte[] data = File.ReadAllBytes(fontFile);
+                            string name = Path.GetFileNameWithoutExtension(fontFile);
+                            fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                        }
+                    }
                 }
-            }
-            return list.ToArray();
-        }, fontFolderPath);
+                return fonts.ToArray();
+            }, fontFolder);
 
-        // List to hold GIF frame blocks
-        var gifBlocks = new List<GifFrameBlock>();
+            GifFrameBlock firstBlock = null;
+            var additionalBlocks = new List<GifFrameBlock>();
 
-        // Load each frame, render text, and convert to GifFrameBlock
-        foreach (var path in framePaths)
-        {
-            using (var raster = (RasterImage)Image.Load(path, loadOptions))
+            foreach (var filePath in frameFiles)
             {
-                // Create a block from the raster image
-                var block = new GifFrameBlock(raster);
-
-                // Draw text onto the block
-                var graphics = new Graphics(block);
-                using (var brush = new SolidBrush(Color.Yellow))
+                if (!File.Exists(filePath))
                 {
-                    // Use a custom font (fallback to default if not found)
-                    var font = new Font("CustomFontName", 20);
-                    graphics.DrawString("Sample Text", font, brush, new PointF(10, 10));
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    continue;
                 }
 
-                gifBlocks.Add(block);
+                using (RasterImage raster = (RasterImage)Image.Load(filePath, loadOptions))
+                {
+                    var block = new GifFrameBlock(raster);
+
+                    var graphics = new Graphics(block);
+                    using (var brush = new SolidBrush(Color.Yellow))
+                    {
+                        var font = new Font("Arial", 20);
+                        graphics.DrawString("Sample Text", font, brush, new PointF(10, 10));
+                    }
+
+                    if (firstBlock == null)
+                    {
+                        firstBlock = block;
+                    }
+                    else
+                    {
+                        additionalBlocks.Add(block);
+                    }
+                }
             }
-        }
 
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        // Assemble GIF
-        using (var gifImage = new GifImage(gifBlocks[0]))
-        {
-            for (int i = 1; i < gifBlocks.Count; i++)
+            if (firstBlock == null)
             {
-                gifImage.AddBlock(gifBlocks[i]);
+                Console.Error.WriteLine("No valid frames to create GIF.");
+                return;
             }
 
-            gifImage.Save(outputPath);
+            using (var gifImage = new GifImage(firstBlock))
+            {
+                foreach (var blk in additionalBlocks)
+                {
+                    gifImage.AddBlock(blk);
+                }
+
+                gifImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -21,31 +20,29 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG image
         using (Image pngImage = Image.Load(inputPath))
         {
-            // Cast to RasterImage for drawing
+            // Cast to RasterImage to access pixel data
             RasterImage raster = (RasterImage)pngImage;
-
             int width = raster.Width;
             int height = raster.Height;
-            int dpi = 96; // Standard DPI
+            int dpi = 96; // Standard screen DPI
 
             // Create an SVG graphics canvas
-            SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+            var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, dpi);
 
             // Set background color by filling the entire canvas
-            graphics.FillRectangle(
-                new Pen(Color.Transparent, 0),
-                new SolidBrush(Color.LightGray),
-                0, 0, width, height);
+            Pen backgroundPen = new Pen(Color.White, 1);
+            SolidBrush backgroundBrush = new SolidBrush(Color.White);
+            graphics.FillRectangle(backgroundPen, backgroundBrush, 0, 0, width, height);
 
-            // Draw the PNG onto the SVG canvas
+            // Draw the PNG raster image onto the SVG canvas
             graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
 
-            // Finalize SVG image
+            // Finalize the SVG image
             using (SvgImage svgImage = graphics.EndRecording())
             {
                 // Save the SVG file

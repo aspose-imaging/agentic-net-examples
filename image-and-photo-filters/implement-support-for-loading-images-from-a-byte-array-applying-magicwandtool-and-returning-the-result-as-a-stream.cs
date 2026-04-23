@@ -3,36 +3,37 @@ using System.IO;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output\\result.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (var inputStream = new MemoryStream(File.ReadAllBytes(inputPath)))
-        using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputStream))
-        {
-            MagicWandTool
-                .Select(image, new MagicWandSettings(10, 10))
-                .Apply();
-
-            var pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, pngOptions);
-            Console.WriteLine($"Saved result to {outputPath}");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                MagicWandTool
+                    .Select(image, new MagicWandSettings(10, 10))
+                    .Apply();
+
+                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

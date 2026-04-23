@@ -12,25 +12,25 @@ class Program
         string inputPath = "Input/sample.eps";
         string outputPath = "Output/sample.pdf";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (var image = (EpsImage)Image.Load(inputPath))
-        {
-            var pdfOptions = new PdfOptions
+            if (!File.Exists(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, pdfOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

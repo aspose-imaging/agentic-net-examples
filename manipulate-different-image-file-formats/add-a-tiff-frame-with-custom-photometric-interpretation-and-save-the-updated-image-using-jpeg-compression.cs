@@ -5,17 +5,16 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.tif";
-        string outputPath = @"c:\temp\output.tif";
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,40 +24,42 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the existing TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        try
         {
-            // Options for the new frame with a custom photometric interpretation
-            TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions.Photometric = TiffPhotometrics.MinIsBlack; // custom photometric
-            frameOptions.BitsPerSample = new ushort[] { 8 }; // 8 bits per sample
-
-            // Create a simple raster image to serve as the frame content
-            using (BmpImage bmp = new BmpImage(100, 100))
+            // Load the existing TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Fill the bitmap with a solid gray color
-                SolidBrush grayBrush = new SolidBrush(Color.Gray);
-                using (Graphics gfx = new Graphics(bmp))
-                {
-                    gfx.FillRectangle(grayBrush, bmp.Bounds);
-                }
+                // Create options for the new frame with a custom photometric interpretation
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                frameOptions.BitsPerSample = new ushort[] { 1 }; // 1-bit per sample for B/W
+                frameOptions.Photometric = TiffPhotometrics.MinIsBlack; // Custom photometric
+                frameOptions.Compression = TiffCompressions.None; // No compression for the frame
 
-                // Create a TIFF frame from the bitmap using the custom options
-                TiffFrame newFrame = new TiffFrame(bmp, frameOptions);
+                // Create a new 100x100 frame using the above options
+                TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
+
+                // Fill the new frame with solid black
+                SolidBrush brush = new SolidBrush(Color.Black);
+                Graphics graphics = new Graphics(newFrame);
+                graphics.FillRectangle(brush, newFrame.Bounds);
 
                 // Add the new frame to the TIFF image
                 tiffImage.AddFrame(newFrame);
+
+                // Prepare save options to use JPEG compression
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                saveOptions.Compression = TiffCompressions.Jpeg;
+                saveOptions.CompressedQuality = 80; // JPEG quality
+                saveOptions.Photometric = TiffPhotometrics.Rgb; // Photometric for saved image
+                saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 }; // 8 bits per channel
+
+                // Save the updated TIFF image
+                tiffImage.Save(outputPath, saveOptions);
             }
-
-            // Save options: JPEG compression
-            TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-            saveOptions.Compression = TiffCompressions.Jpeg;
-            saveOptions.CompressedQuality = 80; // quality level (0-100)
-            saveOptions.Photometric = TiffPhotometrics.Rgb;
-            saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-            // Save the updated TIFF image
-            tiffImage.Save(outputPath, saveOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

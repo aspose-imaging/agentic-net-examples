@@ -6,59 +6,45 @@ using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputCdr";
+            string outputFolder = @"C:\OutputJpg";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all CDR files in the input folder
+            string[] cdrFiles = Directory.GetFiles(inputFolder, "*.cdr");
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            if (!Path.GetExtension(inputPath).Equals(".cdr", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            if (!File.Exists(inputPath))
+            foreach (string cdrFilePath in cdrFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                using (JpegOptions jpegOptions = new JpegOptions())
+                // Verify input file exists
+                if (!File.Exists(cdrFilePath))
                 {
-                    if (image is VectorImage)
-                    {
-                        jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        };
-                    }
+                    Console.Error.WriteLine($"File not found: {cdrFilePath}");
+                    return;
+                }
 
-                    image.Save(outputPath, jpegOptions);
+                // Determine output JPG path
+                string outputFileName = Path.GetFileNameWithoutExtension(cdrFilePath) + ".jpg";
+                string outputFilePath = Path.Combine(outputFolder, outputFileName);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
+
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(cdrFilePath))
+                {
+                    // Save as JPG with default options
+                    JpegOptions jpegOptions = new JpegOptions();
+                    cdrImage.Save(outputFilePath, jpegOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -4,10 +4,10 @@ using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
+        string outputPath = "output\\output.jpg";
 
         if (!File.Exists(inputPath))
         {
@@ -28,9 +28,9 @@ class Program
                 { 0, -1, 0 }
             };
 
-            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+            var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-            raster.Filter(raster.Bounds, filterOptions);
+            raster.Filter(raster.Bounds, convOptions);
 
             raster.Save(outputPath);
         }

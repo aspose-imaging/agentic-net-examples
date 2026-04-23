@@ -2,61 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded paths
-        string inputWebPPath = @"c:\temp\input.webp";
-        string intermediateBmpPath = @"c:\temp\intermediate.bmp";
-        string outputTiffPath = @"c:\temp\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputWebPPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputWebPPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.webp";
+            string bmpPath = "Output/sample.bmp";
+            string tiffPath = "Output/sample.tiff";
 
-        // Load WebP image and save as BMP
-        using (WebPImage webPImage = new WebPImage(inputWebPPath))
-        {
-            // Ensure the directory for the BMP exists
-            Directory.CreateDirectory(Path.GetDirectoryName(intermediateBmpPath));
-
-            // Save to BMP using default BMP options
-            webPImage.Save(intermediateBmpPath, new BmpOptions());
-        }
-
-        // Verify the BMP was created before proceeding
-        if (!File.Exists(intermediateBmpPath))
-        {
-            Console.Error.WriteLine($"File not found: {intermediateBmpPath}");
-            return;
-        }
-
-        // Load the BMP image
-        using (Image bmpImage = Image.Load(intermediateBmpPath))
-        {
-            // Prepare TIFF options with LZW compression
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Compression = TiffCompressions.Lzw,
-                BitsPerSample = new ushort[] { 8, 8, 8 },
-                Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb,
-                ByteOrder = Aspose.Imaging.FileFormats.Tiff.Enums.TiffByteOrder.LittleEndian,
-                PlanarConfiguration = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPlanarConfigs.Contiguous
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tiffPath));
 
-            // Save BMP as TIFF with LZW compression
-            bmpImage.Save(outputTiffPath, tiffOptions);
+            // Load WebP image and save as BMP
+            using (WebPImage webpImage = new WebPImage(inputPath))
+            {
+                using (BmpOptions bmpOptions = new BmpOptions())
+                {
+                    webpImage.Save(bmpPath, bmpOptions);
+                }
+            }
+
+            // Load the BMP image and save as TIFF with LZW compression
+            using (Image bmpImage = Image.Load(bmpPath))
+            {
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    tiffOptions.Compression = TiffCompressions.Lzw;
+                    bmpImage.Save(tiffPath, tiffOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -9,19 +9,27 @@ class Program
         // Hardcoded input path
         string inputPath = @"C:\temp\sample.jpg";
 
-        // Verify the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Load the JPEG image using Aspose.Imaging
-        using (JpegImage jpegImage = new JpegImage(inputPath))
+            // Load the JPEG image using the constructor that accepts a file path
+            using (JpegImage jpegImage = new JpegImage(inputPath))
+            {
+                // Output image dimensions
+                Console.WriteLine($"Width: {jpegImage.Width}");
+                Console.WriteLine($"Height: {jpegImage.Height}");
+            }
+        }
+        catch (Exception ex)
         {
-            // Output image dimensions
-            Console.WriteLine($"Width: {jpegImage.Width}");
-            Console.WriteLine($"Height: {jpegImage.Height}");
+            // Report any unexpected errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -19,22 +18,18 @@ class Program
             return;
         }
 
-        // Read the EPS file into a memory stream
-        byte[] epsData = File.ReadAllBytes(inputPath);
-        using (var inputStream = new MemoryStream(epsData))
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+        // Load EPS image from a memory stream
+        using (MemoryStream memoryStream = new MemoryStream(File.ReadAllBytes(inputPath)))
+        using (Image image = Image.Load(memoryStream))
         {
-            // Load the EPS image from the memory stream using load options
-            using (var image = Image.Load(inputStream, new EpsLoadOptions()))
-            {
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Prepare PSD save options
+            PsdOptions psdOptions = new PsdOptions();
 
-                // Prepare PSD save options (default settings)
-                var psdOptions = new PsdOptions();
-
-                // Save the image as a PSD file
-                image.Save(outputPath, psdOptions);
-            }
+            // Save the image as PSD
+            image.Save(outputPath, psdOptions);
         }
     }
 }

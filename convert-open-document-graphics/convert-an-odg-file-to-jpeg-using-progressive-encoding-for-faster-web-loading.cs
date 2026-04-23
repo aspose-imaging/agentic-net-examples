@@ -9,24 +9,24 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample_converted.jpg";
+        string inputPath = @"C:\temp\sample.odg";
+        string outputPath = @"C:\temp\sample_converted.jpg";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
             // Configure JPEG options for progressive encoding
-            var jpegOptions = new JpegOptions
+            JpegOptions jpegOptions = new JpegOptions
             {
                 CompressionType = JpegCompressionMode.Progressive,
                 Quality = 90 // Adjust quality as needed (1-100)

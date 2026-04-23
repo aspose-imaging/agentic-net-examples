@@ -9,55 +9,63 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input_animation.webp";
-        string outputPath = @"C:\Images\output_animation.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output paths
+            string inputPath = "Animation1.webp";
+            string outputPath = "Animation1.webp.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the animated WebP image
-        using (Image webpImage = Image.Load(inputPath))
-        {
-            // Cast to IMultipageImage to access frame information
-            var webpMultipage = webpImage as IMultipageImage;
-            int originalFrameCount = webpMultipage?.PageCount ?? 1;
-
-            // Save as APNG using default options (preserves frame timing)
-            webpImage.Save(outputPath, new ApngOptions());
-
-            // Load the generated APNG to verify frame data
-            using (Image apngImage = Image.Load(outputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                var apngMultipage = apngImage as IMultipageImage;
-                int apngFrameCount = apngMultipage?.PageCount ?? 1;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Simple verification: frame count should match
-                if (originalFrameCount != apngFrameCount)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the animated WebP image
+            using (Image webpImage = Image.Load(inputPath))
+            {
+                // Convert and save as APNG using default options
+                webpImage.Save(outputPath, new ApngOptions());
+
+                // Determine frame count of the source WebP
+                int webpFrameCount = 0;
+                if (webpImage is IMultipageImage webpMultipage)
                 {
-                    Console.Error.WriteLine($"Frame count mismatch: WebP={originalFrameCount}, APNG={apngFrameCount}");
-                }
-                else
-                {
-                    Console.WriteLine($"Success: Frame count matches ({originalFrameCount} frames).");
+                    webpFrameCount = webpMultipage.PageCount;
                 }
 
-                // Verify default frame time if available
-                var apng = apngImage as ApngImage;
-                if (apng != null && webpMultipage != null)
+                // Load the generated APNG image
+                using (Image apngImage = Image.Load(outputPath))
                 {
-                    // WebPImage does not expose a direct default frame time, but we can compare per‑frame delays if needed.
-                    // Here we simply output the default frame time of the APNG.
-                    Console.WriteLine($"APNG default frame time: {apng.DefaultFrameTime} ms");
+                    // Determine frame count of the resulting APNG
+                    int apngFrameCount = 0;
+                    if (apngImage is IMultipageImage apngMultipage)
+                    {
+                        apngFrameCount = apngMultipage.PageCount;
+                    }
+
+                    // Output verification results
+                    Console.WriteLine($"WebP frames: {webpFrameCount}");
+                    Console.WriteLine($"APNG frames: {apngFrameCount}");
+
+                    if (webpFrameCount == apngFrameCount)
+                    {
+                        Console.WriteLine("Verification succeeded: frame counts match.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Verification failed: frame counts do not match.");
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

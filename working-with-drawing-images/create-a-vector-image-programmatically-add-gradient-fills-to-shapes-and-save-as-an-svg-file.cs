@@ -1,44 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output SVG file path
-        string outputPath = "output.svg";
+        // Define output path
+        string outputPath = @"C:\Temp\vector_output.svg";
 
-        // Ensure the output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrEmpty(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Canvas size and DPI
+        // Canvas size
         int width = 600;
         int height = 400;
         int dpi = 96;
 
-        // Create an SVG graphics context
-        var graphics = new SvgGraphics2D(width, height, dpi);
+        // Create SVG graphics context
+        SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-        // Gradient fills are not supported by Graphics.FillXXX methods.
-        // Fallback to a solid brush with a color that approximates the desired gradient.
-        var rectPen = new Pen(Color.Black, 2);
-        var rectBrush = new SolidBrush(Color.LightBlue);
-        graphics.FillRectangle(rectPen, rectBrush, 50, 50, 200, 150);
+        // Draw outer border
+        Pen borderPen = new Pen(Color.Black, 2);
+        graphics.DrawRectangle(borderPen, 0, 0, width, height);
 
-        // Draw another rectangle with a different solid fill as a placeholder for a gradient.
-        var rectPen2 = new Pen(Color.DarkGreen, 2);
-        var rectBrush2 = new SolidBrush(Color.Pink);
-        graphics.FillRectangle(rectPen2, rectBrush2, 300, 200, 250, 150);
+        // Fill a rectangle (solid brush)
+        Pen rectPen = new Pen(Color.Blue, 1);
+        using (SolidBrush rectBrush = new SolidBrush(Color.LightBlue))
+        {
+            graphics.FillRectangle(rectPen, rectBrush, 50, 50, 200, 150);
+        }
 
-        // Finalize and save the SVG image
+        // Create an ellipse shape and fill it
+        Figure ellipseFigure = new Figure { IsClosed = true };
+        GraphicsPath ellipsePath = new GraphicsPath();
+        ellipsePath.AddFigure(ellipseFigure);
+        ellipseFigure.AddShapes(new Shape[]
+        {
+            new EllipseShape(new Rectangle(300, 50, 150, 150))
+        });
+
+        Pen ellipsePen = new Pen(Color.Green, 2);
+        using (SolidBrush ellipseBrush = new SolidBrush(Color.Yellow))
+        {
+            graphics.FillPath(ellipsePen, ellipseBrush, ellipsePath);
+        }
+
+        // Finalize SVG image and save
         using (SvgImage svgImage = graphics.EndRecording())
         {
             svgImage.Save(outputPath);

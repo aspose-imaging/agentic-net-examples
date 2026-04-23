@@ -3,65 +3,55 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.gif";
-        string emfPath = @"C:\Images\output.emf";
-        string pdfPath = @"C:\Images\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Input GIF path
+            string inputPath = Path.Combine("Input", "sample.gif");
+            // Temporary EMF path
+            string emfPath = Path.Combine("Output", "temp.emf");
+            // Final PDF path
+            string pdfPath = Path.Combine("Output", "output.pdf");
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(emfPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+
+            // Load GIF and convert to EMF
+            using (Image gifImage = Image.Load(inputPath))
+            {
+                var emfOptions = new EmfOptions
+                {
+                    VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = gifImage.Size
+                    }
+                };
+                gifImage.Save(emfPath, emfOptions);
+            }
+
+            // Load the generated EMF and save as PDF
+            using (EmfImage emfImage = (EmfImage)Image.Load(emfPath))
+            {
+                var pdfOptions = new PdfOptions();
+                emfImage.Save(pdfPath, pdfOptions);
+            }
         }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(emfPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-
-        // Load the GIF image
-        using (Image gifImage = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Convert the GIF to EMF (vector) – this rasterizes the image into an EMF container
-            var emfRasterOptions = new EmfRasterizationOptions
-            {
-                PageSize = gifImage.Size,
-                BackgroundColor = Color.White,
-                RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto
-            };
-
-            var emfSaveOptions = new EmfOptions
-            {
-                VectorRasterizationOptions = emfRasterOptions
-            };
-
-            gifImage.Save(emfPath, emfSaveOptions);
-        }
-
-        // Load the generated EMF to extract its vector representation
-        using (EmfImage emfImage = (EmfImage)Image.Load(emfPath))
-        {
-            // Prepare PDF save options with vector rasterization (preserves vector shapes)
-            var pdfRasterOptions = new EmfRasterizationOptions
-            {
-                PageSize = emfImage.Size,
-                BackgroundColor = Color.White,
-                RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto
-            };
-
-            var pdfSaveOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = pdfRasterOptions
-            };
-
-            // Save the EMF content as a PDF document
-            emfImage.Save(pdfPath, pdfSaveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

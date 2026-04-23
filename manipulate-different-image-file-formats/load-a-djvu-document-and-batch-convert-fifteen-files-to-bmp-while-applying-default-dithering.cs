@@ -8,51 +8,59 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input files (15 DjVu documents)
-        string[] inputFiles = new string[]
+        try
         {
-            "doc1.djvu", "doc2.djvu", "doc3.djvu", "doc4.djvu", "doc5.djvu",
-            "doc6.djvu", "doc7.djvu", "doc8.djvu", "doc9.djvu", "doc10.djvu",
-            "doc11.djvu", "doc12.djvu", "doc13.djvu", "doc14.djvu", "doc15.djvu"
-        };
+            // Hardcoded input directory and output directory
+            string inputDir = @"C:\Input";
+            string outputDir = @"C:\Output";
 
-        // Base directories (hardcoded)
-        string inputBaseDir = @"C:\InputDjvu";
-        string outputBaseDir = @"C:\OutputBmp";
-
-        for (int i = 0; i < inputFiles.Length; i++)
-        {
-            string inputPath = Path.Combine(inputBaseDir, inputFiles[i]);
-
-            // Input file existence check
-            if (!File.Exists(inputPath))
+            // List of fifteen DjVu files to process
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                "file1.djvu", "file2.djvu", "file3.djvu", "file4.djvu", "file5.djvu",
+                "file6.djvu", "file7.djvu", "file8.djvu", "file9.djvu", "file10.djvu",
+                "file11.djvu", "file12.djvu", "file13.djvu", "file14.djvu", "file15.djvu"
+            };
 
-            // Load DjVu document
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+            for (int i = 0; i < inputFiles.Length; i++)
             {
-                // Apply default dithering (Floyd‑Steinberg, 8‑bit palette)
-                djvuImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+                string inputPath = Path.Combine(inputDir, inputFiles[i]);
 
-                // Convert each page to BMP
-                for (int pageIndex = 0; pageIndex < djvuImage.Pages.Length; pageIndex++)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Ensure output directory exists
-                    string outputFileName = $"doc{i + 1}_page{pageIndex}.bmp";
-                    string outputPath = Path.Combine(outputBaseDir, outputFileName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Save page as BMP
-                    using (Image page = djvuImage.Pages[pageIndex])
+                // Open the DjVu document
+                using (FileStream stream = File.OpenRead(inputPath))
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                {
+                    // Apply default dithering (Floyd‑Steinberg, 8‑bit palette)
+                    djvuImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+
+                    // Save each page as a separate BMP file
+                    int pageIndex = 0;
+                    foreach (DjvuPage page in djvuImage.Pages)
                     {
+                        string outputPath = Path.Combine(outputDir,
+                            $"output_{i + 1}_page{pageIndex}.bmp");
+
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as BMP
                         page.Save(outputPath, new BmpOptions());
+
+                        pageIndex++;
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

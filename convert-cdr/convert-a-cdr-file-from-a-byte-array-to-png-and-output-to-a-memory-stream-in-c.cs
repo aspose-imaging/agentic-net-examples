@@ -3,53 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input CDR file path
-        string inputPath = "input.cdr";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Example byte array containing CDR data.
+            // Replace with actual CDR file bytes.
+            byte[] cdrData = new byte[0];
 
-        // Read the CDR file into a byte array
-        byte[] cdrData = File.ReadAllBytes(inputPath);
-
-        // Load the CDR image from the byte array using a MemoryStream
-        using (MemoryStream inputStream = new MemoryStream(cdrData))
-        {
-            // Create default CDR load options
-            var loadOptions = new CdrLoadOptions();
-
-            // Initialize CdrImage with the stream and load options
-            using (CdrImage cdrImage = new CdrImage(inputStream, loadOptions))
+            using (MemoryStream inputStream = new MemoryStream(cdrData))
             {
-                // Prepare a memory stream to receive the PNG output
-                using (MemoryStream pngStream = new MemoryStream())
+                using (CdrImage cdrImage = new CdrImage(inputStream, new LoadOptions()))
                 {
-                    // Set PNG save options (default settings)
-                    var pngOptions = new PngOptions();
+                    // Ensure the image data is fully loaded.
+                    cdrImage.CacheData();
 
-                    // Save the CDR image as PNG into the memory stream
-                    cdrImage.Save(pngStream, pngOptions);
+                    using (MemoryStream outputStream = new MemoryStream())
+                    {
+                        PngOptions pngOptions = new PngOptions();
 
-                    // Optional: write the PNG data to a file for verification
-                    string outputPath = Path.Combine("output", "result.png");
+                        // Save the CDR image as PNG into the memory stream.
+                        cdrImage.Save(outputStream, pngOptions);
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Write the PNG bytes to the file
-                    File.WriteAllBytes(outputPath, pngStream.ToArray());
+                        // Output the size of the generated PNG data.
+                        Console.WriteLine($"PNG data size: {outputStream.Length} bytes");
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\large.tif";
-        string outputPath = @"C:\Images\output\large_processed.tif";
+        string outputPath = @"C:\Images\output.tif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,23 +22,31 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set memory usage limit to 500 MB via LoadOptions
-        var loadOptions = new LoadOptions
+        try
         {
-            BufferSizeHint = 500 // limit internal buffers to 500 MB
-        };
-
-        // Load the TIFF image with the memory limit applied
-        using (Image image = Image.Load(inputPath, loadOptions))
-        {
-            // Prepare save options for TIFF and apply the same memory limit
-            var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
+            // Set memory usage limit (500 MB) when loading the TIFF
+            var loadOptions = new LoadOptions
             {
-                BufferSizeHint = 500 // limit internal buffers during saving
+                BufferSizeHint = 500 // MB
             };
 
-            // Save the processed image
-            image.Save(outputPath, saveOptions);
+            // Load the large TIFF with the memory limit applied
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                // Prepare TIFF save options with the same memory limit
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    BufferSizeHint = 500 // MB
+                };
+
+                // Save the image to the output path
+                image.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

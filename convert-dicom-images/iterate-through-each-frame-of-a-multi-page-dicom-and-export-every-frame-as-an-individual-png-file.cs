@@ -8,38 +8,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DICOM file path
-        string inputPath = @"C:\temp\multiframe.dicom";
+        // Hardcoded input and output directory
+        string inputPath = @"c:\temp\sample.dicom";
+        string outputDir = @"c:\temp\";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Directory where PNG files will be saved
-        string outputDirectory = @"C:\temp\output";
-
-        // Open the DICOM file as a stream
-        using (Stream stream = File.OpenRead(inputPath))
-        {
-            // Load the multi‑page DICOM image
-            using (DicomImage dicomImage = new DicomImage(stream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Iterate through each page (frame) in the DICOM image
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists (DirectoryName may be null if outputPath is root, guard against that)
+            Directory.CreateDirectory(outputDir);
+
+            // Open the DICOM file as a stream
+            using (Stream stream = File.OpenRead(inputPath))
+            {
+                // Load the DICOM image from the stream
+                using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    // Build the output file path for the current frame
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{dicomPage.Index}.png");
+                    // Iterate through each page (frame) in the multi‑page DICOM
+                    foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                    {
+                        // Build output file name based on page index
+                        string outputPath = Path.Combine(outputDir, $"sample.{dicomPage.Index}.png");
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current page as a PNG file
-                    dicomPage.Save(outputPath, new PngOptions());
+                        // Save the current page as a PNG image
+                        dicomPage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

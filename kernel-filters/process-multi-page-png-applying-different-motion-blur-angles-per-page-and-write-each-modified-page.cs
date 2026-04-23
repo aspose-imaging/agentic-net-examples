@@ -2,67 +2,68 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputDirectory = "output";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputDir = "output_pages";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the multi‑page PNG
-        using (Image image = Image.Load(inputPath))
-        {
-            // Check if the loaded image supports multiple pages
-            if (image is IMultipageImage multipageImage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int pageCount = multipageImage.PageCount;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                for (int i = 0; i < pageCount; i++)
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the multi‑page PNG (APNG)
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to multipage interface
+                IMultipageImage multipage = image as IMultipageImage;
+                if (multipage == null || multipage.PageCount == 0)
                 {
-                    // Retrieve the page as an Image
-                    Image page = multipageImage.Pages[i];
+                    Console.Error.WriteLine("The loaded image does not contain multiple pages.");
+                    return;
+                }
 
-                    // Cast to RasterImage for processing
-                    using (RasterImage raster = (RasterImage)page)
-                    {
-                        // Define motion blur parameters per page
-                        int length = 10;                     // example length
-                        double sigma = 1.0;                  // example sigma
-                        double angle = i * 30.0;             // different angle for each page
+                // Define motion blur angles for each page (example: 0°, 45°, 90°, 135°, repeat if more pages)
+                double[] angles = new double[] { 0.0, 45.0, 90.0, 135.0 };
 
-                        // Apply motion Wiener filter (motion blur)
-                        raster.Filter(
-                            raster.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(length, sigma, angle));
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    // Retrieve the page as a raster image
+                    RasterImage page = (RasterImage)multipage.Pages[i];
 
-                        // Prepare output file path for this page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
+                    // Determine angle for this page
+                    double angle = angles[i % angles.Length];
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Apply motion blur (MotionWienerFilterOptions) with chosen angle
+                    var motionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, angle);
+                    page.Filter(page.Bounds, motionOptions);
 
-                        // Save the modified page as PNG
-                        raster.Save(outputPath, new PngOptions());
-                    }
+                    // Prepare output file path for this page
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+
+                    // Ensure directory exists (already created above, but follow safety rule)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the modified page as PNG
+                    page.Save(outputPath, new PngOptions());
                 }
             }
-            else
-            {
-                Console.Error.WriteLine("The loaded image does not support multiple pages.");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

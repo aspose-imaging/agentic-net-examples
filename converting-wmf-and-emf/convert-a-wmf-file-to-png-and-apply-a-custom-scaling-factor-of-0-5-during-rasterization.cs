@@ -1,48 +1,37 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.wmf";
-        string outputPath = "output.png";
+        string inputPath = "Input\\sample.wmf";
+        string outputPath = "Output\\sample.png";
 
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load WMF image and rasterize to PNG with 0.5 scaling factor
-        using (WmfImage wmfImage = (WmfImage)Aspose.Imaging.Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Calculate half size for scaling
-            float halfWidth = wmfImage.Width * 0.5f;
-            float halfHeight = wmfImage.Height * 0.5f;
-
-            // Configure rasterization options
-            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+            var rasterOptions = new WmfRasterizationOptions
             {
-                PageSize = new Aspose.Imaging.SizeF(halfWidth, halfHeight),
-                BackgroundColor = Aspose.Imaging.Color.White
+                PageWidth = (int)(image.Width * 0.5),
+                PageHeight = (int)(image.Height * 0.5)
             };
 
-            // Set PNG save options with the rasterization settings
-            PngOptions pngOptions = new PngOptions
+            var pngOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterOptions
             };
 
-            // Save the rasterized image as PNG
-            wmfImage.Save(outputPath, pngOptions);
+            image.Save(outputPath, pngOptions);
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
@@ -9,34 +8,40 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_motion_wiener.png";
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering functionality
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply Motion Wiener filter with horizontal motion (angle = 0 degrees)
+                // Size = 10, Sigma = 1.0 are typical values; adjust as needed
+                var options = new MotionWienerFilterOptions(10, 1.0, 0.0);
+                rasterImage.Filter(rasterImage.Bounds, options);
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Create MotionWiener filter options:
-            // size = 10 (kernel size), sigma = 1.0 (smoothing), angle = 0.0 (horizontal direction)
-            var motionWienerOptions = new MotionWienerFilterOptions(10, 1.0, 0.0);
-
-            // Apply the filter to the entire image bounds
-            rasterImage.Filter(rasterImage.Bounds, motionWienerOptions);
-
-            // Save the processed image as PNG
-            rasterImage.Save(outputPath);
+            // Output any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

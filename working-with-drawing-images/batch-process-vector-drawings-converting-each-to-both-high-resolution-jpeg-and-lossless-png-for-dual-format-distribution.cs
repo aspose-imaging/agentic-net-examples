@@ -2,18 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define base, input and output directories
+        // Define base, input, and output directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure input directory exists; create if missing
+        // Ensure input directory exists; create if missing and exit
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
@@ -32,54 +32,56 @@ class Program
 
         foreach (string inputPath in files)
         {
-            // Validate input file existence
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Derive output file names
             string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string jpegOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-            string pngOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
+            string jpegPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+            string pngPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
             // Load the vector image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG options
-                var jpegOptions = new JpegOptions
+                // ----- JPEG conversion -----
+                using (JpegOptions jpegOptions = new JpegOptions())
                 {
-                    Quality = 100,
-                    Source = new FileCreateSource(jpegOutputPath, false),
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    jpegOptions.Quality = 100; // High-quality JPEG
+                    jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
 
-                // Save as high‑resolution JPEG
-                image.Save(jpegOutputPath, jpegOptions);
+                    // Ensure output directory for JPEG exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(jpegPath));
+                    image.Save(jpegPath, jpegOptions);
+                }
 
-                // Prepare PNG options (lossless)
-                var pngOptions = new PngOptions
+                // ----- PNG conversion -----
+                using (PngOptions pngOptions = new PngOptions())
                 {
-                    Source = new FileCreateSource(pngOutputPath, false),
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
+                    pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
 
-                // Save as lossless PNG
-                image.Save(pngOutputPath, pngOptions);
+                    // Ensure output directory for PNG exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+                    image.Save(pngPath, pngOptions);
+                }
             }
         }
     }

@@ -2,55 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.gif";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.gif";
 
-        // Validate input file existence
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the EMF image
-        using (Image image = Image.Load(inputPath))
+        using (Image emfImage = Image.Load(inputPath))
         {
-            // Determine canvas size
-            int width = image.Width;
-            int height = image.Height;
-            if (image is EmfImage emf)
+            // Configure GIF save options with a 256‑color palette
+            GifOptions gifOptions = new GifOptions
             {
-                width = emf.Width;
-                height = emf.Height;
-            }
-
-            // Set up vector rasterization options for conversion
-            var vectorOptions = new VectorRasterizationOptions
-            {
-                PageSize = new Size(width, height),
-                BackgroundColor = Color.White
+                // Enable palette correction to build an optimal 256‑color palette
+                DoPaletteCorrection = true,
+                // ColorResolution = 7 means 8 bits per primary color (2^8 = 256 colors)
+                ColorResolution = 7
             };
 
-            // Configure GIF options with a limited 256‑color palette
-            var gifOptions = new GifOptions
-            {
-                VectorRasterizationOptions = vectorOptions,
-                DoPaletteCorrection = true,   // Enable palette analysis
-                ColorResolution = 7           // 2^(7+1) = 256 colors per channel
-            };
-
-            // Save as GIF
-            image.Save(outputPath, gifOptions);
+            // Save the image as GIF using the configured options
+            emfImage.Save(outputPath, gifOptions);
         }
     }
 }

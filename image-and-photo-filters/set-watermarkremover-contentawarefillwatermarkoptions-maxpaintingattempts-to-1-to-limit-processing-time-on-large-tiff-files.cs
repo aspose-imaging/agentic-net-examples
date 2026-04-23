@@ -1,54 +1,62 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (var image = Image.Load(inputPath))
-        {
-            var tiffImage = (TiffImage)image;
-
-            // Create a mask using GraphicsPath
-            var mask = new GraphicsPath();
-            var figure = new Figure();
-            figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
-            mask.AddFigure(figure);
-
-            // Configure ContentAwareFillWatermarkOptions with MaxPaintingAttempts = 1
-            var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                MaxPaintingAttempts = 1
-            };
-
-            // Apply watermark removal
-            using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(tiffImage, options))
-            {
-                // Save the processed image
-                result.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists (null‑safe)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            // Load the image (BigTIFF or regular TIFF)
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for watermark removal
+                RasterImage raster = (RasterImage)image;
+
+                // Define the mask region
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                // Example ellipse mask; adjust coordinates as needed
+                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
+                mask.AddFigure(figure);
+
+                // Configure Content Aware Fill options with limited attempts
+                var options = new ContentAwareFillWatermarkOptions(mask)
+                {
+                    MaxPaintingAttempts = 1
+                };
+
+                // Perform watermark removal
+                using (RasterImage result = WatermarkRemover.PaintOver(raster, options))
+                {
+                    // Save the processed image
+                    result.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

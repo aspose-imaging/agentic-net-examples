@@ -9,89 +9,61 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Set up base, input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Process only SVG files
-            if (!Path.GetExtension(inputPath).Equals(".svg", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string tempPngPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_temp.png");
-            string finalPngPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Rasterize SVG to a temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                using (PngOptions pngOptions = new PngOptions())
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
+            foreach (string file in files)
+            {
+                string inputPath = file;
+                if (!File.Exists(inputPath))
                 {
-                    // Set vector rasterization options for SVG
-                    pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image svgImage = Image.Load(inputPath))
+                {
+                    PngOptions pngOptions = new PngOptions();
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                    rasterOptions.PageSize = svgImage.Size;
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = svgImage.Width,
-                        PageHeight = svgImage.Height
-                    };
-
-                    // Ensure directory for temporary file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-                    svgImage.Save(tempPngPath, pngOptions);
+                        svgImage.Save(ms, pngOptions);
+                        ms.Position = 0;
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(8, 1.0, 60.0));
+                            raster.Save(outputPath);
+                        }
+                    }
                 }
             }
-
-            // Load the rasterized PNG, apply motion blur, and save final PNG
-            using (Image rasterImage = Image.Load(tempPngPath))
-            {
-                RasterImage raster = (RasterImage)rasterImage;
-
-                // Apply motion blur filter with size 8, brightness 1.0, angle 60 degrees
-                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(8, 1.0, 60.0));
-
-                // Ensure output directory exists before saving
-                Directory.CreateDirectory(Path.GetDirectoryName(finalPngPath));
-                using (PngOptions finalOptions = new PngOptions())
-                {
-                    raster.Save(finalPngPath, finalOptions);
-                }
-            }
-
-            // Optionally delete the temporary file
-            try
-            {
-                File.Delete(tempPngPath);
-            }
-            catch
-            {
-                // Ignore any errors during cleanup
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

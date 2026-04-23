@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -21,19 +20,32 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the BMP image
-        using (BmpImage image = (BmpImage)Image.Load(inputPath))
+        try
         {
-            // Rotate by an arbitrary angle (e.g., 45 degrees)
-            // resizeProportionally = true to expand canvas,
-            // backgroundColor = transparent to fill empty areas.
-            float angle = 45f;
-            image.Rotate(angle, true, Color.Transparent);
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access Rotate method with background color
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-            // Save the rotated image preserving transparency
-            image.Save(outputPath, new BmpOptions());
+                // Rotate by arbitrary angle (e.g., 45 degrees), resize proportionally, fill background with transparent color
+                float angle = 45f; // change as needed
+                raster.Rotate(angle, true, Color.Transparent);
+
+                // Save the rotated image preserving transparency (default Bitfields compression)
+                raster.Save(outputPath, new BmpOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

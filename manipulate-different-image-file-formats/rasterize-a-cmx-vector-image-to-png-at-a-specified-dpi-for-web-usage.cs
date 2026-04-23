@@ -8,37 +8,44 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\sample.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.cmx";
+            string outputPath = "output/output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX vector image
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
-        {
-            // Prepare PNG save options
-            PngOptions pngOptions = new PngOptions();
-
-            // Configure rasterization options with desired DPI (e.g., 300 DPI)
-            CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                ResolutionSettings = new ResolutionSetting(300, 300)
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Assign rasterization options to PNG options
-            pngOptions.VectorRasterizationOptions = rasterOptions;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the rasterized PNG image
-            cmxImage.Save(outputPath, pngOptions);
+            // Load the CMX vector image
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            {
+                // Configure rasterization options with desired DPI (e.g., 96 DPI for web)
+                CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
+                {
+                    ResolutionSettings = new ResolutionSetting(96, 96)
+                };
+
+                // Set PNG save options and attach rasterization settings
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the rasterized image as PNG
+                cmx.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,50 +8,61 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\big.tif";
-        string outputDir = @"C:\Images\output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\bigimage.tif";
+            string outputPath1 = @"C:\Images\quadrant_1.png";
+            string outputPath2 = @"C:\Images\quadrant_2.png";
+            string outputPath3 = @"C:\Images\quadrant_3.png";
+            string outputPath4 = @"C:\Images\quadrant_4.png";
 
-        // Ensure output directory exists (creates if missing)
-        Directory.CreateDirectory(outputDir);
-
-        // Load the BigTIFF image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Calculate half dimensions
-            int halfWidth = image.Width / 2;
-            int halfHeight = image.Height / 2;
-
-            // Define the four quadrants
-            var quadrants = new[]
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                new Rectangle(0, 0, halfWidth, halfHeight),                     // Top‑Left
-                new Rectangle(halfWidth, 0, halfWidth, halfHeight),            // Top‑Right
-                new Rectangle(0, halfHeight, halfWidth, halfHeight),           // Bottom‑Left
-                new Rectangle(halfWidth, halfHeight, halfWidth, halfHeight)   // Bottom‑Right
-            };
-
-            // PNG save options
-            var pngOptions = new PngOptions();
-
-            // Save each quadrant as a separate PNG file
-            for (int i = 0; i < quadrants.Length; i++)
-            {
-                string outputPath = Path.Combine(outputDir, $"quadrant_{i + 1}.png");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the specified quadrant
-                image.Save(outputPath, pngOptions, quadrants[i]);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Load the BigTIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                int halfWidth = image.Width / 2;
+                int halfHeight = image.Height / 2;
+
+                // Define the four quadrants
+                var rect1 = new Rectangle(0, 0, halfWidth, halfHeight);                     // Top‑Left
+                var rect2 = new Rectangle(halfWidth, 0, halfWidth, halfHeight);            // Top‑Right
+                var rect3 = new Rectangle(0, halfHeight, halfWidth, halfHeight);           // Bottom‑Left
+                var rect4 = new Rectangle(halfWidth, halfHeight, halfWidth, halfHeight);  // Bottom‑Right
+
+                // Prepare PNG save options (default options are sufficient)
+                var pngOptions = new PngOptions();
+
+                // Helper to save a quadrant
+                void SaveQuadrant(string outputPath, Rectangle bounds)
+                {
+                    // Ensure the output directory exists
+                    string dir = Path.GetDirectoryName(outputPath) ?? ".";
+                    Directory.CreateDirectory(dir);
+
+                    // Save the specified rectangle to a PNG file
+                    using (FileStream outStream = File.Open(outputPath, FileMode.Create))
+                    {
+                        image.Save(outStream, pngOptions, bounds);
+                    }
+                }
+
+                // Save each quadrant
+                SaveQuadrant(outputPath1, rect1);
+                SaveQuadrant(outputPath2, rect2);
+                SaveQuadrant(outputPath3, rect3);
+                SaveQuadrant(outputPath4, rect4);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

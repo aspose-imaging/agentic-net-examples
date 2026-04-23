@@ -2,16 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.jpg";
+        string inputPath = "input.cdr";
+        string outputPath = "output.jpg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,30 +23,29 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR vector image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure JPEG save options with quality 90
-            using (JpegOptions jpegOptions = new JpegOptions())
+            // Load the CDR file
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                jpegOptions.Quality = 90;
-
-                // Set vector rasterization options for vector images
-                if (image is VectorImage)
+                // Configure JPEG options with quality 90 and rasterization settings
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    jpegOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    Quality = 90,
+                    VectorRasterizationOptions = new CdrRasterizationOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                }
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
+                    }
+                };
 
-                // Save the converted JPEG image
-                image.Save(outputPath, jpegOptions);
+                // Save the rasterized image as JPEG
+                cdr.Save(outputPath, jpegOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

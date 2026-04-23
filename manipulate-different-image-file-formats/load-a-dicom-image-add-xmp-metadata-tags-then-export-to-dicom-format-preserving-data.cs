@@ -11,18 +11,25 @@ class Program
         string inputPath = "input.dcm";
         string outputPath = "output.dcm";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var options = new DicomOptions();
+                image.Save(outputPath, options);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            DicomImage dicomImage = (DicomImage)image;
-            dicomImage.Save(outputPath, new DicomOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

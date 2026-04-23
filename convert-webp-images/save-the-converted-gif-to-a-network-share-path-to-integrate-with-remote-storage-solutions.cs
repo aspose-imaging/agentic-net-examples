@@ -8,32 +8,31 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.gif";
+        string inputPath = @"C:\Images\source.bmp";
         string outputPath = @"\\RemoteServer\SharedFolder\converted.gif";
 
-        // Check if the input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the GIF image
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
             // Configure GIF save options (optional settings)
-            var gifOptions = new GifOptions
+            GifOptions options = new GifOptions
             {
-                FullFrame = true
+                Interlaced = true,               // Enable interlaced GIF
+                DoPaletteCorrection = true       // Apply palette correction
             };
 
-            // Save the GIF to the network share
-            image.Save(outputPath, gifOptions);
+            // Save the image as a GIF to the network share
+            image.Save(outputPath, options);
         }
-
-        Console.WriteLine("GIF conversion completed.");
     }
 }

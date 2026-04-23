@@ -3,44 +3,65 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
-
-        foreach (string emfFilePath in emfFiles)
+        try
         {
-            if (!File.Exists(emfFilePath))
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputEmf";
+            string outputDir = @"C:\OutputSvg";
+
+            // Get all EMF files in the input directory
+            string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
+
+            foreach (string inputPath in emfFiles)
             {
-                Console.Error.WriteLine($"File not found: {emfFilePath}");
-                return;
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the output SVG file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the EMF image and convert it to SVG
+                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+                {
+                    // Set up SVG save options
+                    SvgOptions saveOptions = new SvgOptions
+                    {
+                        TextAsShapes = true
+                    };
+
+                    // Configure rasterization options for EMF
+                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                    {
+                        BackgroundColor = Color.WhiteSmoke,
+                        PageSize = emfImage.Size,
+                        RenderMode = EmfRenderMode.Auto,
+                        BorderX = 0,
+                        BorderY = 0
+                    };
+
+                    saveOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Save the SVG file
+                    emfImage.Save(outputPath, saveOptions);
+                }
             }
-
-            string outputFileName = Path.GetFileNameWithoutExtension(emfFilePath) + ".svg";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (EmfImage emfImage = (EmfImage)Image.Load(emfFilePath))
-            using (SvgOptions svgOptions = new SvgOptions())
-            {
-                svgOptions.TextAsShapes = true;
-
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions();
-                rasterOptions.BackgroundColor = Color.WhiteSmoke;
-                rasterOptions.PageSize = emfImage.Size;
-                rasterOptions.RenderMode = EmfRenderMode.Auto;
-
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                emfImage.Save(outputPath, svgOptions);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

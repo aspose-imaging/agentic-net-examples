@@ -1,43 +1,48 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
 
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        // Load the image
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
             try
             {
-                Graphics graphics = new Graphics(image);
+                // Attempt to create a Graphics object
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+
+                // Simple drawing operations
                 graphics.Clear(Aspose.Imaging.Color.White);
-                graphics.DrawRectangle(new Pen(Aspose.Imaging.Color.Blue, 3), new Rectangle(10, 10, image.Width - 20, image.Height - 20));
+                graphics.DrawRectangle(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
+                    new Aspose.Imaging.Rectangle(10, 10, 100, 100));
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Graphics not supported for this format: {ex.Message}");
+                // Handle unsupported format or other errors
+                Console.Error.WriteLine($"Failed to create Graphics: {ex.Message}");
                 return;
             }
 
-            PngOptions saveOptions = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
-            image.Save(outputPath, saveOptions);
+            // Save the modified image as PNG
+            image.Save(outputPath, new PngOptions());
         }
     }
 }

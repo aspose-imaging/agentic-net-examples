@@ -22,10 +22,9 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the WebP image and save it as PDF
+        // Load WebP image and save as PDF
         using (WebPImage webPImage = new WebPImage(inputPath))
         {
-            // Save to PDF using PdfOptions
             webPImage.Save(outputPath, new PdfOptions());
         }
     }

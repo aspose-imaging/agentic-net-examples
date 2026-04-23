@@ -4,67 +4,87 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-class MySvgResourceKeeperCallback : SvgResourceKeeperCallback
+namespace MetafileToSvgExample
 {
-    private readonly string _baseOutputDir;
-
-    public MySvgResourceKeeperCallback(string baseOutputDir)
+    // Callback that saves image resources as external files and returns their relative paths.
+    class ExternalResourceKeeper : SvgResourceKeeperCallback
     {
-        _baseOutputDir = baseOutputDir;
-    }
+        private readonly string _baseFolder;
 
-    public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
-        string suggestedFileName, ref bool useEmbeddedImage)
-    {
-        // Save the image data to an external file and return a relative path.
-        string resourcesDir = Path.Combine(_baseOutputDir, "resources");
-        Directory.CreateDirectory(resourcesDir); // Ensure the directory exists.
-
-        string filePath = Path.Combine(resourcesDir, suggestedFileName);
-        File.WriteAllBytes(filePath, imageData);
-
-        useEmbeddedImage = false; // Force external reference.
-        return Path.Combine("resources", suggestedFileName).Replace('\\', '/');
-    }
-
-    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
-    {
-        // Not used in this scenario; return the suggested file name.
-        return suggestedFileName;
-    }
-}
-
-class Program
-{
-    static void Main()
-    {
-        // Hardcoded input and output paths.
-        string inputPath = @"C:\Input\sample.emf";
-        string outputPath = @"C:\Output\sample.svg";
-
-        // Verify input file existence.
-        if (!File.Exists(inputPath))
+        public ExternalResourceKeeper(string baseFolder)
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            _baseFolder = baseFolder;
         }
 
-        // Ensure the output directory exists.
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the metafile and save it as SVG with external resources.
-        using (Image image = Image.Load(inputPath))
+        // Called for each raster image resource inside the metafile.
+        public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
+                                                    string suggestedFileName, ref bool useEmbeddedImage)
         {
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                },
-                Callback = new MySvgResourceKeeperCallback(Path.GetDirectoryName(outputPath))
-            };
+            // Force external storage.
+            useEmbeddedImage = false;
 
-            image.Save(outputPath, svgOptions);
+            // Ensure the target directory exists.
+            string targetPath = Path.Combine(_baseFolder, suggestedFileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+
+            // Write the image data to a file.
+            File.WriteAllBytes(targetPath, imageData);
+
+            // Return the relative path that will be placed into the SVG.
+            return suggestedFileName;
+        }
+
+        // Called when the SVG document itself is ready.
+        public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
+        {
+            // Save the SVG document (optional – Aspose.Imaging also writes it).
+            string targetPath = Path.Combine(_baseFolder, suggestedFileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+            File.WriteAllBytes(targetPath, htmlData);
+
+            // Return the relative path (file name) for consistency.
+            return suggestedFileName;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            // Hard‑coded input and output paths.
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\output.svg";
+
+            // Validate input file existence.
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            try
+            {
+                // Load the metafile.
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Prepare SVG export options with the external resource callback.
+                    var svgOptions = new SvgOptions
+                    {
+                        Callback = new ExternalResourceKeeper(Path.GetDirectoryName(outputPath))
+                    };
+
+                    // Save the image as SVG; external raster resources will be stored separately.
+                    image.Save(outputPath, svgOptions);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Report any runtime errors without crashing.
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }

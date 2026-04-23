@@ -1,49 +1,47 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.cdr");
-        string outputPath = Path.Combine("Output", "sample.psd");
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.psd";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
-        {
-            PsdOptions psdOptions = new PsdOptions
+            if (!File.Exists(inputPath))
             {
-                CompressionMethod = CompressionMethod.RLE,
-                ColorMode = ColorModes.Rgb,
-                VectorizationOptions = new PsdVectorizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                var exportOptions = new PsdOptions
                 {
-                    VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
-                }
-            };
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    }
+                };
 
-            VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageWidth = cdr.Width,
-                PageHeight = cdr.Height,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
-
-            psdOptions.VectorRasterizationOptions = vectorOptions;
-
-            cdr.Save(outputPath, psdOptions);
+                cdr.Save(outputPath, exportOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cmx";
-        string outputPath = "output.tif";
+        string inputPath = @"C:\temp\input.cmx";
+        string outputPath = @"C:\temp\output.tif";
 
         if (!File.Exists(inputPath))
         {
@@ -18,27 +18,29 @@ class Program
             return;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        var outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrEmpty(outputDir))
         {
-            TiffOptions exportOptions = new TiffOptions(TiffExpectedFormat.Default);
-            exportOptions.MultiPageOptions = null;
+            Directory.CreateDirectory(outputDir);
+        }
 
-            if (image is VectorImage)
+        using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+        {
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+            VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
             {
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-                exportOptions.VectorRasterizationOptions = vectorOptions;
-            }
+                BackgroundColor = Color.White,
+                PageWidth = cmx.Width,
+                PageHeight = cmx.Height,
+                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                SmoothingMode = SmoothingMode.None
+            };
 
-            image.Save(outputPath, exportOptions);
+            tiffOptions.VectorRasterizationOptions = vectorOptions;
+            tiffOptions.MultiPageOptions = null; // export all pages
+
+            cmx.Save(outputPath, tiffOptions);
         }
     }
 }

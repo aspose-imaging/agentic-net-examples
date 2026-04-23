@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.svg";
-        string outputPath = @"C:\Images\sample_grayscale.png";
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,37 +22,40 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
+        // Temporary file for intermediate rasterization
+        string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
+        // Load SVG and rasterize to PNG (color)
         using (Image svgImage = Image.Load(inputPath))
         {
-            // Prepare rasterization options for SVG -> PNG conversion
-            var rasterizationOptions = new SvgRasterizationOptions
+            // Set rasterization options based on SVG size
+            var rasterOptions = new SvgRasterizationOptions
             {
                 PageSize = svgImage.Size
             };
 
-            // Set up PNG save options with the rasterization options
-            var pngSaveOptions = new PngOptions
+            // PNG save options with rasterization settings
+            var pngOptions = new PngOptions
             {
-                VectorRasterizationOptions = rasterizationOptions
+                VectorRasterizationOptions = rasterOptions
             };
 
-            // Rasterize SVG to PNG in memory
-            using (var memoryStream = new MemoryStream())
-            {
-                svgImage.Save(memoryStream, pngSaveOptions);
-                memoryStream.Position = 0; // Reset stream position for reading
+            // Save rasterized PNG to temporary file
+            svgImage.Save(tempPngPath, pngOptions);
+        }
 
-                // Load the rasterized PNG image
-                using (PngImage pngImage = (PngImage)Image.Load(memoryStream))
-                {
-                    // Apply grayscale transformation
-                    pngImage.Grayscale();
+        // Load the rasterized PNG, apply grayscale, and save to final output
+        using (PngImage pngImage = new PngImage(tempPngPath))
+        {
+            pngImage.Grayscale();
+            pngImage.Save(outputPath);
+        }
 
-                    // Save the final grayscale PNG to the output path
-                    pngImage.Save(outputPath);
-                }
-            }
+        // Clean up temporary file
+        if (File.Exists(tempPngPath))
+        {
+            File.Delete(tempPngPath);
         }
     }
 }

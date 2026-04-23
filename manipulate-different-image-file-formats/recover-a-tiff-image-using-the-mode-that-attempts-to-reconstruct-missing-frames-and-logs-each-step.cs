@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.tif";
-        string outputPath = "output.tif";
+        string outputPath = "output\\recovered.tif";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,24 +21,37 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        try
         {
-            // Log basic information
-            Console.WriteLine($"Loaded TIFF image from '{inputPath}'.");
-            Console.WriteLine($"Number of frames detected: {tiffImage.Frames.Length}");
-
-            // Attempt to reconstruct missing frames (Aspose.Imaging automatically tries to recover frames on load)
-            // Log each frame's dimensions as part of the recovery process
-            for (int i = 0; i < tiffImage.Frames.Length; i++)
+            var loadOptions = new LoadOptions
             {
-                var frame = tiffImage.Frames[i];
-                Console.WriteLine($"Frame {i + 1}: Width={frame.Width}, Height={frame.Height}");
-            }
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Color.White
+            };
 
-            // Save the recovered image
-            tiffImage.Save(outputPath);
-            Console.WriteLine($"Recovered TIFF saved to '{outputPath}'.");
+            Console.WriteLine("Loading image with recovery options...");
+
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                Console.WriteLine("Image loaded.");
+
+                if (image is TiffImage tiffImage)
+                {
+                    Console.WriteLine($"Number of frames: {tiffImage.Frames.Length}");
+                }
+                else
+                {
+                    Console.WriteLine("Loaded image is not a TIFF.");
+                }
+
+                Console.WriteLine("Saving recovered image...");
+                image.Save(outputPath);
+                Console.WriteLine($"Image saved to {outputPath}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

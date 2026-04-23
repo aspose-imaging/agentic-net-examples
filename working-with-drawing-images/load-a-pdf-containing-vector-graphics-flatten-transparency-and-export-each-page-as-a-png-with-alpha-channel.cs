@@ -3,47 +3,45 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.pdf";
+        string inputPath = "Input\\sample.pdf";
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string outputDir = "output";
-
-        using (Image image = Image.Load(inputPath))
+        using (Image pdfImage = Image.Load(inputPath))
         {
-            IMultipageImage multipage = image as IMultipageImage;
-            int pageCount = multipage?.PageCount ?? 1;
+            int pageCount = 1;
+            if (pdfImage is IMultipageImage multipage)
+            {
+                pageCount = multipage.PageCount;
+            }
 
             for (int i = 0; i < pageCount; i++)
             {
-                string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                string outputPath = Path.Combine("Output", $"page_{i + 1}.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                PngOptions options = new PngOptions();
-
-                if (image is VectorImage)
+                using (PngOptions pngOptions = new PngOptions
                 {
-                    var vectorOptions = new VectorRasterizationOptions
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                    options.VectorRasterizationOptions = vectorOptions;
+                        PageWidth = pdfImage.Width,
+                        PageHeight = pdfImage.Height
+                    },
+                    MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
+                })
+                {
+                    pdfImage.Save(outputPath, pngOptions);
                 }
-
-                options.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
-
-                image.Save(outputPath, options);
             }
         }
     }

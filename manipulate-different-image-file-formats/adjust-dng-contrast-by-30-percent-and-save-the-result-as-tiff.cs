@@ -3,40 +3,35 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dng";
-        string outputPath = "output.tif";
+        const string inputPath = "input.dng";
+        const string outputPath = "output.tiff";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DNG image, adjust contrast, and save as TIFF
-        using (Image image = Image.Load(inputPath))
-        {
-            DngImage dngImage = (DngImage)image;
-
-            // Adjust contrast by 30 (range -100 to 100)
-            dngImage.AdjustContrast(30f);
-
-            // Save the result as TIFF
-            using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+            if (!File.Exists(inputPath))
             {
-                dngImage.Save(outputPath, tiffOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DngImage dng = (DngImage)Image.Load(inputPath))
+            {
+                dng.AdjustContrast(30f);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                dng.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

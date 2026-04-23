@@ -1,51 +1,67 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Djvu;
 
-class Program
+namespace ImagingNet
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Define input and output directories (relative paths)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Get all DjVu files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
-
-        int processed = 0;
-        foreach (string inputPath in files)
+        static void Main(string[] args)
         {
-            // Limit to 30 files
-            if (processed >= 30)
-                break;
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                string baseDir = Directory.GetCurrentDirectory();
+                string inputDir = Path.Combine(baseDir, "Input");
+                string outputDir = Path.Combine(baseDir, "Output");
 
-            // Prepare output file path with .tif extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
+                // Ensure output directory exists
+                Directory.CreateDirectory(outputDir);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DjVu image and save as TIFF
-            using (Image image = Image.Load(inputPath))
-            {
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                // Prepare list of 30 DjVu files
+                var inputFiles = new List<string>();
+                for (int i = 1; i <= 30; i++)
                 {
-                    image.Save(outputPath, tiffOptions);
+                    inputFiles.Add(Path.Combine(inputDir, $"file{i}.djvu"));
+                }
+
+                foreach (var inputPath in inputFiles)
+                {
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
+
+                    // Load DjVu document
+                    using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+                    {
+                        int pageIndex = 0;
+                        foreach (var page in djvuImage.Pages)
+                        {
+                            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                            string outputPath = Path.Combine(outputDir, $"{fileNameWithoutExt}_page{pageIndex}.tiff");
+
+                            // Ensure output directory for this file exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save page as TIFF
+                            using (var tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default))
+                            {
+                                page.Save(outputPath, tiffOptions);
+                            }
+
+                            pageIndex++;
+                        }
+                    }
                 }
             }
-
-            processed++;
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }

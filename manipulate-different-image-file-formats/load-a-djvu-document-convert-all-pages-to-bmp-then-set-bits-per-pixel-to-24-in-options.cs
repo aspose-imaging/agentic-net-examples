@@ -8,44 +8,51 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu file path
-        string inputPath = @"C:\Temp\sample.djvu";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input path
+            string inputPath = "input.djvu";
 
-        // Hardcoded output directory for BMP files
-        string outputDir = @"C:\Temp\DjvuToBmp";
-
-        // Ensure the output directory exists (unconditional call as required)
-        Directory.CreateDirectory(outputDir);
-
-        // Open the DjVu document from a file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            // Iterate through each page in the DjVu document
-            foreach (DjvuPage page in djvuImage.Pages)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Build output file path for the current page
-                string outputPath = Path.Combine(outputDir, $"page{page.PageNumber}.bmp");
-
-                // Ensure the directory for the output file exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Configure BMP save options with 24 bits per pixel
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    BitsPerPixel = 24
-                };
-
-                // Save the page as a BMP image using the specified options
-                page.Save(outputPath, bmpOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Open the DjVu file as a stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                // Load DjVu document
+                using (DjvuImage djvuImage = new DjvuImage(stream))
+                {
+                    // Iterate through all pages
+                    for (int i = 0; i < djvuImage.PageCount; i++)
+                    {
+                        var page = djvuImage.Pages[i];
+
+                        // Construct output file name for each page
+                        string outputPath = $"output_page_{i + 1}.bmp";
+
+                        // Ensure the output directory exists (handles null for current directory)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                        // Prepare BMP save options with 24 bits per pixel
+                        BmpOptions bmpOptions = new BmpOptions
+                        {
+                            BitsPerPixel = 24
+                        };
+
+                        // Save the page as BMP
+                        page.Save(outputPath, bmpOptions);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

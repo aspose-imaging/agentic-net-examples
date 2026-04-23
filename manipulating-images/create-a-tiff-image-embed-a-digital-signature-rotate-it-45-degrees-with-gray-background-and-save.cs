@@ -11,38 +11,36 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output path for the TIFF image
-        string outputPath = "output\\rotated.tif";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure TIFF options with a file create source
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-        // Create a new TIFF image (200x200 pixels)
-        using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 200, 200))
+        try
         {
-            // Fill the image with a blue‑yellow gradient
-            LinearGradientBrush brush = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(tiffImage.Width, tiffImage.Height),
-                Color.Blue,
-                Color.Yellow);
-            Graphics graphics = new Graphics(tiffImage);
-            graphics.FillRectangle(brush, tiffImage.Bounds);
+            string outputDir = "output";
+            string outputPath = Path.Combine(outputDir, "rotated.tif");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Embed a digital signature using a password
-            tiffImage.ActiveFrame.EmbedDigitalSignature("SecretPassword");
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.Source = new FileCreateSource(outputPath, false);
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
 
-            // Rotate the image 45 degrees, resize canvas, gray background
-            tiffImage.Rotate(45f, true, Color.Gray);
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 200, 200))
+            {
+                LinearGradientBrush brush = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(tiffImage.Width, tiffImage.Height),
+                    Color.Red,
+                    Color.Blue);
 
-            // Save the image (output path already bound to the source)
-            tiffImage.Save();
+                Graphics graphics = new Graphics(tiffImage);
+                graphics.FillRectangle(brush, tiffImage.Bounds);
+
+                tiffImage.EmbedDigitalSignature("secure123");
+                tiffImage.Rotate(45f, true, Color.Gray);
+                tiffImage.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

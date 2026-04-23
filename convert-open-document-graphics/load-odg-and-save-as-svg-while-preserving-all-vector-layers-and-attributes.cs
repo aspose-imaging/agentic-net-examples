@@ -5,37 +5,39 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.odg";
-        string outputPath = "output.svg";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample.svg";
 
-        // Validate input file existence
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load ODG image and save as SVG preserving vector data
+        // Load the ODG image
         using (Image image = Image.Load(inputPath))
         {
-            SvgOptions saveOptions = new SvgOptions();
-
-            // Configure vector rasterization options
-            var vectorOptions = new SvgRasterizationOptions
+            // Prepare SVG export options
+            SvgOptions svgOptions = new SvgOptions
             {
-                PageSize = image.Size,
-                BackgroundColor = Color.White
+                // Preserve original metadata if needed
+                KeepMetadata = true,
+                // Configure vector rasterization (required for SVG export)
+                VectorRasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                }
             };
-            saveOptions.VectorRasterizationOptions = vectorOptions;
 
-            // Save to SVG
-            image.Save(outputPath, saveOptions);
+            // Save the image as SVG, preserving vector layers and attributes
+            image.Save(outputPath, svgOptions);
         }
     }
 }

@@ -6,21 +6,21 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.png";
-        string outputPath = @"c:\temp\sample.grayscale.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.png";
+        string outputPath = @"C:\temp\sample.grayscale.png";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load PNG, apply grayscale, and save
+        // Load the PNG image, convert it to grayscale, and save the result
         using (PngImage pngImage = new PngImage(inputPath))
         {
             pngImage.Grayscale();

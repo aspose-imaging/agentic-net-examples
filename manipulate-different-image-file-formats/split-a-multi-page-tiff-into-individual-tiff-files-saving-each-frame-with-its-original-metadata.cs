@@ -12,37 +12,45 @@ class Program
         string inputPath = @"C:\temp\multipage.tif";
         string outputDirectory = @"C:\temp\output";
 
-        // Verify the source file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists (unconditional per requirements)
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the multi‑page TIFF
-        using (TiffImage multiPage = (TiffImage)Image.Load(inputPath))
-        {
-            // Iterate through each frame in the source TIFF
-            for (int i = 0; i < multiPage.Frames.Length; i++)
+            // Verify the source file exists
+            if (!File.Exists(inputPath))
             {
-                TiffFrame frame = multiPage.Frames[i];
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Build the output file name (preserving original order)
-                string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-                // Ensure the directory for the output file exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Load the multi‑page TIFF
+            using (TiffImage multiPage = (TiffImage)Image.Load(inputPath))
+            {
+                TiffFrame[] frames = multiPage.Frames;
 
-                // Create a new TiffImage containing the current frame
-                using (TiffImage singlePage = new TiffImage(frame))
+                for (int i = 0; i < frames.Length; i++)
                 {
-                    // Save the single‑frame TIFF, preserving its metadata
-                    singlePage.Save(outputPath);
+                    // Clone the current frame to avoid disposing the original one
+                    TiffFrame clonedFrame = new TiffFrame((RasterImage)frames[i]);
+
+                    // Create a new TiffImage containing only this frame
+                    using (TiffImage singlePage = new TiffImage(clonedFrame))
+                    {
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the single‑frame TIFF, preserving its metadata
+                        singlePage.Save(outputPath);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

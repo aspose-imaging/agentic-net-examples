@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -9,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\output\cropped.png";
+        string outputPath = @"C:\Images\sample_cropped.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -18,23 +19,30 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to EmfImage to access EMF-specific methods
-            EmfImage emfImage = (EmfImage)image;
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to EmfImage to access the Crop method
+                EmfImage emfImage = (EmfImage)image;
 
-            // Define the cropping rectangle with specific coordinates (left, top, width, height)
-            Rectangle cropRect = new Rectangle(50, 50, 200, 150);
+                // Define the cropping rectangle (x, y, width, height)
+                var cropArea = new Aspose.Imaging.Rectangle(100, 50, 300, 200);
 
-            // Perform the crop operation
-            emfImage.Crop(cropRect);
+                // Crop the image to the specified rectangle
+                emfImage.Crop(cropArea);
 
-            // Save the cropped image as PNG
-            emfImage.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions());
+                // Save the cropped image as PNG
+                emfImage.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

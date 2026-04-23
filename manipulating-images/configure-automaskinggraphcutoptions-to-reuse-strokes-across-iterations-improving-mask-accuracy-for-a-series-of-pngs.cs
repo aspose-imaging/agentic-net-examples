@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
@@ -13,82 +12,80 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string[] inputPaths = { "input1.png", "input2.png" };
-        string[] outputPaths = { "output1.png", "output2.png" };
-
-        for (int i = 0; i < inputPaths.Length; i++)
+        try
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Temporary file for ExportOptions.Source
-            string tempPath = Path.Combine(Path.GetTempPath(), $"mask_temp_{i}.png");
-
-            // First pass – calculate default strokes
-            AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
+            if (!Directory.Exists(outputDirectory))
             {
-                CalculateDefaultStrokes = true,
-                FeatheringRadius = 3,
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                ExportOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(tempPath, false)
-                },
-                BackgroundReplacementColor = Color.Transparent
-            };
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+            foreach (string inputPath in files)
             {
-                using (MaskingResult firstResult = new ImageMasking(image).Decompose(options))
+                if (!File.Exists(inputPath))
                 {
-                    // Retrieve the automatically calculated strokes
-                    Point[] backgroundStrokes = options.DefaultBackgroundStrokes;
-                    Point[] foregroundStrokes = options.DefaultForegroundStrokes;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                    // Second pass – reuse strokes for improved accuracy
-                    options.CalculateDefaultStrokes = false;
-                    options.Args = new AutoMaskingArgs
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath1 = Path.Combine(outputDirectory, fileName + "_mask1.png");
+                string outputPath2 = Path.Combine(outputDirectory, fileName + "_mask2.png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath1));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
+
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    string tempPath = Path.GetTempFileName();
+
+                    var options = new AutoMaskingGraphCutOptions
                     {
-                        ObjectsPoints = new Point[][]
+                        CalculateDefaultStrokes = true,
+                        FeatheringRadius = 3,
+                        Method = SegmentationMethod.GraphCut,
+                        Decompose = false,
+                        ExportOptions = new PngOptions
                         {
-                            backgroundStrokes,
-                            foregroundStrokes
-                        }
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new FileCreateSource(tempPath, false)
+                        },
+                        BackgroundReplacementColor = Color.Transparent
                     };
 
-                    // Re‑load the image for the second decomposition
-                    using (RasterImage image2 = (RasterImage)Image.Load(inputPath))
+                    MaskingResult results = new ImageMasking(image).Decompose(options);
+                    using (RasterImage resultImage = (RasterImage)results[1].GetImage())
                     {
-                        using (MaskingResult secondResult = new ImageMasking(image2).Decompose(options))
-                        {
-                            using (RasterImage resultImage = (RasterImage)secondResult[1].GetImage())
-                            {
-                                // Save the final masked image
-                                resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                            }
-                        }
+                        resultImage.Save(outputPath1, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    }
+
+                    options.CalculateDefaultStrokes = false;
+                    results = new ImageMasking(image).Decompose(options);
+                    using (RasterImage resultImage2 = (RasterImage)results[1].GetImage())
+                    {
+                        resultImage2.Save(outputPath2, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    }
+
+                    if (File.Exists(tempPath))
+                    {
+                        File.Delete(tempPath);
                     }
                 }
             }
-
-            // Clean up temporary file
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

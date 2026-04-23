@@ -2,47 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dng;
 using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.dng";
-        string outputPath = @"C:\Images\sample_converted.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.dng";
+            string outputPath = @"C:\Images\Result\sample.gif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access palette and dithering features
-            RasterImage raster = (RasterImage)image;
-
-            // Generate a 256‑color palette that best fits the image
-            IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
-
-            // Optional: apply dithering to improve visual quality after palette reduction
-            raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
-
-            // Prepare GIF save options with the custom palette
-            GifOptions gifOptions = new GifOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Palette = palette,
-                DoPaletteCorrection = false   // palette already provided
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as GIF using the specified options
-            image.Save(outputPath, gifOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage (DngImage derives from RasterImage)
+                RasterImage raster = (RasterImage)image;
+
+                // Reduce the palette to 256 colors using Floyd‑Steinberg dithering (8‑bit palette)
+                raster.Dither(DitheringMethod.FloydSteinbergDithering, 8);
+
+                // Save the result as GIF
+                GifOptions gifOptions = new GifOptions(); // default options are sufficient
+                raster.Save(outputPath, gifOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

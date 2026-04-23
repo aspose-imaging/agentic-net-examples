@@ -10,42 +10,46 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDirectory = @"C:\temp\output\";
+        string inputPath = @"c:\temp\sample.djvu";
+        string outputDir = @"c:\temp\output\";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists (will be called for each page as well)
-        Directory.CreateDirectory(outputDirectory);
-
-        // Open the DjVu file stream
-        using (Stream stream = File.OpenRead(inputPath))
-        {
-            // Load DjVu image from the stream
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Prepare TIFF save options with LZW compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Lzw;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Iterate through each page and save as separate TIFF
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
+            // Open the DjVu file as a stream
+            using (Stream stream = File.OpenRead(inputPath))
+            {
+                // Load DjVu image from the stream
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.tif");
+                    // Prepare TIFF save options with LZW compression
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOptions.Compression = TiffCompressions.Lzw;
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Iterate through each page and save as a separate TIFF file
+                    foreach (DjvuPage djvuPage in djvuImage.Pages)
+                    {
+                        // Build output file name based on page number
+                        string outputPath = Path.Combine(outputDir, $"sample_page_{djvuPage.PageNumber}.tif");
 
-                    // Save the page as TIFF with the specified options
-                    djvuPage.Save(outputPath, tiffOptions);
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as TIFF with the specified options
+                        djvuPage.Save(outputPath, tiffOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -11,7 +11,7 @@ class Program
         string inputPath = "Input/sample.cdr";
         string outputPath = "Output/sample.bmp";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,27 +21,33 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CorelDRAW file
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure BMP options with 24‑bit depth
-            using (BmpOptions bmpOptions = new BmpOptions())
+            // Load the CorelDRAW (CDR) image
+            using (Image image = Image.Load(inputPath))
             {
-                bmpOptions.BitsPerPixel = 24;
-
-                // Set vector rasterization options for proper rendering
-                bmpOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                // Configure BMP save options with 24‑bit color depth
+                var bmpOptions = new BmpOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
+                    BitsPerPixel = 24,
+                    // Set vector rasterization options for proper rendering of the CDR vector image
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
 
-                // Save as BMP
+                // Save the image as BMP
                 image.Save(outputPath, bmpOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,16 +1,16 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.eps");
-        string outputPath = Path.Combine("Output", "sample.psd");
+        string inputPath = "Input/sample.eps";
+        string outputPath = "Output/sample.psd";
 
         if (!File.Exists(inputPath))
         {
@@ -20,15 +20,15 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (EpsImage epsImage = (EpsImage)Aspose.Imaging.Image.Load(inputPath))
+        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
         {
-            PsdOptions psdOptions = new PsdOptions
+            using (PsdOptions psdOptions = new PsdOptions())
             {
-                CompressionMethod = CompressionMethod.RLE,
-                ColorMode = ColorModes.Rgb
-            };
+                psdOptions.CompressionMethod = CompressionMethod.RLE;
+                psdOptions.ColorMode = ColorModes.Rgb;
 
-            epsImage.Save(outputPath, psdOptions);
+                epsImage.Save(outputPath, psdOptions);
+            }
         }
     }
 }

@@ -2,37 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\sample_converted.jpg";
+        // Hardcoded input and output paths
+        string inputPath = "input/sample.bmp";
+        string outputPath = "output/sample_converted.jpg";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure JPEG save options with desired quality
-            JpegOptions saveOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Quality = 85,
-                BitsPerChannel = 8 // standard 8‑bit per channel
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as JPEG preserving original dimensions
-            image.Save(outputPath, saveOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure JPEG save options with quality 85
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = 85
+                };
+
+                // Save as JPEG preserving original dimensions
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

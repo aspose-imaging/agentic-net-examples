@@ -1,60 +1,68 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.png";
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported cleanly
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Rasterize SVG to PNG in memory
-            using (MemoryStream rasterStream = new MemoryStream())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                using (PngOptions pngOptions = new PngOptions())
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (SvgImage svgImage = new SvgImage(inputPath))
+            {
+                // Set up rasterization options for PNG output
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size
+                };
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Rasterize SVG to a memory stream
+                using (MemoryStream rasterStream = new MemoryStream())
                 {
                     svgImage.Save(rasterStream, pngOptions);
-                }
+                    rasterStream.Position = 0;
 
-                rasterStream.Position = 0;
-
-                // Load the rasterized image as a RasterImage
-                using (Aspose.Imaging.Image rasterImageContainer = Aspose.Imaging.Image.Load(rasterStream))
-                {
-                    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)rasterImageContainer;
-
-                    // Apply Gaussian blur filter
-                    rasterImage.Filter(
-                        rasterImage.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                    // Apply Gauss-Wiener deconvolution filter
-                    rasterImage.Filter(
-                        rasterImage.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
-
-                    // Save the processed image to the output path
-                    using (PngOptions outOptions = new PngOptions())
+                    // Load the rasterized image as a RasterImage
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
                     {
-                        rasterImage.Save(outputPath, outOptions);
+                        // Apply Gaussian blur (radius 5, sigma 4.0)
+                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                        // Apply Gauss-Wiener deconvolution (radius 5, sigma 4.0)
+                        rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
+
+                        // Save the processed image
+                        rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

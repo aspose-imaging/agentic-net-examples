@@ -8,31 +8,33 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output\\result.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\sample.dicom";
+            string outputPath = "C:\\temp\\sample_adjusted.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DICOM image, adjust gamma, and save as BMP
+            using (Image image = Image.Load(inputPath))
+            {
+                DicomImage dicomImage = (DicomImage)image;
+                dicomImage.AdjustGamma(1.2f);
+                dicomImage.Save(outputPath, new BmpOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DICOM image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to DicomImage to access DICOM-specific methods
-            DicomImage dicomImage = (DicomImage)image;
-
-            // Adjust gamma to 1.2 for all channels
-            dicomImage.AdjustGamma(1.2f);
-
-            // Save the processed image as BMP
-            dicomImage.Save(outputPath, new BmpOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

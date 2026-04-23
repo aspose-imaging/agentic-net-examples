@@ -3,66 +3,73 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Psd; 
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Input and output directories (relative paths)
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Get all CDR files in the input directory
-        string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
-
-        foreach (string inputPath in cdrFiles)
+        try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
             }
 
-            // Prepare output path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".psd");
-
-            // Ensure output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                CdrImage cdr = (CdrImage)image;
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Configure PSD save options
-                PsdOptions psdOptions = new PsdOptions
-                {
-                    CompressionMethod = CompressionMethod.RLE,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
+            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
 
-                // Export all pages as separate layers in the PSD
-                if (cdr.PageCount > 1)
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, cdr.PageCount));
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Save as PSD
-                cdr.Save(outputPath, psdOptions);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".psd");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+                {
+                    PsdOptions psdOptions = new PsdOptions
+                    {
+                        CompressionMethod = CompressionMethod.RLE,
+                        ColorMode = ColorModes.Rgb,
+                        Version = 6,
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        },
+                        VectorizationOptions = new PsdVectorizationOptions
+                        {
+                            VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
+                        }
+                    };
+
+                    cdr.Save(outputPath, psdOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

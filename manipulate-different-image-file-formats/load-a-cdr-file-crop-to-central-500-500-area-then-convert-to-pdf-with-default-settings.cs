@@ -1,57 +1,45 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.cdr";
-        string outputPath = @"C:\output\sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/output.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR image
-        using (CdrImage image = (CdrImage)Image.Load(inputPath))
-        {
-            // Get the first page (index 0)
-            CdrImagePage page = (CdrImagePage)image.Pages[0];
-
-            // Determine crop rectangle (central 500x500 area)
-            int cropWidth = 500;
-            int cropHeight = 500;
-            int x = Math.Max(0, (page.Width - cropWidth) / 2);
-            int y = Math.Max(0, (page.Height - cropHeight) / 2);
-            int actualWidth = Math.Min(cropWidth, page.Width);
-            int actualHeight = Math.Min(cropHeight, page.Height);
-            var cropRect = new Rectangle(x, y, actualWidth, actualHeight);
-
-            // Crop the page
-            page.Crop(cropRect);
-
-            // Prepare PDF save options
-            var pdfOptions = new PdfOptions();
-            var rasterOptions = new CdrRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                PageWidth = page.Width,
-                PageHeight = page.Height
-            };
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the cropped page as PDF
-            page.Save(outputPath, pdfOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                cdr.CacheData();
+
+                int cropWidth = 500;
+                int cropHeight = 500;
+                int x = (cdr.Width - cropWidth) / 2;
+                int y = (cdr.Height - cropHeight) / 2;
+                var rect = new Aspose.Imaging.Rectangle(x, y, cropWidth, cropHeight);
+                cdr.Crop(rect);
+
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.VectorRasterizationOptions = new CdrRasterizationOptions();
+
+                cdr.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,38 +1,53 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.apng";
-        string outputPath = "output.gif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input\\animation.apng";
+            string outputPath = "Output\\animation.gif";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image loadedImage = Image.Load(inputPath))
-        using (ApngImage apngImage = (ApngImage)loadedImage)
-        {
-            using (GifImage gifImage = new GifImage(new GifFrameBlock((ushort)apngImage.Width, (ushort)apngImage.Height)))
+            if (!File.Exists(inputPath))
             {
-                for (int i = 0; i < apngImage.PageCount; i++)
-                {
-                    gifImage.AddPage((RasterImage)apngImage.Pages[i]);
-                }
-
-                gifImage.Save(outputPath, new GifOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            {
+                int width = apng.Width;
+                int height = apng.Height;
+
+                using (GifOptions gifOptions = new GifOptions())
+                {
+                    gifOptions.Source = new FileCreateSource(outputPath, false);
+
+                    using (GifImage gif = (GifImage)Image.Create(gifOptions, width, height))
+                    {
+                        foreach (var page in apng.Pages)
+                        {
+                            gif.AddPage((RasterImage)page);
+                        }
+
+                        gif.Save();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

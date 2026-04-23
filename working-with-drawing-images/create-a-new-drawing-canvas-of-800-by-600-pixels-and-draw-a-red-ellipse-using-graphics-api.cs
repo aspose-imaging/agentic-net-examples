@@ -3,38 +3,35 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output file path (hardcoded)
-        string outputPath = "output\\canvas.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\ellipse.png";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file source bound to the output path
-        Source source = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = source };
+        // Set up PNG options with a file create source
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Create an 800x600 canvas bound to the file
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, 800, 600))
+        // Create a new image canvas of 800x600 pixels
+        using (Image image = Image.Create(pngOptions, 800, 600))
         {
-            // Initialize graphics for the canvas
-            Graphics graphics = new Graphics(canvas);
+            // Initialize graphics object for drawing
+            Graphics graphics = new Graphics(image);
 
-            // Clear the canvas with white background
-            graphics.Clear(Color.White);
+            // Draw a red ellipse with a 2-pixel pen
+            // Rectangle(x, y, width, height) defines the bounding box of the ellipse
+            graphics.DrawEllipse(new Pen(Color.Red, 2), new Rectangle(100, 100, 600, 400));
 
-            // Create a red pen with thickness 2
-            Pen redPen = new Pen(Color.Red, 2);
-
-            // Draw a red ellipse within the specified rectangle
-            graphics.DrawEllipse(redPen, new Rectangle(100, 50, 600, 500));
-
-            // Save the bound image
-            canvas.Save();
+            // Save the image (writes to the file specified in pngOptions.Source)
+            image.Save();
         }
     }
 }

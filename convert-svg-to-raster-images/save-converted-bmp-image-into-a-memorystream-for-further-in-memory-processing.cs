@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -10,28 +11,37 @@ class Program
         // Hard‑coded input path
         string inputPath = @"C:\temp\sample.bmp";
 
-        // Verify the input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Load the BMP image from disk
+        // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Example conversion: rotate the image 180 degrees
-            image.RotateFlip(RotateFlipType.Rotate180FlipNone);
+            // If the image is a BMP, perform a sample conversion (binarization)
+            if (image is BmpImage bmpImage)
+            {
+                bmpImage.BinarizeOtsu();
+            }
 
-            // Prepare BMP save options (default settings are fine for this example)
-            BmpOptions saveOptions = new BmpOptions();
+            // Define save options (using BMP options as an example)
+            var saveOptions = new BmpOptions
+            {
+                BitsPerPixel = 24 // default 24‑bpp
+            };
 
-            // Save the processed image into a memory stream for further in‑memory work
-            using (MemoryStream memoryStream = new MemoryStream())
+            // Save the entire image to a memory stream for further processing
+            using (var memoryStream = new MemoryStream())
             {
                 image.Save(memoryStream, saveOptions);
-                Console.WriteLine($"Image saved to memory stream, size = {memoryStream.Length} bytes");
-                // Additional in‑memory processing can be performed here using memoryStream
+
+                // Example: output the size of the saved image in bytes
+                Console.WriteLine($"Image saved to memory stream, size: {memoryStream.Length} bytes");
+
+                // Further in‑memory processing can be performed here using memoryStream
             }
         }
     }

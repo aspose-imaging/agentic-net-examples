@@ -1,49 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputDirectory = @"C:\temp\output_webp";
-        string dummyOutputPath = @"C:\temp\dummy_output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output locations
+            string inputPath = @"C:\Images\multi_page.tif";
+            string outputDir = @"C:\Images\WebPPages";
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(outputDirectory);
-        Directory.CreateDirectory(Path.GetDirectoryName(dummyOutputPath));
-
-        // Load the multi‑page TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            // Set batch processing action for each page
-            tiffImage.PageExportingAction = (int index, Image page) =>
+            // Verify input file existence
+            if (!File.Exists(inputPath))
             {
-                // Build output file name for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{index + 1}.webp");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-                // Save the current page as WebP
-                page.Save(outputPath, new WebPOptions());
+            // Load the multi‑page TIFF
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Set batch processing action – executed before each page is saved
+                tiffImage.PageExportingAction = (int index, Image page) =>
+                {
+                    // Cast to RasterImage to access Save
+                    if (page is RasterImage rasterPage)
+                    {
+                        // Build per‑page output path
+                        string outPath = Path.Combine(outputDir, $"page_{index}.webp");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
 
-                // Resources for this page will be released automatically after this delegate returns
-            };
+                        // Save the current page as WebP
+                        var webpOptions = new WebPOptions();
+                        rasterPage.Save(outPath, webpOptions);
+                    }
+                };
 
-            // Trigger the batch export by saving to a dummy file
-            tiffImage.Save(dummyOutputPath);
+                // Trigger the batch export by saving the source image.
+                // The actual saved file is not needed; the action handles per‑page output.
+                tiffImage.Save(Path.Combine(outputDir, "placeholder.tif"));
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

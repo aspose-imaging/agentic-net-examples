@@ -1,28 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = @"C:\Images\input.webp";
-        string outputPath = @"C:\Images\output.bmp";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.webp";
+            string outputPath = "output.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WebP image
+            using (WebPImage webPImage = new WebPImage(inputPath))
+            {
+                // Apply a 180-degree rotation (hue rotation interpreted as image rotation)
+                webPImage.Rotate(180f, true, Aspose.Imaging.Color.White);
+
+                // Save the result as BMP
+                webPImage.Save(outputPath, new BmpOptions());
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (WebPImage webPImage = new WebPImage(inputPath))
+        catch (Exception ex)
         {
-            webPImage.Save(outputPath, new BmpOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

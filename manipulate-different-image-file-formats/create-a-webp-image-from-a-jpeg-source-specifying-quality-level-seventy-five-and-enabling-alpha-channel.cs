@@ -7,32 +7,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\source.jpg";
-        string outputPath = @"C:\temp\output.webp";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\source.jpg";
+            string outputPath = "C:\\temp\\output.webp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure WebP options: lossy compression with quality 75
-            var webpOptions = new WebPOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Lossless = false,
-                Quality = 75f
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as WebP with the specified options
-            image.Save(outputPath, webpOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure WebP options: quality 75, enable alpha (lossless = false allows alpha in lossy mode)
+                var webpOptions = new WebPOptions
+                {
+                    Lossless = false,
+                    Quality = 75f
+                };
+
+                // Save the image as WebP with the specified options
+                image.Save(outputPath, webpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

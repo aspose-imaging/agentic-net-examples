@@ -1,94 +1,80 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ProgressManagement;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Hard‑coded input and output folders
-    private const string InputFolder = @"C:\Images\Input";
-    private const string OutputFolder = @"C:\Images\Output";
+    // Holds the name of the file currently being processed for progress callbacks
+    private static string _currentFileName = string.Empty;
+
+    // Progress callback for loading operations
+    private static void LoadProgressCallback(ProgressEventHandlerInfo info)
+    {
+        Console.Write($"\rLoading {_currentFileName}: {info.EventType} {info.Value}/{info.MaxValue}   ");
+    }
+
+    // Progress callback for saving operations
+    private static void SaveProgressCallback(ProgressEventHandlerInfo info)
+    {
+        Console.Write($"\rSaving   {_currentFileName}: {info.EventType} {info.Value}/{info.MaxValue}   ");
+    }
 
     static void Main()
     {
-        // Ensure the output directory exists
-        Directory.CreateDirectory(OutputFolder);
-
-        // Get image files (png, jpg, bmp) from the input folder
-        string[] files = Directory.GetFiles(InputFolder, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(f => f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
-                        f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                        f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                        f.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
-
-        int total = files.Length;
-        int processed = 0;
-
-        foreach (string inputPath in files)
+        try
         {
-            // Input file existence check
-            if (!File.Exists(inputPath))
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
+
+            // Get all PNG files in the input folder
+            string[] files = Directory.GetFiles(inputFolder, "*.png");
+
+            int totalFiles = files.Length;
+            int processedCount = 0;
+
+            foreach (string inputPath in files)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(OutputFolder, fileNameWithoutExt + "_sharpened.png");
-
-            // Ensure the directory for the output file exists (unconditional)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image with a progress callback
-            using (Image image = Image.Load(
-                inputPath,
-                new LoadOptions { ProgressEventHandler = LoadProgress }))
-            {
-                // Apply a sharpen filter if the image is raster based
-                if (image is RasterImage raster)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    var sharpenOptions = new SharpenFilterOptions(5, 4.0);
-                    raster.Filter(raster.Bounds, sharpenOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Save the processed image with a progress callback
-                var pngOptions = new PngOptions
+                _currentFileName = Path.GetFileName(inputPath);
+
+                // Prepare output path
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + "_sharpened.png");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load image with progress handler
+                using (Image image = Image.Load(inputPath, new LoadOptions { ProgressEventHandler = LoadProgressCallback }))
                 {
-                    ProgressEventHandler = SaveProgress
-                };
-                image.Save(outputPath, pngOptions);
+                    // Cast to RasterImage to apply filter
+                    RasterImage rasterImage = (RasterImage)image;
+
+                    // Apply sharpen filter
+                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                    // Save image with progress handler
+                    rasterImage.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions { ProgressEventHandler = SaveProgressCallback });
+                }
+
+                processedCount++;
+                // Overall progress
+                Console.WriteLine($"\rProcessed {processedCount}/{totalFiles} images.                              ");
             }
 
-            processed++;
-            DrawProgressBar(processed, total);
+            Console.WriteLine("All images processed successfully.");
         }
-
-        Console.WriteLine("\nAll images have been processed.");
-    }
-
-    // Progress handler for loading operations
-    private static void LoadProgress(ProgressEventHandlerInfo info)
-    {
-        Console.Write($"\rLoading: {info.EventType} {info.Value}/{info.MaxValue}   ");
-    }
-
-    // Progress handler for saving operations
-    private static void SaveProgress(ProgressEventHandlerInfo info)
-    {
-        Console.Write($"\rSaving:   {info.EventType} {info.Value}/{info.MaxValue}   ");
-    }
-
-    // Simple textual progress bar showing overall folder processing status
-    private static void DrawProgressBar(int processed, int total)
-    {
-        const int barWidth = 40;
-        double ratio = (double)processed / total;
-        int filled = (int)(ratio * barWidth);
-        string bar = new string('#', filled).PadRight(barWidth, '-');
-        Console.Write($"\r[{bar}] {processed}/{total} images processed");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

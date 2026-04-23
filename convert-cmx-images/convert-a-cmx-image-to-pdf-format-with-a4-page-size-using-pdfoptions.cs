@@ -3,15 +3,14 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.cmx";
-        string outputPath = "sample.pdf";
+        string inputPath = "Input/sample.cmx";
+        string outputPath = "Output/sample.pdf";
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -26,22 +25,25 @@ class Program
         // Load the CMX image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PDF options with A4 page size (595x842 points)
-            PdfOptions pdfOptions = new PdfOptions
+            // Configure PDF options with A4 page size
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                PageSize = new SizeF(595, 842)
-            };
+                // A4 size in points (1 point = 1/72 inch)
+                pdfOptions.PageSize = new SizeF(595f, 842f);
 
-            // Set vector rasterization options for CMX rendering
-            pdfOptions.VectorRasterizationOptions = new CmxRasterizationOptions
-            {
-                PageSize = new SizeF(595, 842),
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
+                // Set vector rasterization options for CMX
+                pdfOptions.VectorRasterizationOptions = new CmxRasterizationOptions
+                {
+                    PageSize = new SizeF(595f, 842f),
+                    BackgroundColor = Color.White,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument
+                };
 
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

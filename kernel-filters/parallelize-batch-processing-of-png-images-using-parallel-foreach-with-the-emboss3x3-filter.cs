@@ -1,48 +1,60 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-        System.Threading.Tasks.Parallel.ForEach(files, inputPath =>
-        {
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
                 return;
             }
 
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + "_emboss.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-                image.Save(outputPath);
+                Directory.CreateDirectory(outputDirectory);
             }
-        });
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            Parallel.ForEach(files, inputPath =>
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_embossed.png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage raster = (RasterImage)image;
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+                    PngOptions options = new PngOptions();
+                    image.Save(outputPath, options);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

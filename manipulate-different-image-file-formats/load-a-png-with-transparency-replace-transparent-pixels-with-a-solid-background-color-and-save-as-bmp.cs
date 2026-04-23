@@ -1,61 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.bmp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (string.IsNullOrEmpty(outputDir))
-            outputDir = ".";
-        Directory.CreateDirectory(outputDir);
-
-        // Load PNG image as RasterImage
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
-        {
-            // Load all ARGB pixels
-            int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-
-            // Define solid background color (white)
-            int backgroundArgb = Color.FromArgb(255, 255, 255, 255).ToArgb();
-
-            // Replace fully transparent pixels with background color
-            for (int i = 0; i < pixels.Length; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int alpha = (pixels[i] >> 24) & 0xFF;
-                if (alpha == 0)
-                {
-                    pixels[i] = backgroundArgb;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Write modified pixels back to the image
-            raster.SaveArgb32Pixels(raster.Bounds, pixels);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prepare BMP save options with file source
-            BmpOptions bmpOptions = new BmpOptions
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
+                // Cast to PngImage to access transparency properties
+                if (image is PngImage pngImage && pngImage.HasTransparentColor)
+                {
+                    // Set a solid background color to replace transparent pixels
+                    pngImage.HasBackgroundColor = true;
+                    pngImage.BackgroundColor = Aspose.Imaging.Color.White;
+                }
 
-            // Save the image as BMP
-            raster.Save(outputPath, bmpOptions);
+                // Save the image as BMP (default compression preserves transparency,
+                // but the background color set above will fill transparent areas)
+                image.Save(outputPath, new BmpOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\animation_input.webp";
-        string outputPath = @"C:\Images\animation_output.gif";
+        string inputPath = "input.webp";
+        string outputPath = "output.gif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,13 +24,12 @@ class Program
         // Load the animated WebP image (preserves all frames)
         using (Image image = Image.Load(inputPath))
         {
-            // Configure GIF options to keep all frames
-            GifOptions gifOptions = new GifOptions
+            // Save as animated GIF, keeping all frames
+            var gifOptions = new GifOptions
             {
-                FullFrame = true // Preserve each frame as a full image
+                FullFrame = true // ensures each frame is saved
             };
 
-            // Save as animated GIF
             image.Save(outputPath, gifOptions);
         }
     }

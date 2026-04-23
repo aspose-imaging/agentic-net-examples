@@ -1,52 +1,63 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\Temp\indexed_output.psd";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure PSD options with a custom 256‑color palette
-        PsdOptions psdOptions = new PsdOptions
+        try
         {
-            // Use a standard 8‑bit (256 colors) palette derived from the RGB space
-            Palette = Aspose.Imaging.ColorPaletteHelper.Create8Bit(),
-            // Set color mode to RGB (palette will be applied)
-            ColorMode = ColorModes.Rgb,
-            // Set bits per channel and channels count for a typical 8‑bit per channel RGBA image
-            ChannelBitsCount = 8,
-            ChannelsCount = 4,
-            // No compression (RAW) for simplicity
-            CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
-            // Default PSD version (6)
-            Version = 6
-        };
+            // Define output path
+            string outputPath = @"C:\Temp\indexed_output.psd";
 
-        // Create a new PSD image of size 256x256 using the options above
-        using (Image psdImage = Image.Create(psdOptions, 256, 256))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create a custom 256‑color palette (simple RGB cube)
+            Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[256];
+            for (int i = 0; i < 256; i++)
+            {
+                // Distribute colors across the RGB space
+                byte r = (byte)((i & 0xE0) >> 5); // 3 bits for red
+                byte g = (byte)((i & 0x1C) >> 2); // 3 bits for green
+                byte b = (byte)(i & 0x03);        // 2 bits for blue
+
+                // Scale to full 0‑255 range
+                r = (byte)(r * 255 / 7);
+                g = (byte)(g * 255 / 7);
+                b = (byte)(b * 255 / 3);
+
+                paletteColors[i] = Aspose.Imaging.Color.FromArgb(255, r, g, b);
+            }
+            var customPalette = new Aspose.Imaging.ColorPalette(paletteColors);
+
+            // Set up PSD creation options
+            PsdOptions psdOptions = new PsdOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                ColorMode = ColorModes.Indexed,
+                CompressionMethod = CompressionMethod.RLE,
+                ChannelBitsCount = 8,               // 8 bits per channel
+                ChannelsCount = (short)1,           // Indexed images have a single channel
+                Palette = customPalette
+            };
+
+            // Create a 256x256 indexed PSD image
+            using (Aspose.Imaging.Image psdImage = Aspose.Imaging.Image.Create(psdOptions, 256, 256))
+            {
+                // Optional: fill the image with a simple pattern using the palette indices
+                // Here we just leave it blank (all zeros) which maps to the first palette entry.
+
+                // Save the image (source is already bound, so just call Save())
+                psdImage.Save();
+            }
+        }
+        catch (Exception ex)
         {
-            // Draw a simple gradient to visualize the palette
-            Graphics graphics = new Graphics(psdImage);
-            LinearGradientBrush gradientBrush = new LinearGradientBrush(
-                new Point(0, 0),
-                new Point(psdImage.Width, psdImage.Height),
-                Color.Red,
-                Color.Blue);
-
-            graphics.FillRectangle(gradientBrush, psdImage.Bounds);
-
-            // Save the image to the specified path using the same options
-            psdImage.Save(outputPath, psdOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

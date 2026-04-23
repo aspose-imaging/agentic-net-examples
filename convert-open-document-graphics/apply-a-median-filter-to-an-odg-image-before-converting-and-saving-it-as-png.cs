@@ -1,16 +1,18 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.odg";
-        string outputPath = "output\\result.png";
+        string inputPath = "sample.odg";
+        string outputPath = "sample_filtered.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,33 +24,40 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG vector image
+        // Load the ODG image
         using (Image odgImage = Image.Load(inputPath))
         {
-            // Prepare PNG rasterization options for vector image
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.VectorRasterizationOptions = new OdgRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = odgImage.Size
-            };
-
-            // Rasterize ODG to a memory stream
+            // Rasterize ODG to PNG in memory
             using (MemoryStream rasterStream = new MemoryStream())
             {
-                odgImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0;
-
-                // Load the rasterized image as RasterImage
-                using (Image rasterImageBase = Image.Load(rasterStream))
+                // Set up rasterization options for ODG
+                var rasterizationOptions = new OdgRasterizationOptions
                 {
-                    RasterImage rasterImage = (RasterImage)rasterImageBase;
+                    BackgroundColor = Color.White,
+                    PageSize = odgImage.Size
+                };
 
-                    // Apply median filter with size 5 to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                // PNG save options with the rasterization settings
+                var pngSaveOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
 
-                    // Save the filtered raster image as PNG
-                    rasterImage.Save(outputPath, new PngOptions());
+                // Save rasterized image to the memory stream
+                odgImage.Save(rasterStream, pngSaveOptions);
+                rasterStream.Position = 0; // Reset stream for reading
+
+                // Load the rasterized image (as a RasterImage)
+                using (Image rasterImage = Image.Load(rasterStream))
+                {
+                    // Cast to RasterImage to access Filter method
+                    var raster = (RasterImage)rasterImage;
+
+                    // Apply median filter with size 5 to the whole image
+                    raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                    // Save the filtered image as PNG
+                    raster.Save(outputPath);
                 }
             }
         }

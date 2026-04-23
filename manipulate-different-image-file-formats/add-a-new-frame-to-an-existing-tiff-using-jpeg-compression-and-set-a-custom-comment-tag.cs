@@ -7,29 +7,42 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.tif";
+            string newFramePath = "newframe.jpg";
+            string outputPath = "output/output.tif";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            if (!File.Exists(newFramePath))
+            {
+                Console.Error.WriteLine($"File not found: {newFramePath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (RasterImage jpegImage = (RasterImage)Image.Load(newFramePath))
+            {
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                frameOptions.Compression = TiffCompressions.Jpeg;
+
+                TiffFrame newFrame = new TiffFrame(jpegImage, frameOptions);
+                tiffImage.AddFrame(newFrame);
+                tiffImage.Save(outputPath);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions.Compression = TiffCompressions.Jpeg;
-            frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            frameOptions.Photometric = TiffPhotometrics.Ycbcr;
-
-            TiffFrame newFrame = new TiffFrame(frameOptions, 200, 200);
-            tiffImage.AddFrame(newFrame);
-            tiffImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

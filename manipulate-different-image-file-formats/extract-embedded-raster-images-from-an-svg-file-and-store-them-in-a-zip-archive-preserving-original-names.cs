@@ -2,58 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input SVG file path
-        string inputPath = @"C:\Images\input.svg";
+        string inputPath = "input.svg";
+        string outputPath = "extracted_images.zip";
 
-        // Hardcoded output ZIP file path
-        string outputPath = @"C:\Images\embedded_images.zip";
-
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to VectorImage to access embedded images
-            var vectorImage = (VectorImage)image;
-            var embeddedImages = vectorImage.GetEmbeddedImages();
-
-            // Create ZIP archive for output
-            using (FileStream zipStream = new FileStream(outputPath, FileMode.Create))
-            using (System.IO.Compression.ZipArchive zip = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create))
+            using (Image image = Image.Load(inputPath))
             {
+                var vectorImage = (VectorImage)image;
+                var embeddedImages = vectorImage.GetEmbeddedImages();
                 int index = 0;
-                foreach (var embedded in embeddedImages)
-                {
-                    using (embedded)
-                    {
-                        // Preserve original name if available, otherwise use indexed name
-                        string entryName = $"image{index++}.png";
 
-                        // Create entry in ZIP archive
-                        var entry = zip.CreateEntry(entryName);
-                        using (Stream entryStream = entry.Open())
+                using (var zip = new System.IO.Compression.ZipArchive(File.Open(outputPath, FileMode.Create), System.IO.Compression.ZipArchiveMode.Create))
+                {
+                    foreach (var im in embeddedImages)
+                    {
+                        using (im)
                         {
-                            // Save the embedded raster image as PNG into the ZIP entry
-                            var pngOptions = new PngOptions();
-                            embedded.Image.Save(entryStream, pngOptions);
+                            string entryName = $"image{index++}.png";
+                            var entry = zip.CreateEntry(entryName);
+                            using (var entryStream = entry.Open())
+                            {
+                                im.Image.Save(entryStream, new PngOptions());
+                            }
                         }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

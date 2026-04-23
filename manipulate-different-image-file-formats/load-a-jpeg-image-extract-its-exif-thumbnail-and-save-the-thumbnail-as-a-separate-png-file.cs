@@ -1,42 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.jpg";
-        string outputPath = @"C:\Images\thumbnail.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output\\thumbnail.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load JPEG image
-        using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
-        {
-            // Get EXIF thumbnail (may be null if not present)
-            RasterImage thumbnail = jpegImage.ExifData?.Thumbnail;
-
-            if (thumbnail == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("No EXIF thumbnail found in the image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Save thumbnail as PNG
-            PngOptions pngOptions = new PngOptions();
-            thumbnail.Save(outputPath, pngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image
+            using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
+            {
+                // Retrieve the EXIF thumbnail (may be null)
+                RasterImage thumbnail = jpeg.ExifData?.Thumbnail;
+                if (thumbnail == null)
+                {
+                    Console.Error.WriteLine("No EXIF thumbnail found in the image.");
+                    return;
+                }
+
+                // Save the thumbnail as a PNG file
+                var pngOptions = new PngOptions();
+                thumbnail.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

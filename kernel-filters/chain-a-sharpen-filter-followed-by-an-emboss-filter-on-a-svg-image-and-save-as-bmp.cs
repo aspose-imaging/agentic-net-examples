@@ -1,8 +1,9 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -12,7 +13,7 @@ class Program
         string inputPath = "input.svg";
         string outputPath = "output.bmp";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,34 +23,35 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load SVG image
-        using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
+        // Load the SVG image
+        using (Image vectorImage = Image.Load(inputPath))
         {
-            // Set up rasterization options for vector image
+            // Set up rasterization options for SVG
             var rasterOptions = new SvgRasterizationOptions
             {
-                PageSize = svgImage.Size,
-                BackgroundColor = Aspose.Imaging.Color.White
+                PageSize = vectorImage.Size
             };
 
-            // Rasterize SVG to a memory stream (PNG format)
+            // Use PNG options to rasterize the SVG into a memory stream
+            var pngOptions = new PngOptions
+            {
+                VectorRasterizationOptions = rasterOptions
+            };
+
             using (var memoryStream = new MemoryStream())
             {
-                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                svgImage.Save(memoryStream, pngOptions);
+                // Rasterize SVG to PNG in memory
+                vectorImage.Save(memoryStream, pngOptions);
                 memoryStream.Position = 0;
 
-                // Load rasterized image
-                using (Aspose.Imaging.Image rasterImageContainer = Aspose.Imaging.Image.Load(memoryStream))
+                // Load the rasterized image as a RasterImage for filtering
+                using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
                 {
-                    var rasterImage = (Aspose.Imaging.RasterImage)rasterImageContainer;
-
                     // Apply sharpen filter
-                    rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Apply emboss filter using predefined kernel
-                    rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                    // Apply emboss filter using a predefined convolution kernel
+                    rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
                     // Save the processed image as BMP
                     var bmpOptions = new BmpOptions();

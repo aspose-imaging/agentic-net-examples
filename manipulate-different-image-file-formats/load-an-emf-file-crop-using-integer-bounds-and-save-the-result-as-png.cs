@@ -1,45 +1,52 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.png";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image, crop it, and save as PNG
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to EmfImage to access cropping functionality
-            EmfImage emfImage = (EmfImage)image;
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to EmfImage to access EMF-specific methods
+                EmfImage emfImage = (EmfImage)image;
 
-            // Define the cropping rectangle (example values)
-            // Rectangle(x, y, width, height)
-            var cropRect = new Aspose.Imaging.Rectangle(50, 50, 200, 150);
+                // Define cropping rectangle (x, y, width, height)
+                int cropX = 10;
+                int cropY = 20;
+                int cropWidth = 200;
+                int cropHeight = 150;
 
-            // Perform the crop operation
-            emfImage.Crop(cropRect);
+                // Perform cropping
+                emfImage.Crop(cropX, cropY, cropWidth, cropHeight);
 
-            // Prepare PNG save options
-            var pngOptions = new PngOptions();
-
-            // Save the cropped image as PNG
-            emfImage.Save(outputPath, pngOptions);
+                // Save the cropped image as PNG
+                PngOptions pngOptions = new PngOptions();
+                emfImage.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

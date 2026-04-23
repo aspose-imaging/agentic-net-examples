@@ -8,39 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the SVG image from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (SvgImage svgImage = new SvgImage(stream))
+            {
+                // Remove the background using default analysis
+                svgImage.RemoveBackground();
+
+                // Set up rasterization options for PNG output
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    // Use the original SVG size as the page size
+                    PageSize = svgImage.Size
+                };
+
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the rasterized image as PNG
+                svgImage.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load SVG image
-        using (SvgImage svgImage = new SvgImage(inputPath))
+        catch (Exception ex)
         {
-            // Remove background using default analysis
-            svgImage.RemoveBackground();
-
-            // Configure rasterization options for PNG output
-            var rasterizationOptions = new SvgRasterizationOptions
-            {
-                PageSize = svgImage.Size // preserve original size
-            };
-
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Save as PNG
-            svgImage.Save(outputPath, pngOptions);
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

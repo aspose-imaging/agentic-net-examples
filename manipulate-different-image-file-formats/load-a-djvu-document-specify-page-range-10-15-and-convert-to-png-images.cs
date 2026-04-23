@@ -8,40 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDirectory = @"C:\temp\output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\sample.djvu";
+            string outputDirectory = @"C:\Temp\Output";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Open the DjVu file
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            // Iterate through pages and process pages 10‑15
-            foreach (DjvuPage djvuPage in djvuImage.Pages)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int pageNumber = djvuPage.PageNumber;
-                if (pageNumber < 10 || pageNumber > 15)
-                    continue; // Skip pages outside the desired range
-
-                // Build output file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{pageNumber}.png");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the page as PNG
-                djvuPage.Save(outputPath, new PngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the DjVu document from a file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Iterate through all pages and process only pages 10‑15
+                foreach (var page in djvuImage.Pages)
+                {
+                    var djvuPage = (DjvuPage)page;
+                    int pageNumber = djvuPage.PageNumber;
+
+                    if (pageNumber < 10 || pageNumber > 15)
+                        continue;
+
+                    // Build output file path
+                    string outputPath = Path.Combine(outputDirectory, $"page_{pageNumber}.png");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as PNG
+                    djvuPage.Save(outputPath, new PngOptions());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

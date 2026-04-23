@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.cmx";
-        string outputPath = @"C:\temp\output.jpg";
+        string inputPath = @"C:\input\sample.cmx";
+        string outputPath = @"C:\output\sample.jpg";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -25,7 +25,7 @@ class Program
         using (Image image = Image.Load(inputPath))
         {
             // Configure JPEG save options with quality 90
-            JpegOptions jpegOptions = new JpegOptions
+            var jpegOptions = new JpegOptions
             {
                 Quality = 90
             };

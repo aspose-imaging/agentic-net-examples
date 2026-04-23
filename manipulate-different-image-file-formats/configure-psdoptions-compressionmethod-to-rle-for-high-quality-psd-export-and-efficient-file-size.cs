@@ -8,31 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.psd";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.png";
+            string outputPath = @"c:\temp\output.psd";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PSD export options with RLE compression
-            PsdOptions psdOptions = new PsdOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                CompressionMethod = CompressionMethod.RLE
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PSD using the configured options
-            image.Save(outputPath, psdOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD options with RLE compression
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    CompressionMethod = CompressionMethod.RLE
+                };
+
+                // Save the image as PSD using the configured options
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

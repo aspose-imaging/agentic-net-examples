@@ -11,22 +11,34 @@ class Program
         string inputPath = @"C:\temp\input.bmp";
         string outputPath = @"C:\temp\output_300dpi.bmp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to BmpImage to access SetResolution
+                BmpImage bmpImage = (BmpImage)image;
+
+                // Set horizontal and vertical DPI to 300
+                bmpImage.SetResolution(300.0, 300.0);
+
+                // Save the modified image
+                bmpImage.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image, set its resolution to 300 DPI, and save
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            BmpImage bmpImage = (BmpImage)image;
-            bmpImage.SetResolution(300.0, 300.0);
-            bmpImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

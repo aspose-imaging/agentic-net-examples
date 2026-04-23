@@ -7,34 +7,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = "input.eps";
         string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input EPS file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Optionally, you can cast to EpsImage if EPS‑specific members are needed
+                // var epsImage = (EpsImage)image;
+
+                // Save the loaded image as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (string.IsNullOrEmpty(outputDir))
+        catch (Exception ex)
         {
-            outputDir = "."; // current directory
-        }
-        Directory.CreateDirectory(outputDir);
-
-        // Load EPS image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Optional: cast to EpsImage if EPS‑specific properties are needed
-            // var epsImage = (EpsImage)image;
-
-            // Save as PNG (demonstrates processing)
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

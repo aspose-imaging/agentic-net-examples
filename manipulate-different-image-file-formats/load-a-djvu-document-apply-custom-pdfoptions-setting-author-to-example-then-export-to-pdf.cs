@@ -7,36 +7,40 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define input and output file paths
-        string inputPath = "Input\\sample.djvu";
-        string outputPath = "Output\\sample.pdf";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/output.pdf";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DjVu document
-        using (DjvuImage image = (DjvuImage)Image.Load(inputPath))
-        {
-            // Configure PDF options with custom author metadata
-            var pdfOptions = new PdfOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                PdfDocumentInfo = new PdfDocumentInfo
-                {
-                    Author = "Example"
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Export the DjVu document to PDF
-            image.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DjVu document
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PDF options with custom author metadata
+                var pdfOptions = new PdfOptions
+                {
+                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Example" }
+                };
+
+                // Export the DjVu document to PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

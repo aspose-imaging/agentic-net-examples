@@ -3,37 +3,58 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.djvu";
-        string outputDirectory = "output";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(outputDirectory);
-
-        Rectangle cropRect = new Rectangle(10, 10, 200, 200);
-
-        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
-        {
-            for (int i = 0; i < djvuImage.Pages.Length; i++)
+            // Hardcoded input DjVu file path
+            string inputPath = "input.djvu";
+            if (!File.Exists(inputPath))
             {
-                using (Image page = djvuImage.Pages[i])
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Output directory for BMP files
+            string outputDir = "output";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Define cropping rectangle (example values)
+            var cropRect = new Rectangle(50, 50, 200, 200);
+
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            {
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    page.Crop(cropRect);
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.bmp");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    BmpOptions bmpOptions = new BmpOptions();
-                    page.Save(outputPath, bmpOptions);
+                    int pageIndex = 0;
+                    foreach (var page in djvuImage.Pages)
+                    {
+                        // Apply cropping to the current page
+                        page.Crop(cropRect);
+
+                        // Build output BMP file path
+                        string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.bmp");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the cropped page as BMP
+                        page.Save(outputPath, new BmpOptions());
+
+                        pageIndex++;
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

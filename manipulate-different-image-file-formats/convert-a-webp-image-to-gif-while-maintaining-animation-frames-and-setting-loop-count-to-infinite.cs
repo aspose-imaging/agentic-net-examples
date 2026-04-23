@@ -2,38 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.webp";
+            string outputPath = "output/output.gif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WebP image (animated)
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure GIF options with infinite loop
-            GifOptions gifOptions = new GifOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                LoopsCount = 0 // 0 means infinite looping
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as animated GIF preserving frames
-            image.Save(outputPath, gifOptions);
+            // Ensure output directory exists (unconditional call as required)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WebP image (may contain animation frames)
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure GIF options: infinite loop
+                GifOptions gifOptions = new GifOptions
+                {
+                    LoopsCount = 0 // 0 means infinite looping
+                };
+
+                // Save as animated GIF preserving frames
+                image.Save(outputPath, gifOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

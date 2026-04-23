@@ -3,62 +3,74 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace ImageResizeComparison
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input image path
-        string inputPath = @"C:\Images\input.jpg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        static void Main()
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Hardcoded output directory
-        string outputDir = @"C:\Images\Output";
-
-        // Ensure the output directory exists (unconditional per rule)
-        Directory.CreateDirectory(outputDir);
-
-        // Desired dimensions for resizing
-        int newWidth = 800;
-        int newHeight = 600;
-
-        // Resize types to evaluate
-        ResizeType[] resizeTypes = new ResizeType[]
-        {
-            ResizeType.NearestNeighbourResample,
-            ResizeType.BilinearResample,
-            ResizeType.LanczosResample,
-            ResizeType.HighQualityResample,
-            ResizeType.CatmullRom,
-            ResizeType.Mitchell
-        };
-
-        foreach (ResizeType resizeType in resizeTypes)
-        {
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            try
             {
-                // Perform resizing with the specific ResizeType
-                image.Resize(newWidth, newHeight, resizeType);
+                // Hardcoded input and output directories
+                string inputDir = @"C:\Images\Input\";
+                string outputDir = @"C:\Images\Output\";
 
-                // Construct output file path
-                string outputPath = Path.Combine(outputDir, $"resized_{resizeType}.jpg");
+                // List of images to process
+                string[] inputFiles = { "sample1.jpg", "sample2.png" };
 
-                // Ensure the directory for the output file exists (unconditional per rule)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Resize types to compare
+                ResizeType[] resizeTypes = {
+                    ResizeType.NearestNeighbourResample,
+                    ResizeType.BilinearResample,
+                    ResizeType.LanczosResample,
+                    ResizeType.HighQualityResample,
+                    ResizeType.CatmullRom
+                };
 
-                // Save the resized image as JPEG
-                var jpegOptions = new JpegOptions();
-                image.Save(outputPath, jpegOptions);
+                foreach (var fileName in inputFiles)
+                {
+                    string inputPath = Path.Combine(inputDir, fileName);
 
-                // Retrieve and display the file size
-                long fileSize = new FileInfo(outputPath).Length;
-                Console.WriteLine($"{resizeType}: {fileSize} bytes");
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
+
+                    foreach (var rtype in resizeTypes)
+                    {
+                        // Load the original image for each resize type
+                        using (var image = Image.Load(inputPath))
+                        {
+                            // Desired dimensions
+                            int newWidth = 200;
+                            int newHeight = 200;
+
+                            // Perform resizing with the specific ResizeType
+                            image.Resize(newWidth, newHeight, rtype);
+
+                            // Build output file name and path
+                            string outputFileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{rtype}.jpg";
+                            string outputPath = Path.Combine(outputDir, outputFileName);
+
+                            // Ensure output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save as JPEG
+                            var jpegOptions = new JpegOptions();
+                            image.Save(outputPath, jpegOptions);
+
+                            // Report file size
+                            long fileSize = new FileInfo(outputPath).Length;
+                            Console.WriteLine($"{outputFileName}: {fileSize} bytes");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }
     }

@@ -1,39 +1,62 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.tif";
+            string outputPath = @"C:\Images\output.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Align horizontal and vertical DPI
+                if (image is TiffImage tiffImg)
+                {
+                    // Align each frame in a TIFF image
+                    foreach (TiffFrame frame in tiffImg.Frames)
+                    {
+                        frame.AlignResolutions();
+                    }
+                }
+                else if (image is RasterImage rasterImg)
+                {
+                    // For non‑TIFF raster images, make DPI values equal
+                    double hRes = rasterImg.HorizontalResolution;
+                    double vRes = rasterImg.VerticalResolution;
+                    if (Math.Abs(hRes - vRes) > 0.0001)
+                    {
+                        // Use the larger DPI to avoid shrinking the image
+                        double targetDpi = Math.Max(hRes, vRes);
+                        rasterImg.SetResolution(targetDpi, targetDpi);
+                    }
+                }
+
+                // TODO: Apply correction filters here (e.g., AutoBrightnessContrast)
+
+                // Save the processed image
+                image.Save(outputPath);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            if (image is RasterImage raster && !raster.IsCached)
-            {
-                raster.CacheData();
-            }
-
-            if (image is TiffImage tiff)
-            {
-                tiff.AlignResolutions();
-            }
-
-            TiffOptions options = new TiffOptions(TiffExpectedFormat.Default);
-            image.Save(outputPath, options);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

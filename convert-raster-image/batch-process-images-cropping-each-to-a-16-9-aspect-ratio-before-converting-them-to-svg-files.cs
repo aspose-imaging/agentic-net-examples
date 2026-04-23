@@ -7,68 +7,90 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded list of input image files
-        string[] inputFiles = {
-            @"C:\Images\photo1.jpg",
-            @"C:\Images\photo2.png",
-            @"C:\Images\photo3.bmp"
-        };
+        // Define base, input and output directories (relative paths)
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        foreach (var inputPath in inputFiles)
+        // Ensure input directory exists; if not, create it and exit
+        if (!Directory.Exists(inputDirectory))
         {
-            // Verify input file exists
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
+        if (!Directory.Exists(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+
+        // Get all files in the input directory
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+        foreach (string inputPath in files)
+        {
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                return;
             }
 
-            // Determine output SVG path (same folder, .svg extension)
-            string outputPath = Path.ChangeExtension(inputPath, ".svg");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load the image (raster or vector)
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cache data for raster images for better performance
-                if (!image.IsCached)
-                    image.CacheData();
-
-                // Calculate crop rectangle to achieve 16:9 aspect ratio (centered)
-                int width = image.Width;
-                int height = image.Height;
-                double targetRatio = 16.0 / 9.0;
-                double currentRatio = (double)width / height;
-
-                int cropX = 0, cropY = 0, cropWidth = width, cropHeight = height;
-
-                if (currentRatio > targetRatio)
+                // If the image is raster, crop to 16:9 aspect ratio
+                if (image is RasterImage rasterImage)
                 {
-                    // Image is too wide – reduce width
-                    cropWidth = (int)(height * targetRatio);
-                    cropX = (width - cropWidth) / 2;
-                }
-                else if (currentRatio < targetRatio)
-                {
-                    // Image is too tall – reduce height
-                    cropHeight = (int)(width / targetRatio);
-                    cropY = (height - cropHeight) / 2;
+                    if (!rasterImage.IsCached)
+                        rasterImage.CacheData();
+
+                    int width = rasterImage.Width;
+                    int height = rasterImage.Height;
+                    double targetRatio = 16.0 / 9.0;
+                    double currentRatio = (double)width / height;
+
+                    Rectangle cropRect;
+
+                    if (currentRatio > targetRatio)
+                    {
+                        // Image is too wide – reduce width
+                        int cropWidth = (int)(height * targetRatio);
+                        int x = (width - cropWidth) / 2;
+                        cropRect = new Rectangle(x, 0, cropWidth, height);
+                    }
+                    else
+                    {
+                        // Image is too tall – reduce height
+                        int cropHeight = (int)(width / targetRatio);
+                        int y = (height - cropHeight) / 2;
+                        cropRect = new Rectangle(0, y, width, cropHeight);
+                    }
+
+                    rasterImage.Crop(cropRect);
                 }
 
-                Rectangle cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
-                image.Crop(cropRect);
+                // Prepare output SVG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
 
-                // Prepare SVG save options with proper page size
-                SvgOptions svgOptions = new SvgOptions();
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Set up SVG export options with rasterization settings
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the cropped image as SVG
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the image as SVG
                 image.Save(outputPath, svgOptions);
             }
         }

@@ -4,12 +4,13 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input/sample.dicom";
+        string inputPath = "Input/sample.dcm";
         string outputPath = "Output/result.pdf";
 
         if (!File.Exists(inputPath))
@@ -20,23 +21,26 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            DicomImage dicomImage = (DicomImage)image;
-
-            // Apply Gaussian blur filter to the entire image
-            dicomImage.Filter(
-                dicomImage.Bounds,
-                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-            // Increase brightness by 15
-            dicomImage.AdjustBrightness(15);
-
-            // Save the processed image as PDF with default options
-            using (PdfOptions pdfOptions = new PdfOptions())
+            using (Image image = Image.Load(inputPath))
             {
+                DicomImage dicomImage = (DicomImage)image;
+
+                // Apply Gaussian blur filter
+                dicomImage.Filter(dicomImage.Bounds, new GaussianBlurFilterOptions(5, 1.0));
+
+                // Adjust brightness by 15
+                dicomImage.AdjustBrightness(15);
+
+                // Export to PDF with default settings
+                PdfOptions pdfOptions = new PdfOptions();
                 dicomImage.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

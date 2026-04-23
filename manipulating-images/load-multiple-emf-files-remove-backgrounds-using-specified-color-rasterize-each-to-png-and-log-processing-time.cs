@@ -3,70 +3,77 @@ using System.IO;
 using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input EMF files
-        string[] inputFiles = new string[]
+        try
         {
-            @"C:\Images\file1.emf",
-            @"C:\Images\file2.emf"
-        };
-
-        // Hardcoded output directory for PNG files
-        string outputDir = @"C:\Images\Output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input folder and list of EMF files
+            string inputFolder = @"C:\Images\Input";
+            string[] emfFiles = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
+                "image1.emf",
+                "image2.emf",
+                "image3.emf"
+            };
 
-            // Determine output PNG path
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDir, fileName + ".png");
+            // Hardcoded output folder
+            string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Start timing
-            Stopwatch sw = Stopwatch.StartNew();
-
-            // Load EMF image
-            using (Image image = Image.Load(inputPath))
+            foreach (var fileName in emfFiles)
             {
-                // Remove background if the image is a vector image
-                if (image is VectorImage vectorImage)
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputFolder, fileName);
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(fileName) + ".png");
+
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    vectorImage.RemoveBackground();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Configure PNG options with vector rasterization
-                var pngOptions = new PngOptions();
-                var vectorOptions = new VectorRasterizationOptions
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Measure processing time
+                Stopwatch sw = Stopwatch.StartNew();
+
+                // Load EMF image
+                using (Image image = Image.Load(inputPath))
                 {
-                    BackgroundColor = Color.White, // specified background color
-                    PageSize = image.Size
-                };
-                pngOptions.VectorRasterizationOptions = vectorOptions;
+                    // Cast to EmfImage to access vector-specific methods
+                    EmfImage emfImage = (EmfImage)image;
 
-                // Save rasterized PNG
-                image.Save(outputPath, pngOptions);
+                    // Remove background (default removes any background)
+                    emfImage.RemoveBackground();
+
+                    // Prepare PNG save options with rasterization settings
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new EmfRasterizationOptions
+                        {
+                            // Set background color for rasterization (optional, can be transparent)
+                            BackgroundColor = Aspose.Imaging.Color.White,
+                            // Use original image size
+                            PageSize = emfImage.Size
+                        }
+                    };
+
+                    // Save rasterized PNG
+                    emfImage.Save(outputPath, pngOptions);
+                }
+
+                sw.Stop();
+                Console.WriteLine($"Processed '{fileName}' in {sw.ElapsedMilliseconds} ms. Output: {outputPath}");
             }
-
-            // Stop timing and log
-            sw.Stop();
-            Console.WriteLine($"Processed '{inputPath}' in {sw.ElapsedMilliseconds} ms");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

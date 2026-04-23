@@ -2,37 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.tif";
-        string outputPath = "Output\\thumbnail.webp";
+        string inputPath = "input.tif";
+        string outputPath = "thumbnail.webp";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
-        {
-            int thumbMaxWidth = 150;
-            int thumbMaxHeight = 150;
-            double ratio = Math.Min((double)thumbMaxWidth / raster.Width, (double)thumbMaxHeight / raster.Height);
-            int newWidth = (int)(raster.Width * ratio);
-            int newHeight = (int)(raster.Height * ratio);
-
-            raster.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-            using (WebPOptions webpOptions = new WebPOptions())
+            if (!File.Exists(inputPath))
             {
-                raster.Save(outputPath, webpOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                int thumbWidth = 200;
+                int thumbHeight = 200;
+
+                tiff.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
+
+                WebPOptions options = new WebPOptions();
+                tiff.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

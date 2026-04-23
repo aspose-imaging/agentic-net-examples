@@ -1,49 +1,60 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Verify that the input SVG file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\input.svg";
+            string outputPath = @"C:\Temp\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            {
+                // Configure rasterization options to align DPI (use default DPI and 1:1 scaling)
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                {
+                    // Preserve original size
+                    PageSize = svgImage.Size,
+                    // Ensure no scaling so DPI remains consistent
+                    ScaleX = 1.0f,
+                    ScaleY = 1.0f,
+                    // Optional: set a neutral background color
+                    BackgroundColor = Color.White,
+                    // Enable antialiasing for better quality
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    TextRenderingHint = TextRenderingHint.AntiAlias
+                };
+
+                // Set up PNG save options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the rasterized PNG
+                svgImage.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to SvgImage for vector‑specific properties
-            SvgImage svgImage = (SvgImage)image;
-
-            // Configure rasterization options (page size matches the SVG size)
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = svgImage.Size
-            };
-
-            // Set PNG save options and align DPI via ResolutionSettings
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                ResolutionSettings = new ResolutionSetting(300, 300) // 300 DPI horizontal and vertical
-            };
-
-            // Rasterize the SVG to PNG with the specified DPI
-            svgImage.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

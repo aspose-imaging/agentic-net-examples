@@ -8,18 +8,26 @@ class Program
     static void Main()
     {
         // Hardcoded input and output directories
-        string inputDir = "Input";
-        string outputDir = "Output";
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
 
         // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
+        Directory.CreateDirectory(outputFolder);
 
-        // Get all BMP files in the input directory
-        string[] bmpFiles = Directory.GetFiles(inputDir, "*.bmp");
-
-        foreach (string inputPath in bmpFiles)
+        // List of BMP files to process (hardcoded for the example)
+        string[] bmpFiles = new string[]
         {
-            // Verify the input file exists
+            "image1.bmp",
+            "image2.bmp",
+            "image3.bmp"
+        };
+
+        foreach (string fileName in bmpFiles)
+        {
+            // Build full input path
+            string inputPath = Path.Combine(inputFolder, fileName);
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,22 +36,22 @@ class Program
 
             // Create a unique timestamp prefix
             string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            // Build the output PDF file name with timestamp prefix
-            string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(inputPath)}.pdf";
-            string outputPath = Path.Combine(outputDir, outputFileName);
 
-            // Ensure the output directory for this file exists
+            // Build full output path with timestamp prefix and .pdf extension
+            string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(fileName)}.pdf";
+            string outputPath = Path.Combine(outputFolder, outputFileName);
+
+            // Ensure the directory for the output file exists (unconditional)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF options
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    // Save the image as PDF
-                    image.Save(outputPath, pdfOptions);
-                }
+                // Set up PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
     }

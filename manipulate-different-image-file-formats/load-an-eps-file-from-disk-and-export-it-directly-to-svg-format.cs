@@ -7,28 +7,44 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\sample.svg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.eps";
+            string outputPath = "output.svg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare SVG export options
+                var svgOptions = new SvgOptions();
+
+                // If the image is a vector type, set rasterization options based on its size
+                if (image is VectorImage vectorImage)
+                {
+                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = vectorImage.Size
+                    };
+                }
+
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image and save it as SVG
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Create SVG export options (default settings)
-            var svgOptions = new SvgOptions();
-
-            // Save the image to SVG format
-            image.Save(outputPath, svgOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

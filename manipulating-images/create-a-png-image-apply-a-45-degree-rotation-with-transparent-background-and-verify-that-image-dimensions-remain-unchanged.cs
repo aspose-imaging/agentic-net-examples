@@ -6,41 +6,48 @@ using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"c:\temp\rotated.png";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a 200x200 PNG image
-        using (PngImage pngImage = new PngImage(200, 200))
+        try
         {
-            // Fill the image with a solid red color
-            Graphics graphics = new Graphics(pngImage);
-            SolidBrush brush = new SolidBrush(Color.Red);
-            graphics.FillRectangle(brush, pngImage.Bounds);
+            // Define output path
+            string outputPath = "output.png";
 
-            // Store original dimensions
-            int originalWidth = pngImage.Width;
-            int originalHeight = pngImage.Height;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Rotate 45 degrees without resizing, using transparent background
-            pngImage.Rotate(45f, false, Color.Transparent);
-
-            // Verify that dimensions remain unchanged
-            if (pngImage.Width == originalWidth && pngImage.Height == originalHeight)
+            // Create a PNG image of 200x200 pixels
+            using (PngImage png = new PngImage(200, 200))
             {
-                Console.WriteLine("Dimensions unchanged after rotation.");
-            }
-            else
-            {
-                Console.WriteLine($"Dimensions changed: ({originalWidth}x{originalHeight}) -> ({pngImage.Width}x{pngImage.Height})");
-            }
+                // Fill the image with a solid color for visibility
+                Graphics graphics = new Graphics(png);
+                SolidBrush brush = new SolidBrush(Color.Red);
+                graphics.FillRectangle(brush, png.Bounds);
 
-            // Save the rotated image
-            pngImage.Save(outputPath);
+                // Store original dimensions
+                int originalWidth = png.Width;
+                int originalHeight = png.Height;
+
+                // Rotate 45 degrees without resizing, using transparent background
+                png.Rotate(45f, false, Color.Transparent);
+
+                // Verify dimensions remain unchanged
+                if (png.Width == originalWidth && png.Height == originalHeight)
+                {
+                    Console.WriteLine("Dimensions unchanged after rotation.");
+                }
+                else
+                {
+                    Console.WriteLine($"Dimensions changed: ({originalWidth}x{originalHeight}) -> ({png.Width}x{png.Height})");
+                }
+
+                // Save the rotated image
+                png.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

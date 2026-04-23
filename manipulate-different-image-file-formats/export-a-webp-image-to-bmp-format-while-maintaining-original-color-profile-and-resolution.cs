@@ -7,8 +7,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.webp";
-        string outputPath = "output.bmp";
+        string inputPath = @"C:\Images\input.webp";
+        string outputPath = @"C:\Images\output.bmp";
 
         if (!File.Exists(inputPath))
         {
@@ -18,22 +18,22 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            RasterImage raster = image as RasterImage;
-            if (raster == null)
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine("Loaded image is not a raster image.");
-                return;
+                RasterImage raster = (RasterImage)image;
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    KeepMetadata = true,
+                    ResolutionSettings = new ResolutionSetting(raster.HorizontalResolution, raster.VerticalResolution)
+                };
+                image.Save(outputPath, bmpOptions);
             }
-
-            BmpOptions options = new BmpOptions
-            {
-                KeepMetadata = true,
-                ResolutionSettings = new ResolutionSetting(raster.HorizontalResolution, raster.VerticalResolution)
-            };
-
-            raster.Save(outputPath, options);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

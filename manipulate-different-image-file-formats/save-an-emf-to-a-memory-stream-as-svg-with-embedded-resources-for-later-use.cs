@@ -8,29 +8,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = @"C:\temp\input.emf";
+        string inputPath = "input.emf";
+        string outputPath = "output.svg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Memory stream to hold the resulting SVG
-        using (MemoryStream outputStream = new MemoryStream())
-        {
-            // Load the EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                // Configure SVG save options
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                EmfImage emfImage = (EmfImage)image;
+
                 SvgOptions saveOptions = new SvgOptions
                 {
                     TextAsShapes = true
                 };
 
-                // Configure rasterization options for EMF
                 EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
                     BackgroundColor = Color.WhiteSmoke,
@@ -42,17 +41,16 @@ class Program
 
                 saveOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save EMF as SVG into the memory stream
-                emfImage.Save(outputStream, saveOptions);
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    emfImage.Save(memoryStream, saveOptions);
+                    // The SVG data is now in memoryStream and can be used later.
+                }
             }
-
-            // Reset stream position for further use
-            outputStream.Position = 0;
-
-            // Example: write the SVG to a file (optional)
-            // string outputPath = @"C:\temp\output.svg";
-            // Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            // File.WriteAllBytes(outputPath, outputStream.ToArray());
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

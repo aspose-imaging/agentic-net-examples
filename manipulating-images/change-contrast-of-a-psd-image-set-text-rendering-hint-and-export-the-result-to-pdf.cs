@@ -7,44 +7,51 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.psd");
-        string outputPath = Path.Combine("Output", "result.pdf");
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.psd";
+            string outputPath = "Output/result.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Adjust contrast
-            RasterImage raster = (RasterImage)image;
-            if (!raster.IsCached)
-                raster.CacheData();
-            raster.AdjustContrast(50f); // Increase contrast
-
-            // Prepare PDF export options with text rendering hint
-            PdfOptions pdfOptions = new PdfOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the result as PDF
-            image.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Adjust contrast (example value: 50)
+                if (image is RasterImage raster)
+                {
+                    raster.AdjustContrast(50f);
+                }
+
+                // Prepare PDF export options with vector rasterization settings
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
+                };
+
+                // Save the result as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

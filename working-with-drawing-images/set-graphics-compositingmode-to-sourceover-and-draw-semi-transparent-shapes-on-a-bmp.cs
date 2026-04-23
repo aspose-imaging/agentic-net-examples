@@ -15,21 +15,21 @@ class Program
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-        using (Image image = Image.Create(bmpOptions, 400, 300))
+        using (Image image = Image.Create(bmpOptions, 500, 500))
         {
             Graphics graphics = new Graphics(image);
             graphics.Clear(Color.White);
 
-            using (SolidBrush redBrush = new SolidBrush(Color.Red))
-            {
-                redBrush.Opacity = 0.5f;
-                graphics.FillRectangle(redBrush, new Rectangle(50, 50, 200, 150));
-            }
-
             using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
             {
                 blueBrush.Opacity = 0.5f;
-                graphics.FillEllipse(blueBrush, new Rectangle(150, 100, 200, 150));
+                graphics.FillRectangle(blueBrush, new Rectangle(50, 50, 200, 150));
+            }
+
+            using (SolidBrush redBrush = new SolidBrush(Color.Red))
+            {
+                redBrush.Opacity = 0.3f;
+                graphics.FillEllipse(redBrush, new Rectangle(150, 120, 200, 200));
             }
 
             image.Save();

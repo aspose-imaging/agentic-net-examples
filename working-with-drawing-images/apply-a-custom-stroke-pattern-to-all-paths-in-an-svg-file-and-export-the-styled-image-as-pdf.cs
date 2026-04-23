@@ -1,73 +1,58 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "input.svg");
-        string outputPath = Path.Combine("Output", "output.pdf");
+        string inputPath = @"C:\Images\input.svg";
+        string tempSvgPath = @"C:\Images\temp_modified.svg";
+        string outputPdfPath = @"C:\Images\output.pdf";
 
-        // Validate input file existence
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(tempSvgPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-        // Load the source SVG to obtain its dimensions
-        using (Image sourceImage = Image.Load(inputPath))
+        // Load the original SVG as XML
+        XDocument svgDoc = XDocument.Load(inputPath);
+
+        // Apply a custom dash pattern to all <path> elements
+        var pathElements = svgDoc.Descendants()
+                                 .Where(e => e.Name.LocalName.Equals("path", StringComparison.OrdinalIgnoreCase));
+
+        foreach (var pathElem in pathElements)
         {
-            int width = sourceImage.Width;
-            int height = sourceImage.Height;
+            // Set a dash pattern (e.g., 5 units dash, 5 units gap)
+            pathElem.SetAttributeValue("stroke-dasharray", "5,5");
 
-            // Create a new SVG canvas with the same size
-            int dpi = 96;
-            var svgGraphics = new SvgGraphics2D(width, height, dpi);
-
-            // Define a custom pen (stroke pattern can be customized via DashPattern if needed)
-            Pen customPen = new Pen(Color.Black, 2);
-            // Example for custom dash pattern (uncomment if supported):
-            // customPen.DashStyle = DashStyle.Custom;
-            // customPen.DashPattern = new float[] { 5, 3 };
-
-            // Create a path consisting of a rectangle shape
-            var figure = new Figure { IsClosed = true };
-            var path = new GraphicsPath();
-            path.AddFigure(figure);
-            var rectShape = new RectangleShape(new RectangleF(50, 50, width - 100, height - 100));
-            figure.AddShape(rectShape);
-
-            // Draw the path with the custom pen
-            svgGraphics.DrawPath(customPen, path);
-
-            // Finalize SVG image
-            using (SvgImage svgImage = svgGraphics.EndRecording())
+            // Ensure a stroke color is defined; default to black if missing
+            if (pathElem.Attribute("stroke") == null)
             {
-                // Prepare PDF export options with vector rasterization
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = width,
-                        PageHeight = height
-                    }
-                };
-
-                // Save the styled SVG as PDF
-                svgImage.Save(outputPath, pdfOptions);
+                pathElem.SetAttributeValue("stroke", "black");
             }
+        }
+
+        // Save the modified SVG to a temporary file
+        svgDoc.Save(tempSvgPath);
+
+        // Load the modified SVG with Aspose.Imaging
+        using (Image svgImage = Image.Load(tempSvgPath))
+        {
+            // Export to PDF
+            var pdfOptions = new PdfOptions();
+            svgImage.Save(outputPdfPath, pdfOptions);
         }
     }
 }

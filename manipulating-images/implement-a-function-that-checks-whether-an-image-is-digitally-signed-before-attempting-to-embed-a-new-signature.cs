@@ -6,49 +6,49 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Password used for digital signature operations
-        string password = "secret";
-
-        // Load the image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access digital signature methods
-            RasterImage raster = image as RasterImage;
-            if (raster == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Loaded image is not a raster image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Check if the image is already digitally signed
-            bool isSigned = raster.IsDigitalSigned(password);
-            if (isSigned)
-            {
-                Console.WriteLine("Image is already digitally signed.");
-            }
-            else
-            {
-                // Embed a new digital signature
-                raster.EmbedDigitalSignature(password);
+            // Ensure output directory exists (null‑safe)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+                Directory.CreateDirectory(outputDir);
 
-                // Save the modified image
-                raster.Save(outputPath);
-                Console.WriteLine("Digital signature embedded and image saved.");
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access digital signature methods
+                RasterImage raster = (RasterImage)image;
+
+                // Password for digital signature operations
+                string password = "secure123";
+
+                // Check if the image is already digitally signed
+                bool isSigned = raster.IsDigitalSigned(password);
+
+                if (!isSigned)
+                {
+                    // Embed a new digital signature
+                    raster.EmbedDigitalSignature(password);
+                }
+
+                // Save the (potentially) modified image
+                image.Save(outputPath);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

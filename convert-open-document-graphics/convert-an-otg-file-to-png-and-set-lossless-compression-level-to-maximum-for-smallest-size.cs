@@ -2,14 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample_converted.png";
+        string outputPath = @"C:\Images\output.png";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -24,20 +25,23 @@ class Program
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure PNG save options with maximum lossless compression
+            // Prepare PNG save options with maximum lossless compression
             var pngOptions = new PngOptions
             {
-                CompressionLevel = 9 // maximum compression (0-9)
+                CompressionLevel = 9,                     // Highest compression (0‑9)
+                // Optional: keep other defaults for lossless output
+                // Progressive = false,
+                // FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive,
             };
 
-            // Set up rasterization options for vector OTG content
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Configure rasterization of the vector OTG content
+            var otgRasterization = new OtgRasterizationOptions
             {
-                PageSize = image.Size // preserve original dimensions
+                PageSize = image.Size                     // Preserve original dimensions
             };
-            pngOptions.VectorRasterizationOptions = otgRasterOptions;
+            pngOptions.VectorRasterizationOptions = otgRasterization;
 
-            // Save the image as PNG using the configured options
+            // Save the image as PNG
             image.Save(outputPath, pngOptions);
         }
     }

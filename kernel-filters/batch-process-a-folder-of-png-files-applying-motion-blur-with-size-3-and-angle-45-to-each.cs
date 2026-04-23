@@ -2,55 +2,63 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories (relative to current directory)
-        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Get all PNG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-        foreach (string inputPath in files)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Prepare the output file path
-            string outputPath = Path.Combine(outputDirectory,
-                Path.GetFileNameWithoutExtension(inputPath) + "_blur.png");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image and apply the motion blur filter
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                RasterImage raster = (RasterImage)image;
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Apply motion blur with size 3, smooth factor 1.0, angle 45 degrees
-                raster.Filter(raster.Bounds,
-                    new MotionWienerFilterOptions(3, 1.0, 45.0));
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-                // Save the processed image as PNG using PngOptions
-                using (PngOptions options = new PngOptions())
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    options.Source = new FileCreateSource(outputPath, false);
-                    raster.Save(outputPath, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_motionblur.png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage raster = (RasterImage)image;
+
+                    double[,] kernel = ConvolutionFilter.GetBlurMotion(3, 45);
+                    var filterOptions = new ConvolutionFilterOptions(kernel);
+                    raster.Filter(raster.Bounds, filterOptions);
+
+                    using (var pngOptions = new PngOptions())
+                    {
+                        raster.Save(outputPath, pngOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

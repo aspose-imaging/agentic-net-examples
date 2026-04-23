@@ -7,32 +7,33 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = "input.tif";
+            string outputPath = "output.apng";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the multi‑page TIFF
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare APNG options with infinite looping (NumPlays = 0)
-            var apngOptions = new ApngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                NumPlays = 0
-                // DefaultFrameTime can be set here if a specific frame duration is required
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as animated APNG
-            image.Save(outputPath, apngOptions);
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑page TIFF
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save as an animated PNG with infinite looping (NumPlays = 0)
+                image.Save(outputPath, new ApngOptions { NumPlays = 0 });
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

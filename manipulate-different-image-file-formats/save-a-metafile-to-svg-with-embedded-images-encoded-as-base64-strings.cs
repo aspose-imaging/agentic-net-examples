@@ -4,22 +4,19 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-// Custom callback to embed raster resources as Base64 strings in the SVG
-class EmbeddedImageCallback : SvgResourceKeeperCallback
+class MySvgResourceKeeperCallback : SvgResourceKeeperCallback
 {
-    // Called when an image resource (e.g., bitmap) is ready for export.
-    // Setting useEmbeddedImage to true forces the resource to be embedded.
-    public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
-                                                string suggestedFileName, ref bool useEmbeddedImage)
+    public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType, string suggestedFileName, ref bool useEmbeddedImage)
     {
-        useEmbeddedImage = true;          // embed the image
-        return null;                      // no external file path needed
+        // Request embedding the image as Base64
+        useEmbeddedImage = true;
+        // No external file is needed
+        return null;
     }
 
-    // Called when the SVG document itself is ready.
-    // Returning null lets Aspose.Imaging handle the default saving.
     public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
     {
+        // No special handling for the SVG document itself
         return null;
     }
 }
@@ -28,40 +25,42 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.emf";
         string outputPath = @"C:\Images\sample.svg";
 
-        // Verify input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the metafile (EMF/WMF) and save it as SVG with embedded images
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare SVG options with a callback that embeds raster resources
-            var svgOptions = new SvgOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Callback = new EmbeddedImageCallback()
-            };
-
-            // Optional: set rasterization options to match the source size
-            if (image is VectorImage vectorImage)
-            {
-                svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = vectorImage.Size
-                };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save the image as SVG
-            image.Save(outputPath, svgOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the metafile
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure SVG options with embedded image callback
+                var svgOptions = new SvgOptions
+                {
+                    Callback = new MySvgResourceKeeperCallback(),
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
+                };
+
+                // Save as SVG with embedded images (Base64)
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.gif";
-        string outputPath = @"C:\temp\frame0.webp";
+        string inputPath = "input.gif";
+        string outputPath = "output/output.webp";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,19 +23,25 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the GIF image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure WebP options for lossless compression
-            var webpOptions = new WebPOptions
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
             {
-                Lossless = true,
-                // Export only the first frame (index 0)
-                MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(0, 1))
-            };
+                // Configure WebP options for lossless compression and select the first frame (index 0)
+                WebPOptions webpOptions = new WebPOptions
+                {
+                    Lossless = true,
+                    MultiPageOptions = new MultiPageOptions(new IntRange(0, 0))
+                };
 
-            // Save the selected frame as a WebP image
-            image.Save(outputPath, webpOptions);
+                // Save the selected frame as a lossless WebP image
+                image.Save(outputPath, webpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

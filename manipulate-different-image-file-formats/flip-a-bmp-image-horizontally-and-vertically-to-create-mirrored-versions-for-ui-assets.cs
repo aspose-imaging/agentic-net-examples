@@ -1,44 +1,44 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.bmp";
-        string outputHorizontalPath = "output_horizontal.bmp";
-        string outputVerticalPath = "output_vertical.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\source.bmp";
+        string horizontalOutputPath = @"C:\temp\output\source_horiz.bmp";
+        string verticalOutputPath = @"C:\temp\output\source_vert.bmp";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputHorizontalPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputVerticalPath));
-
-        using (Image imgH = Image.Load(inputPath))
-        {
-            imgH.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            BmpOptions bmpOptionsH = new BmpOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputHorizontalPath, false)
-            };
-            imgH.Save(outputHorizontalPath, bmpOptionsH);
-        }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        using (Image imgV = Image.Load(inputPath))
-        {
-            imgV.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            BmpOptions bmpOptionsV = new BmpOptions
+            // Create horizontal mirrored image
+            using (Image image = Image.Load(inputPath))
             {
-                Source = new FileCreateSource(outputVerticalPath, false)
-            };
-            imgV.Save(outputVerticalPath, bmpOptionsV);
+                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                Directory.CreateDirectory(Path.GetDirectoryName(horizontalOutputPath));
+                image.Save(horizontalOutputPath);
+            }
+
+            // Create vertical mirrored image
+            using (Image image = Image.Load(inputPath))
+            {
+                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                Directory.CreateDirectory(Path.GetDirectoryName(verticalOutputPath));
+                image.Save(verticalOutputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

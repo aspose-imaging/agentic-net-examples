@@ -10,24 +10,27 @@ class Program
         // Hardcoded input path
         string inputPath = @"C:\Images\sample.emf";
 
-        // Verify the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Retrieve and log dimensions
+                Console.WriteLine($"Width: {image.Width}");
+                Console.WriteLine($"Height: {image.Height}");
+            }
         }
-
-        // Load the EMF image and retrieve dimensions
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to EmfImage to access Width and Height properties
-            EmfImage emfImage = (EmfImage)image;
-            int width = emfImage.Width;
-            int height = emfImage.Height;
-
-            // Log the dimensions
-            Console.WriteLine($"Width: {width}");
-            Console.WriteLine($"Height: {height}");
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

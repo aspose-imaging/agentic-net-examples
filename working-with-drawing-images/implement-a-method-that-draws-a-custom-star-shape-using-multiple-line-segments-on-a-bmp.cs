@@ -6,60 +6,56 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output BMP file path (hardcoded)
+        // Hardcoded output path
         string outputPath = @"C:\temp\star.bmp";
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Image dimensions
-        int width = 500;
-        int height = 500;
-
-        // Configure BMP options
+        // Create BMP options with a file source
         BmpOptions bmpOptions = new BmpOptions();
         bmpOptions.BitsPerPixel = 24;
         bmpOptions.Source = new FileCreateSource(outputPath, false);
 
+        // Define image size
+        int width = 500;
+        int height = 500;
+
         // Create the image canvas
         using (Image image = Image.Create(bmpOptions, width, height))
         {
-            // Initialize graphics for drawing
+            // Initialize graphics
             Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.Black); // background color
 
-            // Parameters for a 5‑point star
-            double centerX = width / 2.0;
-            double centerY = height / 2.0;
-            double outerRadius = 200;
-            double innerRadius = 80;
+            // Clear background
+            graphics.Clear(Color.White);
 
-            // Compute star vertices (10 points alternating outer/inner)
-            Point[] starPoints = new Point[10];
-            for (int i = 0; i < 10; i++)
+            // Star parameters
+            int centerX = width / 2;
+            int centerY = height / 2;
+            int outerRadius = 200;
+            int innerRadius = 80;
+            int pointsCount = 5;
+
+            // Calculate star vertices
+            Point[] starPoints = new Point[pointsCount * 2];
+            double angleStep = Math.PI / pointsCount;
+            for (int i = 0; i < pointsCount * 2; i++)
             {
-                double angleDeg = 18 + i * 36; // start at 18°
-                double angleRad = Math.PI * angleDeg / 180.0;
                 double radius = (i % 2 == 0) ? outerRadius : innerRadius;
-                int x = (int)(centerX + radius * Math.Cos(angleRad));
-                int y = (int)(centerY - radius * Math.Sin(angleRad));
+                double angle = i * angleStep - Math.PI / 2; // start at top
+                int x = centerX + (int)(radius * Math.Cos(angle));
+                int y = centerY + (int)(radius * Math.Sin(angle));
                 starPoints[i] = new Point(x, y);
             }
 
-            // Pen for drawing the star
-            Pen pen = new Pen(Color.Yellow, 2);
+            // Draw the star using a pen
+            Pen starPen = new Pen(Color.Gold, 3);
+            graphics.DrawPolygon(starPen, starPoints);
 
-            // Draw lines between consecutive vertices to form the star
-            for (int i = 0; i < 10; i++)
-            {
-                Point start = starPoints[i];
-                Point end = starPoints[(i + 1) % 10];
-                graphics.DrawLine(pen, start, end);
-            }
-
-            // Save the image (output file already bound to the source)
+            // Save the image (file is already bound to outputPath)
             image.Save();
         }
     }

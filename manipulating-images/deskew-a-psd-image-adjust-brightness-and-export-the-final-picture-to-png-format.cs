@@ -8,29 +8,35 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.psd";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.psd";
+            string outputPath = "output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            raster.NormalizeAngle(false, Color.LightGray);
-            raster.AdjustBrightness(30);
-
-            var pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, pngOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                raster.NormalizeAngle(false, Color.LightGray);
+                raster.AdjustBrightness(30);
+
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

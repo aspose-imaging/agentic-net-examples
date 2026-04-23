@@ -2,18 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = "input.cmx";
+        string outputPath = "output.jpg";
 
-        // Validate input file existence
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,29 +20,24 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrEmpty(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
 
-        // Load the CMX vector image
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+        // Load the CMX image
+        using (Image image = Image.Load(inputPath))
         {
             // Configure JPEG options with progressive compression
-            using (JpegOptions jpegOptions = new JpegOptions())
+            JpegOptions jpegOptions = new JpegOptions
             {
-                jpegOptions.CompressionType = JpegCompressionMode.Progressive;
-                jpegOptions.Quality = 90;
+                CompressionType = JpegCompressionMode.Progressive,
+                Quality = 90 // optional quality setting
+            };
 
-                // Set vector rasterization options based on the CMX image size
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = cmxImage.Width,
-                    PageHeight = cmxImage.Height
-                };
-                jpegOptions.VectorRasterizationOptions = vectorOptions;
-
-                // Save the rasterized image as JPEG
-                cmxImage.Save(outputPath, jpegOptions);
-            }
+            // Save as JPEG
+            image.Save(outputPath, jpegOptions);
         }
     }
 }

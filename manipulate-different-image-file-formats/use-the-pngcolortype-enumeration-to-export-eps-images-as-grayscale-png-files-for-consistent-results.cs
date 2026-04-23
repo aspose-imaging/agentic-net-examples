@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -10,37 +9,38 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample_grayscale.png";
+        string inputPath = "sample.eps";
+        string outputPath = "sample_grayscale.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS image
-        using (Image image = Image.Load(inputPath))
-        {
-            var epsImage = (EpsImage)image;
-
-            // Configure PNG export options for grayscale
-            using (var options = new PngOptions())
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                options.ColorType = PngColorType.Grayscale;
-                options.VectorRasterizationOptions = new EpsRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PNG options to use grayscale color type
+                var pngOptions = new PngOptions
                 {
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height
+                    ColorType = PngColorType.Grayscale
                 };
 
-                // Save as grayscale PNG
-                epsImage.Save(outputPath, options);
+                // Save the image as a grayscale PNG
+                image.Save(outputPath, pngOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

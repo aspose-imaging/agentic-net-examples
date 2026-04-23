@@ -1,56 +1,72 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input CDR file paths
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\doc1.cdr",
-            @"C:\Images\doc2.cdr",
-            @"C:\Images\doc3.cdr"
-        };
+            // Hardcoded input CDR file paths (preserve order)
+            string[] inputPaths = {
+                @"C:\Input\doc1.cdr",
+                @"C:\Input\doc2.cdr",
+                @"C:\Input\doc3.cdr"
+            };
 
-        // Hardcoded output PDF path
-        string outputPath = @"C:\Images\Combined.pdf";
+            // Hardcoded output PDF path
+            string outputPath = @"C:\Output\Combined.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create PDF options with CDR rasterization settings
-        PdfOptions pdfOptions = new PdfOptions();
-        CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-        {
-            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-            SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-            Positioning = Aspose.Imaging.ImageOptions.PositioningTypes.DefinedByDocument
-        };
-        pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-        // Open output stream once and append each CDR document as PDF pages
-        using (FileStream outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-        {
-            foreach (string inputPath in inputPaths)
+            // Validate each input file exists
+            foreach (var inputPath in inputPaths)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
-
-                // Load CDR image
-                using (Image cdrImage = Image.Load(inputPath))
-                {
-                    // Save the CDR image (all its pages) to the PDF stream
-                    cdrImage.Save(outStream, pdfOptions);
-                }
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load each CDR document as an Image
+            var images = new List<Image>();
+            foreach (var inputPath in inputPaths)
+            {
+                Image img = Image.Load(inputPath);
+                images.Add(img);
+            }
+
+            // Combine loaded images into a multipage image
+            using (Image combined = Image.Create(images.ToArray(), true))
+            {
+                // Configure PDF options with vector rasterization settings
+                var pdfOptions = new PdfOptions();
+                var rasterOptions = new CdrRasterizationOptions
+                {
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument
+                };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save combined PDF
+                combined.Save(outputPath, pdfOptions);
+            }
+
+            // Dispose individual images
+            foreach (var img in images)
+            {
+                img.Dispose();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

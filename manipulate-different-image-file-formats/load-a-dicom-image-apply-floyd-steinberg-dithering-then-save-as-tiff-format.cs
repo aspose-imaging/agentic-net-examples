@@ -10,33 +10,41 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.tif";
+        string inputPath = Path.Combine("Input", "sample.dcm");
+        string outputPath = Path.Combine("Output", "sample.tif");
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the DICOM image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to DicomImage to access DICOM-specific methods
-            DicomImage dicomImage = (DicomImage)image;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Apply Floyd‑Steinberg dithering with 1‑bit palette
-            dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to DicomImage for DICOM-specific operations
+                DicomImage dicomImage = (DicomImage)image;
 
-            // Prepare TIFF save options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Apply Floyd‑Steinberg dithering with a 1‑bit palette
+                dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
 
-            // Save the processed image as TIFF
-            dicomImage.Save(outputPath, tiffOptions);
+                // Prepare TIFF save options
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    // Save the processed image as TIFF
+                    dicomImage.Save(outputPath, tiffOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

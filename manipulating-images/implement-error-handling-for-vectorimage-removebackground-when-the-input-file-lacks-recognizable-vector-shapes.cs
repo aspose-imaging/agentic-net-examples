@@ -21,33 +21,38 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Check that the loaded image is a vector image
-            if (image is VectorImage vectorImage)
+            // Load the image
+            using (Image image = Image.Load(inputPath))
             {
+                // Check if the loaded image is a vector image
+                if (!(image is VectorImage vectorImage))
+                {
+                    Console.Error.WriteLine("The provided file is not a vector image.");
+                    return;
+                }
+
+                // Attempt to remove the background
                 try
                 {
-                    // Attempt to remove the background
                     vectorImage.RemoveBackground();
                 }
                 catch (Exception ex)
                 {
                     // Handle cases where background removal fails (e.g., no recognizable vector shapes)
-                    Console.Error.WriteLine($"RemoveBackground failed: {ex.Message}");
-                    return;
+                    Console.Error.WriteLine($"Background removal failed: {ex.Message}");
+                    // Continue without background removal
                 }
 
-                // Save the processed image as PNG
+                // Save the result as a raster image (PNG)
                 var pngOptions = new PngOptions();
                 vectorImage.Save(outputPath, pngOptions);
             }
-            else
-            {
-                Console.Error.WriteLine("The provided file is not a vector image.");
-                return;
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

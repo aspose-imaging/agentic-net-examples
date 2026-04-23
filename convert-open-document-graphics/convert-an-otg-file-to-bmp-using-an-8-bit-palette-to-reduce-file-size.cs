@@ -3,51 +3,48 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.otg";
-        string outputPath = @"C:\temp\output_8bit.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.otg";
+        string outputPath = @"C:\Images\output.bmp";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        using (Image otgImage = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access pixel data for palette generation
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Configure BMP save options for 8‑bit palette
-            BmpOptions saveOptions = new BmpOptions
+            // Prepare BMP save options with 8‑bit palette
+            BmpOptions bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 8,
-                // Generate a palette that best matches the source image (max 256 colors)
-                Palette = ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256),
-                Compression = BitmapCompression.Rgb,
-                ResolutionSettings = new ResolutionSetting(96.0, 96.0)
+                Compression = Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb
             };
 
-            // Set OTG rasterization options so the vector content is rasterized correctly
-            OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+            // If the loaded image is a raster image, generate a close 8‑bit palette
+            if (otgImage is RasterImage raster)
             {
-                PageSize = image.Size
-            };
-            saveOptions.VectorRasterizationOptions = otgRasterization;
+                bmpOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
+            }
+            else
+            {
+                // Fallback to a standard 8‑bit grayscale palette
+                bmpOptions.Palette = ColorPaletteHelper.Create8BitGrayscale(false);
+            }
 
-            // Save the image as an 8‑bit BMP
-            image.Save(outputPath, saveOptions);
+            // Save the image as BMP using the specified options
+            otgImage.Save(outputPath, bmpOptions);
         }
     }
 }

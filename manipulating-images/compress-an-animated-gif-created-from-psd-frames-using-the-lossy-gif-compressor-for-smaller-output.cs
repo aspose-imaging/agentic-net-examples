@@ -9,45 +9,70 @@ class Program
 {
     static void Main()
     {
-        string[] inputPaths = { "frame1.psd", "frame2.psd", "frame3.psd" };
-        string outputPath = "Output\\compressed.gif";
-
-        foreach (var path in inputPaths)
+        try
         {
-            if (!File.Exists(path))
+            // Hardcoded input directory containing PSD frames and output file path
+            string inputDirectory = @"C:\Input\PsdFrames";
+            string outputPath = @"C:\Output\animated_lossy.gif";
+
+            // Verify input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {path}");
+                Console.Error.WriteLine($"Directory not found: {inputDirectory}");
                 return;
             }
-        }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage firstFrame = (RasterImage)Image.Load(inputPaths[0]))
-        {
-            using (GifFrameBlock firstBlock = new GifFrameBlock((ushort)firstFrame.Width, (ushort)firstFrame.Height))
+            // Get all PSD files in the directory
+            string[] psdFiles = Directory.GetFiles(inputDirectory, "*.psd");
+            if (psdFiles.Length == 0)
             {
-                using (GifImage gif = new GifImage(firstBlock))
-                {
-                    Graphics graphics = new Graphics(gif.ActiveFrame);
-                    graphics.DrawImage(firstFrame, new Rectangle(0, 0, firstFrame.Width, firstFrame.Height));
+                Console.Error.WriteLine("No PSD files found in the input directory.");
+                return;
+            }
 
-                    for (int i = 1; i < inputPaths.Length; i++)
+            // Load the first frame and create the GIF image
+            string firstFile = psdFiles[0];
+            if (!File.Exists(firstFile))
+            {
+                Console.Error.WriteLine($"File not found: {firstFile}");
+                return;
+            }
+
+            using (RasterImage firstImage = (RasterImage)Image.Load(firstFile))
+            using (GifImage gifImage = new GifImage(new GifFrameBlock(firstImage)))
+            {
+                // Add remaining frames to the GIF
+                for (int i = 1; i < psdFiles.Length; i++)
+                {
+                    string framePath = psdFiles[i];
+                    if (!File.Exists(framePath))
                     {
-                        using (RasterImage frame = (RasterImage)Image.Load(inputPaths[i]))
-                        {
-                            gif.AddPage(frame);
-                        }
+                        Console.Error.WriteLine($"File not found: {framePath}");
+                        continue; // skip missing file
                     }
 
-                    GifOptions options = new GifOptions
+                    using (RasterImage frameImage = (RasterImage)Image.Load(framePath))
                     {
-                        MaxDiff = 80
-                    };
-
-                    gif.Save(outputPath, options);
+                        gifImage.AddPage(frameImage);
+                    }
                 }
+
+                // Prepare lossy GIF save options
+                var saveOptions = new GifOptions
+                {
+                    MaxDiff = 80 // enable lossy compression
+                };
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the animated GIF with lossy compression
+                gifImage.Save(outputPath, saveOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

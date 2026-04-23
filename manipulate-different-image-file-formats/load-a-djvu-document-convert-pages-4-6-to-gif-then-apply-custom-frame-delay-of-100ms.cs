@@ -2,32 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.djvu";
-        string outputPath = "Output/pages_4_6.gif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\pages_4_6.gif";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-        {
-            using (GifOptions gifOptions = new GifOptions())
+            if (!File.Exists(inputPath))
             {
-                // Export pages 4‑6 (zero‑based indexes 3,4,5)
-                gifOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 3, 4, 5 });
-                djvu.Save(outputPath, gifOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                using (DjvuImage djvu = new DjvuImage(stream))
+                {
+                    int[] pages = new int[] { 4, 5, 6 };
+                    var multiPageOptions = new DjvuMultiPageOptions(pages);
+                    multiPageOptions.Mode = MultiPageMode.TimeInterval;
+                    multiPageOptions.TimeInterval = new TimeInterval(0, 100);
+
+                    var gifOptions = new GifOptions
+                    {
+                        FullFrame = true,
+                        MultiPageOptions = multiPageOptions
+                    };
+
+                    djvu.Save(outputPath, gifOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

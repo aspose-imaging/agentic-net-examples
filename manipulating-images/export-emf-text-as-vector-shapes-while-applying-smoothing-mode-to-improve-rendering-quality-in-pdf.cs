@@ -8,45 +8,52 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths.
-        string inputPath = @"c:\temp\test.emf";
-        string outputPath = @"c:\temp\test.output.pdf";
-
-        // Verify that the input file exists.
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.emf";
+            string outputPath = @"C:\Images\output.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            {
+                // Configure rasterization options for EMF
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                {
+                    // Preserve original dimensions
+                    PageSize = emfImage.Size,
+                    // Apply anti-aliasing for smoother rendering
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                    // Optional background color
+                    BackgroundColor = Aspose.Imaging.Color.White
+                };
+
+                // Improve text rendering quality
+                rasterOptions.TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias;
+
+                // Set up PDF save options with vector rasterization
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as PDF; text will be rendered as vector shapes with smoothing applied
+                emfImage.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure the output directory exists.
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image.
-        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure EMF rasterization options.
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-            {
-                // Keep the original page size.
-                PageSize = emfImage.Size,
-
-                // Apply anti‑aliasing to improve rendering quality.
-                SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-
-                // Use automatic render mode.
-                RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto
-            };
-
-            // Set up PDF save options and attach the rasterization options.
-            PdfOptions pdfOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the EMF as a PDF. Text will be rendered as vector shapes because
-            // we are using vector rasterization options.
-            emfImage.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

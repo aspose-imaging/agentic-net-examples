@@ -8,39 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu file path
-        string inputPath = @"C:\temp\sample.djvu";
+        // Hardcoded input and output directory
+        string inputPath = @"c:\temp\sample.djvu";
+        string outputDir = @"c:\temp\";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Hardcoded output directory
-        string outputDir = @"C:\temp\output";
-
-        // Open the DjVu file as a stream
-        using (Stream stream = File.OpenRead(inputPath))
-        {
-            // Load the DjVu document
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Iterate through each page in the document
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Open the DjVu file as a stream
+            using (Stream stream = File.OpenRead(inputPath))
+            {
+                // Load DjVu image from the stream
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Build output file name: sample.1.bmp, sample.2.bmp, etc.
-                    string fileName = $"{Path.GetFileNameWithoutExtension(inputPath)}.{djvuPage.PageNumber}.bmp";
-                    string outputPath = Path.Combine(outputDir, fileName);
+                    // Iterate through each page
+                    foreach (DjvuPage djvuPage in djvuImage.Pages)
+                    {
+                        // Build output file path for BMP
+                        string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.bmp");
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as BMP using default resolution
-                    djvuPage.Save(outputPath, new BmpOptions());
+                        // Save the page as BMP using default resolution
+                        djvuPage.Save(outputPath, new BmpOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

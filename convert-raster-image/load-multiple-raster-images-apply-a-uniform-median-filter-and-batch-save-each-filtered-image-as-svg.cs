@@ -1,31 +1,26 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
-
-        // List of raster image file names to process
-        string[] inputFiles = new[]
+        // Hardcoded input file paths
+        string[] inputPaths = new[]
         {
-            "image1.png",
-            "image2.jpg",
-            "image3.bmp"
+            @"C:\Images\sample1.png",
+            @"C:\Images\sample2.jpg",
+            @"C:\Images\sample3.bmp"
         };
 
-        // Ensure the output directory exists (unconditional per requirements)
-        Directory.CreateDirectory(outputFolder);
+        // Output directory (hardcoded)
+        string outputDir = @"C:\Images\FilteredSvg";
 
-        foreach (string fileName in inputFiles)
+        foreach (string inputPath in inputPaths)
         {
-            string inputPath = Path.Combine(inputFolder, fileName);
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -33,25 +28,23 @@ class Program
                 return;
             }
 
-            // Determine output SVG path
-            string outputFileName = Path.GetFileNameWithoutExtension(fileName) + ".svg";
-            string outputPath = Path.Combine(outputFolder, outputFileName);
-
-            // Ensure the directory for the output file exists (unconditional)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a median filter of size 5 to the entire image
+                // Apply a median filter with size 5 to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
+                // Prepare output SVG path
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Save the filtered image as SVG
-                SvgOptions svgOptions = new SvgOptions();
-                rasterImage.Save(outputPath, svgOptions);
+                rasterImage.Save(outputPath, new SvgOptions());
             }
         }
     }

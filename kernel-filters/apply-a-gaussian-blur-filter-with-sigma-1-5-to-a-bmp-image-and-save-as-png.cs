@@ -19,18 +19,19 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
         // Load the BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering
+            // Cast to RasterImage to access filtering functionality
             RasterImage rasterImage = (RasterImage)image;
 
-            // Apply Gaussian blur with kernel size 5 (odd) and sigma 1.5
-            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 1.5));
+            // Apply Gaussian blur with kernel size 5 and sigma 1.5 to the whole image
+            var blurOptions = new GaussianBlurFilterOptions(5, 1.5);
+            rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
-            // Save the result as PNG
+            // Save the result as PNG (format inferred from file extension)
             rasterImage.Save(outputPath);
         }
     }

@@ -4,40 +4,44 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.gif";
-        string outputPath = "output.webp";
+        string inputPath = "Input\\animation.gif";
+        string outputPath = "Output\\frame5.webp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the GIF image
-        using (GifImage gif = (GifImage)Image.Load(inputPath))
-        {
-            // Check that the GIF has at least five frames
-            if (gif.PageCount < 5)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The GIF does not contain a fifth frame.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Select the fifth frame (zero‑based index)
-            gif.ActiveFrame = (GifFrameBlock)gif.Pages[4];
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the selected frame as a lossless WebP file
-            gif.Save(outputPath, new WebPOptions { Lossless = true });
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            {
+                if (gif.PageCount < 5)
+                {
+                    Console.Error.WriteLine("GIF does not contain a fifth frame.");
+                    return;
+                }
+
+                // Select the fifth frame (zero‑based index 4)
+                gif.ActiveFrame = (GifFrameBlock)gif.Pages[4];
+
+                // Save the selected frame as a lossless WebP image
+                WebPOptions options = new WebPOptions { Lossless = true };
+                gif.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

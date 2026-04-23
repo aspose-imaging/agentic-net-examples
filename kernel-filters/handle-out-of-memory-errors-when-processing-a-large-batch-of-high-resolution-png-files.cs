@@ -2,82 +2,66 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.CoreExceptions.ImageFormats;
-using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\Input\highres1.png",
-            @"C:\Images\Input\highres2.png",
-            @"C:\Images\Input\highres3.png"
-        };
+            // Hardcoded input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-        string[] outputPaths = new string[]
-        {
-            @"C:\Images\Output\highres1_processed.png",
-            @"C:\Images\Output\highres2_processed.png",
-            @"C:\Images\Output\highres3_processed.png"
-        };
-
-        for (int i = 0; i < inputPaths.Length; i++)
-        {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Validate input directory
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            try
+            // Validate (or create) output directory
+            if (!Directory.Exists(outputDirectory))
             {
-                // Load the PNG image
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Get all PNG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            foreach (string inputPath in files)
+            {
+                // Check that the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Determine output path
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Set memory limit via BufferSizeHint (e.g., 100 MB)
+                PngOptions saveOptions = new PngOptions
+                {
+                    BufferSizeHint = 100
+                };
+
+                // Load, process, and save the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Example processing: convert to grayscale if it's a PNG
-                    if (image is PngImage pngImage)
-                    {
-                        pngImage.Grayscale();
-                    }
-
-                    // Set memory limit for saving operation
-                    PngOptions saveOptions = new PngOptions
-                    {
-                        BufferSizeHint = 200 // limit internal buffers to 200 MB
-                    };
-
-                    // Save the processed image
+                    // Example processing could be added here (e.g., resize, rotate)
                     image.Save(outputPath, saveOptions);
                 }
             }
-            catch (OutOfMemoryException ex)
-            {
-                Console.Error.WriteLine($"Out of memory while processing {inputPath}: {ex.Message}");
-                // Continue with next file
-            }
-            catch (ImageSaveException ex)
-            {
-                Console.Error.WriteLine($"Failed to save {outputPath}: {ex.Message}");
-            }
-            catch (PngImageException ex)
-            {
-                Console.Error.WriteLine($"PNG processing error for {inputPath}: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Unexpected error for {inputPath}: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

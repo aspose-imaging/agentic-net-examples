@@ -2,47 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output/output.png";
+        string inputPath = @"C:\Images\animation_input.webp";
+        string outputPath = @"C:\Images\animation_resized.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the animated WebP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // If the loaded image is a WebPImage, resize it
-            if (image is WebPImage webp)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int newWidth = webp.Width / 2;
-                int newHeight = webp.Height / 2;
-
-                // Resize using high-quality resampling
-                webp.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
-
-                // Save the resized animation as APNG
-                webp.Save(outputPath, new ApngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            else
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the animated WebP image
+            using (Image image = Image.Load(inputPath))
             {
-                // Fallback: save without resizing if not a WebPImage
+                // Calculate new dimensions (half of original)
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+
+                // Resize the image (applies to all frames)
+                image.Resize(newWidth, newHeight);
+
+                // Save as APNG (animated PNG) using default options
                 image.Save(outputPath, new ApngOptions());
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,18 +8,27 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define relative input and output directories
-        string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-        string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+        // Set up base, input, and output directories
+        string baseDir = Directory.GetCurrentDirectory();
+        string inputDirectory = Path.Combine(baseDir, "Input");
+        string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure the output directory exists
+        // Ensure input directory exists; if not, create and exit
+        if (!Directory.Exists(inputDirectory))
+        {
+            Directory.CreateDirectory(inputDirectory);
+            Console.WriteLine($"Input directory created at: {inputDirectory}. Add WMF files and rerun.");
+            return;
+        }
+
+        // Ensure output directory exists
         if (!Directory.Exists(outputDirectory))
         {
             Directory.CreateDirectory(outputDirectory);
         }
 
-        // Get all WMF files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
+        // Get all files in the input directory
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
         foreach (string inputPath in files)
         {
@@ -30,8 +39,9 @@ class Program
                 return;
             }
 
-            // Construct the output PNG path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+            // Prepare output path with .png extension
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
             // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -39,24 +49,24 @@ class Program
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to WmfImage to access size
-                var wmfImage = (WmfImage)image;
+                // Cast to WmfImage for vector rasterization options
+                WmfImage wmfImage = (WmfImage)image;
 
-                // Set rasterization options with a uniform white background
+                // Configure rasterization options with a uniform white background
                 var rasterOptions = new WmfRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = wmfImage.Size
                 };
 
-                // Configure PNG save options
+                // Set PNG save options and attach rasterization options
                 var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save the rasterized PNG image
-                image.Save(outputPath, pngOptions);
+                wmfImage.Save(outputPath, pngOptions);
             }
         }
     }

@@ -1,44 +1,50 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Hardcoded input directory and output directory
-    private const string InputDirectory = @"C:\Images\Input\";
-    private const string OutputDirectory = @"C:\Images\Output\";
+    // Hard‑coded input files (WebP) and output directory (GIF)
+    private static readonly string[] InputFiles = new[]
+    {
+        @"c:\temp\input1.webp",
+        @"c:\temp\input2.webp",
+        @"c:\temp\input3.webp"
+    };
+
+    private const string OutputDirectory = @"c:\temp\output";
 
     static async Task Main()
     {
-        // Example list of WebP files to convert
-        string[] webpFiles = new[]
-        {
-            Path.Combine(InputDirectory, "image1.webp"),
-            Path.Combine(InputDirectory, "image2.webp"),
-            Path.Combine(InputDirectory, "image3.webp")
-        };
+        // Ensure the output directory exists (rule 3)
+        Directory.CreateDirectory(OutputDirectory);
 
-        // Create a cancellation token source that can be triggered by the user
+        // Cancellation token source to allow UI‑style cancellation
         using var cts = new CancellationTokenSource();
 
-        // Optional: cancel after a fixed time (e.g., 10 seconds) to simulate UI cancellation
-        // Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(_ => cts.Cancel());
-
-        // Listen for a key press to cancel
-        Task.Run(() =>
+        // Example: cancel after 5 seconds (simulating a user cancel action)
+        _ = Task.Run(async () =>
         {
-            Console.WriteLine("Press 'c' to cancel the batch conversion...");
-            while (Console.ReadKey(true).KeyChar != 'c') { }
+            await Task.Delay(TimeSpan.FromSeconds(5));
             cts.Cancel();
         });
 
-        // Process all files asynchronously
-        var conversionTasks = webpFiles.Select(inputPath => ConvertWebPToGifAsync(inputPath, cts.Token));
+        // Start batch conversion tasks
+        var conversionTasks = new Task[InputFiles.Length];
+        for (int i = 0; i < InputFiles.Length; i++)
+        {
+            string inputPath = InputFiles[i];
+            string outputPath = Path.Combine(OutputDirectory,
+                Path.GetFileNameWithoutExtension(inputPath) + ".gif");
+
+            conversionTasks[i] = ConvertWebPToGifAsync(inputPath, outputPath, cts.Token);
+        }
+
+        // Await all tasks; handle cancellation gracefully
         try
         {
             await Task.WhenAll(conversionTasks);
@@ -49,42 +55,33 @@ class Program
         }
     }
 
-    private static async Task ConvertWebPToGifAsync(string inputPath, CancellationToken token)
+    // Asynchronous conversion of a single WebP file to GIF with cancellation support
+    private static async Task ConvertWebPToGifAsync(string inputPath, string outputPath, CancellationToken token)
     {
-        // Verify input file exists
+        // Input file existence check (rule 2)
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Prepare output path (same file name with .gif extension)
-        string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
-        string outputPath = Path.Combine(OutputDirectory, outputFileName);
-
-        // Ensure output directory exists
+        // Ensure output directory exists (rule 3)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Check for cancellation before starting heavy work
-        if (token.IsCancellationRequested)
-        {
-            token.ThrowIfCancellationRequested();
-        }
-
-        // Load the WebP image and save as GIF inside a background task
+        // Run the conversion on a thread‑pool thread to avoid blocking the UI thread
         await Task.Run(() =>
         {
-            // Respect cancellation inside the task
+            // Observe cancellation before starting heavy work
             token.ThrowIfCancellationRequested();
 
-            // Load the WebP image (using generic Image.Load for flexibility)
-            using (Image image = Image.Load(inputPath))
+            // Load WebP image (using rule‑based creation)
+            using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Prepare GIF save options (default options are sufficient for basic conversion)
-                var gifOptions = new GifOptions();
+                // Observe cancellation again before saving
+                token.ThrowIfCancellationRequested();
 
-                // Save the image as GIF
-                image.Save(outputPath, gifOptions);
+                // Save as GIF using Aspose.Imaging GIF options
+                webPImage.Save(outputPath, new GifOptions());
             }
         }, token);
     }

@@ -2,61 +2,59 @@ using System;
 using System.IO;
 using System.Diagnostics;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\highres.png";
-        string outputPath = @"C:\Images\highres_gaussian.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
+
+            // Load the high‑resolution PNG
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                // Measure memory before applying the filter
+                long memoryBefore = GC.GetTotalMemory(true);
+                Stopwatch sw = Stopwatch.StartNew();
+
+                // Apply a 7×7 Gaussian blur (size 7, sigma 1.0)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(7, 1.0));
+
+                sw.Stop();
+                // Measure memory after applying the filter
+                long memoryAfter = GC.GetTotalMemory(true);
+
+                // Save the filtered image as PNG
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
+
+                // Output benchmark results
+                Console.WriteLine($"Filter time: {sw.ElapsedMilliseconds} ms");
+                Console.WriteLine($"Memory before: {memoryBefore} bytes");
+                Console.WriteLine($"Memory after: {memoryAfter} bytes");
+                Console.WriteLine($"Memory increase: {memoryAfter - memoryBefore} bytes");
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Record initial memory usage
-        long memoryBefore = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
-        long gcMemoryBefore = GC.GetTotalMemory(forceFullCollection: true);
-
-        // Load the high‑resolution PNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Prepare Gaussian blur filter with a 7x7 kernel
-            // Size must be odd; sigma chosen as 2.0 for noticeable blur
-            var gaussianOptions = new GaussianBlurFilterOptions(7, 2.0);
-
-            // Benchmark the filter operation
-            Stopwatch sw = Stopwatch.StartNew();
-            rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
-            sw.Stop();
-
-            // Save the processed image
-            rasterImage.Save(outputPath);
-
-            // Output timing information
-            Console.WriteLine($"Gaussian blur applied in {sw.ElapsedMilliseconds} ms");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Record final memory usage
-        long memoryAfter = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
-        long gcMemoryAfter = GC.GetTotalMemory(forceFullCollection: true);
-
-        // Report memory consumption
-        Console.WriteLine($"Allocated memory (Aspose cache) before: {memoryBefore} bytes");
-        Console.WriteLine($"Allocated memory (Aspose cache) after : {memoryAfter} bytes");
-        Console.WriteLine($"GC total memory before: {gcMemoryBefore} bytes");
-        Console.WriteLine($"GC total memory after : {gcMemoryAfter} bytes");
     }
 }

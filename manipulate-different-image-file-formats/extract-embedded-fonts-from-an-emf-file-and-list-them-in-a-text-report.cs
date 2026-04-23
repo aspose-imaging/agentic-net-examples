@@ -8,46 +8,51 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "fonts_report.txt";
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\font_report.txt";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the EMF file as a MetaImage
-        using (MetaImage image = (MetaImage)Image.Load(inputPath))
-        {
-            // Retrieve used and missed fonts
-            string[] usedFonts = image.GetUsedFonts();
-            string[] missedFonts = image.GetMissedFonts();
-
-            // Write the report
-            using (StreamWriter writer = new StreamWriter(outputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                writer.WriteLine($"Font report for: {Path.GetFileName(inputPath)}");
-                writer.WriteLine();
-                writer.WriteLine("Used fonts:");
-                foreach (string font in usedFonts)
-                {
-                    writer.WriteLine(font);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                writer.WriteLine();
-                writer.WriteLine("Missed fonts:");
-                foreach (string font in missedFonts)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF file as a MetaImage
+            using (MetaImage image = (MetaImage)Image.Load(inputPath))
+            {
+                // Retrieve used and missed fonts
+                string[] usedFonts = image.GetUsedFonts();
+                string[] missedFonts = image.GetMissedFonts();
+
+                // Write the report
+                using (StreamWriter writer = new StreamWriter(outputPath))
                 {
-                    writer.WriteLine(font);
+                    writer.WriteLine("=== Used Fonts ===");
+                    foreach (string font in usedFonts)
+                    {
+                        writer.WriteLine(font);
+                    }
+
+                    writer.WriteLine();
+                    writer.WriteLine("=== Missed Fonts ===");
+                    foreach (string font in missedFonts)
+                    {
+                        writer.WriteLine(font);
+                    }
                 }
             }
-        }
 
-        Console.WriteLine($"Font report written to: {outputPath}");
+            Console.WriteLine($"Font report generated at: {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

@@ -5,60 +5,43 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
+
+            // Get all TIFF files in the input directory
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+
+            foreach (string inputPath in tiffFiles)
+            {
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the output path with the same filename but .jpg extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image and save it as JPEG
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, new JpegOptions());
+                }
+            }
         }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
+        catch (Exception ex)
         {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Process only TIFF files
-            string ext = Path.GetExtension(inputPath);
-            if (!ext.Equals(".tif", StringComparison.OrdinalIgnoreCase) &&
-                !ext.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Prepare output path preserving original filename
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load TIFF and save as JPEG
-            using (Image image = Image.Load(inputPath))
-            using (JpegOptions jpegOptions = new JpegOptions())
-            {
-                image.Save(outputPath, jpegOptions);
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

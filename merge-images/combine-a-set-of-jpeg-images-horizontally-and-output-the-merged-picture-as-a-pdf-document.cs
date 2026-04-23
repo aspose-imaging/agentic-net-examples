@@ -15,12 +15,15 @@ class Program
         // Hardcoded input JPEG files
         string[] inputPaths = new string[]
         {
-            "input1.jpg",
-            "input2.jpg",
-            "input3.jpg"
+            "image1.jpg",
+            "image2.jpg",
+            "image3.jpg"
         };
 
-        // Validate each input file exists
+        // Hardcoded output PDF file
+        string outputPath = "merged.pdf";
+
+        // Validate input files
         foreach (string path in inputPaths)
         {
             if (!File.Exists(path))
@@ -30,14 +33,8 @@ class Program
             }
         }
 
-        // Hardcoded output PDF file
-        string outputPath = "output/merged.pdf";
-        // Temporary JPEG file used as canvas source
-        string tempPath = "temp/temp.jpg";
-
-        // Ensure output directories exist
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
         // Collect sizes of all input images
         List<Size> sizes = new List<Size>();
@@ -50,16 +47,16 @@ class Program
         }
 
         // Calculate canvas dimensions for horizontal merge
-        int totalWidth = sizes.Sum(s => s.Width);
-        int maxHeight = sizes.Max(s => s.Height);
+        int canvasWidth = sizes.Sum(s => s.Width);
+        int canvasHeight = sizes.Max(s => s.Height);
 
-        // Create JPEG canvas bound to temporary file
-        JpegOptions jpegOptions = new JpegOptions
-        {
-            Source = new FileCreateSource(tempPath, false)
-        };
+        // Temporary file for the intermediate JPEG canvas
+        string tempCanvasPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_canvas.jpg");
+        Source tempSource = new FileCreateSource(tempCanvasPath, true);
+        JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
 
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+        // Create JPEG canvas, merge images, and save as PDF
+        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
         {
             int offsetX = 0;
             foreach (string path in inputPaths)
@@ -72,15 +69,8 @@ class Program
                 }
             }
 
-            // Save the bound JPEG canvas to the temporary file
-            canvas.Save();
-        }
-
-        // Load the temporary JPEG and save as PDF
-        using (Image pdfSource = Image.Load(tempPath))
-        {
             PdfOptions pdfOptions = new PdfOptions();
-            pdfSource.Save(outputPath, pdfOptions);
+            canvas.Save(outputPath, pdfOptions);
         }
     }
 }

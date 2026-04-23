@@ -10,32 +10,39 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.apng";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPath = "output.apng";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            ApngOptions createOptions = new ApngOptions
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100,
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
-            {
-                apngImage.RemoveAllFrames();
-                apngImage.AddFrame(sourceImage);
-                apngImage.Save();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            {
+                ApngOptions createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100,
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                {
+                    apngImage.RemoveAllFrames();
+                    apngImage.AddFrame(sourceImage);
+                    apngImage.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

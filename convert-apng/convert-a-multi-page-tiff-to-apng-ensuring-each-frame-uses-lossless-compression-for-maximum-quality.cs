@@ -2,41 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input\\multi.tif";
+            string outputPath = "Output\\converted.apng";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the multi‑page TIFF image
-        using (Image tiffImage = Image.Load(inputPath))
-        {
-            // Configure APNG options for lossless compression (PNG compression is lossless)
-            ApngOptions apngOptions = new ApngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // No compression (level 0) keeps maximum quality while still being lossless
-                PngCompressionLevel = 0,
-                // Preserve alpha channel and truecolor data
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as APNG
-            tiffImage.Save(outputPath, apngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑page TIFF
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure APNG options for lossless (PNG is inherently lossless)
+                var apngOptions = new ApngOptions
+                {
+                    // Set compression level to 0 for no compression (still lossless)
+                    PngCompressionLevel = 0
+                };
+
+                // Save as APNG; each TIFF frame becomes an APNG frame
+                image.Save(outputPath, apngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

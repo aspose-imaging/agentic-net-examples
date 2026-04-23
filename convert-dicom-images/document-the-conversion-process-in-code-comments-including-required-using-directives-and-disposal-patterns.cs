@@ -1,48 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "source.png";
-        string outputPath = "animation.apng";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Input image path (relative to the executable's working directory)
+            string inputPath = Path.Combine("Input", "sample.png");
+            // Output TIFF path
+            string outputPath = Path.Combine("Output", "sample.tif");
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-        {
-            using (ApngOptions createOptions = new ApngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 70,
-                ColorType = PngColorType.TruecolorWithAlpha
-            })
-            {
-                using (Image apngImage = Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
-                {
-                    var apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)apngImage;
-                    apng.RemoveAllFrames();
-
-                    int frameCount = 5;
-                    for (int i = 0; i < frameCount; i++)
-                    {
-                        apng.AddFrame(sourceImage);
-                    }
-
-                    apng.Save();
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure TIFF export options (using default TIFF format)
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the image as TIFF with the specified options
+                image.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

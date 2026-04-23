@@ -3,38 +3,50 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         string inputPath = "input.webp";
-        string outputPath = "output.png";
+        string outputPath = "output.apng";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (WebPImage webp = (WebPImage)Image.Load(inputPath))
-        {
-            webp.Palette = new ColorPalette(new Color[]
+            if (!File.Exists(inputPath))
             {
-                Color.Red,
-                Color.Green,
-                Color.Blue,
-                Color.White,
-                Color.Black
-            });
-
-            using (ApngOptions apngOptions = new ApngOptions())
-            {
-                webp.Save(outputPath, apngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                WebPImage webp = image as WebPImage;
+                if (webp == null)
+                {
+                    Console.Error.WriteLine("Failed to load WebP image.");
+                    return;
+                }
+
+                var newPalette = new ColorPalette(new Color[]
+                {
+                    Color.Black,
+                    Color.White,
+                    Color.Red,
+                    Color.Green,
+                    Color.Blue
+                });
+                webp.Palette = newPalette;
+
+                ApngOptions options = new ApngOptions();
+                webp.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

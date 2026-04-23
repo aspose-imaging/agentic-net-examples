@@ -2,60 +2,64 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded paths
-        string thumbnailPath = @"C:\thumbnails\thumb.png";
-        string inputDirectory = @"C:\images\input";
-        string outputDirectory = @"C:\images\output";
+        string inputDirectory = @"C:\Images\Input";
+        string outputDirectory = @"C:\Images\Output";
+        string thumbnailPath = @"C:\Images\thumbnail.jpg";
 
-        // Ensure thumbnail exists
-        if (!File.Exists(thumbnailPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {thumbnailPath}");
-            return;
-        }
-
-        // Load the custom thumbnail once
-        using (RasterImage thumbnail = (RasterImage)Image.Load(thumbnailPath))
-        {
-            // Get all JPEG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-            foreach (string inputPath in inputFiles)
+            // Verify thumbnail exists
+            if (!File.Exists(thumbnailPath))
             {
-                // Verify input file existence
-                if (!File.Exists(inputPath))
+                Console.Error.WriteLine($"File not found: {thumbnailPath}");
+                return;
+            }
+
+            // Load thumbnail once (as RasterImage)
+            using (RasterImage thumbnailImage = (RasterImage)Image.Load(thumbnailPath))
+            {
+                // Ensure output directory exists for each file later
+                Directory.CreateDirectory(outputDirectory);
+
+                // Process each JPEG file in the input directory
+                foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.jpg"))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Prepare output path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_with_thumb.jpg");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load JPEG image
-                using (JpegImage jpeg = new JpegImage(inputPath))
-                {
-                    // Ensure ExifData container exists
-                    if (jpeg.ExifData == null)
+                    // Input file existence check (redundant but follows rule)
+                    if (!File.Exists(inputPath))
                     {
-                        jpeg.ExifData = new Aspose.Imaging.Exif.JpegExifData();
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
                     }
 
-                    // Assign the custom thumbnail
-                    jpeg.ExifData.Thumbnail = thumbnail;
+                    // Determine output path
+                    string fileName = Path.GetFileName(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileName);
 
-                    // Save the modified image
-                    jpeg.Save(outputPath);
+                    // Ensure output directory exists (unconditional as required)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load JPEG, set thumbnail, and save
+                    using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
+                    {
+                        // Assign the custom thumbnail to EXIF data
+                        jpeg.ExifData.Thumbnail = thumbnailImage;
+
+                        // Save the modified JPEG to the output path
+                        jpeg.Save(outputPath);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

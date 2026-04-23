@@ -3,80 +3,91 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDir = "Input";
-        string outputDir = "Output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Get all PNG files in the input directory
-        string[] files = Directory.GetFiles(inputDir, "*.png");
-
-        foreach (string inputPath in files)
+        try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            string inputDir = "InputImages";
+            string outputDir = "OutputImages";
+
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Prepare output path
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDir, fileName + "_masked.png");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image as a RasterImage
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            if (!Directory.Exists(outputDir))
             {
-                // Define user‑defined strokes (example points)
-                AutoMaskingArgs args = new AutoMaskingArgs
+                Directory.CreateDirectory(outputDir);
+            }
+
+            string[] files = Directory.GetFiles(inputDir, "*.png");
+
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    ObjectsPoints = new Point[][]
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + "_masked.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    AutoMaskingArgs userStrokes = new AutoMaskingArgs
                     {
-                        // Background points
-                        new Point[] { new Point(10, 10), new Point(20, 10) },
-                        // Foreground points
-                        new Point[] { new Point(50, 50) }
+                        ObjectsPoints = new Point[][]
+                        {
+                            new Point[] { new Point(10, 10), new Point(20, 10) },
+                            new Point[] { new Point(30, 30) }
+                        }
+                    };
+
+                    string tempExportPath = Path.GetTempFileName();
+
+                    AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
+                    {
+                        CalculateDefaultStrokes = false,
+                        FeatheringRadius = 3,
+                        Method = SegmentationMethod.GraphCut,
+                        Decompose = false,
+                        Args = userStrokes,
+                        BackgroundReplacementColor = Color.Transparent,
+                        ExportOptions = new PngOptions
+                        {
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new FileCreateSource(tempExportPath, false)
+                        }
+                    };
+
+                    MaskingResult result = new ImageMasking(image).Decompose(options);
+
+                    using (RasterImage resultImage = (RasterImage)result[1].GetImage())
+                    {
+                        resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                     }
-                };
 
-                // Configure auto‑masking options with Graph Cut
-                AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
-                {
-                    CalculateDefaultStrokes = false,
-                    FeatheringRadius = 3,
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    ExportOptions = new PngOptions
+                    if (File.Exists(tempExportPath))
                     {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    },
-                    BackgroundReplacementColor = Color.Transparent,
-                    Args = args
-                };
-
-                // Perform masking
-                using (MaskingResult result = new ImageMasking(image).Decompose(options))
-                using (RasterImage masked = (RasterImage)result[1].GetImage())
-                {
-                    // Save the masked foreground image
-                    masked.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                        File.Delete(tempExportPath);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

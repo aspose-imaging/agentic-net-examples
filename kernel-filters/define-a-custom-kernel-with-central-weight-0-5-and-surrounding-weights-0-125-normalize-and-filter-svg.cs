@@ -1,64 +1,67 @@
 using System;
 using System.IO;
-using System.Linq;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string tempPath = "temp\\temp.png";
+            string outputPath = "output\\filtered.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
-        {
-            var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
-            var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-
-            using (MemoryStream ms = new MemoryStream())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                svgImage.Save(ms, pngOptions);
-                ms.Position = 0;
-
-                using (Aspose.Imaging.Image rasterImageContainer = Aspose.Imaging.Image.Load(ms))
-                {
-                    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)rasterImageContainer;
-
-                    double[,] kernel = new double[,]
-                    {
-                        { 0.125, 0.125, 0.125 },
-                        { 0.125, 0.5,   0.125 },
-                        { 0.125, 0.125, 0.125 }
-                    };
-
-                    double sum = 0;
-                    foreach (double v in kernel) sum += v;
-                    for (int i = 0; i < kernel.GetLength(0); i++)
-                    {
-                        for (int j = 0; j < kernel.GetLength(1); j++)
-                        {
-                            kernel[i, j] /= sum;
-                        }
-                    }
-
-                    var convOptions = new ConvolutionFilterOptions(kernel);
-
-                    rasterImage.Filter(rasterImage.Bounds, convOptions);
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    rasterImage.Save(outputPath);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure directories for temporary and final output exist
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG and rasterize to a temporary PNG
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size
+                };
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+                svgImage.Save(tempPath, pngOptions);
+            }
+
+            // Load the rasterized PNG, apply custom convolution filter, and save result
+            using (Image rasterImage = Image.Load(tempPath))
+            {
+                var raster = (RasterImage)rasterImage;
+
+                // Define custom 3x3 kernel (central 0.333..., surrounding 0.08333...)
+                double[,] kernel = new double[,]
+                {
+                    { 0.0833333333, 0.0833333333, 0.0833333333 },
+                    { 0.0833333333, 0.3333333333, 0.0833333333 },
+                    { 0.0833333333, 0.0833333333, 0.0833333333 }
+                };
+
+                var convOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
+                raster.Filter(raster.Bounds, convOptions);
+                raster.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

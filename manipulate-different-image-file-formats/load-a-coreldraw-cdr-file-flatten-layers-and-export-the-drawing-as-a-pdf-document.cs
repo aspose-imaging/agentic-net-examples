@@ -8,40 +8,51 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Data\sample.cdr";
-        string outputPath = @"C:\Data\sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.cdr";
+            string outputPath = @"C:\temp\sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR image
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-        {
-            // Assume we want to export the first page (index 0)
-            int pageNumber = 0;
-            CdrImagePage page = (CdrImagePage)cdrImage.Pages[pageNumber];
-
-            // Set up PDF export options with rasterization settings
-            PdfOptions pdfOptions = new PdfOptions();
-            CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                PageWidth = page.Width,
-                PageHeight = page.Height
-            };
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the page as PDF
-            page.Save(outputPath, pdfOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR file
+            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            {
+                // Flatten layers if the API provides such a method
+                // Uncomment the following line if CdrDocument has a FlattenLayers method
+                // image.CdrDocument.FlattenLayers();
+
+                // Export the first page (page index 0) to PDF
+                int pageNumber = 0;
+                CdrImagePage page = (CdrImagePage)image.Pages[pageNumber];
+
+                // Configure PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                {
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    PageWidth = page.Width,
+                    PageHeight = page.Height
+                };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save the page as a PDF document
+                page.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

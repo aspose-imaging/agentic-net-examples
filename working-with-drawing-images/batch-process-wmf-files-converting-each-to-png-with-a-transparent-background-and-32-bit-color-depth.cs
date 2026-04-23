@@ -2,19 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define base, input and output directories relative to the current directory
+        // Define base directories
         string baseDir = Directory.GetCurrentDirectory();
         string inputDirectory = Path.Combine(baseDir, "Input");
         string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure input directory exists; create it if missing and exit
+        // Validate input directory
         if (!Directory.Exists(inputDirectory))
         {
             Directory.CreateDirectory(inputDirectory);
@@ -28,41 +27,42 @@ class Program
             Directory.CreateDirectory(outputDirectory);
         }
 
-        // Get all WMF files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
+        // Get all files in the input directory
+        string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-        foreach (var inputPath in files)
+        foreach (string inputPath in files)
         {
-            // Verify the input file exists
+            // Process only WMF files
+            if (!string.Equals(Path.GetExtension(inputPath), ".wmf", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build the output PNG path
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+            // Prepare output path
+            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-            // Ensure the output directory for this file exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WMF image
-            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            // Load WMF image and convert to PNG with transparent background
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options with transparent background and 32‑bit color depth
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.Transparent,
-                        PageSize = wmfImage.Size
+                        PageSize = image.Size
                     }
                 };
 
-                // Save as PNG
-                wmfImage.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
     }

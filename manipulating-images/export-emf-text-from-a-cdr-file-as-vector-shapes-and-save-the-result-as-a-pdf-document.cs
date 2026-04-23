@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Data\sample.cdr";
-        string outputPath = @"C:\Data\sample.cdr.pdf";
+        string outputPath = @"C:\Data\sample.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,22 +22,37 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR file
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure PDF export options with vector rasterization settings
-            PdfOptions pdfOptions = new PdfOptions();
-            CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+            // Load the CDR file
+            using (Image image = Image.Load(inputPath))
             {
-                // Render text as vector shapes
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                Positioning = PositioningTypes.DefinedByDocument
-            };
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
+                // Prepare PDF export options
+                var pdfOptions = new PdfOptions();
 
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+                // Configure rasterization to render text as vector shapes
+                var rasterOptions = new CdrRasterizationOptions
+                {
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Set page size based on the first page of the CDR document
+                if (image is CdrImage cdrImage && cdrImage.Pages.Length > 0)
+                {
+                    var firstPage = (CdrImagePage)cdrImage.Pages[0];
+                    rasterOptions.PageWidth = firstPage.Width;
+                    rasterOptions.PageHeight = firstPage.Height;
+                }
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

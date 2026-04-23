@@ -8,54 +8,57 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input CDR file path
-        string inputPath = @"C:\temp\sample.cdr";
-
-        // Hardcoded output directory for PDF pages
-        string outputDir = @"C:\temp\output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.cdr";
+            string outputDirectory = @"C:\temp\output";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Load the multi‑page CDR image
-        using (CdrImage image = (CdrImage)Image.Load(inputPath))
-        {
-            // Cache all pages to avoid repeated data loading
-            foreach (CdrImagePage page in image.Pages)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                page.CacheData();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Iterate through each page and save as an individual PDF
-            for (int i = 0; i < image.Pages.Length; i++)
+            // Load the CDR image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                CdrImagePage page = (CdrImagePage)image.Pages[i];
-                string outputPath = Path.Combine(outputDir, $"page_{i}.pdf");
+                // Ensure all pages are cached (optional but improves performance)
+                cdrImage.CacheData();
 
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Configure PDF options with rasterization settings matching the page size
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                // Iterate through each page
+                for (int i = 0; i < cdrImage.PageCount; i++)
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
-                };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                    // Retrieve the specific page
+                    CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
+                    page.CacheData();
 
-                // Save the current page as a PDF file
-                page.Save(outputPath, pdfOptions);
+                    // Prepare PDF save options
+                    PdfOptions pdfOptions = new PdfOptions();
+                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                    {
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None,
+                        PageWidth = page.Width,
+                        PageHeight = page.Height
+                    };
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Build output file path for this page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i}.pdf");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as a separate PDF
+                    page.Save(outputPath, pdfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

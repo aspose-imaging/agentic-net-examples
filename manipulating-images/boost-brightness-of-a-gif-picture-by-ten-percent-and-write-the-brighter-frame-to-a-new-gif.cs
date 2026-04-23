@@ -7,30 +7,38 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\temp\sample.gif";
-        string outputPath = @"C:\temp\sample_brighter.gif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.gif";
+        string outputPath = @"C:\Images\output.gif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to GifImage to access GIF-specific methods
+                GifImage gifImage = (GifImage)image;
+
+                // Increase brightness by approximately 10% (255 * 0.10 ≈ 25)
+                gifImage.AdjustBrightness(25);
+
+                // Save the modified GIF
+                gifImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the GIF image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            GifImage gifImage = (GifImage)image;
-
-            // Increase brightness by roughly 10% (≈26 out of 255)
-            gifImage.AdjustBrightness(26);
-
-            // Save the brighter GIF
-            gifImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

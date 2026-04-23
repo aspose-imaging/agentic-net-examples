@@ -6,44 +6,57 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input DjVu file path
+            string inputPath = "input.djvu";
 
-        // Open the DjVu file stream
-        using (Stream stream = File.OpenRead(inputPath))
-        {
-            // Load DjVu image from stream
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Output directory for BMP files
+            string outputDir = "output";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load DjVu document from file stream
+            using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Prepare BMP save options with 32 bits per pixel
-                BmpOptions bmpOptions = new BmpOptions
+                int pageIndex = 0;
+                foreach (Image page in djvuImage.Pages)
                 {
-                    BitsPerPixel = 32
-                };
+                    // Construct output file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex + 1}.bmp");
 
-                // Iterate through each page and save as BMP
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
-                {
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.bmp");
-
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as BMP using the custom options
-                    djvuPage.Save(outputPath, bmpOptions);
+                    using (page)
+                    {
+                        // Configure BMP options
+                        BmpOptions bmpOptions = new BmpOptions
+                        {
+                            BitsPerPixel = 32
+                        };
+
+                        // Save the page as BMP
+                        page.Save(outputPath, bmpOptions);
+                    }
+
+                    pageIndex++;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

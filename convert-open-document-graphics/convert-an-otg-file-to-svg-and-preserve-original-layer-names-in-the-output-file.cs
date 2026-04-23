@@ -7,36 +7,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\sample.otg";
         string outputPath = @"C:\Images\sample.svg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists (creates it if necessary)
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the OTG image
         using (Image image = Image.Load(inputPath))
         {
-            // Configure OTG rasterization options (preserve original size)
-            OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+            // Prepare SVG export options
+            var svgOptions = new SvgOptions
             {
-                PageSize = image.Size
+                // Preserve original metadata (including layer names) if possible
+                KeepMetadata = true,
+                // Configure rasterization to match the source size
+                VectorRasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                }
             };
 
-            // Set up SVG export options and attach rasterization settings
-            SvgOptions svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = otgRasterOptions
-            };
-
-            // Save as SVG; layer names are retained in the exported SVG
+            // Save the image as SVG
             image.Save(outputPath, svgOptions);
         }
     }

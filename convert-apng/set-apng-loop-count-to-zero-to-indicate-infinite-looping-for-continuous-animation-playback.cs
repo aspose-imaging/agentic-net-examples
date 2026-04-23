@@ -7,31 +7,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.webp";
+            string outputPath = "output/output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image (can be any animated format supported by Aspose.Imaging)
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure APNG options with infinite looping (NumPlays = 0)
-            ApngOptions apngOptions = new ApngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                NumPlays = 0 // 0 indicates infinite looping
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as APNG with the specified options
-            image.Save(outputPath, apngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure APNG options for infinite looping
+                var apngOptions = new ApngOptions
+                {
+                    NumPlays = 0 // 0 indicates infinite looping
+                };
+
+                // Save as APNG with the specified options
+                image.Save(outputPath, apngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

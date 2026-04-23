@@ -1,81 +1,50 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input TIFF file paths
-        string[] inputPaths = {
-            "C:\\Images\\input1.tif",
-            "C:\\Images\\input2.tif",
-            "C:\\Images\\input3.tif"
-        };
-
-        // Corresponding output APNG file paths
-        string[] outputPaths = {
-            "C:\\Images\\output1.apng",
-            "C:\\Images\\output2.apng",
-            "C:\\Images\\output3.apng"
-        };
-
-        for (int i = 0; i < inputPaths.Length; i++)
+        try
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
+            // Hardcoded list of input TIFF files (relative paths)
+            string[] inputFiles = { "input1.tif", "input2.tif" };
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            foreach (var inputPath in inputFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image (may contain multiple frames)
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-            {
-                int width = tiffImage.Width;
-                int height = tiffImage.Height;
-
-                // Compute default frame time based on dimensions (example logic)
-                uint defaultFrameTime = (uint)((width + height) / 20);
-                if (defaultFrameTime == 0) defaultFrameTime = 100; // fallback to 100 ms
-
-                // Prepare APNG creation options
-                ApngOptions apngOptions = new ApngOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = defaultFrameTime,
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                // Create APNG image bound to the output file
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
+                // Load the TIFF image
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Remove the default single frame
-                    apngImage.RemoveAllFrames();
+                    // Compute frame delay based on image dimensions (example: average of width and height)
+                    uint frameDelay = (uint)((image.Width + image.Height) / 2);
 
-                    // Add each TIFF frame to the APNG
-                    foreach (TiffFrame frame in tiffImage.Frames)
+                    // Determine output APNG path (same name with .apng extension)
+                    string outputPath = Path.ChangeExtension(inputPath, ".apng");
+
+                    // Ensure the output directory exists (guard against null directory)
+                    string outputDir = Path.GetDirectoryName(outputPath);
+                    if (!string.IsNullOrWhiteSpace(outputDir))
                     {
-                        // Cast frame to RasterImage and add as a new frame
-                        apngImage.AddFrame((RasterImage)frame);
+                        Directory.CreateDirectory(outputDir);
                     }
 
-                    // Save the APNG (output path already bound via FileCreateSource)
-                    apngImage.Save();
+                    // Save as APNG with the calculated default frame time
+                    image.Save(outputPath, new ApngOptions { DefaultFrameTime = frameDelay });
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,8 +8,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/result.png";
+        string inputPath = "input.eps";
+        string outputPath = "output/output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,29 +21,17 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+        // Load EPS image with exception handling
         try
         {
-            // Load EPS image with exception handling
-            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Set PNG options with rasterization for EPS
-                var options = new PngOptions
-                {
-                    VectorRasterizationOptions = new EpsRasterizationOptions
-                    {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        BackgroundColor = Aspose.Imaging.Color.White
-                    }
-                };
-
-                // Save the rasterized image as PNG
-                image.Save(outputPath, options);
+                // Save as PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
         {
-            // Handle any errors that occur during loading or saving
             Console.Error.WriteLine($"Error loading EPS file: {ex.Message}");
         }
     }

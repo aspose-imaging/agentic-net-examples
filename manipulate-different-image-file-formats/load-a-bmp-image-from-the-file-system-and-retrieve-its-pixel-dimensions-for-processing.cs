@@ -6,31 +6,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input BMP file path
-        string inputPath = @"C:\Images\sample.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.txt";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Load the BMP image using the BmpImage constructor
-        using (BmpImage bmpImage = new BmpImage(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load BMP image using the BmpImage constructor that takes a file path
+            using (BmpImage bmpImage = new BmpImage(inputPath))
+            {
+                // Retrieve pixel dimensions
+                int width = bmpImage.Width;
+                int height = bmpImage.Height;
+
+                // Output dimensions to console
+                Console.WriteLine($"Width: {width} pixels");
+                Console.WriteLine($"Height: {height} pixels");
+
+                // Optionally write dimensions to a text file
+                File.WriteAllText(outputPath, $"Width: {width} pixels{Environment.NewLine}Height: {height} pixels");
+            }
+        }
+        catch (Exception ex)
         {
-            // Retrieve pixel dimensions
-            int width = bmpImage.Width;
-            int height = bmpImage.Height;
-
-            // Output the dimensions
-            Console.WriteLine($"Image dimensions: {width} x {height}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Example of an output path (not required for just reading dimensions)
-        // Demonstrates the required directory creation rule before any save operation
-        string outputPath = @"C:\Images\output\dummy.txt";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-        // No actual save performed here as the task only requires reading dimensions
     }
 }

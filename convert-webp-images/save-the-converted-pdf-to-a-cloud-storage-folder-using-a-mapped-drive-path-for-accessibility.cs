@@ -8,7 +8,7 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.jpg";
+        string inputPath = "Input\\sample.jpg";
         string outputPath = @"Z:\CloudStorage\Output\sample.pdf";
 
         // Verify input file exists
@@ -21,13 +21,13 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image
+        // Load the image
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare PDF save options
+            // Prepare PDF options
             using (PdfOptions pdfOptions = new PdfOptions())
             {
-                // Save the image as PDF to the mapped drive location
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

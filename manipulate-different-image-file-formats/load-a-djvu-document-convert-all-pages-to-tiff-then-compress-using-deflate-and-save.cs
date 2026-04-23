@@ -7,47 +7,46 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputDirectory = "output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.djvu";
+            string outputDirectory = "Output";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load DjVu document from file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            int pageIndex = 0;
-            foreach (var pageObj in djvuImage.Pages)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Each page is a DjvuPage
-                var page = (DjvuPage)pageObj;
-
-                // Build output file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.tif");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Configure TIFF options with Deflate compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Deflate;
-
-                // Save the page as a TIFF file
-                page.Save(outputPath, tiffOptions);
-
-                pageIndex++;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Load the DjVu document
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            {
+                int pageIndex = 0;
+                foreach (DjvuPage page in djvuImage.Pages)
+                {
+                    // Construct output file path for each page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.tif");
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Set TIFF options with Deflate compression
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffDeflateRgb);
+
+                    // Save the page as TIFF
+                    page.Save(outputPath, tiffOptions);
+
+                    pageIndex++;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

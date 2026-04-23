@@ -2,36 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output_resized_signed.tif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Define new dimensions (example: half the original size)
+                int newWidth = tiffImage.Width / 2;
+                int newHeight = tiffImage.Height / 2;
+
+                // Resize using Lanczos resampling
+                tiffImage.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+
+                // Embed a digital signature with a password longer than four characters
+                tiffImage.EmbedDigitalSignature("StrongPass123");
+
+                // Save the processed image
+                tiffImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image
-        using (TiffImage image = (TiffImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Resize using Lanczos resampling (example: double size)
-            image.Resize(image.Width * 2, image.Height * 2, ResizeType.LanczosResample);
-
-            // Embed a digital signature with a password longer than four characters
-            image.EmbedDigitalSignature("StrongPassword123");
-
-            // Save the modified image
-            image.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,64 +1,59 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input pattern image and output image paths
+        // Hardcoded input and output paths
         string inputPath = "pattern.png";
         string outputPath = "output.png";
 
-        // Verify that the pattern image exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the pattern image to be used by the TextureBrush
-        using (Image patternImage = Image.Load(inputPath))
+        using (Aspose.Imaging.Image patternImage = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Define canvas size
-            int canvasWidth = 800;
-            int canvasHeight = 600;
-
-            // Create PNG options with a FileCreateSource bound to the output path
-            PngOptions pngOptions = new PngOptions();
+            // Create a PNG canvas
+            var pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
+            int canvasWidth = 500;
+            int canvasHeight = 500;
 
-            // Create the canvas image
-            using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
+            using (Aspose.Imaging.Image canvas = Aspose.Imaging.Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
-                // Create a Graphics instance for drawing
-                Graphics graphics = new Graphics(canvas);
+                // Initialize graphics for the canvas
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Clear the canvas background
-                graphics.Clear(Color.White);
+                // Build a GraphicsPath (a simple rectangle)
+                Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 400f, 400f)));
+                path.AddFigure(figure);
 
-                // Create a TextureBrush using the loaded pattern image
-                // The destination rectangle defines the area of the pattern tile
-                using (TextureBrush textureBrush = new TextureBrush(patternImage, new Rectangle(0, 0, patternImage.Width, patternImage.Height)))
+                // Create a TextureBrush using the pattern image
+                using (TextureBrush textureBrush = new TextureBrush(
+                    patternImage,
+                    new Aspose.Imaging.Rectangle(0, 0, patternImage.Width, patternImage.Height)))
                 {
-                    // Build a GraphicsPath with a single rectangular figure covering the canvas
-                    GraphicsPath path = new GraphicsPath();
-                    Figure figure = new Figure();
-                    figure.AddShape(new RectangleShape(new RectangleF(0f, 0f, canvasWidth, canvasHeight)));
-                    path.AddFigure(figure);
-
                     // Fill the path with the texture brush
                     graphics.FillPath(textureBrush, path);
                 }
 
-                // Save the canvas image (output file is already bound via FileCreateSource)
+                // Save the canvas (output file is already bound via FileCreateSource)
                 canvas.Save();
             }
         }

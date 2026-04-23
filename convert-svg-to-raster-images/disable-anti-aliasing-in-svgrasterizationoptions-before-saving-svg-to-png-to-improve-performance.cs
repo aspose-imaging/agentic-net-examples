@@ -6,40 +6,32 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\test.svg";
-        string outputPath = @"C:\temp\test.output.png";
+        string inputPath = Path.Combine("Input", "test.svg");
+        string outputPath = Path.Combine("Output", "test.png");
 
-        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Configure rasterization options and disable anti‑aliasing
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-            {
-                PageSize = svgImage.Size,
-                SmoothingMode = Aspose.Imaging.SmoothingMode.None // disable anti‑aliasing
-            };
+            SvgImage svgImage = (SvgImage)image;
 
-            // Set up PNG save options with the rasterization options
-            PngOptions saveOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+            rasterOptions.PageSize = svgImage.Size;
+            rasterOptions.SmoothingMode = Aspose.Imaging.SmoothingMode.None;
 
-            // Save the rasterized image to PNG
-            svgImage.Save(outputPath, saveOptions);
+            using (PngOptions pngOptions = new PngOptions())
+            {
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+                svgImage.Save(outputPath, pngOptions);
+            }
         }
     }
 }

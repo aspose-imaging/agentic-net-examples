@@ -8,46 +8,50 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DICOM file and output directory
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputDir = @"c:\temp\output";
-
-        // Input path safety check
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "sample.dicom";
+            string outputDir = "output";
 
-        // Ensure the base output directory exists
-        Directory.CreateDirectory(outputDir);
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Load the DICOM image from a file stream
-        using (Stream stream = File.OpenRead(inputPath))
-        {
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the DICOM image from a file stream
+            using (FileStream stream = File.OpenRead(inputPath))
             using (DicomImage dicomImage = new DicomImage(stream))
             {
-                // Iterate through each page in the DICOM image
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                foreach (DicomPage page in dicomImage.DicomPages)
                 {
-                    // Build the output PNG file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"page_{dicomPage.Index}.png");
+                    // Build output file path for each page
+                    string outputPath = Path.Combine(outputDir, $"page_{page.Index}.png");
 
-                    // Record start timestamp
-                    DateTime start = DateTime.Now;
-                    Console.WriteLine($"Start conversion: Input={inputPath}, Page={dicomPage.Index}, Output={outputPath}, Time={start:O}");
-
-                    // Output path safety: ensure directory exists before saving
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as a PNG image
-                    dicomPage.Save(outputPath, new PngOptions());
+                    // Log start timestamp
+                    DateTime start = DateTime.Now;
+                    Console.WriteLine($"[{start:O}] Starting conversion of page {page.Index}");
 
-                    // Record end timestamp and duration
+                    // Save the page as PNG
+                    page.Save(outputPath, new PngOptions());
+
+                    // Log end timestamp
                     DateTime end = DateTime.Now;
-                    Console.WriteLine($"End conversion: Input={inputPath}, Page={dicomPage.Index}, Output={outputPath}, Time={end:O}, Duration={(end - start).TotalSeconds}s");
+                    Console.WriteLine($"[{end:O}] Finished conversion of page {page.Index}");
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,40 +1,47 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\temp\sample.png";
-        string outputPath = @"C:\temp\sample.sharpened.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                double[,] kernel = new double[,]
+                {
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
+                };
+
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply a sharpening filter.
-            // SharpenFilterOptions internally uses a kernel that contains negative coefficients,
-            // providing the desired sharpening effect.
-            // Size 3 creates a 3×3 kernel; sigma 0.0 selects the default sharpening behavior.
-            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 0.0));
-
-            // Save the processed image
-            rasterImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

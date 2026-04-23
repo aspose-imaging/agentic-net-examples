@@ -2,76 +2,76 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\Temp\spiral.bmp";
+        // Output BMP file path
+        string outputPath = "output_spiral.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (string.IsNullOrEmpty(outputDir))
+            outputDir = ".";
+        Directory.CreateDirectory(outputDir);
 
-        // Create a BMP image of size 800x800
-        BmpOptions bmpOptions = new BmpOptions();
-        using (Image image = Image.Create(bmpOptions, 800, 800))
+        // Create a bound BMP image
+        Source source = new FileCreateSource(outputPath, false);
+        BmpOptions bmpOptions = new BmpOptions() { Source = source };
+        int width = 800;
+        int height = 800;
+
+        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
         {
-            // Initialize graphics object
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            // Initialize graphics
+            Graphics graphics = new Graphics(canvas);
+            graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Pen for drawing the spiral
-            Pen pen = new Pen(Color.Blue, 2);
+            // Pen for drawing
+            Pen pen = new Pen(Aspose.Imaging.Color.Blue, 2);
 
             // Spiral parameters
-            float centerX = 400f;
-            float centerY = 400f;
-            int segments = 100;                     // Number of Bezier segments
-            float deltaAngle = (float)(Math.PI / 4); // 45 degrees per segment
-            float deltaRadius = 5f;                  // Radius increase per segment
-
-            // Starting point at the center
-            float startX = centerX;
-            float startY = centerY;
-            float prevAngle = 0f;
-            float prevRadius = 0f;
+            float centerX = width / 2f;
+            float centerY = height / 2f;
+            float radius = 10f;
+            float angle = 0f;
+            int segments = 100;
+            float angleStep = (float)(Math.PI / 4); // 45 degrees
 
             for (int i = 0; i < segments; i++)
             {
-                // Compute angle and radius for the current segment
-                float angle = prevAngle + deltaAngle;
-                float radius = prevRadius + deltaRadius;
+                // Starting point
+                float x1 = centerX + radius * (float)Math.Cos(angle);
+                float y1 = centerY + radius * (float)Math.Sin(angle);
 
-                // End point of the Bezier curve
-                float endX = centerX + radius * (float)Math.Cos(angle);
-                float endY = centerY + radius * (float)Math.Sin(angle);
+                // First control point
+                float cp1Angle = angle + angleStep / 3f;
+                float cp1Radius = radius + 5f;
+                float x2 = centerX + cp1Radius * (float)Math.Cos(cp1Angle);
+                float y2 = centerY + cp1Radius * (float)Math.Sin(cp1Angle);
 
-                // Approximate control points to create a smooth spiral
-                float ctrl1X = centerX + (prevRadius + deltaRadius / 3f) * (float)Math.Cos(prevAngle + deltaAngle / 3f);
-                float ctrl1Y = centerY + (prevRadius + deltaRadius / 3f) * (float)Math.Sin(prevAngle + deltaAngle / 3f);
+                // Second control point
+                float cp2Angle = angle + 2f * angleStep / 3f;
+                float cp2Radius = radius + 10f;
+                float x3 = centerX + cp2Radius * (float)Math.Cos(cp2Angle);
+                float y3 = centerY + cp2Radius * (float)Math.Sin(cp2Angle);
 
-                float ctrl2X = centerX + (prevRadius + 2f * deltaRadius / 3f) * (float)Math.Cos(prevAngle + 2f * deltaAngle / 3f);
-                float ctrl2Y = centerY + (prevRadius + 2f * deltaRadius / 3f) * (float)Math.Sin(prevAngle + 2f * deltaAngle / 3f);
+                // End point
+                float x4 = centerX + (radius + 15f) * (float)Math.Cos(angle + angleStep);
+                float y4 = centerY + (radius + 15f) * (float)Math.Sin(angle + angleStep);
 
                 // Draw the Bezier segment
-                graphics.DrawBezier(pen,
-                    startX, startY,
-                    ctrl1X, ctrl1Y,
-                    ctrl2X, ctrl2Y,
-                    endX, endY);
+                graphics.DrawBezier(pen, x1, y1, x2, y2, x3, y3, x4, y4);
 
-                // Prepare for the next segment
-                startX = endX;
-                startY = endY;
-                prevAngle = angle;
-                prevRadius = radius;
+                // Update for next segment
+                angle += angleStep;
+                radius += 5f;
             }
 
-            // Save the resulting image
-            image.Save(outputPath);
+            // Save the bound image
+            canvas.Save();
         }
     }
 }

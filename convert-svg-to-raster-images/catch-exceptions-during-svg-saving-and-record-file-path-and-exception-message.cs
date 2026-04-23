@@ -2,62 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.CoreExceptions;
 using Aspose.Imaging.CoreExceptions.ImageFormats;
 
 class Program
 {
-    // Hardcoded input and output paths
-    private const string InputPath = "input.png";
-    private const string OutputPath = "output.svg";
-
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.svg";
+
         // Verify input file exists
-        if (!File.Exists(InputPath))
+        if (!File.Exists(inputPath))
         {
-            Console.Error.WriteLine($"File not found: {InputPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(OutputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image and attempt to save as SVG
         try
         {
-            using (Image image = Image.Load(InputPath))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                var svgOptions = new SvgOptions();
+                // Set SVG save options
+                var svgOptions = new SvgOptions
+                {
+                    // Optional: customize options here if needed
+                };
 
-                try
-                {
-                    image.Save(OutputPath, svgOptions);
-                }
-                catch (SvgImageException ex)
-                {
-                    LogError(OutputPath, ex.Message);
-                }
-                catch (ImageSaveException ex)
-                {
-                    LogError(OutputPath, ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    LogError(OutputPath, ex.Message);
-                }
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
             }
+        }
+        catch (SvgImageException ex)
+        {
+            // Record SVG-specific errors
+            Console.Error.WriteLine($"SVG save error for '{outputPath}': {ex.Message}");
+        }
+        catch (ImageSaveException ex)
+        {
+            // Record generic image save errors
+            Console.Error.WriteLine($"Image save error for '{outputPath}': {ex.Message}");
         }
         catch (Exception ex)
         {
-            // Catch any unexpected errors during loading
-            LogError(InputPath, ex.Message);
+            // Record any other unexpected errors
+            Console.Error.WriteLine($"Unexpected error for '{outputPath}': {ex.Message}");
         }
-    }
-
-    // Simple error logger
-    private static void LogError(string filePath, string message)
-    {
-        Console.Error.WriteLine($"Error processing '{filePath}': {message}");
     }
 }

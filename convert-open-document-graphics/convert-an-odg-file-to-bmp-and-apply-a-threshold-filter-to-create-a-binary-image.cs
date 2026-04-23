@@ -9,9 +9,9 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input\\sample.odg";
-        string outputPath = "output\\sample.bmp";
-        string binaryOutputPath = "output\\sample_binary.bmp";
+        string inputPath = "sample.odg";
+        string outputPath = "sample.bmp";
+        string binaryOutputPath = "sample_binary.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,40 +21,35 @@ class Program
         }
 
         // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(binaryOutputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+        Directory.CreateDirectory(Path.GetDirectoryName(binaryOutputPath) ?? string.Empty);
 
         // Load the ODG image
         using (Image odgImage = Image.Load(inputPath))
         {
-            // Set up rasterization options for ODG to BMP conversion
-            var rasterOptions = new OdgRasterizationOptions
+            // Prepare BMP save options with rasterization settings for ODG
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.VectorRasterizationOptions = new OdgRasterizationOptions
             {
-                BackgroundColor = Color.White,
+                // Use the original image size for rasterization
                 PageSize = odgImage.Size
             };
 
-            // Configure BMP save options with the rasterization settings
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the rasterized image as BMP
+            // Save the rasterized BMP
             odgImage.Save(outputPath, bmpOptions);
         }
 
-        // Load the saved BMP image as a raster image
+        // Load the rasterized BMP as a RasterImage to apply thresholding
         using (Image bmpImage = Image.Load(outputPath))
         {
-            // Cast to RasterImage to access binarization methods
-            var rasterImage = (RasterImage)bmpImage;
+            // Cast to RasterImage to access BinarizeOtsu
+            RasterImage raster = (RasterImage)bmpImage;
 
             // Apply Otsu thresholding to create a binary image
-            rasterImage.BinarizeOtsu();
+            raster.BinarizeOtsu();
 
             // Save the binary image
-            rasterImage.Save(binaryOutputPath);
+            raster.Save(binaryOutputPath);
         }
     }
 }

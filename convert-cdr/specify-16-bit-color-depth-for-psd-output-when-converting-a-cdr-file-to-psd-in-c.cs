@@ -8,38 +8,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\input.cdr";
-        string outputPath = @"C:\Temp\output.psd";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample_output.psd";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR file
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PSD options for 16‑bit per channel output
-            var psdOptions = new PsdOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // 16 bits per color channel
-                ChannelBitsCount = 16,
-                // Number of channels (e.g., RGBA)
-                ChannelsCount = 4,
-                // Use RGB color mode
-                ColorMode = ColorModes.Rgb,
-                // No compression (RAW) for lossless output
-                CompressionMethod = CompressionMethod.Raw
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PSD with the specified options
-            image.Save(outputPath, psdOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR file
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD options for 16‑bit per channel
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    ChannelBitsCount = 16,                     // 16 bits per channel
+                    ChannelsCount = 4,                         // RGBA channels
+                    ColorMode = ColorModes.Rgb,                // RGB color mode
+                    CompressionMethod = CompressionMethod.Raw // No compression
+                };
+
+                // Save as PSD with the specified options
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

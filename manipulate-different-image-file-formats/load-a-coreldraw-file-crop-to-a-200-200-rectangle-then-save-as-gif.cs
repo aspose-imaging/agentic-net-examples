@@ -8,35 +8,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.cdr";
-        string outputPath = @"C:\Temp\output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "c:\\temp\\sample.cdr";
+            string outputPath = "c:\\temp\\output.gif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CorelDRAW file
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to CdrImage for vector operations
+                CdrImage cdrImage = (CdrImage)image;
+
+                // Crop to a 200×200 rectangle (top‑left corner)
+                var cropRect = new Rectangle(0, 0, 200, 200);
+                cdrImage.Crop(cropRect);
+
+                // Save the cropped image as GIF
+                var gifOptions = new GifOptions();
+                cdrImage.Save(outputPath, gifOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CorelDRAW file
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to CdrImage to access vector-specific methods
-            CdrImage cdrImage = (CdrImage)image;
-
-            // Define a 200x200 rectangle (top-left corner at 0,0)
-            Rectangle cropArea = new Rectangle(0, 0, 200, 200);
-
-            // Crop the image
-            cdrImage.Crop(cropArea);
-
-            // Save as GIF
-            GifOptions gifOptions = new GifOptions();
-            cdrImage.Save(outputPath, gifOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -7,51 +7,60 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded paths
         string inputPath = @"C:\Images\sample.svg";
-        string canvasHtmlPath = @"C:\Images\canvas.html";
+        string canvasOutputPath = @"C:\Images\Canvas.html";
         string reactComponentPath = @"C:\Images\CanvasComponent.jsx";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(canvasHtmlPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(reactComponentPath));
-
-        // Load the vector image and export only the <canvas> tag
-        using (var image = Image.Load(inputPath))
-        {
-            var options = new Html5CanvasOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions(),
-                FullHtmlPage = false,          // export only the canvas tag
-                CanvasTagId = "myCanvas"        // optional canvas id
-            };
-            image.Save(canvasHtmlPath, options);
-        }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Read the generated canvas HTML
-        string canvasHtml = File.ReadAllText(canvasHtmlPath);
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(canvasOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(reactComponentPath));
 
-        // Escape backticks for embedding in a JavaScript template literal
-        string escapedCanvasHtml = canvasHtml.Replace("`", "\\`");
+            // Load the vector image
+            using (var image = Image.Load(inputPath))
+            {
+                // Export only the <canvas> tag (no full HTML page)
+                var options = new Html5CanvasOptions
+                {
+                    FullHtmlPage = false,
+                    VectorRasterizationOptions = new SvgRasterizationOptions()
+                };
 
-        // Build a simple React component that injects the canvas HTML
-        string reactComponentCode = $@"import React from 'react';
+                image.Save(canvasOutputPath, options);
+            }
+
+            // Read the generated canvas HTML
+            string canvasHtml = File.ReadAllText(canvasOutputPath);
+
+            // Escape backticks for embedding in a template literal
+            string escapedCanvasHtml = canvasHtml.Replace("`", "\\`");
+
+            // Build a simple React component that injects the canvas HTML
+            string reactComponent = 
+$@"import React from 'react';
 
 const CanvasComponent = () => (
-  <div dangerouslySetInnerHTML={{{{ __html: `{escapedCanvasHtml}` }}}} />
+  <div dangerouslySetInnerHTML={{ __html: `{escapedCanvasHtml}` }} />
 );
 
 export default CanvasComponent;
 ";
 
-        // Write the React component to file
-        File.WriteAllText(reactComponentPath, reactComponentCode);
+            // Write the React component to file
+            File.WriteAllText(reactComponentPath, reactComponent);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

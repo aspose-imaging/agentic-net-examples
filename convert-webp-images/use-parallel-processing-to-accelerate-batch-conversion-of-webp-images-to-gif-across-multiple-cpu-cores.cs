@@ -1,28 +1,24 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories
+        // Hardcoded relative input and output directories
         string inputDirectory = "Input";
         string outputDirectory = "Output";
 
-        // Ensure directories exist
-        Directory.CreateDirectory(inputDirectory);
+        // Ensure output directory exists
         Directory.CreateDirectory(outputDirectory);
 
         // Get all WebP files in the input directory
         string[] files = Directory.GetFiles(inputDirectory, "*.webp");
 
         // Process files in parallel
-        files.AsParallel().ForAll(inputPath =>
+        System.Threading.Tasks.Parallel.ForEach(files, inputPath =>
         {
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -31,19 +27,17 @@ class Program
                 return;
             }
 
-            // Determine output path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
+            // Determine output file path
+            string fileName = Path.GetFileNameWithoutExtension(inputPath);
+            string outputPath = Path.Combine(outputDirectory, fileName + ".gif");
 
-            // Ensure output directory exists
+            // Ensure the output directory for this file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WebP image and save as GIF
-            using (WebPImage webpImage = new WebPImage(inputPath))
+            // Load the WebP image and save as GIF
+            using (Image image = Image.Load(inputPath))
             {
-                using (GifOptions gifOptions = new GifOptions())
-                {
-                    webpImage.Save(outputPath, gifOptions);
-                }
+                image.Save(outputPath, new GifOptions());
             }
         });
     }

@@ -1,17 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.gif";
+        string inputPath = @"c:\temp\test.webp";
+        string outputPath = @"c:\temp\test.output.gif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -26,15 +25,14 @@ class Program
         // Load the WebP image and save it as GIF
         using (WebPImage webPImage = new WebPImage(inputPath))
         {
-            GifOptions gifOptions = new GifOptions();
-            // Optional: configure GIF options here if needed
-            webPImage.Save(outputPath, gifOptions);
+            // Save using default GIF options
+            webPImage.Save(outputPath, new GifOptions());
         }
 
         // Validate that the GIF file was created
         if (File.Exists(outputPath))
         {
-            Console.WriteLine($"Successfully created GIF: {outputPath}");
+            Console.WriteLine($"GIF created successfully: {outputPath}");
         }
         else
         {

@@ -7,36 +7,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Input\sample.pdf";
-        string outputPath = @"C:\Output\sample.pdf.svg";
+        string outputPath = @"C:\Output\sample.svg";
 
-        // Verify that the input PDF exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PDF document
         using (Image image = Image.Load(inputPath))
         {
+            // Configure rasterization options (page size matches source)
+            var rasterOptions = new SvgRasterizationOptions
+            {
+                PageSize = image.Size
+            };
+
             // Configure SVG export options
             var svgOptions = new SvgOptions
             {
-                // Render all text as vector shapes to keep editability
-                TextAsShapes = true,
-                // Set rasterization options; page size matches the source PDF size
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                }
+                VectorRasterizationOptions = rasterOptions,
+                TextAsShapes = true,          // Preserve text as editable shapes
+                KeepMetadata = true           // Retain original metadata
             };
 
-            // Save the PDF as an SVG file, preserving vector layers
+            // Save as SVG, preserving layer hierarchy where supported
             image.Save(outputPath, svgOptions);
         }
     }

@@ -3,16 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.odg";
-        string outputPath = "Output/sample.pdf";
+        string inputPath = Path.Combine("Input", "sample.odg");
+        string outputPath = Path.Combine("Output", "sample.pdf");
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,7 +23,7 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG image
+        // Load ODG image and convert to PDF with compression
         using (Image image = Image.Load(inputPath))
         {
             // Configure rasterization options for ODG
@@ -32,13 +33,13 @@ class Program
                 PageSize = image.Size
             };
 
-            // Configure PDF save options with compression
+            // Configure PDF save options with desired compression
             var pdfOptions = new PdfOptions
             {
                 VectorRasterizationOptions = rasterOptions,
                 PdfCoreOptions = new PdfCoreOptions
                 {
-                    Compression = PdfImageCompressionOptions.Flate // Set desired compression level
+                    Compression = PdfImageCompressionOptions.Flate
                 }
             };
 

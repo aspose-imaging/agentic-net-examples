@@ -2,46 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.jpg";
-        string outputPath = @"C:\Output\thumbnail.pdf";
+        string inputPath = Path.Combine("Input", "source.jpg");
+        string outputPath = Path.Combine("Output", "thumbnail.pdf");
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
+        int thumbWidth = 150;
+        int thumbHeight = 150;
+
+        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
         {
-            // Cast to RasterImage to perform resizing
-            if (image is RasterImage rasterImage)
+            sourceImage.Resize(thumbWidth, thumbHeight);
+
+            Source pdfSource = new FileCreateSource(outputPath, false);
+            using (PdfOptions pdfOptions = new PdfOptions())
             {
-                // Resize to thumbnail dimensions (e.g., 150x150)
-                rasterImage.Resize(150, 150);
+                pdfOptions.Source = pdfSource;
+
+                using (Image pdfCanvas = Image.Create(pdfOptions, thumbWidth, thumbHeight))
+                {
+                    Graphics graphics = new Graphics(pdfCanvas);
+                    graphics.DrawImage(sourceImage, new Rectangle(0, 0, thumbWidth, thumbHeight));
+                    pdfCanvas.Save();
+                }
             }
-
-            // Prepare PDF export options
-            var pdfOptions = new PdfOptions
-            {
-                // Optional: set page size to match the thumbnail
-                PageSize = new SizeF(150, 150)
-            };
-
-            // Save the resized image as a PDF page
-            image.Save(outputPath, pdfOptions);
         }
     }
 }

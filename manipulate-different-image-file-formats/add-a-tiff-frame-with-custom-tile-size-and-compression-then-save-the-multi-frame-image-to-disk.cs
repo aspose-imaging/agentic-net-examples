@@ -4,52 +4,69 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string outputPath = @"C:\Temp\multiframe.tif";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Frame 1 options
-        TiffOptions frameOptions1 = new TiffOptions(TiffExpectedFormat.Default);
-        frameOptions1.BitsPerSample = new ushort[] { 8, 8, 8 };
-        frameOptions1.Photometric = TiffPhotometrics.Rgb;
-        frameOptions1.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-        frameOptions1.Compression = TiffCompressions.Lzw;
-
-        // Frame 2 options
-        TiffOptions frameOptions2 = new TiffOptions(TiffExpectedFormat.Default);
-        frameOptions2.BitsPerSample = new ushort[] { 8, 8, 8 };
-        frameOptions2.Photometric = TiffPhotometrics.Rgb;
-        frameOptions2.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-        frameOptions2.Compression = TiffCompressions.Deflate;
-
-        // Create frames
-        TiffFrame frame1 = new TiffFrame(frameOptions1, 200, 200);
-        TiffFrame frame2 = new TiffFrame(frameOptions2, 300, 300);
-
-        // Fill frame 1 with solid blue
-        int width1 = frame1.Width;
-        int height1 = frame1.Height;
-        Color[] pixels1 = new Color[width1 * height1];
-        for (int i = 0; i < pixels1.Length; i++)
-            pixels1[i] = Color.Blue;
-        frame1.SavePixels(frame1.Bounds, pixels1);
-
-        // Fill frame 2 with solid red
-        int width2 = frame2.Width;
-        int height2 = frame2.Height;
-        Color[] pixels2 = new Color[width2 * height2];
-        for (int i = 0; i < pixels2.Length; i++)
-            pixels2[i] = Color.Red;
-        frame2.SavePixels(frame2.Bounds, pixels2);
-
-        // Create multi‑frame TIFF and save
-        using (TiffImage tiffImage = new TiffImage(new TiffFrame[] { frame1, frame2 }))
+        try
         {
-            tiffImage.Save(outputPath);
+            string outputPath = "C:\\temp\\multiframe.tif";
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Options for the first frame
+            TiffOptions options1 = new TiffOptions(TiffExpectedFormat.Default);
+            options1.BitsPerSample = new ushort[] { 8, 8, 8 };
+            options1.Compression = TiffCompressions.Lzw;
+            options1.Photometric = TiffPhotometrics.Rgb;
+            options1.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+            // Create TIFF image with first frame
+            using (TiffImage tiffImage = (TiffImage)Image.Create(options1, 200, 200))
+            {
+                // Draw gradient on first frame
+                Graphics graphics1 = new Graphics(tiffImage);
+                using (LinearGradientBrush brush1 = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(200, 200),
+                    Color.Blue,
+                    Color.Yellow))
+                {
+                    graphics1.FillRectangle(brush1, tiffImage.ActiveFrame.Bounds);
+                }
+
+                // Options for the second frame
+                TiffOptions options2 = new TiffOptions(TiffExpectedFormat.Default);
+                options2.BitsPerSample = new ushort[] { 8, 8, 8 };
+                options2.Compression = TiffCompressions.Deflate;
+                options2.Photometric = TiffPhotometrics.Rgb;
+                options2.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+                // Create second frame and add to image
+                TiffFrame frame2 = new TiffFrame(options2, 200, 200);
+                tiffImage.AddFrame(frame2);
+                tiffImage.ActiveFrame = frame2;
+
+                // Draw gradient on second frame
+                Graphics graphics2 = new Graphics(tiffImage);
+                using (LinearGradientBrush brush2 = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(200, 200),
+                    Color.Red,
+                    Color.Green))
+                {
+                    graphics2.FillRectangle(brush2, tiffImage.ActiveFrame.Bounds);
+                }
+
+                tiffImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

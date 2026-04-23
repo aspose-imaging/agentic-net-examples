@@ -7,63 +7,63 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tif";
-        string outputPath = @"C:\Images\sample_aligned.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.tif";
+            string outputPath = @"C:\Images\output\aligned_sample.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to TiffImage to access AlignResolutions
-            if (image is TiffImage tiffImage)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Capture resolutions before alignment
-                double beforeH = tiffImage.HorizontalResolution;
-                double beforeV = tiffImage.VerticalResolution;
-                Console.WriteLine($"Before AlignResolutions - Horizontal DPI: {beforeH}, Vertical DPI: {beforeV}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Align resolutions for the whole image
-                tiffImage.AlignResolutions();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Align resolutions for each frame (optional but ensures all frames are consistent)
-                foreach (TiffFrame frame in tiffImage.Frames)
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to TiffImage to access AlignResolutions
+                TiffImage tiff = image as TiffImage;
+                if (tiff == null)
                 {
-                    frame.AlignResolutions();
+                    Console.Error.WriteLine("The loaded image is not a TIFF image.");
+                    return;
                 }
 
-                // Capture resolutions after alignment
-                double afterH = tiffImage.HorizontalResolution;
-                double afterV = tiffImage.VerticalResolution;
-                Console.WriteLine($"After AlignResolutions - Horizontal DPI: {afterH}, Vertical DPI: {afterV}");
+                // Capture DPI values before alignment
+                double hBefore = tiff.HorizontalResolution;
+                double vBefore = tiff.VerticalResolution;
+                Console.WriteLine($"Before AlignResolutions: Horizontal DPI = {hBefore}, Vertical DPI = {vBefore}");
 
-                // Validate that horizontal and vertical DPI are now identical
-                if (Math.Abs(afterH - afterV) < 0.0001)
+                // Align horizontal and vertical resolutions
+                tiff.AlignResolutions();
+
+                // Capture DPI values after alignment
+                double hAfter = tiff.HorizontalResolution;
+                double vAfter = tiff.VerticalResolution;
+                Console.WriteLine($"After AlignResolutions: Horizontal DPI = {hAfter}, Vertical DPI = {vAfter}");
+
+                // Validate that DPI values are now identical
+                if (Math.Abs(hAfter - vAfter) < 0.0001)
                 {
-                    Console.WriteLine("Success: Horizontal and vertical DPI are identical after alignment.");
+                    Console.WriteLine("Validation passed: Horizontal and vertical DPI are identical after alignment.");
                 }
                 else
                 {
-                    Console.WriteLine("Failure: DPI values differ after alignment.");
+                    Console.WriteLine("Validation failed: DPI values are still different after alignment.");
                 }
 
-                // Save the aligned image
-                tiffImage.Save(outputPath);
-                Console.WriteLine($"Aligned image saved to: {outputPath}");
+                // Save the modified image
+                tiff.Save(outputPath);
             }
-            else
-            {
-                Console.Error.WriteLine("The loaded image is not a TIFF image.");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

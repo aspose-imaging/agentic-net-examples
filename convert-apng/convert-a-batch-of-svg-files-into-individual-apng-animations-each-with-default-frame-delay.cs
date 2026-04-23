@@ -2,49 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input SVG files
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Images\example1.svg",
-            @"C:\Images\example2.svg",
-            @"C:\Images\example3.svg"
-        };
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputSvgs";
+            string outputFolder = @"C:\OutputApngs";
 
-        // Hardcoded output directory
-        string outputDirectory = @"C:\Images\APNGOutput";
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Get all SVG files in the input folder
+            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
+
+            foreach (string inputPath in svgFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Build output file path (same name with .apng extension)
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".apng");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Save as APNG with a default frame delay (e.g., 100 ms)
-                var apngOptions = new ApngOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    DefaultFrameTime = 100 // milliseconds
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                image.Save(outputPath, apngOptions);
+                // Determine the output file path (APNG uses .png extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Ensure the output directory exists (covers subfolders if any)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the SVG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Save as APNG with default frame time
+                    image.Save(outputPath, new ApngOptions());
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

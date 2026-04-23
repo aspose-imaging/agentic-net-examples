@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -9,38 +10,43 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputTiffPath = @"C:\temp\input.tif";
-        string newFrameImagePath = @"C:\temp\newframe.png";
-        string outputTiffPath = @"C:\temp\output.tif";
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output.tif";
 
-        // Verify input TIFF exists
-        if (!File.Exists(inputTiffPath))
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
         {
-            Console.Error.WriteLine($"File not found: {inputTiffPath}");
+            Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Verify new frame image exists
-        if (!File.Exists(newFrameImagePath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {newFrameImagePath}");
-            return;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the existing multi‑page TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Define options for the new frame
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                frameOptions.Photometric = TiffPhotometrics.Rgb;
+                frameOptions.Compression = TiffCompressions.None;
+
+                // Create a new blank frame (e.g., 100x100 pixels)
+                TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
+
+                // Insert the new frame at position index 2 (third position)
+                tiffImage.InsertFrame(2, newFrame);
+
+                // Save the modified TIFF to the output path
+                tiffImage.Save(outputPath);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
-
-        // Load the existing multi‑page TIFF
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputTiffPath))
+        catch (Exception ex)
         {
-            // Create a TiffFrame from the new image file
-            TiffFrame newFrame = new TiffFrame(newFrameImagePath);
-
-            // Insert the new frame at position index 2 (third position)
-            tiffImage.InsertFrame(2, newFrame);
-
-            // Save the modified TIFF to the output path
-            tiffImage.Save(outputTiffPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

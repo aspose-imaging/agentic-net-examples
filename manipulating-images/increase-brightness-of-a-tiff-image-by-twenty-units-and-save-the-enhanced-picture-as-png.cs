@@ -1,38 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.tif";
-        string outputPath = @"C:\temp\sample_bright.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output file paths
+            string inputPath = @"c:\temp\sample.tif";
+            string outputPath = @"c:\temp\sample_brightness20.png";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to TiffImage to access AdjustBrightness
+                TiffImage tiffImage = (TiffImage)image;
+
+                // Increase brightness by 20 units (range -255 to 255)
+                tiffImage.AdjustBrightness(20);
+
+                // Save the result as PNG
+                PngOptions pngOptions = new PngOptions();
+                tiffImage.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TIFF image, adjust brightness, and save as PNG
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to TiffImage to access AdjustBrightness
-            TiffImage tiffImage = (TiffImage)image;
-
-            // Increase brightness by 20 units (range -255 to 255)
-            tiffImage.AdjustBrightness(20);
-
-            // Save the modified image as PNG
-            tiffImage.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

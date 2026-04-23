@@ -2,52 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Exif;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
-        {
-            // Ensure EXIF container exists
-            if (jpeg.ExifData == null)
-                jpeg.ExifData = new Aspose.Imaging.Exif.JpegExifData();
-
-            // Ensure JFIF container exists
-            if (jpeg.Jfif == null)
-                jpeg.Jfif = new JFIFData();
-
-            // Determine thumbnail size (e.g., 25% of original)
-            int thumbWidth = jpeg.Width / 4;
-            int thumbHeight = jpeg.Height / 4;
-
-            // Create a thumbnail by loading the image again and resizing
-            using (RasterImage thumb = (RasterImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                thumb.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
-
-                // Assign the thumbnail to both EXIF and JFIF segments
-                jpeg.ExifData.Thumbnail = thumb;
-                jpeg.Jfif.Thumbnail = thumb;
-
-                // Save the modified JPEG with the new thumbnails
-                jpeg.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (JpegImage image = new JpegImage(inputPath))
+            {
+                if (image.ExifData == null)
+                {
+                    image.ExifData = new JpegExifData();
+                }
+
+                if (image.Jfif == null)
+                {
+                    image.Jfif = new JFIFData();
+                }
+
+                using (JpegImage thumb = new JpegImage(100, 100))
+                {
+                    Graphics graphics = new Graphics(thumb);
+                    SolidBrush brush = new SolidBrush(Color.Blue);
+                    graphics.FillRectangle(brush, thumb.Bounds);
+
+                    image.ExifData.Thumbnail = thumb;
+                    image.Jfif.Thumbnail = thumb;
+
+                    image.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

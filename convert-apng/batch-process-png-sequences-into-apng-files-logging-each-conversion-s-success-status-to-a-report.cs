@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -11,70 +10,70 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input PNG files
-        string[] inputFiles = {
-            "input1.png",
-            "input2.png"
-        };
-
-        // Output directory for APNG files
-        string outputDirectory = "output";
-
-        // Report file path
-        string reportPath = "report.txt";
-
-        // Initialize report
-        File.WriteAllText(reportPath, string.Empty);
-
-        foreach (string inputPath in inputFiles)
+        try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+            string reportPath = Path.Combine(outputDirectory, "report.txt");
+
+            // Ensure output directory exists for report and later saves
+            Directory.CreateDirectory(outputDirectory);
+
+            // Get all PNG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            using (StreamWriter reportWriter = new StreamWriter(reportPath, append: true))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Determine output APNG path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".apng");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            try
-            {
-                // Load source PNG as RasterImage
-                using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+                foreach (string inputPath in files)
                 {
-                    // Configure APNG creation options
-                    ApngOptions createOptions = new ApngOptions
+                    if (!File.Exists(inputPath))
                     {
-                        Source = new FileCreateSource(outputPath, false),
-                        DefaultFrameTime = 500, // 500 ms per frame
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
+                    }
 
-                    // Create APNG image canvas
-                    using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".apng";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    try
                     {
-                        // Remove default frame and add the source image as the only frame
-                        apngImage.RemoveAllFrames();
-                        apngImage.AddFrame(sourceImage);
+                        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+                        {
+                            ApngOptions createOptions = new ApngOptions
+                            {
+                                Source = new FileCreateSource(outputPath, false),
+                                DefaultFrameTime = 100, // 100 ms per frame
+                                ColorType = PngColorType.TruecolorWithAlpha
+                            };
 
-                        // Save the APNG file
-                        apngImage.Save();
+                            using (ApngImage apngImage = (ApngImage)Image.Create(
+                                createOptions,
+                                sourceImage.Width,
+                                sourceImage.Height))
+                            {
+                                apngImage.RemoveAllFrames();
+                                apngImage.AddFrame(sourceImage);
+                                apngImage.Save();
+                            }
+                        }
+
+                        reportWriter.WriteLine($"{DateTime.Now}: SUCCESS - Converted '{inputPath}' to '{outputPath}'.");
+                        Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        reportWriter.WriteLine($"{DateTime.Now}: FAILURE - '{inputPath}' -> '{outputPath}'. Error: {ex.Message}");
+                        Console.Error.WriteLine($"Error processing '{inputPath}': {ex.Message}");
                     }
                 }
-
-                // Log success
-                File.AppendAllText(reportPath, $"{inputPath} -> {outputPath}: Success{Environment.NewLine}");
             }
-            catch (Exception ex)
-            {
-                // Log failure
-                File.AppendAllText(reportPath, $"{inputPath} -> {outputPath}: Failed - {ex.Message}{Environment.NewLine}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

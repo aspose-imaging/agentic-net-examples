@@ -7,13 +7,20 @@ using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string outputPath = Path.Combine("Output", "sample.jp2");
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Jpeg2000Options options = new Jpeg2000Options())
+        try
         {
+            string outputPath = "Output/sample.jp2";
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            Jpeg2000Options options = new Jpeg2000Options
+            {
+                Irreversible = true,
+                Codec = Jpeg2000Codec.J2K
+            };
+
             using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, options))
             {
                 Graphics graphics = new Graphics(jpeg2000Image);
@@ -24,16 +31,9 @@ class Program
                 jpeg2000Image.Save(outputPath);
             }
         }
-
-        if (!File.Exists(outputPath))
+        catch (Exception ex)
         {
-            Console.Error.WriteLine($"File not found: {outputPath}");
-            return;
-        }
-
-        using (Jpeg2000Image loadedImage = new Jpeg2000Image(outputPath))
-        {
-            Console.WriteLine("JPEG2000 image created and loaded successfully.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

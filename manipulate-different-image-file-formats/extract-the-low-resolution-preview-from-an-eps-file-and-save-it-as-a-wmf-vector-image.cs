@@ -8,35 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output/preview.wmf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.eps";
+        string outputPath = @"C:\Images\preview.wmf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported without crashing
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the EPS image
-        using (var epsImage = (EpsImage)Image.Load(inputPath))
-        {
-            // Retrieve the WMF preview (low‑resolution vector preview)
-            Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF);
-
-            if (preview == null)
+            // Verify that the input EPS file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("No WMF preview available in the EPS file.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Save the preview as a WMF file
-            preview.Save(outputPath);
-            preview.Dispose();
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            {
+                // Retrieve the WMF preview image (low‑resolution)
+                using (Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF))
+                {
+                    if (preview == null)
+                    {
+                        Console.Error.WriteLine("No WMF preview available in the EPS file.");
+                        return;
+                    }
+
+                    // Save the preview as a WMF vector image
+                    preview.Save(outputPath, new WmfOptions());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

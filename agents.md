@@ -21,10 +21,10 @@ When working in this repository:
 
 ## Repository Overview
 
-This repository contains **2863** working code examples demonstrating Aspose.Imaging for .NET capabilities.
+This repository contains **5694** working code examples demonstrating Aspose.Imaging for .NET capabilities.
 
-**Statistics** (as of 2026-04-08):
-- Total Examples: 2863
+**Statistics** (as of 2026-04-23):
+- Total Examples: 5694
 - Categories: 17
 - Overall Pass Rate: 100.0%
 
@@ -35,67 +35,67 @@ This repository contains **2863** working code examples demonstrating Aspose.Ima
 - Guide: [agents.md](./conversion/agents.md)
 
 ### convert-apng
-- Examples: 51
+- Examples: 153
 - Guide: [agents.md](./convert-apng/agents.md)
 
 ### convert-cdr
-- Examples: 30
+- Examples: 90
 - Guide: [agents.md](./convert-cdr/agents.md)
 
 ### convert-cmx-images
-- Examples: 34
+- Examples: 68
 - Guide: [agents.md](./convert-cmx-images/agents.md)
 
 ### convert-dicom-images
-- Examples: 30
+- Examples: 90
 - Guide: [agents.md](./convert-dicom-images/agents.md)
 
 ### convert-eps-images
-- Examples: 60
+- Examples: 120
 - Guide: [agents.md](./convert-eps-images/agents.md)
 
 ### convert-open-document-graphics
-- Examples: 120
+- Examples: 240
 - Guide: [agents.md](./convert-open-document-graphics/agents.md)
 
 ### convert-raster-image
-- Examples: 138
+- Examples: 276
 - Guide: [agents.md](./convert-raster-image/agents.md)
 
 ### convert-svg-to-raster-images
-- Examples: 40
+- Examples: 120
 - Guide: [agents.md](./convert-svg-to-raster-images/agents.md)
 
 ### convert-webp-images
-- Examples: 30
+- Examples: 60
 - Guide: [agents.md](./convert-webp-images/agents.md)
 
 ### converting-wmf-and-emf
-- Examples: 29
+- Examples: 58
 - Guide: [agents.md](./converting-wmf-and-emf/agents.md)
 
 ### image-and-photo-filters
-- Examples: 136
+- Examples: 208
 - Guide: [agents.md](./image-and-photo-filters/agents.md)
 
 ### kernel-filters
-- Examples: 464
+- Examples: 695
 - Guide: [agents.md](./kernel-filters/agents.md)
 
 ### manipulate-different-image-file-formats
-- Examples: 600
+- Examples: 1896
 - Guide: [agents.md](./manipulate-different-image-file-formats/agents.md)
 
 ### manipulating-images
-- Examples: 407
+- Examples: 644
 - Guide: [agents.md](./manipulating-images/agents.md)
 
 ### merge-images
-- Examples: 135
+- Examples: 175
 - Guide: [agents.md](./merge-images/agents.md)
 
 ### working-with-drawing-images
-- Examples: 397
+- Examples: 639
 - Guide: [agents.md](./working-with-drawing-images/agents.md)
 
 ## Boundaries
@@ -232,22 +232,22 @@ README.md
 | Category | Examples | Pass Rate | Details |
 |----------|----------|-----------|---------|
 | [Conversion](./conversion/) | 162 | 100.0% | [agents.md](./conversion/agents.md) |
-| [Convert APNG](./convert-apng/) | 51 | 100.0% | [agents.md](./convert-apng/agents.md) |
-| [Convert CDR](./convert-cdr/) | 30 | 100.0% | [agents.md](./convert-cdr/agents.md) |
-| [Convert CMX Images](./convert-cmx-images/) | 34 | 100.0% | [agents.md](./convert-cmx-images/agents.md) |
-| [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
-| [Convert EPS Images](./convert-eps-images/) | 60 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
-| [Convert Open Document Graphics](./convert-open-document-graphics/) | 120 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
-| [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
-| [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 40 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
-| [Convert webp Images](./convert-webp-images/) | 30 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
-| [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
-| [Image and Photo Filters](./image-and-photo-filters/) | 136 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
-| [Kernel Filters](./kernel-filters/) | 464 | 100.0% | [agents.md](./kernel-filters/agents.md) |
-| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 600 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
-| [Manipulating Images](./manipulating-images/) | 407 | 100.0% | [agents.md](./manipulating-images/agents.md) |
-| [Merge Images](./merge-images/) | 135 | 100.0% | [agents.md](./merge-images/agents.md) |
-| [Working With Drawing Images](./working-with-drawing-images/) | 397 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
+| [Convert APNG](./convert-apng/) | 153 | 100.0% | [agents.md](./convert-apng/agents.md) |
+| [Convert CDR](./convert-cdr/) | 90 | 100.0% | [agents.md](./convert-cdr/agents.md) |
+| [Convert CMX Images](./convert-cmx-images/) | 68 | 100.0% | [agents.md](./convert-cmx-images/agents.md) |
+| [Convert DICOM Images](./convert-dicom-images/) | 90 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
+| [Convert EPS Images](./convert-eps-images/) | 120 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
+| [Convert Open Document Graphics](./convert-open-document-graphics/) | 240 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
+| [Convert Raster Image](./convert-raster-image/) | 276 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
+| [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 120 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
+| [Convert webp Images](./convert-webp-images/) | 60 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
+| [Converting WMF and EMF](./converting-wmf-and-emf/) | 58 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
+| [Image and Photo Filters](./image-and-photo-filters/) | 208 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
+| [Kernel Filters](./kernel-filters/) | 695 | 100.0% | [agents.md](./kernel-filters/agents.md) |
+| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 1896 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
+| [Manipulating Images](./manipulating-images/) | 644 | 100.0% | [agents.md](./manipulating-images/agents.md) |
+| [Merge Images](./merge-images/) | 175 | 100.0% | [agents.md](./merge-images/agents.md) |
+| [Working With Drawing Images](./working-with-drawing-images/) | 639 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
 
 ## Command Reference
 
@@ -313,8 +313,8 @@ dotnet build --configuration Release --verbosity minimal
    ```
 
 <!-- AUTOGENERATED:START -->
-Updated: 2026-04-08 | Run: `20260408_082413` | Examples: 2863 | Categories: 17
+Updated: 2026-04-23 | Run: `20260423_090043` | Examples: 5694 | Categories: 17
 <!-- AUTOGENERATED:END -->
 
 ---
-*This repository is maintained by automated code generation. Last updated: 2026-04-08 | Total examples: 2863*
+*This repository is maintained by automated code generation. Last updated: 2026-04-23 | Total examples: 5694*

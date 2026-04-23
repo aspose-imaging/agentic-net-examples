@@ -1,42 +1,50 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample_filtered.bmp";
+        // Hardcoded input and output paths
+        string inputPath = Path.Combine("Input", "sample.odg");
+        string outputPath = Path.Combine("Output", "sample_filtered.bmp");
 
-        // Verify that the input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        // Load the ODG vector image and rasterize it to BMP
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Cast to RasterImage to enable pixel‑level operations
-            RasterImage rasterImage = (RasterImage)image;
+            var odgImage = (Aspose.Imaging.FileFormats.OpenDocument.OdgImage)image;
 
-            // Apply a median filter with a size of 5 to the whole image
-            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+            var bmpOptions = new BmpOptions();
+            var rasterOptions = new Aspose.Imaging.ImageOptions.OdgRasterizationOptions
+            {
+                BackgroundColor = Aspose.Imaging.Color.White,
+                PageSize = odgImage.Size
+            };
+            bmpOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Prepare BMP save options (default options are sufficient here)
-            BmpOptions bmpOptions = new BmpOptions();
+            // Save the rasterized BMP (temporary)
+            odgImage.Save(outputPath, bmpOptions);
+        }
 
-            // Save the filtered image as BMP
-            image.Save(outputPath, bmpOptions);
+        // Load the rasterized BMP, apply median filter, and save the final result
+        using (Aspose.Imaging.Image bmpImage = Aspose.Imaging.Image.Load(outputPath))
+        {
+            var raster = (Aspose.Imaging.RasterImage)bmpImage;
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+            raster.Save(outputPath);
         }
     }
 }

@@ -2,38 +2,60 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.webp");
-
-        foreach (var file in files)
+        // Wrap the entire processing in a try-catch to handle unexpected errors gracefully
+        try
         {
-            string inputPath = file;
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Hardcoded input and output directories
+            string inputDir = @"C:\WebPInput\";
+            string outputDir = @"C:\WebPOutput\";
 
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".png");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists (creates the folder if missing)
+            Directory.CreateDirectory(outputDir);
 
-            using (Image image = Image.Load(inputPath))
+            // Get all WebP files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.webp");
+
+            // Process each WebP file
+            foreach (string inputPath in inputFiles)
             {
-                using (var options = new PngOptions())
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    options.BufferSizeHint = 50;
-                    image.Save(outputPath, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Determine the corresponding output path (convert to PNG)
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+                // Ensure the output directory exists (unconditional as required)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Set a memory usage limit (buffer size hint) for loading the image
+                var loadOptions = new LoadOptions
+                {
+                    BufferSizeHint = 100 // limit internal buffers to 100 MB
+                };
+
+                // Load the WebP image with the specified memory limit
+                using (Image image = Image.Load(inputPath, loadOptions))
+                {
+                    // Save the image to PNG format
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            // Output any runtime exception message without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

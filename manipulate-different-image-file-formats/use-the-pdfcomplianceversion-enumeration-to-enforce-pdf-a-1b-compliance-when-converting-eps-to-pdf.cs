@@ -11,32 +11,37 @@ class Program
     {
         // Hardcoded input and output file paths
         string inputPath = "Sample.eps";
-        string outputPath = "Sample.pdf";
+        string outputPath = "Output/Sample.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load EPS image
-        using (var image = (EpsImage)Image.Load(inputPath))
-        {
-            // Configure PDF options with PDF/A‑1b compliance
-            var pdfOptions = new PdfOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image and convert to PDF/A‑1b
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                var options = new PdfOptions
+                {
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    }
+                };
+
+                image.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

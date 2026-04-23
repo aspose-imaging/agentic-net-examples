@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.bmp";
-        string outputPath = "output.svg";
+        string outputPath = "Output/output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -20,30 +19,28 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load BMP image
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for raster operations
+            // Resize to 500x500
+            image.Resize(500, 500);
+
+            // Apply median filter (kernel size 5)
             RasterImage raster = (RasterImage)image;
-
-            // Resize to 500x500 using default nearest neighbour resample
-            raster.Resize(500, 500);
-
-            // Apply median filter with kernel size 5
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
 
             // Prepare SVG save options with rasterization settings
             SvgOptions svgOptions = new SvgOptions();
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
             {
-                PageSize = raster.Size
+                PageSize = image.Size
             };
-            svgOptions.VectorRasterizationOptions = rasterizationOptions;
+            svgOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the processed image as SVG
-            raster.Save(outputPath, svgOptions);
+            // Save as SVG
+            image.Save(outputPath, svgOptions);
         }
     }
 }

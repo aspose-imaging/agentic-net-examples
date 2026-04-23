@@ -1,38 +1,46 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.cdr";
-        string outputPath = "Output\\sample.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input\\sample.cdr";
+            string outputPath = "Output\\sample.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.PageSize = new SizeF(595f, 842f);
-                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions();
+
+                // Set custom A4 page size (595 x 842 points)
+                pdfOptions.PageSize = new Aspose.Imaging.SizeF(595f, 842f);
+
+                var rasterOptions = new CdrRasterizationOptions
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    Positioning = PositioningTypes.DefinedByDocument
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                    PageSize = new Aspose.Imaging.SizeF(595f, 842f)
                 };
+
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
                 image.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,29 +8,40 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        string inputPath = "input/source_image.png";
+        string outputPath = "output/apng_result.png";
 
-        string outputPath = "output.apng.png";
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-
-        // Load the source image (can be multi‑page)
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure APNG options: custom loop count and frame delay
-            ApngOptions apngOptions = new ApngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                NumPlays = 3,            // Loop the animation 3 times (0 = infinite)
-                DefaultFrameTime = 150  // Frame duration in milliseconds
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as APNG with the specified options
-            image.Save(outputPath, apngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image (can be any raster image)
+            using (Image sourceImage = Image.Load(inputPath))
+            {
+                // Configure APNG options: custom loop count and frame delay
+                ApngOptions apngOptions = new ApngOptions
+                {
+                    // Number of times the animation should loop (0 = infinite)
+                    NumPlays = 4,
+                    // Default frame duration in milliseconds
+                    DefaultFrameTime = 150
+                };
+
+                // Save the image as APNG with the configured options
+                sourceImage.Save(outputPath, apngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

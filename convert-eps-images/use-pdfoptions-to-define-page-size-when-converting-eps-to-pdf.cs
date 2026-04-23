@@ -9,9 +9,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.eps";
-        string outputPath = "output.pdf";
+        // Define input and output paths
+        string inputPath = Path.Combine("Input", "sample.eps");
+        string outputPath = Path.Combine("Output", "sample.pdf");
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,23 +23,16 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image
-        using (var image = (EpsImage)Image.Load(inputPath))
+        // Load EPS image and convert to PDF with page size defined
+        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
         {
-            // Configure PDF options with page size and compliance
-            using (var options = new PdfOptions
+            var pdfOptions = new PdfOptions
             {
-                // Set page size (e.g., A4 in points)
-                PageSize = new SizeF(595, 842),
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            })
-            {
-                // Save EPS as PDF using the defined options
-                image.Save(outputPath, options);
-            }
+                // Set PDF page size to match EPS dimensions
+                PageSize = new SizeF(epsImage.Width, epsImage.Height)
+            };
+
+            epsImage.Save(outputPath, pdfOptions);
         }
     }
 }

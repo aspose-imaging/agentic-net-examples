@@ -10,9 +10,9 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample.tiff";
+        string outputPath = @"C:\Images\sample_output.tif";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,24 +22,31 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CDR document
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure rasterization options with smoothing
-            var rasterOptions = new CdrRasterizationOptions
+            // Load the CDR vector image
+            using (Image image = Image.Load(inputPath))
             {
-                SmoothingMode = SmoothingMode.AntiAlias,
-                BackgroundColor = Color.White
-            };
+                // Configure rasterization options with smoothing
+                var rasterOptions = new CdrRasterizationOptions
+                {
+                    // Apply antialiasing to reduce jagged lines
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
+                };
 
-            // Set up TIFF save options and attach rasterization options
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
+                // Prepare TIFF save options and attach rasterization settings
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-            // Export to TIFF
-            image.Save(outputPath, tiffOptions);
+                // Save the rasterized image as TIFF
+                image.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

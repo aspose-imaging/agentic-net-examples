@@ -6,43 +6,43 @@ using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output file paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (var image = Image.Load(inputPath))
+        try
         {
-            var pngImage = (PngImage)image;
-
-            // Define an elliptical mask using GraphicsPath
-            var mask = new GraphicsPath();
-            var figure = new Figure();
-            // Ellipse defined by a rectangle (x, y, width, height)
-            figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
-            mask.AddFigure(figure);
-
-            // Create ContentAwareFill options with the mask (default settings)
-            var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask);
-
-            // Remove the watermark
-            using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
+            using (var image = Image.Load(inputPath))
             {
-                // Save the resulting image
-                result.Save(outputPath);
+                var pngImage = (PngImage)image;
+
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
+                mask.AddFigure(figure);
+
+                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                {
+                    MaxPaintingAttempts = 4
+                };
+
+                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    result.Save(outputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

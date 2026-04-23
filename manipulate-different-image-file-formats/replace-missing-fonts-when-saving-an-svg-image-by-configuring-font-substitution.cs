@@ -1,64 +1,46 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.svg";
-        string fontFolderPath = @"C:\Fonts";
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.svg";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        var loadOptions = new LoadOptions();
-        loadOptions.AddCustomFontSource((object[] parameters) =>
+        try
         {
-            string fontsPath = string.Empty;
-            if (parameters != null && parameters.Length > 0 && parameters[0] != null)
-                fontsPath = parameters[0].ToString();
+            // Configure font substitution: use a default fallback font
+            FontSettings.DefaultFontName = "Arial";
 
-            var fontDataList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-            if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+            // Optionally, point to a folder containing additional fonts
+            // FontSettings.SetFontsFolder(Environment.GetFolderPath(Environment.SpecialFolder.Fonts));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                foreach (var file in Directory.GetFiles(fontsPath))
-                {
-                    string fontName = Path.GetFileNameWithoutExtension(file);
-                    byte[] fontBytes = File.ReadAllBytes(file);
-                    fontDataList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
-                }
+                // Save as SVG, the configured FontSettings will be applied automatically
+                var svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
             }
-            return fontDataList.ToArray();
-        }, fontFolderPath);
-
-        using (Image image = Image.Load(inputPath, loadOptions))
+        }
+        catch (Exception ex)
         {
-            var vectorOptions = new VectorRasterizationOptions
-            {
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None,
-                BackgroundColor = Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height
-            };
-
-            var saveOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = vectorOptions,
-                TextAsShapes = false
-            };
-
-            image.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output.svg";
+        string outputPath = "Output/thumbnail.svg";
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -23,16 +23,19 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load PNG, apply median filter, resize, and save as SVG
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        using (Image image = Image.Load(inputPath))
         {
-            // Apply median filter with size 5
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+            RasterImage raster = (RasterImage)image;
 
-            // Resize to thumbnail size (e.g., 150x150)
+            // Apply median filter with size 5
+            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+
+            // Resize to thumbnail dimensions (e.g., 150x150)
             raster.Resize(150, 150);
 
-            // Save as SVG
-            raster.Save(outputPath, new SvgOptions());
+            // Save the processed image as SVG
+            SvgOptions svgOptions = new SvgOptions();
+            raster.Save(outputPath, svgOptions);
         }
     }
 }

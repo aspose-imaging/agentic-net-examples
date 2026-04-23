@@ -8,55 +8,60 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DICOM files
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\Input1.dcm",
-            @"C:\Images\Input2.dcm"
-        };
+            // Hard‑coded input DICOM files
+            string[] inputPaths = { "input1.dcm", "input2.dcm" };
+            // Hard‑coded output directory
+            string outputDir = "output";
 
-        // Output directory for PNG files
-        string outputDir = @"C:\Images\Output";
-
-        // Ensure the output directory exists (unconditional)
-        Directory.CreateDirectory(outputDir);
-
-        foreach (string inputPath in inputPaths)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Set up load options with a small buffer size hint for high‑performance memory usage
-            LoadOptions loadOptions = new LoadOptions
-            {
-                BufferSizeHint = 256 * 1024 // 256 KB
-            };
-
-            // Load the DICOM image from a file stream using the load options
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
-            {
-                // Adjust gamma for the whole DICOM image (example gamma value)
-                dicomImage.AdjustGamma(2.2f);
-
-                // Iterate through each page and save as PNG
-                foreach (DicomPage page in dicomImage.DicomPages)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Build output file name: InputFileName_page{Index}.png
-                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png";
-                    string outputPath = Path.Combine(outputDir, outputFileName);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Ensure the directory for the output file exists (unconditional)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Configure load options for a small buffer (high‑performance memory strategy)
+                var loadOptions = new LoadOptions
+                {
+                    BufferSizeHint = 256 * 1024 // 256 KB
+                };
 
-                    // Save the page as PNG
-                    page.Save(outputPath, new PngOptions());
+                // Open the DICOM file as a stream and load it with the specified options
+                using (Stream stream = File.OpenRead(inputPath))
+                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
+                {
+                    // Cache all pages to avoid further I/O during processing
+                    dicomImage.CacheData();
+
+                    // Apply gamma correction to the whole image
+                    dicomImage.AdjustGamma(2.2f);
+
+                    int pageIndex = 0;
+                    foreach (DicomPage page in dicomImage.DicomPages)
+                    {
+                        // Build output file name for each page
+                        string outputPath = Path.Combine(
+                            outputDir,
+                            $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.png");
+
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as PNG
+                        page.Save(outputPath, new PngOptions());
+
+                        pageIndex++;
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

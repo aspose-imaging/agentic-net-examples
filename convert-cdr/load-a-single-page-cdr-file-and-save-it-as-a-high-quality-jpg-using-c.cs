@@ -8,38 +8,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CDR file
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-        {
-            // Cache the whole document to avoid further stream reads
-            cdrImage.CacheData();
-
-            // Access the first (and only) page
-            CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
-            page.CacheData();
-
-            // Configure high‑quality JPEG options
-            var jpegOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Quality = 100 // maximum quality
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the page as a JPEG image
-            page.Save(outputPath, jpegOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            {
+                // Ensure the document has at least one page
+                if (cdrImage.PageCount == 0)
+                {
+                    Console.Error.WriteLine("CDR document contains no pages.");
+                    return;
+                }
+
+                // Get the first page (single‑page document)
+                var page = (CdrImagePage)cdrImage.Pages[0];
+
+                // Configure high‑quality JPEG options
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 100 // maximum quality
+                };
+
+                // Save the page as a JPG
+                page.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

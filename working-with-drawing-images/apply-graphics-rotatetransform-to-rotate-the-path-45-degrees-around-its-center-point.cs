@@ -1,47 +1,53 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output/output.png";
+        // Output file path
+        string outputPath = "Output\\rotated_path.png";
 
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        // Set up PNG options with a file create source
+        PngOptions pngOptions = new PngOptions();
+        pngOptions.Source = new FileCreateSource(outputPath, false);
+
+        // Create a 500x500 image canvas
+        using (Image image = Image.Create(pngOptions, 500, 500))
         {
-            if (image is RasterImage raster && !raster.IsCached)
-                raster.CacheData();
-
+            // Initialize graphics for drawing
             Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.White);
 
+            // Build a graphics path with a rectangle and an ellipse
             GraphicsPath path = new GraphicsPath();
             Figure figure = new Figure();
-
-            float rectWidth = 100f;
-            float rectHeight = 100f;
-            float rectX = (image.Width - rectWidth) / 2f;
-            float rectY = (image.Height - rectHeight) / 2f;
-            figure.AddShape(new RectangleShape(new RectangleF(rectX, rectY, rectWidth, rectHeight)));
+            figure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 200f, 200f)));
+            figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
             path.AddFigure(figure);
 
-            float angle = 45f;
-            graphics.RotateTransform(angle);
+            // Determine the center of the path's bounds
+            var bounds = path.Bounds;
+            float centerX = bounds.X + bounds.Width / 2f;
+            float centerY = bounds.Y + bounds.Height / 2f;
 
-            Pen pen = new Pen(Color.Blue, 2);
-            graphics.DrawPath(pen, path);
+            // Rotate the path 45 degrees around its center
+            graphics.TranslateTransform(-centerX, -centerY);
+            graphics.RotateTransform(45);
+            graphics.TranslateTransform(centerX, centerY);
 
-            image.Save(outputPath);
+            // Draw the rotated path
+            graphics.DrawPath(new Pen(Color.Black, 2), path);
+
+            // Save the image (output file is already bound)
+            image.Save();
         }
     }
 }

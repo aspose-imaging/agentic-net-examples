@@ -3,48 +3,55 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "large.tif");
-        string outputDir = "Output";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\large.tif";
+            string outputDirectory = @"C:\Images\WebPOutput";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Load the large TIFF image
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            // Set up sequential processing for each page/frame
-            tiffImage.PageExportingAction = delegate (int index, Image page)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Build output path for the current page
-                string outputPath = Path.Combine(outputDir, $"page_{index}.webp");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-                // Save the current page as WebP
-                var webpOptions = new WebPOptions(); // default options
-                ((RasterImage)page).Save(outputPath, webpOptions);
-            };
+            // Load the multi‑page TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Process each page sequentially to keep memory usage low
+                for (int pageIndex = 0; pageIndex < tiffImage.PageCount; pageIndex++)
+                {
+                    // Retrieve the current page (loaded on demand)
+                    using (Image page = tiffImage.Pages[pageIndex])
+                    {
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.webp");
 
-            // Trigger the page exporting action by saving to a dummy TIFF (the file is not needed)
-            string dummyOutput = Path.Combine(outputDir, "dummy.tif");
-            Directory.CreateDirectory(Path.GetDirectoryName(dummyOutput));
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffImage.Save(dummyOutput, tiffOptions);
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as WebP
+                        var webpOptions = new WebPOptions(); // default options; adjust if needed
+                        page.Save(outputPath, webpOptions);
+                    }
+
+                    // Force garbage collection to release page resources promptly
+                    GC.Collect();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -7,37 +7,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.png";
 
-        // Ensure the output directory exists (unconditionally)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Set up PNG save options
-            PngOptions pngOptions = new PngOptions();
-
-            // Save the image to a memory stream for network transmission
-            using (MemoryStream memoryStream = new MemoryStream())
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                image.Save(memoryStream, pngOptions);
-                // Reset stream position if further reading is needed
-                memoryStream.Position = 0;
-
-                // Example: display the size of the generated PNG data
-                Console.WriteLine($"PNG image size in bytes: {memoryStream.Length}");
-                // The memoryStream now contains the PNG image data ready for transmission
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image from the input file
+            using (Image image = Image.Load(inputPath))
+            {
+                // Create PNG save options (default settings)
+                PngOptions pngOptions = new PngOptions();
+
+                // Optional: save the PNG to a file path
+                image.Save(outputPath, pngOptions);
+
+                // Save the PNG image to a MemoryStream for network transmission
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    image.Save(memoryStream, pngOptions);
+                    // Reset stream position if it will be read later
+                    memoryStream.Position = 0;
+
+                    // Example output: report the size of the PNG data
+                    Console.WriteLine($"PNG image saved to memory stream, size: {memoryStream.Length} bytes");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

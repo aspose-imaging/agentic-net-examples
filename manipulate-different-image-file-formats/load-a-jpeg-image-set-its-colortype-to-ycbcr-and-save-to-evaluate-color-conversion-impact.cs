@@ -8,31 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_ycbcr.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.jpg";
+            string outputPath = @"C:\temp\output_ycbcr.jpg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure JPEG save options to use YCbCr color type
-            var saveOptions = new JpegOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorType = JpegCompressionColorMode.YCbCr
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image with the specified options
-            image.Save(outputPath, saveOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure JPEG save options to use YCbCr color type
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    ColorType = JpegCompressionColorMode.YCbCr
+                };
+
+                // Save the image with the specified options
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

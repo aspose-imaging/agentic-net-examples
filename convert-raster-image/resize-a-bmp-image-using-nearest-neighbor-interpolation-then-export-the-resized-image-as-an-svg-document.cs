@@ -7,37 +7,33 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\source.bmp";
-        string resizedBmpPath = @"C:\Images\output\resized.bmp";
-        string resizedSvgPath = @"C:\Images\output\resized.svg";
+        string outputPath = @"C:\Images\resized.svg";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(resizedBmpPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(resizedSvgPath));
+        // Ensure the output directory exists (creates it if necessary)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the BMP image, resize using nearest‑neighbor (default), and save as BMP and SVG
+        // Load the BMP image, resize it using the default NearestNeighbourResample,
+        // and save the result as an SVG document.
         using (Image image = Image.Load(inputPath))
         {
             // Desired dimensions for the resized image
-            int newWidth = image.Width / 2;   // example: half the original width
-            int newHeight = image.Height / 2; // example: half the original height
+            int newWidth = 200;   // example width
+            int newHeight = 200;  // example height
 
-            // Resize with default NearestNeighbourResample
+            // Resize with nearest‑neighbor interpolation (default behavior)
             image.Resize(newWidth, newHeight);
 
-            // Save the resized raster image as BMP
-            image.Save(resizedBmpPath);
-
-            // Save the same resized image as SVG
-            image.Save(resizedSvgPath, new SvgOptions());
+            // Save the resized image as SVG
+            image.Save(outputPath, new SvgOptions());
         }
     }
 }

@@ -2,67 +2,79 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories (relative to current directory)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = @"c:\temp\cdr\";
+            string outputDir = @"c:\temp\pdf\";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
 
-        // Get all CDR files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // List of CDR files to process (hardcoded paths)
+            string[] cdrFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Path.Combine(inputDir, "sample1.cdr"),
+                Path.Combine(inputDir, "sample2.cdr")
+                // Add more files as needed
+            };
 
-            // Build output PDF path with same file name
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-            // Ensure the output directory exists (unconditional as required)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image
-            using (Image image = Image.Load(inputPath))
+            foreach (string inputPath in cdrFiles)
             {
-                // Prepare PDF options with default vector rasterization settings
-                PdfOptions pdfOptions = new PdfOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                // Save the image as PDF
-                image.Save(outputPath, pdfOptions);
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                {
+                    // Cache all pages to avoid repeated loading
+                    foreach (CdrImagePage page in cdrImage.Pages)
+                    {
+                        page.CacheData();
+                    }
+
+                    int pageIndex = 0;
+                    foreach (CdrImagePage page in cdrImage.Pages)
+                    {
+                        // Build output PDF path for each page
+                        string outputPath = Path.Combine(
+                            outputDir,
+                            $"{Path.GetFileNameWithoutExtension(inputPath)}.page{pageIndex}.pdf");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Set up PDF conversion options
+                        PdfOptions pdfOptions = new PdfOptions();
+                        CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                        {
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None,
+                            PageWidth = page.Width,
+                            PageHeight = page.Height
+                        };
+                        pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                        // Save the page as PDF
+                        page.Save(outputPath, pdfOptions);
+                        pageIndex++;
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

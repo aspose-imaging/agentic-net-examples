@@ -9,10 +9,10 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\input.odg";
-        string outputPath = @"C:\output.svg";
+        string inputPath = "sample.odg";
+        string outputPath = "sample.svg";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,25 +22,13 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG image and save as SVG
+        // Load the ODG image and save it as SVG
         using (Image image = Image.Load(inputPath))
         {
-            // Configure SVG rasterization options
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
+            var svgOptions = new SvgOptions();
+            // Additional options can be set here if needed (e.g., TextAsShapes)
 
-            // Configure SVG save options
-            var saveOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                // Simplify output by converting text to shapes (optional)
-                TextAsShapes = true
-            };
-
-            // Save the image as SVG
-            image.Save(outputPath, saveOptions);
+            image.Save(outputPath, svgOptions);
         }
     }
 }

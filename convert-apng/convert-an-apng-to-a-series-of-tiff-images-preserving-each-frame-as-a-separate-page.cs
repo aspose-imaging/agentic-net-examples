@@ -14,7 +14,7 @@ class Program
         string inputPath = "input.apng";
         string outputPath = "output.tif";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,32 +24,51 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the APNG image
-        using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+        try
         {
-            // Prepare TIFF options (default format, RGB, 8 bits per sample)
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-
-            // Create the first TIFF frame from the first APNG frame
-            RasterImage firstRaster = (RasterImage)apng.Pages[0];
-            TiffFrame firstFrame = new TiffFrame(firstRaster);
-
-            // Initialize the multi-page TIFF image with the first frame
-            using (TiffImage tiffImage = new TiffImage(firstFrame))
+            // Load the APNG image
+            using (Image image = Image.Load(inputPath))
             {
-                // Add remaining APNG frames as additional TIFF pages
-                for (int i = 1; i < apng.PageCount; i++)
+                // Cast to ApngImage to access frames
+                ApngImage apngImage = (ApngImage)image;
+
+                // No frames? Exit gracefully
+                if (apngImage.PageCount == 0)
                 {
-                    RasterImage raster = (RasterImage)apng.Pages[i];
-                    TiffFrame frame = new TiffFrame(raster);
-                    tiffImage.AddFrame(frame);
+                    Console.Error.WriteLine("No frames found in the APNG image.");
+                    return;
                 }
 
-                // Save the resulting multi-page TIFF
-                tiffImage.Save(outputPath);
+                // Prepare TIFF options (RGB, 8 bits per sample)
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Photometric = TiffPhotometrics.Rgb,
+                    BitsPerSample = new ushort[] { 8, 8, 8 }
+                };
+
+                // Use the first frame to create the TIFF image container
+                RasterImage firstFrame = (RasterImage)apngImage.Pages[0];
+                using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, firstFrame.Width, firstFrame.Height))
+                {
+                    // Add the first frame as the initial page
+                    tiffImage.AddFrame(new TiffFrame(firstFrame));
+
+                    // Add remaining frames
+                    for (int i = 1; i < apngImage.PageCount; i++)
+                    {
+                        RasterImage frame = (RasterImage)apngImage.Pages[i];
+                        TiffFrame tiffFrame = new TiffFrame(frame);
+                        tiffImage.AddFrame(tiffFrame);
+                    }
+
+                    // Save the multi-page TIFF
+                    tiffImage.Save(outputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

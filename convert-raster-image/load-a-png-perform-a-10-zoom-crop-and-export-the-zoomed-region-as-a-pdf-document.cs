@@ -1,18 +1,16 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.pdf";
+        string inputPath = "Input/sample.png";
+        string outputPath = "Output/zoomed.pdf";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,18 +21,30 @@ class Program
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Calculate a 10% zoom crop (crop to 90% of original size, centered)
-            int cropWidth = (int)(image.Width * 0.9);
-            int cropHeight = (int)(image.Height * 0.9);
-            int offsetX = (image.Width - cropWidth) / 2;
-            int offsetY = (image.Height - cropHeight) / 2;
-            var cropRect = new Rectangle(offsetX, offsetY, cropWidth, cropHeight);
+            // Cast to RasterImage for cropping operations
+            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+
+            // Cache data for better performance
+            if (!raster.IsCached)
+                raster.CacheData();
+
+            // Calculate a central rectangle that is 90% of the original size (10% zoom)
+            int cropWidth = (int)(raster.Width * 0.9);
+            int cropHeight = (int)(raster.Height * 0.9);
+            int offsetX = (raster.Width - cropWidth) / 2;
+            int offsetY = (raster.Height - cropHeight) / 2;
+            Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(offsetX, offsetY, cropWidth, cropHeight);
+
+            // Perform the crop
+            raster.Crop(cropRect);
 
             // Save the cropped region as a PDF document
-            var pdfOptions = new PdfOptions(); // default PDF options
-            image.Save(outputPath, pdfOptions, cropRect);
+            using (PdfOptions pdfOptions = new PdfOptions())
+            {
+                raster.Save(outputPath, pdfOptions);
+            }
         }
     }
 }

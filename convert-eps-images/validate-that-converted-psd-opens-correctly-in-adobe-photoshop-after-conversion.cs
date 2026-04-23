@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.jpg";
-        string outputPath = @"C:\Images\Converted\sample.psd";
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\output.psd";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -31,23 +31,32 @@ class Program
                 CompressionMethod = CompressionMethod.RLE,               // Use RLE compression
                 ColorMode = ColorModes.Rgb,                               // Set color mode to RGB
                 ChannelBitsCount = 8,                                     // 8 bits per channel
-                ChannelsCount = 4,                                        // RGBA channels
-                Version = 6                                               // PSD version 6
+                ChannelsCount = 4,                                        // RGBA
+                Version = 6                                                // PSD version 6
             };
 
-            // Save the image as PSD
+            // Save as PSD
             image.Save(outputPath, psdOptions);
         }
 
-        // Validate that the saved PSD can be loaded (indicates Photoshop compatibility)
-        bool canLoad = Image.CanLoad(outputPath);
-        if (canLoad)
+        // Validate that the saved PSD can be loaded (Photoshop compatibility check)
+        if (!Image.CanLoad(outputPath))
         {
-            Console.WriteLine("PSD file saved successfully and can be opened by Photoshop.");
+            Console.Error.WriteLine("Saved PSD cannot be loaded. It may be incompatible with Photoshop.");
+            return;
         }
-        else
+
+        // Additional load test to ensure no runtime exception occurs
+        try
         {
-            Console.Error.WriteLine("Saved PSD file could not be loaded. It may not open correctly in Photoshop.");
+            using (Image psdImage = Image.Load(outputPath))
+            {
+                Console.WriteLine("PSD file saved successfully and opened without errors.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading saved PSD: {ex.Message}");
         }
     }
 }

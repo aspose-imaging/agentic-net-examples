@@ -5,74 +5,65 @@ using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
+    // Hardcoded input and output paths
+    private const string InputPath = @"C:\Images\barcode.png";
+    private const string OutputPathOriginal = @"C:\Images\Result\original_detection.txt";
+    private const string OutputPathBlurred = @"C:\Images\Result\blurred_detection.txt";
+
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\barcode.png";
-        string blurredPath = @"C:\Images\processed\barcode_blurred.png";
-        string reportPath = @"C:\Images\processed\detection_report.txt";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(InputPath))
+            {
+                Console.Error.WriteLine($"File not found: {InputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(OutputPathOriginal));
+            Directory.CreateDirectory(Path.GetDirectoryName(OutputPathBlurred));
+
+            // Load the original PNG image
+            using (Image image = Image.Load(InputPath))
+            {
+                // Cast to RasterImage for processing
+                RasterImage raster = (RasterImage)image;
+
+                // ----- Detection on original image -----
+                bool originalDetected = DetectBarcode(raster);
+                File.WriteAllText(OutputPathOriginal, $"Original detection: {(originalDetected ? "Success" : "Failure")}");
+
+                // ----- Apply Gaussian blur -----
+                // Radius = 5, Sigma = 4.0 (as per documentation example)
+                var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+                raster.Filter(raster.Bounds, blurOptions);
+
+                // ----- Detection on blurred image -----
+                bool blurredDetected = DetectBarcode(raster);
+                File.WriteAllText(OutputPathBlurred, $"Blurred detection: {(blurredDetected ? "Success" : "Failure")}");
+
+                // Optionally, save the blurred image for visual inspection
+                string blurredImagePath = Path.Combine(Path.GetDirectoryName(OutputPathBlurred), "blurred.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(blurredImagePath));
+                raster.Save(blurredImagePath);
+            }
+
+            Console.WriteLine("Processing completed. Check result files for detection outcomes.");
         }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(blurredPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
-
-        // Load the original PNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage raster = (RasterImage)image;
-
-            // Apply Gaussian blur (radius 5, sigma 4.0) to the entire image
-            var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
-            raster.Filter(raster.Bounds, blurOptions);
-
-            // Save the blurred image
-            raster.Save(blurredPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
+    }
 
-        // -----------------------------------------------------------------
-        // Placeholder for barcode detection logic.
-        // In a real scenario you would use Aspose.BarCode (or another library)
-        // to read barcodes from the original and blurred images, then compare
-        // detection success rates.
-        // Example (pseudo‑code):
-        //   var readerOriginal = new BarCodeReader(inputPath, DecodeType.AllSupported);
-        //   var readerBlurred  = new BarCodeReader(blurredPath, DecodeType.AllSupported);
-        //   bool detectedOriginal = readerOriginal.ReadBarCodes().Length > 0;
-        //   bool detectedBlurred  = readerBlurred.ReadBarCodes().Length > 0;
-        // -----------------------------------------------------------------
-
-        // Simulated detection results for demonstration purposes
-        bool detectedOriginal = true;   // Assume barcode detected in original image
-        bool detectedBlurred = false;   // Assume barcode NOT detected after blur
-
-        // Write a simple report comparing detection outcomes
-        using (StreamWriter writer = new StreamWriter(reportPath))
-        {
-            writer.WriteLine("Barcode Detection Comparison Report");
-            writer.WriteLine("-----------------------------------");
-            writer.WriteLine($"Input image: {inputPath}");
-            writer.WriteLine($"Blurred image: {blurredPath}");
-            writer.WriteLine();
-            writer.WriteLine($"Detected in original image: {(detectedOriginal ? "Yes" : "No")}");
-            writer.WriteLine($"Detected in blurred image: {(detectedBlurred ? "Yes" : "No")}");
-            writer.WriteLine();
-            writer.WriteLine("Conclusion:");
-            if (detectedOriginal && !detectedBlurred)
-                writer.WriteLine("Gaussian blur reduced the detection rate.");
-            else if (!detectedOriginal && detectedBlurred)
-                writer.WriteLine("Gaussian blur improved the detection rate.");
-            else
-                writer.WriteLine("Detection rate unchanged.");
-        }
-
-        Console.WriteLine("Processing complete. Report saved to: " + reportPath);
+    // Placeholder barcode detection method.
+    // In a real scenario, replace this with Aspose.BarCode or another barcode library.
+    private static bool DetectBarcode(RasterImage image)
+    {
+        // TODO: Implement actual barcode detection logic.
+        // Returning false as a stub.
+        return false;
     }
 }

@@ -6,57 +6,52 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Setup input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
+            // Hardcoded input and output folders
+            string inputFolder = @"C:\InputTiffs\";
+            string outputFolder = @"C:\OutputPdfs\";
+
+            // Get all TIFF files in the input folder
+            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.tif");
+            string[] tiffFilesAlt = Directory.GetFiles(inputFolder, "*.tiff");
+            string[] allFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
+            tiffFiles.CopyTo(allFiles, 0);
+            tiffFilesAlt.CopyTo(allFiles, tiffFiles.Length);
+
+            foreach (string inputPath in allFiles)
+            {
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build output PDF path
+                string outputPath = Path.Combine(outputFolder,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image
+                using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+                {
+                    // Deskew the image (do not resize, use LightGray background)
+                    tiffImage.NormalizeAngle(false, Color.LightGray);
+
+                    // Save as PDF
+                    var pdfOptions = new PdfOptions();
+                    tiffImage.Save(outputPath, pdfOptions);
+                }
+            }
         }
-
-        if (!Directory.Exists(outputDirectory))
+        catch (Exception ex)
         {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        // Process each TIFF file
-        foreach (var file in files)
-        {
-            // Filter for TIFF extensions
-            if (!(file.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
-                  file.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase)))
-            {
-                continue;
-            }
-
-            string inputPath = file;
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputFileName = Path.GetFileNameWithoutExtension(file) + ".pdf";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
-            {
-                // Deskew the image
-                tiff.NormalizeAngle(false, Color.White);
-
-                // Save as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                tiff.Save(outputPath, pdfOptions);
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

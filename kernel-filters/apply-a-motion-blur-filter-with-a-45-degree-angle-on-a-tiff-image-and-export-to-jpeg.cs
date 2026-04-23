@@ -1,36 +1,41 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = Path.Combine("Input", "sample.tif");
-        string outputPath = Path.Combine("Output", "sample.jpg");
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Images\sample_blur.jpg";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        // Load the TIFF image
+        using (Image image = Image.Load(inputPath))
         {
-            Aspose.Imaging.FileFormats.Tiff.TiffImage tiffImage = (Aspose.Imaging.FileFormats.Tiff.TiffImage)image;
+            // Cast to TiffImage to access the Filter method
+            TiffImage tiffImage = (TiffImage)image;
 
-            tiffImage.Filter(tiffImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 45.0));
+            // Apply a motion blur (using MotionWienerFilterOptions as the closest available option)
+            // Length = 10, Smooth = 1.0, Angle = 45 degrees
+            var motionOptions = new MotionWienerFilterOptions(10, 1.0, 45.0);
+            tiffImage.Filter(tiffImage.Bounds, motionOptions);
 
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
-
+            // Save the result as JPEG
+            var jpegOptions = new JpegOptions();
             tiffImage.Save(outputPath, jpegOptions);
         }
     }

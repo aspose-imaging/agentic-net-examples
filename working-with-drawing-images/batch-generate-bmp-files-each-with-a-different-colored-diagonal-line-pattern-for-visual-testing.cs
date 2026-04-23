@@ -9,44 +9,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output directory for generated BMP files
+        // Define output directory and ensure it exists
         string outputDir = @"C:\Temp\BmpDiagonalLines";
+        Directory.CreateDirectory(outputDir);
 
         // Image dimensions
         int width = 200;
         int height = 200;
 
-        // Define colors and corresponding file name parts
-        var colorInfos = new List<(Color color, string name)>
+        // Define colors and corresponding file names
+        var colorInfos = new List<(Color color, string fileName)>
         {
-            (Color.Red, "red"),
-            (Color.Green, "green"),
-            (Color.Blue, "blue"),
-            (Color.Yellow, "yellow"),
-            (Color.Purple, "purple")
+            (Color.Red, "Diagonal_Red.bmp"),
+            (Color.Green, "Diagonal_Green.bmp"),
+            (Color.Blue, "Diagonal_Blue.bmp"),
+            (Color.Yellow, "Diagonal_Yellow.bmp"),
+            (Color.Magenta, "Diagonal_Magenta.bmp"),
+            (Color.Cyan, "Diagonal_Cyan.bmp")
         };
 
-        foreach (var info in colorInfos)
+        foreach (var (color, fileName) in colorInfos)
         {
-            // Construct output file path
-            string outputPath = Path.Combine(outputDir, $"diag_{info.name}.bmp");
-
-            // Ensure the output directory exists
+            string outputPath = Path.Combine(outputDir, fileName);
+            // Ensure the directory for the output file exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP creation options with bound file source
-            BmpOptions bmpOptions = new BmpOptions
+            // Create BmpOptions with a bound file source
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions
             {
                 BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
+                Source = source
             };
 
-            // Create the BMP image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create a new BMP image bound to the output file
+            using (Image image = Image.Create(options, width, height))
             {
-                // Draw a diagonal line of the specified color
+                // Draw a diagonal line using the specified color
                 Graphics graphics = new Graphics(image);
-                Pen pen = new Pen(info.color, 5);
+                Pen pen = new Pen(color, 5);
                 graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
 
                 // Save the bound image

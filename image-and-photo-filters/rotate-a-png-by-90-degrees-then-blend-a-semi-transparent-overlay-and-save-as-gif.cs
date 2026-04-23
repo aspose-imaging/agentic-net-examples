@@ -2,49 +2,63 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = "input.png";
-        string overlayPath = "overlay.png";
-        string outputPath = "output.gif";
-
-        // Input file checks
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-        if (!File.Exists(overlayPath))
-        {
-            Console.Error.WriteLine($"File not found: {overlayPath}");
-            return;
-        }
+            // Hardcoded input and overlay image paths
+            string inputPngPath = "input.png";
+            string overlayPath = "overlay.png";
+            // Hardcoded output GIF path
+            string outputGifPath = "output.gif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load base PNG, rotate, blend overlay, and save as GIF
-        using (RasterImage baseImg = (RasterImage)Image.Load(inputPath))
-        {
-            // Rotate 90 degrees clockwise, resize proportionally, transparent background
-            baseImg.Rotate(90f, true, Color.Transparent);
-
-            // Load overlay image
-            using (RasterImage overlayImg = (RasterImage)Image.Load(overlayPath))
+            // Validate input PNG exists
+            if (!File.Exists(inputPngPath))
             {
-                // Blend overlay with 50% opacity (128 out of 255)
-                baseImg.Blend(new Point(0, 0), overlayImg, 128);
+                Console.Error.WriteLine($"File not found: {inputPngPath}");
+                return;
             }
 
-            // Save result as GIF
-            GifOptions gifOptions = new GifOptions();
-            baseImg.Save(outputPath, gifOptions);
+            // Validate overlay image exists
+            if (!File.Exists(overlayPath))
+            {
+                Console.Error.WriteLine($"File not found: {overlayPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
+
+            // Load the base PNG image as a raster image
+            using (RasterImage baseImage = (RasterImage)Image.Load(inputPngPath))
+            {
+                // Rotate the image 90 degrees clockwise, resize proportionally, white background
+                baseImage.Rotate(90f, true, Color.White);
+
+                // Load the semi‑transparent overlay image
+                using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+                {
+                    // Blend overlay onto the rotated image at (0,0) with 50% opacity (128 out of 255)
+                    baseImage.Blend(new Point(0, 0), overlay, 128);
+                }
+
+                // Prepare GIF save options with a file source
+                GifOptions gifOptions = new GifOptions
+                {
+                    Source = new FileCreateSource(outputGifPath, false)
+                };
+
+                // Save the resulting image as a GIF
+                baseImage.Save(outputGifPath, gifOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

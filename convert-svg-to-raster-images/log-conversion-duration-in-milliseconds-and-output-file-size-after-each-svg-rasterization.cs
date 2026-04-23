@@ -1,67 +1,66 @@
 using System;
 using System.IO;
+using System.Diagnostics;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        // Hardcoded input SVG files
+        string[] inputFiles = new[]
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            @"C:\Images\example1.svg",
+            @"C:\Images\example2.svg"
+        };
 
-        if (!Directory.Exists(outputDirectory))
+        foreach (string inputPath in inputFiles)
         {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (var inputPath in files)
-        {
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+            // Determine output PNG path
+            string outputPath = inputPath + ".png";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            // Start timing
+            Stopwatch sw = Stopwatch.StartNew();
 
-            using (var image = Aspose.Imaging.Image.Load(inputPath))
+            // Load SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
+                // Configure rasterization options
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
+                    PageSize = image.Size,
+                    BackgroundColor = Color.White
                 };
 
-                var saveOptions = new PngOptions
+                // Configure PNG save options
+                PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
-                image.Save(outputPath, saveOptions);
+                // Save rasterized PNG
+                image.Save(outputPath, pngOptions);
             }
 
-            stopwatch.Stop();
-            Console.WriteLine($"Converted {inputPath} to {outputPath} in {stopwatch.ElapsedMilliseconds} ms");
+            // Stop timing
+            sw.Stop();
 
-            var fileInfo = new FileInfo(outputPath);
-            Console.WriteLine($"Output file size: {fileInfo.Length} bytes");
+            // Get output file size
+            long fileSize = new FileInfo(outputPath).Length;
+
+            // Log duration and size
+            Console.WriteLine($"Rasterized '{inputPath}' to '{outputPath}' in {sw.ElapsedMilliseconds} ms, size: {fileSize} bytes.");
         }
     }
 }

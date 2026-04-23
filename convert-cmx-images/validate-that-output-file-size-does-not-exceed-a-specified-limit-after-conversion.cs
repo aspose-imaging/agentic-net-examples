@@ -8,11 +8,11 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        const string inputPath = @"C:\temp\input.jpg";
-        const string outputPath = @"C:\temp\output.png";
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.png";
 
-        // Maximum allowed output file size (bytes)
-        const long maxOutputSizeBytes = 5 * 1024 * 1024; // 5 MB
+        // Maximum allowed output file size in bytes (e.g., 5 MB)
+        const long maxOutputSizeBytes = 5 * 1024 * 1024;
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -27,18 +27,18 @@ class Program
         // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // Define save options (PNG in this example)
+            // Prepare PNG save options (default options are sufficient for this example)
             PngOptions saveOptions = new PngOptions();
 
             // Save the image to the output path
             image.Save(outputPath, saveOptions);
         }
 
-        // Validate output file size
+        // Validate output file size does not exceed the limit
         FileInfo outInfo = new FileInfo(outputPath);
         if (outInfo.Length > maxOutputSizeBytes)
         {
-            Console.Error.WriteLine($"Output file size exceeds limit: {outInfo.Length} bytes (limit: {maxOutputSizeBytes} bytes)");
+            Console.Error.WriteLine($"Output file exceeds size limit: {outputPath} ({outInfo.Length} > {maxOutputSizeBytes} bytes)");
         }
         else
         {

@@ -2,13 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
+        string inputPath = @"C:\Images\sample.png";
         string outputPath = @"C:\Images\output.svg";
 
         // Verify input file exists
@@ -18,22 +19,29 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         // Load the raster image
         using (Image image = Image.Load(inputPath))
         {
-            // Define the top-left quadrant rectangle
+            // Determine the top‑left quadrant dimensions
             int cropWidth = image.Width / 2;
             int cropHeight = image.Height / 2;
-            var cropRect = new Rectangle(0, 0, cropWidth, cropHeight);
 
-            // Crop the image to the defined rectangle
-            image.Crop(cropRect);
+            // Define the cropping rectangle (top‑left corner)
+            var cropArea = new Rectangle(0, 0, cropWidth, cropHeight);
+
+            // Perform the crop
+            image.Crop(cropArea);
+
+            // Prepare SVG save options with default rasterization settings
+            var svgOptions = new SvgOptions
+            {
+                VectorRasterizationOptions = new SvgRasterizationOptions()
+            };
 
             // Save the cropped image as SVG
-            var svgOptions = new SvgOptions();
             image.Save(outputPath, svgOptions);
         }
     }

@@ -2,56 +2,71 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input CDR files
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Input\Sample1.cdr",
-            @"C:\Input\Sample2.cdr",
-            @"C:\Input\Sample3.cdr"
-        };
-
-        // Hard‑coded output directory
-        string outputDir = @"C:\Output";
-
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input and output file paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\input\file1.cdr",
+                @"C:\input\file2.cdr"
+            };
 
-            // Build output TIFF path (same base name, .tif extension)
-            string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".tif");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image with default load options
-            using (Image image = Image.Load(inputPath, new CdrLoadOptions()))
+            string[] outputPaths = new string[]
             {
-                // Configure TIFF save options with LZW compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                @"C:\output\file1.tif",
+                @"C:\output\file2.tif"
+            };
+
+            // Process each file
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Compression = TiffCompressions.Lzw,
-                    // Optional: set other typical TIFF settings
-                    BitsPerSample = new ushort[] { 8, 8, 8 },
-                    ByteOrder = TiffByteOrder.BigEndian,
-                    Photometric = TiffPhotometrics.Rgb,
-                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save the image as TIFF
-                image.Save(outputPath, tiffOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load CDR image
+                using (FileStream stream = File.OpenRead(inputPath))
+                {
+                    var loadOptions = new CdrLoadOptions(); // default options
+                    using (var cdrImage = new Aspose.Imaging.FileFormats.Cdr.CdrImage(stream, loadOptions))
+                    {
+                        // Configure TIFF save options with LZW compression
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                        {
+                            BitsPerSample = new ushort[] { 8, 8, 8 },
+                            ByteOrder = TiffByteOrder.BigEndian,
+                            Compression = TiffCompressions.Lzw,
+                            Photometric = TiffPhotometrics.Rgb,
+                            PlanarConfiguration = TiffPlanarConfigs.Contiguous,
+                            Predictor = TiffPredictor.Horizontal
+                        };
+
+                        // Save as TIFF
+                        cdrImage.Save(outputPath, tiffOptions);
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

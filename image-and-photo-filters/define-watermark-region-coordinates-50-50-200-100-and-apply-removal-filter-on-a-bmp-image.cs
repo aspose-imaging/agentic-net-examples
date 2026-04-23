@@ -2,8 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -21,28 +20,29 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists (null‑safe)
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrEmpty(outputDir))
+            Directory.CreateDirectory(outputDir);
 
         // Load the BMP image
         using (var image = Image.Load(inputPath))
         {
-            // Cast to RasterImage for watermark removal
-            var raster = (RasterImage)image;
+            var bmpImage = (BmpImage)image; // Cast to BMP image
 
-            // Define watermark region (x=50, y=50, width=200, height=100)
+            // Define watermark region (50,50,200,100) using a rectangle shape
             var mask = new GraphicsPath();
             var figure = new Figure();
-            figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 100)));
+            figure.AddShape(new RectangleShape(new RectangleF(50, 50, 200, 100)));
             mask.AddFigure(figure);
 
             // Create Telea algorithm options with the mask
             var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
-            // Apply watermark removal
-            using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
+            // Remove the watermark
+            using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(bmpImage, options))
             {
-                // Save the resulting image as BMP
+                // Save the result as BMP using BmpOptions
                 result.Save(outputPath, new BmpOptions());
             }
         }

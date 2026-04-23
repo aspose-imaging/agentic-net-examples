@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,7 +9,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.bmp";
-        string outputPath = "output\\grid.bmp";
+        string outputPath = "output.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,35 +19,41 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         // Load the BMP image
-        using (Image image = Image.Load(inputPath))
+        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
         {
-            // Create graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Create graphics object for drawing
+            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
             // Clear the image to light gray
             graphics.Clear(Aspose.Imaging.Color.LightGray);
 
-            // Define grid spacing and pen
+            // Define grid spacing
             int spacing = 50;
-            Pen redPen = new Pen(Aspose.Imaging.Color.Red, 1);
 
-            // Draw vertical lines
+            // Draw vertical red lines
             for (int x = 0; x <= image.Width; x += spacing)
             {
-                graphics.DrawLine(redPen, new Point(x, 0), new Point(x, image.Height));
+                graphics.DrawLine(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 1),
+                    new Aspose.Imaging.Point(x, 0),
+                    new Aspose.Imaging.Point(x, image.Height));
             }
 
-            // Draw horizontal lines
+            // Draw horizontal red lines
             for (int y = 0; y <= image.Height; y += spacing)
             {
-                graphics.DrawLine(redPen, new Point(0, y), new Point(image.Width, y));
+                graphics.DrawLine(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 1),
+                    new Aspose.Imaging.Point(0, y),
+                    new Aspose.Imaging.Point(image.Width, y));
             }
 
             // Save the modified image as BMP
-            image.Save(outputPath, new BmpOptions());
+            var bmpOptions = new BmpOptions();
+            image.Save(outputPath, bmpOptions);
         }
     }
 }

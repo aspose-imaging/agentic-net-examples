@@ -3,46 +3,43 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input DjVu file and output directory
-        string inputPath = "input.djvu";
-        string outputDir = "output";
+        string inputPath = "sample.djvu";
+        string outputFolder = "output";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists (unconditional per requirement)
-        Directory.CreateDirectory(outputDir);
+        Directory.CreateDirectory(outputFolder);
 
-        // Load DjVu document from a file stream
-        using (Stream stream = File.OpenRead(inputPath))
+        try
         {
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (Stream stream = File.OpenRead(inputPath))
             {
-                // Process each page in parallel
-                System.Threading.Tasks.Parallel.ForEach(djvuImage.Pages, page =>
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Cast to DjvuPage to access PageNumber
-                    var djvuPage = (Aspose.Imaging.FileFormats.Djvu.DjvuPage)page;
-
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"page_{djvuPage.PageNumber}.png");
-
-                    // Ensure the directory for the output file exists (unconditional)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as PNG
-                    djvuPage.Save(outputPath, new PngOptions());
-                });
+                    var pages = djvuImage.Pages;
+                    System.Threading.Tasks.Parallel.ForEach(pages, page =>
+                    {
+                        var djvuPage = (DjvuPage)page;
+                        string outPath = Path.Combine(outputFolder, $"page_{djvuPage.PageNumber}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                        djvuPage.Save(outPath, new PngOptions());
+                    });
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

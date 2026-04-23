@@ -1,51 +1,52 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input directory containing JPEG files
-        string inputDirectory = "C:\\Images";
-
-        // Ensure the directory exists
-        Directory.CreateDirectory(inputDirectory);
-
-        // Get all JPEG files in the directory
-        string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-
-        foreach (string inputPath in jpegFiles)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Hardcoded input directory containing JPEG files
+            string inputDirectory = @"C:\Images";
 
-            // Ensure the output directory exists (same as input directory for in-place save)
-            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+            // Get all JPEG files in the directory
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
 
-            // Load the JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            foreach (string inputPath in jpegFiles)
             {
-                // Access EXIF data; create if missing
-                var exif = image.ExifData;
-                if (exif == null)
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    exif = new Aspose.Imaging.Exif.JpegExifData();
-                    image.ExifData = exif;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Modify the Artist tag
-                exif.Artist = "New Artist";
+                // Load the JPEG image
+                using (JpegImage image = (JpegImage)Image.Load(inputPath))
+                {
+                    // Access JPEG EXIF data
+                    JpegExifData jpegExif = image.ExifData as JpegExifData;
+                    if (jpegExif != null)
+                    {
+                        // Modify the Artist tag
+                        jpegExif.Artist = "New Artist";
+                    }
 
-                // Save changes back to the same file (in-place)
-                image.Save(inputPath);
+                    // Ensure the output directory exists (in-place save)
+                    Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+
+                    // Save changes back to the same file
+                    image.Save(inputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

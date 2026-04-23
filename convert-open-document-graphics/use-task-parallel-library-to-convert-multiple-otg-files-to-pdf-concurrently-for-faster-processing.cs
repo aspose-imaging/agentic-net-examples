@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
@@ -8,8 +9,8 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded list of OTG files to convert
-        string[] inputFiles = new string[]
+        // Hardcoded list of OTG input files
+        List<string> inputFiles = new List<string>
         {
             @"C:\Images\Sample1.otg",
             @"C:\Images\Sample2.otg",
@@ -26,7 +27,7 @@ class Program
                 return;
             }
 
-            // Determine output PDF path
+            // Determine output PDF path (same folder, .pdf extension)
             string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
             // Ensure output directory exists
@@ -36,22 +37,20 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure rasterization options for OTG
-                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Set up PDF save options
+                // Configure PDF save options
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = otgOptions
                 };
 
-                // Save the image as PDF
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
-
-            Console.WriteLine($"Converted '{inputPath}' to PDF at '{outputPath}'.");
         });
     }
 }

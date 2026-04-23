@@ -1,42 +1,44 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.psd";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.psd";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Adjust brightness
+                if (image is Aspose.Imaging.RasterImage raster)
+                {
+                    raster.AdjustBrightness(50); // increase brightness by 50
+                }
+
+                // Set smoothing mode
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+
+                // Export to PNG
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PSD image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage for pixel manipulation
-            RasterImage raster = (RasterImage)image;
-
-            // Adjust brightness (positive value brightens)
-            raster.AdjustBrightness(50);
-
-            // Set smoothing mode via Graphics
-            Graphics graphics = new Graphics(raster);
-            graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
-
-            // Save the result as PNG
-            PngOptions pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
