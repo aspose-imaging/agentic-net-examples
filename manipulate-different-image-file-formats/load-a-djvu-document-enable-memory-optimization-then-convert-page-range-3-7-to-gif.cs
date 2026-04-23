@@ -1,52 +1,68 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Set load options to limit memory usage (e.g., 1 MB buffer)
-        LoadOptions loadOptions = new LoadOptions
-        {
-            BufferSizeHint = 1 * 1024 * 1024 // 1 MB
-        };
-
-        // Open the DjVu file with memory‑optimized loading
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
-        {
-            // Iterate through pages and save pages 3‑7 as GIF files
-            foreach (DjvuPage page in djvuImage.Pages)
+            // Hardcoded input and output paths
+            string inputPath = "sample.djvu";
+            if (!File.Exists(inputPath))
             {
-                int pageNumber = page.PageNumber;
-                if (pageNumber >= 3 && pageNumber <= 7)
-                {
-                    string outputPath = Path.Combine(outputDirectory, $"page{pageNumber}.gif");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                    // Ensure the directory for the output file exists (already created above)
+            string outputDir = "output";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Enable memory optimization via LoadOptions
+            LoadOptions loadOptions = new LoadOptions
+            {
+                BufferSizeHint = 1 * 1024 * 1024 // 1 MB buffer
+            };
+
+            // Load DjVu document with memory optimization
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
+            {
+                // Convert pages 3‑7 to GIF
+                for (int pageNum = 3; pageNum <= 7; pageNum++)
+                {
+                    DjvuPage targetPage = null;
+                    foreach (DjvuPage page in djvuImage.DjvuPages)
+                    {
+                        if (page.PageNumber == pageNum)
+                        {
+                            targetPage = page;
+                            break;
+                        }
+                    }
+
+                    if (targetPage == null)
+                    {
+                        Console.Error.WriteLine($"Page {pageNum} not found.");
+                        continue;
+                    }
+
+                    string outputPath = Path.Combine(outputDir, $"page_{pageNum}.gif");
+                    // Ensure directory exists for each output file
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the page as GIF
-                    page.Save(outputPath, new GifOptions());
+                    targetPage.Save(outputPath, new GifOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
