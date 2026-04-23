@@ -27,10 +27,10 @@ class Program
             // Load the WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Rotate 90 degrees clockwise
+                // Rotate 90 degrees clockwise without flipping
                 webPImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save the result as BMP
+                // Save the rotated image as BMP
                 webPImage.Save(outputPath, new BmpOptions());
             }
         }
