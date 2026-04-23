@@ -10,43 +10,43 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\TiffInput";
-            string outputDirectory = @"C:\Images\WebpOutput";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            string inputDirectory = @"C:\Images\Tiff";
+            string outputDirectory = @"C:\Images\WebP";
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-            foreach (string inputPath in tiffFiles)
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (string filePath in tiffFiles)
             {
+                // Process only .tif and .tiff extensions
+                string extension = Path.GetExtension(filePath).ToLowerInvariant();
+                if (extension != ".tif" && extension != ".tiff")
+                    continue;
+
                 // Verify input file exists
-                if (!File.Exists(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
                 // Build output file name: original name + timestamp + .webp
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
                 string outputFileName = $"{fileNameWithoutExt}_{timestamp}.webp";
                 string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the TIFF image and save as WebP
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(filePath))
                 {
                     var webpOptions = new WebPOptions
                     {
-                        // Example settings; adjust as needed
-                        Lossless = false,
+                        // Example: set quality to 80 (adjust as needed)
                         Quality = 80,
-                        KeepMetadata = true
+                        Lossless = false
                     };
-
                     image.Save(outputPath, webpOptions);
                 }
             }
