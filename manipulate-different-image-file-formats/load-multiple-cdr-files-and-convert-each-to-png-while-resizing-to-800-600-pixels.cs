@@ -1,73 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "InputCdr";
-        string outputDirectory = "OutputPng";
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add CDR files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputCdr";
+            string outputDir = @"C:\OutputPng";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all CDR files
-        string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
-
-        foreach (string inputPath in files)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // List of CDR files to process
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Path.Combine(inputDir, "file1.cdr"),
+                Path.Combine(inputDir, "file2.cdr")
+                // Add more file paths as needed
+            };
 
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Ensure output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load CDR, rasterize to PNG in memory, resize, and save
-            using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath))
+            foreach (var inputPath in inputFiles)
             {
-                using (MemoryStream ms = new MemoryStream())
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            PageWidth = cdr.Width,
-                            PageHeight = cdr.Height
-                        }
-                    };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    cdr.Save(ms, pngOptions);
-                    ms.Position = 0;
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                {
+                    // Resize to 800x600 pixels
+                    cdrImage.Resize(800, 600);
 
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
-                    {
-                        raster.Resize(800, 600);
-                        raster.Save(outputPath);
-                    }
+                    // Prepare output file path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                    string outputPath = Path.Combine(outputDir, outputFileName);
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as PNG
+                    cdrImage.Save(outputPath, new PngOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
