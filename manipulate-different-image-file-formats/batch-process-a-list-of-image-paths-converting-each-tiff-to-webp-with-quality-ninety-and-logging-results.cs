@@ -9,18 +9,14 @@ class Program
     {
         try
         {
-            // Hardcoded list of TIFF files to process
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\image1.tif",
-                @"C:\Images\image2.tif",
-                @"C:\Images\image3.tif"
-            };
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Hardcoded output directory for WebP files
-            string outputDirectory = @"C:\Images\WebP";
+            // Get all TIFF files in the input directory
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
 
-            foreach (var inputPath in inputPaths)
+            foreach (string inputPath in tiffFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -30,13 +26,13 @@ class Program
                 }
 
                 // Build output path with .webp extension
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image and save as WebP with quality 90
+                // Load TIFF image and save as WebP with quality 90
                 using (Image image = Image.Load(inputPath))
                 {
                     var webpOptions = new WebPOptions
