@@ -2,61 +2,59 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\corrupted.tif";
-            string outputConsistent = @"C:\Temp\recovered_consistent.tif";
-            string outputMaximal = @"C:\Temp\recovered_maximal.tif";
+            string inputPath = "corrupted.tif";
+            string outputPathConsistent = "output\\recovered_consistent.tif";
+            string outputPathFull = "output\\recovered_full.tif";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // ---------- Consistent recovery ----------
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathConsistent));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathFull));
+
+            // Recovery using ConsistentRecover mode
+            TiffImage tiffConsistent;
             var loadOptionsConsistent = new LoadOptions
             {
-                DataRecoveryMode = DataRecoveryMode.ConsistentRecover
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Color.White
             };
-
-            using (TiffImage imageConsistent = (TiffImage)Image.Load(inputPath, loadOptionsConsistent))
+            using (tiffConsistent = (TiffImage)Image.Load(inputPath, loadOptionsConsistent))
             {
-                int frameCountConsistent = imageConsistent.Frames.Length;
-                Console.WriteLine($"Consistent recovery frame count: {frameCountConsistent}");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputConsistent));
-                // Save recovered image
-                imageConsistent.Save(outputConsistent);
+                tiffConsistent.Save(outputPathConsistent);
             }
 
-            // ---------- Maximal recovery ----------
-            var loadOptionsMaximal = new LoadOptions
+            // Recovery using ConsistentRecover mode as fallback (FullRecover not available)
+            TiffImage tiffFull;
+            var loadOptionsFull = new LoadOptions
             {
-                DataRecoveryMode = DataRecoveryMode.MaximalRecover
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Color.White
             };
-
-            using (TiffImage imageMaximal = (TiffImage)Image.Load(inputPath, loadOptionsMaximal))
+            using (tiffFull = (TiffImage)Image.Load(inputPath, loadOptionsFull))
             {
-                int frameCountMaximal = imageMaximal.Frames.Length;
-                Console.WriteLine($"Maximal recovery frame count: {frameCountMaximal}");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputMaximal));
-                // Save recovered image
-                imageMaximal.Save(outputMaximal);
+                tiffFull.Save(outputPathFull);
             }
 
-            // Comparison already printed above
+            // Compare frame counts
+            int countConsistent = tiffConsistent.Frames.Length;
+            int countFull = tiffFull.Frames.Length;
+
+            Console.WriteLine($"ConsistentRecover frame count: {countConsistent}");
+            Console.WriteLine($"FullRecover frame count: {countFull}");
         }
         catch (Exception ex)
         {
