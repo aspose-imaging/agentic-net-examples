@@ -1,37 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input/sample.djvu";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input path
+            string inputPath = "input.djvu";
 
-        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
-        {
-            for (int i = 0; i < djvuImage.Pages.Length; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                using (DjvuPage page = (DjvuPage)djvuImage.Pages[i])
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Open the DjVu file as a stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                // Load DjVu document
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    string outputPath = $"output/page_{page.PageNumber}.bmp";
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    BmpOptions bmpOptions = new BmpOptions
+                    // Iterate through all pages
+                    for (int i = 0; i < djvuImage.PageCount; i++)
                     {
-                        BitsPerPixel = 24
-                    };
+                        var page = djvuImage.Pages[i];
 
-                    page.Save(outputPath, bmpOptions);
+                        // Construct output file name for each page
+                        string outputPath = $"output_page_{i + 1}.bmp";
+
+                        // Ensure the output directory exists (handles null for current directory)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                        // Prepare BMP save options with 24 bits per pixel
+                        BmpOptions bmpOptions = new BmpOptions
+                        {
+                            BitsPerPixel = 24
+                        };
+
+                        // Save the page as BMP
+                        page.Save(outputPath, bmpOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
