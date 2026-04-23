@@ -4,6 +4,7 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,37 +13,48 @@ class Program
     {
         try
         {
-            // Hardcoded input TIFF path
+            // Hardcoded input and output paths
             string inputPath = "input.tif";
+            string outputDir = "output";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output directory for extracted BMP frames
-            string outputDir = "output_frames";
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDir);
 
             // Load the multi‑page TIFF
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                int pageCount = tiff.PageCount;
-                for (int i = 0; i < pageCount; i++)
+                // Preserve original DPI
+                double dpiX = tiffImage.HorizontalResolution;
+                double dpiY = tiffImage.VerticalResolution;
+
+                // Iterate through each frame
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
-                    // Build output BMP file path
-                    string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.bmp");
+                    // Set the current frame as active
+                    tiffImage.ActiveFrame = tiffImage.Frames[i];
+
+                    // Build output file path for the current frame
+                    string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
+
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Configure BMP options preserving original DPI and exporting a single page
+                    // Configure BMP save options with original DPI
                     BmpOptions bmpOptions = new BmpOptions
                     {
-                        ResolutionSettings = new ResolutionSetting(tiff.HorizontalResolution, tiff.VerticalResolution),
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
+                        Source = new FileCreateSource(outputPath, false),
+                        ResolutionSettings = new ResolutionSetting(dpiX, dpiY)
                     };
 
-                    // Save the current frame as BMP
-                    tiff.Save(outputPath, bmpOptions);
+                    // Save only the active frame as BMP
+                    tiffImage.Save(outputPath, bmpOptions);
                 }
             }
         }
