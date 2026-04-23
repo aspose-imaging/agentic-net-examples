@@ -8,33 +8,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\source.eps";
+            string outputPath = @"C:\Images\result.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Calculate new height to maintain aspect ratio for width = 2000
+                int newWidth = 2000;
+                int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
+
+                // Resize using Mitchell cubic interpolation
+                image.Resize(newWidth, newHeight, ResizeType.Mitchell);
+
+                // Save as PNG
+                image.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        Directory.CreateDirectory(outputDir ?? ".");
-
-        // Load the EPS image, resize while keeping aspect ratio, and save as PNG
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Calculate new height to maintain aspect ratio for a width of 2000 pixels
-            int newWidth = 2000;
-            int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
-
-            // Resize using Mitchell cubic interpolation
-            image.Resize(newWidth, newHeight, ResizeType.Mitchell);
-
-            // Save the resized image as PNG
-            image.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
