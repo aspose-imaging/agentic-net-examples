@@ -5,62 +5,66 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all HTML5 Canvas files (assuming .html extension)
-        string[] inputFiles = Directory.GetFiles(inputDirectory, "*.html");
-
-        // Uniform dimensions for all output JPEGs
-        const int targetWidth = 800;
-        const int targetHeight = 600;
-
-        foreach (string inputPath in inputFiles)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Hard‑coded input HTML5 Canvas files
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\canvas1.html",
+                @"C:\Images\canvas2.html"
+            };
 
-            // Prepare output path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            // Corresponding output JPEG files
+            string[] outputPaths = new string[]
             {
-                // Resize to uniform dimensions
-                image.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+                @"C:\Output\image1.jpg",
+                @"C:\Output\image2.jpg"
+            };
 
-                // Set JPEG save options
-                JpegOptions jpegOptions = new JpegOptions
+            // Desired uniform dimensions
+            const int targetWidth = 800;
+            const int targetHeight = 600;
+
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Quality = 90
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save as JPEG
-                image.Save(outputPath, jpegOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the HTML5 Canvas image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Resize to uniform dimensions if necessary
+                    if (image.Width != targetWidth || image.Height != targetHeight)
+                    {
+                        image.Resize(targetWidth, targetHeight);
+                    }
+
+                    // Set JPEG save options
+                    JpegOptions jpegOptions = new JpegOptions
+                    {
+                        Quality = 90
+                    };
+
+                    // Save as JPEG
+                    image.Save(outputPath, jpegOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
