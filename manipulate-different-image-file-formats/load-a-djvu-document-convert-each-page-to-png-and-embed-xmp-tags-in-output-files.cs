@@ -1,36 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.djvu";
+        string inputPath = "sample.djvu";
         string outputDirectory = "Output";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(outputDirectory);
-
-        using (FileStream stream = File.OpenRead(inputPath))
-        {
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            if (!File.Exists(inputPath))
             {
-                foreach (DjvuPage page in djvuImage.Pages)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(outputDirectory);
+
+            using (Stream stream = File.OpenRead(inputPath))
+            {
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    page.Save(outputPath, new PngOptions());
+                    foreach (Image img in djvuImage.Pages)
+                    {
+                        DjvuPage djvuPage = img as DjvuPage;
+                        if (djvuPage == null)
+                            continue;
+
+                        string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        PngOptions pngOptions = new PngOptions();
+                        djvuPage.Save(outputPath, pngOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
