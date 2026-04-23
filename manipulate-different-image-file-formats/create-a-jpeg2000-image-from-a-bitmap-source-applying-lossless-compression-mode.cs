@@ -2,49 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\source.png";
-        string outputPath = @"C:\temp\output.jp2";
+        string inputPath = "c:\\temp\\source.bmp";
+        string outputPath = "c:\\temp\\output.jp2";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the bitmap source image
-        using (Image srcImage = Image.Load(inputPath))
-        {
-            // Cast to RasterImage for conversion
-            RasterImage raster = srcImage as RasterImage;
-            if (raster == null)
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Source image is not a raster image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Create JPEG2000 image from the raster source
-            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(raster))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the bitmap source image
+            using (Image bitmap = Image.Load(inputPath))
             {
-                // Configure lossless compression (Irreversible = false)
+                // Set up JPEG2000 options for lossless compression
                 Jpeg2000Options options = new Jpeg2000Options
                 {
-                    Irreversible = false
+                    Irreversible = false // Use lossless DWT 5-3 compression
                 };
 
-                // Save the JPEG2000 image with the specified options
-                jpeg2000Image.Save(outputPath, options);
+                // Save the image as JPEG2000
+                bitmap.Save(outputPath, options);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
