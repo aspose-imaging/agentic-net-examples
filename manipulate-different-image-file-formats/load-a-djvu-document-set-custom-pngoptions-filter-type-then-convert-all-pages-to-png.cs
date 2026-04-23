@@ -1,48 +1,47 @@
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load DjVu document from stream
-        using (Stream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
-        {
-            // Prepare PNG options with custom filter type
-            PngOptions pngOptions = new PngOptions
+            string inputPath = "Input/sample.djvu";
+            if (!File.Exists(inputPath))
             {
-                FilterType = PngFilterType.Sub
-            };
-
-            // Convert each page to PNG
-            foreach (DjvuPage djvuPage in djvuImage.Pages)
-            {
-                string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
-
-                // Ensure the directory for the output file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the page as PNG using the custom options
-                djvuPage.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            string outputDir = "Output";
+
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                using (DjvuImage djvuImage = new DjvuImage(stream))
+                {
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        FilterType = PngFilterType.Sub
+                    };
+
+                    foreach (Image page in djvuImage.Pages)
+                    {
+                        DjvuPage djvuPage = (DjvuPage)page;
+                        string outputPath = Path.Combine(outputDir, $"page_{djvuPage.PageNumber}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        djvuPage.Save(outputPath, pngOptions);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
