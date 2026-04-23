@@ -1,56 +1,55 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\InputDICOM\";
-        string outputDir = @"C:\OutputPNG\";
-
-        // List of DICOM files to process (hardcoded)
-        string[] files = new string[]
+        try
         {
-            "image1.dcm",
-            "image2.dcm",
-            "image3.dcm"
-        };
+            // Hardcoded input folder and output folder
+            string inputFolder = @"C:\Images\Dicom\Input";
+            string outputFolder = @"C:\Images\Dicom\Output";
 
-        foreach (var fileName in files)
-        {
-            // Build full input path
-            string inputPath = Path.Combine(inputDir, fileName);
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // List of DICOM files to process
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Path.Combine(inputFolder, "image1.dcm"),
+                Path.Combine(inputFolder, "image2.dcm"),
+                Path.Combine(inputFolder, "image3.dcm")
+            };
 
-            // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            foreach (string inputPath in inputFiles)
             {
-                // Cast to DicomImage to access DICOM-specific methods
-                DicomImage dicomImage = (DicomImage)image;
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Adjust brightness by 10 units
-                dicomImage.AdjustBrightness(10);
-
-                // Prepare output path (same name with .png extension)
-                string outputFileName = Path.ChangeExtension(fileName, ".png");
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Determine output file path (same name with .png extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save as PNG
-                dicomImage.Save(outputPath, new PngOptions());
+                // Load DICOM image, adjust brightness, and save as PNG
+                using (Image image = Image.Load(inputPath))
+                {
+                    DicomImage dicomImage = (DicomImage)image;
+                    dicomImage.AdjustBrightness(10);
+                    dicomImage.Save(outputPath, new PngOptions());
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
