@@ -15,7 +15,7 @@ class Program
             string inputPath = @"C:\temp\input.emf";
             string outputPath = @"C:\temp\output.svg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -31,23 +31,22 @@ class Program
                 // Configure SVG save options
                 SvgOptions saveOptions = new SvgOptions
                 {
-                    TextAsShapes = true,
-                    Callback = new SvgResourceKeeperCallback()
+                    TextAsShapes = true
                 };
 
-                // Configure rasterization options for EMF
+                // Configure rasterization options for EMF rendering
                 EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
-                    BackgroundColor = Color.White,
+                    BackgroundColor = Color.WhiteSmoke,
                     PageSize = emfImage.Size,
                     RenderMode = EmfRenderMode.Auto,
-                    BorderX = 0,
-                    BorderY = 0
+                    BorderX = 50,
+                    BorderY = 50
                 };
 
                 saveOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as SVG
+                // Save as SVG; external images will be stored alongside the SVG file
                 emfImage.Save(outputPath, saveOptions);
             }
         }
