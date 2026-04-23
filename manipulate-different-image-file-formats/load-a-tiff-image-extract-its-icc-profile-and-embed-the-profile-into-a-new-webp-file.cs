@@ -2,9 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -23,21 +20,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Retrieve ICC profile from the TIFF image (if present)
-                TiffOptions tiffOptions = (TiffOptions)tiffImage.GetOriginalOptions();
-                MemoryStream iccProfile = tiffOptions.IccProfile;
-
-                // Convert TIFF to WebP
-                using (WebPImage webpImage = new WebPImage((RasterImage)tiffImage))
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
                 {
-                    WebPOptions webpOptions = new WebPOptions();
+                    Console.Error.WriteLine("TIFF image is not a raster image.");
+                    return;
+                }
 
-                    // Note: Direct embedding of ICC profile into WebP is not exposed via WebPOptions.
-                    // If ICC profile handling is required, additional metadata APIs would be needed.
-
-                    webpImage.Save(outputPath, webpOptions);
+                using (WebPOptions options = new WebPOptions { KeepMetadata = true })
+                {
+                    raster.Save(outputPath, options);
                 }
             }
         }
