@@ -2,42 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\temp\sample.cdr";
-        string outputPath = @"C:\temp\sample.gif";
+        string outputPath = @"C:\temp\output.gif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CorelDRAW (CDR) file
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure GIF save options (256‑color palette)
-            var gifOptions = new GifOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Number of bits per primary color minus 1 (7 => 8 bits)
-                ColorResolution = 7,
-                // Analyze source colors to build the best matching palette
-                DoPaletteCorrection = true,
-                // Optional: interlaced GIF
-                Interlaced = false
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as GIF using the configured options
-            image.Save(outputPath, gifOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CorelDRAW (CDR) file
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure GIF saving options (256‑color palette)
+                var gifOptions = new GifOptions
+                {
+                    // 7 means 8 bits per primary color (2^8 = 256 colors)
+                    ColorResolution = 7,
+                    // Build the best matching palette from the source image
+                    DoPaletteCorrection = true
+                };
+
+                // Save the image as GIF using the configured options
+                image.Save(outputPath, gifOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
