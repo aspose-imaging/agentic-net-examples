@@ -6,10 +6,10 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 4830 |
+| Total Examples | 5262 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-04-22 |
+| Last Updated | 2026-04-23 |
 
 ## Repository Structure
 
@@ -52,7 +52,7 @@ README.md
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 58 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 208 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 695 | 100.0% | [agents.md](./kernel-filters/agents.md) |
-| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 1032 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
+| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 1464 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
 | [Manipulating Images](./manipulating-images/) | 644 | 100.0% | [agents.md](./manipulating-images/agents.md) |
 | [Merge Images](./merge-images/) | 175 | 100.0% | [agents.md](./merge-images/agents.md) |
 | [Working With Drawing Images](./working-with-drawing-images/) | 639 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
@@ -71,4 +71,4 @@ dotnet run <example-file.cs>
 - Aspose.Imaging for .NET (via NuGet)
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260422_065110` | 2026-04-22*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260423_054336` | 2026-04-23*
