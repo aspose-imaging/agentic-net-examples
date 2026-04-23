@@ -2,41 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "Sample.eps";
-        string outputPath = "Sample.pdf";
-
-        // Verify that the input EPS file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
 
-        // Ensure the output directory exists (handles cases where outputPath has no directory)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the EPS image and convert it to PDF
-        using (var image = (EpsImage)Image.Load(inputPath))
-        {
-            var pdfOptions = new PdfOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    // Set desired PDF compliance (e.g., PDF/A-1b)
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as a PDF file using the specified options
-            image.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image and save as PDF
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                var options = new PdfOptions();
+                image.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
