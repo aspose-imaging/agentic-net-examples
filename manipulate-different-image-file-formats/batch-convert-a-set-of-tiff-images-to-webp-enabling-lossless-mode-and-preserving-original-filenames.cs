@@ -10,11 +10,14 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\input\";
-            string outputDir = @"C:\output\";
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
+
+            // Ensure the output directory exists (will also work for each file)
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
 
             foreach (string inputPath in tiffFiles)
             {
@@ -25,15 +28,17 @@ class Program
                     return;
                 }
 
-                // Build output path preserving original filename (change extension to .webp)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+                // Build output path with same filename but .webp extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image and save as lossless WebP
+                // Load the TIFF image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Save as lossless WebP
                     var webpOptions = new WebPOptions
                     {
                         Lossless = true
