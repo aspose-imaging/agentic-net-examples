@@ -2,53 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output/output.webp";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.gif";
-            string outputPath = @"C:\temp\frame0.webp";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the GIF animation
+            // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to multipage image to access frames
-                var multipage = image as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                // Configure WebP options for lossless compression and select the first frame (index 0)
+                WebPOptions webpOptions = new WebPOptions
                 {
-                    Console.Error.WriteLine("No frames found in the GIF.");
-                    return;
-                }
+                    Lossless = true,
+                    MultiPageOptions = new MultiPageOptions(new IntRange(0, 0))
+                };
 
-                // Index of the frame to convert (0‑based)
-                int frameIndex = 0;
-
-                // Extract the specific frame
-                using (Image frame = multipage.Pages[frameIndex])
-                {
-                    // Set up WebP options with lossless compression
-                    var webpOptions = new WebPOptions
-                    {
-                        Lossless = true
-                    };
-
-                    // Save the frame as a WebP image
-                    frame.Save(outputPath, webpOptions);
-                }
+                // Save the selected frame as a lossless WebP image
+                image.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
