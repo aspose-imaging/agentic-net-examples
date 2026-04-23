@@ -9,56 +9,57 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input TIFF files and output directory
-        string[] inputFiles = new[]
-        {
-            @"C:\Images\Input1.tif",
-            @"C:\Images\Input2.tif",
-            @"C:\Images\Input3.tif"
-        };
-        string outputDirectory = @"C:\Images\WebPOutput";
-
+        // Wrap the entire execution in a try/catch to report any unexpected errors.
         try
         {
-            // Ensure the output directory exists once (additional calls are safe)
-            Directory.CreateDirectory(outputDirectory);
+            // Hard‑coded input and output directories.
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
-            // Limit parallelism to avoid excessive memory consumption
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+            // Retrieve all TIFF files from the input folder.
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
 
-            Parallel.ForEach(inputFiles, parallelOptions, inputPath =>
+            // Limit parallelism to avoid excessive memory consumption.
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
+
+            // Process each TIFF file in parallel.
+            Parallel.ForEach(tiffFiles, parallelOptions, inputPath =>
             {
-                // Verify input file existence
+                // Verify that the source file exists.
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output file path (same name with .webp extension)
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+                // Determine the output WebP file path.
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists (safe to call repeatedly)
+                // Ensure the output directory exists.
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image, set a page exporting action to release resources,
-                // and save it as WebP using default options.
+                // Load the TIFF image.
                 using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
                 {
-                    // Release page resources after each page is saved (helps memory usage)
-                    tiffImage.PageExportingAction = (index, page) =>
+                    // Optional: release page resources after each page is saved.
+                    tiffImage.PageExportingAction = (index, page) => { GC.Collect(); };
+
+                    // Configure WebP export options.
+                    var webpOptions = new WebPOptions
                     {
-                        GC.Collect();
+                        Lossless = false,   // Use lossy compression.
+                        Quality = 80        // Adjust quality as needed.
                     };
 
-                    // Save as WebP; you can adjust options (e.g., Quality, Lossless) if needed
-                    tiffImage.Save(outputPath, new WebPOptions());
+                    // Save the image as WebP.
+                    tiffImage.Save(outputPath, webpOptions);
                 }
             });
         }
         catch (Exception ex)
         {
+            // Report any errors without crashing the process.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
