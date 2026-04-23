@@ -8,47 +8,44 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output locations
-        string inputPath = @"C:\Images\large_input.tif";
-        string outputDirectory = @"C:\Images\WebP_Output";
-
-        // Path‑safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists (unconditional)
-        Directory.CreateDirectory(outputDirectory);
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\large.tif";
+            string outputDirectory = @"C:\Images\WebPOutput";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
             // Load the multi‑page TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Define the action executed before each page is saved.
-                // Here we convert the current page to WebP and write it to disk.
-                tiffImage.PageExportingAction = (int index, Image page) =>
+                // Process each page sequentially to keep memory usage low
+                for (int pageIndex = 0; pageIndex < tiffImage.PageCount; pageIndex++)
                 {
-                    // Build a file name for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{index}.webp");
+                    // Retrieve the current page (loaded on demand)
+                    using (Image page = tiffImage.Pages[pageIndex])
+                    {
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.webp");
 
-                    // Ensure the directory for this page exists (unconditional)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as WebP using default options
-                    page.Save(outputPath, new WebPOptions());
+                        // Save the page as WebP
+                        var webpOptions = new WebPOptions(); // default options; adjust if needed
+                        page.Save(outputPath, webpOptions);
+                    }
 
-                    // Release memory used by the previous page
+                    // Force garbage collection to release page resources promptly
                     GC.Collect();
-                };
-
-                // Trigger processing of all pages.
-                // Saving to a dummy stream forces the PageExportingAction to run for each page.
-                using (var dummyStream = new MemoryStream())
-                {
-                    tiffImage.Save(dummyStream);
                 }
             }
         }
