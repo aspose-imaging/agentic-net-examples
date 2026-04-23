@@ -4,31 +4,28 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input\\input.tif";
+        string outputPath = "output\\output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists (guard against null/empty)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
             // Load existing TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
@@ -38,16 +35,23 @@ class Program
                 frameOptions.Photometric = TiffPhotometrics.Rgb;
                 frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
                 frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-                frameOptions.Xresolution = new TiffRational(300, 1); // 300 DPI horizontal
-                frameOptions.Yresolution = new TiffRational(300, 1); // 300 DPI vertical
 
                 // Create a new frame with custom dimensions
                 int newWidth = 200;
-                int newHeight = 200;
+                int newHeight = 150;
                 TiffFrame newFrame = new TiffFrame(frameOptions, newWidth, newHeight);
+
+                // Draw a simple background on the new frame
+                Graphics graphics = new Graphics(newFrame);
+                SolidBrush brush = new SolidBrush(Color.LightGray);
+                graphics.FillRectangle(brush, newFrame.Bounds);
 
                 // Add the new frame to the TIFF image
                 tiffImage.AddFrame(newFrame);
+
+                // Set specific resolution (DPI) for the TIFF image
+                tiffImage.HorizontalResolution = 300;
+                tiffImage.VerticalResolution = 300;
 
                 // Save the modified TIFF image
                 tiffImage.Save(outputPath);
