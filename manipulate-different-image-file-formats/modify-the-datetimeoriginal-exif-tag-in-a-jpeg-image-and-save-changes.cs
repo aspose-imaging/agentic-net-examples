@@ -8,33 +8,44 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
-        {
-            // Access JPEG EXIF data
-            JpegExifData jpegExif = image.ExifData as JpegExifData;
-            if (jpegExif != null)
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Modify the DateTimeOriginal tag (format: "yyyy:MM:dd HH:mm:ss")
-                jpegExif.DateTimeOriginal = "2023:01:01 12:00:00";
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save the modified image
-            image.Save(outputPath);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            {
+                // Access EXIF data
+                JpegExifData exif = image.ExifData as JpegExifData;
+                if (exif != null)
+                {
+                    // Set the DateTimeOriginal tag (format: "yyyy:MM:dd HH:mm:ss")
+                    exif.DateTimeOriginal = "2023:01:01 12:00:00";
+                }
+                else
+                {
+                    Console.Error.WriteLine("No EXIF data found in the image.");
+                }
+
+                // Save the modified image
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
