@@ -7,25 +7,32 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.dcm";
-        string outputPath = "output.pdf";
+        string inputPath = "Input/sample.dcm";
+        string outputPath = "Output/output.pdf";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
-        {
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                dicomImage.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            {
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    dicomImage.Save(outputPath, pdfOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
