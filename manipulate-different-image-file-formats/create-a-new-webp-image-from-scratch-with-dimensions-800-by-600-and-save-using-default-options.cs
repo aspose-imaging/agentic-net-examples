@@ -2,32 +2,28 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Webp;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            // Output file path
-            string outputPath = "output.webp";
+            // Define output file path
+            string outputPath = "output/output.webp";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create source bound to the output file
-            Source source = new FileCreateSource(outputPath, false);
+            // Create default WebP options
+            WebPOptions options = new WebPOptions();
 
-            // Default WebP options with the source
-            using (WebPOptions options = new WebPOptions() { Source = source })
+            // Create a new blank WebP image with the specified dimensions
+            using (WebPImage webPImage = new WebPImage(800, 600, options))
             {
-                // Create a blank WebP image of 800x600 bound to the source
-                using (RasterImage canvas = (RasterImage)Image.Create(options, 800, 600))
-                {
-                    // Save the bound image
-                    canvas.Save();
-                }
+                // Save the image using default options
+                webPImage.Save(outputPath);
             }
         }
         catch (Exception ex)
