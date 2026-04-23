@@ -9,52 +9,67 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "report.txt";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputDirectory = "Input";
+            string outputFile = "Output/report.txt";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
 
-        var results = new List<(string FileName, double ExposureValue)>();
+            var jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
+                .ToList();
 
-        // Load JPEG image and extract EXIF exposure time
-        using (JpegImage image = (JpegImage)Image.Load(inputPath))
-        {
-            var exif = image.ExifData;
-            if (exif != null)
+            var records = new List<(string FileName, string ExposureStr, double ExposureVal)>();
+
+            foreach (var filePath in jpegFiles)
             {
-                // ExposureTime may be null or a non‑numeric type; convert safely
-                string exposureStr = exif.ExposureTime?.ToString() ?? string.Empty;
-                double exposureVal = double.MaxValue;
-                if (double.TryParse(exposureStr, out double parsed))
+                if (!File.Exists(filePath))
                 {
-                    exposureVal = parsed;
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
                 }
 
-                results.Add((Path.GetFileName(inputPath), exposureVal));
+                using (JpegImage image = (JpegImage)Image.Load(filePath))
+                {
+                    var jpegExif = image.ExifData;
+                    if (jpegExif != null)
+                    {
+                        string exposureStr = jpegExif.ExposureTime?.ToString();
+                        double exposureVal = double.MaxValue;
+
+                        if (!string.IsNullOrEmpty(exposureStr))
+                        {
+                            int idx = exposureStr.IndexOf('(');
+                            string numericPart = idx > 0 ? exposureStr.Substring(0, idx).Trim() : exposureStr.Trim();
+                            if (double.TryParse(numericPart, out double parsed))
+                            {
+                                exposureVal = parsed;
+                            }
+                        }
+
+                        records.Add((Path.GetFileName(filePath), exposureStr ?? "N/A", exposureVal));
+                    }
+                }
             }
+
+            var sorted = records.OrderBy(r => r.ExposureVal).ThenBy(r => r.FileName).ToList();
+
+            using (var writer = new StreamWriter(outputFile))
+            {
+                writer.WriteLine("Exposure Time Report (sorted by fastest shutter speed):");
+                foreach (var rec in sorted)
+                {
+                    writer.WriteLine($"{rec.FileName}: {rec.ExposureStr}");
+                }
+            }
+
+            Console.WriteLine($"Report generated at: {outputFile}");
         }
-
-        // Sort by fastest shutter speed (smallest exposure time)
-        var sorted = results.OrderBy(r => r.ExposureValue).ToList();
-
-        // Prepare report lines
-        var lines = new List<string>();
-        foreach (var entry in sorted)
+        catch (Exception ex)
         {
-            string exposureDisplay = entry.ExposureValue == double.MaxValue ? "N/A" : entry.ExposureValue.ToString();
-            lines.Add($"{entry.FileName}: ExposureTime = {exposureDisplay}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Write report to output file
-        File.WriteAllLines(outputPath, lines);
     }
 }
