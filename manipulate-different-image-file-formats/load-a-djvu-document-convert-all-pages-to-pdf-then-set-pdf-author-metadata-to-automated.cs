@@ -9,24 +9,32 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.djvu";
-        string outputPath = "Output\\sample.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\output.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
-        {
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo { Author = "Automated" };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            {
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Automated" }
+                };
+
                 djvuImage.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
