@@ -28,7 +28,7 @@ class Program
             // Load BMP image
             using (BmpImage bmpImage = new BmpImage(inputPath))
             {
-                // Set WebP conversion options
+                // Set WebP conversion options (lossy, quality 85)
                 var webpOptions = new WebPOptions
                 {
                     Lossless = false,
@@ -49,7 +49,7 @@ class Program
             }
             else
             {
-                Console.WriteLine("Size reduction verification failed.");
+                Console.WriteLine("Warning: Output file size reduction is less than 40%.");
             }
         }
         catch (Exception ex)
