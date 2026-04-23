@@ -3,16 +3,16 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\animation.webp";
-            string outputDirectory = @"C:\temp\frames";
+            // Hardcoded input WebP file path
+            string inputPath = "input.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,24 +21,27 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists (unconditional)
-            Directory.CreateDirectory(outputDirectory);
+            // Directory where extracted BMP frames will be saved
+            string outputDirectory = "output_frames";
 
-            // Load the WebP animation
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            // Load the WebP image
+            using (Image image = Image.Load(inputPath))
             {
-                // Try to treat the image as a multipage image
-                if (webPImage is IMultipageImage multipage && multipage.PageCount > 0)
+                // Attempt to treat the loaded image as a multipage image
+                IMultipageImage multipage = image as IMultipageImage;
+
+                if (multipage != null && multipage.PageCount > 0)
                 {
+                    // Export each frame of the animation
                     for (int i = 0; i < multipage.PageCount; i++)
                     {
-                        // Each page is a frame; cast to RasterImage for saving
-                        var frame = multipage.Pages[i] as RasterImage;
-                        if (frame == null)
-                            continue;
+                        // Cast the page to RasterImage
+                        RasterImage frame = (RasterImage)multipage.Pages[i];
 
+                        // Build output BMP file path
                         string outputPath = Path.Combine(outputDirectory, $"frame_{i}.bmp");
-                        // Ensure the directory for this file exists (unconditional)
+
+                        // Ensure the output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Save the frame as BMP
@@ -47,10 +50,11 @@ class Program
                 }
                 else
                 {
-                    // Fallback: single-frame image, save the active frame
+                    // Single-frame WebP (or non-multipage) – save as a single BMP
+                    RasterImage raster = (RasterImage)image;
                     string outputPath = Path.Combine(outputDirectory, "frame_0.bmp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    webPImage.Save(outputPath, new BmpOptions());
+                    raster.Save(outputPath, new BmpOptions());
                 }
             }
         }
