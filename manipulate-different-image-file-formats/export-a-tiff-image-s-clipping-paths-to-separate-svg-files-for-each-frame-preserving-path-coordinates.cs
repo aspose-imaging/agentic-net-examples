@@ -1,19 +1,18 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
             string inputPath = "input.tif";
-            string outputDir = "output_paths";
+            string outputDir = "output";
 
             if (!File.Exists(inputPath))
             {
@@ -23,28 +22,21 @@ class Program
 
             Directory.CreateDirectory(outputDir);
 
-            using (Aspose.Imaging.FileFormats.Tiff.TiffImage tiff = (Aspose.Imaging.FileFormats.Tiff.TiffImage)Aspose.Imaging.Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                for (int i = 0; i < tiff.Frames.Length; i++)
+                int frameIndex = 0;
+                foreach (TiffFrame frame in tiffImage.Frames)
                 {
-                    Aspose.Imaging.FileFormats.Tiff.TiffFrame frame = tiff.Frames[i];
-                    var resources = frame.PathResources;
-                    if (resources == null) continue;
+                    string outputPath = Path.Combine(outputDir, $"frame{frameIndex}.svg");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    for (int j = 0; j < resources.Count; j++)
+                    var svgGraphics = new SvgGraphics2D(frame.Width, frame.Height, 96);
+                    using (SvgImage svgImage = svgGraphics.EndRecording())
                     {
-                        var pathResource = resources[j];
-
-                        var svgGraphics = new SvgGraphics2D(frame.Width, frame.Height, 96);
-                        // No drawing performed; just create empty SVG for each path resource
-
-                        using (var svgImage = svgGraphics.EndRecording())
-                        {
-                            string outputPath = Path.Combine(outputDir, $"frame_{i}_path_{j}.svg");
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                            svgImage.Save(outputPath);
-                        }
+                        svgImage.Save(outputPath);
                     }
+
+                    frameIndex++;
                 }
             }
         }
