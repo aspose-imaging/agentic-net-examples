@@ -2,37 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\sample.jpg";
-
-        // Verify that the input EPS file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.eps";
+            string outputPath = @"C:\Images\sample.jpg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image and save it as JPEG
-        using (Image image = Image.Load(inputPath) as EpsImage)
-        {
-            if (image == null)
+            // Verify that the input EPS file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Failed to load EPS image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Save the image to JPEG format using default JPEG options
-            image.Save(outputPath, new JpegOptions());
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Use default JPEG options
+                var jpegOptions = new JpegOptions();
+
+                // Save the image as JPEG
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
