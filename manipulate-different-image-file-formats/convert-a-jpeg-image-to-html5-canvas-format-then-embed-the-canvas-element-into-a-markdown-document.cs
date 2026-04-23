@@ -7,41 +7,55 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.jpg";
-        string canvasOutputPath = @"C:\temp\canvas.html";
-        string markdownOutputPath = @"C:\temp\image.md";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input JPEG path
+            string inputPath = @"C:\temp\input.jpg";
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(canvasOutputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(markdownOutputPath));
+            // Hard‑coded output HTML5 Canvas file path
+            string htmlOutputPath = @"C:\temp\canvas.html";
 
-        // Load the JPEG image and save it as an HTML5 Canvas (only the <canvas> tag)
-        using (Image image = Image.Load(inputPath))
-        {
-            var canvasOptions = new Html5CanvasOptions
+            // Hard‑coded output Markdown file path
+            string markdownPath = @"C:\temp\image.md";
+
+            // Verify that the input JPEG exists
+            if (!File.Exists(inputPath))
             {
-                FullHtmlPage = false,          // Export only the canvas element
-                CanvasTagId = "myCanvas"        // Optional identifier for the canvas tag
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(canvasOutputPath, canvasOptions);
+            // Ensure the directory for the HTML output exists
+            Directory.CreateDirectory(Path.GetDirectoryName(htmlOutputPath));
+
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save the image as an HTML5 Canvas fragment (only the <canvas> tag)
+                var canvasOptions = new Html5CanvasOptions
+                {
+                    FullHtmlPage = false,                     // export only the canvas tag
+                    CanvasTagId = "myCanvas",                  // optional canvas identifier
+                    VectorRasterizationOptions = new SvgRasterizationOptions()
+                };
+
+                image.Save(htmlOutputPath, canvasOptions);
+            }
+
+            // Read the generated <canvas> tag
+            string canvasTag = File.ReadAllText(htmlOutputPath);
+
+            // Ensure the directory for the Markdown file exists
+            Directory.CreateDirectory(Path.GetDirectoryName(markdownPath));
+
+            // Create a simple Markdown document embedding the canvas tag
+            string markdownContent = "# Image Canvas\n\n" + canvasTag + "\n";
+
+            File.WriteAllText(markdownPath, markdownContent);
         }
-
-        // Read the generated canvas HTML
-        string canvasHtml = File.ReadAllText(canvasOutputPath);
-
-        // Create Markdown content embedding the canvas element
-        string markdownContent = "# Image Canvas\n\n" + canvasHtml + "\n";
-
-        // Write the Markdown file
-        File.WriteAllText(markdownOutputPath, markdownContent);
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
