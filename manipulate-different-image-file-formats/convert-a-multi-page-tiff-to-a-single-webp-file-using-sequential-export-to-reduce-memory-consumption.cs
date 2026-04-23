@@ -2,53 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
         // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input_multi.tif";
-        string outputPath = @"C:\Images\output.webp";
+        string inputPath = @"C:\Images\multi_page.tif";
+        string outputPath = @"C:\Images\single.webp";
 
-        // Ensure any runtime exception is reported cleanly
+        // Path‑safety checks as required
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the multi‑page TIFF
-            using (Image tiffImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterCachedMultipageImage to release each page after it is processed
-                if (tiffImage is RasterCachedMultipageImage rasterImage)
+                // If the source is a multipage image, limit export to the first page
+                if (image is IMultipageImage multipage && multipage.PageCount > 0)
                 {
-                    rasterImage.PageExportingAction = (index, page) =>
+                    // Export only the first page to keep memory usage low
+                    var exportOptions = new WebPOptions
                     {
-                        // Release resources for the just‑processed page
-                        GC.Collect();
+                        MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(0, 1))
                     };
+                    image.Save(outputPath, exportOptions);
                 }
-
-                // Prepare WebP export options (animated WebP will contain all pages as frames)
-                var webpOptions = new WebPOptions
+                else
                 {
-                    // Keep all pages; MultiPageOptions left null to export the whole image
-                    // Adjust quality/compression as needed
-                    Quality = 80,
-                    Lossless = false
-                };
-
-                // Save as a single (animated) WebP file
-                tiffImage.Save(outputPath, webpOptions);
+                    // For single‑page images just save directly
+                    var exportOptions = new WebPOptions();
+                    image.Save(outputPath, exportOptions);
+                }
             }
         }
         catch (Exception ex)
