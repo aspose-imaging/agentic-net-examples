@@ -8,42 +8,48 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths for twenty DjVu documents.
-        string[] inputPaths = new string[20];
-        string[] outputPaths = new string[20];
-
-        for (int i = 0; i < 20; i++)
+        try
         {
-            // Example file names – adjust the folder as needed.
-            inputPaths[i] = $@"C:\DjvuBatch\Input\document{i + 1}.djvu";
-            outputPaths[i] = $@"C:\DjvuBatch\Output\document{i + 1}.pdf";
-        }
-
-        // Process each file sequentially.
-        for (int i = 0; i < inputPaths.Length; i++)
-        {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
-
-            // Verify that the input file exists.
-            if (!File.Exists(inputPath))
+            // Hardcoded input directory and file names (20 DjVu files)
+            string inputDirectory = @"C:\InputDjvu";
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                "file1.djvu","file2.djvu","file3.djvu","file4.djvu","file5.djvu",
+                "file6.djvu","file7.djvu","file8.djvu","file9.djvu","file10.djvu",
+                "file11.djvu","file12.djvu","file13.djvu","file14.djvu","file15.djvu",
+                "file16.djvu","file17.djvu","file18.djvu","file19.djvu","file20.djvu"
+            };
 
-            // Ensure the output directory exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Hardcoded output directory
+            string outputDirectory = @"C:\OutputPdf";
 
-            // Load the DjVu document from a file stream.
-            using (Stream stream = File.OpenRead(inputPath))
+            foreach (string fileName in inputFiles)
             {
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputDirectory, fileName);
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(fileName) + ".pdf");
+
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Save the entire DjVu document as a PDF using default options.
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load DjVu document and save as PDF using default options
+                using (FileStream inputStream = File.OpenRead(inputPath))
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
+                {
                     djvuImage.Save(outputPath, new PdfOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
