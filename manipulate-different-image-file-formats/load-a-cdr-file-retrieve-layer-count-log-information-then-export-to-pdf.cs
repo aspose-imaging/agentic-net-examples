@@ -1,58 +1,63 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.cdr";
-        string outputDirectory = @"C:\temp\output";
+        string inputPath = @"C:\Data\sample.cdr";
+        string outputPath = @"C:\Data\sample.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Load the CDR image
-        using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-        {
-            // Retrieve and log the number of pages (layers)
-            int pageCount = cdrImage.PageCount;
-            Console.WriteLine($"Cdr file contains {pageCount} page(s).");
-
-            // Iterate through each page and export to a separate PDF file
-            for (int i = 0; i < pageCount; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Access the specific page
-                CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
-
-                // Prepare PDF output path
-                string outputPath = Path.Combine(outputDirectory, $"page{i}.pdf");
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Set up PDF options with rasterization settings matching the page size
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
-                };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the page as PDF
-                page.Save(outputPath, pdfOptions);
-                Console.WriteLine($"Exported page {i} to PDF: {outputPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR image
+            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            {
+                // Retrieve and log the number of pages (layers)
+                int pageCount = image.PageCount;
+                Console.WriteLine($"Page count (layers): {pageCount}");
+
+                // Export the first page to PDF
+                if (pageCount > 0)
+                {
+                    CdrImagePage page = (CdrImagePage)image.Pages[0];
+
+                    PdfOptions pdfOptions = new PdfOptions();
+                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                    {
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None,
+                        PageWidth = page.Width,
+                        PageHeight = page.Height
+                    };
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                    page.Save(outputPath, pdfOptions);
+                    Console.WriteLine($"Exported page 0 to PDF: {outputPath}");
+                }
+                else
+                {
+                    Console.Error.WriteLine("No pages found in the CDR document.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
