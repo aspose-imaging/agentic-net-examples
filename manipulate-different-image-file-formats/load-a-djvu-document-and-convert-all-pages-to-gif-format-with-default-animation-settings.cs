@@ -8,35 +8,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu file path
+        // Hardcoded input and output locations
         string inputPath = "sample.djvu";
+        string outputDirectory = "output";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Open the DjVu file as a stream
-        using (Stream inputStream = File.OpenRead(inputPath))
-        {
-            // Load the DjVu document from the stream
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Iterate through each page in the DjVu document
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Open the DjVu file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            {
+                // Load the DjVu document
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
                 {
-                    // Build the output GIF file path for the current page
-                    string outputPath = Path.Combine("output", $"page{djvuPage.PageNumber}.gif");
+                    // Iterate through each page and save as an individual GIF
+                    foreach (DjvuPage page in djvuImage.Pages)
+                    {
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as a GIF image using default options
-                    djvuPage.Save(outputPath, new GifOptions());
+                        // Save the page as GIF using default options
+                        page.Save(outputPath, new GifOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
