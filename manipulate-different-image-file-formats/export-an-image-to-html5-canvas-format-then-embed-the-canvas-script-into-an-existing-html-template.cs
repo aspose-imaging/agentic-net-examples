@@ -5,53 +5,56 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input image, HTML template, temporary canvas, and final output paths
-        string inputPath = "input/input.jpg";
-        string templatePath = "template/template.html";
-        string tempCanvasPath = "output/tempCanvas.html";
-        string outputPath = "output/final.html";
+        // Hardcoded paths
+        string inputPath = @"Sample.svg";
+        string canvasSnippetPath = @"CanvasSnippet.html";
+        string templatePath = @"Template.html";
+        string resultPath = @"Result.html";
 
-        // Validate input image existence
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Validate template file existence
-        if (!File.Exists(templatePath))
-        {
-            Console.Error.WriteLine($"File not found: {templatePath}");
-            return;
-        }
-
         // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(canvasSnippetPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(resultPath));
 
-        // Export only the canvas tag (no full HTML page) to a temporary file
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            var options = new Html5CanvasOptions
+            // Load the vector image
+            using (Image image = Image.Load(inputPath))
             {
-                FullHtmlPage = false,
-                VectorRasterizationOptions = new SvgRasterizationOptions()
-            };
-            image.Save(tempCanvasPath, options);
+                // Export only the canvas tag (no full HTML page)
+                var options = new Html5CanvasOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions(),
+                    FullHtmlPage = false
+                };
+
+                // Save canvas snippet
+                image.Save(canvasSnippetPath, options);
+            }
+
+            // Read generated canvas HTML
+            string canvasHtml = File.ReadAllText(canvasSnippetPath);
+
+            // Read the existing HTML template
+            string templateHtml = File.ReadAllText(templatePath);
+
+            // Embed the canvas HTML into the template (placeholder {{CANVAS}})
+            string finalHtml = templateHtml.Replace("{{CANVAS}}", canvasHtml);
+
+            // Write the final HTML file
+            File.WriteAllText(resultPath, finalHtml);
         }
-
-        // Read the generated canvas tag
-        string canvasTag = File.ReadAllText(tempCanvasPath);
-
-        // Read the existing HTML template
-        string templateContent = File.ReadAllText(templatePath);
-
-        // Replace placeholder {{canvas}} with the actual canvas tag
-        string result = templateContent.Replace("{{canvas}}", canvasTag);
-
-        // Write the final HTML file with the embedded canvas
-        File.WriteAllText(outputPath, result);
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
