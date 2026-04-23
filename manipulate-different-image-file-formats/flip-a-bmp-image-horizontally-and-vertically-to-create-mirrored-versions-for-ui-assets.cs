@@ -7,31 +7,38 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.bmp";
-        string outputPathHorizontal = "sample.horizontal.bmp";
-        string outputPathVertical = "sample.vertical.bmp";
+        string inputPath = @"C:\temp\source.bmp";
+        string horizontalOutputPath = @"C:\temp\output\source_horiz.bmp";
+        string verticalOutputPath = @"C:\temp\output\source_vert.bmp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Create horizontal mirrored image
+            using (Image image = Image.Load(inputPath))
+            {
+                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                Directory.CreateDirectory(Path.GetDirectoryName(horizontalOutputPath));
+                image.Save(horizontalOutputPath);
+            }
+
+            // Create vertical mirrored image
+            using (Image image = Image.Load(inputPath))
+            {
+                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                Directory.CreateDirectory(Path.GetDirectoryName(verticalOutputPath));
+                image.Save(verticalOutputPath);
+            }
         }
-
-        // Create horizontal mirrored version
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            image.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathHorizontal) ?? ".");
-            image.Save(outputPathHorizontal);
-        }
-
-        // Create vertical mirrored version
-        using (Image image = Image.Load(inputPath))
-        {
-            image.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathVertical) ?? ".");
-            image.Save(outputPathVertical);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
