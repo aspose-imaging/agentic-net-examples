@@ -8,42 +8,47 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu file path
-        string inputPath = @"C:\Images\sample.djvu";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.djvu";
+            string outputDir = @"C:\temp\output";
 
-        // Open the DjVu file stream
-        using (Stream stream = File.OpenRead(inputPath))
-        {
-            // Load DjVu document
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Process pages 1‑3 (indices 0‑2)
-                int pagesToProcess = Math.Min(3, djvuImage.PageCount);
-                for (int i = 0; i < pagesToProcess; i++)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the DjVu document
+            using (Image image = Image.Load(inputPath))
+            {
+                DjvuImage djvuImage = (DjvuImage)image;
+
+                // Iterate over pages 1‑3
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    // Build output BMP file path
-                    string outputPath = $@"C:\Images\output\page{i + 1}.bmp";
+                    if (page.PageNumber < 1 || page.PageNumber > 3)
+                        continue;
+
+                    // Apply Floyd‑Steinberg dithering with 1‑bit palette
+                    page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1);
+
+                    // Prepare output file path
+                    string outputPath = Path.Combine(outputDir, $"page{page.PageNumber}.bmp");
 
                     // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Retrieve the specific page
-                    DjvuPage page = (DjvuPage)djvuImage.Pages[i];
-
-                    // Apply Floyd‑Steinberg dithering with 1‑bit palette (black & white)
-                    page.Dither(DitheringMethod.FloydSteinbergDithering, 1);
-
-                    // Save the dithered page as BMP
+                    // Save the page as BMP
                     page.Save(outputPath, new BmpOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
