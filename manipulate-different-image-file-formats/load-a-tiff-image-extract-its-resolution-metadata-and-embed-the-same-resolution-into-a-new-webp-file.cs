@@ -8,13 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tif";
-        string outputPath = @"C:\Images\output.webp";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.webp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,27 +25,21 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (Image tiffImage = Image.Load(inputPath))
             {
                 // Cast to TiffImage to access resolution properties
-                TiffImage tiffImage = (TiffImage)image;
+                TiffImage tiff = (TiffImage)tiffImage;
+                double dpiX = tiff.HorizontalResolution;
+                double dpiY = tiff.VerticalResolution;
 
-                // Extract horizontal and vertical resolution
-                double horizontalResolution = tiffImage.HorizontalResolution;
-                double verticalResolution = tiffImage.VerticalResolution;
+                // Apply the same resolution to the image before saving
+                tiff.SetResolution(dpiX, dpiY);
 
-                // Apply the same resolution to the image (ensures it is stored in the output)
-                tiffImage.SetResolution(horizontalResolution, verticalResolution);
+                // Prepare WebP save options (default settings)
+                WebPOptions webpOptions = new WebPOptions();
 
-                // Prepare WebP save options
-                WebPOptions webpOptions = new WebPOptions
-                {
-                    // Example: lossless compression; adjust as needed
-                    Lossless = true
-                };
-
-                // Save the image as WebP with the embedded resolution
-                image.Save(outputPath, webpOptions);
+                // Save as WebP with the same resolution metadata
+                tiff.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
