@@ -7,28 +7,35 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\source.tga";
-        string outputPath = @"C:\Images\Rotated\result.bmp";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.tga";
+            string outputPath = "output.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TGA image, rotate 90° clockwise, and save as BMP
+            using (TgaImage tgaImage = new TgaImage(inputPath))
+            {
+                // Rotate 90 degrees clockwise without flipping
+                tgaImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                // Save the result; extension determines BMP format
+                tgaImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the TGA image, rotate 90 degrees clockwise, and save as BMP
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Rotate 90 degrees clockwise without flipping
-            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-            // Save the rotated image as BMP
-            image.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
