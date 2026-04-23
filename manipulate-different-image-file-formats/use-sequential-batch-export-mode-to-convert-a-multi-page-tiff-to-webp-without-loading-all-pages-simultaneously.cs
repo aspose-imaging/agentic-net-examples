@@ -3,19 +3,19 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/multipage.tif";
-            string outputPath = "Output/animated.webp";
+            // Hard‑coded input and output locations
+            string inputPath = @"C:\Images\multi_page.tif";
+            string outputDir = @"C:\Images\WebPPages";
 
-            // Validate input file existence
+            // Verify input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,30 +23,30 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDir);
 
             // Load the multi‑page TIFF
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Configure WebP export options
-                using (WebPOptions webpOptions = new WebPOptions())
+                // Set batch processing action – executed before each page is saved
+                tiffImage.PageExportingAction = (int index, Image page) =>
                 {
-                    // Example settings (adjust as needed)
-                    webpOptions.Lossless = false;
-                    webpOptions.Quality = 80;
-                    webpOptions.AnimLoopCount = 0; // infinite loop
-
-                    // Batch processing: action executed for each page before it is saved
-                    tiffImage.PageExportingAction = delegate (int index, Image page)
+                    // Cast to RasterImage to access Save
+                    if (page is RasterImage rasterPage)
                     {
-                        // Optional per‑page processing can be placed here
-                        // For demonstration, force garbage collection to free previous page resources
-                        GC.Collect();
-                    };
+                        // Build per‑page output path
+                        string outPath = Path.Combine(outputDir, $"page_{index}.webp");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
 
-                    // Save all pages as an animated WebP
-                    tiffImage.Save(outputPath, webpOptions);
-                }
+                        // Save the current page as WebP
+                        var webpOptions = new WebPOptions();
+                        rasterPage.Save(outPath, webpOptions);
+                    }
+                };
+
+                // Trigger the batch export by saving the source image.
+                // The actual saved file is not needed; the action handles per‑page output.
+                tiffImage.Save(Path.Combine(outputDir, "placeholder.tif"));
             }
         }
         catch (Exception ex)
