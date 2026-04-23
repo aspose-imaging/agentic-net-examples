@@ -2,57 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string logoPath = "logo.png";
-        string[] backgroundPaths = { "bg1.bmp", "bg2.bmp", "bg3.bmp" };
-        string outputDirectory = "output";
-
-        // Validate logo file
-        if (!File.Exists(logoPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {logoPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string backgroundPath = "background.bmp";
+            string logoPath = "logo.png";
+            string outputPath = "output.bmp";
 
-        // Ensure output directory exists (null‑safe)
-        if (!string.IsNullOrEmpty(outputDirectory))
-            Directory.CreateDirectory(outputDirectory);
-
-        // Load the logo once
-        using (RasterImage logoImage = (RasterImage)Image.Load(logoPath))
-        {
-            // Position where the logo will be placed (top‑left corner)
-            var logoPosition = new Point(50, 50); // adjust as needed
-            byte opacity = 128; // 50% transparent
-
-            foreach (string bgPath in backgroundPaths)
+            // Validate input files
+            if (!File.Exists(backgroundPath))
             {
-                // Validate background file
-                if (!File.Exists(bgPath))
-                {
-                    Console.Error.WriteLine($"File not found: {bgPath}");
-                    continue;
-                }
-
-                // Load background BMP
-                using (RasterImage background = (RasterImage)Image.Load(bgPath))
-                {
-                    // Blend the logo onto the background
-                    background.Blend(logoPosition, logoImage, opacity);
-
-                    // Prepare output path
-                    string outputPath = Path.Combine(outputDirectory,
-                        Path.GetFileNameWithoutExtension(bgPath) + "_branded.bmp");
-
-                    // Save the result (default BMP options)
-                    background.Save(outputPath);
-                }
+                Console.Error.WriteLine($"File not found: {backgroundPath}");
+                return;
             }
+            if (!File.Exists(logoPath))
+            {
+                Console.Error.WriteLine($"File not found: {logoPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load background and logo images
+            using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
+            using (RasterImage logo = (RasterImage)Image.Load(logoPath))
+            {
+                // Overlay logo at (0,0) with 50% opacity (128 out of 255)
+                background.Blend(new Point(0, 0), logo, 128);
+
+                // Save the composited image as BMP
+                BmpOptions bmpOptions = new BmpOptions() { Source = new FileCreateSource(outputPath, false) };
+                background.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
