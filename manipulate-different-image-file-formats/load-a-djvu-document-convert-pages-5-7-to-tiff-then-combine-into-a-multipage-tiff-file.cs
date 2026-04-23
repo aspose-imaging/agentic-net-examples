@@ -9,35 +9,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputPath = @"C:\temp\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\sample.djvu";
+            string outputPath = @"C:\Temp\output.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DjVu document
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
+            {
+                // Configure TIFF save options for multipage output
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Compression = TiffCompressions.Deflate,
+                    BitsPerSample = new ushort[] { 1 },
+                    MultiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 }) // pages 5‑7 (zero‑based)
+                };
+
+                // Save selected pages as a multipage TIFF
+                djvuImage.Save(outputPath, tiffOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the DjVu document from a file stream
-        using (FileStream stream = File.OpenRead(inputPath))
-        using (DjvuImage djvuImage = new DjvuImage(stream))
+        catch (Exception ex)
         {
-            // Configure TIFF save options
-            TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-            saveOptions.Compression = TiffCompressions.Deflate;
-            // Optional: force B/W output
-            saveOptions.BitsPerSample = new ushort[] { 1 };
-
-            // Specify pages 5‑7 (zero‑based indexes 4,5,6) for the multipage TIFF
-            saveOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 });
-
-            // Save the selected pages as a multipage TIFF file
-            djvuImage.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
