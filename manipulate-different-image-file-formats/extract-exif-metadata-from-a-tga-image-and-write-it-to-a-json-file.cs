@@ -1,145 +1,70 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Text.Json;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tga;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.tga";
-        string outputPath = "output/metadata.json";
+        string outputPath = "output.json";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load image and extract metadata via reflection
-        using (Image image = Image.Load(inputPath))
-        {
-            var metadata = new Dictionary<string, object>();
-            var imgType = image.GetType();
-
-            // List of TGA-specific metadata properties to extract
-            var propertyNames = new[]
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                "DateTimeStamp",
-                "AuthorName",
-                "AuthorComments",
-                "ImageId",
-                "JobNameOrId",
-                "JobTime",
-                "TransparentColor",
-                "SoftwareId",
-                "SoftwareVersion",
-                "SoftwareVersionLetter",
-                "SoftwareVersionNumber",
-                "XOrigin",
-                "YOrigin",
-                "HasAlpha",
-                "HasColorMap",
-                "Height",
-                "Width",
-                "IsGrayScale",
-                "GammaValueNumerator",
-                "GammaValueDenominator",
-                "PixelAspectRatioNumerator",
-                "PixelAspectRatioDenominator"
-            };
-
-            foreach (var propName in propertyNames)
-            {
-                var propInfo = imgType.GetProperty(propName);
-                if (propInfo != null)
-                {
-                    var value = propInfo.GetValue(image);
-                    if (value is DateTime dt)
-                    {
-                        metadata[propName] = dt.ToString("o");
-                    }
-                    else if (value is DateTime? ndt)
-                    {
-                        metadata[propName] = ndt.HasValue ? ndt.Value.ToString("o") : null;
-                    }
-                    else if (value is TimeSpan ts)
-                    {
-                        metadata[propName] = ts.ToString();
-                    }
-                    else if (value is TimeSpan? nts)
-                    {
-                        metadata[propName] = nts.HasValue ? nts.Value.ToString() : null;
-                    }
-                    else if (value is Aspose.Imaging.Color color)
-                    {
-                        metadata[propName] = color.ToArgb();
-                    }
-                    else
-                    {
-                        metadata[propName] = value;
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // EXIF data (if present)
-            var exifProp = imgType.GetProperty("ExifData");
-            if (exifProp != null)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the TGA image
+            using (TgaImage image = (TgaImage)Image.Load(inputPath))
             {
-                var exifData = exifProp.GetValue(image);
-                if (exifData != null)
+                // Access EXIF data
+                var exif = image.ExifData;
+                if (exif == null)
                 {
-                    var exifType = exifData.GetType();
-                    var exifProps = new[] { "ExifVersion", "Make", "Model", "Orientation", "Software" };
-                    foreach (var propName in exifProps)
+                    Console.WriteLine("No EXIF data found.");
+                    return;
+                }
+
+                // Convert EXIF properties to a dictionary for JSON serialization
+                var dict = new Dictionary<string, object>();
+                foreach (PropertyInfo prop in exif.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    try
                     {
-                        var propInfo = exifType.GetProperty(propName);
-                        if (propInfo != null)
+                        var value = prop.GetValue(exif);
+                        if (value != null)
                         {
-                            var value = propInfo.GetValue(exifData);
-                            metadata[$"Exif_{propName}"] = value;
+                            dict[prop.Name] = value;
                         }
                     }
+                    catch
+                    {
+                        // Ignore properties that throw on get
+                    }
                 }
-            }
 
-            // Build simple JSON string manually
-            var sb = new System.Text.StringBuilder();
-            sb.Append("{");
-            bool first = true;
-            foreach (var kvp in metadata)
-            {
-                if (!first) sb.Append(",");
-                first = false;
-                sb.Append($"\"{kvp.Key}\":");
-                if (kvp.Value == null)
-                {
-                    sb.Append("null");
-                }
-                else if (kvp.Value is string str)
-                {
-                    string escaped = str.Replace("\\", "\\\\").Replace("\"", "\\\"");
-                    sb.Append($"\"{escaped}\"");
-                }
-                else if (kvp.Value is bool b)
-                {
-                    sb.Append(b.ToString().ToLower());
-                }
-                else
-                {
-                    sb.Append(kvp.Value);
-                }
-            }
-            sb.Append("}");
-            string json = sb.ToString();
+                // Serialize to JSON with indentation
+                string json = JsonSerializer.Serialize(dict, new JsonSerializerOptions { WriteIndented = true });
 
-            // Write JSON to file
-            File.WriteAllText(outputPath, json);
+                // Write JSON to the output file
+                File.WriteAllText(outputPath, json);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
