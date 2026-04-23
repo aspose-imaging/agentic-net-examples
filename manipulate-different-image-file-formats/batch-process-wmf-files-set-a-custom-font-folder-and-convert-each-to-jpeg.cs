@@ -3,7 +3,6 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -11,32 +10,32 @@ class Program
     {
         try
         {
-            string inputDir = "Input";
-            string outputDir = "Output";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
             string fontFolder = "Fonts";
 
-            Directory.CreateDirectory(inputDir);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
             Directory.CreateDirectory(fontFolder);
 
             var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource((object[] args) =>
+            loadOptions.AddCustomFontSource((fontArgs) =>
             {
-                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                string fontsPath = fontArgs.Length > 0 ? fontArgs[0]?.ToString() : string.Empty;
                 var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
                 if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                 {
                     foreach (var file in Directory.GetFiles(fontsPath))
                     {
-                        string name = Path.GetFileNameWithoutExtension(file);
                         byte[] data = File.ReadAllBytes(file);
+                        string name = Path.GetFileNameWithoutExtension(file);
                         fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
                     }
                 }
                 return fonts.ToArray();
             }, fontFolder);
 
-            foreach (var inputPath in Directory.GetFiles(inputDir, "*.wmf"))
+            string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -44,27 +43,16 @@ class Program
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath, loadOptions))
                 {
-                    var rasterOptions = new WmfRasterizationOptions
+                    using (JpegOptions jpegOptions = new JpegOptions())
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-
-                    var jpegOptions = new JpegOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions,
-                        Quality = 90
-                    };
-
-                    image.Save(outputPath, jpegOptions);
+                        jpegOptions.Quality = 90;
+                        image.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
