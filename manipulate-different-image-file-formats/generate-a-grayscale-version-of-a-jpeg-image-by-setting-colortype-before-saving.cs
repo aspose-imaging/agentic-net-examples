@@ -8,35 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output_grayscale.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output_grayscale.jpg";
 
-        // Verify that the input file exists; report and exit if it does not
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source JPEG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure JPEG save options to force grayscale output
-            JpegOptions saveOptions = new JpegOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Set the color mode to Grayscale
-                ColorType = JpegCompressionColorMode.Grayscale,
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Optional: preserve quality (1‑100). Here we keep maximum quality.
-                Quality = 100
-            };
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image using the configured options
-            image.Save(outputPath, saveOptions);
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare JPEG save options with grayscale color mode
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    ColorType = JpegCompressionColorMode.Grayscale
+                };
+
+                // Save the image as a grayscale JPEG
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
