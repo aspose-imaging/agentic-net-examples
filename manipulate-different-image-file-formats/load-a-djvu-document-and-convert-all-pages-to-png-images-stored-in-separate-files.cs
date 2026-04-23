@@ -8,41 +8,45 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu file path
-        string inputPath = @"C:\temp\sample.djvu";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input DjVu file path
+            string inputPath = @"C:\temp\sample.djvu";
+            // Hardcoded output directory
+            string outputDir = @"C:\temp\";
 
-        // Hardcoded output directory
-        string outputDir = @"C:\temp\output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Open the DjVu file as a stream
-        using (Stream stream = File.OpenRead(inputPath))
-        {
-            // Load the DjVu image from the stream
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Iterate through each page in the DjVu document
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Open the DjVu file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            {
+                // Load DjVu image from the stream
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Build the output file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.png");
+                    // Iterate through each page in the DjVu document
+                    foreach (DjvuPage djvuPage in djvuImage.Pages)
+                    {
+                        // Build output file name based on page number
+                        string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.png");
 
-                    // Ensure the directory for the output file exists (unconditional as required)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current page as a PNG image
-                    djvuPage.Save(outputPath, new PngOptions());
+                        // Save the page as a PNG image
+                        djvuPage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
