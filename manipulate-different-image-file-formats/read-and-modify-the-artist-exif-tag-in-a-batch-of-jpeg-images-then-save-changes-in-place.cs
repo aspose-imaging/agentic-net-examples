@@ -8,44 +8,45 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input directory and list of JPEG files to process
-        string inputDir = @"C:\Images\Input";
-        string[] files = new string[]
+        try
         {
-            Path.Combine(inputDir, "image1.jpg"),
-            Path.Combine(inputDir, "image2.jpg"),
-            // Add more file names as needed
-        };
+            // Hardcoded input directory containing JPEG files
+            string inputDirectory = @"C:\Images";
 
-        // New value for the Artist EXIF tag
-        string newArtist = "John Doe";
+            // Get all JPEG files in the directory
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
 
-        foreach (string inputPath in files)
-        {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in jpegFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists (same as input directory)
-            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
-
-            // Load the JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
-            {
-                // Access JPEG-specific EXIF data
-                JpegExifData jpegExif = image.ExifData as JpegExifData;
-                if (jpegExif != null)
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Modify the Artist tag
-                    jpegExif.Artist = newArtist;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Save changes back to the original file (in-place)
-                image.Save(inputPath);
+                // Load the JPEG image
+                using (JpegImage image = (JpegImage)Image.Load(inputPath))
+                {
+                    // Access JPEG EXIF data
+                    JpegExifData jpegExif = image.ExifData as JpegExifData;
+                    if (jpegExif != null)
+                    {
+                        // Modify the Artist tag
+                        jpegExif.Artist = "New Artist";
+                    }
+
+                    // Ensure the output directory exists (in-place save)
+                    Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+
+                    // Save changes back to the same file
+                    image.Save(inputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
