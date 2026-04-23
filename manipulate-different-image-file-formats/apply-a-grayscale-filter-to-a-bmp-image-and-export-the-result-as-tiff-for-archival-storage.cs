@@ -10,37 +10,50 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.bmp";
-        string outputPath = "Output/sample.tif";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Define input and output paths
+            string inputPath = "Input/sample.bmp";
+            string outputPath = "Output/sample.tif";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image bmpImage = Image.Load(inputPath))
-        {
-            int width = bmpImage.Width;
-            int height = bmpImage.Height;
-
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            using (Image tiffImage = Image.Create(tiffOptions, width, height))
-            {
-                Graphics graphics = new Graphics(tiffImage);
-                graphics.DrawImage(bmpImage, 0, 0);
-
-                var tiffImg = (TiffImage)tiffImage;
-                tiffImg.Grayscale();
-
-                tiffImg.Save();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image bmpImage = Image.Load(inputPath))
+            {
+                // Prepare TIFF options with a bound file source
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    tiffOptions.Source = new FileCreateSource(outputPath, false);
+
+                    // Create a TIFF canvas with the same dimensions as the BMP
+                    using (Image tiffCanvas = Image.Create(tiffOptions, bmpImage.Width, bmpImage.Height))
+                    {
+                        // Draw the BMP onto the TIFF canvas
+                        Graphics graphics = new Graphics(tiffCanvas);
+                        graphics.DrawImage(bmpImage, 0, 0);
+
+                        // Convert the canvas to grayscale
+                        TiffImage tiffImage = (TiffImage)tiffCanvas;
+                        tiffImage.Grayscale();
+
+                        // Save the TIFF (output path already bound)
+                        tiffCanvas.Save();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
