@@ -2,41 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.bmp";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\sample.adjusted.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported cleanly
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access adjustment methods
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Custom brightness and contrast values
+                int brightness = 50;          // Range: -255 to 255
+                float contrast = 30f;        // Range: -100 to 100
+
+                // Apply adjustments
+                rasterImage.AdjustBrightness(brightness);
+                rasterImage.AdjustContrast(contrast);
+
+                // Save the modified image (as PNG in this example)
+                rasterImage.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image using the BmpImage constructor (lifecycle rule)
-        using (BmpImage bmpImage = new BmpImage(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access brightness/contrast adjustment methods
-            RasterImage raster = (RasterImage)bmpImage;
-
-            // Custom adjustment values (within allowed ranges)
-            int brightness = 50; // -255 .. 255
-            int contrast = 30;   // -100 .. 100
-
-            // Apply brightness and contrast adjustments
-            raster.AdjustBrightness(brightness);
-            raster.AdjustContrast(contrast);
-
-            // Save the modified image to the output path (lifecycle rule)
-            bmpImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
