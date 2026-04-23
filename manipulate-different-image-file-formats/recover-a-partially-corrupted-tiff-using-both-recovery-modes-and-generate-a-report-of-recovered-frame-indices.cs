@@ -1,10 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -13,51 +10,46 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input\\corrupted.tif";
+            string inputPath = "corrupted.tif";
+            string reportPath = "output/recovery_report.txt";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPathConsistent = "output\\recovered_consistent.tif";
-            string reportPathConsistent = "output\\report_consistent.txt";
-            string outputPathDefault = "output\\recovered_default.tif";
-            string reportPathDefault = "output\\report_default.txt";
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathConsistent));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathDefault));
-
-            // Recovery using ConsistentRecover mode
-            var loadOptionsConsistent = new LoadOptions { DataRecoveryMode = DataRecoveryMode.ConsistentRecover };
-            using (TiffImage tiffConsistent = (TiffImage)Image.Load(inputPath, loadOptionsConsistent))
+            // Recover using ConsistentRecover mode
+            var consistentOptions = new LoadOptions { DataRecoveryMode = DataRecoveryMode.ConsistentRecover };
+            string consistentReport;
+            using (TiffImage tiffConsistent = (TiffImage)Image.Load(inputPath, consistentOptions))
             {
-                tiffConsistent.Save(outputPathConsistent);
-
-                var recoveredIndicesConsistent = new List<string>();
+                consistentReport = "ConsistentRecover recovered frames: ";
                 for (int i = 0; i < tiffConsistent.Frames.Length; i++)
                 {
-                    if (tiffConsistent.Frames[i] != null)
-                        recoveredIndicesConsistent.Add(i.ToString());
+                    consistentReport += i + " ";
                 }
-                File.WriteAllLines(reportPathConsistent, recoveredIndicesConsistent);
             }
 
-            // Recovery using default load options (no explicit recovery mode)
-            var loadOptionsDefault = new LoadOptions();
-            using (TiffImage tiffDefault = (TiffImage)Image.Load(inputPath, loadOptionsDefault))
+            // Recover using default mode (full recovery if supported)
+            var fullOptions = new LoadOptions();
+            string fullReport;
+            using (TiffImage tiffFull = (TiffImage)Image.Load(inputPath, fullOptions))
             {
-                tiffDefault.Save(outputPathDefault);
-
-                var recoveredIndicesDefault = new List<string>();
-                for (int i = 0; i < tiffDefault.Frames.Length; i++)
+                fullReport = "FullRecover recovered frames: ";
+                for (int i = 0; i < tiffFull.Frames.Length; i++)
                 {
-                    if (tiffDefault.Frames[i] != null)
-                        recoveredIndicesDefault.Add(i.ToString());
+                    fullReport += i + " ";
                 }
-                File.WriteAllLines(reportPathDefault, recoveredIndicesDefault);
             }
+
+            // Write report to file
+            string reportContent = consistentReport + Environment.NewLine + fullReport;
+            File.WriteAllText(reportPath, reportContent);
         }
         catch (Exception ex)
         {
