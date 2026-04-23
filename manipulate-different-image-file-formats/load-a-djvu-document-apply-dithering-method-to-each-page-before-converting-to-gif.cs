@@ -1,45 +1,49 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input DjVu file path
-        string inputPath = @"C:\temp\sample.djvu";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.djvu";
+            string outputPath = "output.gif";
 
-        // Load the DjVu document
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to DjvuImage to access pages
-            DjvuImage djvuImage = (DjvuImage)image;
-
-            // Iterate through each page in the DjVu document
-            foreach (DjvuPage page in djvuImage.Pages)
+            if (!File.Exists(inputPath))
             {
-                // Apply dithering to the page (using Floyd‑Steinberg and 8‑bit palette)
-                page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8, null);
-
-                // Prepare output file name for the current page
-                string outputPath = $@"C:\temp\output\page_{page.PageNumber}.gif";
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the dithered page as a GIF image
-                page.Save(outputPath, new GifOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                DjvuImage djvu = (DjvuImage)image;
+                var frames = new List<Image>();
+
+                foreach (Image pageImg in djvu.Pages)
+                {
+                    DjvuPage page = (DjvuPage)pageImg;
+                    page.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+                    frames.Add(page);
+                }
+
+                using (Image gif = Image.Create(frames.ToArray(), true))
+                {
+                    gif.Save(outputPath, new GifOptions());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
