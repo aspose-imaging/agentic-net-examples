@@ -8,11 +8,14 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input SVG file path
+        string inputPath = "input.svg";
+
+        // Hardcoded directory where extracted JPEGs will be saved
+        string outputDirectory = "extracted_images";
+
         try
         {
-            // Hardcoded input SVG file path
-            string inputPath = "sample.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,37 +23,37 @@ class Program
                 return;
             }
 
-            // Load the SVG image
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the SVG (or any vector) image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to VectorImage (SvgImage derives from VectorImage)
+                // Cast to VectorImage to access embedded images
                 var vectorImage = image as VectorImage;
                 if (vectorImage == null)
                 {
-                    Console.Error.WriteLine("The loaded file is not a vector image.");
+                    Console.Error.WriteLine("The provided file is not a vector image.");
                     return;
                 }
 
                 // Retrieve embedded raster images
                 EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
 
-                int i = 0;
-                foreach (var embedded in embeddedImages)
+                int index = 0;
+                foreach (EmbeddedImage embedded in embeddedImages)
                 {
-                    // Prepare output JPEG file name
-                    string outputPath = $"image{i}.jpg";
+                    // Build output file path for each extracted image
+                    string outputPath = Path.Combine(outputDirectory, $"image{index++}.jpg");
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    // Ensure the directory for the output file exists (unconditional as required)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the embedded image as JPEG
+                    // Save the embedded raster image as JPEG
                     using (embedded)
                     {
-                        var jpegOptions = new JpegOptions();
-                        embedded.Image.Save(outputPath, jpegOptions);
+                        embedded.Image.Save(outputPath, new JpegOptions());
                     }
-
-                    i++;
                 }
             }
         }
