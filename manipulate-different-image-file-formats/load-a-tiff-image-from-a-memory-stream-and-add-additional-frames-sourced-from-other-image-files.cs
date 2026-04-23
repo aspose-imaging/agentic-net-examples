@@ -5,50 +5,59 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
             string inputTiffPath = "input.tif";
-            string[] additionalImagePaths = new string[] { "frame1.png", "frame2.jpg" };
-            string outputTiffPath = "output\\result.tif";
+            string outputTiffPath = "output.tif";
 
-            // Verify the base TIFF file exists
+            // Additional frame image paths
+            string framePath1 = "frame1.jpg";
+            string framePath2 = "frame2.png";
+
+            // Verify input files exist
             if (!File.Exists(inputTiffPath))
             {
                 Console.Error.WriteLine($"File not found: {inputTiffPath}");
                 return;
             }
-
-            // Verify each additional image file exists
-            foreach (var path in additionalImagePaths)
+            if (!File.Exists(framePath1))
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {framePath1}");
+                return;
             }
+            if (!File.Exists(framePath2))
+            {
+                Console.Error.WriteLine($"File not found: {framePath2}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
 
             // Load the base TIFF image from a memory stream
             byte[] tiffBytes = File.ReadAllBytes(inputTiffPath);
-            using (MemoryStream memoryStream = new MemoryStream(tiffBytes))
+            using (var tiffStream = new MemoryStream(tiffBytes))
             {
-                using (TiffImage tiffImage = (TiffImage)Image.Load(memoryStream))
+                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
                 {
-                    // Add each additional image as a new frame
-                    foreach (var imgPath in additionalImagePaths)
+                    // Load first additional frame and add to TIFF
+                    using (RasterImage raster1 = (RasterImage)Image.Load(framePath1))
                     {
-                        // Create a TiffFrame directly from the image file
-                        TiffFrame frame = new TiffFrame(imgPath);
-                        tiffImage.AddFrame(frame);
+                        TiffFrame frame1 = new TiffFrame(raster1);
+                        tiffImage.AddFrame(frame1);
                     }
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+                    // Load second additional frame and add to TIFF
+                    using (RasterImage raster2 = (RasterImage)Image.Load(framePath2))
+                    {
+                        TiffFrame frame2 = new TiffFrame(raster2);
+                        tiffImage.AddFrame(frame2);
+                    }
 
-                    // Save the multi‑frame TIFF
+                    // Save the updated multi-frame TIFF
                     tiffImage.Save(outputTiffPath);
                 }
             }
