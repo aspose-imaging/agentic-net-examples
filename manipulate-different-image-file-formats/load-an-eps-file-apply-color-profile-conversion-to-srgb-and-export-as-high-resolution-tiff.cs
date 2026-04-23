@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -25,16 +25,17 @@ class Program
 
             using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Convert color profile to sRGB if supported
-                // epsImage.ConvertColorProfile(ColorProfile.Srgb);
-
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-                tiffOptions.VectorRasterizationOptions = new EpsRasterizationOptions
+                // Set high‑resolution rasterization options
+                var rasterOptions = new EpsRasterizationOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height
+                    PageWidth = 2000,   // desired width in pixels
+                    PageHeight = 2000,  // desired height in pixels
+                    BackgroundColor = Color.White
+                };
+
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 epsImage.Save(outputPath, tiffOptions);
