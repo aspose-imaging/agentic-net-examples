@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -15,10 +15,10 @@ class Program
         {
             // Hardcoded paths
             string inputWebPPath = @"C:\temp\input.webp";
-            string bmpFramesDir = @"C:\temp\bmp_frames\";
+            string bmpFramesDir = @"C:\temp\bmpFrames";
             string outputGifPath = @"C:\temp\output.gif";
 
-            // Input file existence check
+            // Validate input file
             if (!File.Exists(inputWebPPath))
             {
                 Console.Error.WriteLine($"File not found: {inputWebPPath}");
@@ -29,48 +29,36 @@ class Program
             Directory.CreateDirectory(bmpFramesDir);
             Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
 
-            // List to hold BMP file paths
-            List<string> bmpPaths = new List<string>();
-
             // Load the animated WebP image
             using (WebPImage webPImage = new WebPImage(inputWebPPath))
             {
                 // Cast to multipage interface to access frames
-                var multipage = webPImage as IMultipageImage;
+                IMultipageImage multipage = webPImage as IMultipageImage;
                 if (multipage == null || multipage.PageCount == 0)
                 {
                     Console.Error.WriteLine("No frames found in the WebP image.");
                     return;
                 }
 
-                // Extract each frame and save as BMP
+                // Extract each frame to a BMP file
+                List<string> bmpPaths = new List<string>();
                 for (int i = 0; i < multipage.PageCount; i++)
                 {
                     // Each page is a RasterImage
-                    var frame = (RasterImage)multipage.Pages[i];
+                    RasterImage frame = (RasterImage)multipage.Pages[i];
                     string bmpPath = Path.Combine(bmpFramesDir, $"frame_{i}.bmp");
 
-                    // Ensure directory for this BMP exists (already created above)
+                    // Ensure directory for this BMP (already created above, but keep rule)
                     Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
 
                     // Save frame as BMP
                     frame.Save(bmpPath, new BmpOptions());
-
                     bmpPaths.Add(bmpPath);
                 }
-            }
 
-            if (bmpPaths.Count == 0)
-            {
-                Console.Error.WriteLine("No BMP frames were created.");
-                return;
-            }
-
-            // Create GIF animation from BMP frames
-            // Load the first frame
-            using (RasterImage firstFrame = (RasterImage)Image.Load(bmpPaths[0]))
-            {
-                // Initialize GIF with the first frame
+                // Create GIF from the extracted BMP frames
+                // Load the first frame to initialize the GIF image
+                using (RasterImage firstFrame = (RasterImage)Image.Load(bmpPaths[0]))
                 using (GifImage gifImage = new GifImage(new GifFrameBlock(firstFrame)))
                 {
                     // Add remaining frames
@@ -83,7 +71,7 @@ class Program
                     }
 
                     // Save the GIF animation
-                    gifImage.Save(outputGifPath);
+                    gifImage.Save(outputGifPath, new GifOptions());
                 }
             }
         }
