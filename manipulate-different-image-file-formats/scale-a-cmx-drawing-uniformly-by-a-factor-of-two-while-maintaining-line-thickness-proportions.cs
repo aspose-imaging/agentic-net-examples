@@ -7,32 +7,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.cmx";
-        string outputPath = @"C:\Images\output.cmx";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\sample_scaled.cmx";
 
-        // Verify that the input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the CMX image
-        using (CmxImage image = (CmxImage)Image.Load(inputPath))
+        try
         {
-            // Calculate new dimensions (scale uniformly by factor of 2)
-            int newWidth = image.Width * 2;
-            int newHeight = image.Height * 2;
+            // Load the CMX image
+            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            {
+                // Calculate new dimensions (scale uniformly by factor of 2)
+                int newWidth = image.Width * 2;
+                int newHeight = image.Height * 2;
 
-            // Resize the image – this scales drawing elements and line thickness proportionally
-            image.Resize(newWidth, newHeight);
+                // Resize the image; this scales the drawing and line thickness proportionally
+                image.Resize(newWidth, newHeight);
 
-            // Save the scaled image to the output path
-            image.Save(outputPath);
+                // Save the scaled image
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
