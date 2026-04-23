@@ -6,38 +6,41 @@ using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dng";
-        string outputPath = "output\\thumbnail.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.dng";
+            string outputPath = "thumbnail.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DNG image, resize, and save as JPEG
-        using (Image image = Image.Load(inputPath))
-        {
-            DngImage dng = (DngImage)image;
-
-            // Resize to 150x150 pixels using nearest neighbour resampling
-            dng.Resize(150, 150, ResizeType.NearestNeighbourResample);
-
-            // Configure JPEG save options
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Quality = 90
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the thumbnail as JPEG
-            dng.Save(outputPath, jpegOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for resizing operations
+                RasterImage raster = (RasterImage)image;
+
+                // Resize to 150x150 pixels
+                raster.Resize(150, 150);
+
+                // Save as JPEG with default options
+                JpegOptions jpegOptions = new JpegOptions();
+                raster.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
