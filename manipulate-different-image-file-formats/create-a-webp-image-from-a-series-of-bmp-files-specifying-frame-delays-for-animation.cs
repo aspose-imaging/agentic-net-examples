@@ -3,81 +3,71 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input BMP files
-            string inputPath1 = "frame1.bmp";
-            string inputPath2 = "frame2.bmp";
-            string inputPath3 = "frame3.bmp";
+            // Hard‑coded input BMP files (replace with your actual file names)
+            string[] inputPaths = new string[]
+            {
+                @"C:\temp\frame1.bmp",
+                @"C:\temp\frame2.bmp",
+                @"C:\temp\frame3.bmp"
+                // add more paths as needed
+            };
 
-            // Hardcoded output WebP file
-            string outputPath = "Output\\animation.webp";
-
-            // Validate input files
-            if (!File.Exists(inputPath1))
+            // Verify each input file exists
+            foreach (var inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
-            if (!File.Exists(inputPath3))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath3}");
-                return;
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
             }
 
-            // Ensure output directory exists
+            // Hard‑coded output WebP file
+            string outputPath = @"C:\temp\animated_output.webp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first image to obtain canvas size
-            using (RasterImage firstImage = (RasterImage)Image.Load(inputPath1))
+            // Load the first BMP to obtain width/height
+            using (RasterImage firstBmp = (RasterImage)Image.Load(inputPaths[0]))
             {
-                int width = firstImage.Width;
-                int height = firstImage.Height;
-
-                // Configure WebP animation options
-                WebPOptions createOptions = new WebPOptions
+                // Configure animation options
+                WebPOptions options = new WebPOptions
                 {
-                    Lossless = false,
-                    Quality = 80f,
-                    AnimLoopCount = 0 // infinite loop
+                    Lossless = true,
+                    Quality = 100f,
+                    AnimBackgroundColor = (uint)Aspose.Imaging.Color.Gray.ToArgb(),
+                    AnimLoopCount = 0 // 0 = infinite loop
                 };
 
-                // Create an empty animated WebP image
-                using (WebPImage webPImage = new WebPImage(width, height, createOptions))
+                // Create an empty animated WebP image with the size of the first frame
+                using (WebPImage webPImage = new WebPImage(firstBmp.Width, firstBmp.Height, options))
                 {
-                    // Add first frame with a delay of 100 ms
-                    using (RasterImage frame1 = (RasterImage)Image.Load(inputPath1))
+                    // Add each BMP as a frame
+                    foreach (var inputPath in inputPaths)
                     {
-                        WebPFrameBlock block1 = new WebPFrameBlock(frame1);
-                        // If the API provides a duration property, set it here
-                        // block1.Duration = 100;
-                        webPImage.AddBlock(block1);
-                    }
+                        using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
+                        {
+                            // Create a frame block from the raster image
+                            WebPFrameBlock frameBlock = new WebPFrameBlock(bmp);
 
-                    // Add second frame with a delay of 200 ms
-                    using (RasterImage frame2 = (RasterImage)Image.Load(inputPath2))
-                    {
-                        WebPFrameBlock block2 = new WebPFrameBlock(frame2);
-                        // block2.Duration = 200;
-                        webPImage.AddBlock(block2);
-                    }
+                            // Set frame delay (in milliseconds). Adjust as needed.
+                            // The property name for delay may differ; replace with the correct one if required.
+                            // Example: frameBlock.Duration = 100; // 100 ms per frame
+                            // If the API uses a different member, set it accordingly.
+                            // frameBlock.Delay = 100;
 
-                    // Add third frame with a delay of 150 ms
-                    using (RasterImage frame3 = (RasterImage)Image.Load(inputPath3))
-                    {
-                        WebPFrameBlock block3 = new WebPFrameBlock(frame3);
-                        // block3.Duration = 150;
-                        webPImage.AddBlock(block3);
+                            // Add the frame to the animated WebP
+                            webPImage.AddBlock(frameBlock);
+                        }
                     }
 
                     // Save the animated WebP file
