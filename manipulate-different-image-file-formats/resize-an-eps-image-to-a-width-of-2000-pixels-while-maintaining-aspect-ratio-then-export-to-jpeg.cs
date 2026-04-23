@@ -8,33 +8,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.eps";
-        string outputPath = @"C:\Images\ResizedResult.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.eps";
+            string outputPath = "output.jpg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+            // Load EPS image
+            using (var image = Image.Load(inputPath) as EpsImage)
+            {
+                if (image == null)
+                {
+                    Console.Error.WriteLine("Failed to load EPS image.");
+                    return;
+                }
+
+                // Calculate new height to maintain aspect ratio
+                int newWidth = 2000;
+                int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
+
+                // Resize using Mitchell interpolation
+                image.Resize(newWidth, newHeight, ResizeType.Mitchell);
+
+                // Save as JPEG
+                var jpegOptions = new JpegOptions();
+                image.Save(outputPath, jpegOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Calculate new height to keep aspect ratio for width = 2000
-            int newWidth = 2000;
-            int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
-
-            // Resize using a high‑quality interpolation method
-            image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
-
-            // Save as JPEG
-            var jpegOptions = new JpegOptions();
-            image.Save(outputPath, jpegOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
