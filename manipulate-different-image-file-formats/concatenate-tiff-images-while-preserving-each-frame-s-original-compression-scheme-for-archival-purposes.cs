@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 
@@ -11,43 +10,41 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath1 = "input1.tif";
-            string inputPath2 = "input2.tif";
-            string outputPath = "output.tif";
-
-            // Verify input files exist
-            if (!File.Exists(inputPath1))
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
+                @"C:\Images\input1.tif",
+                @"C:\Images\input2.tif",
+                @"C:\Images\input3.tif"
+            };
+            string outputPath = @"C:\Images\output.tif";
 
-            // Load the first TIFF image
-            using (Image img1 = Image.Load(inputPath1))
-            using (TiffImage tiff1 = (TiffImage)img1)
-            // Load the second TIFF image
-            using (Image img2 = Image.Load(inputPath2))
-            using (TiffImage tiff2 = (TiffImage)img2)
+            // Verify each input file exists
+            foreach (var inputPath in inputPaths)
             {
-                // Collect all frames preserving original compression
-                List<TiffFrame> allFrames = new List<TiffFrame>();
-                allFrames.AddRange(tiff1.Frames);
-                allFrames.AddRange(tiff2.Frames);
-
-                // Create a new multi‑frame TIFF image from the collected frames
-                using (TiffImage result = new TiffImage(allFrames.ToArray()))
+                if (!File.Exists(inputPath))
                 {
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the concatenated TIFF
-                    result.Save(outputPath);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the first TIFF image which will become the target image
+            using (TiffImage targetImage = (TiffImage)Image.Load(inputPaths[0]))
+            {
+                // Append remaining TIFF images, preserving each frame's original compression
+                for (int i = 1; i < inputPaths.Length; i++)
+                {
+                    using (TiffImage sourceImage = (TiffImage)Image.Load(inputPaths[i]))
+                    {
+                        targetImage.Add(sourceImage);
+                    }
+                }
+
+                // Save the concatenated multi‑page TIFF
+                targetImage.Save(outputPath);
             }
         }
         catch (Exception ex)
