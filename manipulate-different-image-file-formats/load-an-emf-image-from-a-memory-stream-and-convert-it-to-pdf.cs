@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -24,13 +25,35 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EMF image from a memory stream
-            byte[] emfData = File.ReadAllBytes(inputPath);
-            using (var memoryStream = new MemoryStream(emfData))
-            using (Image image = Image.Load(memoryStream))
+            byte[] fileBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(fileBytes))
             {
-                // Save the image as PDF
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                using (Image image = Image.Load(ms))
+                {
+                    // Cast to EmfImage to access size information
+                    EmfImage emfImage = image as EmfImage;
+                    if (emfImage == null)
+                    {
+                        Console.Error.WriteLine("The loaded image is not a valid EMF image.");
+                        return;
+                    }
+
+                    // Set up rasterization options for EMF rendering
+                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = emfImage.Size,
+                        BackgroundColor = Color.White
+                    };
+
+                    // Configure PDF save options with the rasterization settings
+                    PdfOptions pdfOptions = new PdfOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Save the image as PDF
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
