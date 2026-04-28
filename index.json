@@ -697,15 +697,17 @@
         "write-a-powershell-script-that-invokes-the-net-conversion-library-to-process-dicom-files-in-bulk.cs"
       ],
       "required_namespaces": [
-        "Aspose.Imaging",
         "System",
         "System.IO",
         "Aspose.Imaging.ImageOptions",
+        "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Dicom",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.ImageFilters.FilterOptions",
         "Aspose.Imaging.ProgressManagement",
+        "System.Linq",
         "Aspose.Imaging.CoreExceptions.ImageFormats",
+        "Aspose.Imaging.CoreExceptions",
         "System.Threading.Tasks",
         "Aspose.Imaging.FileFormats.Tiff.Enums"
       ],
