@@ -10,34 +10,31 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\InputWebp";
-            string outputDir = @"C:\OutputApng";
+            string inputFolder = @"C:\InputWebp";
+            string outputFolder = @"C:\OutputApng";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Get all animated WEBP files in the input folder
+            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
 
-            // Get all animated WEBP files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.webp");
-
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in webpFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Build the output file path with .png extension (APNG)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+                // Build output path (same name with .png extension)
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure the output directory for this file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the animated WEBP and save it as APNG, preserving frames and timing
+                // Load the animated WEBP image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Save as APNG preserving frames and timing
                     image.Save(outputPath, new ApngOptions());
                 }
             }
