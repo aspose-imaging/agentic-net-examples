@@ -8,57 +8,59 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output locations
-        string inputPath = "sample.dcm";
-        string outputDirectory = "output";
-
-        // Verify the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the DICOM image
-            using (DicomImage dicomImage = Image.Load(inputPath) as DicomImage)
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputDir = "output";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
+            {
+                DicomImage dicomImage = image as DicomImage;
                 if (dicomImage == null)
                 {
-                    Console.Error.WriteLine("Failed to load DICOM image.");
+                    Console.Error.WriteLine("The input file is not a DICOM image.");
                     return;
                 }
 
-                // Preserve the original XMP metadata for traceability
-                var originalXmp = dicomImage.XmpData;
+                // Capture XMP metadata from the original DICOM image
+                var xmpMetadata = dicomImage.XmpData;
 
                 int pageIndex = 0;
                 foreach (var dicomPage in dicomImage.DicomPages)
                 {
-                    // Build the PNG output path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
+                    // Build output file path for each page
+                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.png");
 
-                    // Ensure the output directory exists (unconditional per requirements)
+                    // Ensure the directory for the specific file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Configure PNG options and embed the original XMP metadata
+                    // Configure PNG options to keep metadata and embed the captured XMP data
                     var pngOptions = new PngOptions
                     {
                         KeepMetadata = true,
-                        XmpData = originalXmp
+                        XmpData = xmpMetadata
                     };
 
-                    // Save the page as PNG with the configured options
+                    // Save the page as PNG with metadata
                     dicomPage.Save(outputPath, pngOptions);
-
                     pageIndex++;
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
