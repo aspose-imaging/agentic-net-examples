@@ -1,19 +1,21 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\temp\input.cdr";
-        string outputPath = @"C:\temp\output.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,28 +26,42 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image from a stream
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Load CDR image and convert to JPEG
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                var loadOptions = new LoadOptions(); // default load options
-                using (CdrImage cdrImage = new CdrImage(stream, loadOptions))
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    // Prepare JPEG save options (default quality)
-                    var jpegOptions = new JpegOptions();
+                    Source = new FileCreateSource(outputPath, false),
+                    // Configure rasterization for vector image
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
+                };
 
-                    // Save the image as JPEG
-                    cdrImage.Save(outputPath, jpegOptions);
-                }
+                cdr.Save(outputPath, jpegOptions);
             }
 
-            // Verify the JPEG file was created and has non‑zero size
-            if (File.Exists(outputPath) && new FileInfo(outputPath).Length > 0)
+            // Verify the JPEG file exists and has non‑zero size
+            if (File.Exists(outputPath))
             {
-                Console.WriteLine("JPG file created successfully and is non‑zero size.");
+                long fileSize = new FileInfo(outputPath).Length;
+                if (fileSize > 0)
+                {
+                    Console.WriteLine($"JPG file created successfully. Size: {fileSize} bytes.");
+                }
+                else
+                {
+                    Console.WriteLine("JPG file was created but is empty.");
+                }
             }
             else
             {
-                Console.Error.WriteLine("Failed to create JPG or file is empty.");
+                Console.WriteLine("JPG file was not created.");
             }
         }
         catch (Exception ex)
