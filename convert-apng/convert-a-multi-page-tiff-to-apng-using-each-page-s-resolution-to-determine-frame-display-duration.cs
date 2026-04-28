@@ -3,75 +3,72 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.png";
+            string inputPath = "Input/multipage.tif";
+            string outputPath = "Output/animation.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF
+            int pageCount;
+            int width;
+            int height;
+
             using (Image tiffImage = Image.Load(inputPath))
             {
-                TiffImage tiff = (TiffImage)tiffImage;
-                TiffFrame[] frames = tiff.Frames;
-
-                if (frames.Length == 0)
+                if (tiffImage is IMultipageImage multipage)
                 {
-                    Console.Error.WriteLine("No frames found in the TIFF image.");
-                    return;
+                    pageCount = multipage.PageCount;
+                }
+                else
+                {
+                    pageCount = 1;
                 }
 
-                // Prepare APNG creation options
-                ApngOptions apngOptions = new ApngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                width = tiffImage.Width;
+                height = tiffImage.Height;
+            }
 
-                // Create an APNG image using the dimensions of the first frame
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    apngOptions,
-                    frames[0].Width,
-                    frames[0].Height))
-                {
-                    // Remove the default single frame
-                    apngImage.RemoveAllFrames();
+            ApngOptions apngOptions = new ApngOptions
+            {
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-                    // Add each TIFF frame as an APNG frame
-                    foreach (TiffFrame tiffFrame in frames)
+            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
+            {
+                apngImage.RemoveAllFrames();
+
+                using (Image tiffImage = Image.Load(inputPath))
+                {
+                    IMultipageImage multipage = tiffImage as IMultipageImage;
+
+                    for (int i = 0; i < pageCount; i++)
                     {
-                        // Cast the frame to RasterImage (TiffFrame derives from RasterImage)
-                        RasterImage raster = (RasterImage)tiffFrame;
+                        using (Image page = multipage != null ? multipage.Pages[i] : Image.Load(inputPath))
+                        {
+                            RasterImage raster = (RasterImage)page;
+                            apngImage.AddFrame(raster);
 
-                        // Determine frame duration based on resolution (example: area / 1000, minimum 100 ms)
-                        uint frameDuration = Math.Max(100u, (uint)(raster.Width * raster.Height / 1000));
-
-                        // Set the default frame time for the next added frame
-                        apngImage.DefaultFrameTime = frameDuration;
-
-                        // Add the frame to the APNG
-                        apngImage.AddFrame(raster);
+                            int duration = (int)Math.Max(1, 1000.0 / Math.Max(1, raster.HorizontalResolution));
+                            ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                            frame.FrameTime = duration;
+                        }
                     }
-
-                    // Save the APNG file
-                    apngImage.Save();
                 }
+
+                apngImage.Save();
             }
         }
         catch (Exception ex)
