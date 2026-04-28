@@ -3,41 +3,45 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cmx";
-        string outputPath = "output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.cmx";
+            string outputPath = @"C:\temp\output.jpg";
 
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrEmpty(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        // Load the CMX image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure JPEG options with progressive compression
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                CompressionType = JpegCompressionMode.Progressive,
-                Quality = 90 // optional quality setting
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as JPEG
-            image.Save(outputPath, jpegOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load CMX image with default load options
+            using (Image image = Image.Load(inputPath, new CmxLoadOptions()))
+            {
+                // Configure JPEG save options for progressive encoding
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 90 // optional quality setting
+                };
+
+                // Save as progressive JPEG
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
