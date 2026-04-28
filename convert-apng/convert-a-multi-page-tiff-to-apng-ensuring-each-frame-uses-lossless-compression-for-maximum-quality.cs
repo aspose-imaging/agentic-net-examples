@@ -5,13 +5,13 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input\\multi.tif";
-            string outputPath = "Output\\converted.apng";
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,20 +20,20 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the multi‑page TIFF
             using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options for lossless (PNG is inherently lossless)
+                // Configure APNG options (lossless PNG compression is default)
                 var apngOptions = new ApngOptions
                 {
-                    // Set compression level to 0 for no compression (still lossless)
-                    PngCompressionLevel = 0
+                    // Set a reasonable default frame duration (in milliseconds)
+                    DefaultFrameTime = 100
                 };
 
-                // Save as APNG; each TIFF frame becomes an APNG frame
+                // Save as APNG
                 image.Save(outputPath, apngOptions);
             }
         }
