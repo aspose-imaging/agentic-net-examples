@@ -6,30 +6,37 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.cmx";
-        string outputPath = @"C:\temp\sample.tif";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output file paths
+            string inputPath = "input.cmx";
+            string outputPath = "output.tif";
+
+            // Verify that the input CMX file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CMX image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Set up default TIFF options (default compression)
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the image as a single‑page TIFF
+                image.Save(outputPath, tiffOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Prepare default TIFF save options
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // Save the image as a single‑page TIFF with default compression
-            image.Save(outputPath, tiffOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
