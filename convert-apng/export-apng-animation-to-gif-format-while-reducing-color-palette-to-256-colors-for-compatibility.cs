@@ -9,38 +9,38 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = "input.apng";
-            string outputPath = "output\\output.gif";
+            // Hardcoded input and output paths
+            string inputPath = "input/animation.apng";
+            string outputPath = "output/animation.gif";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the APNG animation
-            using (Image image = Image.Load(inputPath))
+            using (Image apngImage = Image.Load(inputPath))
             {
-                // Configure GIF export options with palette correction (limits to 256 colors)
-                var gifOptions = new GifOptions
+                // Configure GIF options to reduce palette to 256 colors
+                GifOptions gifOptions = new GifOptions
                 {
+                    // Enable palette correction to build an optimal 256‑color palette
                     DoPaletteCorrection = true,
-                    // Optional: set color resolution (7 means 8 bits per channel, suitable for GIF)
+                    // Set color resolution (bits per color channel minus 1). 7 => 8 bits => 256 colors
                     ColorResolution = 7
                 };
 
-                // Save the image as a GIF using the configured options
-                image.Save(outputPath, gifOptions);
+                // Save as GIF using the configured options
+                apngImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
