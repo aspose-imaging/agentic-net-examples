@@ -5,40 +5,45 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded list of input TIFF files (relative paths)
-            string[] inputFiles = { "input1.tif", "input2.tif" };
+            // Hard‑coded list of TIFF files to process
+            string[] inputPaths = {
+                @"C:\Images\sample1.tif",
+                @"C:\Images\sample2.tif"
+            };
 
-            foreach (var inputPath in inputFiles)
+            foreach (string inputPath in inputPaths)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
+                // Determine output path (same name with .apng.png extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".apng.png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load the TIFF image
-                using (Image image = Image.Load(inputPath))
+                using (Image tiffImage = Image.Load(inputPath))
                 {
-                    // Compute frame delay based on image dimensions (example: average of width and height)
-                    uint frameDelay = (uint)((image.Width + image.Height) / 2);
+                    // Compute frame delay based on image dimensions
+                    uint frameDelay = (uint)((tiffImage.Width + tiffImage.Height) / 2);
 
-                    // Determine output APNG path (same name with .apng extension)
-                    string outputPath = Path.ChangeExtension(inputPath, ".apng");
-
-                    // Ensure the output directory exists (guard against null directory)
-                    string outputDir = Path.GetDirectoryName(outputPath);
-                    if (!string.IsNullOrWhiteSpace(outputDir))
+                    // Set up APNG options with the calculated default frame time
+                    ApngOptions apngOptions = new ApngOptions
                     {
-                        Directory.CreateDirectory(outputDir);
-                    }
+                        DefaultFrameTime = frameDelay
+                    };
 
-                    // Save as APNG with the calculated default frame time
-                    image.Save(outputPath, new ApngOptions { DefaultFrameTime = frameDelay });
+                    // Export the multi‑page TIFF as an APNG animation
+                    tiffImage.Save(outputPath, apngOptions);
                 }
             }
         }
