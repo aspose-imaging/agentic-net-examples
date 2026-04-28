@@ -9,20 +9,20 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input directory and output file paths
-            string inputDirectory = "InputPngs";
-            string outputFilePath = "Output\\animation.apng";
+            // Hardcoded input directory and output file path
+            string inputDirectory = @"C:\Images\Input";
+            string outputPath = @"C:\Images\Output\animation.png";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get PNG files sorted alphabetically
+            // Get PNG files in alphabetical order
             string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png")
-                                         .OrderBy(f => f)
+                                         .OrderBy(f => f, StringComparer.Ordinal)
                                          .ToArray();
 
             if (pngFiles.Length == 0)
@@ -31,61 +31,49 @@ class Program
                 return;
             }
 
-            // Load first image to obtain canvas size
-            string firstFile = pngFiles[0];
-            if (!File.Exists(firstFile))
+            // Verify each input file exists
+            foreach (string filePath in pngFiles)
             {
-                Console.Error.WriteLine($"File not found: {firstFile}");
-                return;
-            }
-
-            int canvasWidth, canvasHeight;
-            using (RasterImage firstImage = (RasterImage)Image.Load(firstFile))
-            {
-                canvasWidth = firstImage.Width;
-                canvasHeight = firstImage.Height;
-            }
-
-            // Create APNG canvas bound to the output file
-            ApngOptions createOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputFilePath, false),
-                ColorType = PngColorType.TruecolorWithAlpha,
-                DefaultFrameTime = 100 // default frame duration in ms
-            };
-
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, canvasWidth, canvasHeight))
-            {
-                // Remove the default empty frame
-                apngImage.RemoveAllFrames();
-
-                // Add each PNG as a frame
-                foreach (string pngPath in pngFiles)
+                if (!File.Exists(filePath))
                 {
-                    if (!File.Exists(pngPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {pngPath}");
-                        continue;
-                    }
-
-                    using (RasterImage frame = (RasterImage)Image.Load(pngPath))
-                    {
-                        // Ensure frame size matches canvas size
-                        if (frame.Width != canvasWidth || frame.Height != canvasHeight)
-                        {
-                            // Resize frame to match canvas dimensions
-                            frame.Resize(canvasWidth, canvasHeight, ResizeType.NearestNeighbourResample);
-                        }
-
-                        apngImage.AddFrame(frame);
-                    }
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
                 }
-
-                // Save the APNG (output path already bound)
-                apngImage.Save();
             }
 
-            Console.WriteLine("APNG created successfully.");
+            // Load the first image to obtain dimensions
+            using (RasterImage firstImage = (RasterImage)Image.Load(pngFiles[0]))
+            {
+                int width = firstImage.Width;
+                int height = firstImage.Height;
+
+                // Set up APNG creation options
+                ApngOptions createOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100, // default frame duration in ms
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                // Create the APNG image
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+                {
+                    // Remove the default empty frame
+                    apngImage.RemoveAllFrames();
+
+                    // Add each PNG as a frame
+                    foreach (string filePath in pngFiles)
+                    {
+                        using (RasterImage frame = (RasterImage)Image.Load(filePath))
+                        {
+                            apngImage.AddFrame(frame);
+                        }
+                    }
+
+                    // Save the APNG (output path already defined in options)
+                    apngImage.Save();
+                }
+            }
         }
         catch (Exception ex)
         {
