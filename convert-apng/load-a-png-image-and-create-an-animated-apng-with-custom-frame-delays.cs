@@ -10,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.apng";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output\\animation.apng";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,9 +28,9 @@ class Program
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100,
+                    DefaultFrameTime = 100, // default frame time in ms
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    NumPlays = 0
+                    NumPlays = 0 // infinite looping
                 };
 
                 using (ApngImage apngImage = (ApngImage)Image.Create(
@@ -40,14 +40,12 @@ class Program
                 {
                     apngImage.RemoveAllFrames();
 
-                    int[] frameDelays = new int[] { 100, 200, 300, 200, 100 };
-
-                    foreach (int delay in frameDelays)
-                    {
-                        apngImage.AddFrame(sourceImage);
-                        ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                        frame.FrameTime = delay;
-                    }
+                    // Add frames with custom delays
+                    apngImage.AddFrame(sourceImage, 100); // 100 ms
+                    apngImage.AddFrame(sourceImage, 200); // 200 ms
+                    apngImage.AddFrame(sourceImage, 300); // 300 ms
+                    apngImage.AddFrame(sourceImage, 200); // 200 ms
+                    apngImage.AddFrame(sourceImage, 100); // 100 ms
 
                     apngImage.Save();
                 }
