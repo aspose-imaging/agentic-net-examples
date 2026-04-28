@@ -2,10 +2,10 @@
   "product": "Aspose.Imaging",
   "platform": "net",
   "framework": "net9.0",
-  "package_version": "26.3.0",
-  "total_examples": 2914,
+  "package_version": "26.4.0",
+  "total_examples": 2916,
   "total_categories": 17,
-  "last_updated": "2026-04-23",
+  "last_updated": "2026-04-28",
   "categories": [
     {
       "name": "conversion",
@@ -272,13 +272,15 @@
       ],
       "more_files": {
         "count": 132,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/conversion"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/conversion"
       }
     },
     {
       "name": "convert-apng",
-      "file_count": 51,
+      "file_count": 53,
       "all_files": [
+        "28121-set-apng-metadata-software-field-to-indicate-processing-library-version-before-saving.cs",
+        "28123-save-an-apng-image-to-disk-with-lossless-compression-and-embed-color-profile-information.cs",
         "adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs",
         "batch-convert-a-collection-of-svg-files-to-apng-assigning-each-svg-a-random-frame-delay.cs",
         "batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs",
@@ -332,6 +334,8 @@
         "transform-a-multi-page-tiff-into-an-animated-apng-setting-loop-count-to-infinite.cs"
       ],
       "files": [
+        "28121-set-apng-metadata-software-field-to-indicate-processing-library-version-before-saving.cs",
+        "28123-save-an-apng-image-to-disk-with-lossless-compression-and-embed-color-profile-information.cs",
         "adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs",
         "batch-convert-a-collection-of-svg-files-to-apng-assigning-each-svg-a-random-frame-delay.cs",
         "batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs",
@@ -359,9 +363,7 @@
         "export-an-apng-to-gif-and-include-a-timestamp-comment-indicating-conversion-date-and-time.cs",
         "export-an-apng-to-gif-and-include-frame-specific-comments-indicating-original-frame-indices.cs",
         "export-an-existing-apng-animation-to-an-animated-gif-maintaining-original-frame-order.cs",
-        "export-apng-animation-to-gif-format-while-reducing-color-palette-to-256-colors-for-compatibility.cs",
-        "generate-an-apng-from-a-single-page-png-specifying-a-100-ms-delay-for-each-frame.cs",
-        "load-a-multi-page-tiff-assign-each-page-a-unique-frame-delay-and-compile-into-an-apng.cs"
+        "export-apng-animation-to-gif-format-while-reducing-color-palette-to-256-colors-for-compatibility.cs"
       ],
       "required_namespaces": [
         "System",
@@ -371,16 +373,16 @@
         "Aspose.Imaging.FileFormats.Apng",
         "Aspose.Imaging.Sources",
         "Aspose.Imaging.FileFormats.Png",
-        "System.Collections.Generic",
-        "Aspose.Imaging.FileFormats.Gif",
-        "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.FileFormats.Webp",
-        "Aspose.Imaging.FileFormats.Svg",
+        "Aspose.Imaging.FileFormats.Tiff",
         "System.Linq",
+        "System.Collections.Generic",
+        "Aspose.Imaging.FileFormats.Svg",
+        "Aspose.Imaging.FileFormats.Gif",
         "System.Diagnostics",
-        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "Aspose.Imaging.FileFormats.Gif.Blocks"
+        "Aspose.Imaging.FileFormats.Gif.Blocks",
+        "System.Text"
       ],
       "key_apis": [
         "ApngFrame",
@@ -405,8 +407,8 @@
         "WebPImage"
       ],
       "more_files": {
-        "count": 21,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/convert-apng"
+        "count": 23,
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/convert-apng"
       }
     },
     {
@@ -618,7 +620,7 @@
       ],
       "more_files": {
         "count": 5,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/convert-cmx-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/convert-cmx-images"
       }
     },
     {
@@ -850,7 +852,7 @@
       ],
       "more_files": {
         "count": 30,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/convert-eps-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/convert-eps-images"
       }
     },
     {
@@ -1059,7 +1061,7 @@
       ],
       "more_files": {
         "count": 90,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/convert-open-document-graphics"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/convert-open-document-graphics"
       }
     },
     {
@@ -1278,7 +1280,7 @@
       ],
       "more_files": {
         "count": 108,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/convert-raster-image"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/convert-raster-image"
       }
     },
     {
@@ -1391,7 +1393,7 @@
       ],
       "more_files": {
         "count": 10,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/convert-svg-to-raster-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/convert-svg-to-raster-images"
       }
     },
     {
@@ -1807,7 +1809,7 @@
       ],
       "more_files": {
         "count": 107,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/image-and-photo-filters"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/image-and-photo-filters"
       }
     },
     {
@@ -2384,7 +2386,7 @@
       ],
       "more_files": {
         "count": 435,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/kernel-filters"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/kernel-filters"
       }
     },
     {
@@ -3163,7 +3165,7 @@
       ],
       "more_files": {
         "count": 598,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/manipulate-different-image-file-formats"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/manipulate-different-image-file-formats"
       }
     },
     {
@@ -3701,7 +3703,7 @@
       ],
       "more_files": {
         "count": 377,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/manipulating-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/manipulating-images"
       }
     },
     {
@@ -3935,7 +3937,7 @@
       ],
       "more_files": {
         "count": 105,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/merge-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/merge-images"
       }
     },
     {
@@ -4477,7 +4479,7 @@
       ],
       "more_files": {
         "count": 387,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.3.0/working-with-drawing-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/working-with-drawing-images"
       }
     }
   ]
