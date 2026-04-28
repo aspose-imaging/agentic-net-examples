@@ -6,15 +6,15 @@ using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
             string inputPath = "input.apng";
-            string outputDir = "output";
+            string outputDirectory = "frames";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,23 +22,28 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
 
             // Load the animated APNG
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                int frameIndex = 0;
-                foreach (var page in apng.Pages)
-                {
-                    string outputPath = Path.Combine(outputDir, $"frame_{frameIndex}.png");
+                // Cast to ApngImage to access frames
+                ApngImage apng = (ApngImage)image;
 
-                    // Ensure the directory for each output file exists
+                // Iterate over each frame and save as a separate PNG
+                for (int i = 0; i < apng.PageCount; i++)
+                {
+                    // Retrieve the frame
+                    ApngFrame frame = (ApngFrame)apng.Pages[i];
+
+                    // Build output file path
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.png");
+
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current frame as a PNG file
-                    page.Save(outputPath, new PngOptions());
-
-                    frameIndex++;
+                    // Save the frame as PNG
+                    frame.Save(outputPath, new PngOptions());
                 }
             }
         }

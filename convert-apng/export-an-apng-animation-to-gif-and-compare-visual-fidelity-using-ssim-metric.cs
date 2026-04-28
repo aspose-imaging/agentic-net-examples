@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Gif;
 
 class Program
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/animation.apng";
-            string outputPath = "Output/animation.gif";
+            string inputPath = "Input\\animation.apng";
+            string outputPath = "Output\\animation.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -21,10 +22,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image apngImage = Image.Load(inputPath))
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                var gifOptions = new GifOptions();
-                apngImage.Save(outputPath, gifOptions);
+                GifOptions gifOptions = new GifOptions();
+                apng.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)

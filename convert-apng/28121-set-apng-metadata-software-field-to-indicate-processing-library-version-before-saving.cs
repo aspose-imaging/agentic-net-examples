@@ -2,19 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input/animation.webp";
-        string outputPath = "output/animation_apng.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.apng";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,23 +23,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WebPImage webp = new WebPImage(inputPath))
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                ApngOptions apngOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false)
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100,
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, webp.Width, webp.Height))
+                using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
-                    apng.RemoveAllFrames();
-
-                    foreach (RasterImage frame in webp.Pages)
-                    {
-                        apng.AddFrame(frame);
-                    }
-
-                    apng.Save();
+                    apngImage.RemoveAllFrames();
+                    apngImage.AddFrame(sourceImage);
+                    apngImage.Save();
                 }
             }
         }

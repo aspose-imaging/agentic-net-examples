@@ -1,11 +1,11 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,77 +14,56 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputImagePath = "input.png";
-            string jsonConfigPath = "config.json";
-            string outputPath = "output\\animation.apng";
+            string sourcePath = "input.png";
+            string configPath = "config.json";
+            string outputPath = "output.apng";
 
-            // Input validation
-            if (!File.Exists(inputImagePath))
+            // Input file existence checks
+            if (!File.Exists(sourcePath))
             {
-                Console.Error.WriteLine($"File not found: {inputImagePath}");
+                Console.Error.WriteLine($"File not found: {sourcePath}");
                 return;
             }
-            if (!File.Exists(jsonConfigPath))
+            if (!File.Exists(configPath))
             {
-                Console.Error.WriteLine($"File not found: {jsonConfigPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Parse frame durations from JSON (expected format: {"frames":[100,200,150]})
-            string json = File.ReadAllText(jsonConfigPath);
-            int bracketStart = json.IndexOf('[');
-            int bracketEnd = json.IndexOf(']');
-            List<uint> frameDurations = new List<uint>();
-            if (bracketStart >= 0 && bracketEnd > bracketStart)
-            {
-                string numbers = json.Substring(bracketStart + 1, bracketEnd - bracketStart - 1);
-                string[] parts = numbers.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string part in parts)
-                {
-                    if (uint.TryParse(part.Trim(), out uint value))
-                    {
-                        frameDurations.Add(value);
-                    }
-                }
-            }
-
-            if (frameDurations.Count == 0)
-            {
-                Console.Error.WriteLine("No frame durations found in configuration.");
+                Console.Error.WriteLine($"File not found: {configPath}");
                 return;
             }
 
-            // Load source raster image
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputImagePath))
+            // Read and parse JSON configuration (expects an array of integers)
+            string json = File.ReadAllText(configPath);
+            int[] delays = json
+                .Split(new char[] { '[', ']', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => int.TryParse(s, out _))
+                .Select(s => int.Parse(s))
+                .ToArray();
+
+            using (RasterImage sourceImage = (RasterImage)Image.Load(sourcePath))
             {
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Create APNG options
-                ApngOptions createOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = 0 // will be overridden per frame
+                    DefaultFrameTime = delays.Length > 0 ? (uint)delays[0] : (uint)100
                 };
 
-                // Create APNG image bound to output file
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    createOptions,
-                    sourceImage.Width,
-                    sourceImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
-                    // Remove the default initial frame
-                    apngImage.RemoveAllFrames();
+                    apng.RemoveAllFrames();
 
-                    // Add frames with specific durations
-                    foreach (uint frameTime in frameDurations)
+                    // Add frames with specific delays
+                    foreach (int delay in delays)
                     {
-                        apngImage.AddFrame(sourceImage, frameTime);
+                        apng.AddFrame(sourceImage, (uint)delay);
                     }
 
-                    // Save the APNG (output already bound via FileCreateSource)
-                    apngImage.Save();
+                    // Save the APNG
+                    apng.Save();
                 }
             }
         }

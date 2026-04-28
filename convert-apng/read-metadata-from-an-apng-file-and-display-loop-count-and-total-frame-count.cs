@@ -7,41 +7,40 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input path
+        string inputPath = "input.apng";
+
+        // Check if the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input path
-            string inputPath = "sample.apng";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Load the image using Aspose.Imaging
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to ApngImage to access APNG-specific properties
                 ApngImage apng = image as ApngImage;
-                if (apng == null)
+                if (apng != null)
                 {
-                    Console.Error.WriteLine("The file is not a valid APNG image.");
-                    return;
+                    // Retrieve loop count (NumPlays) and total frame count (PageCount)
+                    int loopCount = apng.NumPlays;
+                    int frameCount = apng.PageCount;
+
+                    Console.WriteLine($"Loop count: {loopCount}");
+                    Console.WriteLine($"Total frames: {frameCount}");
                 }
-
-                // Retrieve loop count (NumPlays) and total frame count (PageCount)
-                int loopCount = apng.NumPlays;
-                int frameCount = apng.PageCount;
-
-                // Display the metadata
-                Console.WriteLine($"Loop count (NumPlays): {loopCount}");
-                Console.WriteLine($"Total frame count (PageCount): {frameCount}");
+                else
+                {
+                    Console.WriteLine("The specified file is not an APNG image.");
+                }
             }
         }
         catch (Exception ex)
         {
-            // Output any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

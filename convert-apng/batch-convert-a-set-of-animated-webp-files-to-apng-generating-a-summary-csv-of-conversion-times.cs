@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Diagnostics;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -12,21 +11,23 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\WebpInput";
-            string outputDir = @"C:\ApngOutput";
-            string csvPath = Path.Combine(outputDir, "summary.csv");
+            string inputFolder = @"C:\InputWebp";
+            string outputFolder = @"C:\OutputApng";
+            string csvPath = Path.Combine(outputFolder, "summary.csv");
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-            // Ensure directory for CSV exists
-            Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
+            Directory.CreateDirectory(outputFolder);
 
-            // Prepare CSV header
-            List<string> csvLines = new List<string>();
-            csvLines.Add("FileName,ConversionTimeMs");
+            // Write CSV header (overwrite if exists)
+            using (var csvWriter = new StreamWriter(csvPath, false))
+            {
+                csvWriter.WriteLine("InputFile,OutputFile,ConversionTimeMs");
+            }
 
-            // Process each WEBP file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDir, "*.webp"))
+            // Get all animated WEBP files
+            string[] inputFiles = Directory.GetFiles(inputFolder, "*.webp");
+
+            foreach (string inputPath in inputFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -35,15 +36,16 @@ class Program
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png"); // APNG saved as .png
+                // Determine output file path (append .png to keep original name)
+                string outputPath = Path.Combine(outputFolder, Path.GetFileName(inputPath) + ".png");
 
-                // Ensure output directory for this file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Measure conversion time
                 Stopwatch sw = Stopwatch.StartNew();
 
-                // Load WEBP and save as APNG using Aspose.Imaging
+                // Load WEBP and save as APNG
                 using (Image image = Image.Load(inputPath))
                 {
                     image.Save(outputPath, new ApngOptions());
@@ -51,12 +53,12 @@ class Program
 
                 sw.Stop();
 
-                // Record conversion time
-                csvLines.Add($"{fileNameWithoutExt},{sw.ElapsedMilliseconds}");
+                // Append result to CSV
+                using (var csvWriter = new StreamWriter(csvPath, true))
+                {
+                    csvWriter.WriteLine($"{inputPath},{outputPath},{sw.ElapsedMilliseconds}");
+                }
             }
-
-            // Write summary CSV
-            File.WriteAllLines(csvPath, csvLines);
         }
         catch (Exception ex)
         {

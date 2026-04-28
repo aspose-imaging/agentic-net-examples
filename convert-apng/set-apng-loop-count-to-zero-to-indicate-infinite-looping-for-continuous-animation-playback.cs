@@ -11,7 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.webp";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,18 +21,17 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options for infinite looping
+                // Save as APNG with infinite looping (NumPlays = 0)
                 var apngOptions = new ApngOptions
                 {
                     NumPlays = 0 // 0 indicates infinite looping
                 };
 
-                // Save as APNG with the specified options
                 image.Save(outputPath, apngOptions);
             }
         }
