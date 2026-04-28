@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.dicom";
+        string outputPath = "sample.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.dicom";
-            string outputDir = "output";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,37 +21,32 @@ class Program
                 return;
             }
 
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image from a file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DicomImage dicomImage = new DicomImage(stream))
-            {
-                foreach (DicomPage page in dicomImage.DicomPages)
-                {
-                    // Build output file path for each page
-                    string outputPath = Path.Combine(outputDir, $"page_{page.Index}.png");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Log start timestamp
-                    DateTime start = DateTime.Now;
-                    Console.WriteLine($"[{start:O}] Starting conversion of page {page.Index}");
-
-                    // Save the page as PNG
-                    page.Save(outputPath, new PngOptions());
-
-                    // Log end timestamp
-                    DateTime end = DateTime.Now;
-                    Console.WriteLine($"[{end:O}] Finished conversion of page {page.Index}");
-                }
-            }
+            // Perform conversion with logging
+            ConvertDicomToPng(inputPath, outputPath);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
+    }
+
+    static void ConvertDicomToPng(string inputPath, string outputPath)
+    {
+        // Log start timestamp
+        Console.WriteLine($"Conversion started: {DateTime.Now:O}");
+
+        // Open the DICOM file as a stream and load it
+        using (Stream stream = File.OpenRead(inputPath))
+        using (DicomImage dicomImage = new DicomImage(stream))
+        {
+            // Save the DICOM image as PNG
+            dicomImage.Save(outputPath, new PngOptions());
+        }
+
+        // Log end timestamp
+        Console.WriteLine($"Conversion finished: {DateTime.Now:O}");
     }
 }
