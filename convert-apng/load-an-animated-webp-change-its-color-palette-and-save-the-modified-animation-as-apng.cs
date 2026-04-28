@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 
@@ -8,11 +7,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.webp";
-        string outputPath = "output.apng";
-
         try
         {
+            string inputPath = "input.webp";
+            string outputPath = "output\\result.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,27 +20,19 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (WebPImage webp = new WebPImage(inputPath))
             {
-                WebPImage webp = image as WebPImage;
-                if (webp == null)
+                var colors = new Aspose.Imaging.Color[]
                 {
-                    Console.Error.WriteLine("Failed to load WebP image.");
-                    return;
-                }
+                    Aspose.Imaging.Color.FromArgb(255, 255, 0, 0),
+                    Aspose.Imaging.Color.FromArgb(255, 0, 255, 0),
+                    Aspose.Imaging.Color.FromArgb(255, 0, 0, 255)
+                };
 
-                var newPalette = new ColorPalette(new Color[]
-                {
-                    Color.Black,
-                    Color.White,
-                    Color.Red,
-                    Color.Green,
-                    Color.Blue
-                });
-                webp.Palette = newPalette;
+                var palette = new Aspose.Imaging.ColorPalette(colors);
+                webp.Palette = palette;
 
-                ApngOptions options = new ApngOptions();
-                webp.Save(outputPath, options);
+                webp.Save(outputPath, new ApngOptions());
             }
         }
         catch (Exception ex)
