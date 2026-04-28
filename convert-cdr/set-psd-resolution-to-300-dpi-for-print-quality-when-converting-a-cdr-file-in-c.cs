@@ -2,9 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output.psd";
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\output.psd";
 
             if (!File.Exists(inputPath))
             {
@@ -23,29 +21,23 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var cdr = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                using (var ms = new MemoryStream())
+                var psdOptions = new PsdOptions
                 {
-                    var pngOptions = new PngOptions
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                };
+
+                if (image is VectorImage)
+                {
+                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            PageWidth = cdr.Width,
-                            PageHeight = cdr.Height
-                        }
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
                     };
-                    cdr.Save(ms, pngOptions);
-                    ms.Position = 0;
-                    using (var raster = (RasterImage)Image.Load(ms))
-                    {
-                        var psdOptions = new PsdOptions
-                        {
-                            ResolutionSettings = new ResolutionSetting(300, 300)
-                        };
-                        raster.Save(outputPath, psdOptions);
-                    }
                 }
+
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
