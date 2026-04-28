@@ -8,37 +8,36 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\InputCdr";
+        string outputFolder = @"C:\OutputJpg";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\InputCdr";
-            string outputFolder = @"C:\OutputJpg";
-
             // Get all CDR files in the input folder
             string[] cdrFiles = Directory.GetFiles(inputFolder, "*.cdr");
 
-            foreach (string cdrFilePath in cdrFiles)
+            foreach (string inputPath in cdrFiles)
             {
                 // Verify input file exists
-                if (!File.Exists(cdrFilePath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {cdrFilePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
                 // Determine output JPG path
-                string outputFileName = Path.GetFileNameWithoutExtension(cdrFilePath) + ".jpg";
-                string outputFilePath = Path.Combine(outputFolder, outputFileName);
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(cdrFilePath))
+                using (CdrImage image = (CdrImage)Image.Load(inputPath))
                 {
                     // Save as JPG with default options
-                    JpegOptions jpegOptions = new JpegOptions();
-                    cdrImage.Save(outputFilePath, jpegOptions);
+                    image.Save(outputPath, new JpegOptions());
                 }
             }
         }
