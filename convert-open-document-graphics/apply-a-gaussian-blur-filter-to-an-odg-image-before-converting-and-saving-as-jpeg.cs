@@ -10,51 +10,60 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.jpg";
+        string outputPath = @"C:\Images\sample_blur.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image odgImage = Image.Load(inputPath))
-        {
-            // Prepare rasterization options for converting ODG to a raster format
-            var rasterizationOptions = new OdgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Rasterize ODG to a memory stream (PNG format) so we can apply raster filters
-            using (var rasterStream = new MemoryStream())
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG vector image
+            using (Image odgImage = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions
+                // Rasterize the ODG to a raster image (PNG in memory)
+                using (var memoryStream = new MemoryStream())
                 {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-                odgImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0; // Reset stream position for reading
+                    var pngOptions = new PngOptions
+                    {
+                        // Set rasterization options for ODG
+                        VectorRasterizationOptions = new OdgRasterizationOptions
+                        {
+                            // Preserve original size
+                            PageSize = odgImage.Size,
+                            BackgroundColor = Color.White
+                        }
+                    };
 
-                // Load the rasterized image
-                using (Image rasterImage = Image.Load(rasterStream))
-                {
-                    // Cast to RasterImage to access filtering capabilities
-                    var raster = (RasterImage)rasterImage;
+                    // Save rasterized image to memory stream
+                    odgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                    // Apply Gaussian blur filter to the entire image
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    // Load the rasterized image
+                    using (Image rasterImage = Image.Load(memoryStream))
+                    {
+                        // Cast to RasterImage to apply filters
+                        var raster = (RasterImage)rasterImage;
 
-                    // Save the processed image as JPEG
-                    var jpegOptions = new JpegOptions();
-                    raster.Save(outputPath, jpegOptions);
+                        // Apply Gaussian blur filter (size=5, sigma=4.0) to the whole image
+                        raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                        // Save the processed image as JPEG
+                        var jpegOptions = new JpegOptions();
+                        raster.Save(outputPath, jpegOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
