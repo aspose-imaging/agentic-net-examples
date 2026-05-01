@@ -7,37 +7,39 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample.svg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.odg";
+            string outputPath = "output\\converted.svg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare SVG export options
-            SvgOptions svgOptions = new SvgOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Preserve original metadata if needed
-                KeepMetadata = true,
-                // Configure vector rasterization (required for SVG export)
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as SVG, preserving vector layers and attributes
-            image.Save(outputPath, svgOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure SVG export options
+                SvgOptions svgOptions = new SvgOptions
+                {
+                    // Preserve original metadata and attributes
+                    KeepMetadata = true
+                };
+
+                // Save as SVG, preserving vector layers and attributes
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
