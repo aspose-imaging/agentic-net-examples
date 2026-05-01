@@ -2,17 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.eps";
-        string outputPath = @"C:\Temp\sample_converted.psd";
+        string inputPath = "Input/sample.eps";
+        string outputPath = "Output/sample.psd";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,28 +23,36 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Prepare PSD save options
-            var psdOptions = new PsdOptions
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
             {
-                // Example: use RLE compression and RGB color mode
-                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                // Preserve layers by exporting each page as a separate layer (if multipage)
-                MultiPageOptions = null
-            };
+                // Prepare PSD save options
+                var psdOptions = new PsdOptions();
 
-            // If the EPS contains multiple pages, export them as layers
-            if (image is IMultipageImage multipage && multipage.PageCount > 1)
-            {
-                // Export all pages; each page becomes a layer in the PSD
-                psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
+                // Set vector rasterization options to preserve vector data as layers
+                var vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
+                psdOptions.VectorRasterizationOptions = vectorOptions;
+
+                // If the EPS contains multiple pages, export each page as a separate PSD layer
+                if (image is IMultipageImage multipage && multipage.PageCount > 1)
+                {
+                    psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
+                }
+
+                // Save as PSD
+                image.Save(outputPath, psdOptions);
             }
-
-            // Save as PSD preserving layers
-            image.Save(outputPath, psdOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
