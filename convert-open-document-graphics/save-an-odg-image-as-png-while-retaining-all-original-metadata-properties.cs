@@ -8,47 +8,47 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\sample.odg";
+            string outputPath = @"C:\temp\sample.png";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PNG save options
+                PngOptions pngOptions = new PngOptions
+                {
+                    // Preserve all original metadata
+                    KeepMetadata = true,
+
+                    // Rasterization options required for vector ODG files
+                    VectorRasterizationOptions = new OdgRasterizationOptions
+                    {
+                        PageSize = image.Size,
+                        BackgroundColor = Color.White
+                    }
+                };
+
+                // Save the image as PNG while retaining metadata
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to the specific ODG image type
-            OdgImage odgImage = (OdgImage)image;
-
-            // Preserve original metadata (the same metadata object is kept for the rasterization process)
-            // The metadata is automatically considered during the Save operation.
-            // If needed, you could explicitly copy it using TrySetMetadata, but the Save method
-            // retains the metadata for ODG → PNG conversion.
-
-            // Prepare rasterization options for ODG → PNG conversion
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
-            {
-                // Use the original image size to keep the aspect ratio
-                PageSize = odgImage.Size,
-                BackgroundColor = Color.White
-            };
-
-            // Configure PNG save options and attach rasterization options
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the image as PNG while keeping metadata
-            odgImage.Save(outputPath, pngOptions);
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
