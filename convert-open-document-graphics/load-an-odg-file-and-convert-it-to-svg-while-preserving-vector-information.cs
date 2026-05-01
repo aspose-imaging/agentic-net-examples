@@ -7,37 +7,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.odg";
-        string outputPath = "output\\converted.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\sample.svg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare SVG export options with vector rasterization settings
+                SvgOptions svgOptions = new SvgOptions();
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    BackgroundColor = Color.White
+                };
+                svgOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save as SVG preserving vector information
+                image.Save(outputPath, svgOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load ODG image and save as SVG preserving vector data
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options based on source image size
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-
-            // Set up SVG save options with the rasterization settings
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the image as SVG
-            image.Save(outputPath, svgOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
