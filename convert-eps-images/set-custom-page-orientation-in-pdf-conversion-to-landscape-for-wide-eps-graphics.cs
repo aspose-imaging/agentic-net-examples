@@ -1,52 +1,56 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.eps");
-        string outputPath = Path.Combine("Output", "sample.pdf");
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image
+            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Retrieve original dimensions
+                int width = epsImage.Width;
+                int height = epsImage.Height;
+
+                // Configure PDF options for landscape orientation
+                var pdfOptions = new PdfOptions
+                {
+                    // Swap width and height for landscape page size
+                    PageSize = new Aspose.Imaging.SizeF(height, width),
+
+                    // Set vector rasterization options matching the landscape dimensions
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = height,
+                        PageHeight = width
+                    }
+                };
+
+                // Save as PDF with the specified options
+                epsImage.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS image
-        using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Prepare PDF options
-            var pdfOptions = new PdfOptions();
-
-            // Optional: set PDF compliance (default can be used)
-            pdfOptions.PdfCoreOptions = new PdfCoreOptions
-            {
-                PdfCompliance = PdfComplianceVersion.PdfA1b
-            };
-
-            // Configure rasterization to landscape orientation
-            var rasterOptions = new EpsRasterizationOptions
-            {
-                // Swap width and height for landscape
-                PageWidth = image.Height,
-                PageHeight = image.Width,
-                BackgroundColor = Color.White
-            };
-
-            pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
