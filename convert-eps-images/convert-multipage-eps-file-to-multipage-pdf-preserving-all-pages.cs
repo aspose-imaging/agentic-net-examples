@@ -2,41 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = "multipage_input.eps";
-        string outputPath = "multipage_output.pdf";
-
-        // Verify that the input EPS file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input\\multipage.eps";
+            string outputPath = "Output\\multipage.pdf";
 
-        // Ensure the output directory exists (handles null directory case)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the EPS image (cast to EpsImage) and save as multipage PDF
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to the specific EPS image type
-            var epsImage = image as Aspose.Imaging.FileFormats.Eps.EpsImage;
-            if (epsImage == null)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded file is not a valid EPS image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare PDF export options
-            PdfOptions pdfOptions = new PdfOptions();
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save all pages of the EPS to the PDF
-            epsImage.Save(outputPath, pdfOptions);
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            {
+                var options = new PdfOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
+                };
+
+                // Preserve all pages (MultiPageOptions left null)
+                image.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
