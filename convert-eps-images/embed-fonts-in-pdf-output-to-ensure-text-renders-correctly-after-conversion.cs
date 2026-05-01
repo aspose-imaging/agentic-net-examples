@@ -1,48 +1,67 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging;
+using Aspose.Imaging.CustomFontHandler;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.pdf";
-        string fontsFolder = "fonts";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.svg";
+            string outputPath = "Output/sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure Aspose.Imaging to use custom fonts folder
-        FontSettings.SetFontsFolder(fontsFolder);
-        FontSettings.UpdateFonts();
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare PDF save options
-            var pdfOptions = new PdfOptions
+            if (!File.Exists(inputPath))
             {
-                // Example: set PDF compliance if needed
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    PdfCompliance = PdfComplianceVersion.Pdf15
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PDF with embedded fonts
-            image.Save(outputPath, pdfOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((args) =>
+            {
+                string fontsPath = "";
+                if (args.Length > 0 && args[0] != null)
+                    fontsPath = args[0].ToString();
+
+                var fontList = new List<CustomFontData>();
+                if (Directory.Exists(fontsPath))
+                {
+                    foreach (var file in Directory.GetFiles(fontsPath))
+                    {
+                        fontList.Add(new CustomFontData(Path.GetFileNameWithoutExtension(file), File.ReadAllBytes(file)));
+                    }
+                }
+                return fontList.ToArray();
+            }, "Fonts");
+
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                var vectorOpts = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = vectorOpts
+                };
+
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
