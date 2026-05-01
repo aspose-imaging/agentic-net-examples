@@ -7,36 +7,42 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = @"C:\temp\sample.otg";
-
-        // Verify the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input path
+            string inputPath = "sample.otg";
 
-        // MemoryStream to hold the PNG output
-        using (MemoryStream outputStream = new MemoryStream())
-        {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up PNG save options with OTG rasterization
-                PngOptions pngOptions = new PngOptions();
-                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                // Prepare PNG save options with OTG rasterization settings
+                var pngOptions = new PngOptions();
+                var otgRasterization = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
                 pngOptions.VectorRasterizationOptions = otgRasterization;
 
-                // Save the image as PNG into the memory stream
-                image.Save(outputStream, pngOptions);
-            }
+                // Save the converted PNG into a MemoryStream
+                using (var memoryStream = new MemoryStream())
+                {
+                    image.Save(memoryStream, pngOptions);
 
-            // The MemoryStream now contains the PNG data
-            Console.WriteLine($"PNG data length: {outputStream.Length} bytes");
+                    // Example usage of the resulting stream
+                    Console.WriteLine($"PNG data size: {memoryStream.Length} bytes");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
