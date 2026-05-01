@@ -8,40 +8,47 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\Result\sample.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\output\sample.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Create PNG save options
+                PngOptions pngOptions = new PngOptions();
+
+                // Configure OTG rasterization options
+                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+                {
+                    // Set background color (e.g., white)
+                    BackgroundColor = Color.White,
+                    // Preserve original page size
+                    PageSize = image.Size
+                };
+
+                // Assign rasterization options to the PNG save options
+                pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
+
+                // Save the image as PNG
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options for OTG
-            OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
-            {
-                // Set a background color (e.g., white)
-                BackgroundColor = Color.White,
-                // Preserve original page size
-                PageSize = image.Size
-            };
-
-            // Set up PNG save options and attach the rasterization options
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = otgOptions
-            };
-
-            // Save the image as PNG using the configured options
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
