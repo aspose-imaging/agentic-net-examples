@@ -2,38 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        string inputPath = Path.Combine(inputDirectory, "sample.odg");
-        string outputPath = Path.Combine(outputDirectory, "sample.jpg");
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.odg";
+            string outputPath = "Output\\sample.jpg";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            using (JpegOptions jpegOptions = new JpegOptions())
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                jpegOptions.HorizontalSampling = new byte[] { 2, 2, 2 };
-                jpegOptions.VerticalSampling = new byte[] { 2, 2, 2 };
-                jpegOptions.Quality = 90;
-                jpegOptions.ColorType = JpegCompressionColorMode.YCbCr;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure JPEG options with custom chroma subsampling
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    // 4:2:0 subsampling (example)
+                    HorizontalSampling = new byte[] { 2, 1, 1 },
+                    VerticalSampling = new byte[] { 2, 1, 1 },
+                    Quality = 90,
+                    // Vector rasterization for converting vector ODG to raster JPEG
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
+                };
+
+                // Save as JPEG
                 image.Save(outputPath, jpegOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
