@@ -8,54 +8,59 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample_blur.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample_blur.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image otgImage = Image.Load(inputPath))
-        {
-            // Prepare rasterization options for converting OTG to a raster format (PNG)
-            var rasterizationOptions = new OtgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = otgImage.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            var pngOptions = new PngOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image otgImage = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Rasterize OTG to a memory stream as PNG
-            using (var rasterStream = new MemoryStream())
-            {
-                otgImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0; // Reset stream position for reading
-
-                // Load the rasterized image
-                using (Image rasterImage = Image.Load(rasterStream))
+                // Rasterize OTG to a raster image in memory (PNG)
+                using (var memoryStream = new MemoryStream())
                 {
-                    // Cast to RasterImage to apply filters
-                    var raster = (RasterImage)rasterImage;
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new OtgRasterizationOptions
+                        {
+                            PageSize = otgImage.Size
+                        }
+                    };
+                    otgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                    // Apply Gaussian blur filter (size = 5, sigma = 4.0) to the whole image
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    // Load the rasterized image
+                    using (Image rasterImage = Image.Load(memoryStream))
+                    {
+                        var raster = (RasterImage)rasterImage;
 
-                    // Save the filtered image as JPEG
-                    var jpegOptions = new JpegOptions();
-                    raster.Save(outputPath, jpegOptions);
+                        // Apply Gaussian blur filter (size 5, sigma 4.0) to the whole image
+                        raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                        // Save the processed image as JPEG
+                        var jpegOptions = new JpegOptions
+                        {
+                            Quality = 90
+                        };
+                        raster.Save(outputPath, jpegOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
