@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -12,28 +10,35 @@ class Program
         string inputPath = Path.Combine("Input", "sample.otg");
         string outputPath = Path.Combine("Output", "sample.jpg");
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            using (JpegOptions jpegOptions = new JpegOptions())
+            if (!File.Exists(inputPath))
             {
-                jpegOptions.KeepMetadata = true;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var jpegOptions = new JpegOptions
                 {
-                    PageSize = image.Size
+                    KeepMetadata = true,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
                 };
-                jpegOptions.VectorRasterizationOptions = rasterOptions;
 
                 image.Save(outputPath, jpegOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
