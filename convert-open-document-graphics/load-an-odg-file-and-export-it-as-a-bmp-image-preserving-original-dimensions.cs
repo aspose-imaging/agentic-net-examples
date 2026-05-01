@@ -9,34 +9,45 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.odg";
-        string outputPath = @"C:\temp\sample.bmp";
+        string inputPath = @"C:\temp\input.odg";
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare BMP save options with vector rasterization to keep original size
-            BmpOptions bmpOptions = new BmpOptions
+            // Verify that the input ODG file exists
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new OdgRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size // preserve original dimensions
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as BMP
-            image.Save(outputPath, bmpOptions);
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image using Aspose.Imaging
+            using (Image image = Image.Load(inputPath))
+            {
+                // Set up rasterization options to preserve the original dimensions
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White, // optional background
+                    PageSize = image.Size           // keep original size
+                };
+
+                // Configure BMP save options and attach the rasterization options
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the image as BMP
+                image.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
