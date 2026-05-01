@@ -12,29 +12,35 @@ class Program
         string inputPath = "sample.odg";
         string outputPath = "sample.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Start timing the conversion
+            Stopwatch sw = Stopwatch.StartNew();
+
+            // Load the ODG image and save it as PNG
+            using (Image image = Image.Load(inputPath))
+            {
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
+
+            // Stop timing and report the elapsed time
+            sw.Stop();
+            Console.WriteLine($"Conversion completed in {sw.ElapsedMilliseconds} ms.");
         }
-
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-        Directory.CreateDirectory(outputDir);
-
-        // Start timing the conversion
-        Stopwatch sw = Stopwatch.StartNew();
-
-        // Load the ODG image and save it as PNG
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            PngOptions pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Stop timing and report duration
-        sw.Stop();
-        Console.WriteLine($"Conversion completed in {sw.ElapsedMilliseconds} ms.");
     }
 }
