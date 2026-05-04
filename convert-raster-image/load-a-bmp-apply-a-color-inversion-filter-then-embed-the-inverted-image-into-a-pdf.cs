@@ -1,53 +1,55 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output paths
-        string inputPath = Path.Combine("Input", "sample.bmp");
-        string outputPath = Path.Combine("Output", "inverted.pdf");
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage for pixel manipulation
-            RasterImage raster = (RasterImage)image;
-            if (!raster.IsCached)
-                raster.CacheData();
-
-            // Load ARGB pixels
-            int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-
-            // Invert colors (preserve alpha)
-            for (int i = 0; i < pixels.Length; i++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int argb = pixels[i];
-                int a = argb & unchecked((int)0xFF000000);
-                int rgb = argb & 0x00FFFFFF;
-                int invRgb = (~rgb) & 0x00FFFFFF;
-                pixels[i] = a | invRgb;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save inverted pixels back to the image
-            raster.SaveArgb32Pixels(raster.Bounds, pixels);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Embed the inverted image into a PDF
-            PdfOptions pdfOptions = new PdfOptions();
-            image.Save(outputPath, pdfOptions);
+            // Load BMP image
+            using (BmpImage bmp = new BmpImage(inputPath))
+            {
+                // Invert colors pixel by pixel
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    for (int x = 0; x < bmp.Width; x++)
+                    {
+                        var original = bmp.GetPixel(x, y);
+                        var inverted = Color.FromArgb(
+                            original.A,
+                            255 - original.R,
+                            255 - original.G,
+                            255 - original.B);
+                        bmp.SetPixel(x, y, inverted);
+                    }
+                }
+
+                // Save the inverted image into a PDF file
+                bmp.Save(outputPath, new PdfOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
