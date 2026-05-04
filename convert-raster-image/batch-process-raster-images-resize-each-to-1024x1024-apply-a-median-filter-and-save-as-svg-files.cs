@@ -3,60 +3,68 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded list of raster images to process
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Images\photo1.jpg",
-            @"C:\Images\photo2.png",
-            @"C:\Images\photo3.bmp"
-        };
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            // List of raster image files to process (add your file names here)
+            string[] inputFiles = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                Path.Combine(inputDir, "image1.png"),
+                Path.Combine(inputDir, "image2.jpg"),
+                Path.Combine(inputDir, "image3.bmp")
+            };
 
-            // Build the output path by changing the extension to .svg
-            string outputPath = Path.ChangeExtension(inputPath, ".svg");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            foreach (string inputPath in inputFiles)
             {
-                // Resize to 1024x1024 pixels
-                image.Resize(1024, 1024);
-
-                // Apply a median filter with kernel size 5
-                if (image is RasterImage rasterImage)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Configure SVG save options with appropriate rasterization settings
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = new Size(1024, 1024)
-                };
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+                // Determine output path with .svg extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
-                // Save the processed image as SVG
-                image.Save(outputPath, svgOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load raster image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Resize to 1024x1024
+                    image.Resize(1024, 1024);
+
+                    // Apply median filter with size 5
+                    if (image is RasterImage rasterImage)
+                    {
+                        rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                    }
+
+                    // Save as SVG using vector rasterization options
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageSize = image.Size
+                        }
+                    };
+                    image.Save(outputPath, svgOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
