@@ -5,54 +5,47 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Base directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\Images\InputWebP";
+        string outputFolder = @"C:\Images\OutputPDF";
 
-        // Ensure input directory exists; create if missing and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Ensure the output directory exists (unconditional as per rule)
+            Directory.CreateDirectory(outputFolder);
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all WebP files in the input folder
+            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
 
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in webpFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the output PDF path (same file name, .pdf extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Ensure the directory for the output file exists (unconditional)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the WebP image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Save as PDF using default PdfOptions
+                    image.Save(outputPath, new PdfOptions());
+                }
             }
-
-            // Build output PDF path with same file name but .pdf extension
-            string outputFileName = Path.ChangeExtension(Path.GetFileName(inputPath), ".pdf");
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the WebP image and save as PDF
-            using (Image image = Image.Load(inputPath))
-            {
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
-            }
-
-            Console.WriteLine($"Converted '{inputPath}' to PDF at '{outputPath}'.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

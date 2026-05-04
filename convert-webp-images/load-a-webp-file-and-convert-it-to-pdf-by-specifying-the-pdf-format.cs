@@ -8,24 +8,31 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.webp";
-        string outputPath = @"c:\temp\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.webp";
+            string outputPath = @"C:\temp\output.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load WebP image and save as PDF
+            using (WebPImage webPImage = new WebPImage(inputPath))
+            {
+                webPImage.Save(outputPath, new PdfOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load WebP image and save as PDF
-        using (WebPImage webPImage = new WebPImage(inputPath))
+        catch (Exception ex)
         {
-            webPImage.Save(outputPath, new PdfOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

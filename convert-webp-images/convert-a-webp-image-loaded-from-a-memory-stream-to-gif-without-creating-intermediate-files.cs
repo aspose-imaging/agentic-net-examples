@@ -12,22 +12,36 @@ class Program
         string inputPath = @"c:\temp\input.webp";
         string outputPath = @"c:\temp\output.gif";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported cleanly
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load WebP image from a memory stream
+            using (FileStream fileStream = File.OpenRead(inputPath))
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                fileStream.CopyTo(memoryStream);
+                memoryStream.Position = 0; // reset position for reading
+
+                using (WebPImage webPImage = new WebPImage(memoryStream))
+                {
+                    // Save as GIF
+                    webPImage.Save(outputPath, new GifOptions());
+                }
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WebP image from a memory stream and save it as GIF
-        using (FileStream inputStream = File.OpenRead(inputPath))
-        using (WebPImage webPImage = new WebPImage(inputStream))
+        catch (Exception ex)
         {
-            // Save directly to GIF format without creating intermediate files
-            webPImage.Save(outputPath, new GifOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
