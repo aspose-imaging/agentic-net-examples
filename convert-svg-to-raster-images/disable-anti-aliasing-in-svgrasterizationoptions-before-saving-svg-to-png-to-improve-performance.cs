@@ -6,32 +6,49 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = Path.Combine("Input", "test.svg");
-        string outputPath = Path.Combine("Output", "test.png");
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\test.svg";
+        string outputPath = @"C:\temp\test.output.png";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            SvgImage svgImage = (SvgImage)image;
-
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-            rasterOptions.PageSize = svgImage.Size;
-            rasterOptions.SmoothingMode = Aspose.Imaging.SmoothingMode.None;
-
-            using (PngOptions pngOptions = new PngOptions())
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            {
+                // Configure rasterization options
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    // Set the page size to match the SVG dimensions
+                    PageSize = svgImage.Size,
+                    // Disable anti‑aliasing for better performance
+                    SmoothingMode = SmoothingMode.None
+                };
+
+                // Set up PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the rasterized image to PNG
                 svgImage.Save(outputPath, pngOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
