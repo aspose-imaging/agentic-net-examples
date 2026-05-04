@@ -1383,8 +1383,6 @@
         "Aspose.Imaging.CoreExceptions",
         "Aspose.Imaging.CoreExceptions.ImageFormats",
         "System.Diagnostics",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "System.Text",
         "Aspose.Imaging.Brushes",
         "Aspose.Imaging.Sources",
         "System.Threading.Tasks"
