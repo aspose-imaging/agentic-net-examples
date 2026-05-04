@@ -1,76 +1,69 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded list of BMP files to process
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Images\Input1.bmp",
-            @"C:\Images\Input2.bmp",
-            @"C:\Images\Input3.bmp"
-        };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Output directory (hard‑coded)
-        string outputDir = @"C:\Images\Output";
-
-        // Ensure the output directory exists (rule 3)
-        Directory.CreateDirectory(outputDir);
-
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists (rule 2)
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Load BMP image using Aspose.Imaging (lifecycle rule)
-            using (BmpImage bmp = new BmpImage(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                // Invert colors pixel by pixel
-                for (int y = 0; y < bmp.Height; y++)
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+
+            foreach (var inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    for (int x = 0; x < bmp.Width; x++)
-                    {
-                        var original = bmp.GetPixel(x, y);
-                        var inverted = Color.FromArgb(
-                            original.A,
-                            255 - original.R,
-                            255 - original.G,
-                            255 - original.B);
-                        bmp.SetPixel(x, y, inverted);
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
                 }
 
-                // Prepare output SVG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".svg");
 
-                // Ensure the directory for the output file exists (rule 3)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set up SVG saving options
-                var svgOptions = new SvgOptions
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Rasterization options are required for converting raster to SVG
-                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    RasterImage raster = image as RasterImage;
+                    if (raster != null)
                     {
-                        PageSize = bmp.Size
-                    }
-                };
+                        SvgOptions svgOptions = new SvgOptions
+                        {
+                            VectorRasterizationOptions = new SvgRasterizationOptions
+                            {
+                                BackgroundColor = Color.White,
+                                PageWidth = raster.Width,
+                                PageHeight = raster.Height
+                            }
+                        };
 
-                // Save as SVG (lifecycle rule)
-                bmp.Save(outputPath, svgOptions);
+                        raster.Save(outputPath, svgOptions);
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
