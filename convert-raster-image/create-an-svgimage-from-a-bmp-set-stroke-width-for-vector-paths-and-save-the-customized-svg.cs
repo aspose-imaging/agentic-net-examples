@@ -1,48 +1,57 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.bmp";
-        string outputPath = "output.svg";
+        string inputPath = "C:\\temp\\sample.bmp";
+        string outputPath = "C:\\temp\\output.svg";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load BMP image
-        using (Aspose.Imaging.Image bmpImage = Aspose.Imaging.Image.Load(inputPath))
-        {
-            int width = bmpImage.Width;
-            int height = bmpImage.Height;
-
-            // Create SVG graphics canvas
-            var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, 96);
-
-            // Set stroke width for vector paths (draw a rectangle border)
-            var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 5);
-            graphics.DrawRectangle(pen, 0, 0, width, height);
-
-            // Draw the raster BMP onto the SVG canvas
-            var raster = (Aspose.Imaging.RasterImage)bmpImage;
-            graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
-
-            // Finalize SVG image and save
-            using (Aspose.Imaging.FileFormats.Svg.SvgImage svgImage = graphics.EndRecording())
+            if (!File.Exists(inputPath))
             {
-                svgImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                int width = raster.Width;
+                int height = raster.Height;
+                int dpi = 96;
+
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+
+                graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
+
+                Figure figure = new Figure { IsClosed = true };
+                GraphicsPath path = new GraphicsPath();
+                path.AddFigure(figure);
+                figure.AddShapes(new Shape[]
+                {
+                    new RectangleShape(new RectangleF(10, 10, width - 20, height - 20))
+                });
+
+                Pen vectorPen = new Pen(Color.Red, 5);
+                graphics.DrawPath(vectorPen, path);
+
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
+                    svgImage.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
