@@ -7,49 +7,54 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded list of PNG files to convert
-        string[] inputPaths = new string[]
+        try
         {
-            @"C:\Images\image1.png",
-            @"C:\Images\image2.png",
-            @"C:\Images\image3.png"
-        };
+            // Hardcoded input folder containing PNG files
+            string inputFolder = @"C:\Images\Input";
 
-        // Path for the aggregated PDF file
-        string aggregatedPdfPath = @"C:\Output\combined.pdf";
+            // Hardcoded output PDF file that will contain all PDFs concatenated
+            string outputPdfPath = @"C:\Images\Output\combined.pdf";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(aggregatedPdfPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-        // Shared memory stream that will hold all PDF data
-        using (MemoryStream sharedStream = new MemoryStream())
-        {
-            foreach (string inputPath in inputPaths)
+            // Get all PNG files in the input folder
+            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
+
+            // Shared memory stream to aggregate PDF data
+            using (MemoryStream combinedStream = new MemoryStream())
             {
-                // Verify the input PNG exists
-                if (!File.Exists(inputPath))
+                // PDF export options (default)
+                PdfOptions pdfOptions = new PdfOptions();
+
+                foreach (string pngPath in pngFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    // Verify the PNG file exists
+                    if (!File.Exists(pngPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {pngPath}");
+                        return;
+                    }
+
+                    // Load the PNG image
+                    using (Image image = Image.Load(pngPath))
+                    {
+                        // Save the image as PDF into the shared memory stream
+                        image.Save(combinedStream, pdfOptions);
+                    }
                 }
 
-                // Load the PNG image
-                using (Image image = Image.Load(inputPath))
+                // Write the aggregated PDF data to the output file
+                combinedStream.Position = 0;
+                using (FileStream fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
                 {
-                    // Set up PDF export options
-                    PdfOptions pdfOptions = new PdfOptions();
-
-                    // Save the image as PDF into the shared stream
-                    image.Save(sharedStream, pdfOptions);
+                    combinedStream.CopyTo(fileStream);
                 }
             }
-
-            // Write the aggregated PDF data to the final file
-            sharedStream.Position = 0;
-            using (FileStream fileStream = new FileStream(aggregatedPdfPath, FileMode.Create, FileAccess.Write))
-            {
-                sharedStream.CopyTo(fileStream);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
