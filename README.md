@@ -6,7 +6,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 6049 |
+| Total Examples | 6187 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-05-04 |
@@ -46,7 +46,7 @@ README.md
 | [Convert DICOM Images](./convert-dicom-images/) | 120 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert EPS Images](./convert-eps-images/) | 180 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
 | [Convert Open Document Graphics](./convert-open-document-graphics/) | 360 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
-| [Convert Raster Image](./convert-raster-image/) | 276 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
+| [Convert Raster Image](./convert-raster-image/) | 414 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 120 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 90 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 58 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
@@ -108,9 +108,29 @@ The agent exposes a public REST API for programmatic access:
 
 > API documentation is available at `/api/v1/docs`. The API is intended for internal team use.
 
+## Evaluation & Benchmarks
+
+All examples are compiler-validated against the target NuGet version before being committed. The benchmark is a 100% build pass rate across all generated examples.
+
+| Version | Total Examples | Pass Rate | Framework |
+|---------|---------------|-----------|----------|
+| 26.4.0 | 6187 | 100.0% | net9.0 |
+
+Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
+
+## How to Run Validation
+
+Validation runs automatically on every pull request targeting `main` via GitHub Actions (`validate-pr.yml`).
+
+To trigger validation:
+1. Push your branch to GitHub
+2. Open a pull request targeting `main`
+3. GitHub Actions will automatically build and run all changed `.cs` files
+4. Build failures block the merge — runtime errors are informational only
+
 ## Metrics
 
 Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260504_025614` | 2026-05-04*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260504_042215` | 2026-05-04*
