@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.gif";
+        string inputPath = @"C:\Temp\input.gif";
+        string outputPath = @"C:\Temp\output.gif";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,17 +19,20 @@ class Program
         }
 
         // Ensure output directory exists
-        string? outputDir = Path.GetDirectoryName(outputPath);
-        Directory.CreateDirectory(outputDir ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image and automatically dispose it after use
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Prepare GIF save options (default options are sufficient for basic conversion)
-            GifOptions gifOptions = new GifOptions();
-
-            // Save the image as GIF
-            image.Save(outputPath, gifOptions);
+            // Load the GIF image and automatically dispose it after use
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save the image to the output path (can be same or different format)
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
