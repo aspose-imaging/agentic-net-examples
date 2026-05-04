@@ -7,44 +7,53 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\source.jpg";
+            string outputPath = @"C:\Images\output.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
-        {
-            const int maxWidth = 2000;
-            int newWidth = image.Width;
-            int newHeight = image.Height;
-
-            // Resize proportionally if width exceeds the limit
-            if (image.Width > maxWidth)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                newWidth = maxWidth;
-                newHeight = (int)((long)image.Height * maxWidth / image.Width);
-                image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Prepare PDF export options
-            var pdfOptions = new PdfOptions
-            {
-                // Set page size to match the resized image dimensions
-                PageSize = new Size(newWidth, newHeight)
-            };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Determine new dimensions to fit within 2000px width while preserving aspect ratio
+                int maxWidth = 2000;
+                int newWidth = image.Width;
+                int newHeight = image.Height;
+
+                if (image.Width > maxWidth)
+                {
+                    double scale = (double)maxWidth / image.Width;
+                    newWidth = maxWidth;
+                    newHeight = (int)Math.Round(image.Height * scale);
+                }
+
+                // Resize if needed
+                if (newWidth != image.Width || newHeight != image.Height)
+                {
+                    image.Resize(newWidth, newHeight);
+                }
+
+                // Prepare PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Save the resized image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

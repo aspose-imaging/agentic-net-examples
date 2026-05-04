@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output/output.svg";
+        string outputPath = "output.svg";
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -22,21 +22,26 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage for pixel operations
-            RasterImage raster = (RasterImage)image;
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Resize using bicubic interpolation (CubicConvolution)
+                image.Resize(800, 600, ResizeType.CubicConvolution);
 
-            // Resize using bicubic interpolation (CubicConvolution)
-            raster.Resize(800, 600, ResizeType.CubicConvolution);
+                // Apply sharpening filter
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-            // Apply sharpening filter
-            raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-
-            // Save the result as SVG
-            SvgOptions svgOptions = new SvgOptions();
-            image.Save(outputPath, svgOptions);
+                // Save the result as SVG
+                SvgOptions svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,59 +2,67 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input folder and output folder
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
-
-        // List of raster image files to process (hard‑coded)
-        string[] inputFiles = new[]
+        try
         {
-            Path.Combine(inputFolder, "image1.png"),
-            Path.Combine(inputFolder, "image2.jpg"),
-            Path.Combine(inputFolder, "image3.bmp")
-        };
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // List of raster image file names to process
+            string[] files = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                "image1.png",
+                "image2.jpg",
+                "image3.bmp"
+                // add more file names as needed
+            };
 
-            // Determine output path (same name, .svg extension, placed in output folder)
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
-            string outputPath = Path.Combine(outputFolder, outputFileName);
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            foreach (string fileName in files)
             {
-                // Resize uniformly to 1024x1024
-                image.Resize(1024, 1024);
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputDir, fileName);
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".svg");
 
-                // Prepare SVG save options with rasterization settings
-                var svgOptions = new SvgOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        // Set the page size to match the resized dimensions
-                        PageSize = new Size(1024, 1024)
-                    }
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the raster image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Resize to 1024x1024 (ignoring aspect ratio)
+                    image.Resize(1024, 1024);
+
+                    // Prepare SVG save options with rasterization settings
+                    var rasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size // set page size to match resized image
+                    };
+
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = rasterizationOptions
+                    };
+
+                    // Save as SVG
+                    image.Save(outputPath, svgOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,46 +8,54 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\sample.bmp";
+            string outputPath = "C:\\temp\\output.svg";
 
-        // Load the BMP raster image
-        using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
-        {
-            // Create an SVG graphics context with the same dimensions as the BMP
-            int width = rasterImage.Width;
-            int height = rasterImage.Height;
-            int dpi = 96; // standard DPI
-
-            SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-            // Draw the raster image onto the SVG canvas
-            graphics.DrawImage(rasterImage, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
-
-            // Create a pen with dashed stroke
-            Pen dashedPen = new Pen(Color.Black, 2);
-            dashedPen.DashPattern = new float[] { 5, 5 }; // 5 units dash, 5 units gap
-
-            // Draw a diagonal dashed line across the image
-            graphics.DrawLine(dashedPen, 0, 0, width, height);
-
-            // Finalize SVG image
-            using (SvgImage svgImage = graphics.EndRecording())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the SVG file
-                svgImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
+            {
+                int width = bmp.Width;
+                int height = bmp.Height;
+                int dpi = 96;
+
+                // Create an SVG graphics context with the same dimensions as the BMP
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+
+                // Draw the bitmap onto the SVG canvas
+                graphics.DrawImage(bmp, new Point(0, 0));
+
+                // Create a pen with a dashed stroke pattern
+                Pen dashedPen = new Pen(Color.Black, 2);
+                // 5 units on, 5 units off
+                dashedPen.DashPattern = new float[] { 5, 5 };
+
+                // Draw a diagonal line using the dashed pen
+                graphics.DrawLine(dashedPen, 0, 0, width, height);
+
+                // Finalize the SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
+                    // Save the SVG file
+                    svgImage.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

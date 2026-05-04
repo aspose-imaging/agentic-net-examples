@@ -7,52 +7,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputFolder);
-
-        // List of BMP files to process (hardcoded for the example)
-        string[] bmpFiles = new string[]
+        try
         {
-            "image1.bmp",
-            "image2.bmp",
-            "image3.bmp"
-        };
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
-        foreach (string fileName in bmpFiles)
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Retrieve all BMP files from the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+
+            foreach (string inputPath in bmpFiles)
+            {
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Create a unique timestamp prefix
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, $"{timestamp}_{fileNameWithoutExt}.pdf");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the BMP image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Set up PDF export options
+                    var pdfOptions = new PdfOptions();
+
+                    // Save the image as a PDF file
+                    image.Save(outputPath, pdfOptions);
+                }
+            }
+        }
+        catch (Exception ex)
         {
-            // Build full input path
-            string inputPath = Path.Combine(inputFolder, fileName);
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Create a unique timestamp prefix
-            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-
-            // Build full output path with timestamp prefix and .pdf extension
-            string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(fileName)}.pdf";
-            string outputPath = Path.Combine(outputFolder, outputFileName);
-
-            // Ensure the directory for the output file exists (unconditional)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Set up PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Save the image as PDF
-                image.Save(outputPath, pdfOptions);
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

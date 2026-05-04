@@ -2,16 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\source.png";
+        string outputPath = @"C:\Images\resized_output.svg";
 
         // Verify that the input file exists
         if (!File.Exists(inputPath))
@@ -23,19 +22,25 @@ class Program
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image, resize with high‑quality bicubic interpolation, and save as SVG
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Desired dimensions (example: 400x400)
-            int newWidth = 400;
-            int newHeight = 400;
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Define new dimensions (example: half the original size)
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
 
-            // High‑quality bicubic interpolation
-            image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
+                // Resize using high‑quality bicubic interpolation (CubicConvolution)
+                image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
 
-            // Save the resized image as SVG
-            var svgOptions = new SvgOptions();
-            image.Save(outputPath, svgOptions);
+                // Save the resized image as SVG
+                image.Save(outputPath, new SvgOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

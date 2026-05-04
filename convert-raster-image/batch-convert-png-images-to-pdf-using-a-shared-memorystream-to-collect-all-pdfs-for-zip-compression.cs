@@ -1,72 +1,78 @@
 using System;
 using System.IO;
+using System.IO.Compression;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input directory containing PNG files
+            string inputDirectory = @"C:\Images\Input";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Hardcoded output ZIP file path
+            string outputZipPath = @"C:\Images\Output\converted.zip";
 
-        // Get all PNG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
 
-        // Shared memory stream to collect PDF data (for later zip compression)
-        using (MemoryStream sharedPdfStream = new MemoryStream())
-        {
-            foreach (string inputPath in files)
+            // MemoryStream that will hold the ZIP archive
+            using (MemoryStream zipStream = new MemoryStream())
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Create a ZIP archive in the MemoryStream
+                using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Determine output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-                // Ensure the output directory for this file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load PNG image and save as PDF
-                using (Image image = Image.Load(inputPath))
-                {
-                    using (PdfOptions pdfOptions = new PdfOptions())
+                    // Enumerate all PNG files in the input directory
+                    foreach (string pngPath in Directory.GetFiles(inputDirectory, "*.png"))
                     {
-                        // Save to file
-                        image.Save(outputPath, pdfOptions);
+                        // Verify the PNG file exists
+                        if (!File.Exists(pngPath))
+                        {
+                            Console.Error.WriteLine($"File not found: {pngPath}");
+                            return;
+                        }
 
-                        // Also save to the shared memory stream
-                        image.Save(sharedPdfStream, pdfOptions);
+                        // Load the PNG image
+                        using (Image image = Image.Load(pngPath))
+                        {
+                            // Prepare PDF export options (default options are sufficient)
+                            PdfOptions pdfOptions = new PdfOptions();
+
+                            // Save the image as PDF into a temporary MemoryStream
+                            using (MemoryStream pdfStream = new MemoryStream())
+                            {
+                                image.Save(pdfStream, pdfOptions);
+                                pdfStream.Position = 0; // Reset stream position for reading
+
+                                // Create a ZIP entry for this PDF
+                                string entryName = Path.GetFileNameWithoutExtension(pngPath) + ".pdf";
+                                ZipArchiveEntry entry = zipArchive.CreateEntry(entryName, CompressionLevel.Optimal);
+
+                                // Write the PDF bytes into the ZIP entry
+                                using (Stream entryStream = entry.Open())
+                                {
+                                    pdfStream.CopyTo(entryStream);
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            // At this point, sharedPdfStream contains concatenated PDF bytes.
-            // It can be used for zip compression with external libraries if needed.
+                // Write the completed ZIP archive to the output file
+                Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
+                using (FileStream fileStream = new FileStream(outputZipPath, FileMode.Create, FileAccess.Write))
+                {
+                    zipStream.Position = 0;
+                    zipStream.CopyTo(fileStream);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

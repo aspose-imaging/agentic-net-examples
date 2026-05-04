@@ -2,100 +2,78 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input BMP files
-        string[] inputPaths = {
-            @"C:\Images\sample1.bmp",
-            @"C:\Images\sample2.bmp"
-        };
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.pdf";
 
-        // Corresponding output PDF files
-        string[] outputPaths = {
-            @"C:\Images\sample1.pdf",
-            @"C:\Images\sample2.pdf"
-        };
-
-        // Simple 5x5 color matrix (identity with a slight red boost)
-        double[,] colorMatrix = new double[5, 5]
+        // Validate input file existence
+        if (!File.Exists(inputPath))
         {
-            { 1.2, 0.0, 0.0, 0.0, 0.0 }, // Red channel
-            { 0.0, 1.0, 0.0, 0.0, 0.0 }, // Green channel
-            { 0.0, 0.0, 1.0, 0.0, 0.0 }, // Blue channel
-            { 0.0, 0.0, 0.0, 1.0, 0.0 }, // Alpha channel
-            { 0.0, 0.0, 0.0, 0.0, 1.0 }  // Offset
-        };
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-        for (int i = 0; i < inputPaths.Length; i++)
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        try
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
-
-            // Input file existence check
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access pixel data
-                using (RasterImage raster = (RasterImage)image)
+                RasterImage raster = (RasterImage)image;
+                raster.CacheData();
+
+                // Example color matrix: increase red channel by 20%
+                float[,] matrix = new float[4, 4]
                 {
-                    int width = raster.Width;
-                    int height = raster.Height;
+                    { 1.2f, 0f,   0f,   0f },
+                    { 0f,   1f,   0f,   0f },
+                    { 0f,   0f,   1f,   0f },
+                    { 0f,   0f,   0f,   1f }
+                };
 
-                    // Apply color matrix to each pixel
-                    for (int y = 0; y < height; y++)
-                    {
-                        for (int x = 0; x < width; x++)
-                        {
-                            Aspose.Imaging.Color srcColor = raster.GetPixel(x, y);
+                // Retrieve pixel data
+                int[] pixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
 
-                            // Normalize components to 0‑1 range
-                            double r = srcColor.R / 255.0;
-                            double g = srcColor.G / 255.0;
-                            double b = srcColor.B / 255.0;
-                            double a = srcColor.A / 255.0;
-                            double[] src = { r, g, b, a, 1.0 };
-                            double[] dst = new double[5];
+                // Apply color matrix to each pixel
+                for (int i = 0; i < pixels.Length; i++)
+                {
+                    int argb = pixels[i];
+                    byte a = (byte)((argb >> 24) & 0xFF);
+                    byte r = (byte)((argb >> 16) & 0xFF);
+                    byte g = (byte)((argb >> 8) & 0xFF);
+                    byte b = (byte)(argb & 0xFF);
 
-                            // Matrix multiplication
-                            for (int row = 0; row < 5; row++)
-                            {
-                                double sum = 0.0;
-                                for (int col = 0; col < 5; col++)
-                                {
-                                    sum += colorMatrix[row, col] * src[col];
-                                }
-                                dst[row] = sum;
-                            }
+                    int newR = (int)(r * matrix[0, 0] + g * matrix[0, 1] + b * matrix[0, 2] + a * matrix[0, 3]);
+                    int newG = (int)(r * matrix[1, 0] + g * matrix[1, 1] + b * matrix[1, 2] + a * matrix[1, 3]);
+                    int newB = (int)(r * matrix[2, 0] + g * matrix[2, 1] + b * matrix[2, 2] + a * matrix[2, 3]);
+                    int newA = (int)(r * matrix[3, 0] + g * matrix[3, 1] + b * matrix[3, 2] + a * matrix[3, 3]);
 
-                            // Clamp and convert back to byte range
-                            byte nr = (byte)Math.Min(255, Math.Max(0, (int)(dst[0] * 255)));
-                            byte ng = (byte)Math.Min(255, Math.Max(0, (int)(dst[1] * 255)));
-                            byte nb = (byte)Math.Min(255, Math.Max(0, (int)(dst[2] * 255)));
-                            byte na = (byte)Math.Min(255, Math.Max(0, (int)(dst[3] * 255)));
+                    newR = Math.Clamp(newR, 0, 255);
+                    newG = Math.Clamp(newG, 0, 255);
+                    newB = Math.Clamp(newB, 0, 255);
+                    newA = Math.Clamp(newA, 0, 255);
 
-                            Aspose.Imaging.Color newColor = Aspose.Imaging.Color.FromArgb(na, nr, ng, nb);
-                            raster.SetPixel(x, y, newColor);
-                        }
-                    }
+                    pixels[i] = (newA << 24) | (newR << 16) | (newG << 8) | newB;
                 }
 
-                // Save transformed image as PDF
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                // Write transformed pixels back to the image
+                raster.SaveArgb32Pixels(raster.Bounds, pixels);
+
+                // Export transformed image as PDF
+                raster.Save(outputPath, new PdfOptions());
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

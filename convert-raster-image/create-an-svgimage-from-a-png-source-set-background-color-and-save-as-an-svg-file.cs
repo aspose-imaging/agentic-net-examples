@@ -1,18 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
+        string inputPath = @"C:\Images\source.png";
+        string outputPath = @"C:\Images\result.svg";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,32 +23,34 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image pngImage = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage to access pixel data
-            RasterImage raster = (RasterImage)pngImage;
-            int width = raster.Width;
-            int height = raster.Height;
-            int dpi = 96; // Standard screen DPI
-
-            // Create an SVG graphics canvas
-            var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, dpi);
-
-            // Set background color by filling the entire canvas
-            Pen backgroundPen = new Pen(Color.White, 1);
-            SolidBrush backgroundBrush = new SolidBrush(Color.White);
-            graphics.FillRectangle(backgroundPen, backgroundBrush, 0, 0, width, height);
-
-            // Draw the PNG raster image onto the SVG canvas
-            graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
-
-            // Finalize the SVG image
-            using (SvgImage svgImage = graphics.EndRecording())
+            // Load the PNG image
+            using (Image pngImage = Image.Load(inputPath))
             {
-                // Save the SVG file
-                svgImage.Save(outputPath);
+                // Cast to RasterImage to obtain dimensions
+                RasterImage raster = pngImage as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
+                // Create a new SVG image with the same dimensions as the PNG
+                using (SvgImage svgImage = new SvgImage(raster.Width, raster.Height))
+                {
+                    // Set the background color of the SVG image
+                    svgImage.BackgroundColor = Aspose.Imaging.Color.LightGray;
+                    svgImage.HasBackgroundColor = true;
+
+                    // Save the SVG image to the output path
+                    svgImage.Save(outputPath, new SvgOptions());
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

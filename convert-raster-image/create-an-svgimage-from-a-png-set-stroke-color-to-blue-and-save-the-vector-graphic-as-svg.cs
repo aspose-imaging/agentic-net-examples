@@ -13,37 +13,49 @@ class Program
         string inputPath = "input.png";
         string outputPath = "output.svg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage for drawing
-            var rasterImage = (RasterImage)image;
-
-            // Create an SVG graphics context with the same dimensions as the PNG
-            var graphics = new SvgGraphics2D(rasterImage.Width, rasterImage.Height, 96);
-
-            // Draw the raster image onto the SVG canvas
-            graphics.DrawImage(rasterImage, new Point(0, 0), new Size(rasterImage.Width, rasterImage.Height));
-
-            // Set stroke color to blue by drawing a rectangle border
-            graphics.DrawRectangle(new Pen(Color.Blue, 1), 0, 0, rasterImage.Width, rasterImage.Height);
-
-            // Finalize the SVG image
-            using (SvgImage svgImage = graphics.EndRecording())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Save the SVG file
-                svgImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for drawing
+                RasterImage raster = (RasterImage)image;
+
+                int width = raster.Width;
+                int height = raster.Height;
+                int dpi = 96; // Standard screen DPI
+
+                // Create an SVG graphics context
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+
+                // Draw the raster image onto the SVG canvas
+                graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
+
+                // Set stroke color to blue by drawing a rectangle border
+                Pen bluePen = new Pen(Color.Blue, 1);
+                graphics.DrawRectangle(bluePen, 0, 0, width, height);
+
+                // Finalize SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
+                    // Save the SVG file
+                    svgImage.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
