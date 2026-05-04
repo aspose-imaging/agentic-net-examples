@@ -8,31 +8,39 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/input.png";
-        string outputPath = "Output/output.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/processed.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            // Resize to 1024x1024
-            image.Resize(1024, 1024);
-
-            // Apply median filter with kernel size 5
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-
-            // Save as PDF
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                // Resize to 1024x1024
+                raster.Resize(1024, 1024);
+
+                // Apply median filter with size 5
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                // Save as PDF
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    raster.Save(outputPath, pdfOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
