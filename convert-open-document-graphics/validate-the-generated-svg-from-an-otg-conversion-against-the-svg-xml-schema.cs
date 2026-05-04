@@ -1,88 +1,85 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
-class SvgValidator
+class Program
 {
-    // Holds validation errors encountered during schema validation
-    private static readonly List<string> _validationErrors = new List<string>();
-
     static void Main()
     {
-        // Hardcoded input SVG path
-        string inputSvgPath = @"C:\Temp\input.svg";
-
-        // Hardcoded output validation report path
-        string outputReportPath = @"C:\Temp\validation\report.txt";
-
-        // Input file existence check
-        if (!File.Exists(inputSvgPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputSvgPath}");
-            return;
-        }
+            // Hardcoded paths
+            string otgInputPath = @"C:\temp\input.otg";
+            string svgOutputPath = @"C:\temp\output.svg";
+            string svgSchemaPath = @"C:\schemas\svg.xsd";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputReportPath));
-
-        // Load SVG and validate against the official SVG XSD
-        bool isValid = ValidateSvgAgainstSchema(inputSvgPath);
-
-        // Write validation result to the report file
-        using (StreamWriter writer = new StreamWriter(outputReportPath, false))
-        {
-            writer.WriteLine($"SVG Validation Result: {(isValid ? "Valid" : "Invalid")}");
-            if (_validationErrors.Count > 0)
+            // Verify input OTG file exists
+            if (!File.Exists(otgInputPath))
             {
-                writer.WriteLine("Errors:");
-                foreach (string err in _validationErrors)
-                {
-                    writer.WriteLine(err);
-                }
+                Console.Error.WriteLine($"File not found: {otgInputPath}");
+                return;
             }
-        }
 
-        Console.WriteLine($"Validation completed. Report saved to: {outputReportPath}");
-    }
+            // Verify SVG schema file exists
+            if (!File.Exists(svgSchemaPath))
+            {
+                Console.Error.WriteLine($"File not found: {svgSchemaPath}");
+                return;
+            }
 
-    private static bool ValidateSvgAgainstSchema(string svgPath)
-    {
-        // Prepare XML schema set; using the W3C SVG 1.1 schema URL
-        XmlSchemaSet schemas = new XmlSchemaSet();
-        // The schema can be loaded from the web; if offline, replace with a local .xsd file path
-        schemas.Add(null, "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.xsd");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
 
-        XmlReaderSettings settings = new XmlReaderSettings
-        {
-            ValidationType = ValidationType.Schema,
-            Schemas = schemas,
-            DtdProcessing = DtdProcessing.Ignore
-        };
-        settings.ValidationEventHandler += ValidationEventHandler;
+            // Load the OTG image
+            using (Image image = Image.Load(otgInputPath))
+            {
+                // Prepare rasterization options (use image size if available)
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-        using (FileStream fs = new FileStream(svgPath, FileMode.Open, FileAccess.Read))
-        using (XmlReader reader = XmlReader.Create(fs, settings))
-        {
-            try
+                // Prepare SVG save options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as SVG
+                image.Save(svgOutputPath, svgOptions);
+            }
+
+            // Validate the generated SVG against the schema
+            bool validationFailed = false;
+            var settings = new XmlReaderSettings();
+            settings.Schemas.Add(null, svgSchemaPath);
+            settings.ValidationType = ValidationType.Schema;
+            settings.ValidationEventHandler += (sender, args) =>
+            {
+                validationFailed = true;
+                Console.Error.WriteLine($"Validation {args.Severity}: {args.Message}");
+            };
+
+            using (var reader = XmlReader.Create(svgOutputPath, settings))
             {
                 while (reader.Read()) { /* reading triggers validation */ }
             }
-            catch (XmlException ex)
+
+            if (validationFailed)
             {
-                _validationErrors.Add($"XML parsing error: {ex.Message}");
-                return false;
+                Console.Error.WriteLine("SVG validation failed.");
+            }
+            else
+            {
+                Console.WriteLine("SVG validation succeeded.");
             }
         }
-
-        // If any errors were collected, the SVG is invalid
-        return _validationErrors.Count == 0;
-    }
-
-    private static void ValidationEventHandler(object sender, ValidationEventArgs e)
-    {
-        string severity = e.Severity == XmlSeverityType.Error ? "Error" : "Warning";
-        _validationErrors.Add($"{severity}: {e.Message}");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

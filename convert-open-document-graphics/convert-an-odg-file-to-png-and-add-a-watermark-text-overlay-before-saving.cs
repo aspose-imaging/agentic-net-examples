@@ -6,53 +6,49 @@ using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.odg";
-        string outputPath = "output\\result.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.odg";
+            string outputPath = "output\\result.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image odgImage = Image.Load(inputPath))
-        {
-            var rasterOptions = new OdgRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White,
-                PageSize = odgImage.Size
-            };
-
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                odgImage.Save(ms, pngOptions);
-                ms.Position = 0;
-
-                using (RasterImage raster = (RasterImage)Image.Load(ms))
-                {
-                    Graphics graphics = new Graphics(raster);
-
-                    Font font = new Font("Arial", 48);
-                    using (SolidBrush brush = new SolidBrush())
-                    {
-                        brush.Color = Color.Yellow;
-                        brush.Opacity = 100;
-
-                        graphics.DrawString("Watermark", font, brush, new Point(10, raster.Height - 60));
-                    }
-
-                    raster.Save(outputPath, new PngOptions());
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            string tempPath = Path.Combine(Path.GetTempPath(), "temp_converted.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+
+            using (Image odgImage = Image.Load(inputPath))
+            {
+                PngOptions pngOptions = new PngOptions();
+                odgImage.Save(tempPath, pngOptions);
+            }
+
+            using (Image pngImage = Image.Load(tempPath))
+            {
+                Graphics graphics = new Graphics(pngImage);
+                Font font = new Font("Arial", 24);
+                using (SolidBrush brush = new SolidBrush(Color.Red))
+                {
+                    graphics.DrawString("Watermark", font, brush, new PointF(10, 10));
+                }
+                pngImage.Save(outputPath);
+            }
+
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

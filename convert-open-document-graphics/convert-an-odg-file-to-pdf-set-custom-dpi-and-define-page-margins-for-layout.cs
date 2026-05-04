@@ -1,47 +1,49 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.odg";
-        string outputPath = "Output/sample.pdf";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "sample.odg";
+            string outputPath = "sample.pdf";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Configure rasterization options (margins, background, page size)
+                Aspose.Imaging.ImageOptions.OdgRasterizationOptions rasterOptions = new Aspose.Imaging.ImageOptions.OdgRasterizationOptions();
+                rasterOptions.BackgroundColor = Aspose.Imaging.Color.White;
+                rasterOptions.BorderX = 20; // left/right margin in pixels
+                rasterOptions.BorderY = 30; // top/bottom margin in pixels
+                rasterOptions.PageSize = image.Size; // preserve original size
+
+                // Configure PDF save options with custom DPI
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                pdfOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300); // DPI X, DPI Y
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options (margins, background, page size)
-            var rasterOptions = new OdgRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                BorderX = 20, // left/right margin
-                BorderY = 20, // top/bottom margin
-                PageSize = image.Size
-            };
-
-            // Configure PDF save options with custom DPI
-            var pdfOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                ResolutionSettings = new ResolutionSetting(300, 300) // 300 DPI X and Y
-            };
-
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,45 +1,52 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded relative input and output paths
-        string inputPath = Path.Combine("Input", "sample.otg");
-        string outputPath = Path.Combine("Output", "sample.pdf");
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure OTG rasterization options with a custom page size
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                {
+                    // Example custom size (width x height) in points
+                    PageSize = new SizeF(800, 600),
+                    BackgroundColor = Color.White
+                };
+
+                // Set up PDF save options and assign the rasterization options
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = otgOptions
+                };
+
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure OTG rasterization options with a custom page size
-            var otgOptions = new OtgRasterizationOptions
-            {
-                // Example custom size: 800x600 points
-                PageSize = new Aspose.Imaging.SizeF(800, 600),
-                BackgroundColor = Aspose.Imaging.Color.White
-            };
-
-            // Set up PDF save options and assign the rasterization options
-            var pdfOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = otgOptions
-            };
-
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

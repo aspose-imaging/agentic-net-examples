@@ -8,42 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input ODG file and output JPEG file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.jpg";
-
-        // Hard‑coded ICC profile to embed in the JPEG
-        string iccProfilePath = @"C:\Images\profile.icc";
-
-        // Verify that the input ODG file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded file paths
+            string inputPath = @"C:\temp\sample.odg";
+            string outputPath = @"C:\temp\sample.jpg";
+            string rgbProfilePath = @"C:\temp\eciRGB_v2.icc";
+            string cmykProfilePath = @"C:\temp\ISOcoated_v2_FullGamut4.icc";
 
-        // Verify that the ICC profile file exists
-        if (!File.Exists(iccProfilePath))
-        {
-            Console.Error.WriteLine($"ICC profile not found: {iccProfilePath}");
-            return;
-        }
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image odgImage = Image.Load(inputPath))
-        {
-            // Prepare JPEG save options with the ICC profile
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Use the RGB ICC profile for color management
-                RgbColorProfile = new StreamSource(File.OpenRead(iccProfilePath))
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as JPEG with the embedded ICC profile
-            odgImage.Save(outputPath, jpegOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure JPEG options with ICC profiles
+                var jpegOptions = new JpegOptions
+                {
+                    // Use CMYK color mode to demonstrate both profiles; change to Rgb if desired
+                    ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk
+                };
+
+                // Open ICC profile streams
+                using (FileStream rgbStream = File.OpenRead(rgbProfilePath))
+                using (FileStream cmykStream = File.OpenRead(cmykProfilePath))
+                {
+                    jpegOptions.RgbColorProfile = new StreamSource(rgbStream);
+                    jpegOptions.CmykColorProfile = new StreamSource(cmykStream);
+
+                    // Save the image as JPEG with embedded profiles
+                    image.Save(outputPath, jpegOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,53 +1,66 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded list of ODG input files
-        var inputFiles = new List<string>
+        try
         {
-            @"C:\Images\Input1.odg",
-            @"C:\Images\Input2.odg",
-            @"C:\Images\Input3.odg"
-        };
-
-        // Process each file in parallel
-        Parallel.ForEach(inputFiles, inputPath =>
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hard‑coded list of ODG files to convert.
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\sample1.odg",
+                @"C:\Images\sample2.odg",
+                @"C:\Images\sample3.odg"
+            };
 
-            // Determine output PNG path (same folder, same name with .png extension)
-            var outputPath = Path.ChangeExtension(inputPath, ".png");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load ODG image and save as PNG
-            using (Image image = Image.Load(inputPath))
+            // Process each file in parallel.
+            Parallel.ForEach(inputPaths, inputPath =>
             {
-                var pngOptions = new PngOptions();
-
-                // Set rasterization options for vector to raster conversion
-                var rasterOptions = new OdgRasterizationOptions
+                // Verify the input file exists.
+                if (!File.Exists(inputPath))
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
-                };
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                image.Save(outputPath, pngOptions);
-            }
-        });
+                // Determine the output PNG path (same folder, .png extension).
+                string outputPath = Path.ChangeExtension(inputPath, ".png");
+
+                // Ensure the output directory exists.
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the ODG image.
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Prepare rasterization options for ODG → raster image conversion.
+                    var rasterOptions = new OdgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = image.Size
+                    };
+
+                    // Set up PNG save options and attach rasterization options.
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Save the image as PNG.
+                    image.Save(outputPath, pngOptions);
+                }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

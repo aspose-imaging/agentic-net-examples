@@ -1,36 +1,47 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = Path.Combine("Input", "sample.otg");
-        string outputPath = Path.Combine("Output", "sample.pdf");
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            var pdfOptions = new PdfOptions
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, pdfOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var otgOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    BackgroundColor = Color.White
+                };
+
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = otgOptions
+                };
+
+                // Password protection for PDF is not supported by Aspose.Imaging.
+                throw new NotSupportedException("Password protection for PDF is not supported by Aspose.Imaging.");
+
+                // image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,45 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.odg";
-        string outputPath = @"C:\temp\output.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample.bmp";
 
-        // Verify that the input file exists
+        // Path safety checks
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure BMP options – default compression (Bitfields) preserves transparency
-            BmpOptions bmpOptions = new BmpOptions();
-
-            // Set rasterization options for vector ODG content
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
-                // Transparent background to keep alpha channel
-                BackgroundColor = Aspose.Imaging.Color.Transparent,
-                // Preserve original image size
-                PageSize = image.Size
-            };
+                // Prepare BMP save options with transparency support
+                var bmpOptions = new BmpOptions
+                {
+                    // Bitfields compression preserves alpha channel
+                    Compression = BitmapCompression.Bitfields,
+                    // Set rasterization options for vector ODG source
+                    VectorRasterizationOptions = new OdgRasterizationOptions
+                    {
+                        // Transparent background to keep original transparency
+                        BackgroundColor = Color.Transparent,
+                        // Use the source image size for rasterization
+                        PageSize = image.Size
+                    }
+                };
 
-            bmpOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save the image as BMP with transparency
-            image.Save(outputPath, bmpOptions);
+                // Save as BMP
+                image.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

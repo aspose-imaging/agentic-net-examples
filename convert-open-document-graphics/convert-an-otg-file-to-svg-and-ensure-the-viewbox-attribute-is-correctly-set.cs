@@ -7,37 +7,50 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare SVG export options
-            var svgOptions = new SvgOptions();
-
-            // Configure OTG rasterization options to preserve page size (sets viewBox correctly)
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size // ensures viewBox matches the original dimensions
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Assign rasterization options to SVG options
-            svgOptions.VectorRasterizationOptions = otgRasterOptions;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save as SVG
-            image.Save(outputPath, svgOptions);
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure rasterization options for OTG to preserve page size
+                var otgRasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
+                // Configure SVG options with proper viewBox via PageSize
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
+                };
+
+                // Assign OTG rasterization options to the save options (required for vector formats)
+                svgOptions.VectorRasterizationOptions = otgRasterOptions as VectorRasterizationOptions ?? svgOptions.VectorRasterizationOptions;
+
+                // Save as SVG; viewBox will be set based on PageSize
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

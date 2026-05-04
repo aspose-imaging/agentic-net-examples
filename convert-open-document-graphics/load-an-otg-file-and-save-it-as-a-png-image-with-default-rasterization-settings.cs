@@ -7,36 +7,42 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.otg";
-        string outputPath = "output\\sample.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input\\sample.otg";
+            string outputPath = "output\\sample.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare PNG save options with default rasterization settings
-            PngOptions pngOptions = new PngOptions();
-
-            // Configure rasterization options for OTG
-            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Use the source image size as the page size
-                PageSize = image.Size
-            };
-            pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PNG
-            image.Save(outputPath, pngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare PNG save options with default rasterization settings
+                PngOptions pngOptions = new PngOptions();
+
+                // Configure rasterization options to match the source image size
+                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save the image as PNG
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

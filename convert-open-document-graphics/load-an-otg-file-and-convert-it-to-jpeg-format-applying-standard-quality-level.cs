@@ -10,34 +10,41 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output\sample.jpg";
+        string outputPath = @"C:\Images\sample.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare JPEG save options with default quality
-            JpegOptions jpegOptions = new JpegOptions();
-
-            // Configure vector rasterization for OTG conversion
-            OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Preserve original size
-                PageSize = image.Size
-            };
-            jpegOptions.VectorRasterizationOptions = otgRasterization;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as JPEG
-            image.Save(outputPath, jpegOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare JPEG save options with default quality
+                JpegOptions jpegOptions = new JpegOptions();
+
+                // Configure rasterization options for vector OTG content
+                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                {
+                    // Preserve original size
+                    PageSize = image.Size
+                };
+                jpegOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save as JPEG
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

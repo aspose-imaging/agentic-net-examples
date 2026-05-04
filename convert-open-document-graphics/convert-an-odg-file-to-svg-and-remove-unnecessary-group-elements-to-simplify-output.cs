@@ -1,34 +1,78 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample.svg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\sample.svg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare SVG export options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size,
+                        BackgroundColor = Color.White
+                    }
+                };
+
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
+            }
+
+            // Load generated SVG, remove empty <g> elements, and overwrite the file
+            XDocument svgDoc = XDocument.Load(outputPath);
+            RemoveEmptyGroups(svgDoc.Root);
+            svgDoc.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    // Recursively removes <g> elements that have no child elements (or only whitespace)
+    static void RemoveEmptyGroups(XElement element)
+    {
+        if (element == null) return;
+
+        // Process child groups first
+        var groups = element.Elements().Where(e => e.Name.LocalName == "g").ToList();
+        foreach (var grp in groups)
+        {
+            RemoveEmptyGroups(grp);
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image and save it as SVG
-        using (Image image = Image.Load(inputPath))
+        // After processing children, remove groups that are empty
+        foreach (var grp in groups)
         {
-            var svgOptions = new SvgOptions();
-            // Additional options can be set here if needed (e.g., TextAsShapes)
-
-            image.Save(outputPath, svgOptions);
+            bool hasNonEmptyChild = grp.Elements().Any(e => e.Name.LocalName != "g" || !string.IsNullOrWhiteSpace(e.Value));
+            if (!hasNonEmptyChild && !grp.Elements().Any())
+            {
+                grp.Remove();
+            }
         }
     }
 }

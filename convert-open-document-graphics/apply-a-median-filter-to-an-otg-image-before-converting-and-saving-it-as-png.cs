@@ -22,49 +22,41 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Temporary PNG path for intermediate rasterization
-        string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-        // Load the OTG image and rasterize it to PNG
-        using (Image otgImage = Image.Load(inputPath))
-        {
-            // Set up rasterization options to match the original size
-            var otgRasterOptions = new OtgRasterizationOptions
-            {
-                PageSize = otgImage.Size
-            };
-
-            // PNG save options with vector rasterization
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = otgRasterOptions
-            };
-
-            // Save the rasterized image to a temporary PNG file
-            otgImage.Save(tempPngPath, pngOptions);
-        }
-
-        // Load the temporary PNG as a raster image, apply median filter, and save final PNG
-        using (Image pngImage = Image.Load(tempPngPath))
-        {
-            var rasterImage = (RasterImage)pngImage;
-
-            // Apply median filter with a kernel size of 5 to the entire image
-            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-            // Save the filtered image to the final output path
-            rasterImage.Save(outputPath);
-        }
-
-        // Optionally delete the temporary file
         try
         {
-            File.Delete(tempPngPath);
+            // Load the OTG image
+            using (Image otgImage = Image.Load(inputPath))
+            {
+                // Prepare PNG save options with OTG rasterization settings
+                PngOptions pngOptions = new PngOptions();
+                OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
+                {
+                    PageSize = otgImage.Size
+                };
+                pngOptions.VectorRasterizationOptions = otgRaster;
+
+                // Rasterize OTG to a memory stream
+                using (MemoryStream rasterStream = new MemoryStream())
+                {
+                    otgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0; // Reset stream position for reading
+
+                    // Load the rasterized image from the memory stream
+                    using (Image rasterImage = Image.Load(rasterStream))
+                    {
+                        // Apply median filter to the entire image
+                        var raster = (RasterImage)rasterImage;
+                        raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                        // Save the filtered image as PNG
+                        raster.Save(outputPath);
+                    }
+                }
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore any errors during cleanup
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

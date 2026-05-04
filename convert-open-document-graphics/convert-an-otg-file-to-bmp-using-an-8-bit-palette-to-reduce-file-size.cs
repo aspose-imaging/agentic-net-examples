@@ -8,43 +8,45 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.otg";
-        string outputPath = @"C:\Images\output.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.otg";
+            string outputPath = @"C:\temp\output.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access pixel data for palette generation
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Configure BMP save options for 8‑bit palette
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 8,
+                    // Generate a close 8‑bit palette covering the image colors
+                    Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256),
+                    Compression = Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb,
+                    ResolutionSettings = new ResolutionSetting(96.0, 96.0)
+                };
+
+                // Save the image as BMP using the specified options
+                image.Save(outputPath, bmpOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image otgImage = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Prepare BMP save options with 8‑bit palette
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 8,
-                Compression = Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb
-            };
-
-            // If the loaded image is a raster image, generate a close 8‑bit palette
-            if (otgImage is RasterImage raster)
-            {
-                bmpOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
-            }
-            else
-            {
-                // Fallback to a standard 8‑bit grayscale palette
-                bmpOptions.Palette = ColorPaletteHelper.Create8BitGrayscale(false);
-            }
-
-            // Save the image as BMP using the specified options
-            otgImage.Save(outputPath, bmpOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
