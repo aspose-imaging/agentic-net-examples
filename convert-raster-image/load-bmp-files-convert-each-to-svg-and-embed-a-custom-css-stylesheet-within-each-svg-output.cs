@@ -2,33 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input BMP files
-        string[] inputPaths = {
-            @"C:\Images\sample1.bmp",
-            @"C:\Images\sample2.bmp"
-        };
-
-        // Corresponding output SVG files (ensure they contain a directory)
-        string[] outputPaths = {
-            @"C:\Converted\sample1.svg",
-            @"C:\Converted\sample2.svg"
-        };
-
-        // Custom CSS to embed into each SVG
-        string customCss = @"
-            svg { background-color:#f0f0f0; }
-            .myClass { fill:red; }
-        ";
-
-        for (int i = 0; i < inputPaths.Length; i++)
+        try
         {
-            string inputPath = inputPaths[i];
-            string outputPath = outputPaths[i];
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -43,7 +27,7 @@ class Program
             // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options for SVG conversion
+                // Prepare SVG rasterization options
                 var rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
@@ -52,22 +36,39 @@ class Program
                 // Prepare SVG save options
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    VectorRasterizationOptions = rasterizationOptions,
+                    // Do not compress to keep SVG readable for CSS injection
+                    Compress = false
                 };
 
                 // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
 
-            // Embed custom CSS into the generated SVG
+            // Embed custom CSS stylesheet into the generated SVG
+            const string customCss = @"
+    <style type=""text/css"">
+        /* Custom CSS */
+        .customClass { fill: #ff0000; stroke: #0000ff; stroke-width: 2; }
+    </style>
+";
+
+            // Read the SVG content
             string svgContent = File.ReadAllText(outputPath);
-            int insertPos = svgContent.IndexOf('>');
-            if (insertPos != -1)
+
+            // Find the position after the opening <svg> tag
+            int insertPos = svgContent.IndexOf('>') + 1;
+            if (insertPos > 0 && insertPos < svgContent.Length)
             {
-                string styleBlock = $"\n<style type=\"text/css\"><![CDATA[{customCss}]]></style>\n";
-                string newSvgContent = svgContent.Insert(insertPos + 1, styleBlock);
-                File.WriteAllText(outputPath, newSvgContent);
+                // Insert the CSS after the <svg> tag
+                svgContent = svgContent.Insert(insertPos, customCss);
+                // Write back the modified SVG
+                File.WriteAllText(outputPath, svgContent);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
