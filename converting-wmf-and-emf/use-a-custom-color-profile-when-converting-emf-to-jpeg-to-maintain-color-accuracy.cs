@@ -9,50 +9,50 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input, output, and ICC profile paths
-        string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\output.jpg";
-        string rgbProfilePath = @"C:\Profiles\eciRGB_v2.icc";
-        string cmykProfilePath = @"C:\Profiles\ISOcoated_v2_FullGamut4.icc";
+        try
+        {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.emf";
+            string outputPath = @"C:\temp\output.jpg";
 
-        // Verify input files exist
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-        if (!File.Exists(rgbProfilePath))
-        {
-            Console.Error.WriteLine($"File not found: {rgbProfilePath}");
-            return;
-        }
-        if (!File.Exists(cmykProfilePath))
-        {
-            Console.Error.WriteLine($"File not found: {cmykProfilePath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (Image emfImage = Image.Load(inputPath))
-        {
-            // Configure JPEG options with custom ICC profiles
-            var jpegOptions = new JpegOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorType = JpegCompressionColorMode.Cmyk
-            };
-
-            using (FileStream rgbStream = File.OpenRead(rgbProfilePath))
-            using (FileStream cmykStream = File.OpenRead(cmykProfilePath))
-            {
-                jpegOptions.RgbColorProfile = new StreamSource(rgbStream);
-                jpegOptions.CmykColorProfile = new StreamSource(cmykStream);
-
-                // Save the image as JPEG using the custom profiles
-                emfImage.Save(outputPath, jpegOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Paths to custom ICC profiles
+            string rgbProfilePath = @"C:\temp\eciRGB_v2.icc";
+            string cmykProfilePath = @"C:\temp\ISOcoated_v2_FullGamut4.icc";
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare JPEG save options with custom color profiles
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    ColorType = JpegCompressionColorMode.Cmyk
+                };
+
+                // Load ICC profile streams and assign to options
+                using (Stream rgbProfileStream = File.OpenRead(rgbProfilePath))
+                using (Stream cmykProfileStream = File.OpenRead(cmykProfilePath))
+                {
+                    jpegOptions.RgbColorProfile = new StreamSource(rgbProfileStream);
+                    jpegOptions.CmykColorProfile = new StreamSource(cmykProfileStream);
+
+                    // Save the image as JPEG using the configured options
+                    image.Save(outputPath, jpegOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

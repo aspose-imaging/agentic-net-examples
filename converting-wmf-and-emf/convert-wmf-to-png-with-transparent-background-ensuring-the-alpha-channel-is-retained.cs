@@ -9,38 +9,44 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\sample.png";
+        string inputPath = @"C:\Images\input.wmf";
+        string outputPath = @"C:\Images\output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure rasterization options with transparent background
+                var rasterOptions = new WmfRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    BackgroundColor = Aspose.Imaging.Color.Transparent
+                };
+
+                // Set PNG options to use the rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as PNG preserving alpha channel
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WMF image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options for transparent background
-            var rasterizationOptions = new WmfRasterizationOptions
-            {
-                PageSize = image.Size,
-                BackgroundColor = Aspose.Imaging.Color.Transparent,
-                RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
-            };
-
-            // Set PNG save options with the rasterization options
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Save as PNG preserving alpha channel
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

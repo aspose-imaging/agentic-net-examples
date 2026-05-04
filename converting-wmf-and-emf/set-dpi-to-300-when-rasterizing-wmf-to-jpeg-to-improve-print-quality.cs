@@ -8,42 +8,37 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.wmf";
         string outputPath = "output.jpg";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            {
+                var rasterOptions = new WmfRasterizationOptions
+                {
+                    PageSize = wmfImage.Size
+                };
+
+                var jpegOptions = new JpegOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                wmfImage.Save(outputPath, jpegOptions);
+            }
         }
-
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (string.IsNullOrEmpty(outputDir))
-            outputDir = ".";
-        Directory.CreateDirectory(outputDir);
-
-        // Load WMF image
-        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options
-            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = new SizeF(wmfImage.Width, wmfImage.Height)
-            };
-
-            // Configure JPEG options with 300 DPI
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                ResolutionSettings = new ResolutionSetting(300, 300),
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save as JPEG
-            wmfImage.Save(outputPath, jpegOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,33 +8,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.emf";
-        string outputPath = "output.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.emf";
+        string outputPath = @"C:\Temp\output.tif";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the EMF image from a memory stream
-        byte[] emfData = File.ReadAllBytes(inputPath);
-        using (MemoryStream ms = new MemoryStream(emfData))
-        using (Image emfImage = Image.Load(ms))
-        {
-            // Configure TIFF save options with LZW compression
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Compression = TiffCompressions.Lzw
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as TIFF
-            emfImage.Save(outputPath, tiffOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EMF image from a memory stream
+            byte[] emfData = File.ReadAllBytes(inputPath);
+            using (var memoryStream = new MemoryStream(emfData))
+            using (Image image = Image.Load(memoryStream))
+            {
+                // Configure TIFF save options with LZW compression
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Compression = TiffCompressions.Lzw
+                };
+
+                // Save the image as TIFF
+                image.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

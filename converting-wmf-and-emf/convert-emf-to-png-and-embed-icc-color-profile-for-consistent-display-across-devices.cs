@@ -4,6 +4,7 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,29 +13,32 @@ class Program
         string inputPath = "input.emf";
         string outputPath = "output.png";
 
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
+                };
+
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            var vectorOptions = new VectorRasterizationOptions
-            {
-                PageWidth = image.Width,
-                PageHeight = image.Height,
-                BackgroundColor = Color.White
-            };
-
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = vectorOptions
-            };
-
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
