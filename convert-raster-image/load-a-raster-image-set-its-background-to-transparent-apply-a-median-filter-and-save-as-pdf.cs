@@ -1,35 +1,53 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input\\sample.png";
-        string outputPath = "Output\\result.pdf";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply median filter with size 5 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+                // Prepare PDF save options with transparent background
+                PdfOptions pdfOptions = new PdfOptions();
+                OtgRasterizationOptions rasterizationOptions = new OtgRasterizationOptions
+                {
+                    BackgroundColor = Color.Transparent
+                };
+                pdfOptions.VectorRasterizationOptions = rasterizationOptions;
+
+                // Save the processed image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image, apply median filter, and save as PDF
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Apply a median filter with size 5 to the entire image
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-
-            // Save the processed image as PDF (PDF supports transparency)
-            raster.Save(outputPath, new PdfOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
