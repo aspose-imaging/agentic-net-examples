@@ -8,32 +8,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\sample_sharpened.pdf";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply a sharpen filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                // Prepare PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Save the processed image as PDF
+                rasterImage.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply a sharpen filter to the entire image
-            rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
-
-            // Save the processed image as PDF
-            PdfOptions pdfOptions = new PdfOptions();
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
