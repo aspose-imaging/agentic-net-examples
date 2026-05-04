@@ -5,54 +5,51 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories (relative to current directory)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\Images\Input";
+        string outputDirectory = @"C:\Images\Output";
 
-        // Validate input directory; create if missing and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDirectory);
+
+            // Get all BMP files in the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+
+            int index = 1;
+            foreach (string inputPath in bmpFiles)
+            {
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the output PDF file path with a sequential numeric suffix
+                string outputPath = Path.Combine(outputDirectory, $"output_{index}.pdf");
+                index++;
+
+                // Ensure the directory for the output file exists (unconditional as required)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the BMP image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Set up PDF export options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the image as PDF
+                    image.Save(outputPath, pdfOptions);
+                }
+            }
         }
-
-        // Get all BMP files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-        int counter = 1;
-        foreach (string inputPath in files)
+        catch (Exception ex)
         {
-            // Verify each input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            // Build output PDF path with sequential numeric suffix
-            string outputPath = Path.Combine(outputDirectory, $"output{counter}.pdf");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load BMP image and save as PDF
-            using (Image image = Image.Load(inputPath))
-            using (PdfOptions pdfOptions = new PdfOptions())
-            {
-                image.Save(outputPath, pdfOptions);
-            }
-
-            counter++;
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
