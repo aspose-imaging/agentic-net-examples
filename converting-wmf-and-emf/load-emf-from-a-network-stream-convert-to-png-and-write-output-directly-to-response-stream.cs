@@ -3,42 +3,55 @@ using System.IO;
 using System.Net.Http;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths as required
-        string inputPath = "placeholder.emf";               // dummy path for rule enforcement
-        string outputPath = "output.png";                    // dummy path for rule enforcement
-
-        // Input path existence check (exact rule)
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input URL and output path
+            string inputUrl = "https://example.com/sample.emf";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists (unconditional as required)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Validate input URL by attempting to download (no file existence check for URLs)
+            // Validate output path directory
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(string.IsNullOrEmpty(outputDir) ? "." : outputDir);
 
-        // URL of the EMF image to load from a network stream
-        string emfUrl = "https://example.com/sample.emf";
-
-        // Load EMF from the network stream, convert to PNG, and write directly to the response stream
-        using (HttpClient httpClient = new HttpClient())
-        using (Stream networkStream = httpClient.GetStreamAsync(emfUrl).Result)
-        using (Image emfImage = Image.Load(networkStream))
-        {
-            // Prepare PNG save options
-            PngOptions pngOptions = new PngOptions();
-
-            // Write PNG data directly to the response stream.
-            // Here Console.OpenStandardOutput() is used as a stand‑in for an HTTP response stream.
-            using (Stream responseStream = Console.OpenStandardOutput())
+            // Download EMF image from network stream
+            using (HttpClient httpClient = new HttpClient())
+            using (Stream networkStream = httpClient.GetStreamAsync(inputUrl).Result)
+            using (Image image = Image.Load(networkStream))
             {
-                emfImage.Save(responseStream, pngOptions);
+                // Prepare PNG options with vector rasterization for EMF
+                PngOptions pngOptions = new PngOptions();
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Simulate response stream (replace with actual response stream in real scenario)
+                using (Stream responseStream = new MemoryStream())
+                {
+                    // Save PNG to response stream
+                    image.Save(responseStream, pngOptions);
+
+                    // For demonstration, also write the stream to a file
+                    responseStream.Position = 0;
+                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        responseStream.CopyTo(fileStream);
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
