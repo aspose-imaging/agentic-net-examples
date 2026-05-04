@@ -6,10 +6,10 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 6019 |
+| Total Examples | 6049 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-05-01 |
+| Last Updated | 2026-05-04 |
 
 ## Repository Structure
 
@@ -48,7 +48,7 @@ README.md
 | [Convert Open Document Graphics](./convert-open-document-graphics/) | 360 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
 | [Convert Raster Image](./convert-raster-image/) | 276 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 120 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
-| [Convert webp Images](./convert-webp-images/) | 60 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
+| [Convert webp Images](./convert-webp-images/) | 90 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 58 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 208 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 695 | 100.0% | [agents.md](./kernel-filters/agents.md) |
@@ -70,5 +70,47 @@ dotnet run <example-file.cs>
 - .NET SDK (net9.0)
 - Aspose.Imaging for .NET (via NuGet)
 
+## Agent Pipeline
+
+The agent that generates these examples follows a three-attempt pipeline per task:
+
+| Attempt | Strategy | Trigger |
+|---------|----------|---------|
+| 1 | Raw MCP call with path-safety rules | Always |
+| 2 | MCP call with LLM-selected category rules | Attempt 1 fails |
+| 3 | LLM direct fix with compiler errors + rules | Attempt 2 fails |
+
+After all tasks complete, a **retry pass** automatically re-runs any failed tasks through the full 1→2→3 pipeline once more. Only examples that pass both `dotnet build` and `dotnet run` are committed to the repository.
+
+## Validation
+
+Every pull request is automatically validated by GitHub Actions (`validate-pr.yml`):
+
+- `dotnet build` — **required**, blocks merge on failure
+- `dotnet run` — **informational**, runtime errors are expected when input files are absent
+
+## Versioning
+
+Examples are versioned by NuGet release. Each version gets its own branch and a GitHub release tag. When a new NuGet version is available, the agent creates a release tag on `main`, bumps the NuGet version, and starts generating examples on a new branch. Once complete, the branch is merged into `main`.
+
+## REST API
+
+The agent exposes a public REST API for programmatic access:
+
+| Method | Endpoint | Description |
+|--------|----------|--------------|
+| `POST` | `/api/v1/run/prompt` | Submit a single task |
+| `POST` | `/api/v1/run/category` | Submit a full category run |
+| `GET` | `/api/v1/status/<job_id>` | Poll job status |
+| `GET` | `/api/v1/results/<category>` | Get category results |
+| `GET` | `/api/v1/categories` | List available categories |
+| `GET` | `/api/v1/stats` | Overall stats from GitHub |
+
+> API documentation is available at `/api/v1/docs`. The API is intended for internal team use.
+
+## Metrics
+
+Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
+
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260501_132158` | 2026-05-01*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260504_025614` | 2026-05-04*
