@@ -2,44 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.svg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure SVG save options with a light‑gray background
-            var svgOptions = new SvgOptions();
-
-            var rasterizationOptions = new SvgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Set background color for the SVG canvas
-                BackgroundColor = Aspose.Imaging.Color.LightGray,
-                // Use the original image size as the page size
-                PageSize = image.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            svgOptions.VectorRasterizationOptions = rasterizationOptions;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image as SVG with the specified background
-            image.Save(outputPath, svgOptions);
+            // Load the raster image
+            using (Image rasterImage = Image.Load(inputPath))
+            {
+                // Prepare SVG save options
+                var saveOptions = new SvgOptions();
+
+                // Configure rasterization options with background color
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    // Set background to light gray
+                    BackgroundColor = Aspose.Imaging.Color.LightGray,
+                    // Use the original image size as page size
+                    PageSize = rasterImage.Size
+                };
+
+                saveOptions.VectorRasterizationOptions = rasterizationOptions;
+
+                // Save as SVG with background
+                rasterImage.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
