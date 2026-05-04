@@ -6,7 +6,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 3026 |
+| Total Examples | 3055 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-05-04 |
@@ -49,7 +49,7 @@ README.md
 | [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 120 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 60 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
-| [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
+| [Converting WMF and EMF](./converting-wmf-and-emf/) | 58 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 137 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 465 | 100.0% | [agents.md](./kernel-filters/agents.md) |
 | [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 628 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
@@ -114,7 +114,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.4.0 | 3026 | 100.0% | net9.0 |
+| 26.4.0 | 3055 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
@@ -133,4 +133,4 @@ To trigger validation:
 Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260504_052728` | 2026-05-04*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260504_061021` | 2026-05-04*
