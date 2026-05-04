@@ -8,53 +8,56 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input directory containing SVG files
-        string inputDirectory = @"C:\InputSvgs";
-
-        // List of SVG file names to convert
-        string[] svgFiles = new[]
+        try
         {
-            "image1.svg",
-            "image2.svg",
-            "image3.svg"
-        };
-
-        // Create a single rasterization options instance to be reused
-        SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
-
-        // PNG save options that reference the shared rasterization options
-        PngOptions pngSaveOptions = new PngOptions
-        {
-            VectorRasterizationOptions = rasterizationOptions
-        };
-
-        foreach (string fileName in svgFiles)
-        {
-            // Build full input path
-            string inputPath = Path.Combine(inputDirectory, fileName);
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input folder and SVG files to process
+            string inputFolder = @"C:\Images\Input";
+            string[] svgFiles = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                "image1.svg",
+                "image2.svg",
+                "image3.svg"
+            };
 
-            // Determine output path (same name with .png extension)
-            string outputPath = Path.ChangeExtension(inputPath, ".png");
+            // Prepare a single instance of rasterization options to be reused
+            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            // Loop through each SVG file
+            foreach (string fileName in svgFiles)
             {
-                // Update page size for the current image
-                rasterizationOptions.PageSize = image.Size;
+                string inputPath = Path.Combine(inputFolder, fileName);
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save as PNG using the shared options
-                image.Save(outputPath, pngSaveOptions);
+                // Load the SVG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Set page size based on the loaded image (first iteration sets it, subsequent reuse)
+                    rasterOptions.PageSize = image.Size;
+
+                    // Prepare PNG save options with the shared rasterization options
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Determine output path (same name with .png extension)
+                    string outputPath = inputPath + ".png";
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the rasterized PNG
+                    image.Save(outputPath, pngOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,45 +1,46 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.bmp";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.bmp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported without crashing
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Create the output directory (if needed) before saving
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image from the specified file
+            using (SvgImage svgImage = new SvgImage(inputPath))
+            {
+                // Desired dimensions for the rasterized image
+                int customWidth = 800;   // example width
+                int customHeight = 600;  // example height
+
+                // Resize the SVG to the custom dimensions
+                svgImage.Resize(customWidth, customHeight);
+
+                // Save the rasterized image as BMP; format is inferred from the file extension
+                svgImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image from the file
-        using (SvgImage svgImage = new SvgImage(inputPath))
+        catch (Exception ex)
         {
-            // Define rasterization options with custom dimensions
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageWidth = 800,   // custom width in pixels
-                PageHeight = 600   // custom height in pixels
-            };
-
-            // Set BMP save options and attach the rasterization settings
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the rasterized image as BMP
-            svgImage.Save(outputPath, bmpOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

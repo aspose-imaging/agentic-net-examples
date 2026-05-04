@@ -3,39 +3,39 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        // Hardcoded input file path (relative)
-        string inputPath = "Input/sample.bmp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.jpg";
+            string outputPath = "Output/sample_converted.png";
 
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare PNG save options
-            PngOptions pngOptions = new PngOptions
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Example option settings (optional)
-                // Compression level 6 (mid-range)
-                // PngCompressionLevel = PngCompressionLevel.ZipLevel6
-            };
-
-            // Obtain the HTTP response stream.
-            // In a real web scenario this would be the response output stream.
-            // Here we use the standard output stream for demonstration.
-            using (Stream responseStream = Console.OpenStandardOutput())
-            {
-                // Write the PNG image directly to the response stream
-                image.Save(responseStream, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image, convert to PNG, and write to the HTTP response stream (simulated with MemoryStream)
+            using (Image image = Image.Load(inputPath))
+            using (var pngOptions = new PngOptions())
+            using (var responseStream = new MemoryStream())
+            {
+                image.Save(responseStream, pngOptions);
+                // Simulate sending the response: output the size of the generated PNG
+                Console.WriteLine($"PNG image written to response stream. Size: {responseStream.Length} bytes.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
