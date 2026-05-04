@@ -7,13 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Global exception handling to prevent crashes
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\output.jpg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\output.jpg";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,28 +23,19 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Conversion specific exception handling
-            try
+            // Load the CDR file
+            using (Image image = Image.Load(inputPath))
             {
-                // Load the CDR file
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Set JPEG save options (default settings)
-                    JpegOptions jpegOptions = new JpegOptions();
+                // Set JPEG options (default options are sufficient for basic conversion)
+                var jpegOptions = new JpegOptions();
 
-                    // Save the image as JPEG
-                    image.Save(outputPath, jpegOptions);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log any errors that occur during conversion
-                Console.Error.WriteLine($"Conversion error: {ex.Message}");
+                // Save the image as JPEG
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
-            // Log any unexpected errors
+            // Log any runtime exceptions
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

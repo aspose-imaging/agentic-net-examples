@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -10,10 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\output\sample.pdf";
+        string inputPath = "input.cdr";
+        string outputPath = "output.pdf";
 
-        // Validate input file existence
+        // Ensure input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,15 +25,13 @@ class Program
         try
         {
             // Load the CDR image
-            using (var image = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with PDF compliance (closest to PDF 1.7)
+                // Configure PDF options with PDF 1.7 compatibility (using Pdf15 as closest match)
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
-                        // Aspose.Imaging currently provides Pdf15, PdfA1a, PdfA1b.
-                        // Pdf15 is used here as the available option for PDF 1.x compliance.
                         PdfCompliance = PdfComplianceVersion.Pdf15
                     }
                 };

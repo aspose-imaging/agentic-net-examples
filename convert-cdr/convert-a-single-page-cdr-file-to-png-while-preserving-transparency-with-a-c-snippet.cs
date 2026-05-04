@@ -6,15 +6,15 @@ using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.png";
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,26 +25,17 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR image
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Cache data to avoid repeated loading
-                cdr.CacheData();
+                // Get the first (single) page
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
 
-                // Configure PNG options with vector rasterization to preserve transparency
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                        // No background color set to keep transparency
-                    }
-                };
+                // Preserve transparency by disabling background color
+                page.HasBackgroundColor = false;
 
-                // Save the CDR as PNG
-                cdr.Save(outputPath, pngOptions);
+                // Save the page as PNG with default options (preserves alpha channel)
+                PngOptions pngOptions = new PngOptions();
+                page.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,11 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputCdrFiles";
-            string outputDirectory = @"C:\OutputJpgFiles";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            string inputDirectory = @"C:\InputCdr";
+            string outputDirectory = @"C:\OutputJpg";
 
             // Get all CDR files in the input directory
             string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
@@ -32,30 +29,17 @@ class Program
                 // Load the CDR image
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Cache all pages to avoid repeated loading
-                    cdrImage.CacheData();
-                    foreach (CdrImagePage page in cdrImage.Pages)
-                    {
-                        page.CacheData();
+                    // Prepare output file name with timestamp
+                    string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_{timestamp}.jpg";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                        // Prepare output file name with timestamp
-                        string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                        string baseName = Path.GetFileNameWithoutExtension(inputPath);
-                        string outputFileName = $"{baseName}_{timestamp}.jpg";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Set JPEG save options
-                        JpegOptions jpegOptions = new JpegOptions
-                        {
-                            Quality = 90
-                        };
-
-                        // Save the page as JPEG
-                        page.Save(outputPath, jpegOptions);
-                    }
+                    // Save as JPEG
+                    JpegOptions jpegOptions = new JpegOptions();
+                    cdrImage.Save(outputPath, jpegOptions);
                 }
             }
         }
