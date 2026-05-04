@@ -8,15 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input SVG files
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Images\example1.svg",
-            @"C:\Images\example2.svg"
-        };
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.png";
 
-        foreach (string inputPath in inputFiles)
-        {
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,43 +21,46 @@ class Program
                 return;
             }
 
-            // Determine output PNG path
-            string outputPath = inputPath + ".png";
-
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Start timing
-            Stopwatch sw = Stopwatch.StartNew();
-
-            // Load SVG image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure rasterization options
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
+                    // Preserve original size
                     PageSize = image.Size,
+                    // Optional: set background color if needed
                     BackgroundColor = Color.White
                 };
 
                 // Configure PNG save options
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
+
+                // Measure rasterization duration
+                var stopwatch = Stopwatch.StartNew();
 
                 // Save rasterized PNG
                 image.Save(outputPath, pngOptions);
+
+                stopwatch.Stop();
+
+                // Get output file size
+                long fileSize = new FileInfo(outputPath).Length;
+
+                // Log duration and size
+                Console.WriteLine($"Rasterization completed in {stopwatch.ElapsedMilliseconds} ms");
+                Console.WriteLine($"Output file size: {fileSize} bytes");
             }
-
-            // Stop timing
-            sw.Stop();
-
-            // Get output file size
-            long fileSize = new FileInfo(outputPath).Length;
-
-            // Log duration and size
-            Console.WriteLine($"Rasterized '{inputPath}' to '{outputPath}' in {sw.ElapsedMilliseconds} ms, size: {fileSize} bytes.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
