@@ -8,39 +8,47 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\temp\input.svg";
         string outputPath = @"C:\temp\output.bmp";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure rasterization options for low quality (no smoothing)
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                    BackgroundColor = Aspose.Imaging.Color.White
+                };
+
+                // Set BMP save options with the rasterization options
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as BMP
+                image.Save(outputPath, bmpOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options for low quality (faster) conversion
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = image.Size,                     // Preserve original size
-                SmoothingMode = Aspose.Imaging.SmoothingMode.None,          // Disable anti‑aliasing
-                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel // Simple text rendering
-            };
-
-            // Set up BMP save options and attach the rasterization options
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the rasterized image as BMP
-            image.Save(outputPath, bmpOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
