@@ -8,41 +8,42 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Determine the top‑left quadrant dimensions
-            int cropWidth = image.Width / 2;
-            int cropHeight = image.Height / 2;
-
-            // Define the cropping rectangle (top‑left corner)
-            var cropArea = new Rectangle(0, 0, cropWidth, cropHeight);
-
-            // Perform the crop
-            image.Crop(cropArea);
-
-            // Prepare SVG save options with default rasterization settings
-            var svgOptions = new SvgOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions()
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the cropped image as SVG
-            image.Save(outputPath, svgOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access cropping functionality
+                RasterImage raster = (RasterImage)image;
+
+                // Define the top-left quadrant rectangle
+                var cropArea = new Rectangle(0, 0, raster.Width / 2, raster.Height / 2);
+
+                // Crop the image
+                raster.Crop(cropArea);
+
+                // Save the cropped image as SVG
+                var svgOptions = new SvgOptions();
+                raster.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
