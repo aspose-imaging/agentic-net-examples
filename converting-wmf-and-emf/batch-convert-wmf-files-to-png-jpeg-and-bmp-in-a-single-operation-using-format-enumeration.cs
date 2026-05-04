@@ -1,59 +1,80 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input folder containing WMF files
-        string inputFolder = @"C:\Images\WMF";
-
-        // Ensure the input folder exists; if not, report and exit
-        if (!Directory.Exists(inputFolder))
+        try
         {
-            Console.Error.WriteLine($"Input folder not found: {inputFolder}");
-            return;
-        }
+            // Base directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Retrieve all WMF files in the folder
-        string[] wmfFiles = Directory.GetFiles(inputFolder, "*.wmf");
-
-        // Process each WMF file
-        foreach (string inputPath in wmfFiles)
-        {
-            // Verify the file exists (safety check)
-            if (!File.Exists(inputPath))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Load the WMF image
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
             {
-                // Prepare vector rasterization options based on the source image size
-                var rasterizationOptions = new WmfRasterizationOptions { PageSize = image.Size };
-
-                // Convert to PNG
-                string pngOutput = Path.ChangeExtension(inputPath, ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(pngOutput));
-                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterizationOptions };
-                image.Save(pngOutput, pngOptions);
-
-                // Convert to JPEG
-                string jpegOutput = Path.ChangeExtension(inputPath, ".jpg");
-                Directory.CreateDirectory(Path.GetDirectoryName(jpegOutput));
-                var jpegOptions = new JpegOptions { VectorRasterizationOptions = rasterizationOptions };
-                image.Save(jpegOutput, jpegOptions);
-
-                // Convert to BMP
-                string bmpOutput = Path.ChangeExtension(inputPath, ".bmp");
-                Directory.CreateDirectory(Path.GetDirectoryName(bmpOutput));
-                var bmpOptions = new BmpOptions { VectorRasterizationOptions = rasterizationOptions };
-                image.Save(bmpOutput, bmpOptions);
+                Directory.CreateDirectory(outputDirectory);
             }
+
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            // Define target formats
+            var formatMap = new Dictionary<string, Action<Image, string>>
+            {
+                { "png", (img, outPath) => img.Save(outPath, new PngOptions()) },
+                { "jpg", (img, outPath) => img.Save(outPath, new JpegOptions()) },
+                { "bmp", (img, outPath) => img.Save(outPath, new BmpOptions()) }
+            };
+
+            foreach (var filePath in files)
+            {
+                // Process only WMF files
+                if (!string.Equals(Path.GetExtension(filePath), ".wmf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // Validate input file existence
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
+
+                using (Image image = Image.Load(filePath))
+                {
+                    foreach (var kvp in formatMap)
+                    {
+                        string extension = kvp.Key;
+                        var saveAction = kvp.Value;
+
+                        string outputFileName = Path.GetFileNameWithoutExtension(filePath) + "." + extension;
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                        // Ensure output directory exists for each file
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save in the target format
+                        saveAction(image, outputPath);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
