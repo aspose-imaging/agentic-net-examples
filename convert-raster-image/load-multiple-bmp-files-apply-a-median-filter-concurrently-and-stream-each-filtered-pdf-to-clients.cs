@@ -1,64 +1,67 @@
 using System;
 using System.IO;
-using System.Linq;
+using System.Threading.Tasks;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input BMP file paths
+            string[] inputPaths = new string[]
+            {
+                @"C:\Images\image1.bmp",
+                @"C:\Images\image2.bmp",
+                @"C:\Images\image3.bmp"
+            };
 
-        if (!Directory.Exists(outputDirectory))
-        {
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Output";
+
+            // Ensure the output directory exists (rule 3)
             Directory.CreateDirectory(outputDirectory);
-        }
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-        files.AsParallel().ForAll(inputPath =>
-        {
-            if (!File.Exists(inputPath))
+            // Process each BMP file concurrently
+            Parallel.ForEach(inputPaths, inputPath =>
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-
-                using (MemoryStream ms = new MemoryStream())
+                // Verify input file exists (rule 2)
+                if (!File.Exists(inputPath))
                 {
-                    PdfOptions pdfOptions = new PdfOptions();
-                    raster.Save(ms, pdfOptions);
-
-                    Console.WriteLine($"Processed {inputPath} -> PDF stream length {ms.Length} bytes.");
-
-                    ms.Position = 0;
-                    using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                    {
-                        ms.CopyTo(fs);
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
-            }
-        });
+
+                // Load the BMP image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to RasterImage to apply filters
+                    RasterImage rasterImage = (RasterImage)image;
+
+                    // Apply median filter with size 5 to the entire image
+                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+                    // Prepare PDF output path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure the output directory exists (rule 3)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
+                    // Set PDF options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the filtered image as PDF
+                    image.Save(outputPath, pdfOptions);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
