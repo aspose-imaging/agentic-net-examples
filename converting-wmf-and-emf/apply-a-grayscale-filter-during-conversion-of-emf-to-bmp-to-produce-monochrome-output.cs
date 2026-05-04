@@ -22,33 +22,44 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image and rasterize it to BMP
-        using (Image emfImage = Image.Load(inputPath))
+        try
         {
-            // Set up rasterization options for EMF
-            var rasterizationOptions = new EmfRasterizationOptions
+            // Load the EMF image
+            using (Image emfImage = Image.Load(inputPath))
             {
-                PageSize = emfImage.Size
-            };
+                // Set up rasterization options for EMF to BMP conversion
+                var rasterizationOptions = new EmfRasterizationOptions
+                {
+                    PageSize = emfImage.Size
+                };
 
-            // BMP save options with the rasterization settings
-            var bmpOptions = new BmpOptions
+                // BMP save options with the rasterization settings
+                var bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the rasterized image as BMP
+                emfImage.Save(outputPath, bmpOptions);
+            }
+
+            // Ensure output directory exists again before second save (unconditional as required)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image to apply grayscale
+            using (Image bmpImage = Image.Load(outputPath))
             {
-                VectorRasterizationOptions = rasterizationOptions
-            };
+                // Cast to BMP-specific class to access Grayscale method
+                var bmp = (BmpImage)bmpImage;
+                bmp.Grayscale(); // Convert to grayscale
 
-            // Save the rasterized image as BMP
-            emfImage.Save(outputPath, bmpOptions);
+                // Overwrite the BMP file with the grayscale version
+                bmp.Save(outputPath);
+            }
         }
-
-        // Load the saved BMP, apply grayscale, and overwrite the file
-        using (BmpImage bmpImage = (BmpImage)Image.Load(outputPath))
+        catch (Exception ex)
         {
-            // Convert to grayscale (monochrome effect)
-            bmpImage.Grayscale();
-
-            // Save the modified BMP back to the same path
-            bmpImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
