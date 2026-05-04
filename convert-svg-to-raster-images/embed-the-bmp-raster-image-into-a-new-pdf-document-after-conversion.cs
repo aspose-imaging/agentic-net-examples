@@ -7,28 +7,35 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Temp\sample.bmp";
+            string outputPath = @"C:\Temp\sample.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image bmpImage = Image.Load(inputPath))
+            {
+                // Prepare PDF export options
+                var pdfOptions = new PdfOptions();
+
+                // Save the image as a PDF document
+                bmpImage.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image bmpImage = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Prepare PDF export options
-            PdfOptions pdfOptions = new PdfOptions();
-
-            // Save the image as a PDF document (the BMP will be embedded as a page)
-            bmpImage.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
