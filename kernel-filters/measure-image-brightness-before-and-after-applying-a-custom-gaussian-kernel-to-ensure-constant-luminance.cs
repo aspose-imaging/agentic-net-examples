@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,60 +9,54 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Cache data for safe pixel access
-                if (!rasterImage.IsCached)
+                if (!raster.IsCached)
                 {
-                    rasterImage.CacheData();
+                    raster.CacheData();
                 }
 
-                // Measure brightness before filtering
-                int[] beforePixels = rasterImage.GetDefaultArgb32Pixels(rasterImage.Bounds);
+                int[] pixelsBefore = raster.LoadArgb32Pixels(raster.Bounds);
                 double sumBefore = 0;
-                foreach (int argb in beforePixels)
+                foreach (int pixel in pixelsBefore)
                 {
-                    var color = Aspose.Imaging.Color.FromArgb(argb);
-                    sumBefore += (color.R + color.G + color.B) / 3.0;
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    sumBefore += (r + g + b) / 3.0;
                 }
-                double beforeBrightness = sumBefore / beforePixels.Length;
-                Console.WriteLine($"Average brightness before: {beforeBrightness:F2}");
+                double brightnessBefore = sumBefore / pixelsBefore.Length;
 
-                // Apply custom Gaussian blur (radius 5, sigma 4.0)
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                // Measure brightness after filtering
-                int[] afterPixels = rasterImage.GetDefaultArgb32Pixels(rasterImage.Bounds);
+                int[] pixelsAfter = raster.LoadArgb32Pixels(raster.Bounds);
                 double sumAfter = 0;
-                foreach (int argb in afterPixels)
+                foreach (int pixel in pixelsAfter)
                 {
-                    var color = Aspose.Imaging.Color.FromArgb(argb);
-                    sumAfter += (color.R + color.G + color.B) / 3.0;
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    sumAfter += (r + g + b) / 3.0;
                 }
-                double afterBrightness = sumAfter / afterPixels.Length;
-                Console.WriteLine($"Average brightness after: {afterBrightness:F2}");
+                double brightnessAfter = sumAfter / pixelsAfter.Length;
 
-                // Save the filtered image
-                var pngOptions = new PngOptions();
-                rasterImage.Save(outputPath, pngOptions);
+                raster.Save(outputPath, new PngOptions());
+
+                Console.WriteLine($"Brightness before: {brightnessBefore:F2}");
+                Console.WriteLine($"Brightness after: {brightnessAfter:F2}");
             }
         }
         catch (Exception ex)
