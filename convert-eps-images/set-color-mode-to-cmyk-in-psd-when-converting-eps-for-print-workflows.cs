@@ -8,31 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\output.psd";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.eps";
+            string outputPath = "output.psd";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PSD options for CMYK color mode
-            var psdOptions = new PsdOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorMode = ColorModes.Cmyk
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as PSD with CMYK color mode
-            image.Save(outputPath, psdOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare PSD save options with CMYK color mode
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    ColorMode = ColorModes.Cmyk
+                };
+
+                // Save as PSD using the specified options
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

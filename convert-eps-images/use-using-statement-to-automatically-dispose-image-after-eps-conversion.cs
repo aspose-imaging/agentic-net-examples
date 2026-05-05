@@ -2,35 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\Result\sample.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/result.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image and automatically dispose it after conversion
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save as PNG
+                image.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image, convert and save as PNG
-        // The using statement guarantees disposal of the image object
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Set PNG-specific options if needed
-            var pngOptions = new PngOptions();
-
-            // Save the image to the output path using the PNG options
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

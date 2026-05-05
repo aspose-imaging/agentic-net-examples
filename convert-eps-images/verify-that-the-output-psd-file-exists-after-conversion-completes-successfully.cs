@@ -8,22 +8,22 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.psd";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\sample.jpg";
+        string outputPath = @"C:\Temp\output.psd";
 
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
@@ -32,27 +32,27 @@ class Program
                 {
                     // Example settings – can be adjusted as needed
                     CompressionMethod = CompressionMethod.RLE,
-                    ColorMode = ColorModes.Grayscale
+                    ColorMode = ColorModes.Rgb,
+                    Version = 6
                 };
 
                 // Save the image as PSD
                 image.Save(outputPath, psdOptions);
             }
 
-            // Verify that the output PSD file was created
+            // Verify that the PSD file was created
             if (File.Exists(outputPath))
             {
-                Console.WriteLine("Conversion succeeded, output file exists.");
+                Console.WriteLine($"Conversion successful. PSD file created at: {outputPath}");
             }
             else
             {
-                Console.Error.WriteLine("Output file not found after conversion.");
+                Console.Error.WriteLine("Conversion failed: PSD file was not created.");
             }
         }
         catch (Exception ex)
         {
-            // Log any unexpected errors without throwing
-            Console.Error.WriteLine($"Error during conversion: {ex.Message}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

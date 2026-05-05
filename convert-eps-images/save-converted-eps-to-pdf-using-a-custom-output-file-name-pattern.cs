@@ -9,39 +9,45 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input EPS file path
-        string inputPath = @"C:\Images\Sample.eps";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input EPS file path
+            string inputPath = @"C:\Images\Sample.eps";
 
-        // Build a custom output file name based on the input name
-        string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_converted.pdf";
-        string outputPath = Path.Combine(@"C:\Images\Output", outputFileName);
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image
-        using (var image = (EpsImage)Image.Load(inputPath))
-        {
-            // Configure PDF options (example: set PDF/A‑1b compliance)
-            var pdfOptions = new PdfOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Build output PDF path using custom pattern: original name + "_converted.pdf"
+            string outputDirectory = Path.GetDirectoryName(inputPath);
+            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_converted.pdf";
+            string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image and convert to PDF with PDF/A-1b compliance
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions
                 {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    }
+                };
 
-            // Save the EPS as PDF using the custom output path
-            image.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
+            }
+
+            Console.WriteLine($"Conversion successful: {outputPath}");
         }
-
-        Console.WriteLine($"Conversion completed: {outputPath}");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

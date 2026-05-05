@@ -3,53 +3,48 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.psd";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\sample.eps";
+        string outputPath = @"C:\Temp\sample_converted.psd";
 
-        // Verify that the EPS file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the EPS image
-        using (var image = Image.Load(inputPath) as EpsImage)
-        {
-            if (image == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Failed to load EPS image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Set up PSD saving options (optional: configure compression, color mode, etc.)
-            var psdOptions = new PsdOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image
+            using (Image image = Image.Load(inputPath))
             {
-                CompressionMethod = CompressionMethod.RLE, // Example compression
-                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                ChannelBitsCount = 8,
-                ChannelsCount = 4
-            };
+                // Prepare PSD save options (default settings)
+                var psdOptions = new PsdOptions();
 
-            // Save the image as PSD
-            image.Save(outputPath, psdOptions);
+                // Save as PSD
+                image.Save(outputPath, psdOptions);
+            }
+
+            // Retrieve file sizes
+            long epsSize = new FileInfo(inputPath).Length;
+            long psdSize = new FileInfo(outputPath).Length;
+
+            // Output size comparison
+            Console.WriteLine($"Original EPS size: {epsSize} bytes");
+            Console.WriteLine($"Converted PSD size: {psdSize} bytes");
         }
-
-        // Compare file sizes
-        long epsSize = new FileInfo(inputPath).Length;
-        long psdSize = new FileInfo(outputPath).Length;
-
-        Console.WriteLine($"EPS size: {epsSize} bytes");
-        Console.WriteLine($"PSD size: {psdSize} bytes");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

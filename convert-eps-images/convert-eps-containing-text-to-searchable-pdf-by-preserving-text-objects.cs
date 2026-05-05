@@ -1,42 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = "input.eps";
-        string outputPath = "output.pdf";
+        // Hardcoded input and output paths
+        string inputPath = "Input\\sample.eps";
+        string outputPath = "Output\\sample.pdf";
 
-        // Verify that the input EPS file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EPS image
-        using (var epsImage = (EpsImage)Image.Load(inputPath))
+        try
         {
-            // Configure PDF options – using PDF/A‑1b compliance to keep text searchable
-            var pdfOptions = new PdfOptions
+            // Load EPS image (fully qualified type, no using for its namespace)
+            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
+                // Configure PDF options with PDF/A-1b compliance
+                var pdfOptions = new PdfOptions
                 {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    }
+                };
 
-            // Save the EPS as a searchable PDF, preserving text objects
-            epsImage.Save(outputPath, pdfOptions);
+                // Save as searchable PDF preserving text objects
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

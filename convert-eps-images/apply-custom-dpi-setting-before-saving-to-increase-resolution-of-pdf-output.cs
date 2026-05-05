@@ -8,34 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output paths
         string inputPath = @"C:\Images\sample.png";
         string outputPath = @"C:\Images\output.pdf";
 
-        // Verify input file exists
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Prepare PDF save options with custom DPI
-            var pdfOptions = new PdfOptions
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Set desired resolution (e.g., 300 DPI)
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-                // Do not use the original image resolution
-                UseOriginalImageResolution = false
-            };
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions
+                {
+                    // Set custom DPI (e.g., 300 dpi) to increase PDF resolution
+                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
 
-            // Save the image as PDF with the specified options
-            image.Save(outputPath, pdfOptions);
+                    // Do not use the original image DPI; use the value above instead
+                    UseOriginalImageResolution = false
+                };
+
+                // Save the image as PDF with the specified options
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

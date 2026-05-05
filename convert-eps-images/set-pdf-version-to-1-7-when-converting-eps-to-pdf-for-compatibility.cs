@@ -9,36 +9,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "Sample.eps";
-        string outputPath = "Sample.pdf";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.eps";
+            string outputPath = @"C:\Images\sample.pdf";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image
-        using (var image = (EpsImage)Image.Load(inputPath))
-        {
-            // Configure PDF options with PDF version 1.7 compatibility
-            var pdfOptions = new PdfOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    // PdfComplianceVersion.Pdf15 corresponds to PDF 1.5;
-                    // setting this is the closest available option for PDF 1.7 compatibility.
-                    PdfCompliance = PdfComplianceVersion.Pdf15
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                // Configure PDF options with PDF 1.7 compatibility (closest available is PDF 1.5)
+                var pdfOptions = new PdfOptions
+                {
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.Pdf15 // PDF 1.5 is the nearest supported version
+                    }
+                };
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -11,25 +11,40 @@ class Program
         string inputPath = "input.eps";
         string outputPath = "output.psd";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input EPS file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load EPS data into a memory stream
+            using (FileStream fileStream = File.OpenRead(inputPath))
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                fileStream.CopyTo(memoryStream);
+                memoryStream.Position = 0; // Reset position for reading
+
+                // Load the image from the memory stream
+                using (Image image = Image.Load(memoryStream))
+                {
+                    // Prepare PSD save options (default settings)
+                    PsdOptions psdOptions = new PsdOptions();
+
+                    // Save the image as PSD
+                    image.Save(outputPath, psdOptions);
+                }
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load EPS image from a memory stream
-        using (MemoryStream memoryStream = new MemoryStream(File.ReadAllBytes(inputPath)))
-        using (Image image = Image.Load(memoryStream))
+        catch (Exception ex)
         {
-            // Prepare PSD save options
-            PsdOptions psdOptions = new PsdOptions();
-
-            // Save the image as PSD
-            image.Save(outputPath, psdOptions);
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
