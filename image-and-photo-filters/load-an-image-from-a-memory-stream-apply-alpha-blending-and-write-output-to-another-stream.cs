@@ -8,49 +8,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath1 = "input1.png";
-        string inputPath2 = "input2.png";
-        string outputPath = "output.png";
-
-        // Validate input files
-        if (!File.Exists(inputPath1))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath1}");
-            return;
-        }
-        if (!File.Exists(inputPath2))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath2}");
-            return;
-        }
+            string inputPath = "input.jpg";
+            string overlayPath = "overlay.png";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load background image from memory stream
-        using (MemoryStream bgStream = new MemoryStream(File.ReadAllBytes(inputPath1)))
-        using (RasterImage background = (RasterImage)Image.Load(bgStream))
-        // Load overlay image from memory stream
-        using (MemoryStream overlayStream = new MemoryStream(File.ReadAllBytes(inputPath2)))
-        using (RasterImage overlay = (RasterImage)Image.Load(overlayStream))
-        {
-            // Apply alpha blending (50% opacity)
-            background.Blend(new Point(0, 0), overlay, 128);
-
-            // Save blended image to an output memory stream
-            using (MemoryStream outStream = new MemoryStream())
+            if (!File.Exists(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-                background.Save(outStream, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Write the memory stream to the output file
-                outStream.Position = 0;
-                using (FileStream fileOut = new FileStream(outputPath, FileMode.Create))
+            if (!File.Exists(overlayPath))
+            {
+                Console.Error.WriteLine($"File not found: {overlayPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (FileStream inputStream = File.OpenRead(inputPath))
+            using (Image inputImage = Image.Load(inputStream))
+            using (FileStream overlayStream = File.OpenRead(overlayPath))
+            using (Image overlayImage = Image.Load(overlayStream))
+            {
+                RasterImage background = (RasterImage)inputImage;
+                RasterImage overlay = (RasterImage)overlayImage;
+
+                // Blend overlay onto background at (0,0) with 50% opacity
+                background.Blend(new Point(0, 0), overlay, 128);
+
+                using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
                 {
-                    outStream.CopyTo(fileOut);
+                    PngOptions saveOptions = new PngOptions();
+                    background.Save(outputStream, saveOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
