@@ -10,59 +10,54 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        string inputPath = @"c:\temp\input.svg";
+        string intermediatePath = @"c:\temp\rotated.png";
+        string outputPath = @"c:\temp\final.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load SVG, rotate 45 degrees, and save as PNG (intermediate raster image)
+            using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to SvgImage to access vector-specific methods
-                SvgImage svgImage = (SvgImage)image;
-
-                // Rotate the SVG by 45 degrees
                 svgImage.Rotate(45f);
 
-                // Rasterize the rotated SVG into a PNG stored in memory
-                using (MemoryStream ms = new MemoryStream())
+                // Ensure output directory exists for intermediate file
+                Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
+
+                // Rasterization options for PNG output
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Set up rasterization options (use original SVG size)
-                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    };
+                    PageSize = svgImage.Size
+                };
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
 
-                    // Configure PNG save options with the rasterization settings
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
+                svgImage.Save(intermediatePath, pngOptions);
+            }
 
-                    // Save the rasterized image to the memory stream
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0; // Reset stream position for reading
+            // Load the intermediate PNG as a raster image
+            using (Image image = Image.Load(intermediatePath))
+            {
+                var rasterImage = (RasterImage)image;
 
-                    // Load the rasterized image as a RasterImage to apply filters
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
-                    {
-                        // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
-                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur filter to the entire image
+                var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+                rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
-                        // Save the final image to the output path
-                        rasterImage.Save(outputPath);
-                    }
-                }
+                // Ensure output directory exists for final file
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the final blurred image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
