@@ -7,32 +7,33 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input/sample.cmx";
-        string outputPath = "Output/sample.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.cmx";
+            string outputPath = "Output/sample.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
-        {
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = cmx.Width,
-                    PageHeight = cmx.Height
-                };
-
-                cmx.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            {
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.KeepMetadata = true;
+                    cmxImage.Save(outputPath, pdfOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
