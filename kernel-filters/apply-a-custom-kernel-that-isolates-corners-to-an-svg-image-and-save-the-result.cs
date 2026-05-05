@@ -3,67 +3,69 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.svg";
-        string outputPath = "output.svg";
+        string outputPath = "output.png";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            using (Image image = Image.Load(inputPath))
+            // Load the SVG image
+            using (Image svgImage = Image.Load(inputPath))
             {
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Prepare rasterization options for SVG to PNG conversion
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size
+                    PageSize = svgImage.Size
                 };
-                PngOptions pngOptions = new PngOptions
+
+                // PNG save options with vector rasterization
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                using (MemoryStream ms = new MemoryStream())
+                // Rasterize SVG to a memory stream
+                using (var memoryStream = new MemoryStream())
                 {
-                    image.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                    using (Image rasterImg = Image.Load(ms))
+                    // Load the rasterized image as a RasterImage
+                    using (Image rasterImageContainer = Image.Load(memoryStream))
                     {
-                        RasterImage raster = (RasterImage)rasterImg;
+                        var rasterImage = (RasterImage)rasterImageContainer;
 
-                        double[,] kernel = new double[,]
+                        // Define a custom kernel that isolates corners (edge detection)
+                        double[,] kernel = new double[3, 3]
                         {
                             { -1, -1, -1 },
                             { -1,  8, -1 },
                             { -1, -1, -1 }
                         };
 
-                        ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
-                        raster.Filter(raster.Bounds, filterOptions);
+                        // Create convolution filter options with the custom kernel
+                        var convolutionOptions = new ConvolutionFilterOptions(kernel);
 
-                        int width = raster.Width;
-                        int height = raster.Height;
-                        int dpi = 96;
+                        // Apply the filter to the entire image
+                        rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
 
-                        SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-                        graphics.DrawImage(raster, new Point(0, 0));
-
-                        using (SvgImage resultSvg = graphics.EndRecording())
-                        {
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                            resultSvg.Save(outputPath);
-                        }
+                        // Save the filtered image to the output path
+                        rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
             }
