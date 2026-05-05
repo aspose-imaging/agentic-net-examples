@@ -1,53 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.MagicWand;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.png";
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputDir = "output";
-            Directory.CreateDirectory(outputDir);
-
-            var resolutions = new (int width, int height)[]
-            {
-                (640, 480),
-                (1280, 720),
-                (1920, 1080)
+            string[] inputPaths = {
+                "image_640x480.png",
+                "image_1280x720.png",
+                "image_1920x1080.png"
             };
 
-            foreach (var (width, height) in resolutions)
+            foreach (var inputPath in inputPaths)
             {
-                string outputPath = Path.Combine(outputDir, $"mask_{width}x{height}.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string outputPath = "output_" + Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    image.Resize(width, height, ResizeType.NearestNeighbourResample);
-
-                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    var start = DateTime.Now;
 
                     MagicWandTool
-                        .Select(image, new MagicWandSettings(width / 2, height / 2))
+                        .Select(image, new MagicWandSettings(10, 10) { Threshold = 100 })
                         .Apply();
 
-                    sw.Stop();
+                    var elapsed = DateTime.Now - start;
+                    Console.WriteLine($"Processing {inputPath} took {elapsed.TotalMilliseconds} ms");
 
                     image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-
-                    Console.WriteLine($"Resolution {width}x{height}: {sw.ElapsedMilliseconds} ms");
                 }
             }
         }
