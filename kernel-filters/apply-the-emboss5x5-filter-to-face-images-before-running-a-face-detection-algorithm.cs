@@ -6,14 +6,14 @@ using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input/face.jpg";
+        string outputPath = "Output/face_embossed.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\face.png";
-            string outputPath = @"C:\Images\face_embossed.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,19 +24,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the image and apply Emboss5x5 filter
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply the 5x5 emboss convolution filter
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
-
-                // Save the filtered image
-                rasterImage.Save(outputPath);
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                raster.Save(outputPath);
             }
 
-            // TODO: Run face detection algorithm on the filtered image (outputPath)
+            // Placeholder: run face detection on the filtered image
+            // FaceDetectionAlgorithm.Detect(outputPath);
         }
         catch (Exception ex)
         {
