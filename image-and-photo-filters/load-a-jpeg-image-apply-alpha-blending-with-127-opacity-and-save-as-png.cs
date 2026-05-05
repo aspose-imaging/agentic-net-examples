@@ -1,19 +1,18 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.jpg";
         string outputPath = "output.png";
 
-        // Validate input file existence
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,22 +22,25 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the JPEG image as a raster image
-        using (RasterImage jpegImage = (RasterImage)Image.Load(inputPath))
+        try
         {
-            // Prepare PNG options with a bound file source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a PNG canvas with the same dimensions as the JPEG
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, jpegImage.Width, jpegImage.Height))
+            // Load the JPEG image
+            using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                // Blend the JPEG onto the canvas with 127 (≈50%) opacity
-                canvas.Blend(new Point(0, 0), jpegImage, 127);
+                // Create a blank background image with the same dimensions
+                using (RasterImage background = (RasterImage)Image.Create(new PngOptions(), jpegImage.Width, jpegImage.Height))
+                {
+                    // Blend the JPEG onto the background with 127 (≈50%) opacity
+                    background.Blend(new Aspose.Imaging.Point(0, 0), jpegImage, 127);
 
-                // Save the bound canvas (outputPath is already set in the source)
-                canvas.Save();
+                    // Save the result as PNG
+                    background.Save(outputPath, new PngOptions());
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,49 +1,63 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = "input.jpg";
         string outputPath = "output.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Create a mask for the watermark region (example ellipse)
-        var mask = new GraphicsPath();
-        var figure = new Figure();
-        figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
-        mask.AddFigure(figure);
-
-        // Configure Content Aware Fill options with three attempts
-        var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
-        {
-            MaxPaintingAttempts = 3
-        };
-
-        // Load the JPEG image, remove the watermark, and save the result
-        using (var image = Image.Load(inputPath))
-        {
-            var jpegImage = (JpegImage)image;
-
-            using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(jpegImage, options))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the processed image
-                result.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for watermark removal
+                RasterImage raster = (RasterImage)image;
+
+                // Define the mask region (example ellipse)
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
+                mask.AddFigure(figure);
+
+                // Configure content-aware fill options with three attempts
+                var options = new ContentAwareFillWatermarkOptions(mask)
+                {
+                    MaxPaintingAttempts = 3
+                };
+
+                // Perform watermark removal
+                using (RasterImage result = WatermarkRemover.PaintOver(raster, options))
+                {
+                    // Save the processed image
+                    result.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

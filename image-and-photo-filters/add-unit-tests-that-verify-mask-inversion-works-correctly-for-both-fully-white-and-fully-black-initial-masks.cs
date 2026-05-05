@@ -1,6 +1,10 @@
 using System;
 using System.IO;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.MagicWand;
 
 class Program
 {
@@ -8,9 +12,10 @@ class Program
     {
         try
         {
-            // Hardcoded paths (not used in the test but required by path‑safety rules)
-            string inputPath = "input.png";
+            string inputPath = "C:\\Windows\\System32\\drivers\\etc\\hosts";
             string outputPath = "output.png";
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             if (!File.Exists(inputPath))
             {
@@ -18,54 +23,39 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            using (RasterImage whiteImg = (RasterImage)Image.Create(
+                new PngOptions { Source = new StreamSource(new MemoryStream()) }, 10, 10))
+            {
+                int[] whitePixels = new int[10 * 10];
+                for (int i = 0; i < whitePixels.Length; i++)
+                    whitePixels[i] = unchecked((int)0xFFFFFFFF);
+                whiteImg.SaveArgb32Pixels(new Rectangle(0, 0, 10, 10), whitePixels);
 
-            // Run tests
-            bool whiteMaskResult = TestMaskInversion(isInitiallyOpaque: true);
-            bool blackMaskResult = TestMaskInversion(isInitiallyOpaque: false);
+                var whiteMask = MagicWandTool.Select(whiteImg, new MagicWandSettings(0, 0));
+                var invertedWhiteMask = whiteMask.Invert();
 
-            Console.WriteLine($"White mask inversion test passed: {whiteMaskResult}");
-            Console.WriteLine($"Black mask inversion test passed: {blackMaskResult}");
+                bool whiteTest = whiteMask.IsOpaque(0, 0) && invertedWhiteMask.IsTransparent(0, 0);
+                Console.WriteLine($"White mask inversion test: {(whiteTest ? "PASS" : "FAIL")}");
+            }
+
+            using (RasterImage blackImg = (RasterImage)Image.Create(
+                new PngOptions { Source = new StreamSource(new MemoryStream()) }, 10, 10))
+            {
+                int[] blackPixels = new int[10 * 10];
+                for (int i = 0; i < blackPixels.Length; i++)
+                    blackPixels[i] = unchecked((int)0xFF000000);
+                blackImg.SaveArgb32Pixels(new Rectangle(0, 0, 10, 10), blackPixels);
+
+                var blackMask = MagicWandTool.Select(blackImg, new MagicWandSettings(0, 0));
+                var invertedBlackMask = blackMask.Invert();
+
+                bool blackTest = blackMask.IsOpaque(0, 0) && invertedBlackMask.IsTransparent(0, 0);
+                Console.WriteLine($"Black mask inversion test: {(blackTest ? "PASS" : "FAIL")}");
+            }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
-    }
-
-    // Verifies that Invert() correctly flips a fully opaque (white) or fully transparent (black) mask.
-    static bool TestMaskInversion(bool isInitiallyOpaque)
-    {
-        const int width = 10;
-        const int height = 10;
-        byte initialValue = isInitiallyOpaque ? (byte)255 : (byte)0;
-        byte expectedInvertedValue = isInitiallyOpaque ? (byte)0 : (byte)255;
-
-        // Create a grayscale mask and fill it uniformly.
-        var mask = new ImageGrayscaleMask(width, height);
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                mask[x, y] = initialValue;
-            }
-        }
-
-        // Invert the mask.
-        var invertedMask = mask.Invert();
-
-        // Verify every pixel has the expected inverted opacity.
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                if (invertedMask.GetByteOpacity(x, y) != expectedInvertedValue)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 }

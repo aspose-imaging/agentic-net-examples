@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
@@ -11,18 +9,19 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            // Hardcoded input and output folders
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output folder exists
+            Directory.CreateDirectory(outputFolder);
 
-            // Process 50 JPEG images named image1.jpg ... image50.jpg
+            // Process 50 JPEG images
             for (int i = 1; i <= 50; i++)
             {
-                string inputPath = Path.Combine(inputDir, $"image{i}.jpg");
-                string outputPath = Path.Combine(outputDir, $"image{i}_masked.jpg");
+                // Build input and output file paths
+                string inputPath = Path.Combine(inputFolder, $"image{i}.jpg");
+                string outputPath = Path.Combine(outputFolder, $"image{i}_masked.png");
 
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -31,19 +30,17 @@ class Program
                     return;
                 }
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists (handles nested paths)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the image, apply magic wand mask, and save the result
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Create a mask using MagicWandTool with a reference point (0,0)
-                    MagicWandTool
-                        .Select(image, new MagicWandSettings(0, 0))
-                        .Apply();
+                    // Create a mask using a reference point (10,10) and apply it
+                    MagicWandTool.Select(image, new MagicWandSettings(10, 10)).Apply();
 
-                    // Save the masked image as JPEG
-                    image.Save(outputPath, new JpegOptions());
+                    // Save the masked image
+                    image.Save(outputPath);
                 }
             }
         }

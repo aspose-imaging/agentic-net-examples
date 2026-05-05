@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Watermark;
@@ -11,8 +12,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input/ball.png";
-        string outputPath = "output/result.png";
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,8 +22,10 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists (null‑safe)
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrEmpty(outputDir))
+            Directory.CreateDirectory(outputDir);
 
         try
         {
@@ -31,14 +34,12 @@ class Program
             {
                 var pngImage = (PngImage)image;
 
-                // Create a mask that does NOT intersect any watermark region
+                // Create a mask that likely does not intersect any watermark region
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                // Rectangle placed outside the image bounds
-                figure.AddShape(new RectangleShape(new RectangleF(-100, -100, 10, 10)));
+                figure.AddShape(new RectangleShape(new RectangleF(0, 0, 10, 10)));
                 mask.AddFigure(figure);
 
-                // Use Telea algorithm options with the empty mask
                 var options = new TeleaWatermarkOptions(mask);
 
                 // Attempt watermark removal with error handling for non‑intersecting mask
@@ -51,7 +52,7 @@ class Program
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Watermark removal error: {ex.Message}");
+                    Console.Error.WriteLine($"Watermark removal failed: {ex.Message}");
                     return;
                 }
             }

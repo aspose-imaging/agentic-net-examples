@@ -1,53 +1,69 @@
 using System;
 using System.IO;
+using System.Diagnostics;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string pngInputPath = "input\\input4k.png";
-        string pngOutputPath = "output\\output4k.png";
-        string jpegInputPath = "input\\input1080.jpg";
-        string jpegOutputPath = "output\\output1080.jpg";
-
-        // Validate input files
-        if (!File.Exists(pngInputPath))
-        {
-            Console.Error.WriteLine($"File not found: {pngInputPath}");
-            return;
-        }
-        if (!File.Exists(jpegInputPath))
-        {
-            Console.Error.WriteLine($"File not found: {jpegInputPath}");
-            return;
-        }
-
         try
         {
-            // Process 4K PNG with MagicWandTool
-            long memBeforePng = GC.GetTotalMemory(true);
-            using (Aspose.Imaging.RasterImage pngImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(pngInputPath))
+            // Hardcoded input and output paths
+            string pngInput = "input_4k.png";
+            string jpegInput = "input_1080p.jpg";
+            string pngOutput = "output_4k_processed.png";
+            string jpegOutput = "output_1080p_processed.jpg";
+
+            // Validate input files
+            if (!File.Exists(pngInput))
+            {
+                Console.Error.WriteLine($"File not found: {pngInput}");
+                return;
+            }
+            if (!File.Exists(jpegInput))
+            {
+                Console.Error.WriteLine($"File not found: {jpegInput}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(pngOutput));
+            Directory.CreateDirectory(Path.GetDirectoryName(jpegOutput));
+
+            // Measure memory before processing PNG
+            long beforePng = Process.GetCurrentProcess().PrivateMemorySize64;
+
+            // Load 4K PNG and apply MagicWand
+            using (RasterImage pngImage = (RasterImage)Image.Load(pngInput))
             {
                 MagicWandTool.Select(pngImage, new MagicWandSettings(100, 100)).Apply();
-                Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
-                pngImage.Save(pngOutputPath);
+                pngImage.Save(pngOutput, new PngOptions());
             }
-            long memAfterPng = GC.GetTotalMemory(true);
-            Console.WriteLine($"Memory used for PNG MagicWand processing: {memAfterPng - memBeforePng} bytes");
 
-            // Process 1080p JPEG with MagicWandTool
-            long memBeforeJpeg = GC.GetTotalMemory(true);
-            using (Aspose.Imaging.RasterImage jpegImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(jpegInputPath))
+            // Measure memory after processing PNG
+            long afterPng = Process.GetCurrentProcess().PrivateMemorySize64;
+            long pngMemoryUsed = afterPng - beforePng;
+
+            // Measure memory before processing JPEG
+            long beforeJpeg = Process.GetCurrentProcess().PrivateMemorySize64;
+
+            // Load 1080p JPEG and apply MagicWand
+            using (RasterImage jpegImage = (RasterImage)Image.Load(jpegInput))
             {
-                MagicWandTool.Select(jpegImage, new MagicWandSettings(100, 100)).Apply();
-                Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
-                jpegImage.Save(jpegOutputPath);
+                MagicWandTool.Select(jpegImage, new MagicWandSettings(50, 50)).Apply();
+                jpegImage.Save(jpegOutput, new JpegOptions());
             }
-            long memAfterJpeg = GC.GetTotalMemory(true);
-            Console.WriteLine($"Memory used for JPEG MagicWand processing: {memAfterJpeg - memBeforeJpeg} bytes");
+
+            // Measure memory after processing JPEG
+            long afterJpeg = Process.GetCurrentProcess().PrivateMemorySize64;
+            long jpegMemoryUsed = afterJpeg - beforeJpeg;
+
+            // Output memory usage comparison
+            Console.WriteLine($"Memory increase during PNG MagicWand processing: {pngMemoryUsed / 1024} KB");
+            Console.WriteLine($"Memory increase during JPEG MagicWand processing: {jpegMemoryUsed / 1024} KB");
         }
         catch (Exception ex)
         {

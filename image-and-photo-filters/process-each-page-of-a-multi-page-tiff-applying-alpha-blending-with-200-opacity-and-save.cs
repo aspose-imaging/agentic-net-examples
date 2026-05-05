@@ -1,43 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "C:\\temp\\input.tif";
-            string outputPath = "C:\\temp\\output.tif";
+            // Hard‑coded input and output file paths
+            string inputPath = "input\\multi_page.tif";
+            string outputPath = "output\\processed.tif";
 
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑page TIFF
+            using (Image img = Image.Load(inputPath))
             {
-                int pageCount = tiff.PageCount;
-                for (int i = 0; i < pageCount; i++)
+                TiffImage tiff = (TiffImage)img;
+
+                // Process each frame (page) of the TIFF
+                foreach (TiffFrame frame in tiff.Frames)
                 {
-                    tiff.ActiveFrame = tiff.Frames[i];
-                    var bounds = tiff.ActiveFrame.Bounds;
-                    Color[] pixels = tiff.LoadPixels(bounds);
-                    for (int p = 0; p < pixels.Length; p++)
+                    // Make the current frame active so that pixel operations target it
+                    tiff.ActiveFrame = frame;
+
+                    // Load all pixels of the active frame
+                    Color[] pixels = tiff.LoadPixels(tiff.Bounds);
+
+                    // Apply opacity of 200 (out of 255) to each pixel
+                    for (int i = 0; i < pixels.Length; i++)
                     {
-                        Color c = pixels[p];
-                        pixels[p] = Color.FromArgb(200, c.R, c.G, c.B);
+                        Color src = pixels[i];
+                        // Blend the original alpha with the desired opacity
+                        int blendedAlpha = (src.A * 200) / 255;
+                        pixels[i] = Color.FromArgb(blendedAlpha, src.R, src.G, src.B);
                     }
-                    tiff.SavePixels(bounds, pixels);
+
+                    // Save the modified pixels back to the active frame
+                    tiff.SavePixels(tiff.Bounds, pixels);
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                tiff.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                // Save the modified multi‑page TIFF to the output path
+                tiff.Save(outputPath);
             }
         }
         catch (Exception ex)

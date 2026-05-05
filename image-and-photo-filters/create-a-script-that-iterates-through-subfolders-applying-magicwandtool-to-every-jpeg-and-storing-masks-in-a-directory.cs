@@ -1,53 +1,52 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output root directories
-        string inputRoot = @"C:\Images\Input";
-        string outputRoot = @"C:\Images\Output";
-
         try
         {
-            // Get all JPEG files in subfolders
-            string[] files = Directory.GetFiles(inputRoot, "*.*", SearchOption.AllDirectories);
-            foreach (string filePath in files)
-            {
-                string extension = Path.GetExtension(filePath).ToLowerInvariant();
-                if (extension != ".jpg" && extension != ".jpeg")
-                    continue;
+            // Hardcoded input and output root directories
+            string inputRoot = "InputImages";
+            string outputRoot = "Masks";
 
+            // Ensure the output root directory exists
+            Directory.CreateDirectory(outputRoot);
+
+            // Get all JPEG files recursively
+            string[] jpegFiles = Directory.GetFiles(inputRoot, "*.jpg", SearchOption.AllDirectories);
+
+            foreach (string inputPath in jpegFiles)
+            {
                 // Verify input file exists
-                if (!File.Exists(filePath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path preserving relative folder structure
-                string relativePath = Path.GetRelativePath(inputRoot, filePath);
-                string outputPath = Path.Combine(outputRoot, relativePath);
+                // Compute relative path and corresponding output mask path (PNG)
+                string relativePath = Path.GetRelativePath(inputRoot, inputPath);
+                string outputPath = Path.Combine(outputRoot, Path.ChangeExtension(relativePath, ".png"));
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load image as RasterImage
-                using (RasterImage image = (RasterImage)Image.Load(filePath))
+                // Load the image as a raster image
+                using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
                 {
-                    // Create a mask using MagicWandTool (reference point at (0,0) with default threshold)
-                    MagicWandTool
-                        .Select(image, new MagicWandSettings(0, 0))
-                        .Apply();
+                    // Apply MagicWandTool selection at (0,0) with default settings and apply the mask
+                    MagicWandTool.Select(image, new MagicWandSettings(0, 0)).Apply();
 
-                    // Save the masked image as JPEG
-                    image.Save(outputPath, new JpegOptions());
+                    // Save the resulting mask as a PNG with alpha channel
+                    image.Save(outputPath, new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    });
                 }
             }
         }

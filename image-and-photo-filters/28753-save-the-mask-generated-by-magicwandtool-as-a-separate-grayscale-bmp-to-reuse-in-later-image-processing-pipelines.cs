@@ -2,21 +2,20 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputMaskPath = "mask.bmp";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,17 +23,20 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputMaskPath));
 
-            // Load the PNG image
+            // Load the source image as a RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a mask with a high threshold to expand coverage over color gradients
-                var mask = MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = 255 });
+                // Create a mask using MagicWandTool at a sample point (120,100)
+                ImageBitMask mask = MagicWandTool.Select(image, new MagicWandSettings(120, 100));
+
+                // Apply the mask to the image (optional, prepares the mask)
                 mask.Apply();
 
-                // Save the modified image with alpha channel preserved
-                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                // Save the resulting masked image as a grayscale BMP
+                // BMP format does not support explicit color type, so we rely on the image's pixel data
+                image.Save(outputMaskPath, new BmpOptions());
             }
         }
         catch (Exception ex)
