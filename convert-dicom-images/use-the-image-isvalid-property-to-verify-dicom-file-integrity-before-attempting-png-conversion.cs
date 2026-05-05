@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,29 +10,30 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/sample.png";
+            // Hardcoded input DICOM file and output directory
+            string inputPath = "input.dcm";
+            string outputDirectory = "Output";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            using (Image image = Image.Load(inputPath))
+            // Load the DICOM image
+            using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                var dicomImage = image as DicomImage;
-                var pngOptions = new PngOptions();
-
-                if (dicomImage != null)
+                // Export each DICOM page to PNG
+                foreach (var page in dicomImage.DicomPages)
                 {
-                    dicomImage.Save(outputPath, pngOptions);
-                }
-                else
-                {
-                    image.Save(outputPath, pngOptions);
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.Index}.png");
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    page.Save(outputPath, new PngOptions());
                 }
             }
         }

@@ -8,13 +8,12 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output file paths (relative to the executable directory)
+        string inputPath = Path.Combine("Input", "sample.jpg");
+        string outputPath = Path.Combine("Output", "sample.tif");
+
         try
         {
-            // Input image path (relative to the executable's working directory)
-            string inputPath = Path.Combine("Input", "sample.png");
-            // Output TIFF path
-            string outputPath = Path.Combine("Output", "sample.tif");
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,10 +27,10 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF export options (using default TIFF format)
+                // Configure TIFF export options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                // Save the image as TIFF with the specified options
+                // Save the image as TIFF using the specified options
                 image.Save(outputPath, tiffOptions);
             }
         }
