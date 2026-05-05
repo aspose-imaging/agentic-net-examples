@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -9,19 +10,20 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Define base, input, and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
+            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Validate (or create) output directory
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
@@ -32,7 +34,7 @@ class Program
 
             foreach (string inputPath in files)
             {
-                // Check that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -40,23 +42,26 @@ class Program
                 }
 
                 // Determine output path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_processed.png");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists (in case of subfolders)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set memory limit via BufferSizeHint (e.g., 100 MB)
-                PngOptions saveOptions = new PngOptions
-                {
-                    BufferSizeHint = 100
-                };
-
-                // Load, process, and save the image
+                // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Example processing could be added here (e.g., resize, rotate)
+                    // Set memory limit via BufferSizeHint (e.g., 100 MB)
+                    PngOptions saveOptions = new PngOptions
+                    {
+                        BufferSizeHint = 100
+                    };
+
+                    // Save the image with the specified options
                     image.Save(outputPath, saveOptions);
                 }
+
+                Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
