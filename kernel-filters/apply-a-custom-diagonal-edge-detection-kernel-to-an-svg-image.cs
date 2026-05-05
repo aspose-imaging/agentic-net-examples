@@ -3,63 +3,59 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Rasterization options for SVG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = svgImage.Size;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // PNG options with vector rasterization
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-            using (FileStream svgStream = File.OpenRead(inputPath))
-            using (SvgImage svgImage = new SvgImage(svgStream))
-            {
-                // Set up rasterization options for SVG to PNG conversion
-                var rasterOptions = new SvgRasterizationOptions
+                // Rasterize SVG to a memory stream
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height
-                };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                using (MemoryStream pngStream = new MemoryStream())
-                {
-                    // Rasterize SVG into PNG stored in memory
-                    svgImage.Save(pngStream, pngOptions);
-                    pngStream.Position = 0;
-
-                    using (Image pngImage = Image.Load(pngStream))
+                    using (Image rasterImg = Image.Load(ms))
                     {
-                        RasterImage raster = (RasterImage)pngImage;
+                        RasterImage raster = (RasterImage)rasterImg;
 
-                        // Custom diagonal edge‑detection kernel
+                        // Custom diagonal edge‑detection kernel (3x3)
                         double[,] kernel = new double[,]
                         {
                             { -2, -1, 0 },
                             { -1,  0, 1 },
                             {  0,  1, 2 }
                         };
-                        var convOptions = new ConvolutionFilterOptions(kernel);
 
-                        // Apply the convolution filter to the entire image
+                        // Apply convolution filter
+                        ConvolutionFilterOptions convOptions = new ConvolutionFilterOptions(kernel);
                         raster.Filter(raster.Bounds, convOptions);
 
-                        // Save the filtered image
-                        raster.Save(outputPath);
+                        // Save the filtered raster image as PNG
+                        PngOptions saveOptions = new PngOptions();
+                        raster.Save(outputPath, saveOptions);
                     }
                 }
             }
