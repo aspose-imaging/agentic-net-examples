@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.png";
-        string outputPath = @"C:\temp\sample_compressed.png";
-
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\temp\sample.png";
+            string outputDirectory = @"C:\temp\output";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,29 +21,51 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options for lossless compression
-                var pngOptions = new PngOptions
+                // Report original file size
+                long originalSize = new FileInfo(inputPath).Length;
+                Console.WriteLine($"Original size: {originalSize} bytes");
+
+                // Define the filter types to test
+                PngFilterType[] filterTypes = new PngFilterType[]
                 {
-                    CompressionLevel = 9, // maximum compression
-                    FilterType = PngFilterType.Adaptive, // best filter for lossless compression
-                    Progressive = true
+                    PngFilterType.None,
+                    PngFilterType.Up,
+                    PngFilterType.Sub,
+                    PngFilterType.Paeth,
+                    PngFilterType.Avg,
+                    PngFilterType.Adaptive
                 };
 
-                // Save the compressed image
-                image.Save(outputPath, pngOptions);
-            }
+                // Iterate over each filter, save with maximal lossless compression, and report size
+                foreach (PngFilterType filter in filterTypes)
+                {
+                    var options = new PngOptions
+                    {
+                        CompressionLevel = 9,          // maximal lossless compression
+                        FilterType = filter,
+                        Progressive = true
+                    };
 
-            // Compare file sizes
-            long originalSize = new FileInfo(inputPath).Length;
-            long compressedSize = new FileInfo(outputPath).Length;
-            Console.WriteLine($"Original size: {originalSize} bytes");
-            Console.WriteLine($"Compressed size: {compressedSize} bytes");
+                    string outputPath = Path.Combine(outputDirectory, $"sample_{filter}.png");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the image with the current options
+                    image.Save(outputPath, options);
+
+                    // Get the size of the saved file
+                    long compressedSize = new FileInfo(outputPath).Length;
+
+                    Console.WriteLine($"Filter: {filter}, compressed size: {compressedSize} bytes");
+                }
+            }
         }
         catch (Exception ex)
         {
