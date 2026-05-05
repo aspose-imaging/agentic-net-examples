@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -11,10 +12,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.cmx";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = Path.Combine("Input", "sample.cmx");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,23 +25,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
+            // Load CMX image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure PDF options with custom title
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo { Title = "Custom Document Title" }
-                };
-
-                // Set vector rasterization options for proper rendering
-                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
+                    PdfDocumentInfo = new PdfDocumentInfo
+                    {
+                        Title = "Custom Document Title"
+                    },
+                    VectorRasterizationOptions = new CmxRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
 
                 // Save as PDF
