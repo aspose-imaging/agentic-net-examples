@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
@@ -11,24 +12,37 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output\\output.png";
+            string outputPath = "output.png";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            // Load the image as a RasterImage
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
+                // Current cursor coordinates (seed point for Magic Wand)
+                int cursorX = 120; // example X coordinate
+                int cursorY = 100; // example Y coordinate
+
+                // Create mask with MagicWandTool and apply it
                 MagicWandTool
-                    .Select(image, new MagicWandSettings(100, 100))
+                    .Select(image, new MagicWandSettings(cursorX, cursorY))
                     .Apply();
 
-                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                // Save the resulting image with transparency support
+                image.Save(outputPath, new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha
+                });
             }
         }
         catch (Exception ex)
