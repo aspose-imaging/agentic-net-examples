@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,39 +9,57 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output/output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Define sigma and compute kernel size (odd integer)
+                // Generate a Gaussian kernel programmatically (size 5, sigma 1.2)
+                int size = 5; // must be odd
                 double sigma = 1.2;
-                int size = ((int)Math.Ceiling(sigma * 3) * 2) + 1; // ensures odd size
+                double[,] kernel = new double[size, size];
+                double sum = 0.0;
+                int half = size / 2;
+                double twoSigmaSq = 2 * sigma * sigma;
 
-                // Apply Gaussian blur filter with computed size and sigma
-                rasterImage.Filter(rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(size, sigma));
-
-                // Save the processed image as PNG
-                PngOptions options = new PngOptions
+                for (int y = -half; y <= half; y++)
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                rasterImage.Save(outputPath, options);
+                    for (int x = -half; x <= half; x++)
+                    {
+                        double exponent = -(x * x + y * y) / twoSigmaSq;
+                        double value = Math.Exp(exponent);
+                        kernel[y + half, x + half] = value;
+                        sum += value;
+                    }
+                }
+
+                // Normalize the kernel so that the sum of all elements equals 1
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        kernel[y, x] /= sum;
+                    }
+                }
+
+                // Apply the custom Gaussian kernel using ConvolutionFilterOptions
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
+
+                // Save the filtered image as PNG
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
