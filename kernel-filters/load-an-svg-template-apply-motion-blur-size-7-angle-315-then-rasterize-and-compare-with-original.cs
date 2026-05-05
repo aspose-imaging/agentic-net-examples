@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,11 +13,11 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputPath = "input/template.svg";
-            string originalRasterPath = "output/original.png";
-            string outputPath = "output/blurred.png";
+            string inputPath = "template.svg";
+            string originalPath = "output\\original.png";
+            string filteredPath = "output\\filtered.png";
 
-            // Verify input file exists
+            // Input file existence check
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,68 +25,50 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(originalRasterPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(originalPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(filteredPath));
 
-            // Load SVG and rasterize to PNG (original)
+            // Load SVG image
             using (Image img = Image.Load(inputPath))
             {
                 SvgImage svgImage = (SvgImage)img;
 
+                // Rasterization options
                 SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
+                    BackgroundColor = Color.White,
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    TextRenderingHint = TextRenderingHint.AntiAlias
                 };
 
+                // Save original rasterized PNG
                 PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
-
-                svgImage.Save(originalRasterPath, pngOptions);
+                svgImage.Save(originalPath, pngOptions);
             }
 
-            // Load rasterized image, apply motion blur, and save
-            using (Image img = Image.Load(originalRasterPath))
+            // Load rasterized original PNG
+            using (Image origImg = Image.Load(originalPath))
+            using (RasterImage originalRaster = (RasterImage)origImg)
             {
-                RasterImage raster = (RasterImage)img;
-
-                // Motion blur: size 7, brightness 1.0, angle 315
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(7, 1.0, 315.0));
-
-                raster.Save(outputPath);
+                // Apply motion blur filter (size 7, angle 315)
+                originalRaster.Filter(originalRaster.Bounds, new MotionWienerFilterOptions(7, 1.0, 315.0));
+                originalRaster.Save(filteredPath, new PngOptions());
             }
 
-            // Compare original and blurred images pixel-wise
-            using (Image imgOrig = Image.Load(originalRasterPath))
-            using (Image imgBlur = Image.Load(outputPath))
+            // Compare original and filtered images
+            using (Image origImg = Image.Load(originalPath))
+            using (RasterImage originalRaster = (RasterImage)origImg)
+            using (Image filtImg = Image.Load(filteredPath))
+            using (RasterImage filteredRaster = (RasterImage)filtImg)
             {
-                RasterImage orig = (RasterImage)imgOrig;
-                RasterImage blur = (RasterImage)imgBlur;
-
-                bool identical = true;
-
-                if (orig.Width != blur.Width || orig.Height != blur.Height)
-                {
-                    identical = false;
-                }
-                else
-                {
-                    int[] origPixels = orig.LoadArgb32Pixels(orig.Bounds);
-                    int[] blurPixels = blur.LoadArgb32Pixels(blur.Bounds);
-
-                    for (int i = 0; i < origPixels.Length; i++)
-                    {
-                        if (origPixels[i] != blurPixels[i])
-                        {
-                            identical = false;
-                            break;
-                        }
-                    }
-                }
-
-                Console.WriteLine(identical ? "Images are identical." : "Images differ after blur.");
+                int[] originalPixels = originalRaster.LoadArgb32Pixels(originalRaster.Bounds);
+                int[] filteredPixels = filteredRaster.LoadArgb32Pixels(filteredRaster.Bounds);
+                bool identical = originalPixels.SequenceEqual(filteredPixels);
+                Console.WriteLine($"Images identical: {identical}");
             }
         }
         catch (Exception ex)
