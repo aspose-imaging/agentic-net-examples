@@ -2,17 +2,20 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "barcode.webp";
+        string outputPath = "output/barcode_embossed.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input/barcode.webp";
-            string outputPath = "output/barcode_embossed.webp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,19 +26,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image as a raster image
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage for filtering
+                RasterImage raster = (RasterImage)image;
 
                 // Apply Emboss3x3 filter to the entire image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                // Save the processed image as WebP
+                WebPOptions options = new WebPOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
