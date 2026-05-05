@@ -10,43 +10,58 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\temp\input16bit.png";
-        string outputDir = @"C:\temp\output\";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        string outputDir = @"C:\temp\filter_test";
 
         try
         {
-            // Load the 16‑bit PNG image
-            using (Image image = Image.Load(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Iterate over all available PNG filter types
-                foreach (PngFilterType filter in Enum.GetValues(typeof(PngFilterType)))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the 16‑bit PNG image
+            using (PngImage pngImage = new PngImage(inputPath))
+            {
+                // Define filter types to test
+                PngFilterType[] filterTypes = new PngFilterType[]
                 {
-                    // Prepare PNG save options: convert to 8‑bit and apply the current filter
+                    PngFilterType.None,
+                    PngFilterType.Up,
+                    PngFilterType.Sub,
+                    PngFilterType.Paeth,
+                    PngFilterType.Avg,
+                    PngFilterType.Adaptive
+                };
+
+                foreach (PngFilterType filter in filterTypes)
+                {
+                    // Prepare PNG save options: convert to 8‑bit and set filter
                     PngOptions saveOptions = new PngOptions
                     {
-                        BitDepth = 8,                                 // Convert to 8‑bit per channel
-                        FilterType = filter,                          // Current filter type
-                        ColorType = PngColorType.TruecolorWithAlpha, // Preserve alpha channel
-                        CompressionLevel = 9,                         // Maximum compression
-                        Progressive = false                           // No progressive loading needed for this test
+                        BitDepth = 8,                                   // Convert to 8‑bit per channel
+                        ColorType = PngColorType.TruecolorWithAlpha,    // Preserve alpha if present
+                        FilterType = filter,
+                        CompressionLevel = 9,                           // Max compression for size comparison
+                        Progressive = true
                     };
 
-                    // Build output file path and ensure its directory exists
+                    // Build output file path
                     string outputPath = Path.Combine(outputDir, $"output_{filter}.png");
+
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the image with the specified options
-                    image.Save(outputPath, saveOptions);
+                    // Save the image with the current filter
+                    pngImage.Save(outputPath, saveOptions);
 
-                    // Report the resulting file size
+                    // Report file size
                     long fileSize = new FileInfo(outputPath).Length;
-                    Console.WriteLine($"Filter {filter}: output size {fileSize} bytes.");
+                    Console.WriteLine($"Filter: {filter}, Output size: {fileSize} bytes");
                 }
             }
         }
