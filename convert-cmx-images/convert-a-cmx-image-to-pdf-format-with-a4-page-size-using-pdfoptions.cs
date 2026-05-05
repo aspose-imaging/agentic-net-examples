@@ -2,48 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.cmx";
-        string outputPath = "Output/sample.pdf";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.cmx";
+            string outputPath = "Output/sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PDF options with A4 page size
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                // A4 size in points (1 point = 1/72 inch)
-                pdfOptions.PageSize = new SizeF(595f, 842f);
-
-                // Set vector rasterization options for CMX
-                pdfOptions.VectorRasterizationOptions = new CmxRasterizationOptions
-                {
-                    PageSize = new SizeF(595f, 842f),
-                    BackgroundColor = Color.White,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    Positioning = PositioningTypes.DefinedByDocument
-                };
-
-                // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    // Set A4 page size (595x842 points)
+                    CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
+                    {
+                        PageSize = new SizeF(595, 842),
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None,
+                        Positioning = PositioningTypes.DefinedByDocument
+                    };
+
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+                    image.Save(outputPath, pdfOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
