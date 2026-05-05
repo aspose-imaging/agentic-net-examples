@@ -8,17 +8,14 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputSvgs";
+        string outputDirectory = @"C:\OutputSvgs";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
             // Get all SVG files in the input directory
-            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
+            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
             foreach (string inputPath in svgFiles)
             {
@@ -29,41 +26,44 @@ class Program
                     return;
                 }
 
-                // Prepare output file path (same name with .png extension)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Prepare output path (same name with .blur.png extension)
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".blur.png");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the SVG image
                 using (Image svgImage = Image.Load(inputPath))
                 {
-                    // Set up rasterization options for SVG
-                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                    // Set up rasterization options to convert SVG to raster
+                    var rasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = svgImage.Size
                     };
 
-                    // Prepare PNG save options with rasterization
-                    PngOptions pngOptions = new PngOptions
+                    // Define PNG save options that use the rasterization settings
+                    var pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = rasterizationOptions
                     };
 
-                    // Rasterize SVG to a memory stream as PNG
-                    using (MemoryStream rasterStream = new MemoryStream())
+                    // Rasterize SVG into a memory stream
+                    using (var rasterStream = new MemoryStream())
                     {
                         svgImage.Save(rasterStream, pngOptions);
                         rasterStream.Position = 0;
 
                         // Load the rasterized image as a RasterImage
-                        using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
+                        using (Image rasterImage = Image.Load(rasterStream))
                         {
-                            // Apply Gaussian blur filter to the entire image
-                            rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                            var raster = (RasterImage)rasterImage;
+
+                            // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
+                            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
                             // Save the blurred image to the output path
-                            rasterImage.Save(outputPath);
+                            raster.Save(outputPath);
                         }
                     }
                 }
