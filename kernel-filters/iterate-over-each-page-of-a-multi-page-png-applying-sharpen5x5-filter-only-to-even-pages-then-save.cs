@@ -1,53 +1,59 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\multi.png";
+        string outputPath = @"C:\temp\multi_processed.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the multi‑page PNG image
+            // Load the multi‑page PNG (APNG)
             using (Image image = Image.Load(inputPath))
             {
-                // Process only if the image supports multiple pages
-                if (image is IMultipageImage multipageImage)
+                ApngImage apng = image as ApngImage;
+                if (apng == null)
                 {
-                    for (int i = 0; i < multipageImage.PageCount; i++)
+                    Console.Error.WriteLine("The loaded image is not a multi‑page PNG (APNG).");
+                    return;
+                }
+
+                // Iterate over pages
+                for (int i = 0; i < apng.PageCount; i++)
+                {
+                    // Apply filter only to even pages (2,4,6,...). Pages are 1‑based for this rule.
+                    if ((i + 1) % 2 == 0)
                     {
-                        // Apply filter to even‑indexed pages (0, 2, 4, ...)
-                        if (i % 2 == 0)
+                        // Each page is a RasterImage
+                        var rasterPage = apng.Pages[i] as RasterImage;
+                        if (rasterPage != null)
                         {
-                            if (multipageImage.Pages[i] is RasterImage rasterPage)
-                            {
-                                // Sharpen filter with kernel size 5 and sigma 1.0
-                                rasterPage.Filter(
-                                    rasterPage.Bounds,
-                                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 1.0));
-                            }
+                            // Apply Sharpen filter with kernel size 5 (sigma value 4.0 as example)
+                            rasterPage.Filter(rasterPage.Bounds, new SharpenFilterOptions(5, 4.0));
                         }
                     }
                 }
 
-                // Save the modified image using PNG options
-                PngOptions saveOptions = new PngOptions();
-                image.Save(outputPath, saveOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified APNG using default PNG options
+                var saveOptions = new PngOptions();
+                apng.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
