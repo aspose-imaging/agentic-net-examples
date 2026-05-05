@@ -5,27 +5,35 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = "sample.cmx";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "sample.cmx";
+            string outputPath = "output.txt";
 
-        // Load CMX image and check if it contains multiple pages
-        using (CmxImage image = (CmxImage)Image.Load(inputPath))
-        {
-            bool isMultiPage = false;
-            if (image is IMultipageImage multipageImage)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                isMultiPage = multipageImage.PageCount > 1;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            Console.WriteLine($"Is multi-page: {isMultiPage}");
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load CMX image and check if it is multi-page
+            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            {
+                IMultipageImage multipage = image as IMultipageImage;
+                bool isMultiPage = multipage != null && multipage.PageCount > 1;
+                Console.WriteLine($"Is multi-page: {isMultiPage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

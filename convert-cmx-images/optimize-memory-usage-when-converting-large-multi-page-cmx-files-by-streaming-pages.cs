@@ -1,53 +1,67 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\large.cmx";
-        string outputDirectory = @"C:\output\";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.cmx";
+            string outputDirectory = "Output";
 
-        // Ensure output directory exists (unconditional)
-        Directory.CreateDirectory(outputDirectory);
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-        // Configure load options for optimal memory usage
-        var loadOptions = new Aspose.Imaging.ImageLoadOptions.CmxLoadOptions
-        {
-            OptimalMemoryUsage = true,
-            // Optional: hint for internal buffer size (e.g., 4 MB)
-            BufferSizeHint = 4 * 1024 * 1024
-        };
-
-        // Load the CMX image using the specified options
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath, loadOptions))
-        {
-            // Iterate through each page without caching the whole document
-            for (int i = 0; i < cmxImage.PageCount; i++)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Retrieve the current page
-                CmxImagePage page = (CmxImagePage)cmxImage.Pages[i];
-
-                // Build output file path for the current page
-                string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
-
-                // Ensure the directory for the output file exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the page as PNG using default options
-                page.Save(outputPath, new PngOptions());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Load CMX image
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            {
+                int pageIndex = 0;
+                foreach (Image page in cmx.Pages)
+                {
+                    pageIndex++;
+                    string pageOutputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
+
+                    // Ensure directory for the page exists (already created above)
+                    Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
+
+                    // Configure rasterization options for the page
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new CmxRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = page.Width,
+                            PageHeight = page.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        }
+                    };
+
+                    // Save the page as PNG
+                    page.Save(pageOutputPath, pngOptions);
+
+                    // Release resources for the current page
+                    page.Dispose();
+                    GC.Collect();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

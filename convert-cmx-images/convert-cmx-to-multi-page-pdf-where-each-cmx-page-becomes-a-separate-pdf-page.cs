@@ -2,15 +2,13 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.cmx";
-        string outputPath = "output.pdf";
+        string inputPath = "Input/sample.cmx";
+        string outputPath = "Output/sample.pdf";
 
         if (!File.Exists(inputPath))
         {
@@ -20,24 +18,28 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+        try
         {
-            PdfOptions pdfOptions = new PdfOptions();
-
-            if (cmxImage is VectorImage)
+            using (Image image = Image.Load(inputPath))
             {
-                var vectorOptions = new VectorRasterizationOptions
+                var pdfOptions = new PdfOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = cmxImage.Width,
-                    PageHeight = cmxImage.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
-                pdfOptions.VectorRasterizationOptions = vectorOptions;
-            }
 
-            cmxImage.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

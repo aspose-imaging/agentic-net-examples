@@ -1,37 +1,52 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.cmx";
-        string outputPath = @"C:\temp\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.cmx";
+            string outputPath = "output.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load CMX image from a memory stream
+            byte[] cmxData = File.ReadAllBytes(inputPath);
+            using (var memoryStream = new MemoryStream(cmxData))
+            {
+                var streamContainer = new StreamContainer(memoryStream);
+                var loadOptions = new CmxLoadOptions();
+
+                using (var cmxImage = new CmxImage(streamContainer, loadOptions))
+                {
+                    // Prepare TIFF save options
+                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                    // Save directly to the output file without temporary files
+                    cmxImage.Save(outputPath, tiffOptions);
+                }
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load CMX image from memory stream
-        byte[] cmxBytes = File.ReadAllBytes(inputPath);
-        using (var cmxStream = new MemoryStream(cmxBytes))
-        using (Image cmxImage = Image.Load(cmxStream))
+        catch (Exception ex)
         {
-            // Prepare TIFF save options
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // Save the image as TIFF directly to the output path
-            cmxImage.Save(outputPath, tiffOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
