@@ -11,8 +11,11 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\multipage.svg";
-            string outputDir = @"C:\temp\output";
+            string inputPath = "input/multipage.svg";
+            string outputDir = "output";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -21,54 +24,62 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Load the multipage SVG image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to multipage interface
-                IMultipageImage multipage = image as IMultipageImage;
-                int pageCount = multipage != null ? multipage.PageCount : 1;
-
-                for (int i = 0; i < pageCount; i++)
+                // Check if the image supports multiple pages
+                if (image is IMultipageImage multipageImage && multipageImage.PageCount > 0)
                 {
-                    // Export current page to a temporary PNG
-                    string tempPngPath = Path.Combine(outputDir, $"page_{i}.png");
-                    PngOptions pngOptions = new PngOptions
+                    for (int i = 0; i < multipageImage.PageCount; i++)
                     {
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1)),
-                        VectorRasterizationOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions
+                        // Get the current page
+                        using (Image pageImage = multipageImage.Pages[i])
                         {
-                            PageSize = image.Size
+                            // Rasterize the page to a PNG in memory
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                // Set up vector rasterization options
+                                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                                {
+                                    PageSize = pageImage.Size
+                                };
+
+                                // Save the page as PNG to the memory stream
+                                PngOptions pngOptions = new PngOptions
+                                {
+                                    VectorRasterizationOptions = vectorOptions
+                                };
+                                pageImage.Save(ms, pngOptions);
+                                ms.Position = 0;
+
+                                // Load the rasterized page
+                                using (RasterImage raster = (RasterImage)Image.Load(ms))
+                                {
+                                    // Define a custom 3x3 convolution kernel (sharpen)
+                                    double[,] kernel = new double[,]
+                                    {
+                                        { 0, -1, 0 },
+                                        { -1, 5, -1 },
+                                        { 0, -1, 0 }
+                                    };
+
+                                    // Create convolution filter options
+                                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+
+                                    // Apply the convolution filter to the entire image
+                                    raster.Filter(raster.Bounds, filterOptions);
+
+                                    // Save the filtered page
+                                    string outputPath = Path.Combine(outputDir, $"page_{i}.png");
+                                    raster.Save(outputPath, new PngOptions());
+                                }
+                            }
                         }
-                    };
-                    image.Save(tempPngPath, pngOptions);
-
-                    // Load the exported PNG as a raster image
-                    using (Image rasterImg = Image.Load(tempPngPath))
-                    {
-                        var raster = (RasterImage)rasterImg;
-
-                        // Define a custom 3x3 convolution kernel (sharpen example)
-                        double[,] kernel = new double[,]
-                        {
-                            { 0, -1,  0 },
-                            { -1, 5, -1 },
-                            { 0, -1,  0 }
-                        };
-
-                        // Apply the convolution filter to the entire image
-                        raster.Filter(raster.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
-
-                        // Save the filtered image
-                        string filteredPath = Path.Combine(outputDir, $"page_{i}_filtered.png");
-                        raster.Save(filteredPath);
                     }
-
-                    // Optionally delete the intermediate unfiltered PNG
-                    File.Delete(tempPngPath);
+                }
+                else
+                {
+                    Console.Error.WriteLine("The image does not support multiple pages.");
                 }
             }
         }
