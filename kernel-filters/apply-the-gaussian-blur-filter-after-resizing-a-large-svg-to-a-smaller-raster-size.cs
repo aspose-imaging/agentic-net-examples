@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -13,7 +13,8 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\large.svg";
-            string outputPath = @"C:\Images\output.png";
+            string resizedPath = @"C:\Images\resized.png";
+            string outputPath = @"C:\Images\blurred.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,48 +23,36 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(resizedPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Temporary raster file path
-            string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-            // Load SVG, rasterize to a smaller PNG
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            // Load the SVG image
+            using (Image svgImage = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    // Preserve original page size
-                    PageSize = svgImage.Size,
-                    // Reduce size to 50% (adjust as needed)
-                    ScaleX = 0.5f,
-                    ScaleY = 0.5f,
-                    // Optional: improve quality
-                    SmoothingMode = SmoothingMode.AntiAlias,
-                    TextRenderingHint = TextRenderingHint.AntiAlias
-                };
+                // Define target raster size (example: 800x600)
+                int targetWidth = 800;
+                int targetHeight = 600;
 
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                // Resize the SVG while preserving aspect ratio
+                svgImage.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
 
-                svgImage.Save(tempPath, pngOptions);
+                // Save the resized SVG as a PNG (raster image)
+                var pngOptions = new PngOptions();
+                svgImage.Save(resizedPath, pngOptions);
             }
 
-            // Load the rasterized PNG, apply Gaussian blur, and save final output
-            using (RasterImage rasterImage = (RasterImage)Image.Load(tempPath))
+            // Load the rasterized PNG
+            using (Image rasterImg = Image.Load(resizedPath))
             {
-                // Apply Gaussian blur with kernel size 5 and sigma 4.0
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-                rasterImage.Save(outputPath);
-            }
+                // Cast to RasterImage to apply filters
+                var raster = (RasterImage)rasterImg;
 
-            // Clean up temporary file
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
+                // Apply Gaussian blur filter (size 5, sigma 4.0) to the whole image
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the final blurred image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
