@@ -1,20 +1,19 @@
 using System;
 using System.IO;
-using System.Diagnostics;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string inputPath = "C:\\Images\\highres.png";
+            string outputPath = "C:\\Images\\highres_gaussian.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,34 +21,37 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Memory before loading the image
+            long memoryBeforeLoad = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
 
             // Load the high‑resolution PNG
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Measure memory before applying the filter
-                long memoryBefore = GC.GetTotalMemory(true);
-                Stopwatch sw = Stopwatch.StartNew();
+                // Memory after loading
+                long memoryAfterLoad = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
 
-                // Apply a 7×7 Gaussian blur (size 7, sigma 1.0)
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(7, 1.0));
+                // Apply a 7×7 Gaussian blur (size = 7, sigma = 1.0)
+                var blurOptions = new GaussianBlurFilterOptions(7, 1.0);
+                raster.Filter(raster.Bounds, blurOptions);
 
-                sw.Stop();
-                // Measure memory after applying the filter
-                long memoryAfter = GC.GetTotalMemory(true);
+                // Memory after filtering
+                long memoryAfterFilter = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
 
-                // Save the filtered image as PNG
-                PngOptions saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                // Save the processed image
+                raster.Save(outputPath);
 
-                // Output benchmark results
-                Console.WriteLine($"Filter time: {sw.ElapsedMilliseconds} ms");
-                Console.WriteLine($"Memory before: {memoryBefore} bytes");
-                Console.WriteLine($"Memory after: {memoryAfter} bytes");
-                Console.WriteLine($"Memory increase: {memoryAfter - memoryBefore} bytes");
+                // Memory after saving
+                long memoryAfterSave = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
+
+                // Output memory usage statistics
+                Console.WriteLine($"Memory (bytes) before load: {memoryBeforeLoad}");
+                Console.WriteLine($"Memory (bytes) after load: {memoryAfterLoad}");
+                Console.WriteLine($"Memory (bytes) after filter: {memoryAfterFilter}");
+                Console.WriteLine($"Memory (bytes) after save: {memoryAfterSave}");
             }
         }
         catch (Exception ex)
