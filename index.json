@@ -3,9 +3,9 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.4.0",
-  "total_examples": 2916,
+  "total_examples": 2917,
   "total_categories": 17,
-  "last_updated": "2026-05-04",
+  "last_updated": "2026-05-05",
   "categories": [
     {
       "name": "conversion",
@@ -1604,8 +1604,9 @@
     },
     {
       "name": "image-and-photo-filters",
-      "file_count": 137,
+      "file_count": 138,
       "all_files": [
+        "28753-save-the-mask-generated-by-magicwandtool-as-a-separate-grayscale-bmp-to-reuse-in-later-image-processing-pipelines.cs",
         "28757-combine-a-magicwand-mask-with-a-manually-drawn-polygon-mask-using-union-to-create-a-composite-selection.cs",
         "add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs",
         "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs",
@@ -1745,6 +1746,7 @@
         "write-integration-tests-that-process-an-image-through-both-filters-and-compare-the-output-hashes-to-expected-values.cs"
       ],
       "files": [
+        "28753-save-the-mask-generated-by-magicwandtool-as-a-separate-grayscale-bmp-to-reuse-in-later-image-processing-pipelines.cs",
         "28757-combine-a-magicwand-mask-with-a-manually-drawn-polygon-mask-using-union-to-create-a-composite-selection.cs",
         "add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs",
         "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs",
@@ -1773,34 +1775,38 @@
         "apply-image-and-photo-filters-to-isolate-and-process-a-specific-color-region-within-an-image.cs",
         "apply-image-and-photo-filters-to-remove-watermarks-from-a-given-image-while-preserving-visual-quality.cs",
         "apply-image-and-photo-filters-using-the-magic-wand-filter-to-a-specified-image.cs",
-        "apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs",
-        "apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs"
+        "apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs"
       ],
       "required_namespaces": [
         "System",
         "System.IO",
         "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
-        "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.MagicWand",
+        "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.MagicWand.ImageMasks",
-        "Aspose.Imaging.Sources",
         "Aspose.Imaging.Shapes",
+        "Aspose.Imaging.Sources",
         "Aspose.Imaging.Watermark",
         "Aspose.Imaging.Watermark.Options",
-        "Aspose.Imaging.FileFormats.Jpeg",
-        "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.Masking",
         "Aspose.Imaging.Masking.Options",
         "Aspose.Imaging.Masking.Result",
-        "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.Brushes",
-        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Gif",
+        "System.Diagnostics",
+        "Aspose.Imaging.FileFormats.Gif.Blocks",
+        "System.Drawing",
+        "System.Collections.Generic",
+        "Aspose.Imaging.FileFormats.BigTiff",
         "System.Linq"
       ],
       "key_apis": [
+        "AutoMaskingGraphCutOptions",
         "BmpImage",
         "BmpOptions",
         "ContentAwareFillWatermarkOptions",
@@ -1821,7 +1827,7 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 107,
+        "count": 108,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.4.0/image-and-photo-filters"
       }
     },
