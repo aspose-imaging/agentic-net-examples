@@ -1,27 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
-public interface IImageFilterService
-{
-    void ApplySharpenFilter(string inputPath, string outputPath);
-}
-
-public class ImageFilterService : IImageFilterService
-{
-    public void ApplySharpenFilter(string inputPath, string outputPath)
-    {
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new SharpenFilterOptions());
-            raster.Save(outputPath);
-        }
-    }
-}
-
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
@@ -36,10 +17,12 @@ public class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            IImageFilterService filterService = new ImageFilterService();
-            filterService.ApplySharpenFilter(inputPath, outputPath);
+            using (Image image = Image.Load(inputPath))
+            {
+                image.Save(outputPath);
+            }
         }
         catch (Exception ex)
         {
