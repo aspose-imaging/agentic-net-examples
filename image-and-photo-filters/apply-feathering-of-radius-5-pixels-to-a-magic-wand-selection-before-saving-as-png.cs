@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -10,7 +9,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
@@ -22,23 +21,27 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load image and apply Magic Wand selection with feathering
-        using (RasterImage image = (RasterImage)Image.Load(inputPath))
+        try
         {
-            // Select a region based on a reference point (e.g., 120,100)
-            MagicWandTool
-                .Select(image, new MagicWandSettings(120, 100))
-                .GetFeathered(new FeatheringSettings { Size = 5 })
-                .Apply();
-
-            // Save the result as PNG with alpha channel
-            var pngOptions = new PngOptions
+            // Load the image as a RasterImage
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-            image.Save(outputPath, pngOptions);
+                // Create a magic wand selection at point (10,10), feather it with radius 5, and apply the mask
+                MagicWandTool
+                    .Select(image, new MagicWandSettings(10, 10))
+                    .GetFeathered(new FeatheringSettings() { Size = 5 })
+                    .Apply();
+
+                // Save the resulting image as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
