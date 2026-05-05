@@ -1,5 +1,9 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -9,14 +13,14 @@ class Program
     {
         try
         {
-            var tasks = new (string input, string output, int threshold, int featherSize)[]
-            {
-                (@"C:\Images\image1.png", @"C:\Processed\image1_processed.png", 120, 3),
-                (@"C:\Images\image2.png", @"C:\Processed\image2_processed.png", 200, 0),
-                (@"C:\Images\image3.png", @"C:\Processed\image3_processed.png", 80, 5)
-            };
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            foreach (var (inputPath, outputPath, threshold, featherSize) in tasks)
+            string[] files = Directory.GetFiles(inputDirectory);
+            var reportLines = new List<string>();
+            reportLines.Add("FileName,Threshold,Feathered");
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -24,27 +28,36 @@ class Program
                     continue;
                 }
 
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
-                {
-                    var mask = MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = threshold });
+                int threshold = 150;
+                bool feathered = true;
 
-                    if (featherSize > 0)
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    if (feathered)
                     {
-                        var featheredMask = mask.GetFeathered(new FeatheringSettings { Size = featherSize });
-                        featheredMask.Apply();
+                        MagicWandTool.Select(image, new MagicWandSettings(10, 10) { Threshold = threshold })
+                            .GetFeathered(new FeatheringSettings() { Size = 3 })
+                            .Apply();
                     }
                     else
                     {
-                        mask.Apply();
+                        MagicWandTool.Select(image, new MagicWandSettings(10, 10) { Threshold = threshold })
+                            .Apply();
                     }
 
-                    image.Save(outputPath);
+                    image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
 
-                Console.WriteLine($"{Path.GetFileName(inputPath)}\tThreshold={threshold}\tFeathered={(featherSize > 0)}");
+                reportLines.Add($"{fileName},{threshold},{feathered}");
             }
+
+            string reportPath = Path.Combine(outputDirectory, "report.csv");
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
+            File.WriteAllLines(reportPath, reportLines);
         }
         catch (Exception ex)
         {
