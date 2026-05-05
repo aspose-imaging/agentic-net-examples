@@ -1,8 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
@@ -11,54 +9,47 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
+            string inputPath = "input/multipage.svg";
+            string outputPath = "output/processed.svg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputBaseDir = "output";
-            Directory.CreateDirectory(outputBaseDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                IMultipageImage multipage = image as IMultipageImage;
-                if (multipage == null)
+                if (image is Aspose.Imaging.IMultipageImage multipageImage)
                 {
-                    Console.Error.WriteLine("The loaded image is not a multipage image.");
-                    return;
-                }
-
-                for (int i = 0; i < multipage.PageCount; i++)
-                {
-                    using (Image page = multipage.Pages[i])
+                    for (int i = 0; i < multipageImage.PageCount; i++)
                     {
-                        // Rasterize the page to a PNG in memory
+                        Aspose.Imaging.Image page = multipageImage.Pages[i];
+
+                        var svgOptions = new SvgRasterizationOptions
+                        {
+                            PageWidth = page.Width,
+                            PageHeight = page.Height,
+                            BackgroundColor = Aspose.Imaging.Color.White
+                        };
+
                         using (MemoryStream ms = new MemoryStream())
                         {
-                            PngOptions pngOptions = new PngOptions();
-                            VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
-                            {
-                                PageSize = page.Size
-                            };
-                            pngOptions.VectorRasterizationOptions = rasterOptions;
-
+                            var pngOptions = new PngOptions { VectorRasterizationOptions = svgOptions };
                             page.Save(ms, pngOptions);
                             ms.Position = 0;
 
-                            using (RasterImage raster = (RasterImage)Image.Load(ms))
+                            using (Aspose.Imaging.Image rasterImg = Aspose.Imaging.Image.Load(ms))
                             {
-                                // Apply motion Wiener filter (size 6, smooth 1.0, angle 75)
-                                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(6, 1.0, 75.0));
-
-                                string outputPath = Path.Combine(outputBaseDir, $"page_{i}.png");
-                                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                                raster.Save(outputPath);
+                                // No additional processing
                             }
                         }
                     }
                 }
+
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)
