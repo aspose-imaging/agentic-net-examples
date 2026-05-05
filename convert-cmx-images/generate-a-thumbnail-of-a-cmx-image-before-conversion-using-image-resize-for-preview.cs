@@ -1,41 +1,42 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input\\sample.cmx";
-        string outputPath = "Output\\thumbnail.png";
+        string inputPath = "sample.cmx";
+        string outputPath = "preview\\sample_thumbnail.png";
 
-        // Verify that the input CMX file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the CMX image
+            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            {
+                // Resize to thumbnail size (e.g., 100x100)
+                image.Resize(100, 100);
+
+                // Save the resized thumbnail as PNG
+                image.Save(outputPath, new PngOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image using a fully qualified type name
-        using (Aspose.Imaging.FileFormats.Cmx.CmxImage cmxImage = (Aspose.Imaging.FileFormats.Cmx.CmxImage)Aspose.Imaging.Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cache data for better performance (optional)
-            cmxImage.CacheData();
-
-            // Determine thumbnail dimensions (e.g., quarter size)
-            int thumbWidth = cmxImage.Width / 4;
-            int thumbHeight = cmxImage.Height / 4;
-
-            // Resize the image to create a thumbnail
-            cmxImage.Resize(thumbWidth, thumbHeight);
-
-            // Save the thumbnail as a PNG file
-            cmxImage.Save(outputPath, new PngOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
