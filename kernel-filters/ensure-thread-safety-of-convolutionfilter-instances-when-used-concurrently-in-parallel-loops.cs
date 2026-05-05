@@ -1,10 +1,6 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -12,46 +8,45 @@ class Program
     {
         try
         {
+            // Hard‑coded input and output directories
             string inputDir = "InputImages";
             string outputDir = "OutputImages";
 
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
-            List<string> inputFiles = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly)
-                .Where(f => f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            // Get all PNG files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.png");
 
-            inputFiles.AsParallel().ForAll(inputPath =>
+            // Process each file in parallel – each iteration creates its own filter instance
+            System.Threading.Tasks.Parallel.ForEach(inputFiles, inputPath =>
             {
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+                // Build output path and ensure its directory exists
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + "_sharpened.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load the image, apply a Sharpen filter, and save the result
                 using (Image img = Image.Load(inputPath))
                 {
+                    // Cast to RasterImage for filtering
                     RasterImage raster = (RasterImage)img;
 
-                    double[,] kernel = new double[,]
-                    {
-                        { -1, -1, -1 },
-                        { -1,  8, -1 },
-                        { -1, -1, -1 }
-                    };
+                    // Each thread gets its own filter options instance (thread‑safe)
+                    var filter = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0);
 
-                    var filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
-                    raster.Filter(raster.Bounds, filterOptions);
-                    raster.Save(outputPath, new PngOptions());
+                    // Apply the filter to the whole image
+                    raster.Filter(raster.Bounds, filter);
+
+                    // Save the processed image
+                    raster.Save(outputPath);
                 }
             });
         }

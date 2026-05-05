@@ -1,40 +1,34 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "templates/sample.svg";
-        string outputPath = "output/sample.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input path to the SVG file in the templates folder
+            string inputPath = "templates/sample.svg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image using Aspose.Imaging.Image.Load
-        using (Image image = Image.Load(inputPath))
-        {
-            // Set up rasterization options for SVG to PNG conversion
-            var rasterizationOptions = new SvgRasterizationOptions();
-
-            // Configure PNG save options with the rasterization settings
-            var pngOptions = new PngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = rasterizationOptions
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the rasterized image to the output path
-            image.Save(outputPath, pngOptions);
+            // Load the SVG image using Aspose.Imaging.Image.Load
+            using (Image image = Image.Load(inputPath))
+            {
+                // Example usage: output basic information about the loaded image
+                Console.WriteLine($"Successfully loaded SVG image: {inputPath}");
+                Console.WriteLine($"Dimensions: {image.Width}x{image.Height}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

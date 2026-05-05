@@ -1,42 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output_sobel.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage rasterImage = (RasterImage)image;
 
-                double[,] kernel = new double[3, 3]
+                // Define the horizontal Sobel kernel
+                double[,] sobelKernel = new double[,]
                 {
                     { -1, 0, 1 },
                     { -2, 0, 2 },
                     { -1, 0, 1 }
                 };
 
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                // Apply the convolution filter with the Sobel kernel to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(sobelKernel));
 
-                PngOptions options = new PngOptions();
-                raster.Save(outputPath, options);
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)

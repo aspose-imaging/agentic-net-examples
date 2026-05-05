@@ -13,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\temp\sample.png";
-            string outputPath = @"C:\temp\sample.GaussianBlur.png";
+            string outputPath = @"C:\temp\sample.GaussianBlurFilter.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,20 +25,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Run the image processing on a background thread to avoid blocking the UI thread
+            // Run the image processing on a background thread
             await Task.Run(() =>
             {
-                // Load the PNG image
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering capabilities
+                    // Cast to RasterImage to access filtering
                     var rasterImage = (RasterImage)image;
 
-                    // Configure Gaussian blur filter (size = 5, sigma = 4.0)
-                    var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
-
-                    // Apply the filter to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, blurOptions);
+                    // Apply Gaussian blur with radius 5 and sigma 4.0
+                    rasterImage.Filter(
+                        rasterImage.Bounds,
+                        new GaussianBlurFilterOptions(5, 4.0));
 
                     // Save the processed image
                     rasterImage.Save(outputPath);

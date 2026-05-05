@@ -2,44 +2,33 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main()
     {
         try
         {
-            // Define output path
-            string outputPath = "output.png";
-
-            // Ensure output directory exists
+            string outputPath = Path.Combine("Output", "drawing_filtered.png");
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG image with bound output file
-            var pngOptions = new PngOptions();
+            PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
-            int width = 400;
-            int height = 300;
 
-            using (Image image = Image.Create(pngOptions, width, height))
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                // Draw a simple rectangle
-                var graphics = new Graphics(image);
+                Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
-                var pen = new Pen(Color.Blue, 5);
-                graphics.DrawRectangle(pen, new Rectangle(50, 50, 300, 200));
+                graphics.DrawRectangle(new Pen(Color.Blue, 5), new Rectangle(50, 50, 200, 150));
+                graphics.DrawEllipse(new Pen(Color.Red, 3), new Rectangle(300, 100, 150, 100));
+                graphics.DrawLine(new Pen(Color.Green, 2), new Point(100, 400), new Point(400, 400));
 
-                // Apply motion blur convolution filter (size 4, angle 135)
-                var raster = (RasterImage)image;
-                double[,] kernel = ConvolutionFilter.GetBlurMotion(4, 135);
-                var convOptions = new ConvolutionFilterOptions(kernel);
+                RasterImage raster = (RasterImage)image;
+                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(4, 135);
+                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
                 raster.Filter(raster.Bounds, convOptions);
 
-                // Save the image (file is already bound to outputPath)
                 image.Save();
             }
         }

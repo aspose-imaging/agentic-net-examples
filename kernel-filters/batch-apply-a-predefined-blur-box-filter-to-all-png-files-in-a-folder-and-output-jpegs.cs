@@ -1,67 +1,58 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure input directory exists before enumerating files
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        // Get all PNG files in the input directory
-        string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+            // Get all PNG files in the input folder
+            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
 
-        foreach (string inputPath in pngFiles)
-        {
-            // Validate each input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in pngFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the output JPEG path (same file name, .jpg extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PNG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to RasterImage to apply filters
+                    RasterImage rasterImage = (RasterImage)image;
+
+                    // Apply a Gaussian blur filter (used as a predefined blur box filter)
+                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                    // Save the processed image as JPEG
+                    rasterImage.Save(outputPath, new JpegOptions());
+                }
             }
-
-            // Prepare output JPEG path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG image as a raster image
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)image;
-
-                // Apply a blur box filter (size 5) using ConvolutionFilterOptions
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5));
-                raster.Filter(raster.Bounds, blurOptions);
-
-                // Save the processed image as JPEG
-                var jpegOptions = new JpegOptions();
-                raster.Save(outputPath, jpegOptions);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -11,8 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.png";
-            string blurredPath = @"C:\Images\blurred.png";
-            string outputPath = @"C:\Images\result.png";
+            string outputPath = @"C:\Images\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,24 +20,22 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(blurredPath));
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
+                // Cast to RasterImage to apply filters
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with sigma 1.2 (kernel size 5)
+                // Apply Gaussian blur with radius 5 and sigma 1.2
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 1.2));
-                // Save the blurred image
-                rasterImage.Save(blurredPath);
 
                 // Apply Gaussian deconvolution (Gauss-Wiener) with matching kernel
                 rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 1.2));
-                // Save the final deconvolved image
+
+                // Save the processed image
                 rasterImage.Save(outputPath);
             }
         }

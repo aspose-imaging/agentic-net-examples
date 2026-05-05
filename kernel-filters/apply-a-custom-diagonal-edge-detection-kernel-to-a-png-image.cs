@@ -2,41 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Custom diagonal edge‑detection kernel (3×3)
+                // Define a custom diagonal edge‑detection kernel
                 double[,] kernel = new double[,]
                 {
-                    { -2, -1, 0 },
-                    { -1,  0, 1 },
-                    {  0,  1, 2 }
+                    { -1, 0, 1 },
+                    {  0, 0, 0 },
+                    {  1, 0,-1 }
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                raster.Filter(raster.Bounds, filterOptions);
+                // Apply the convolution filter with the custom kernel
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                var pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                // Prepare PNG save options
+                PngOptions saveOptions = new PngOptions();
+
+                // Save the processed image
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

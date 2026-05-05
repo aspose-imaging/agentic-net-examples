@@ -1,9 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -11,9 +8,11 @@ class Program
     {
         try
         {
+            // Hardcoded input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
+            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -21,38 +20,38 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            // Get all PNG files in the input folder
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
             foreach (string inputPath in files)
             {
+                // Verify each input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
+                // Prepare output path
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_motionblur.png");
+                string outputPath = Path.Combine(outputDirectory, fileName + "_motion.png");
 
+                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load image, apply motion Wiener filter, and save
                 using (Image image = Image.Load(inputPath))
                 {
                     RasterImage raster = (RasterImage)image;
-
-                    double[,] kernel = ConvolutionFilter.GetBlurMotion(3, 45);
-                    var filterOptions = new ConvolutionFilterOptions(kernel);
-                    raster.Filter(raster.Bounds, filterOptions);
-
-                    using (var pngOptions = new PngOptions())
-                    {
-                        raster.Save(outputPath, pngOptions);
-                    }
+                    raster.Filter(raster.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(3, 1.0, 45.0));
+                    raster.Save(outputPath);
                 }
             }
         }

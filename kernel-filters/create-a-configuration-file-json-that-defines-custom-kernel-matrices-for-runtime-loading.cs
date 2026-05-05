@@ -1,55 +1,66 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Collections.Generic;
+using Aspose.Imaging; // Ensure Aspose.Imaging v2 is referenced
 
-namespace AsposeImagingKernelConfig
+namespace KernelConfigGenerator
 {
-    // Represents a kernel matrix configuration
+    // Represents the structure of the JSON configuration file
     public class KernelConfig
     {
-        // Dictionary where key is kernel name and value is the flat matrix values
-        public Dictionary<string, double[]> Kernels { get; set; } = new Dictionary<string, double[]>();
+        public Dictionary<string, double[][]> Kernels { get; set; } = new Dictionary<string, double[][]>();
     }
 
     class Program
     {
         static void Main()
         {
-            // Hard‑coded paths (no argument validation)
-            string outputPath = "Config/kernelConfig.json";
+            // Hardcoded paths
+            string inputPath = "sample.jpg"; // Example input image (not used for config generation)
+            string outputPath = "config/kernels.json";
 
             try
             {
-                // Ensure the output directory exists (unconditional)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Build the configuration object with custom kernels
+                // Build custom kernel definitions
                 var config = new KernelConfig();
 
-                // Example custom kernels (flat arrays, row‑major order)
-                config.Kernels["CustomEmboss3x3"] = new double[]
+                // Example custom 3x3 sharpen kernel
+                config.Kernels["CustomSharpen3x3"] = new double[][]
                 {
-                    -2, -1, 0,
-                    -1,  1, 1,
-                     0,  1, 2
+                    new double[] { 0, -1, 0 },
+                    new double[] { -1, 5, -1 },
+                    new double[] { 0, -1, 0 }
                 };
 
-                config.Kernels["CustomSharpen5x5"] = new double[]
+                // Example custom 5x5 emboss kernel
+                config.Kernels["CustomEmboss5x5"] = new double[][]
                 {
-                    0, -1, -1, -1, 0,
-                    -1, 2, -4, 2, -1,
-                    -1, -4, 13, -4, -1,
-                    -1, 2, -4, 2, -1,
-                    0, -1, -1, -1, 0
+                    new double[] { -2, -1, 0, 1, 2 },
+                    new double[] { -1, -1, 0, 1, 1 },
+                    new double[] { 0, 0, 0, 0, 0 },
+                    new double[] { 1, 1, 0, -1, -1 },
+                    new double[] { 2, 1, 0, -1, -2 }
                 };
 
                 // Serialize to JSON with indentation for readability
                 var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize(config, jsonOptions);
+                string jsonContent = JsonSerializer.Serialize(config, jsonOptions);
 
-                // Save the JSON configuration file
-                File.WriteAllText(outputPath, json);
+                // Write JSON to the output file
+                File.WriteAllText(outputPath, jsonContent);
+
+                Console.WriteLine($"Kernel configuration saved to: {outputPath}");
             }
             catch (Exception ex)
             {

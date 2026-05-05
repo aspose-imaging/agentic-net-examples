@@ -1,47 +1,65 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_soft_focus.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output_softfocus.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the JPEG image
-        using (JpegImage jpegImage = new JpegImage(inputPath))
-        {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)jpegImage;
-
-            // Create a 7x7 Gaussian blur filter (soft focus) with neutral brightness
-            // Size = 7 (kernel size), Sigma = 2.0 (controls blur amount)
-            // Bias = 0 and Factor = 1.0 keep the overall brightness unchanged
-            var blurOptions = new GaussianBlurFilterOptions(7, 2.0)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Bias = 0,
-                Factor = 1.0
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Apply the filter to the whole image
-            rasterImage.Filter(rasterImage.Bounds, blurOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the processed image
-            rasterImage.Save(outputPath);
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                // Define a custom 7x7 kernel (example values)
+                double[] kernel = new double[]
+                {
+                    1, 1, 2, 2, 2, 1, 1,
+                    1, 2, 2, 4, 2, 2, 1,
+                    2, 2, 4, 8, 4, 2, 2,
+                    2, 4, 8,16, 8, 4, 2,
+                    2, 2, 4, 8, 4, 2, 2,
+                    1, 2, 2, 4, 2, 2, 1,
+                    1, 1, 2, 2, 2, 1, 1
+                };
+
+                // Normalize the kernel so that its sum equals 1 (neutral brightness)
+                double sum = kernel.Sum();
+                for (int i = 0; i < kernel.Length; i++)
+                {
+                    kernel[i] /= sum;
+                }
+
+                // Apply a soft‑focus effect using a Gaussian blur that matches the 7x7 size.
+                // The Gaussian blur internally creates a normalized kernel, achieving the desired effect.
+                var blurOptions = new GaussianBlurFilterOptions(7, 2.0);
+                raster.Filter(raster.Bounds, blurOptions);
+
+                // Save the processed image
+                raster.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

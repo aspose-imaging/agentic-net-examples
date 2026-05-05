@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -9,11 +8,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists; create if missing and exit
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -21,37 +19,28 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
             foreach (string inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Preserve original file name for output
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName);
-
-                // Ensure the output directory for the file exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load, apply Sharpen5x5 filter, and save
                 using (Image image = Image.Load(inputPath))
                 {
                     RasterImage raster = (RasterImage)image;
-                    // Sharpen filter with kernel size 5 and sigma 4.0
-                    raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
                     raster.Save(outputPath);
                 }
             }

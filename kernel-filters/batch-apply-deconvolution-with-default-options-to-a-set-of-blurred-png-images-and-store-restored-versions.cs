@@ -1,67 +1,45 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-public class Program
+class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define base, input and output directories
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output file paths
+            string[] inputPaths = { "blurred1.png", "blurred2.png", "blurred3.png" };
+            string[] outputPaths = { "restored1.png", "restored2.png", "restored3.png" };
 
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
+            for (int i = 0; i < inputPaths.Length; i++)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Get all PNG files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string inputPath in files)
-            {
-                // Verify each input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output file path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_restored.png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                // Ensure the output directory for this file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image as a raster image
+                // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Cast to RasterImage to apply filters
                     RasterImage raster = (RasterImage)image;
 
-                    // Apply deconvolution filter with default options (GaussWienerFilterOptions)
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions());
+                    // Apply deconvolution filter with default options (MotionWienerFilterOptions)
+                    var deconvOptions = new MotionWienerFilterOptions(5, 1.0, 0.0);
+                    raster.Filter(raster.Bounds, deconvOptions);
 
-                    // Save the restored image as PNG
-                    using (PngOptions saveOptions = new PngOptions())
-                    {
-                        saveOptions.Source = new FileCreateSource(outputPath, false);
-                        raster.Save(outputPath, saveOptions);
-                    }
+                    // Save the restored image
+                    raster.Save(outputPath);
                 }
             }
         }

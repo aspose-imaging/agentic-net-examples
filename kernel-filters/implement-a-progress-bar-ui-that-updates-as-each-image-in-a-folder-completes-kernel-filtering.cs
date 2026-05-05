@@ -6,34 +6,21 @@ using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
-    // Holds the name of the file currently being processed for progress callbacks
-    private static string _currentFileName = string.Empty;
-
-    // Progress callback for loading operations
-    private static void LoadProgressCallback(ProgressEventHandlerInfo info)
-    {
-        Console.Write($"\rLoading {_currentFileName}: {info.EventType} {info.Value}/{info.MaxValue}   ");
-    }
-
-    // Progress callback for saving operations
-    private static void SaveProgressCallback(ProgressEventHandlerInfo info)
-    {
-        Console.Write($"\rSaving   {_currentFileName}: {info.EventType} {info.Value}/{info.MaxValue}   ");
-    }
-
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
-
-            // Get all PNG files in the input folder
-            string[] files = Directory.GetFiles(inputFolder, "*.png");
-
+            // Get all image files in the input folder (adjust the pattern as needed)
+            string[] files = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
             int totalFiles = files.Length;
-            int processedCount = 0;
+            int processedFiles = 0;
+
+            // Simple console progress bar settings
+            const int progressBarWidth = 50;
 
             foreach (string inputPath in files)
             {
@@ -44,33 +31,34 @@ class Program
                     return;
                 }
 
-                _currentFileName = Path.GetFileName(inputPath);
-
                 // Prepare output path
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + "_sharpened.png");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_sharpened.png";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load image with progress handler
-                using (Image image = Image.Load(inputPath, new LoadOptions { ProgressEventHandler = LoadProgressCallback }))
+                // Load image, apply sharpen filter, and save
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to apply filter
-                    RasterImage rasterImage = (RasterImage)image;
+                    RasterImage raster = (RasterImage)image;
 
-                    // Apply sharpen filter
-                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                    // Apply sharpen filter with kernel size 5 and sigma 4.0
+                    raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Save image with progress handler
-                    rasterImage.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions { ProgressEventHandler = SaveProgressCallback });
+                    // Save the processed image
+                    raster.Save(outputPath);
                 }
 
-                processedCount++;
-                // Overall progress
-                Console.WriteLine($"\rProcessed {processedCount}/{totalFiles} images.                              ");
+                // Update progress bar
+                processedFiles++;
+                int filled = (int)((double)processedFiles / totalFiles * progressBarWidth);
+                string bar = new string('#', filled).PadRight(progressBarWidth, '-');
+                Console.Write($"\rProcessing: [{bar}] {processedFiles}/{totalFiles}");
             }
 
-            Console.WriteLine("All images processed successfully.");
+            // Move to next line after completion
+            Console.WriteLine();
         }
         catch (Exception ex)
         {

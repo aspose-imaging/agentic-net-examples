@@ -2,31 +2,32 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image svgImage = Image.Load(inputPath))
+            using (var svgImage = (SvgImage)Image.Load(inputPath))
             {
                 var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
                 };
 
                 var pngOptions = new PngOptions
@@ -34,25 +35,22 @@ class Program
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                using (var memoryStream = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                    using (Image rasterImg = Image.Load(memoryStream))
+                    using (var rasterImage = (RasterImage)Image.Load(ms))
                     {
-                        var raster = (RasterImage)rasterImg;
-
-                        double[,] sobelVertical = new double[,]
+                        double[,] kernel = new double[,]
                         {
                             { -1, 0, 1 },
                             { -2, 0, 2 },
                             { -1, 0, 1 }
                         };
-
-                        var convOptions = new ConvolutionFilterOptions(sobelVertical);
-                        raster.Filter(raster.Bounds, convOptions);
-                        raster.Save(outputPath, new PngOptions());
+                        var filterOptions = new ConvolutionFilterOptions(kernel);
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                        rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
             }

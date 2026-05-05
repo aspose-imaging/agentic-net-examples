@@ -3,35 +3,48 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            Image image = null;
+            try
+            {
+                // Load the image
+                image = Image.Load(inputPath);
                 RasterImage raster = (RasterImage)image;
-                try
+
+                // Apply a sharpen filter to the entire image
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                // Save the processed image as PNG
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
+            }
+            finally
+            {
+                // Guarantee disposal of the image object
+                if (image != null)
                 {
-                    raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-                    raster.Save(outputPath, new PngOptions());
-                }
-                finally
-                {
-                    // Disposal handled by the using block above
+                    image.Dispose();
                 }
             }
         }

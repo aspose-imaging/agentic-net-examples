@@ -1,16 +1,18 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
-        // Verify input file exists
+        // Check input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,24 +24,28 @@ class Program
 
         try
         {
-            // Load the image and cast to RasterImage
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access filtering
+                RasterImage rasterImage = (RasterImage)image;
 
                 // Store original dimensions
-                int originalWidth = raster.Width;
-                int originalHeight = raster.Height;
+                int originalWidth = rasterImage.Width;
+                int originalHeight = rasterImage.Height;
 
-                // Apply a convolution filter (Sharpen filter as example)
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                // Apply a convolution filter (Gaussian blur as an example)
+                var filterOptions = new GaussianBlurFilterOptions(5, 4.0);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
                 // Verify dimensions remain unchanged
-                bool dimensionsUnchanged = raster.Width == originalWidth && raster.Height == originalHeight;
-                Console.WriteLine($"Dimensions unchanged after filter: {dimensionsUnchanged}");
+                bool dimensionsUnchanged = rasterImage.Width == originalWidth && rasterImage.Height == originalHeight;
+                Console.WriteLine(dimensionsUnchanged
+                    ? "Image dimensions unchanged after filter."
+                    : "Image dimensions changed after filter.");
 
                 // Save the processed image
-                raster.Save(outputPath);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)

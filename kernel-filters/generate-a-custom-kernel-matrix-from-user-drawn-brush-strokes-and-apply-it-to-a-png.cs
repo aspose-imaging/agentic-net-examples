@@ -3,75 +3,58 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\sample.png";
-            string outputPath = "output\\result.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source PNG image as a raster image
-            using (Image srcImage = Image.Load(inputPath))
+            using (RasterImage inputRaster = (RasterImage)Image.Load(inputPath))
             {
-                RasterImage rasterSrc = (RasterImage)srcImage;
-
-                // Define kernel size (e.g., 5x5)
-                int kernelSize = 5;
-
-                // Create a temporary PNG canvas to draw brush strokes
-                using (PngImage kernelImg = new PngImage(kernelSize, kernelSize))
+                using (PngImage kernelImage = new PngImage(3, 3))
                 {
-                    // Draw a simple brush stroke (filled black circle) on white background
-                    Graphics graphics = new Graphics(kernelImg);
-                    graphics.Clear(Color.White);
-                    using (SolidBrush brush = new SolidBrush(Color.Black))
+                    Graphics graphics = new Graphics(kernelImage);
+                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.White))
                     {
-                        graphics.FillEllipse(brush, new Rectangle(0, 0, kernelSize, kernelSize));
+                        graphics.FillRectangle(brush, new Rectangle(1, 1, 1, 1));
                     }
 
-                    // Extract ARGB pixel data from the brush stroke canvas
-                    int[] argbPixels = kernelImg.LoadArgb32Pixels(kernelImg.Bounds);
+                    RasterImage kernelRaster = (RasterImage)kernelImage;
+                    int[] argbPixels = kernelRaster.LoadArgb32Pixels(kernelRaster.Bounds);
 
-                    // Convert pixel data to a double[,] kernel (grayscale intensity normalized to 0‑1)
-                    double[,] customKernel = new double[kernelSize, kernelSize];
-                    for (int y = 0; y < kernelSize; y++)
+                    double[,] customKernel = new double[3, 3];
+                    for (int y = 0; y < 3; y++)
                     {
-                        for (int x = 0; x < kernelSize; x++)
+                        for (int x = 0; x < 3; x++)
                         {
-                            int pixel = argbPixels[y * kernelSize + x];
-                            // Extract RGB components
-                            double r = (pixel >> 16) & 0xFF;
-                            double g = (pixel >> 8) & 0xFF;
-                            double b = pixel & 0xFF;
-                            // Convert to luminance (simple average) and normalize
-                            double intensity = (r + g + b) / (3.0 * 255.0);
-                            customKernel[y, x] = intensity;
+                            int index = y * 3 + x;
+                            int argb = argbPixels[index];
+                            int red = (argb >> 16) & 0xFF;
+                            customKernel[y, x] = red / 255.0;
                         }
                     }
 
-                    // Apply the custom convolution kernel to the source image
-                    rasterSrc.Filter(rasterSrc.Bounds, new ConvolutionFilterOptions(customKernel));
-
-                    // Save the processed image as PNG
-                    PngOptions saveOptions = new PngOptions();
-                    rasterSrc.Save(outputPath, saveOptions);
+                    var convolutionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
+                    inputRaster.Filter(inputRaster.Bounds, convolutionOptions);
                 }
+
+                PngOptions saveOptions = new PngOptions();
+                saveOptions.Source = new FileCreateSource(outputPath, false);
+                inputRaster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

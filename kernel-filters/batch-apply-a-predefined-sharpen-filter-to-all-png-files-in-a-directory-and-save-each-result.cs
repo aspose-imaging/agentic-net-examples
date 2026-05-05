@@ -19,7 +19,7 @@ class Program
 
             foreach (string inputPath in pngFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,22 +27,21 @@ class Program
                 }
 
                 // Build the output file path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".sharpened.png";
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".sharpen.png";
                 string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, apply sharpen filter, and save the result
+                // Load the image, apply the sharpen filter, and save the result
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering functionality
                     RasterImage rasterImage = (RasterImage)image;
 
                     // Apply sharpen filter with kernel size 5 and sigma 4.0
                     rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Save the processed image
+                    // Save the processed image as PNG
                     rasterImage.Save(outputPath);
                 }
             }

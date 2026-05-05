@@ -7,29 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.GaussianBlur.png";
-
-        // Read environment variables for size and sigma, with fallback defaults
-        string sizeEnv = Environment.GetEnvironmentVariable("GAUSSIAN_BLUR_SIZE");
-        string sigmaEnv = Environment.GetEnvironmentVariable("GAUSSIAN_BLUR_SIGMA");
-
-        int size = 5;          // default kernel size (must be positive odd)
-        double sigma = 4.0;    // default sigma (must be positive)
-
-        if (int.TryParse(sizeEnv, out int parsedSize) && parsedSize > 0 && parsedSize % 2 == 1)
-        {
-            size = parsedSize;
-        }
-
-        if (double.TryParse(sigmaEnv, out double parsedSigma) && parsedSigma > 0)
-        {
-            sigma = parsedSigma;
-        }
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.png";
+            string outputPath = @"C:\temp\sample.GaussianBlur.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -37,17 +20,44 @@ class Program
                 return;
             }
 
+            // Read configuration from environment variables
+            string sizeEnv = Environment.GetEnvironmentVariable("GAUSSIAN_BLUR_SIZE");
+            string sigmaEnv = Environment.GetEnvironmentVariable("GAUSSIAN_BLUR_SIGMA");
+
+            // Default values
+            int size = 5;          // must be positive odd integer
+            double sigma = 4.0;    // must be positive non‑zero
+
+            // Parse size if provided and valid
+            if (!string.IsNullOrEmpty(sizeEnv) &&
+                int.TryParse(sizeEnv, out int parsedSize) &&
+                parsedSize > 0 && parsedSize % 2 == 1)
+            {
+                size = parsedSize;
+            }
+
+            // Parse sigma if provided and valid
+            if (!string.IsNullOrEmpty(sigmaEnv) &&
+                double.TryParse(sigmaEnv, out double parsedSigma) &&
+                parsedSigma > 0)
+            {
+                sigma = parsedSigma;
+            }
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load image, apply Gaussian blur, and save
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access Filter method
                 RasterImage rasterImage = (RasterImage)image;
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(size, sigma)
-                );
+
+                // Apply Gaussian blur filter to the whole image
+                var blurOptions = new GaussianBlurFilterOptions(size, sigma);
+                rasterImage.Filter(rasterImage.Bounds, blurOptions);
+
+                // Save the processed image
                 rasterImage.Save(outputPath);
             }
         }

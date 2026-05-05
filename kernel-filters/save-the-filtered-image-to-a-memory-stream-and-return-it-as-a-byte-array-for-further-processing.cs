@@ -2,56 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    // Loads an image, saves it to a memory stream using PNG options,
-    // and returns the resulting byte array.
-    static byte[] GetImageBytes()
-    {
-        // Hard‑coded input and dummy output paths.
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify the input file exists.
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return null;
-        }
-
-        // Ensure the output directory exists (required before any save operation).
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image, save it to a MemoryStream, and return the byte array.
-        using (Image image = Image.Load(inputPath))
-        {
-            // Use default PNG options; can be customized if needed.
-            PngOptions pngOptions = new PngOptions();
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                image.Save(ms, pngOptions);
-                return ms.ToArray();
-            }
-        }
-    }
-
     static void Main()
     {
         try
         {
-            byte[] imageBytes = GetImageBytes();
+            // Hardcoded input path
+            string inputPath = @"C:\temp\sample.bmp";
 
-            if (imageBytes != null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.WriteLine($"Image saved to memory stream. Byte count: {imageBytes.Length}");
-                // Further processing can be done with imageBytes here.
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Process image and obtain byte array
+            byte[] imageBytes = GetFilteredImageBytes(inputPath);
+
+            // Example usage of the resulting byte array
+            Console.WriteLine($"Filtered image byte array length: {imageBytes.Length}");
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    // Loads the image, applies a filter, saves to a MemoryStream and returns the bytes
+    static byte[] GetFilteredImageBytes(string inputPath)
+    {
+        // Load the image from the specified file
+        using (Image image = Image.Load(inputPath))
+        {
+            // If the image is a BMP, apply Otsu binarization as an example filter
+            if (image is BmpImage bmpImage)
+            {
+                bmpImage.BinarizeOtsu();
+            }
+
+            // Prepare save options (PNG format in this example)
+            PngOptions saveOptions = new PngOptions();
+
+            // Save the filtered image to a memory stream
+            using (MemoryStream stream = new MemoryStream())
+            {
+                image.Save(stream, saveOptions);
+                // Return the underlying byte array
+                return stream.ToArray();
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,7 +11,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output\\embossed.png";
+            string outputPath = "output_emboss_interlaced.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,17 +25,15 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Apply emboss filter using convolution kernel
-                var embossKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
-                var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
-                raster.Filter(raster.Bounds, embossOptions);
+                raster.Filter(raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-                // Save with interlaced (progressive) PNG encoding
-                PngOptions options = new PngOptions
+                using (PngOptions options = new PngOptions())
                 {
-                    Progressive = true
-                };
-                raster.Save(outputPath, options);
+                    options.Progressive = true;
+                    raster.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)

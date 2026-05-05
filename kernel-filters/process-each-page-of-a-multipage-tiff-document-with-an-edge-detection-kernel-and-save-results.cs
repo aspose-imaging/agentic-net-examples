@@ -3,6 +3,10 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -10,48 +14,50 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.tif";
-        string outputDirectory = "output";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        string outputPath = "output\\processed.tif";
 
         // Ensure output directory exists
-        Directory.CreateDirectory(outputDirectory);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Edge detection kernel (3x3)
-        double[,] edgeKernel = new double[,]
+        try
         {
-            { -1, -1, -1 },
-            { -1,  8, -1 },
-            { -1, -1, -1 }
-        };
-
-        // Load the multipage TIFF
-        using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-        {
-            int frameIndex = 0;
-            foreach (TiffFrame frame in tiffImage.Frames)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Set the current frame as active
-                tiffImage.ActiveFrame = frame;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Apply edge detection filter to the active frame
-                tiffImage.Filter(tiffImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel));
-
-                // Save the processed frame as PNG
-                string outputPath = Path.Combine(outputDirectory, $"frame_{frameIndex}.png");
-                using (PngOptions pngOptions = new PngOptions())
+            // Load the multipage TIFF
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Edge detection kernel
+                double[,] kernel = new double[,]
                 {
-                    frame.Save(outputPath, pngOptions);
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
+                };
+
+                // Process each frame
+                for (int i = 0; i < tiffImage.PageCount; i++)
+                {
+                    // Set the active frame
+                    tiffImage.ActiveFrame = tiffImage.Frames[i];
+
+                    // Apply convolution filter with the edge detection kernel
+                    tiffImage.Filter(tiffImage.Bounds, new ConvolutionFilterOptions(kernel));
                 }
 
-                frameIndex++;
+                // Save the processed multipage TIFF
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                saveOptions.Source = new FileCreateSource(outputPath, false);
+                tiffImage.Save(outputPath, saveOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

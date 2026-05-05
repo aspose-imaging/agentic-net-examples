@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output_gaussian_blur.png";
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
 
         try
         {
@@ -26,12 +26,14 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to access filtering functionality
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with kernel size 9 and sigma 3.0
-                var blurOptions = new GaussianBlurFilterOptions(9, 3.0);
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
+                // Apply Gaussian blur with kernel size 9 and sigma 3.0 to the whole image
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new GaussianBlurFilterOptions(9, 3.0)
+                );
 
                 // Save the processed image
                 rasterImage.Save(outputPath);
@@ -39,6 +41,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

@@ -1,33 +1,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Templates\example.svg";
+        string outputPath = Path.Combine(@"C:\Templates", Path.GetFileName(inputPath));
+
         try
         {
-            // Hardcoded input SVG path in the templates folder
-            string inputPath = "templates/sample.svg";
-
-            // Output path preserves the original filename
-            string outputPath = inputPath;
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image and save it back to the same location
-            using (Image image = Image.Load(inputPath))
+            // Load the SVG image
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                image.Save(outputPath);
+                // (Optional) Apply any filtering or modifications to svgImage here
+
+                // Save the SVG back, preserving the original filename
+                svgImage.Save(outputPath);
             }
         }
         catch (Exception ex)

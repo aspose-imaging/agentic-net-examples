@@ -1,39 +1,40 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
 
-        // Ensure any runtime exception is reported cleanly
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the SVG image
             using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                // Set up rasterization options for PNG output
+                // Prepare rasterization options (use original SVG size)
                 SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size
                 };
+
+                // Prepare PNG save options with rasterization
                 PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
@@ -55,7 +56,7 @@ class Program
                         rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
 
                         // Save the processed image
-                        rasterImage.Save(outputPath, new PngOptions());
+                        rasterImage.Save(outputPath);
                     }
                 }
             }

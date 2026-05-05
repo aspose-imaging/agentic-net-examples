@@ -1,40 +1,47 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.jpg";
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply motion blur (motion wiener) filter with length 10, smooth 1.0, angle 90 degrees
+                var motionOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
+                rasterImage.Filter(rasterImage.Bounds, motionOptions);
+
+                // Save the result as JPEG
+                var jpegOptions = new JpegOptions();
+                rasterImage.Save(outputPath, jpegOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply a motion blur filter with length 10 pixels, smooth factor 1.0, angle 0 degrees
-            rasterImage.Filter(
-                rasterImage.Bounds,
-                new MotionWienerFilterOptions(10, 1.0, 0.0));
-
-            // Save the result as JPEG
-            rasterImage.Save(outputPath, new JpegOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,15 +2,13 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        string inputPath = "input\\sample.png";
+        string outputPath = "output\\filtered.png";
 
         try
         {
@@ -26,17 +24,18 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                // 3x3 high-pass kernel
-                double[,] kernel = new double[,]
+                double[,] kernel = new double[4, 4]
                 {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
+                    { 1.0/16, 1.0/16, 1.0/16, 1.0/16 },
+                    { 1.0/16, 1.0/16, 1.0/16, 1.0/16 },
+                    { 1.0/16, 1.0/16, 1.0/16, 1.0/16 },
+                    { 1.0/16, 1.0/16, 1.0/16, 1.0/16 }
                 };
 
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                PngOptions saveOptions = new PngOptions();
+                var saveOptions = new PngOptions();
                 raster.Save(outputPath, saveOptions);
             }
         }

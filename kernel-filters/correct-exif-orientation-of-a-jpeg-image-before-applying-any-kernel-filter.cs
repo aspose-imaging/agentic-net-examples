@@ -3,40 +3,33 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                // Correct orientation based on EXIF data
-                image.AutoRotate();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Apply a sharpen filter to the entire image
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the processed image with JPEG options
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90
-                };
-                image.Save(outputPath, jpegOptions);
+            using (Image img = Image.Load(inputPath))
+            {
+                var jpegImage = (Aspose.Imaging.FileFormats.Jpeg.JpegImage)img;
+                jpegImage.AutoRotate();
+
+                jpegImage.Filter(jpegImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+                var jpegOptions = new JpegOptions();
+                jpegImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)

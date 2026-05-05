@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.svg";
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,32 +24,31 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image (may be multi‑page)
+            // Load the SVG image (or any multi‑page vector image)
             using (Image image = Image.Load(inputPath))
             {
-                // If the image supports multiple pages, process each one
-                if (image is IMultipageImage multipageImage && multipageImage.Pages != null)
+                // If the image supports multiple pages, process each page
+                if (image is IMultipageImage multipage)
                 {
-                    for (int i = 0; i < multipageImage.PageCount; i++)
+                    for (int i = 0; i < multipage.PageCount; i++)
                     {
-                        // Access the current page
-                        var page = multipageImage.Pages[i];
+                        // Retrieve the page as an Image
+                        Image page = multipage.Pages[i];
 
-                        // Attempt to treat the page as a raster image for filtering
-                        if (page is RasterImage rasterPage)
+                        // Apply Sharpen filter only to raster pages
+                        if (page is RasterImage raster)
                         {
-                            // Apply Sharpen filter to the entire page
-                            rasterPage.Filter(rasterPage.Bounds, new SharpenFilterOptions());
+                            raster.Filter(raster.Bounds, new SharpenFilterOptions());
                         }
                     }
                 }
                 else if (image is RasterImage rasterImage)
                 {
-                    // Single‑page raster image case
+                    // Single‑page raster image: apply filter directly
                     rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions());
                 }
 
-                // Save the modified SVG document
+                // Save the modified document back to SVG format
                 image.Save(outputPath);
             }
         }

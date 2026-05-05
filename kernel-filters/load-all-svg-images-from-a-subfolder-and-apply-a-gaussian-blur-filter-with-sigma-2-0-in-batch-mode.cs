@@ -1,21 +1,18 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\InputSvgs";
-            string outputFolder = @"C:\Images\OutputSvgs";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
+            string inputFolder = @"C:\InputSvgs";
+            string outputFolder = @"C:\OutputSvgs";
 
             // Get all SVG files in the input folder
             string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg", SearchOption.TopDirectoryOnly);
@@ -26,46 +23,42 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Determine output file path (same name with .png extension)
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".png");
+                // Determine output file path (PNG with same name)
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image
+                // Load SVG image
                 using (Image svgImage = Image.Load(inputPath))
                 {
-                    // Set up rasterization options to convert SVG to raster format
-                    var rasterizationOptions = new SvgRasterizationOptions
+                    // Rasterize SVG to PNG in memory
+                    using (MemoryStream rasterStream = new MemoryStream())
                     {
-                        PageSize = svgImage.Size
-                    };
-
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
-
-                    // Rasterize SVG into a memory stream
-                    using (var ms = new MemoryStream())
-                    {
-                        svgImage.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        // Load the rasterized image as a RasterImage
-                        using (Image rasterImg = Image.Load(ms))
+                        var pngOptions = new PngOptions
                         {
-                            var raster = (RasterImage)rasterImg;
+                            VectorRasterizationOptions = new SvgRasterizationOptions
+                            {
+                                PageSize = svgImage.Size
+                            }
+                        };
+                        svgImage.Save(rasterStream, pngOptions);
+                        rasterStream.Position = 0;
 
-                            // Apply Gaussian blur with size 5 (odd) and sigma 2.0
-                            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 2.0));
+                        // Load rasterized image as RasterImage
+                        using (Image rasterImageContainer = Image.Load(rasterStream))
+                        {
+                            RasterImage rasterImage = (RasterImage)rasterImageContainer;
 
-                            // Save the processed image
-                            raster.Save(outputPath);
+                            // Apply Gaussian blur filter with radius 5 and sigma 2.0
+                            rasterImage.Filter(rasterImage.Bounds,
+                                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.0));
+
+                            // Save the filtered image as PNG
+                            rasterImage.Save(outputPath, new PngOptions());
                         }
                     }
                 }
