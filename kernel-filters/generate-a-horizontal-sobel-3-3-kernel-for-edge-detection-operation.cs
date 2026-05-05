@@ -31,8 +31,10 @@ class Program
                     { -1, 0, 1 }
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
+
                 raster.Filter(raster.Bounds, filterOptions);
+
                 raster.Save(outputPath, new PngOptions());
             }
         }
