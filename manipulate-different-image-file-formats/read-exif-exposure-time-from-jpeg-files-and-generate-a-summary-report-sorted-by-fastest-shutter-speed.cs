@@ -11,19 +11,28 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputFile = "Output/report.txt";
+            // Hardcoded input directory and output report file
+            string inputDirectory = "InputImages";
+            string outputPath = "Report\\ExposureReport.txt";
 
-            Directory.CreateDirectory(inputDirectory);
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+            // Validate input directory
+            if (!Directory.Exists(inputDirectory))
+            {
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
+                return;
+            }
+
+            // Get all JPEG files in the input directory
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
                 .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToList();
+                .ToArray();
 
-            var records = new List<(string FileName, string ExposureStr, double ExposureVal)>();
+            var exposureData = new List<(string FileName, double ExposureTime)>();
 
-            foreach (var filePath in jpegFiles)
+            foreach (string filePath in jpegFiles)
             {
                 if (!File.Exists(filePath))
                 {
@@ -33,39 +42,29 @@ class Program
 
                 using (JpegImage image = (JpegImage)Image.Load(filePath))
                 {
-                    var jpegExif = image.ExifData;
-                    if (jpegExif != null)
+                    var exif = image.ExifData;
+                    if (exif != null)
                     {
-                        string exposureStr = jpegExif.ExposureTime?.ToString();
-                        double exposureVal = double.MaxValue;
-
-                        if (!string.IsNullOrEmpty(exposureStr))
-                        {
-                            int idx = exposureStr.IndexOf('(');
-                            string numericPart = idx > 0 ? exposureStr.Substring(0, idx).Trim() : exposureStr.Trim();
-                            if (double.TryParse(numericPart, out double parsed))
-                            {
-                                exposureVal = parsed;
-                            }
-                        }
-
-                        records.Add((Path.GetFileName(filePath), exposureStr ?? "N/A", exposureVal));
+                        dynamic d = exif;
+                        double exposure = (double)d.ExposureTime.ToDouble();
+                        exposureData.Add((Path.GetFileName(filePath), exposure));
                     }
                 }
             }
 
-            var sorted = records.OrderBy(r => r.ExposureVal).ThenBy(r => r.FileName).ToList();
+            // Sort by fastest shutter speed (smallest exposure time)
+            var sorted = exposureData.OrderBy(item => item.ExposureTime).ToList();
 
-            using (var writer = new StreamWriter(outputFile))
+            // Prepare report lines
+            var reportLines = new List<string>();
+            reportLines.Add("Exposure Time Report (sorted by fastest shutter speed):");
+            foreach (var item in sorted)
             {
-                writer.WriteLine("Exposure Time Report (sorted by fastest shutter speed):");
-                foreach (var rec in sorted)
-                {
-                    writer.WriteLine($"{rec.FileName}: {rec.ExposureStr}");
-                }
+                reportLines.Add($"{item.FileName}: {item.ExposureTime}");
             }
 
-            Console.WriteLine($"Report generated at: {outputFile}");
+            // Write report to the output file
+            File.WriteAllLines(outputPath, reportLines);
         }
         catch (Exception ex)
         {
