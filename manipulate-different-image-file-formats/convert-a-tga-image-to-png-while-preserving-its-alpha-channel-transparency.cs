@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tga";
-        string outputPath = "output\\output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.tga";
+            string outputPath = "output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,12 +21,12 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the TGA image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Save as PNG preserving alpha channel
+                // Save as PNG, preserving alpha channel
                 image.Save(outputPath, new PngOptions());
             }
         }
