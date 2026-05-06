@@ -1,16 +1,14 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -19,23 +17,20 @@ class Program
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Configure font substitution: use a default fallback font
-            FontSettings.DefaultFontName = "Arial";
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Optionally, point to a folder containing additional fonts
-            // FontSettings.SetFontsFolder(Environment.GetFolderPath(Environment.SpecialFolder.Fonts));
+            // Configure font substitution for missing fonts
+            FontSettings.DefaultFontName = "Arial";          // fallback font
+            FontSettings.GetSystemAlternativeFont = true;   // allow system alternatives
 
-            // Load the source image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as SVG, the configured FontSettings will be applied automatically
-                var svgOptions = new SvgOptions();
-                image.Save(outputPath, svgOptions);
+                // Save the SVG with substituted fonts
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
