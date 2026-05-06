@@ -7,23 +7,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cmx";
-        string outputPath = "output\\extracted.txt";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.cmx";
+            string outputPath = "output.txt";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            // Load CMX image
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                var document = image.Document;
-                string extractedText = document?.ToString() ?? string.Empty;
+                // Extract textual representation of the CMX document
+                string extractedText = cmx.Document?.ToString() ?? string.Empty;
+
+                // Write extracted text to the output file
                 File.WriteAllText(outputPath, extractedText);
             }
         }
