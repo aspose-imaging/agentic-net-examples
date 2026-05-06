@@ -1,9 +1,7 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -26,15 +24,15 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
-
                 // Apply Gaussian blur filter to the whole image
-                dicomImage.Filter(dicomImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                dicomImage.Filter(
+                    dicomImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
                 // Resize to 1024x768 using nearest neighbour resampling
-                dicomImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+                dicomImage.Resize(1024, 768, Aspose.Imaging.ResizeType.NearestNeighbourResample);
 
                 // Save as BMP
                 BmpOptions bmpOptions = new BmpOptions();
