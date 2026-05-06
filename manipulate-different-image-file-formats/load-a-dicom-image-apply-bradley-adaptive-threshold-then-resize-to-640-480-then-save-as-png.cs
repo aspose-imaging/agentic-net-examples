@@ -8,35 +8,35 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.dicom";
+        string outputPath = "result.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply Bradley adaptive thresholding (example parameters: brightnessDifference=5, windowSize=10)
-                dicomImage.BinarizeBradley(5, 10);
+                // Apply Bradley adaptive thresholding (example parameters)
+                dicomImage.BinarizeBradley(brightnessDifference: 5, windowSize: 10);
 
-                // Resize to 640x480 using Bilinear resampling (choose any ResizeType)
+                // Resize to 640x480 using bilinear resampling
                 dicomImage.Resize(640, 480, ResizeType.BilinearResample);
 
-                // Save as PNG
+                // Save the processed image as PNG
                 dicomImage.Save(outputPath, new PngOptions());
             }
         }
