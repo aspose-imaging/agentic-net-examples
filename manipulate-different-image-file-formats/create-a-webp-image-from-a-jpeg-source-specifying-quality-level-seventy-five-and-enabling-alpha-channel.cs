@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -9,11 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\source.jpg";
-            string outputPath = "C:\\temp\\output.webp";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\source.jpg";
+            string outputPath = @"C:\temp\output.webp";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,17 +24,17 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
+            // Load the JPEG source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure WebP options: quality 75, enable alpha (lossless = false allows alpha in lossy mode)
+                // Configure WebP options: lossy compression, quality 75, alpha channel enabled
                 var webpOptions = new WebPOptions
                 {
-                    Lossless = false,
-                    Quality = 75f
+                    Lossless = false,   // lossy compression (alpha is supported in lossy mode)
+                    Quality = 75f       // quality level 75
                 };
 
-                // Save the image as WebP with the specified options
+                // Save the image as WebP using the specified options
                 image.Save(outputPath, webpOptions);
             }
         }
