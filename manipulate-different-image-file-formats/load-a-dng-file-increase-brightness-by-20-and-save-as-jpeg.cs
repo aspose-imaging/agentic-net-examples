@@ -12,9 +12,9 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.dng";
-            string outputPath = "output/output.jpg";
+            string outputPath = "output.jpg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,6 +27,7 @@ class Program
             // Load DNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to DngImage to access DNG-specific methods
                 DngImage dng = (DngImage)image;
 
                 // Increase brightness by approximately 20% (51 out of 255)
