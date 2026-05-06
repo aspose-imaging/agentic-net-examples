@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Exif;
 
 class Program
 {
@@ -24,22 +26,43 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
+            // Load the image using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access ExifData
-                TiffImage tiffImage = image as TiffImage;
-                if (tiffImage == null)
+                // Cast to TiffImage to access EXIF data
+                TiffImage tiff = image as TiffImage;
+                if (tiff == null)
                 {
                     Console.Error.WriteLine("The loaded image is not a TIFF image.");
                     return;
                 }
 
-                // Extract EXIF metadata
-                var exifData = tiffImage.ExifData;
+                // Retrieve EXIF metadata
+                ExifData exif = tiff.ExifData;
+                if (exif == null)
+                {
+                    Console.Error.WriteLine("No EXIF data found in the TIFF image.");
+                    return;
+                }
 
-                // Serialize EXIF data to JSON (indented for readability)
-                string json = JsonSerializer.Serialize(exifData, new JsonSerializerOptions { WriteIndented = true });
+                // Convert EXIF data to a dictionary for JSON serialization
+                var exifDict = new Dictionary<string, object>();
+                var properties = exif.GetType().GetProperties();
+                foreach (var prop in properties)
+                {
+                    try
+                    {
+                        object value = prop.GetValue(exif);
+                        exifDict[prop.Name] = value;
+                    }
+                    catch
+                    {
+                        // Ignore properties that cannot be read
+                    }
+                }
+
+                // Serialize dictionary to formatted JSON
+                string json = JsonSerializer.Serialize(exifDict, new JsonSerializerOptions { WriteIndented = true });
 
                 // Write JSON to the output file
                 File.WriteAllText(outputPath, json);
