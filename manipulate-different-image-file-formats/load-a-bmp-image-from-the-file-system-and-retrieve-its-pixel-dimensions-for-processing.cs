@@ -6,35 +6,25 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input path
         string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.txt";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load BMP image using the BmpImage constructor that takes a file path
+            // Load the BMP image and retrieve its dimensions
             using (BmpImage bmpImage = new BmpImage(inputPath))
             {
-                // Retrieve pixel dimensions
                 int width = bmpImage.Width;
                 int height = bmpImage.Height;
 
-                // Output dimensions to console
-                Console.WriteLine($"Width: {width} pixels");
-                Console.WriteLine($"Height: {height} pixels");
-
-                // Optionally write dimensions to a text file
-                File.WriteAllText(outputPath, $"Width: {width} pixels{Environment.NewLine}Height: {height} pixels");
+                Console.WriteLine($"Image dimensions: {width} x {height}");
             }
         }
         catch (Exception ex)
