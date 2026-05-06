@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output\\thumbnail.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output\\thumbnail.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,11 +27,11 @@ class Program
             // Load the JPEG image
             using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
             {
-                // Retrieve the EXIF thumbnail (may be null)
-                RasterImage thumbnail = jpeg.ExifData?.Thumbnail;
+                // Retrieve the EXIF thumbnail
+                var thumbnail = jpeg.ExifData?.Thumbnail;
                 if (thumbnail == null)
                 {
-                    Console.Error.WriteLine("No EXIF thumbnail found in the image.");
+                    Console.Error.WriteLine("No EXIF thumbnail found.");
                     return;
                 }
 
