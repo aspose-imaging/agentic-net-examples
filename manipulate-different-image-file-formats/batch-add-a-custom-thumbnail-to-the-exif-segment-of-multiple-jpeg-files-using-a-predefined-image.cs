@@ -2,56 +2,60 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
-        string thumbnailPath = @"C:\Images\thumbnail.jpg";
-
         try
         {
-            // Verify thumbnail exists
+            // Hardcoded input, output and thumbnail paths
+            string inputDir = "Input";
+            string outputDir = "Output";
+            string thumbnailPath = "thumbnail.jpg";
+
+            // Validate thumbnail file
             if (!File.Exists(thumbnailPath))
             {
                 Console.Error.WriteLine($"File not found: {thumbnailPath}");
                 return;
             }
 
-            // Load thumbnail once (as RasterImage)
-            using (RasterImage thumbnailImage = (RasterImage)Image.Load(thumbnailPath))
-            {
-                // Ensure output directory exists for each file later
-                Directory.CreateDirectory(outputDirectory);
+            // Ensure the output root directory exists
+            Directory.CreateDirectory(outputDir);
 
-                // Process each JPEG file in the input directory
-                foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.jpg"))
+            // Load the thumbnail image once
+            using (RasterImage thumbnail = (RasterImage)Image.Load(thumbnailPath))
+            {
+                // Get all JPEG files in the input directory
+                string[] files = Directory.GetFiles(inputDir, "*.jpg");
+                foreach (string inputPath in files)
                 {
-                    // Input file existence check (redundant but follows rule)
+                    // Validate each input file
                     if (!File.Exists(inputPath))
                     {
                         Console.Error.WriteLine($"File not found: {inputPath}");
                         continue;
                     }
 
-                    // Determine output path
-                    string fileName = Path.GetFileName(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileName);
-
-                    // Ensure output directory exists (unconditional as required)
+                    // Prepare output path and ensure its directory exists
+                    string outputPath = Path.Combine(outputDir, Path.GetFileName(inputPath));
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Load JPEG, set thumbnail, and save
+                    // Load the JPEG image
                     using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
                     {
-                        // Assign the custom thumbnail to EXIF data
-                        jpeg.ExifData.Thumbnail = thumbnailImage;
+                        // Ensure EXIF data container exists
+                        if (jpeg.ExifData == null)
+                        {
+                            Console.Error.WriteLine($"No EXIF data in: {inputPath}");
+                            continue;
+                        }
 
-                        // Save the modified JPEG to the output path
+                        // Assign the custom thumbnail
+                        jpeg.ExifData.Thumbnail = thumbnail;
+
+                        // Save the modified image
                         jpeg.Save(outputPath);
                     }
                 }
