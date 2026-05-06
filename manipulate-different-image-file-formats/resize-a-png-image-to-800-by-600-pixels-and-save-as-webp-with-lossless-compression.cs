@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -12,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.png";
-            string outputPath = "C:\\temp\\output.webp";
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,20 +21,32 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
-            using (PngImage pngImage = new PngImage(inputPath))
+            using (Image loadedImage = Image.Load(inputPath))
             {
-                // Resize to 800x600 using nearest neighbour resampling
-                pngImage.Resize(800, 600, ResizeType.NearestNeighbourResample);
+                // Cast to RasterImage (base for raster formats like PNG)
+                var raster = loadedImage as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Prepare lossless WebP options
-                var webpOptions = new WebPOptions { Lossless = true };
+                // Create a WebPImage from the raster image
+                using (WebPImage webpImage = new WebPImage(raster))
+                {
+                    // Resize to 800x600 using nearest neighbour resampling
+                    webpImage.Resize(800, 600, ResizeType.NearestNeighbourResample);
 
-                // Save as WebP with lossless compression
-                pngImage.Save(outputPath, webpOptions);
+                    // Set lossless compression options
+                    var webpOptions = new WebPOptions { Lossless = true };
+
+                    // Save as WebP
+                    webpImage.Save(outputPath, webpOptions);
+                }
             }
         }
         catch (Exception ex)
