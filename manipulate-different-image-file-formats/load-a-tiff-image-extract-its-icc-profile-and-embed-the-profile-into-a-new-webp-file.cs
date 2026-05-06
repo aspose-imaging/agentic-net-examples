@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -9,29 +10,34 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.tif";
-            string outputPath = "Output/output.webp";
+            // Hardcoded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.webp";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load the TIFF image
+            using (Image tiffImage = Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
+                // Prepare WebP options and preserve metadata (including ICC profile)
+                var webpOptions = new WebPOptions
                 {
-                    Console.Error.WriteLine("TIFF image is not a raster image.");
-                    return;
-                }
+                    KeepMetadata = true
+                };
 
-                using (WebPOptions options = new WebPOptions { KeepMetadata = true })
+                // Convert the TIFF raster image to WebP
+                using (WebPImage webpImage = new WebPImage((RasterImage)tiffImage))
                 {
-                    raster.Save(outputPath, options);
+                    // Save the new WebP file with embedded ICC profile
+                    webpImage.Save(outputPath, webpOptions);
                 }
             }
         }
