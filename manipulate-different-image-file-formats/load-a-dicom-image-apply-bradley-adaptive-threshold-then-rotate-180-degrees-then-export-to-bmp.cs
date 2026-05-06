@@ -1,40 +1,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output\\result.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the DICOM image
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            string inputPath = "Input\\sample.dcm";
+            string outputPath = "Output\\output.bmp";
+
+            if (!File.Exists(inputPath))
             {
-                // Apply Bradley adaptive thresholding (example parameters)
-                dicomImage.BinarizeBradley(brightnessDifference: 5, windowSize: 10);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Rotate the image 180 degrees
-                dicomImage.RotateFlip(RotateFlipType.Rotate180FlipNone);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the result as BMP
-                dicomImage.Save(outputPath, new BmpOptions());
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
+            {
+                // Apply Bradley adaptive thresholding
+                image.BinarizeBradley(5, 10);
+                // Rotate 180 degrees with proportional resize and gray background
+                image.Rotate(180, true, Color.Gray);
+                // Save as BMP
+                BmpOptions bmpOptions = new BmpOptions();
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
