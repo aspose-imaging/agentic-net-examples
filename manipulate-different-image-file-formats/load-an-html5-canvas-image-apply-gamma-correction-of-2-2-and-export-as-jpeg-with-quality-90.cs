@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\canvas.png";
-        string outputPath = @"C:\Images\canvas_gamma.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\canvas.png";
+            string outputPath = @"C:\temp\canvas_gamma.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,23 +23,28 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the image (HTML5 canvas saved as PNG)
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access AdjustGamma
-                var rasterImage = (RasterImage)image;
-
-                // Apply gamma correction (2.2)
-                rasterImage.AdjustGamma(2.2f);
-
-                // Set JPEG options with quality 90
-                var jpegOptions = new JpegOptions
+                // Apply gamma correction of 2.2
+                if (image is RasterImage raster)
                 {
-                    Quality = 90
-                };
+                    raster.AdjustGamma(2.2f);
+                }
+                else if (image is RasterCachedImage cached)
+                {
+                    cached.AdjustGamma(2.2f);
+                }
+                else
+                {
+                    // Fallback for other image types that support AdjustGamma
+                    dynamic dyn = image;
+                    dyn.AdjustGamma(2.2f);
+                }
 
-                // Save as JPEG
-                rasterImage.Save(outputPath, jpegOptions);
+                // Save as JPEG with quality 90
+                var jpegOptions = new JpegOptions { Quality = 90 };
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
