@@ -6,14 +6,14 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cmx";
-        string outputPath = "output.svg";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Temp\sample.cmx";
+            string outputPath = @"C:\Temp\sample.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,26 +25,23 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
-            using (Image image = Image.Load(inputPath))
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
             {
-                CmxImage cmxImage = image as CmxImage;
-                if (cmxImage == null)
-                {
-                    Console.Error.WriteLine("Failed to load CMX image.");
-                    return;
-                }
-
-                // Configure SVG save options
+                // Prepare SVG save options
                 SvgOptions saveOptions = new SvgOptions
                 {
-                    TextAsShapes = true // Preserve text as vector shapes
+                    TextAsShapes = true // preserve text as vector shapes
                 };
 
-                // Set rasterization options based on the CMX canvas size
+                // Configure rasterization options specific to CMX
                 CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
                 {
-                    PageSize = cmxImage.Size
+                    // Use the source image size as the page size
+                    PageSize = cmxImage.Size,
+                    // Optional: set background color if needed
+                    BackgroundColor = Color.White
                 };
+
                 saveOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save as SVG
