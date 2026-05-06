@@ -1,29 +1,29 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = "input.dcm";
+        string outputPath = "output.pdf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
-            string outputPath = "output.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
@@ -31,12 +31,13 @@ class Program
                 DicomImage dicomImage = (DicomImage)image;
 
                 // Adjust brightness, contrast, and gamma sequentially
-                dicomImage.AdjustBrightness(30);      // example brightness value
-                dicomImage.AdjustContrast(20f);       // example contrast value
-                dicomImage.AdjustGamma(1.2f);         // example gamma value
+                dicomImage.AdjustBrightness(30);      // Example brightness value
+                dicomImage.AdjustContrast(20f);       // Example contrast value
+                dicomImage.AdjustGamma(1.2f);         // Example gamma value
 
                 // Save the processed image as PDF
-                dicomImage.Save(outputPath, new PdfOptions());
+                var pdfOptions = new PdfOptions();
+                dicomImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
