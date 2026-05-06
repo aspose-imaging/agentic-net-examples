@@ -6,10 +6,12 @@ using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.jpg";
+        // Hard‑coded input path
+        string inputPath = @"C:\Images\sample.jpg";
 
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -18,31 +20,32 @@ class Program
 
         try
         {
+            // Load the JPEG image
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
+                // Retrieve EXIF data container
                 ExifData exifData = image.ExifData;
 
                 if (exifData == null)
                 {
-                    Console.WriteLine("No EXIF data found.");
+                    Console.WriteLine("No EXIF data found in the image.");
                     return;
                 }
 
-                Console.WriteLine("EXIF Tags:");
-                Console.WriteLine(new string('-', 60));
-                Console.WriteLine("{0,-30} {1}", "Tag", "Value");
-                Console.WriteLine(new string('-', 60));
+                // Header for the console table
+                Console.WriteLine("{0,-12} {1}", "Tag ID", "Value");
+                Console.WriteLine(new string('-', 50));
 
-                foreach (ExifProperties tag in Enum.GetValues(typeof(ExifProperties)))
+                // Iterate over all EXIF properties (includes common, EXIF and GPS tags)
+                foreach (var prop in exifData.Properties)
                 {
-                    object value = exifData.GetTagValue(tag);
-                    if (value != null)
-                    {
-                        Console.WriteLine("{0,-30} {1}", tag, value);
-                    }
-                }
+                    // Tag ID as hexadecimal for readability
+                    string tagId = $"0x{prop.TagId:X4}";
+                    // Convert the value to a string, handling nulls
+                    string value = prop.Value?.ToString() ?? "null";
 
-                Console.WriteLine(new string('-', 60));
+                    Console.WriteLine("{0,-12} {1}", tagId, value);
+                }
             }
         }
         catch (Exception ex)
