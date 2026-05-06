@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
@@ -7,24 +8,21 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input DjVu files
-            string[] inputPaths = { "input1.djvu", "input2.djvu" };
-            // Corresponding output TIFF files (placed in the 'output' folder)
-            string[] outputPaths = {
-                Path.Combine("output", "output1.tif"),
-                Path.Combine("output", "output2.tif")
+            string[] inputFiles = new[]
+            {
+                @"C:\Input\sample1.djvu",
+                @"C:\Input\sample2.djvu",
+                @"C:\Input\sample3.djvu"
             };
 
-            // Process files in parallel
-            System.Threading.Tasks.Parallel.For(0, inputPaths.Length, i =>
+            // Process each file in parallel
+            Parallel.ForEach(inputFiles, inputPath =>
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
-
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -32,18 +30,25 @@ class Program
                     return;
                 }
 
-                // Ensure the output directory exists
+                // Determine output TIFF path
+                string outputDirectory = @"C:\Output";
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tif";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DjVu image from file stream
+                // Load DjVu document
                 using (FileStream stream = File.OpenRead(inputPath))
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
                 {
-                    // Configure TIFF save options
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    tiffOptions.Compression = TiffCompressions.Deflate;
-                    // Export all pages of the DjVu document
-                    tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
+                    // Configure TIFF save options for multipage output
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                    {
+                        Compression = TiffCompressions.Deflate,
+                        BitsPerSample = new ushort[] { 1 },
+                        MultiPageOptions = new DjvuMultiPageOptions()
+                    };
 
                     // Save as multipage TIFF
                     djvuImage.Save(outputPath, tiffOptions);
