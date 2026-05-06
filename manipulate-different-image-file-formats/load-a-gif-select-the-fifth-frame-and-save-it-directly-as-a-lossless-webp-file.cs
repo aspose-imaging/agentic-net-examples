@@ -2,41 +2,55 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input\\animation.gif";
-        string outputPath = "Output\\frame5.webp";
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.webp";
+
+        // Ensure input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
+            // Load the GIF image
+            using (Image gifImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
-            {
-                if (gif.PageCount < 5)
+                // Cast to multipage image to access frames
+                IMultipageImage multipage = gifImage as IMultipageImage;
+                if (multipage == null || multipage.PageCount < 5)
                 {
-                    Console.Error.WriteLine("GIF does not contain a fifth frame.");
+                    Console.Error.WriteLine("The GIF does not contain at least five frames.");
                     return;
                 }
 
-                // Select the fifth frame (zero‑based index 4)
-                gif.ActiveFrame = (GifFrameBlock)gif.Pages[4];
+                // Get the fifth frame (zero‑based index 4)
+                RasterImage fifthFrame = (RasterImage)multipage.Pages[4];
 
-                // Save the selected frame as a lossless WebP image
-                WebPOptions options = new WebPOptions { Lossless = true };
-                gif.Save(outputPath, options);
+                // Create a WebP image from the selected frame
+                using (WebPImage webPImage = new WebPImage(fifthFrame))
+                {
+                    // Set lossless compression options
+                    var webpOptions = new WebPOptions
+                    {
+                        Lossless = true
+                    };
+
+                    // Save as lossless WebP
+                    webPImage.Save(outputPath, webpOptions);
+                }
             }
         }
         catch (Exception ex)
