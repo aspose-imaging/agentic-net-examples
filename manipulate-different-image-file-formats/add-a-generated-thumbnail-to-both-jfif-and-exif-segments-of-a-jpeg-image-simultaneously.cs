@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -11,39 +11,48 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.jpg";
             string outputPath = "output.jpg";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage image = new JpegImage(inputPath))
+            // Load the JPEG image
+            using (JpegImage jpeg = (JpegImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                if (image.ExifData == null)
+                // Create a thumbnail image (100x100) in memory
+                PngOptions thumbOptions = new PngOptions();
+                using (Aspose.Imaging.Image thumbImg = Aspose.Imaging.Image.Create(thumbOptions, 100, 100))
                 {
-                    image.ExifData = new JpegExifData();
-                }
+                    // Fill the thumbnail with a solid red color
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics((Aspose.Imaging.RasterImage)thumbImg);
+                    Aspose.Imaging.Brushes.SolidBrush brush = new Aspose.Imaging.Brushes.SolidBrush(Aspose.Imaging.Color.Red);
+                    graphics.FillRectangle(brush, ((Aspose.Imaging.RasterImage)thumbImg).Bounds);
+                    // Do NOT dispose graphics (Graphics does not implement IDisposable)
 
-                if (image.Jfif == null)
-                {
-                    image.Jfif = new JFIFData();
-                }
+                    // Assign thumbnail to EXIF segment if EXIF data exists
+                    if (jpeg.ExifData != null)
+                    {
+                        jpeg.ExifData.Thumbnail = (Aspose.Imaging.RasterImage)thumbImg;
+                    }
 
-                using (JpegImage thumb = new JpegImage(100, 100))
-                {
-                    Graphics graphics = new Graphics(thumb);
-                    SolidBrush brush = new SolidBrush(Color.Blue);
-                    graphics.FillRectangle(brush, thumb.Bounds);
+                    // Ensure JFIF segment exists and assign thumbnail
+                    if (jpeg.Jfif == null)
+                    {
+                        jpeg.Jfif = new JFIFData();
+                    }
+                    jpeg.Jfif.Thumbnail = (Aspose.Imaging.RasterImage)thumbImg;
 
-                    image.ExifData.Thumbnail = thumb;
-                    image.Jfif.Thumbnail = thumb;
-
-                    image.Save(outputPath);
+                    // Save the modified JPEG image
+                    jpeg.Save(outputPath);
                 }
             }
         }
