@@ -1,40 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dng;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input\\photo.dng";
-        string outputPath = "Output\\photo.jp2";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.dng";
+        string outputPath = @"C:\temp\output.jp2";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            using (Image image = Image.Load(inputPath))
+            // Load the DNG image (demosaicing is performed automatically)
+            using (Image image = Image.Load(inputPath, new Aspose.Imaging.ImageLoadOptions.DngLoadOptions()))
             {
-                var dngImage = (Aspose.Imaging.FileFormats.Dng.DngImage)image;
-                dngImage.UseRawData = false; // ensure demosaicing
+                DngImage dngImage = (DngImage)image;
 
-                Jpeg2000Options saveOptions = new Jpeg2000Options
-                {
-                    Irreversible = false // lossless compression
-                };
+                // Prepare JPEG2000 save options (default is lossless)
+                Jpeg2000Options jpeg2000Options = new Jpeg2000Options();
 
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(dngImage))
-                {
-                    jpeg2000Image.Save(outputPath, saveOptions);
-                }
+                // Save as JPEG2000 lossless
+                dngImage.Save(outputPath, jpeg2000Options);
             }
         }
         catch (Exception ex)
