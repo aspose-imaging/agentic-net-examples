@@ -1,17 +1,18 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_resized.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output_resized.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,27 +24,22 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                // Determine new dimensions while preserving aspect ratio
                 const int maxWidth = 1200;
-                int newWidth = image.Width;
-                int newHeight = image.Height;
 
-                if (image.Width > maxWidth)
+                // Resize only if the image is wider than the maximum width
+                if (jpegImage.Width > maxWidth)
                 {
-                    newWidth = maxWidth;
-                    newHeight = (int)Math.Round((double)image.Height * maxWidth / image.Width);
-                }
+                    int newWidth = maxWidth;
+                    int newHeight = (int)Math.Round(jpegImage.Height * (newWidth / (double)jpegImage.Width));
 
-                // Resize only if needed
-                if (newWidth != image.Width || newHeight != image.Height)
-                {
-                    image.Resize(newWidth, newHeight);
+                    // Perform the resize using the default resampling method
+                    jpegImage.Resize(newWidth, newHeight);
                 }
 
                 // Save the resized image
-                image.Save(outputPath);
+                jpegImage.Save(outputPath);
             }
         }
         catch (Exception ex)
