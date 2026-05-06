@@ -6,7 +6,7 @@ using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
@@ -14,7 +14,7 @@ class Program
             string inputPath = "input.png";
             string outputPath = "output.psd";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,18 +27,15 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to work with palettes
-                RasterImage raster = (RasterImage)image;
+                // Generate a 256‑color palette from the source image
+                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette((RasterImage)image, 256);
 
-                // Create a 256‑color palette from the source image
-                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
-
-                // Configure PSD save options and assign the palette
+                // Configure PSD options for indexed color mode
                 PsdOptions psdOptions = new PsdOptions
                 {
+                    ColorMode = ColorModes.Indexed,
                     Palette = palette,
-                    // Use indexed (bitmap) color mode for palettized PSD
-                    ColorMode = ColorModes.Bitmap
+                    CompressionMethod = CompressionMethod.RLE
                 };
 
                 // Save the image as an indexed PSD
