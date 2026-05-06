@@ -3,39 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
+        // Hardcoded input and output file paths
+        string inputPath = "input.dcm";
+        string outputPath = "output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.dcm";
-            string outputPath = "output.tif";
-
-            // Verify input file exists
+            // Verify that the input DICOM file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DICOM image, adjust contrast, and save as TIFF
+            // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Decrease contrast by 20 (approximately 20% reduction)
+                // Decrease contrast by 20% (factor 0.8)
+                // AdjustContrast expects a value in [-100, 100]; negative reduces contrast
                 dicomImage.AdjustContrast(-20f);
 
-                // Save the result as a TIFF file
+                // Prepare TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the adjusted image as TIFF
                 dicomImage.Save(outputPath, tiffOptions);
             }
         }
