@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "sample.djvu";
-        string outputFolder = "output";
+        string outputDirectory = "output";
 
         try
         {
@@ -21,38 +21,37 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Load DjVu document from file stream
+            // Open the DjVu file stream
             using (Stream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
             {
-                // Target width for scaling (example: 1024 pixels)
-                const int targetWidth = 1024;
-
-                foreach (DjvuPage page in djvuImage.Pages)
+                // Load the DjVu document
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Retrieve original dimensions
-                    int originalWidth = page.Width;
-                    int originalHeight = page.Height;
+                    // Iterate through each page
+                    foreach (DjvuPage page in djvuImage.Pages)
+                    {
+                        // Retrieve original dimensions
+                        int originalWidth = page.Width;
+                        int originalHeight = page.Height;
 
-                    // Calculate scaling factor to maintain aspect ratio
-                    double scale = (double)targetWidth / originalWidth;
-                    int newWidth = targetWidth;
-                    int newHeight = (int)(originalHeight * scale);
+                        // Define target width for scaling (example: 1024 pixels)
+                        const int targetWidth = 1024;
+                        // Calculate scaling factor while preserving aspect ratio
+                        double scale = (double)targetWidth / originalWidth;
+                        int targetHeight = (int)(originalHeight * scale);
 
-                    // Resize the page
-                    page.Resize(newWidth, newHeight);
+                        // Resize the page
+                        page.Resize(targetWidth, targetHeight);
 
-                    // Prepare output file path
-                    string outputPath = Path.Combine(outputFolder, $"page_{page.PageNumber}.png");
+                        // Prepare output file path
+                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
 
-                    // Ensure directory for this file exists (already created above)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the resized page as PNG
-                    page.Save(outputPath, new PngOptions());
+                        // Save the resized page as PNG
+                        page.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
