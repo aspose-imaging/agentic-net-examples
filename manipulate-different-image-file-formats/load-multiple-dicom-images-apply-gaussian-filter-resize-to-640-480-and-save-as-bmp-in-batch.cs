@@ -1,7 +1,9 @@
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -9,28 +11,29 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "Input";
-            string outputDir = "Output";
+            // Define base, input and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists; create if missing and exit
-            if (!Directory.Exists(inputDir))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add DICOM files and rerun.");
                 return;
             }
 
             // Ensure output directory exists
-            if (!Directory.Exists(outputDir))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
             // Get all DICOM files in the input directory
-            string[] dicomFiles = Directory.GetFiles(inputDir, "*.dcm");
+            string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
 
-            foreach (string inputPath in dicomFiles)
+            foreach (string inputPath in files)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -39,25 +42,23 @@ class Program
                     return;
                 }
 
-                // Prepare output file path (same name with .bmp extension)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".bmp");
+                // Prepare output path with .bmp extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the DICOM image
-                using (DicomImage image = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
+                // Load DICOM image, apply Gaussian blur, resize, and save as BMP
+                using (DicomImage image = (DicomImage)Image.Load(inputPath))
                 {
-                    // Apply Gaussian blur filter to the whole image
-                    image.Filter(
-                        image.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                    // Apply Gaussian blur filter to the entire image
+                    image.Filter(image.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
                     // Resize to 640x480 using nearest neighbour resampling
-                    image.Resize(640, 480, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+                    image.Resize(640, 480, ResizeType.NearestNeighbourResample);
 
-                    // Save as BMP
+                    // Save the processed image as BMP
                     BmpOptions bmpOptions = new BmpOptions();
                     image.Save(outputPath, bmpOptions);
                 }
