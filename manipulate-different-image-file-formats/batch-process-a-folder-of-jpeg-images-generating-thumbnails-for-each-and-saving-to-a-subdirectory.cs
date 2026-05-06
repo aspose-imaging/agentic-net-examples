@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,40 +11,56 @@ class Program
         {
             // Hardcoded input and output directories
             string inputDirectory = "Input";
-            string outputDirectory = "Output\\Thumbnails";
+            string outputDirectory = "Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Get all JPEG files (both .jpg and .jpeg) in the input directory
-            string[] allFiles = Directory.GetFiles(inputDirectory, "*.*")
-                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-
-            foreach (string inputPath in allFiles)
+            // Ensure input directory exists; create if missing and exit
+            if (!Directory.Exists(inputDirectory))
             {
-                // Validate input file existence
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            // Get all JPEG files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            foreach (string inputPath in inputFiles)
+            {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output file path (same name with _thumb suffix)
+                // Build output thumbnail path
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_thumb.jpg");
 
-                // Ensure the output subdirectory exists (redundant but satisfies rule)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, resize to thumbnail size, and save
+                // Load the JPEG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Resize to 150x150 pixels thumbnail
-                    image.Resize(150, 150);
-                    // Save the thumbnail as JPEG
-                    image.Save(outputPath);
+                    // Process only raster images
+                    if (image is RasterImage raster)
+                    {
+                        // Cache data for better performance
+                        if (!raster.IsCached)
+                            raster.CacheData();
+
+                        // Resize to thumbnail size (e.g., 150x150) using nearest neighbour resampling
+                        raster.Resize(150, 150, ResizeType.NearestNeighbourResample);
+
+                        // Set JPEG save options (quality 75)
+                        JpegOptions jpegOptions = new JpegOptions
+                        {
+                            Quality = 75
+                        };
+
+                        // Save the thumbnail
+                        raster.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
