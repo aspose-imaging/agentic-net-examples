@@ -21,13 +21,13 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TGA image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Set DPI to 300 for both axes
+                // Change DPI to 300
                 image.HorizontalResolution = 300;
                 image.VerticalResolution = 300;
 
