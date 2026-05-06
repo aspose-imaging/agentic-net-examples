@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -9,7 +10,7 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.odg";
             string outputPath = @"C:\Images\output.png";
 
@@ -20,34 +21,29 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure font substitution:
-            // Use a default font name that will be used when the original font is missing
-            Aspose.Imaging.FontSettings.DefaultFontName = "Arial";
-
-            // Optionally add system font folders so Aspose.Imaging can locate substitute fonts
-            string[] systemFontFolders = Aspose.Imaging.FontSettings.GetDefaultFontsFolders();
-            Aspose.Imaging.FontSettings.SetFontsFolders(systemFontFolders, true);
+            // Set a default font to be used when a required font is missing
+            FontSettings.DefaultFontName = "Arial";
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for ODG conversion
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                // Configure rasterization options for ODG
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
+                    BackgroundColor = Color.White,
                     PageSize = image.Size
                 };
 
-                // Prepare PNG save options with the rasterization settings
-                PngOptions pngOptions = new PngOptions
+                // Set up PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the image, applying the font substitution settings
+                // Save the image using the configured options
                 image.Save(outputPath, pngOptions);
             }
         }
