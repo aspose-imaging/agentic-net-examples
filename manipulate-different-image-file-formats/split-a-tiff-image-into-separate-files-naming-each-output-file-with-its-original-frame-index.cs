@@ -7,35 +7,35 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output locations
+        // Hardcoded input and output locations
         string inputPath = "input.tif";
         string outputDirectory = "output_frames";
 
         try
         {
-            // Verify the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
             // Load the multi‑frame TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Ensure the output directory exists (creates even if null is returned)
-                Directory.CreateDirectory(outputDirectory);
-
-                // Iterate over each frame and save it as an individual TIFF file
+                // Iterate over each frame
                 for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
-                    // Build the output file name using the original frame index
+                    // Build output file path using the original frame index
                     string outputPath = Path.Combine(outputDirectory, $"frame_{i}.tif");
 
-                    // Ensure the directory for the output file exists
+                    // Ensure the directory for this output file exists (unconditional per rules)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Create a new TiffImage that contains only the current frame
+                    // Create a new TIFF image containing only the current frame
                     using (TiffImage singleFrameImage = new TiffImage(tiffImage.Frames[i]))
                     {
                         // Save the single‑frame TIFF
