@@ -10,14 +10,22 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string[] inputPaths = { "input1.djvu", "input2.djvu" };
-            string[] outputPaths = { "output1.pdf", "output2.pdf" };
+            // Hard‑coded input DjVu files
+            string[] inputPaths = {
+                @"C:\Data\doc1.djvu",
+                @"C:\Data\doc2.djvu"
+            };
 
-            // Define page indexes to export for each file (1‑based indexes)
+            // Corresponding output PDF files
+            string[] outputPaths = {
+                @"C:\Data\Result\doc1.pdf",
+                @"C:\Data\Result\doc2.pdf"
+            };
+
+            // Page indexes to export for each file (0‑based)
             int[][] pagesToExport = {
-                new int[] { 1, 2, 3 },   // pages for input1.djvu
-                new int[] { 2, 3, 4 }    // pages for input2.djvu
+                new int[] { 0, 1, 2 },   // first three pages of doc1.djvu
+                new int[] { 4, 5 }       // pages 5 and 6 of doc2.djvu
             };
 
             for (int i = 0; i < inputPaths.Length; i++)
@@ -33,28 +41,29 @@ class Program
                 }
 
                 // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                string outputDir = Path.GetDirectoryName(outputPath);
+                Directory.CreateDirectory(outputDir ?? ".");
 
                 // Low‑memory loading options (e.g., 1 MB buffer)
-                var loadOptions = new LoadOptions
+                LoadOptions loadOptions = new LoadOptions
                 {
                     BufferSizeHint = 1 * 1024 * 1024
                 };
 
-                // Load the DjVu document with the specified options
+                // Open the DjVu document with the low‑memory options
                 using (FileStream stream = File.OpenRead(inputPath))
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+                using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
                 {
-                    // Configure which pages to export
-                    var multiPageOptions = new DjvuMultiPageOptions(pagesToExport[i]);
+                    // Define which pages to export
+                    DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pagesToExport[i]);
 
-                    // Set up PDF saving options and attach the page selection
-                    var pdfOptions = new PdfOptions
+                    // Set up PDF saving options with the selected pages
+                    PdfOptions pdfOptions = new PdfOptions
                     {
                         MultiPageOptions = multiPageOptions
                     };
 
-                    // Save the selected pages as a PDF file
+                    // Save selected pages as a PDF
                     djvuImage.Save(outputPath, pdfOptions);
                 }
             }
