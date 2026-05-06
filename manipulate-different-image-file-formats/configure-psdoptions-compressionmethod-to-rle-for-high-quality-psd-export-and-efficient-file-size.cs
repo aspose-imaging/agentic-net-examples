@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.png";
-            string outputPath = @"c:\temp\output.psd";
+            // Hardcoded input and output file paths
+            string inputPath = "c:\\temp\\sample.bmp";
+            string outputPath = "c:\\temp\\output.psd";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,13 +21,13 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD options with RLE compression
+                // Configure PSD export options with RLE compression
                 PsdOptions psdOptions = new PsdOptions
                 {
                     CompressionMethod = CompressionMethod.RLE
