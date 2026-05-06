@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -14,29 +13,29 @@ class Program
 
         try
         {
-            // Verify the source file exists
+            // Verify that the source file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(outputDirectory);
 
             // Load the multi‑page TIFF
             using (TiffImage multiPage = (TiffImage)Image.Load(inputPath))
             {
-                TiffFrame[] frames = multiPage.Frames;
-
-                for (int i = 0; i < frames.Length; i++)
+                // Iterate through each frame in the source image
+                for (int i = 0; i < multiPage.Frames.Length; i++)
                 {
-                    // Clone the current frame to avoid disposing the original one
-                    TiffFrame clonedFrame = new TiffFrame((RasterImage)frames[i]);
+                    // Retrieve the current frame
+                    TiffFrame frame = multiPage.Frames[i];
 
-                    // Create a new TiffImage containing only this frame
-                    using (TiffImage singlePage = new TiffImage(clonedFrame))
+                    // Create a new TiffImage that contains only this frame
+                    using (TiffImage singlePage = new TiffImage(frame))
                     {
+                        // Build the output file path
                         string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
 
                         // Ensure the directory for the output file exists
