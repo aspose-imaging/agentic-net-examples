@@ -10,39 +10,34 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string inputDir = "C:\\input\\tiff\\";
+            string outputDir = "C:\\output\\webp\\";
 
-            // Ensure the output directory exists (will also work for each file)
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
 
             foreach (string inputPath in tiffFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output path with same filename but .webp extension
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
+                // Build the output path preserving the original filename
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
-                // Ensure the output directory exists (unconditional as required)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image
+                // Load the TIFF image and save it as lossless WebP
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save as lossless WebP
-                    var webpOptions = new WebPOptions
-                    {
-                        Lossless = true
-                    };
+                    var webpOptions = new WebPOptions { Lossless = true };
                     image.Save(outputPath, webpOptions);
                 }
             }
