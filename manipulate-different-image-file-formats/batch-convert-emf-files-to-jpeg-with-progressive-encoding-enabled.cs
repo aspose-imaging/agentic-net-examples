@@ -10,20 +10,20 @@ class Program
     {
         try
         {
-            // Define input and output directories relative to the current directory
+            // Set up base, input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the input directory exists; create it if missing
+            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add EMF files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
@@ -32,41 +32,31 @@ class Program
             // Get all EMF files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.emf");
 
-            foreach (var filePath in files)
+            foreach (var inputPath in files)
             {
-                // Validate input file existence
-                if (!File.Exists(filePath))
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                // Prepare output path with .jpg extension
-                string fileName = Path.GetFileName(filePath);
-                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(fileName, ".jpg"));
+                // Build the output JPEG path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
 
                 // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
-                using (Image image = Image.Load(filePath))
+                // Load the EMF image and save as progressive JPEG
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Configure JPEG options with progressive compression
-                    var jpegOptions = new JpegOptions
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        CompressionType = JpegCompressionMode.Progressive,
-                        Quality = 100,
-                        VectorRasterizationOptions = new EmfRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        }
+                        CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
+                        Quality = 90 // Adjust quality as needed
                     };
 
-                    // Save as JPEG
                     image.Save(outputPath, jpegOptions);
                 }
             }
