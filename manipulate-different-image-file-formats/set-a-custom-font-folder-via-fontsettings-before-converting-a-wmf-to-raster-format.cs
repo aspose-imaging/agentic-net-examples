@@ -3,6 +3,8 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -24,25 +26,27 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set custom font folder via LoadOptions
+            // Load WMF image with custom fonts
             var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource(args =>
-            {
-                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+            loadOptions.AddCustomFontSource(
+                (object[] fontArgs) =>
                 {
-                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    string fontsPath = fontArgs.Length > 0 ? fontArgs[0]?.ToString() : string.Empty;
+                    var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                    if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                     {
-                        byte[] fontBytes = File.ReadAllBytes(fontFile);
-                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                        result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                        foreach (var fontFile in Directory.GetFiles(fontsPath))
+                        {
+                            byte[] fontBytes = File.ReadAllBytes(fontFile);
+                            string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                            result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                        }
                     }
-                }
-                return result.ToArray();
-            }, "CustomFonts");
+                    return result.ToArray();
+                },
+                "Fonts"
+            );
 
-            // Load WMF image and convert to raster PNG
             using (Image image = Image.Load(inputPath, loadOptions))
             {
                 var rasterOptions = new WmfRasterizationOptions
@@ -52,12 +56,12 @@ class Program
                     PageHeight = image.Height
                 };
 
-                var saveOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                image.Save(outputPath, saveOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
