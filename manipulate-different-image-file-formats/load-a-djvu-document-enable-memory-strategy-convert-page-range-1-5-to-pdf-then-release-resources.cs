@@ -2,54 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Data\sample.djvu";
-        string outputPath = @"C:\Data\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Configure memory strategy (buffer size hint)
-            LoadOptions loadOptions = new LoadOptions
-            {
-                // Example: limit internal buffers to 5 MB
-                BufferSizeHint = 5 * 1024 * 1024
-            };
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/output.pdf";
 
-            // Open the DjVu file stream
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure memory strategy
+            LoadOptions loadOptions = new LoadOptions();
+            loadOptions.BufferSizeHint = 1 * 1024 * 1024; // 1 MB buffer
+
+            // Load DjVu document with memory options
             using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
             {
-                // Load DjVu document with the specified load options
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
-                {
-                    // Define page range 1‑5 (zero‑based indexes 0‑4)
-                    int[] pages = new int[] { 0, 1, 2, 3, 4 };
-                    DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pages);
+                // Set page range 1‑5 for export
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(1, 5));
 
-                    // Set up PDF saving options with the page range
-                    PdfOptions pdfOptions = new PdfOptions
-                    {
-                        MultiPageOptions = multiPageOptions
-                    };
-
-                    // Save selected pages as a single PDF file
-                    djvuImage.Save(outputPath, pdfOptions);
-                }
+                // Save selected pages to PDF
+                djvuImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
