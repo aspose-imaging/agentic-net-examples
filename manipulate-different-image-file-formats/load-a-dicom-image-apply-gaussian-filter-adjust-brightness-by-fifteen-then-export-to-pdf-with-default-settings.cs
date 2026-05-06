@@ -1,40 +1,43 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.dcm";
-        string outputPath = "Output/result.pdf";
+        // Define input and output paths
+        string inputPath = "Input\\sample.dcm";
+        string outputPath = "Output\\result.pdf";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            using (Image image = Image.Load(inputPath))
+            // Load the DICOM image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
+                var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
 
-                // Apply Gaussian blur filter
-                dicomImage.Filter(dicomImage.Bounds, new GaussianBlurFilterOptions(5, 1.0));
+                // Apply Gaussian blur filter to the whole image
+                dicomImage.Filter(
+                    dicomImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                // Adjust brightness by 15
+                // Increase brightness by 15 units
                 dicomImage.AdjustBrightness(15);
 
-                // Export to PDF with default settings
-                PdfOptions pdfOptions = new PdfOptions();
+                // Save the processed image as PDF with default options
+                var pdfOptions = new PdfOptions();
                 dicomImage.Save(outputPath, pdfOptions);
             }
         }
