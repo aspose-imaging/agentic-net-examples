@@ -3,43 +3,40 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.cmx";
+        string outputPath = "output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.cmx";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                // Apply scaling factor of 2.0
-                int newWidth = (int)(cmxImage.Width * 2.0);
-                int newHeight = (int)(cmxImage.Height * 2.0);
-                cmxImage.Resize(newWidth, newHeight);
+                int newWidth = cmx.Width * 2;
+                int newHeight = cmx.Height * 2;
 
-                // Prepare BMP save options for 24‑bit color
-                var bmpOptions = new BmpOptions
+                cmx.Resize(newWidth, newHeight);
+
+                BmpOptions bmpOptions = new BmpOptions
                 {
-                    BitsPerPixel = 24
+                    BitsPerPixel = 24,
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Save as BMP
-                cmxImage.Save(outputPath, bmpOptions);
+                cmx.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
