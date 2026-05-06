@@ -1,57 +1,48 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.gif";
-            string outputPath = "output\\frame3.webp";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load GIF image
-            using (Image gifImage = Image.Load(inputPath))
+            // Ensure output directory exists (if any)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                // Cast to multipage interface
-                IMultipageImage multipage = gifImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount <= 2)
-                {
-                    Console.Error.WriteLine("The GIF does not contain a third frame.");
-                    return;
-                }
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Retrieve the third frame (zero‑based index 2)
-                RasterImage thirdFrame = (RasterImage)multipage.Pages[2];
-
-                // Convert the frame to a lossless WebP image
-                using (WebPImage webpImage = new WebPImage(thirdFrame))
+            // Load the GIF image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Configure WebP options for lossless compression and select only the third frame (index 2)
+                var options = new WebPOptions
                 {
-                    WebPOptions options = new WebPOptions
-                    {
-                        Lossless = true
-                    };
-                    webpImage.Save(outputPath, options);
-                }
+                    Lossless = true,
+                    MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(2, 1))
+                };
+
+                // Save the selected frame as a WebP file
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
