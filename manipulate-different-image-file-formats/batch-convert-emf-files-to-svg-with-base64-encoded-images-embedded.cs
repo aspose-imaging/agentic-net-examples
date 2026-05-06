@@ -6,56 +6,61 @@ using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputEmf";
-            string outputDir = @"C:\OutputSvg";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the output root directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all EMF files in the input directory
-            string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
-
-            foreach (string inputPath in emfFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (var inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Build output SVG path
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".svg");
+                string outputPath = Path.Combine(outputDirectory, fileName + ".svg");
 
-                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
                 using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    // Configure SVG save options
                     SvgOptions saveOptions = new SvgOptions
                     {
-                        TextAsShapes = true, // render text as shapes
-                        VectorRasterizationOptions = new EmfRasterizationOptions
-                        {
-                            BackgroundColor = Color.WhiteSmoke,
-                            PageSize = emfImage.Size,
-                            RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                            BorderX = 0,
-                            BorderY = 0
-                        }
+                        TextAsShapes = true
                     };
 
-                    // Save as SVG; embedded raster images are encoded as Base64 by default
+                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = emfImage.Size,
+                        RenderMode = EmfRenderMode.Auto
+                    };
+
+                    saveOptions.VectorRasterizationOptions = rasterOptions;
+
                     emfImage.Save(outputPath, saveOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
