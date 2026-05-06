@@ -2,54 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\sample.cdr";
-        string outputPath = "output\\result.bmp";
+        string inputPath = "sample.cdr";
+        string outputPath = "sample.bmp";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CorelDRAW (CDR) file
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-            {
-                // Save the CDR image to a memory stream as BMP
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    cdrImage.Save(ms, new BmpOptions());
-                    ms.Position = 0; // Reset stream position for reading
-
-                    // Load the BMP from the memory stream as a raster image
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                    var pngOptions = new PngOptions
                     {
-                        // Apply Gaussian blur filter to the entire image
-                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                        // Save the processed image to the final BMP file
-                        rasterImage.Save(outputPath, new BmpOptions());
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                        var bmpOptions = new BmpOptions();
+                        raster.Save(outputPath, bmpOptions);
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            // Output any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
