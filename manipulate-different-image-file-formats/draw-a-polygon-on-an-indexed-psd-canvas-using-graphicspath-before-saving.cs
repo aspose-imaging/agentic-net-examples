@@ -12,66 +12,60 @@ class Program
     {
         try
         {
-            // Output PSD file path (hard‑coded)
-            string outputPath = @"C:\temp\output.psd";
+            // Define output path
+            string outputPath = @"C:\Temp\output.psd";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a simple palette for the indexed image
-            Color[] paletteColors = new Color[]
+            // Create PSD options for an indexed image
+            PsdOptions psdOptions = new PsdOptions();
+            psdOptions.Source = new FileCreateSource(outputPath, false);
+            psdOptions.ColorMode = ColorModes.Indexed;
+            psdOptions.CompressionMethod = CompressionMethod.RLE;
+            psdOptions.ChannelBitsCount = 8;      // 8 bits per channel
+            psdOptions.ChannelsCount = 1;         // Indexed uses a single channel
+            // Define a simple palette (red, green, blue, black, white)
+            psdOptions.Palette = new ColorPalette(new Color[]
             {
-                Color.Black,
-                Color.White,
                 Color.Red,
                 Color.Green,
                 Color.Blue,
-                Color.Yellow,
-                Color.Cyan,
-                Color.Magenta
-            };
-            ColorPalette palette = new ColorPalette(paletteColors);
+                Color.Black,
+                Color.White
+            });
 
-            // Configure PSD options for an indexed canvas
-            PsdOptions psdOptions = new PsdOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                ColorMode = ColorModes.Indexed,
-                CompressionMethod = CompressionMethod.RLE,
-                ChannelBitsCount = (short)8,
-                ChannelsCount = (short)1,
-                Palette = palette,
-                Version = 6
-            };
-
-            // Create a 500x500 indexed PSD image
-            using (Image image = Image.Create(psdOptions, 500, 500))
+            // Create a new PSD image with the specified options
+            using (Image image = Image.Create(psdOptions, 300, 300))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(paletteColors[0]);
+                graphics.Clear(Color.White);
+
+                // Create a GraphicsPath and a Figure
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
 
                 // Define polygon vertices
                 PointF[] polygonPoints = new PointF[]
                 {
-                    new PointF(100f, 100f),
-                    new PointF(400f, 100f),
-                    new PointF(250f, 400f)
+                    new PointF(50f, 50f),
+                    new PointF(250f, 50f),
+                    new PointF(200f, 200f),
+                    new PointF(100f, 200f)
                 };
 
-                // Create a figure and add a closed polygon shape
-                Figure figure = new Figure();
-                figure.AddShape(new PolygonShape(polygonPoints, true));
+                // Add a PolygonShape to the figure
+                figure.AddShape(new PolygonShape(polygonPoints));
 
-                // Build a graphics path containing the figure
-                GraphicsPath path = new GraphicsPath();
+                // Add the figure to the path
                 path.AddFigure(figure);
 
-                // Draw the polygon outline
-                Pen pen = new Pen(Color.White, 2);
+                // Draw the polygon using a black pen
+                Pen pen = new Pen(Color.Black, 2);
                 graphics.DrawPath(pen, path);
 
-                // Save the image (output file is already bound to the source)
+                // Save the image (output file is already bound via FileCreateSource)
                 image.Save();
             }
         }
