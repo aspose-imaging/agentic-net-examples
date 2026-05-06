@@ -3,64 +3,63 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace AsposeCanvasExport
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Images\sample.svg";
-        string canvasOutputPath = @"C:\Images\Canvas.html";
-        string reactComponentPath = @"C:\Images\CanvasComponent.jsx";
-
-        try
+        static void Main()
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Hardcoded input and output paths
+                string inputPath = @"C:\Images\sample.svg";
+                string htmlOutputPath = @"C:\Output\Canvas.html";
+                string reactComponentPath = @"C:\Output\CanvasComponent.jsx";
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(canvasOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(reactComponentPath));
-
-            // Load the vector image
-            using (var image = Image.Load(inputPath))
-            {
-                // Export only the <canvas> tag (no full HTML page)
-                var options = new Html5CanvasOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    FullHtmlPage = false,
-                    VectorRasterizationOptions = new SvgRasterizationOptions()
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                image.Save(canvasOutputPath, options);
-            }
+                // Ensure output directories exist
+                Directory.CreateDirectory(Path.GetDirectoryName(htmlOutputPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(reactComponentPath));
 
-            // Read the generated canvas HTML
-            string canvasHtml = File.ReadAllText(canvasOutputPath);
+                // Load vector image and export to HTML5 Canvas
+                using (var image = Image.Load(inputPath))
+                {
+                    var options = new Html5CanvasOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions(),
+                        FullHtmlPage = true
+                    };
+                    image.Save(htmlOutputPath, options);
+                }
 
-            // Escape backticks for embedding in a template literal
-            string escapedCanvasHtml = canvasHtml.Replace("`", "\\`");
+                // Read generated HTML content
+                string htmlContent = File.ReadAllText(htmlOutputPath);
+                // Escape characters for inclusion in a JavaScript template literal
+                string escapedHtml = htmlContent.Replace("\\", "\\\\").Replace("`", "\\`");
 
-            // Build a simple React component that injects the canvas HTML
-            string reactComponent = 
-$@"import React from 'react';
+                // Create React component source code
+                string componentCode = $@"import React from 'react';
 
 const CanvasComponent = () => (
-  <div dangerouslySetInnerHTML={{ __html: `{escapedCanvasHtml}` }} />
+    <div dangerouslySetInnerHTML={{{{ __html: `{escapedHtml}` }}}} />
 );
 
 export default CanvasComponent;
 ";
 
-            // Write the React component to file
-            File.WriteAllText(reactComponentPath, reactComponent);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+                // Write React component to file
+                File.WriteAllText(reactComponentPath, componentCode);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }

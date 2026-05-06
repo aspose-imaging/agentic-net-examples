@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.dcm";
-            string outputPath = "Output\\output.gif";
+            string outputPath = "output.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,13 +22,18 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load DICOM image
             using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                // Crop 10 pixels from each side
-                dicom.Crop(10, 10, 10, 10);
+                // Crop: remove 10 pixels from each side
+                int cropLeft = 10;
+                int cropTop = 10;
+                int cropWidth = dicom.Width - 20;
+                int cropHeight = dicom.Height - 20;
+                var cropRect = new Rectangle(cropLeft, cropTop, cropWidth, cropHeight);
+                dicom.Crop(cropRect);
 
                 // Rotate 45 degrees clockwise, resize proportionally, white background
                 dicom.Rotate(45f, true, Color.White);
@@ -37,7 +42,7 @@ class Program
                 dicom.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
                 // Save as GIF
-                GifOptions gifOptions = new GifOptions();
+                var gifOptions = new GifOptions();
                 dicom.Save(outputPath, gifOptions);
             }
         }

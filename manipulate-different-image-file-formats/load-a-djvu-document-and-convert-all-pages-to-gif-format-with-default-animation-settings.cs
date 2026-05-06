@@ -8,12 +8,14 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output locations
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
-
         try
         {
+            // Hardcoded input DjVu file path
+            string inputPath = @"C:\Temp\sample.djvu";
+
+            // Hardcoded output directory for GIF files
+            string outputDir = @"C:\Temp\GifOutput";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,31 +24,33 @@ class Program
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
-            // Open the DjVu file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            // Load the DjVu document from a file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Load the DjVu document
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                int pageIndex = 1;
+
+                // Iterate through each page in the DjVu document
+                foreach (DjvuPage djvuPage in djvuImage.Pages)
                 {
-                    // Iterate through each page and save as an individual GIF
-                    foreach (DjvuPage page in djvuImage.Pages)
-                    {
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
+                    // Build the output file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"page{pageIndex}.gif");
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the page as GIF using default options
-                        page.Save(outputPath, new GifOptions());
-                    }
+                    // Save the page as a GIF using default animation settings
+                    djvuPage.Save(outputPath, new GifOptions());
+
+                    pageIndex++;
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

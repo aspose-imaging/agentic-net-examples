@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.dicom";
-        string outputPath = @"C:\Images\sample_brightness20.png";
+        string inputPath = @"C:\temp\sample.dicom";
+        string outputPath = @"C:\temp\sample.adjusted.png";
 
         try
         {
@@ -22,19 +22,13 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image
+            // Load the DICOM image, adjust brightness, and save as PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
-
-                // Increase brightness by 20 units
-                dicomImage.AdjustBrightness(20);
-
-                // Save as PNG
+                dicomImage.AdjustBrightness(20); // Increase brightness by 20 units
                 dicomImage.Save(outputPath, new PngOptions());
             }
         }

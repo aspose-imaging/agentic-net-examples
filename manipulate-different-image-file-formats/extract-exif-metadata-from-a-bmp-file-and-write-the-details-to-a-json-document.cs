@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 using System.Text.Json;
 using Aspose.Imaging;
-using Aspose.Imaging.Exif;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -13,38 +13,35 @@ class Program
         string inputPath = "input.bmp";
         string outputPath = "output.json";
 
-        // Ensure any runtime exception is reported cleanly
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load BMP image
+            using (BmpImage image = (BmpImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Retrieve EXIF data if available
+                var exifData = image.Metadata?.ExifData;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                // Prepare a dictionary to hold EXIF tag values
+                var exifDictionary = new Dictionary<string, object>();
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Retrieve EXIF data if present
-                ExifData exif = image.Metadata?.ExifData;
-
-                // Prepare a dictionary to hold EXIF properties
-                var exifDictionary = new Dictionary<string, object?>();
-
-                if (exif != null)
+                if (exifData != null)
                 {
-                    // Reflect over all public properties of the EXIF data object
-                    var properties = exif.GetType().GetProperties();
+                    var properties = exifData.GetType().GetProperties();
                     foreach (var prop in properties)
                     {
                         try
                         {
-                            object? value = prop.GetValue(exif);
-                            // Store only non-null values for clarity
+                            var value = prop.GetValue(exifData);
                             if (value != null)
                             {
                                 exifDictionary[prop.Name] = value;
@@ -52,15 +49,15 @@ class Program
                         }
                         catch
                         {
-                            // Ignore any property that throws during retrieval
+                            // Ignore properties that throw during get
                         }
                     }
                 }
 
-                // Serialize the dictionary to JSON (empty object if no EXIF data)
+                // Serialize dictionary to JSON
                 string json = JsonSerializer.Serialize(exifDictionary, new JsonSerializerOptions { WriteIndented = true });
 
-                // Write JSON to the output file
+                // Write JSON to output file
                 File.WriteAllText(outputPath, json);
             }
         }

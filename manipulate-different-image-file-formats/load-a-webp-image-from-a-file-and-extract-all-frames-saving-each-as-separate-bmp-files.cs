@@ -1,20 +1,17 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputDirectory = "output_frames";
-
         try
         {
+            // Hardcoded input WebP file path
+            string inputPath = "input.webp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,44 +19,45 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
             // Load the WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (WebPImage webP = new WebPImage(inputPath))
             {
                 // Cast to multipage interface to access frames
-                IMultipageImage multipage = webPImage as IMultipageImage;
+                var multipage = webP as Aspose.Imaging.IMultipageImage;
                 if (multipage == null)
                 {
-                    Console.Error.WriteLine("The loaded image is not a multipage WebP.");
+                    Console.Error.WriteLine("The loaded image does not support multiple frames.");
                     return;
                 }
 
-                int frameCount = multipage.PageCount;
+                int pageCount = multipage.PageCount;
 
-                for (int i = 0; i < frameCount; i++)
+                // Iterate through each frame
+                for (int i = 0; i < pageCount; i++)
                 {
                     // Retrieve the frame
                     var frame = multipage.Pages[i];
 
                     // Cast frame to RasterImage for saving
-                    RasterImage raster = frame as RasterImage;
+                    var raster = frame as Aspose.Imaging.RasterImage;
                     if (raster == null)
                     {
                         Console.Error.WriteLine($"Frame {i} is not a raster image.");
                         continue;
                     }
 
-                    // Build output path for this frame
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.bmp");
+                    // Define output BMP file path for the current frame
+                    string outputPath = $"frame_{i}.bmp";
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure the output directory exists (guard against null/empty)
+                    string outputDir = Path.GetDirectoryName(outputPath);
+                    if (!string.IsNullOrWhiteSpace(outputDir))
+                    {
+                        Directory.CreateDirectory(outputDir);
+                    }
 
                     // Save the frame as BMP
-                    BmpOptions bmpOptions = new BmpOptions();
-                    raster.Save(outputPath, bmpOptions);
+                    raster.Save(outputPath, new BmpOptions());
                 }
             }
         }

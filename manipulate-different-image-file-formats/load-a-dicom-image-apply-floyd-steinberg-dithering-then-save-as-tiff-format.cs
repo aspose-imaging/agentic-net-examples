@@ -1,23 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.dcm");
-        string outputPath = Path.Combine("Output", "sample.tif");
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputPath = "output\\result.tif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,21 +22,17 @@ class Program
                 return;
             }
 
-            // Load the DICOM image
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load DICOM image, apply Floyd‑Steinberg dithering, and save as TIFF
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage for DICOM-specific operations
                 DicomImage dicomImage = (DicomImage)image;
-
-                // Apply Floyd‑Steinberg dithering with a 1‑bit palette
                 dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
 
-                // Prepare TIFF save options
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    // Save the processed image as TIFF
-                    dicomImage.Save(outputPath, tiffOptions);
-                }
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                dicomImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

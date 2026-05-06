@@ -1,10 +1,8 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -13,26 +11,24 @@ class Program
         try
         {
             string inputPath = "Input/sample.djvu";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            using (Stream stream = File.OpenRead(inputPath))
             {
-                foreach (DjvuPage page in djvuImage.Pages)
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    string outputPath = Path.Combine("Output", $"page_{page.PageNumber}.png");
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    PngOptions options = new PngOptions
+                    foreach (DjvuPage page in djvuImage.Pages)
                     {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
-                    page.Save(outputPath, options);
+                        string outputPath = $"Output/page_{page.PageNumber}.png";
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        page.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }

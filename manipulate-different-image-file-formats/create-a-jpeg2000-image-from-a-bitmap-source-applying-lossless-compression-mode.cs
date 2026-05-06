@@ -2,38 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "c:\\temp\\source.bmp";
-        string outputPath = "c:\\temp\\output.jp2";
+        string inputPath = "C:\\temp\\source.png";
+        string outputPath = "C:\\temp\\output.jp2";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            using (Image srcImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                RasterImage raster = srcImage as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Source image is not a raster image.");
+                    return;
+                }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the bitmap source image
-            using (Image bitmap = Image.Load(inputPath))
-            {
-                // Set up JPEG2000 options for lossless compression
                 Jpeg2000Options options = new Jpeg2000Options
                 {
-                    Irreversible = false // Use lossless DWT 5-3 compression
+                    Irreversible = false // lossless compression
                 };
 
-                // Save the image as JPEG2000
-                bitmap.Save(outputPath, options);
+                using (Jpeg2000Image jp2Image = new Jpeg2000Image(raster))
+                {
+                    jp2Image.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)

@@ -11,7 +11,7 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.jpg";
+            string inputPath = "sample.jpg";
             string outputPath = "thumbnail.jpg";
 
             // Verify input file exists
@@ -24,22 +24,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
-            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+            // Load JPEG image
+            using (var jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Retrieve the EXIF thumbnail (may be null)
-                RasterImage thumbnail = jpegImage.ExifData?.Thumbnail;
-
-                if (thumbnail == null)
+                // Get thumbnail from EXIF data
+                var thumb = jpegImage.ExifData?.Thumbnail;
+                if (thumb == null)
                 {
-                    Console.Error.WriteLine("No EXIF thumbnail found in the image.");
+                    Console.Error.WriteLine("No thumbnail found in EXIF data.");
                     return;
                 }
 
-                // Save the thumbnail to a separate file
-                using (thumbnail)
+                // Save the thumbnail as a separate file
+                using (thumb)
                 {
-                    thumbnail.Save(outputPath);
+                    thumb.Save(outputPath);
                 }
             }
         }

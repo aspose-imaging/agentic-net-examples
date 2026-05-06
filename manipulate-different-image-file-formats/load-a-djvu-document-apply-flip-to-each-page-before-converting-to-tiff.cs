@@ -1,40 +1,44 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/input.djvu";
-        string outputPath = "output/output.tif";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "sample.djvu";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load DjVu document
-        using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
-        {
-            // Apply flip to each page
-            foreach (Image page in djvu.Pages)
+            if (!File.Exists(inputPath))
             {
-                page.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save the flipped document as a multi-page TIFF
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            djvu.Save(outputPath, tiffOptions);
+            string outputDir = "output";
+            Directory.CreateDirectory(outputDir);
+
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            {
+                for (int i = 0; i < djvu.Pages.Length; i++)
+                {
+                    var page = djvu.Pages[i];
+                    page.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.tiff");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    page.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

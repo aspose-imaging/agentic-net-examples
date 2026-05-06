@@ -2,59 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
-        // Wrap the entire processing in a try-catch to handle unexpected errors gracefully
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\WebPInput\";
-            string outputDir = @"C:\WebPOutput\";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Ensure the output directory exists (creates the folder if missing)
+            // Ensure the output root directory exists
             Directory.CreateDirectory(outputDir);
 
             // Get all WebP files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.webp");
+            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp");
 
-            // Process each WebP file
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in webpFiles)
             {
-                // Verify that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine the corresponding output path (convert to PNG)
+                // Determine output file path (same name with .png extension)
                 string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure the output directory exists (unconditional as required)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set a memory usage limit (buffer size hint) for loading the image
-                var loadOptions = new LoadOptions
+                // Load the WebP image with a memory usage limit (BufferSizeHint in MB)
+                using (Image image = Image.Load(inputPath, new LoadOptions { BufferSizeHint = 100 }))
                 {
-                    BufferSizeHint = 100 // limit internal buffers to 100 MB
-                };
-
-                // Load the WebP image with the specified memory limit
-                using (Image image = Image.Load(inputPath, loadOptions))
-                {
-                    // Save the image to PNG format
-                    var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
+                    // Save as PNG using default options
+                    image.Save(outputPath, new PngOptions());
                 }
             }
         }
         catch (Exception ex)
         {
-            // Output any runtime exception message without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

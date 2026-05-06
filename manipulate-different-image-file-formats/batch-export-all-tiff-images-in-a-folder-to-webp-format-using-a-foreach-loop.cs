@@ -9,44 +9,36 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Hardcoded input and output directories
+            string inputDir = "Input";
+            string outputDir = "Output";
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
-            // Process all files in the input directory
-            foreach (var inputPath in Directory.GetFiles(inputDirectory, "*.*"))
+            // Get all TIFF files in the input directory
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+
+            foreach (string inputPath in tiffFiles)
             {
-                string ext = Path.GetExtension(inputPath);
-                if (!ext.Equals(".tif", StringComparison.OrdinalIgnoreCase) &&
-                    !ext.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue; // Skip non‑TIFF files
-                }
-
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
+                // Build output file path with .webp extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
                 // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load the TIFF image and save as WebP
                 using (Image image = Image.Load(inputPath))
                 {
-                    using (WebPOptions options = new WebPOptions())
-                    {
-                        // Example settings; adjust as needed
-                        options.Lossless = false;
-                        options.Quality = 80f;
-
-                        image.Save(outputPath, options);
-                    }
+                    image.Save(outputPath, new WebPOptions());
                 }
             }
         }

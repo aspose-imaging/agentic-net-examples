@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.gif";
+        string inputPath = @"C:\Images\sample.dcm";
+        string outputPath = @"C:\Images\output\cropped.gif";
 
         try
         {
@@ -22,7 +22,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
@@ -30,11 +30,8 @@ class Program
                 // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Define the cropping rectangle (0,0,200,200)
-                Rectangle cropArea = new Rectangle(0, 0, 200, 200);
-
-                // Perform the crop
-                dicomImage.Crop(cropArea);
+                // Crop to rectangle (0,0,200,200)
+                dicomImage.Crop(new Aspose.Imaging.Rectangle(0, 0, 200, 200));
 
                 // Save the cropped image as GIF
                 dicomImage.Save(outputPath, new GifOptions());
@@ -42,6 +39,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

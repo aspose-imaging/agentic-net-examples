@@ -8,13 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "preview.png";
-
-        // Ensure any runtime exception is caught and reported
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input/sample.eps";
+            string outputPath = "output/preview.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,34 +21,36 @@ class Program
                 return;
             }
 
-            // Prepare output directory
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
                 // Determine if a raster preview is present
                 if (epsImage.HasRasterPreview)
                 {
+                    Console.WriteLine("Raster preview is present.");
+
                     // Retrieve the preview image (default format)
-                    using (Image preview = epsImage.GetPreviewImage())
+                    using (var preview = epsImage.GetPreviewImage())
                     {
                         if (preview != null)
                         {
-                            // Save the preview image to the specified output path
-                            preview.Save(outputPath, new PngOptions());
-                            Console.WriteLine($"Preview image extracted and saved to: {outputPath}");
+                            // Save the preview image as PNG
+                            var pngOptions = new PngOptions();
+                            preview.Save(outputPath, pngOptions);
+                            Console.WriteLine($"Preview saved to {outputPath}");
                         }
                         else
                         {
-                            // HasRasterPreview was true but GetPreviewImage returned null (unlikely)
-                            Console.WriteLine("Raster preview indicated but could not retrieve the preview image.");
+                            Console.WriteLine("Preview image could not be retrieved.");
                         }
                     }
                 }
                 else
                 {
-                    Console.WriteLine("No raster preview image found in the EPS file.");
+                    Console.WriteLine("No raster preview found in the EPS file.");
                 }
             }
         }

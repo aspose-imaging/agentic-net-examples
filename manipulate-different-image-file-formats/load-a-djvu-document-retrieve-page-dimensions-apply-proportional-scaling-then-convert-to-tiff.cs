@@ -1,20 +1,20 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.djvu";
+        string outputDirectory = "output";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.djvu";
-            string outputPath = "output/output.tiff";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,21 +22,39 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load DjVu document
-            using (DjvuImage djvu = (DjvuImage)Aspose.Imaging.Image.Load(inputPath))
+            // Load the DjVu document from file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
             {
-                // Retrieve original dimensions
-                int originalWidth = djvu.Width;
-                int originalHeight = djvu.Height;
+                // Define a proportional scaling factor (e.g., 50%)
+                const double scaleFactor = 0.5;
 
-                // Apply proportional scaling (double the width, height adjusts automatically)
-                djvu.ResizeWidthProportionally(originalWidth * 2, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+                // Iterate through each page in the DjVu document
+                foreach (DjvuPage page in djvuImage.Pages)
+                {
+                    // Retrieve original dimensions
+                    int originalWidth = page.Width;
+                    int originalHeight = page.Height;
 
-                // Save the result as TIFF
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                djvu.Save(outputPath, tiffOptions);
+                    // Calculate new dimensions while preserving aspect ratio
+                    int newWidth = (int)(originalWidth * scaleFactor);
+                    int newHeight = (int)(originalHeight * scaleFactor);
+
+                    // Resize the page proportionally
+                    page.Resize(newWidth, newHeight);
+
+                    // Prepare output file path for the current page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.tiff");
+
+                    // Ensure the directory for the output file exists (already created above)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the resized page as TIFF
+                    TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
+                    page.Save(outputPath, tiffOptions);
+                }
             }
         }
         catch (Exception ex)

@@ -1,51 +1,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.emf";
+        string outputPath = "output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.pdf";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access cropping functionality
-                EmfImage emfImage = (EmfImage)image;
+                EmfImage emf = img as EmfImage;
+                if (emf == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not an EMF image.");
+                    return;
+                }
 
-                // Define a margin to remove the border (adjust as needed)
-                int margin = 10;
+                int border = 10;
+                int newWidth = emf.Width - 2 * border;
+                int newHeight = emf.Height - 2 * border;
+                if (newWidth <= 0 || newHeight <= 0)
+                {
+                    Console.Error.WriteLine("Border too large for image dimensions.");
+                    return;
+                }
 
-                // Ensure the crop rectangle is within image bounds
-                int cropX = margin;
-                int cropY = margin;
-                int cropWidth = Math.Max(0, emfImage.Width - 2 * margin);
-                int cropHeight = Math.Max(0, emfImage.Height - 2 * margin);
-                var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+                var cropRect = new Rectangle(border, border, newWidth, newHeight);
+                emf.Crop(cropRect);
 
-                // Crop the image
-                emfImage.Crop(cropRect);
-
-                // Save the cropped image as PDF
-                var pdfOptions = new PdfOptions();
-                emfImage.Save(outputPath, pdfOptions);
+                PdfOptions pdfOptions = new PdfOptions();
+                emf.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

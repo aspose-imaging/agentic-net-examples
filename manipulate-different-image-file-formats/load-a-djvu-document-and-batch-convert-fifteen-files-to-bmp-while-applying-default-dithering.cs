@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input directory and output directory
-            string inputDir = @"C:\Input";
-            string outputDir = @"C:\Output";
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputDjvu\";
+            string outputDir = @"C:\OutputBmp\";
 
             // List of fifteen DjVu files to process
             string[] inputFiles = new string[]
@@ -22,37 +22,38 @@ class Program
                 "file11.djvu", "file12.djvu", "file13.djvu", "file14.djvu", "file15.djvu"
             };
 
-            for (int i = 0; i < inputFiles.Length; i++)
+            foreach (var fileName in inputFiles)
             {
-                string inputPath = Path.Combine(inputDir, inputFiles[i]);
-
-                // Verify input file exists
+                string inputPath = Path.Combine(inputDir, fileName);
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Open the DjVu document
+                // Ensure the output directory exists
+                Directory.CreateDirectory(outputDir);
+
+                // Load the DjVu document
                 using (FileStream stream = File.OpenRead(inputPath))
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
                     // Apply default dithering (Floyd‑Steinberg, 8‑bit palette)
                     djvuImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
                     // Save each page as a separate BMP file
                     int pageIndex = 0;
-                    foreach (DjvuPage page in djvuImage.Pages)
+                    foreach (var page in djvuImage.Pages)
                     {
-                        string outputPath = Path.Combine(outputDir,
-                            $"output_{i + 1}_page{pageIndex}.bmp");
+                        string pageOutputPath = Path.Combine(
+                            outputDir,
+                            $"{Path.GetFileNameWithoutExtension(fileName)}_page{pageIndex}.bmp");
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the directory for the page output exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
 
-                        // Save the page as BMP
-                        page.Save(outputPath, new BmpOptions());
-
+                        // Save the page using BMP options
+                        page.Save(pageOutputPath, new BmpOptions());
                         pageIndex++;
                     }
                 }

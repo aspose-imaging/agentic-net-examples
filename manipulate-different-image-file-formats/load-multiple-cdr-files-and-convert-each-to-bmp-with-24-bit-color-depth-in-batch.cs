@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,19 +11,25 @@ class Program
     {
         try
         {
-            // Hardcoded input CDR files
-            string[] inputFiles = new string[]
+            // Hard‑coded input CDR files
+            string[] inputPaths = new string[]
             {
                 @"C:\Images\sample1.cdr",
-                @"C:\Images\sample2.cdr",
-                @"C:\Images\sample3.cdr"
+                @"C:\Images\sample2.cdr"
             };
 
-            // Hardcoded output directory
-            string outputDir = @"C:\Images\Converted";
-
-            foreach (string inputPath in inputFiles)
+            // Corresponding output BMP files (24‑bit)
+            string[] outputPaths = new string[]
             {
+                @"C:\Converted\sample1.bmp",
+                @"C:\Converted\sample2.bmp"
+            };
+
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -31,35 +37,21 @@ class Program
                     return;
                 }
 
-                // Build output BMP path (same name, .bmp extension)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
-
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                using (Image cdrImage = Image.Load(inputPath))
                 {
-                    // Ensure at least one page exists
-                    if (cdrImage.Pages.Length == 0)
+                    // Prepare BMP options with 24‑bit color depth
+                    BmpOptions bmpOptions = new BmpOptions
                     {
-                        Console.Error.WriteLine($"No pages found in: {inputPath}");
-                        continue;
-                    }
+                        BitsPerPixel = 24
+                    };
 
-                    // Use the first page for conversion
-                    using (RasterImage page = (RasterImage)cdrImage.Pages[0])
-                    {
-                        // Create a 24‑bpp BMP image from the raster page
-                        using (BmpImage bmpImage = new BmpImage(page, 24, BitmapCompression.Rgb, 96.0, 96.0))
-                        {
-                            // Save the BMP file
-                            bmpImage.Save(outputPath);
-                        }
-                    }
+                    // Save as BMP
+                    cdrImage.Save(outputPath, bmpOptions);
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
         }
         catch (Exception ex)

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff;
@@ -26,18 +25,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DICOM image with memory buffer hint
-            var loadOptions = new LoadOptions { BufferSizeHint = 256 * 1024 };
-            using (Image image = Image.Load(inputPath, loadOptions))
+            // Set memory strategy via LoadOptions
+            var loadOptions = new Aspose.Imaging.LoadOptions
             {
-                var dicomImage = (DicomImage)image;
+                BufferSizeHint = 256 * 1024 // 256 KB buffer size hint
+            };
 
+            // Load DICOM image with memory strategy
+            using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath, loadOptions))
+            {
                 // Adjust brightness and contrast
-                dicomImage.AdjustBrightness(50);      // range [-255, 255]
-                dicomImage.AdjustContrast(30f);      // range [-100, 100]
+                dicomImage.AdjustBrightness(30);      // Increase brightness
+                dicomImage.AdjustContrast(20f);       // Increase contrast
 
-                // Save as TIFF
+                // Prepare TIFF save options
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the processed image as TIFF
                 dicomImage.Save(outputPath, tiffOptions);
             }
         }

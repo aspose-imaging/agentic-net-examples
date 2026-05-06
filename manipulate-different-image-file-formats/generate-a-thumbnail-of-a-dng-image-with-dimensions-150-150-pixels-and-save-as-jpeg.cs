@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
@@ -12,7 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.dng";
-            string outputPath = "thumbnail.jpg";
+            string outputPath = "output\\thumbnail.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,16 +23,13 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DNG image
-            using (Image image = Image.Load(inputPath))
+            // Load the DNG image as a raster image
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for resizing operations
-                RasterImage raster = (RasterImage)image;
-
-                // Resize to 150x150 pixels
+                // Resize to thumbnail dimensions
                 raster.Resize(150, 150);
 
-                // Save as JPEG with default options
+                // Save as JPEG
                 JpegOptions jpegOptions = new JpegOptions();
                 raster.Save(outputPath, jpegOptions);
             }

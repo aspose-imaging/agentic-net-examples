@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -10,38 +11,32 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output locations
-            string inputPath = @"C:\Images\multipage.tif";
-            string outputDirectory = @"C:\Images\WebPPages";
+            // Hardcoded input TIFF path
+            string inputPath = @"c:\temp\input.tif";
+            // Hardcoded output directory
+            string outputDir = @"c:\temp\output";
 
-            // Verify the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(outputDirectory);
-
             // Load the multi‑page TIFF
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Cast to TiffImage to access the Frames collection
-                TiffImage tiffImage = (TiffImage)image;
                 TiffFrame[] frames = tiffImage.Frames;
 
-                // Iterate over each frame and save it as a separate WebP file
                 for (int i = 0; i < frames.Length; i++)
                 {
-                    // Build the output file path using the page number (starting at 0)
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i}.webp");
+                    // Build output file name with page number (1‑based)
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.webp");
 
-                    // Ensure the directory for this file exists (covers cases where outputDirectory might be a deeper path)
+                    // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current frame as WebP
-                    // WebPOptions provides default encoding settings; adjust if needed
+                    // Save the current frame as a WebP image
                     frames[i].Save(outputPath, new WebPOptions());
                 }
             }

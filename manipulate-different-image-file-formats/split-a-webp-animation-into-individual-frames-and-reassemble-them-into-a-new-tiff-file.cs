@@ -5,16 +5,17 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input\\animation.webp";
-            string outputPath = "Output\\result.tif";
+            string inputPath = "input_animation.webp";
+            string outputPath = "output_frames.tif";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -31,49 +32,51 @@ class Program
             {
                 // Cast to multipage interface to access frames
                 IMultipageImage multipage = webpImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
-                {
-                    Console.Error.WriteLine("The WebP image does not contain any frames.");
-                    return;
-                }
+                int frameCount = (multipage != null) ? multipage.PageCount : 1;
 
-                // Get dimensions from the first frame
-                RasterImage firstFrame = multipage.Pages[0] as RasterImage;
-                if (firstFrame == null)
-                {
-                    Console.Error.WriteLine("Unable to retrieve the first frame as a raster image.");
-                    return;
-                }
-                int width = firstFrame.Width;
-                int height = firstFrame.Height;
+                // Determine canvas size from the source image
+                int width = webpImage.Width;
+                int height = webpImage.Height;
 
-                // Prepare TIFF options
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                // Prepare TIFF options with a FileCreateSource
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Source = new FileCreateSource(outputPath, false);
+
+                // Create the TIFF image canvas
+                using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
                 {
-                    // Create a new TIFF image canvas
-                    using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
+                    // Process each frame from the WebP animation
+                    for (int i = 0; i < frameCount; i++)
                     {
-                        // Iterate through each WebP frame and copy its pixels to the TIFF
-                        for (int i = 0; i < multipage.PageCount; i++)
+                        // Retrieve the raster image for the current frame
+                        RasterImage frameRaster = (RasterImage)webpImage.Pages[i];
+
+                        // Load pixel data from the frame
+                        Color[] pixels = frameRaster.LoadPixels(frameRaster.Bounds);
+
+                        if (i == 0)
                         {
-                            RasterImage frame = multipage.Pages[i] as RasterImage;
-                            if (frame == null)
-                                continue;
+                            // Replace the default frame with the first animation frame
+                            tiffImage.SavePixels(tiffImage.ActiveFrame.Bounds, pixels);
+                        }
+                        else
+                        {
+                            // Add a new blank frame to the TIFF
+                            tiffImage.AddFrame(new TiffFrame(tiffOptions, width, height));
 
-                            // Add a new frame to the TIFF after the first one
-                            if (i > 0)
-                            {
-                                tiffImage.AddFrame(new TiffFrame(tiffOptions, width, height));
-                            }
+                            // Set the newly added frame as active
+                            tiffImage.ActiveFrame = tiffImage.Frames[tiffImage.Frames.Length - 1];
 
-                            // Copy pixel data
-                            var pixels = frame.LoadPixels(frame.Bounds);
-                            tiffImage.Frames[i].SavePixels(tiffImage.Frames[i].Bounds, pixels);
+                            // Copy pixel data into the new frame
+                            tiffImage.SavePixels(tiffImage.ActiveFrame.Bounds, pixels);
                         }
 
-                        // Save the assembled TIFF file
-                        tiffImage.Save(outputPath);
+                        // Dispose the raster frame after use
+                        frameRaster.Dispose();
                     }
+
+                    // Save the assembled TIFF file
+                    tiffImage.Save();
                 }
             }
         }

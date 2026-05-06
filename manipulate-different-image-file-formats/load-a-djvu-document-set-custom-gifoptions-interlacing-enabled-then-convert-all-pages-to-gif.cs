@@ -8,15 +8,15 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.djvu";
-        string outputDirectory = "Output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.djvu";
+            string outputDirectory = "Output";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
             // Validate input file existence
             if (!File.Exists(inputPath))
             {
@@ -24,33 +24,30 @@ class Program
                 return;
             }
 
-            // Open the DjVu file stream
+            // Load DjVu document from file stream
             using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvu = new DjvuImage(stream))
             {
-                // Load DjVu image
-                using (DjvuImage djvu = new DjvuImage(stream))
+                // Iterate through each page in the DjVu document
+                for (int i = 0; i < djvu.PageCount; i++)
                 {
-                    // Iterate through each page
-                    for (int i = 0; i < djvu.PageCount; i++)
+                    // Get the current page
+                    Image page = djvu.Pages[i];
+
+                    // Prepare output file path for the GIF page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.gif");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Configure GIF options with interlacing enabled
+                    GifOptions gifOptions = new GifOptions
                     {
-                        // Get the current page
-                        Image page = djvu.Pages[i];
+                        Interlaced = true
+                    };
 
-                        // Build output path for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.gif");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Configure GIF options with interlacing enabled
-                        GifOptions gifOptions = new GifOptions
-                        {
-                            Interlaced = true
-                        };
-
-                        // Save the page as a GIF file
-                        page.Save(outputPath, gifOptions);
-                    }
+                    // Save the page as a GIF using the specified options
+                    page.Save(outputPath, gifOptions);
                 }
             }
         }

@@ -2,17 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\sample.adjusted.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Ensure any runtime exception is reported cleanly
         try
         {
             // Verify input file exists
@@ -31,16 +29,16 @@ class Program
                 // Cast to RasterImage to access adjustment methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Custom brightness and contrast values
-                int brightness = 50;          // Range: -255 to 255
-                float contrast = 30f;        // Range: -100 to 100
-
-                // Apply adjustments
+                // Adjust brightness (range -255 to 255)
+                int brightness = 50; // custom brightness value
                 rasterImage.AdjustBrightness(brightness);
+
+                // Adjust contrast (range -100 to 100)
+                float contrast = 30f; // custom contrast value
                 rasterImage.AdjustContrast(contrast);
 
-                // Save the modified image (as PNG in this example)
-                rasterImage.Save(outputPath, new PngOptions());
+                // Save the modified image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)

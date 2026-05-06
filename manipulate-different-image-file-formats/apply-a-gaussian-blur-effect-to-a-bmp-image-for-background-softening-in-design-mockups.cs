@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output\\output_gaussian.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\Images\\input.bmp";
-            string outputPath = "C:\\Images\\output_gaussian.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,16 +20,16 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to use the Filter method
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage to access filtering capabilities
+                var rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur to the entire image (radius 5, sigma 4.0)
+                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
                 // Save the processed image

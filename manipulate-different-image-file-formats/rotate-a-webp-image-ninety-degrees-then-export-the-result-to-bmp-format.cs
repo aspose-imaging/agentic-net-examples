@@ -8,13 +8,13 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.webp";
-            string outputPath = "C:\\temp\\output.bmp";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,18 +24,19 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image
+            // Load the WebP image, rotate it 90 degrees clockwise, and save as BMP
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Rotate 90 degrees clockwise without flipping
+                // Rotate 90 degrees without flipping
                 webPImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save the rotated image as BMP
+                // Save the transformed image to BMP format
                 webPImage.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

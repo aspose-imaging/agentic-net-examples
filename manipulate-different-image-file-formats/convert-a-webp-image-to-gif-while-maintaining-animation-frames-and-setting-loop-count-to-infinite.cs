@@ -5,34 +5,34 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.webp";
+        string outputPath = "output.gif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.webp";
-            string outputPath = "output/output.gif";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (unconditional call as required)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image (may contain animation frames)
+            // Load the animated WebP image (preserves all frames)
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF options: infinite loop
-                GifOptions gifOptions = new GifOptions
+                // Configure GIF options to keep full frames (required for animation)
+                var gifOptions = new GifOptions
                 {
-                    LoopsCount = 0 // 0 means infinite looping
+                    FullFrame = true
                 };
 
-                // Save as animated GIF preserving frames
+                // Save as animated GIF; default loop count is infinite
                 image.Save(outputPath, gifOptions);
             }
         }

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -10,44 +9,47 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output directories
-            string inputDirectory = @"C:\InputCdr";
-            string outputDirectory = @"C:\OutputGif";
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputCdrFiles";
+            string outputDirectory = @"C:\OutputGifs";
+
+            // Ensure the output directory exists (will also handle subfolders)
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all CDR files in the input directory
             string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
             foreach (string inputPath in cdrFiles)
             {
-                // Verify that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output GIF path (same file name, .gif extension)
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".gif");
+                // Build the output GIF path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                // Configure GIF save options for 256‑color palette
+                var gifOptions = new GifOptions
                 {
-                    // Prepare GIF save options for a 256‑color palette
-                    GifOptions gifOptions = new GifOptions
-                    {
-                        // Palette correction builds the best matching 256‑color palette
-                        DoPaletteCorrection = true,
-                        // ColorResolution = bits per pixel - 1; 7 => 8 bits => 256 colors
-                        ColorResolution = 7
-                    };
+                    // 7 means (bits per pixel - 1) => 8 bits => 256 colors
+                    ColorResolution = 7,
+                    DoPaletteCorrection = true
+                };
 
-                    // Save the image (all pages will be exported as animated frames if present)
-                    cdrImage.Save(outputPath, gifOptions);
+                // Load the CDR image and save as GIF
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, gifOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)

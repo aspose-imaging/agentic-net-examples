@@ -26,16 +26,21 @@ class Program
             // Load the high‑resolution photograph
             using (Image image = Image.Load(inputPath))
             {
-                // Calculate scaling factor to fit within 1920x1080 while preserving aspect ratio
-                double widthScale = 1920.0 / image.Width;
-                double heightScale = 1080.0 / image.Height;
+                // Determine scaling factor to fit within 1920x1080 while preserving aspect ratio
+                double maxWidth = 1920.0;
+                double maxHeight = 1080.0;
+                double widthScale = maxWidth / image.Width;
+                double heightScale = maxHeight / image.Height;
                 double scale = Math.Min(widthScale, heightScale);
-                if (scale < 1.0) // Downscale only if larger than viewport
-                {
-                    int newWidth = (int)(image.Width * scale);
-                    int newHeight = (int)(image.Height * scale);
-                    image.Resize(newWidth, newHeight);
-                }
+
+                // If the image is already smaller than the viewport, keep original size
+                if (scale > 1.0) scale = 1.0;
+
+                int newWidth = (int)(image.Width * scale);
+                int newHeight = (int)(image.Height * scale);
+
+                // Resize the image
+                image.Resize(newWidth, newHeight);
 
                 // Prepare HTML5 Canvas export options
                 var canvasOptions = new Html5CanvasOptions
@@ -43,7 +48,7 @@ class Program
                     FullHtmlPage = true // generate a full HTML page
                 };
 
-                // Save the image as HTML5 Canvas
+                // Save as HTML5 Canvas
                 image.Save(outputPath, canvasOptions);
             }
         }

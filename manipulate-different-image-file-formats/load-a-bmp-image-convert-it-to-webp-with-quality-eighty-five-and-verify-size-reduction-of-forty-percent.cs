@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -12,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.bmp";
-            string outputPath = @"C:\Images\output.webp";
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,7 +27,7 @@ class Program
             // Load BMP image
             using (BmpImage bmpImage = new BmpImage(inputPath))
             {
-                // Set WebP conversion options (lossy, quality 85)
+                // Configure WebP options with quality 85 (lossy)
                 var webpOptions = new WebPOptions
                 {
                     Lossless = false,
@@ -45,11 +44,11 @@ class Program
 
             if (outputSize <= inputSize * 0.6)
             {
-                Console.WriteLine("Size reduction verification passed.");
+                Console.WriteLine("Size reduction verified: output is at least 40% smaller.");
             }
             else
             {
-                Console.WriteLine("Warning: Output file size reduction is less than 40%.");
+                Console.WriteLine("Size reduction not sufficient.");
             }
         }
         catch (Exception ex)

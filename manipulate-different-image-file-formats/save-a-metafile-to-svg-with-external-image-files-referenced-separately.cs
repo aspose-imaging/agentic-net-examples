@@ -4,87 +4,78 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-namespace MetafileToSvgExample
+class MySvgResourceKeeperCallback : SvgResourceKeeperCallback
 {
-    // Callback that saves image resources as external files and returns their relative paths.
-    class ExternalResourceKeeper : SvgResourceKeeperCallback
+    private readonly string _outputDirectory;
+
+    public MySvgResourceKeeperCallback(string outputDirectory)
     {
-        private readonly string _baseFolder;
-
-        public ExternalResourceKeeper(string baseFolder)
-        {
-            _baseFolder = baseFolder;
-        }
-
-        // Called for each raster image resource inside the metafile.
-        public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
-                                                    string suggestedFileName, ref bool useEmbeddedImage)
-        {
-            // Force external storage.
-            useEmbeddedImage = false;
-
-            // Ensure the target directory exists.
-            string targetPath = Path.Combine(_baseFolder, suggestedFileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
-
-            // Write the image data to a file.
-            File.WriteAllBytes(targetPath, imageData);
-
-            // Return the relative path that will be placed into the SVG.
-            return suggestedFileName;
-        }
-
-        // Called when the SVG document itself is ready.
-        public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
-        {
-            // Save the SVG document (optional – Aspose.Imaging also writes it).
-            string targetPath = Path.Combine(_baseFolder, suggestedFileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
-            File.WriteAllBytes(targetPath, htmlData);
-
-            // Return the relative path (file name) for consistency.
-            return suggestedFileName;
-        }
+        _outputDirectory = outputDirectory;
     }
 
-    class Program
+    public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
+        string suggestedFileName, ref bool useEmbeddedImage)
     {
-        static void Main()
+        // Force external image usage
+        useEmbeddedImage = false;
+
+        // Ensure the output directory exists (already created in Main, but safe here)
+        Directory.CreateDirectory(_outputDirectory);
+
+        string imagePath = Path.Combine(_outputDirectory, suggestedFileName);
+        File.WriteAllBytes(imagePath, imageData);
+
+        // Return relative path (just the file name)
+        return suggestedFileName;
+    }
+
+    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
+    {
+        // This method is called when the SVG document is ready.
+        // The document is already being saved by Image.Save, so we just return the file name.
+        return suggestedFileName;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\output.svg";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
         {
-            // Hard‑coded input and output paths.
-            string inputPath = @"C:\Images\sample.emf";
-            string outputPath = @"C:\Images\output.svg";
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
-            // Validate input file existence.
-            if (!File.Exists(inputPath))
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        try
+        {
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            try
-            {
-                // Load the metafile.
-                using (Image image = Image.Load(inputPath))
+                // Prepare SVG options with a callback for external resources
+                var svgOptions = new SvgOptions
                 {
-                    // Prepare SVG export options with the external resource callback.
-                    var svgOptions = new SvgOptions
+                    Callback = new MySvgResourceKeeperCallback(Path.GetDirectoryName(outputPath)),
+                    VectorRasterizationOptions = new SvgRasterizationOptions
                     {
-                        Callback = new ExternalResourceKeeper(Path.GetDirectoryName(outputPath))
-                    };
+                        PageSize = image.Size
+                    }
+                };
 
-                    // Save the image as SVG; external raster resources will be stored separately.
-                    image.Save(outputPath, svgOptions);
-                }
+                // Save the Metafile as SVG with external image resources
+                image.Save(outputPath, svgOptions);
             }
-            catch (Exception ex)
-            {
-                // Report any runtime errors without crashing.
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,41 +1,41 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.emf";
+        string outputPath = @"C:\Temp\output.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the EMF image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for the EMF vector image
-                var rasterOptions = new EmfRasterizationOptions
+                // Set up rasterization options for EMF to bitmap conversion
+                var rasterizationOptions = new EmfRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    PageSize = image.Size
                 };
 
-                // Set PNG save options and attach rasterization options
+                // Configure PNG save options with the rasterization settings
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Save the rendered bitmap as PNG

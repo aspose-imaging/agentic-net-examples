@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\sample.djvu";
+        string outputPath = @"C:\Temp\output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.djvu";
-            string outputPath = @"C:\temp\output.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,12 +24,15 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document from file stream
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Load the DjVu document from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Save all pages to a single PDF preserving layout
-                djvuImage.Save(outputPath, new PdfOptions());
+                // Prepare PDF saving options (multi‑page PDF will be generated automatically)
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Save all pages to a single PDF file
+                djvuImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -14,7 +16,7 @@ class Program
             string outputPathConsistent = "output\\recovered_consistent.tif";
             string outputPathFull = "output\\recovered_full.tif";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,36 +27,45 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPathConsistent));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPathFull));
 
-            // Recovery using ConsistentRecover mode
-            TiffImage tiffConsistent;
+            // ---------- Consistent recovery ----------
             var loadOptionsConsistent = new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
             };
-            using (tiffConsistent = (TiffImage)Image.Load(inputPath, loadOptionsConsistent))
+
+            int countConsistent = 0;
+            using (Image imgConsistent = Image.Load(inputPath, loadOptionsConsistent))
             {
-                tiffConsistent.Save(outputPathConsistent);
+                if (imgConsistent is TiffImage tiffConsistent)
+                {
+                    countConsistent = tiffConsistent.PageCount;
+                    var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    imgConsistent.Save(outputPathConsistent, saveOptions);
+                }
             }
 
-            // Recovery using ConsistentRecover mode as fallback (FullRecover not available)
-            TiffImage tiffFull;
+            // ---------- Full recovery (using ConsistentRecover as fallback) ----------
             var loadOptionsFull = new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
             };
-            using (tiffFull = (TiffImage)Image.Load(inputPath, loadOptionsFull))
+
+            int countFull = 0;
+            using (Image imgFull = Image.Load(inputPath, loadOptionsFull))
             {
-                tiffFull.Save(outputPathFull);
+                if (imgFull is TiffImage tiffFull)
+                {
+                    countFull = tiffFull.PageCount;
+                    var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    imgFull.Save(outputPathFull, saveOptions);
+                }
             }
 
-            // Compare frame counts
-            int countConsistent = tiffConsistent.Frames.Length;
-            int countFull = tiffFull.Frames.Length;
-
-            Console.WriteLine($"ConsistentRecover frame count: {countConsistent}");
-            Console.WriteLine($"FullRecover frame count: {countFull}");
+            // Compare recovered frame counts
+            Console.WriteLine($"Consistent recovery frame count: {countConsistent}");
+            Console.WriteLine($"Full recovery frame count: {countFull}");
         }
         catch (Exception ex)
         {

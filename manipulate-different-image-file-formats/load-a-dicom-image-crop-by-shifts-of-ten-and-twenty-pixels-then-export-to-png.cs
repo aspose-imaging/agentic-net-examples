@@ -1,27 +1,27 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.dicom";
-        string outputPath = @"C:\temp\sample.Crop.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"c:\temp\sample.dicom";
+            string outputPath = @"c:\temp\sample.Cropped.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
@@ -30,7 +30,7 @@ class Program
                 // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Crop the image: left/right shift = 10 pixels, top/bottom shift = 20 pixels
+                // Crop the image: leftShift=10, rightShift=10, topShift=20, bottomShift=20
                 dicomImage.Crop(10, 10, 20, 20);
 
                 // Save the cropped image as PNG

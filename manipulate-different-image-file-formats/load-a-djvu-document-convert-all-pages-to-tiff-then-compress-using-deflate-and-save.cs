@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
@@ -9,39 +8,36 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.djvu";
+        string outputPath = "output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        string outputDir = Path.GetDirectoryName(outputPath);
+        Directory.CreateDirectory(outputDir);
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputDirectory = "Output";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Load DjVu document from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Set up TIFF save options with Deflate compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Deflate;
 
-            // Load the DjVu document
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
-            {
-                int pageIndex = 0;
-                foreach (DjvuPage page in djvuImage.Pages)
-                {
-                    // Construct output file path for each page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.tif");
+                // Export all pages using DjvuMultiPageOptions
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Set TIFF options with Deflate compression
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffDeflateRgb);
-
-                    // Save the page as TIFF
-                    page.Save(outputPath, tiffOptions);
-
-                    pageIndex++;
-                }
+                // Save the DjVu document as a compressed TIFF file
+                djvuImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

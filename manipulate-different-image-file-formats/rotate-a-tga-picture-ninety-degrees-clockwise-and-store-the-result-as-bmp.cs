@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tga;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.tga";
-            string outputPath = "output.bmp";
+            string inputPath = @"C:\Images\source.tga";
+            string outputPath = @"C:\Images\rotated.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,14 +24,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TGA image, rotate 90° clockwise, and save as BMP
-            using (TgaImage tgaImage = new TgaImage(inputPath))
+            // Load the TGA image
+            using (TgaImage image = (TgaImage)Image.Load(inputPath))
             {
-                // Rotate 90 degrees clockwise without flipping
-                tgaImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                // Rotate 90 degrees clockwise without resizing
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save the result; extension determines BMP format
-                tgaImage.Save(outputPath);
+                // Save as BMP (format inferred from file extension)
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)

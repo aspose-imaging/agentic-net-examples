@@ -8,30 +8,30 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input DjVu file path
+        string inputPath = @"c:\temp\sample.djvu";
+        // Hardcoded output directory for PNG files
+        string outputDir = @"c:\temp\output\";
+
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = @"C:\temp\sample.djvu";
-            // Hardcoded output directory
-            string outputDir = @"C:\temp\";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Open the DjVu file stream
+            // Open the DjVu file as a stream
             using (Stream stream = File.OpenRead(inputPath))
             {
-                // Load DjVu image from the stream
+                // Load the DjVu image from the stream
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
                     // Iterate through each page in the DjVu document
                     foreach (DjvuPage djvuPage in djvuImage.Pages)
                     {
-                        // Build output file name based on page number
+                        // Build the output file path for the current page
                         string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.png");
 
                         // Ensure the output directory exists
@@ -45,7 +45,7 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

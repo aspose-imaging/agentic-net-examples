@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats;
 using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
@@ -10,19 +11,18 @@ class Program
     {
         try
         {
-            // Hardcoded input BMP file paths
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\image1.bmp",
-                @"C:\Images\image2.bmp",
-                @"C:\Images\image3.bmp"
+            // Hardcoded input BMP files
+            string[] inputPaths = {
+                @"c:\temp\image1.bmp",
+                @"c:\temp\image2.bmp",
+                @"c:\temp\image3.bmp"
             };
 
-            // Hardcoded output TIFF file path
-            string outputPath = @"C:\Images\output.tif";
+            // Hardcoded output multi‑page TIFF file
+            string outputPath = @"c:\temp\multipage.tif";
 
             // Verify each input file exists
-            foreach (var inputPath in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -34,30 +34,28 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP images and convert each to a TiffFrame
-            var frames = new List<TiffFrame>();
-            foreach (var inputPath in inputPaths)
+            // Load each BMP and create a corresponding TiffFrame
+            List<TiffFrame> frames = new List<TiffFrame>();
+            foreach (string inputPath in inputPaths)
             {
                 using (Image bmpImage = Image.Load(inputPath))
                 {
-                    // Ensure the loaded image is a raster image
-                    var raster = bmpImage as RasterImage;
+                    // The loaded image is a RasterImage; create a frame from it
+                    RasterImage raster = bmpImage as RasterImage;
                     if (raster == null)
                     {
-                        Console.Error.WriteLine($"Unsupported image format: {inputPath}");
+                        Console.Error.WriteLine($"Unable to load raster image: {inputPath}");
                         return;
                     }
 
-                    // Create a TiffFrame from the raster image
-                    var frame = new TiffFrame(raster);
+                    TiffFrame frame = new TiffFrame(raster);
                     frames.Add(frame);
                 }
             }
 
-            // Create a multi‑page TIFF image from the collected frames
+            // Create a TiffImage from the collected frames and save it
             using (TiffImage tiffImage = new TiffImage(frames.ToArray()))
             {
-                // Save the resulting TIFF
                 tiffImage.Save(outputPath);
             }
         }

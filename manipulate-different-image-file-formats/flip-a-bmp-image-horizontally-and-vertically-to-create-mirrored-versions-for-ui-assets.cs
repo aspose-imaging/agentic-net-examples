@@ -1,39 +1,36 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\source.bmp";
-        string horizontalOutputPath = @"C:\temp\output\source_horiz.bmp";
-        string verticalOutputPath = @"C:\temp\output\source_vert.bmp";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.bmp";
+            string outputPathHorizontal = "output\\horizontal.bmp";
+            string outputPathVertical = "output\\vertical.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Create horizontal mirrored image
-            using (Image image = Image.Load(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathHorizontal));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathVertical));
+
+            using (Aspose.Imaging.Image horiz = Aspose.Imaging.Image.Load(inputPath))
             {
-                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                Directory.CreateDirectory(Path.GetDirectoryName(horizontalOutputPath));
-                image.Save(horizontalOutputPath);
+                horiz.RotateFlip(Aspose.Imaging.RotateFlipType.RotateNoneFlipX);
+                horiz.Save(outputPathHorizontal, new BmpOptions());
             }
 
-            // Create vertical mirrored image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image vert = Aspose.Imaging.Image.Load(inputPath))
             {
-                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                Directory.CreateDirectory(Path.GetDirectoryName(verticalOutputPath));
-                image.Save(verticalOutputPath);
+                vert.RotateFlip(Aspose.Imaging.RotateFlipType.RotateNoneFlipY);
+                vert.Save(outputPathVertical, new BmpOptions());
             }
         }
         catch (Exception ex)

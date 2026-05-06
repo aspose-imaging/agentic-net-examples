@@ -8,20 +8,20 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\input.dcm";
         string outputPath = @"C:\Images\output.bmp";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
@@ -30,7 +30,7 @@ class Program
                 // Resize to 800x600 using Bilinear resampling
                 dicomImage.Resize(800, 600, ResizeType.BilinearResample);
 
-                // Save as BMP
+                // Save the resized image as BMP
                 dicomImage.Save(outputPath, new BmpOptions());
             }
         }

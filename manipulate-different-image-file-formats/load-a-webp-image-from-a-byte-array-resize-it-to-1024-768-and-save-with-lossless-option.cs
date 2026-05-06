@@ -3,14 +3,15 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.webp";
-        string outputPath = @"C:\Images\output_resized.webp";
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output_resized.webp";
 
         try
         {
@@ -25,15 +26,15 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image from a byte array
-            byte[] imageBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream ms = new MemoryStream(imageBytes))
-            using (WebPImage webPImage = new WebPImage(ms))
+            byte[] imageData = File.ReadAllBytes(inputPath);
+            using (var memoryStream = new MemoryStream(imageData))
+            using (var webPImage = new WebPImage(memoryStream))
             {
-                // Resize to 1024 x 768 using bilinear resampling
+                // Resize to 1024x768 using bilinear resampling
                 webPImage.Resize(1024, 768, ResizeType.BilinearResample);
 
                 // Prepare lossless WebP save options
-                WebPOptions saveOptions = new WebPOptions
+                var saveOptions = new WebPOptions
                 {
                     Lossless = true
                 };

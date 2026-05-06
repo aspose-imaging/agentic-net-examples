@@ -3,55 +3,56 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input JPEG path
-            string inputPath = @"C:\temp\input.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string canvasPath = "canvas.html";
+            string markdownPath = "output.md";
 
-            // Hard‑coded output HTML5 Canvas file path
-            string htmlOutputPath = @"C:\temp\canvas.html";
-
-            // Hard‑coded output Markdown file path
-            string markdownPath = @"C:\temp\image.md";
-
-            // Verify that the input JPEG exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the directory for the HTML output exists
-            Directory.CreateDirectory(Path.GetDirectoryName(htmlOutputPath));
-
-            // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directories exist
+            string canvasDir = Path.GetDirectoryName(canvasPath);
+            if (!string.IsNullOrEmpty(canvasDir))
             {
-                // Save the image as an HTML5 Canvas fragment (only the <canvas> tag)
-                var canvasOptions = new Html5CanvasOptions
-                {
-                    FullHtmlPage = false,                     // export only the canvas tag
-                    CanvasTagId = "myCanvas",                  // optional canvas identifier
-                    VectorRasterizationOptions = new SvgRasterizationOptions()
-                };
-
-                image.Save(htmlOutputPath, canvasOptions);
+                Directory.CreateDirectory(canvasDir);
             }
 
-            // Read the generated <canvas> tag
-            string canvasTag = File.ReadAllText(htmlOutputPath);
+            string markdownDir = Path.GetDirectoryName(markdownPath);
+            if (!string.IsNullOrEmpty(markdownDir))
+            {
+                Directory.CreateDirectory(markdownDir);
+            }
 
-            // Ensure the directory for the Markdown file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(markdownPath));
+            // Load JPEG image and save as HTML5 Canvas (only the canvas tag)
+            using (Image image = Image.Load(inputPath))
+            {
+                image.Save(canvasPath, new Html5CanvasOptions
+                {
+                    FullHtmlPage = false
+                });
+            }
 
-            // Create a simple Markdown document embedding the canvas tag
-            string markdownContent = "# Image Canvas\n\n" + canvasTag + "\n";
+            // Read the generated canvas tag
+            string canvasHtml = File.ReadAllText(canvasPath);
 
-            File.WriteAllText(markdownPath, markdownContent);
+            // Embed the canvas tag into a Markdown document
+            using (StreamWriter writer = new StreamWriter(markdownPath))
+            {
+                writer.WriteLine("# Image Canvas");
+                writer.WriteLine();
+                writer.WriteLine(canvasHtml);
+            }
         }
         catch (Exception ex)
         {

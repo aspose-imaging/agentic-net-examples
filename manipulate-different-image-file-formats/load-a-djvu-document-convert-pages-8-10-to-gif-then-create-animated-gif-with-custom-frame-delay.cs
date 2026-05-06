@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.djvu";
-            string outputPath = "Output\\animated.gif";
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/animated.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,33 +23,40 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int[] pageIndexes = new int[] { 7, 8, 9 };
-            int frameDelayMs = 200;
+            const int frameDelay = 200; // milliseconds
+
+            List<RasterImage> frames = new List<RasterImage>();
 
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                using (RasterImage firstFrame = (RasterImage)djvu.Pages[pageIndexes[0]])
+                int[] pageIndexes = new int[] { 7, 8, 9 }; // pages 8‑10 (zero‑based)
+
+                foreach (int idx in pageIndexes)
                 {
-                    firstFrame.CacheData();
+                    Image pageImg = djvu.Pages[idx];
+                    RasterImage raster = (RasterImage)pageImg;
+                    frames.Add(raster);
+                }
 
-                    using (GifImage gif = new GifImage(new GifFrameBlock((ushort)firstFrame.Width, (ushort)firstFrame.Height)))
+                if (frames.Count > 0)
+                {
+                    using (var gif = new GifImage(new GifFrameBlock(frames[0])))
                     {
-                        Graphics graphics = new Graphics(gif.ActiveFrame);
-                        graphics.DrawImage(firstFrame, new Rectangle(0, 0, firstFrame.Width, firstFrame.Height));
-                        gif.ActiveFrame.FrameTime = frameDelayMs;
+                        gif.ActiveFrame.FrameTime = frameDelay;
 
-                        for (int i = 1; i < pageIndexes.Length; i++)
+                        for (int i = 1; i < frames.Count; i++)
                         {
-                            using (RasterImage frame = (RasterImage)djvu.Pages[pageIndexes[i]])
-                            {
-                                frame.CacheData();
-                                gif.AddPage(frame);
-                                gif.ActiveFrame.FrameTime = frameDelayMs;
-                            }
+                            gif.AddPage(frames[i]);
+                            gif.ActiveFrame.FrameTime = frameDelay;
                         }
 
                         gif.Save(outputPath);
                     }
+                }
+
+                foreach (var f in frames)
+                {
+                    f.Dispose();
                 }
             }
         }

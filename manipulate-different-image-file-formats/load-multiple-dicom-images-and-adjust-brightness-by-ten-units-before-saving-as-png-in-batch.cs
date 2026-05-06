@@ -10,19 +10,19 @@ class Program
     {
         try
         {
-            // Hardcoded input folder and output folder
-            string inputFolder = @"C:\Images\Dicom\Input";
-            string outputFolder = @"C:\Images\Dicom\Output";
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputDicom";
+            string outputDir = @"C:\OutputPng";
 
-            // List of DICOM files to process
+            // List of DICOM files to process (hardcoded)
             string[] inputFiles = new string[]
             {
-                Path.Combine(inputFolder, "image1.dcm"),
-                Path.Combine(inputFolder, "image2.dcm"),
-                Path.Combine(inputFolder, "image3.dcm")
+                Path.Combine(inputDir, "image1.dcm"),
+                Path.Combine(inputDir, "image2.dcm"),
+                Path.Combine(inputDir, "image3.dcm")
             };
 
-            foreach (string inputPath in inputFiles)
+            foreach (var inputPath in inputFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -31,18 +31,22 @@ class Program
                     return;
                 }
 
-                // Determine output file path (same name with .png extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load DICOM image, adjust brightness, and save as PNG
+                // Load the DICOM image
                 using (Image image = Image.Load(inputPath))
                 {
                     DicomImage dicomImage = (DicomImage)image;
+
+                    // Adjust brightness by ten units
                     dicomImage.AdjustBrightness(10);
+
+                    // Build output PNG path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                    string outputPath = Path.Combine(outputDir, outputFileName);
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the adjusted image as PNG
                     dicomImage.Save(outputPath, new PngOptions());
                 }
             }

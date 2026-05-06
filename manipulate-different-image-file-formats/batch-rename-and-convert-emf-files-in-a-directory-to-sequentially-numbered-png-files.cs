@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,61 +8,41 @@ class Program
     {
         try
         {
-            // Define input and output directories (relative paths)
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Get all EMF files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+            int index = 1;
 
-            // Process each file and convert to sequential PNG
-            for (int i = 0; i < files.Length; i++)
+            foreach (var filePath in files)
             {
-                string inputPath = files[i];
-
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                // Build output path with sequential numbering (1.png, 2.png, ...)
-                string outputPath = Path.Combine(outputDirectory, $"{i + 1}.png");
-
-                // Ensure the output directory exists
+                string outputPath = Path.Combine(outputDirectory, $"{index}.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(filePath))
                 {
-                    // Configure PNG options with vector rasterization
-                    PngOptions pngOptions = new PngOptions
+                    var rasterOptions = new EmfRasterizationOptions
                     {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageSize = image.Size
-                        }
+                        PageSize = image.Size,
+                        BackgroundColor = Aspose.Imaging.Color.White
                     };
 
-                    // Save as PNG
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
                     image.Save(outputPath, pngOptions);
                 }
+
+                index++;
             }
         }
         catch (Exception ex)

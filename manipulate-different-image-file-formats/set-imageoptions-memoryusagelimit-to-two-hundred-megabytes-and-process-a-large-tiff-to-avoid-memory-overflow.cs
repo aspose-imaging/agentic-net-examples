@@ -3,44 +3,39 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.BigTiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.BigTiff;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.tif";
-        string outputPath = "output.bigtiff";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputPath = "output.tif";
 
         try
         {
-            using (Image srcImage = Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                TiffImage srcTiff = (TiffImage)srcImage;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (TiffImage source = (TiffImage)Image.Load(inputPath))
+            {
+                int frameCount = source.Frames.Length;
+                TiffFrame[] frames = new TiffFrame[frameCount];
+                for (int i = 0; i < frameCount; i++)
+                {
+                    frames[i] = TiffFrame.CopyFrame(source.Frames[i]);
+                }
 
                 BigTiffOptions options = new BigTiffOptions(TiffExpectedFormat.Default);
-                options.Source = new FileCreateSource(outputPath, false);
-
-                using (BigTiffImage bigTiff = (BigTiffImage)Image.Create(options, srcTiff.Width, srcTiff.Height))
+                using (BigTiffImage bigTiff = new BigTiffImage(frames))
                 {
-                    bigTiff.RemoveFrame(0);
-
-                    foreach (TiffFrame frame in srcTiff.Frames)
-                    {
-                        bigTiff.AddFrame(TiffFrame.CopyFrame(frame));
-                    }
-
-                    bigTiff.Save();
+                    bigTiff.Save(outputPath, options);
                 }
             }
         }

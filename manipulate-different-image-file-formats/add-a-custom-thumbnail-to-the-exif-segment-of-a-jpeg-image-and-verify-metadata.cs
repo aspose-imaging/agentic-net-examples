@@ -10,17 +10,19 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = @"C:\Images\input.jpg";
-            string thumbnailPath = @"C:\Images\thumb.jpg";
-            string outputPath = @"C:\Images\output_with_thumb.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string thumbnailPath = "thumb.jpg";
+            string outputPath = "output.jpg";
 
-            // Verify input files exist
+            // Verify input JPEG exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
+            // Verify thumbnail image exists
             if (!File.Exists(thumbnailPath))
             {
                 Console.Error.WriteLine($"File not found: {thumbnailPath}");
@@ -28,34 +30,46 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+                outputDir = ".";
+            Directory.CreateDirectory(outputDir);
 
             // Load the main JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Load the thumbnail image (any raster image format)
+                // Load the thumbnail image (any supported raster format)
                 using (RasterImage thumbImage = (RasterImage)Image.Load(thumbnailPath))
                 {
-                    // Assign the thumbnail to the EXIF data
-                    jpegImage.ExifData.Thumbnail = thumbImage;
-                }
+                    // Access EXIF data container
+                    JpegExifData jpegExif = jpegImage.ExifData as JpegExifData;
+                    if (jpegExif == null)
+                    {
+                        // If EXIF segment does not exist, create a new one
+                        jpegExif = new JpegExifData();
+                        jpegImage.ExifData = jpegExif;
+                    }
 
-                // Save the image with the new EXIF thumbnail
-                jpegImage.Save(outputPath);
+                    // Assign the thumbnail
+                    jpegExif.Thumbnail = thumbImage;
+
+                    // Save the modified JPEG with EXIF thumbnail
+                    jpegImage.Save(outputPath);
+                }
             }
 
             // Verify that the thumbnail was written
-            using (JpegImage savedImage = (JpegImage)Image.Load(outputPath))
+            using (JpegImage resultImage = (JpegImage)Image.Load(outputPath))
             {
-                JpegExifData exif = savedImage.ExifData as JpegExifData;
-                if (exif != null && exif.Thumbnail != null)
+                JpegExifData resultExif = resultImage.ExifData as JpegExifData;
+                if (resultExif?.Thumbnail != null)
                 {
-                    Console.WriteLine("Thumbnail successfully added.");
-                    Console.WriteLine($"Thumbnail size: {exif.Thumbnail.Width}x{exif.Thumbnail.Height}");
+                    Console.WriteLine("Thumbnail successfully added to EXIF data.");
+                    Console.WriteLine($"Thumbnail size: {resultExif.Thumbnail.Width}x{resultExif.Thumbnail.Height}");
                 }
                 else
                 {
-                    Console.WriteLine("Thumbnail not found in saved image.");
+                    Console.WriteLine("Thumbnail was not found in the saved image.");
                 }
             }
         }

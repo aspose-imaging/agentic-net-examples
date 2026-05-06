@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
 
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.bmp";
-        string outputPath = @"C:\Images\output.jp2";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\sample_output.jp2";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,35 +26,20 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load BMP image
-            using (Image bmpImage = Image.Load(inputPath))
+            using (BmpImage bmpImage = (BmpImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage (required for Jpeg2000Image constructor)
-                RasterImage raster = bmpImage as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Failed to load raster image from BMP.");
-                    return;
-                }
-
-                // Create JPEG2000 image with custom bits per pixel (e.g., 12 bits)
+                // Create JPEG2000 image from BMP with custom bits per pixel (e.g., 12)
                 int customBitsPerPixel = 12;
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(raster, customBitsPerPixel))
+                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(bmpImage, customBitsPerPixel))
                 {
-                    // Optional: set JPEG2000 options (e.g., irreversible compression)
-                    Jpeg2000Options options = new Jpeg2000Options
-                    {
-                        Irreversible = true,
-                        Codec = Aspose.Imaging.FileFormats.Jpeg2000.Jpeg2000Codec.J2K
-                    };
-
                     // Save JPEG2000 image
-                    jpeg2000Image.Save(outputPath, options);
+                    jpeg2000Image.Save(outputPath);
                 }
             }
 
             // Verify output file size
-            long fileSize = new FileInfo(outputPath).Length;
-            Console.WriteLine($"Output file size: {fileSize} bytes");
+            FileInfo info = new FileInfo(outputPath);
+            Console.WriteLine($"Output file size: {info.Length} bytes");
         }
         catch (Exception ex)
         {

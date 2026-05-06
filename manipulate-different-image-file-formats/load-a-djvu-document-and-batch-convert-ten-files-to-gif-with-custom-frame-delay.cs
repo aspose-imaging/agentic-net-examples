@@ -3,46 +3,63 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.djvu";
+        string outputPath = "Output\\output.gif";
+
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-
-            // Process ten DjVu files
-            for (int i = 1; i <= 10; i++)
+            if (!File.Exists(inputPath))
             {
-                string inputPath = Path.Combine(inputDirectory, $"file{i}.djvu");
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                string outputPath = Path.Combine(outputDirectory, $"file{i}.gif");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DjVu image
-                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            using (FileStream stream = File.OpenRead(inputPath))
+            {
+                using (DjvuImage djvu = new DjvuImage(stream))
                 {
-                    // Configure GIF options with custom frame delay (200 ms)
-                    var gifOptions = new GifOptions
+                    int pagesToConvert = Math.Min(10, djvu.PageCount);
+                    GifImage gif = null;
+
+                    for (int i = 0; i < pagesToConvert; i++)
                     {
-                        MultiPageOptions = new MultiPageOptions
-                        {
-                            Mode = MultiPageMode.TimeInterval,
-                            TimeInterval = new TimeInterval(0, 200) // delay in milliseconds
-                        },
-                        LoopsCount = 0 // infinite looping
-                    };
+                        DjvuPage page = (DjvuPage)djvu.Pages[i];
+                        if (!page.IsCached)
+                            page.CacheData();
 
-                    // Save as GIF
-                    djvu.Save(outputPath, gifOptions);
+                        GifFrameBlock frame = new GifFrameBlock((ushort)page.Width, (ushort)page.Height);
+                        frame.FrameTime = 200; // custom delay (in hundredths of a second)
+
+                        Graphics graphics = new Graphics(frame);
+                        graphics.DrawImage(page, 0, 0);
+
+                        if (i == 0)
+                        {
+                            gif = new GifImage(frame);
+                        }
+                        else
+                        {
+                            gif.AddPage(frame);
+                        }
+                    }
+
+                    if (gif != null)
+                    {
+                        using (gif)
+                        {
+                            GifOptions gifOptions = new GifOptions();
+                            gif.Save(outputPath, gifOptions);
+                        }
+                    }
                 }
             }
         }

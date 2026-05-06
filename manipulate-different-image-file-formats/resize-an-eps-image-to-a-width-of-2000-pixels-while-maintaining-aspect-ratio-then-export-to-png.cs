@@ -8,23 +8,23 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\source.eps";
+        string outputPath = @"C:\Images\Result\resized.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\source.eps";
-            string outputPath = @"C:\Images\result.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
+            // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
                 // Calculate new height to maintain aspect ratio for width = 2000
@@ -34,7 +34,7 @@ class Program
                 // Resize using Mitchell cubic interpolation
                 image.Resize(newWidth, newHeight, ResizeType.Mitchell);
 
-                // Save as PNG
+                // Save the resized image as PNG
                 image.Save(outputPath, new PngOptions());
             }
         }

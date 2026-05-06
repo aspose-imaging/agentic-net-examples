@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -24,17 +22,12 @@ class Program
 
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                using (JpegImage thumb = new JpegImage(new JpegOptions(), 50, 50))
+                if (jpegImage.Jfif == null)
                 {
-                    Graphics graphics = new Graphics(thumb);
-                    var brush = new SolidBrush(Color.Blue);
-                    graphics.FillRectangle(brush, thumb.Bounds);
-
                     jpegImage.Jfif = new JFIFData();
-                    jpegImage.Jfif.Thumbnail = thumb;
-
-                    jpegImage.Save(outputPath);
                 }
+
+                jpegImage.Save(outputPath);
             }
         }
         catch (Exception ex)

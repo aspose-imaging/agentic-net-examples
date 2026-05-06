@@ -11,60 +11,49 @@ class Program
     {
         try
         {
-            // Output path (hardcoded)
-            string outputPath = "output.psd";
+            // Output PSD file path
+            string outputPath = @"C:\temp\concentric_circles.psd";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define PSD creation options for an indexed image
+            // Define a simple palette for indexed color mode
+            Color[] paletteColors = new Color[] { Color.Black, Color.White };
+            ColorPalette palette = new ColorPalette(paletteColors);
+
+            // Configure PSD options for an indexed image
             PsdOptions psdOptions = new PsdOptions();
             psdOptions.Source = new FileCreateSource(outputPath, false);
             psdOptions.ColorMode = ColorModes.Indexed;
-            psdOptions.CompressionMethod = CompressionMethod.RLE;
-            psdOptions.Version = 6;
-            psdOptions.ChannelBitsCount = 8; // short implicitly
-            psdOptions.ChannelsCount = 1;   // indexed palette uses 1 channel
+            psdOptions.Palette = palette;
+            psdOptions.CompressionMethod = CompressionMethod.RLE; // optional compression
 
-            // Define a simple palette (black, white, red, green, blue)
-            psdOptions.Palette = new ColorPalette(new Color[]
-            {
-                Color.Black,
-                Color.White,
-                Color.Red,
-                Color.Green,
-                Color.Blue
-            });
-
-            // Canvas size
             int width = 500;
             int height = 500;
 
             // Create the PSD image canvas
             using (Image image = Image.Create(psdOptions, width, height))
             {
-                // Create graphics for drawing
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Center of the canvas
+                // Parameters for concentric circles
                 int centerX = width / 2;
                 int centerY = height / 2;
-
-                // Maximum radius and step between circles
                 int maxRadius = Math.Min(width, height) / 2 - 10;
                 int step = 20;
 
-                // Draw concentric circles
+                // Draw circles from outermost to innermost
                 for (int radius = maxRadius; radius > 0; radius -= step)
                 {
-                    Rectangle bounds = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
-                    Color circleColor = ((radius / step) % 2 == 0) ? Color.Black : Color.Gray;
-                    Pen pen = new Pen(circleColor, 2);
-                    graphics.DrawEllipse(pen, bounds);
+                    int left = centerX - radius;
+                    int top = centerY - radius;
+                    int diameter = radius * 2;
+                    graphics.DrawEllipse(new Pen(Color.Black, 1), new Rectangle(left, top, diameter, diameter));
                 }
 
-                // Save the PSD image (output path already bound via FileCreateSource)
+                // Save the image (output is already bound to the file)
                 image.Save();
             }
         }

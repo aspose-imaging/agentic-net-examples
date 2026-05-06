@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directory
+        string inputPath = @"c:\temp\sample.djvu";
+        string outputDir = @"c:\temp\";
+
         try
         {
-            // Hardcoded input and output directory
-            string inputPath = @"c:\temp\sample.djvu";
-            string outputDir = @"c:\temp\";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,24 +21,27 @@ class Program
                 return;
             }
 
-            // Open the DjVu document from a file stream
+            // Open the DjVu file stream
             using (Stream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Log the total number of pages
-                Console.WriteLine($"Page count: {djvuImage.PageCount}");
-
-                // Iterate through each page and save as PNG
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
+                // Load DjVu image from the stream
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Build output file name
-                    string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.png");
+                    // Log total number of pages
+                    Console.WriteLine($"Total pages: {djvuImage.PageCount}");
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Iterate through each page and save as PNG
+                    foreach (DjvuPage page in djvuImage.Pages)
+                    {
+                        // Build output file path
+                        string outputPath = Path.Combine(outputDir, $"sample.{page.PageNumber}.png");
 
-                    // Save the page as PNG
-                    djvuPage.Save(outputPath, new PngOptions());
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as PNG
+                        page.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }

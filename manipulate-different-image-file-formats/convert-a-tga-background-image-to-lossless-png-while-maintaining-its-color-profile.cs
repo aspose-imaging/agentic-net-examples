@@ -11,22 +11,22 @@ class Program
         string inputPath = "input.tga";
         string outputPath = "output.png";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the TGA image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Prepare PNG save options to keep metadata (color profile)
+                // Set PNG options to keep metadata (color profile)
                 var pngOptions = new PngOptions
                 {
                     KeepMetadata = true

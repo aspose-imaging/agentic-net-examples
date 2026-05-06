@@ -8,13 +8,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\sample.jpg";
-        string customFontDir = @"C:\Fonts";
-
         try
         {
+            // Hardcoded input, output and custom font directory paths
+            string inputPath = @"C:\Images\input.wmf";
+            string outputPath = @"C:\Images\output.jpg";
+            string customFontDir = @"C:\CustomFonts";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,20 +25,17 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set custom font folder for vector rendering
+            // Set custom fonts folder for rendering the WMF
             FontSettings.SetFontsFolder(customFontDir);
             FontSettings.UpdateFonts();
 
-            // Load WMF image
+            // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options for WMF
+                // Configure rasterization options based on the source image size
                 var rasterOptions = new WmfRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    // Optional: improve text rendering quality
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    PageSize = image.Size
                 };
 
                 // JPEG save options with vector rasterization
@@ -47,7 +44,7 @@ class Program
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save as JPEG
+                // Save the image as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }

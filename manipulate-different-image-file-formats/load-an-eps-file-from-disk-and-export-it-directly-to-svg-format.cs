@@ -9,41 +9,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = "input.eps";
-            string outputPath = "output.svg";
+            string outputPath = "output/output.svg";
 
-            // Verify input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
+            // Load the EPS image and save it as SVG
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
                 var svgOptions = new SvgOptions();
-
-                // If the image is a vector type, set rasterization options based on its size
-                if (image is VectorImage vectorImage)
-                {
-                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = vectorImage.Size
-                    };
-                }
-
-                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

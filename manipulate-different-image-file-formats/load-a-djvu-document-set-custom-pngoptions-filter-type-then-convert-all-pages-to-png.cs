@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
@@ -11,31 +10,40 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.djvu";
+            // Hardcoded input and output paths
+            string inputPath = "sample.djvu";
+            string outputDir = "output";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = "Output";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
+            // Load DjVu document from stream
             using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Iterate through all pages and save each as PNG with custom filter type
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    PngOptions pngOptions = new PngOptions
+                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.png");
+
+                    // Ensure directory for each output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Configure PNG options with custom filter type
+                    PngOptions options = new PngOptions
                     {
                         FilterType = PngFilterType.Sub
                     };
 
-                    foreach (Image page in djvuImage.Pages)
-                    {
-                        DjvuPage djvuPage = (DjvuPage)page;
-                        string outputPath = Path.Combine(outputDir, $"page_{djvuPage.PageNumber}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                        djvuPage.Save(outputPath, pngOptions);
-                    }
+                    // Save the page as PNG
+                    page.Save(outputPath, options);
                 }
             }
         }

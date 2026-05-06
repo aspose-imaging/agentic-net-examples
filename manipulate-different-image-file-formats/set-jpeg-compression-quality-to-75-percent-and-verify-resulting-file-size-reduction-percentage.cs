@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\output_75.jpg";
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,35 +23,27 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get original file size
-            long originalSize = new FileInfo(inputPath).Length;
-
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with 75% quality
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure JPEG save options with 75% quality
+                JpegOptions saveOptions = new JpegOptions
                 {
                     Quality = 75
                 };
 
                 // Save the image with the specified JPEG options
-                image.Save(outputPath, jpegOptions);
+                image.Save(outputPath, saveOptions);
             }
 
-            // Get new file size
+            // Calculate file size reduction percentage
+            long originalSize = new FileInfo(inputPath).Length;
             long newSize = new FileInfo(outputPath).Length;
-
-            // Calculate reduction percentage
-            double reduction = 0;
-            if (originalSize > 0)
-            {
-                reduction = ((double)(originalSize - newSize) / originalSize) * 100;
-            }
+            double reductionPercent = (double)(originalSize - newSize) / originalSize * 100.0;
 
             Console.WriteLine($"Original size: {originalSize} bytes");
             Console.WriteLine($"Compressed size: {newSize} bytes");
-            Console.WriteLine($"Size reduction: {reduction:F2}%");
+            Console.WriteLine($"File size reduced by {reductionPercent:F2}%");
         }
         catch (Exception ex)
         {

@@ -1,45 +1,42 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg2000;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output path for the JPEG2000 image
-            string outputPath = "C:\\temp\\output.jp2";
+            // Hardcoded output path
+            string outputPath = @"C:\temp\output.jp2";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Image dimensions
+            int width = 200;
+            int height = 200;
+
             // Configure JPEG2000 options with a custom memory buffer size
             Jpeg2000Options options = new Jpeg2000Options
             {
-                Source = new FileCreateSource(outputPath, false),
-                BufferSizeHint = 10, // Buffer size hint in MB
-                Irreversible = true // Use irreversible DWT (optional)
+                BufferSizeHint = 1024 * 1024 // 1 MB buffer
             };
 
-            // Create a new JPEG2000 image with the specified options
-            using (Jpeg2000Image canvas = new Jpeg2000Image(200, 200, options))
+            // Create a new JPEG2000 image using the options
+            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(width, height, options))
             {
-                // Obtain a graphics object for drawing
-                Graphics graphics = new Graphics(canvas);
+                // Fill the entire image with a solid blue background
+                Graphics graphics = new Graphics(jpeg2000Image);
+                SolidBrush brush = new SolidBrush(Color.Blue);
+                graphics.FillRectangle(brush, jpeg2000Image.Bounds);
 
-                // Fill the entire image with a solid blue color
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
-                {
-                    graphics.FillRectangle(brush, canvas.Bounds);
-                }
-
-                // Save the bound image (no path needed because it's already bound)
-                canvas.Save();
+                // Save the image to the specified path
+                jpeg2000Image.Save(outputPath);
             }
         }
         catch (Exception ex)

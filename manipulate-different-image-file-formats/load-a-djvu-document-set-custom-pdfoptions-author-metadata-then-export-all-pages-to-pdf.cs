@@ -2,16 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string inputPath = "Input\\sample.djvu";
-            string outputPath = "Output\\sample.pdf";
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -21,12 +22,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (DjvuImage image = (DjvuImage)Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions
-                {
-                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Custom Author" }
-                };
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                pdfOptions.PdfDocumentInfo.Author = "Custom Author";
+                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions();
 
                 image.Save(outputPath, pdfOptions);
             }

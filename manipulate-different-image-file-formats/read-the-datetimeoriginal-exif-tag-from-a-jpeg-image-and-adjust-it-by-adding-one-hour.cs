@@ -1,19 +1,19 @@
 using System;
 using System.IO;
+using System.Globalization;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,31 +21,31 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the JPEG image
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
                 // Access EXIF data
-                JpegExifData jpegExif = image.ExifData as JpegExifData;
-                if (jpegExif != null && !string.IsNullOrEmpty(jpegExif.DateTimeOriginal))
+                var exif = image.ExifData;
+                if (exif != null && !string.IsNullOrEmpty(exif.DateTimeOriginal))
                 {
                     // Parse the original DateTime string (format: "yyyy:MM:dd HH:mm:ss")
                     if (DateTime.TryParseExact(
-                            jpegExif.DateTimeOriginal,
+                            exif.DateTimeOriginal,
                             "yyyy:MM:dd HH:mm:ss",
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None,
-                            out DateTime originalDate))
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out DateTime originalDateTime))
                     {
                         // Add one hour
-                        DateTime updatedDate = originalDate.AddHours(1);
+                        DateTime updatedDateTime = originalDateTime.AddHours(1);
 
-                        // Write back in the same EXIF format
-                        jpegExif.DateTimeOriginal = updatedDate.ToString("yyyy:MM:dd HH:mm:ss");
+                        // Write back in the same format
+                        exif.DateTimeOriginal = updatedDateTime.ToString("yyyy:MM:dd HH:mm:ss");
                     }
                 }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save the modified image
                 image.Save(outputPath);

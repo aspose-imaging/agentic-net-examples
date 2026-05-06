@@ -19,35 +19,37 @@ class Program
             }
 
             // Directory to store extracted frames
-            string outputDir = "output_frames";
+            string outputDir = "frames";
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Load the WebP image
+            // Load the animated WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Check if the image has multiple frames
-                if (webPImage is IMultipageImage multipageImage)
+                // Verify the image supports multiple pages/frames
+                IMultipageImage multipage = webPImage as IMultipageImage;
+                if (multipage == null)
                 {
-                    int frameCount = multipageImage.PageCount;
-                    for (int i = 0; i < frameCount; i++)
-                    {
-                        // Retrieve the frame and cast to RasterImage
-                        using (RasterImage rasterFrame = (RasterImage)multipageImage.Pages[i])
-                        {
-                            string outputPath = Path.Combine(outputDir, $"frame_{i}.png");
-                            // Ensure the output directory exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                            // Save the frame as PNG
-                            rasterFrame.Save(outputPath, new PngOptions());
-                        }
-                    }
+                    Console.Error.WriteLine("The loaded image is not a multipage WebP.");
+                    return;
                 }
-                else
+
+                int pageCount = multipage.PageCount;
+                for (int i = 0; i < pageCount; i++)
                 {
-                    // Single-frame WebP: save as a single PNG
-                    string outputPath = Path.Combine(outputDir, "frame_0.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    webPImage.Save(outputPath, new PngOptions());
+                    // Retrieve the i‑th frame
+                    var frame = multipage.Pages[i];
+
+                    // Cast the frame to RasterImage for saving
+                    using (RasterImage frameImage = (RasterImage)frame)
+                    {
+                        string outputPath = Path.Combine(outputDir, $"frame_{i}.png");
+                        // Ensure the directory for this frame exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the frame as PNG
+                        frameImage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }

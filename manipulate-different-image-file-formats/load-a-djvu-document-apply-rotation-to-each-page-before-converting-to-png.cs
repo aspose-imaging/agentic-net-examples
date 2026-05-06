@@ -3,17 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.djvu";
+        string outputDirectory = "Output";
+
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = "sample.djvu";
-
             // Validate input file existence
             if (!File.Exists(inputPath))
             {
@@ -21,27 +21,27 @@ class Program
                 return;
             }
 
-            // Open the DjVu file stream
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load DjVu document from file stream
             using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Load DjVu image from stream
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Iterate through each page
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    // Iterate through each page
-                    foreach (DjvuPage page in djvuImage.Pages)
-                    {
-                        // Rotate the page 90 degrees clockwise, resize proportionally, white background
-                        page.Rotate(90f, true, Color.White);
+                    // Rotate the page (example: 90 degrees clockwise, resize proportionally, white background)
+                    page.Rotate(90f, true, Color.White);
 
-                        // Prepare output PNG file path for the current page
-                        string outputPath = $"page_{page.PageNumber}.png";
+                    // Build output file path for the current page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the rotated page as PNG
-                        page.Save(outputPath, new PngOptions());
-                    }
+                    // Save the rotated page as PNG
+                    page.Save(outputPath, new PngOptions());
                 }
             }
         }

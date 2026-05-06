@@ -10,16 +10,16 @@ class Program
     static void Main()
     {
         // Hardcoded input and output directories
-        string inputDir = @"C:\Images\Input";
-        string outputDir = @"C:\Images\Output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
+        string inputDir = @"C:\Images\InputWebp";
+        string outputDir = @"C:\Images\OutputTiff";
 
         try
         {
+            // Ensure output directory exists (will also work if Path.GetDirectoryName returns null)
+            Directory.CreateDirectory(outputDir);
+
             // Get all WebP files in the input directory
-            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp", SearchOption.TopDirectoryOnly);
+            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp");
 
             foreach (string inputPath in webpFiles)
             {
@@ -30,25 +30,31 @@ class Program
                     return;
                 }
 
-                // Build the output path with .tiff extension, preserving the original filename
+                // Build the output path with the same filename but .tif extension
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".tiff");
+                string outputPath = Path.Combine(outputDir, fileName + ".tif");
 
-                // Ensure the output directory exists (unconditional as required)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WebP image and save it as TIFF
+                // Load the WebP image
                 using (WebPImage webPImage = new WebPImage(inputPath))
                 {
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    // Prepare TIFF save options (default format)
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                    // Save as TIFF
                     webPImage.Save(outputPath, tiffOptions);
                 }
 
                 // Preserve original timestamps
                 DateTime creationTime = File.GetCreationTime(inputPath);
                 DateTime lastWriteTime = File.GetLastWriteTime(inputPath);
+                DateTime lastAccessTime = File.GetLastAccessTime(inputPath);
+
                 File.SetCreationTime(outputPath, creationTime);
                 File.SetLastWriteTime(outputPath, lastWriteTime);
+                File.SetLastAccessTime(outputPath, lastAccessTime);
             }
         }
         catch (Exception ex)

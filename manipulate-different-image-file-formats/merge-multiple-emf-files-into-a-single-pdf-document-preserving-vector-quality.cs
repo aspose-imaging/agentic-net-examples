@@ -1,10 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,16 +9,19 @@ class Program
     {
         try
         {
-            // Hardcoded input EMF file paths
-            string[] inputPaths = new string[]
+            // Input EMF files (hardcoded relative paths)
+            string[] inputFiles = new[]
             {
-                "input1.emf",
-                "input2.emf",
-                "input3.emf"
+                "Input/file1.emf",
+                "Input/file2.emf",
+                "Input/file3.emf"
             };
 
-            // Validate each input file
-            foreach (string inputPath in inputPaths)
+            // Output PDF file (hardcoded relative path)
+            string outputPath = "Output/merged.pdf";
+
+            // Validate input files
+            foreach (string inputPath in inputFiles)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -30,32 +30,39 @@ class Program
                 }
             }
 
-            // Hardcoded output PDF path
-            string outputPath = "merged.pdf";
-
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load each EMF image
-            List<Image> loadedImages = new List<Image>();
-            foreach (string inputPath in inputPaths)
+            // Prepare vector rasterization options for each page
+            VectorRasterizationOptions[] pageOptions = new VectorRasterizationOptions[inputFiles.Length];
+            for (int i = 0; i < inputFiles.Length; i++)
             {
-                Image img = Image.Load(inputPath);
-                loadedImages.Add(img);
+                using (Image img = Image.Load(inputFiles[i]))
+                {
+                    pageOptions[i] = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = img.Size
+                    };
+                }
             }
 
-            // Create a multipage image from the loaded EMF images
-            using (Image multipage = Image.Create(loadedImages.ToArray(), true))
+            // Load the first EMF to act as the source image for saving
+            using (Image firstImage = Image.Load(inputFiles[0]))
             {
-                // Save the multipage image as a PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                multipage.Save(outputPath, pdfOptions);
-            }
+                // Configure PDF options with multipage settings
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    MultiPageOptions = new MultiPageOptions { PageRasterizationOptions = pageOptions },
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = firstImage.Size
+                    }
+                };
 
-            // Dispose loaded images
-            foreach (Image img in loadedImages)
-            {
-                img.Dispose();
+                // Save all EMF pages into a single PDF
+                firstImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

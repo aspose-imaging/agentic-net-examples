@@ -2,47 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "Input/sample.cdr";
         string outputPath = "Output/sample.bmp";
 
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load the CorelDRAW (CDR) image
-            using (Image image = Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Configure BMP save options with 24‑bit color depth
-                var bmpOptions = new BmpOptions
+                using (BmpOptions options = new BmpOptions())
                 {
-                    BitsPerPixel = 24,
-                    // Set vector rasterization options for proper rendering of the CDR vector image
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    options.BitsPerPixel = 24;
+                    options.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
+                    };
 
-                // Save the image as BMP
-                image.Save(outputPath, bmpOptions);
+                    cdr.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)

@@ -10,33 +10,29 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.jpg";
             string outputPath = @"C:\Images\output.jpg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
                 // Access EXIF data
-                JpegExifData exif = image.ExifData as JpegExifData;
-                if (exif != null)
+                JpegExifData jpegExif = image.ExifData as JpegExifData;
+                if (jpegExif != null)
                 {
-                    // Set the DateTimeOriginal tag (format: "yyyy:MM:dd HH:mm:ss")
-                    exif.DateTimeOriginal = "2023:01:01 12:00:00";
-                }
-                else
-                {
-                    Console.Error.WriteLine("No EXIF data found in the image.");
+                    // Set DateTimeOriginal to current date/time in EXIF format
+                    jpegExif.DateTimeOriginal = DateTime.Now.ToString("yyyy:MM:dd HH:mm:ss");
                 }
 
                 // Save the modified image

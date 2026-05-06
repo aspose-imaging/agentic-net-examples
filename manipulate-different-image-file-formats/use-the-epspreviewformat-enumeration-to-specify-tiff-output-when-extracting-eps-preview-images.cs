@@ -1,18 +1,19 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.eps";
-            string outputPath = "output/preview.tif";
-
             // Validate input file existence
             if (!File.Exists(inputPath))
             {
@@ -24,23 +25,19 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
-            using (Image img = Image.Load(inputPath))
+            using (EpsImage eps = (EpsImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                var epsImage = (EpsImage)img;
-
                 // Retrieve TIFF preview
-                Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.TIFF);
+                var preview = eps.GetPreviewImage(EpsPreviewFormat.TIFF);
                 if (preview == null)
                 {
-                    Console.Error.WriteLine("No TIFF preview found in the EPS file.");
+                    Console.Error.WriteLine("No TIFF preview available in the EPS file.");
                     return;
                 }
 
-                // Save the preview image
-                using (preview)
-                {
-                    preview.Save(outputPath);
-                }
+                // Save the preview as a TIFF file
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                preview.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

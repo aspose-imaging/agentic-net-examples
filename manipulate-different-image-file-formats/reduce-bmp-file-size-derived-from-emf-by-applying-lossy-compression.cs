@@ -12,7 +12,7 @@ class Program
         string inputPath = @"C:\Images\input.emf";
         string outputPath = @"C:\Images\output.bmp";
 
-        // Path safety checks
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,21 +27,27 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for vector to raster conversion
-                var rasterOptions = new EmfRasterizationOptions
+                // Set up rasterization options to match the source size
+                var vectorOptions = new EmfRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Configure BMP save options with lossy settings (8‑bpp palette)
+                // Configure BMP save options with lossy DXT1 compression
                 var bmpOptions = new BmpOptions
                 {
-                    BitsPerPixel = 8, // Reduce color depth to 8 bits per pixel
-                    Compression = BitmapCompression.Rgb, // Use simple RGB compression
-                    VectorRasterizationOptions = rasterOptions
+                    Compression = BitmapCompression.Dxt1, // lossy compression
+                    BitsPerPixel = 8,                     // reduce color depth
+                    VectorRasterizationOptions = vectorOptions
                 };
 
-                // Save the rasterized BMP image
+                // Create an 8‑bit palette that approximates the source colors
+                if (image is RasterImage rasterImage)
+                {
+                    bmpOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256);
+                }
+
+                // Save the rasterized BMP
                 image.Save(outputPath, bmpOptions);
             }
         }

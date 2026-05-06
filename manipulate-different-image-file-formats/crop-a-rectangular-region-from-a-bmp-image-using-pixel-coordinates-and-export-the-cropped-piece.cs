@@ -1,17 +1,18 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output_cropped.bmp";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.bmp";
+            string outputPath = @"C:\Images\output_cropped.png";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,19 +26,19 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Define the rectangle to crop (left, top, width, height)
-                // Example: crop a 200x150 region starting at (50, 30)
+                // Define the cropping rectangle (example: top-left corner at (50, 30), width 200, height 150)
                 int left = 50;
                 int top = 30;
                 int width = 200;
                 int height = 150;
-                var cropArea = new Rectangle(left, top, width, height);
+                Rectangle cropArea = new Rectangle(left, top, width, height);
 
-                // Perform the crop operation
+                // Crop the image to the specified rectangle
                 image.Crop(cropArea);
 
-                // Save the cropped image (same format as input by default)
-                image.Save(outputPath);
+                // Save the cropped image as PNG
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

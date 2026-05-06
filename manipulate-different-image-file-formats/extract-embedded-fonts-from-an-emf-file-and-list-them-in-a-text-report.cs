@@ -30,7 +30,7 @@ class Program
                 string[] usedFonts = image.GetUsedFonts();
                 string[] missedFonts = image.GetMissedFonts();
 
-                // Write the report
+                // Write the report to the output file
                 using (StreamWriter writer = new StreamWriter(outputPath))
                 {
                     writer.WriteLine("=== Used Fonts ===");
@@ -47,8 +47,6 @@ class Program
                     }
                 }
             }
-
-            Console.WriteLine($"Font report generated at: {outputPath}");
         }
         catch (Exception ex)
         {

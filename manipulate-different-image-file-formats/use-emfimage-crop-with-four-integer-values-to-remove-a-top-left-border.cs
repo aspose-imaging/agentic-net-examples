@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\output\sample_cropped.png";
+        string outputPath = @"C:\Images\output\sample_cropped.emf";
 
         try
         {
@@ -30,18 +29,16 @@ class Program
                 // Cast to EmfImage to access EMF‑specific methods
                 EmfImage emfImage = (EmfImage)image;
 
-                // Define border sizes to remove (left, right, top, bottom)
-                int leftShift = 10;   // remove 10 pixels from the left
-                int rightShift = 0;   // keep right side unchanged
-                int topShift = 10;    // remove 10 pixels from the top
-                int bottomShift = 0;  // keep bottom side unchanged
+                // Remove a top‑left border: 10 pixels from left and top, none from right/bottom
+                int leftShift = 10;
+                int rightShift = 0;
+                int topShift = 10;
+                int bottomShift = 0;
 
-                // Crop the image using shift values
                 emfImage.Crop(leftShift, rightShift, topShift, bottomShift);
 
-                // Save the cropped image as PNG
-                PngOptions pngOptions = new PngOptions();
-                emfImage.Save(outputPath, pngOptions);
+                // Save the cropped image
+                emfImage.Save(outputPath);
             }
         }
         catch (Exception ex)
