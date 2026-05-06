@@ -8,13 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.dicom";
-        string outputPath = @"C:\Images\Result\sample_processed.png";
-
-        // Ensure any runtime exception is reported without crashing
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.dcm";
+            string outputPath = @"C:\Images\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,16 +27,15 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM‑specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply fixed‑threshold binarization (threshold value 127)
+                // Apply fixed threshold binarization (threshold value 127)
                 dicomImage.BinarizeFixed(127);
 
-                // Resize to 500×500 using bilinear resampling
-                dicomImage.Resize(500, 500, ResizeType.BilinearResample);
+                // Resize to 500x500 using nearest neighbour resampling
+                dicomImage.Resize(500, 500, ResizeType.NearestNeighbourResample);
 
-                // Save as PNG
+                // Save the processed image as PNG
                 dicomImage.Save(outputPath, new PngOptions());
             }
         }
