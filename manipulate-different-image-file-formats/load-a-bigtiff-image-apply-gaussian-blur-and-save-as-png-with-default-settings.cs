@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\biginput.tif";
+        string outputPath = @"C:\Images\blurred_output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input_big.tif";
-            string outputPath = @"C:\Images\output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -30,10 +30,10 @@ class Program
                 // Cast to RasterImage to apply filters
                 RasterImage raster = (RasterImage)image;
 
-                // Apply Gaussian blur with radius 5 and sigma 4.0
+                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save as PNG with default options
+                // Save the result as PNG using default options
                 raster.Save(outputPath, new PngOptions());
             }
         }
