@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\sample.dcm";
-        string outputPath = "output\\rotated.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputPath = "output.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,14 +25,13 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
-                // Rotate 90 degrees clockwise, resize proportionally, white background
-                dicomImage.Rotate(90f, true, Color.White);
+                // Rotate 90 degrees clockwise
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save as GIF
-                var gifOptions = new GifOptions();
-                dicomImage.Save(outputPath, gifOptions);
+                // Save the rotated image as GIF
+                image.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
