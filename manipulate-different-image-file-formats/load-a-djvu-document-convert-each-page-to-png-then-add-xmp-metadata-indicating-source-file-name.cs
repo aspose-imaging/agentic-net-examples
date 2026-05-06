@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 
@@ -23,11 +24,12 @@ class Program
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                foreach (DjvuPage page in djvuImage.Pages)
+                foreach (Image pageImage in djvuImage.Pages)
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                    DjvuPage djvuPage = (DjvuPage)pageImage;
+                    string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    page.Save(outputPath, new PngOptions());
+                    djvuPage.Save(outputPath, new PngOptions());
                 }
             }
         }
