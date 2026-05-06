@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -11,38 +10,65 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Define base, input and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
+            // Validate input directory
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Get all EMF files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.emf");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+                // Prepare output PNG path
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
+                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+                // Load EMF image
+                using (Image image = Image.Load(inputPath))
                 {
-                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                    // Configure PNG export options
+                    PngOptions pngOptions = new PngOptions
                     {
-                        PageSize = emfImage.Size,
-                        BackgroundColor = Color.White
+                        // Set 300 DPI resolution
+                        ResolutionSettings = new ResolutionSetting(300, 300),
+                        // Use lossless compression (PNG is lossless; set compression level as desired)
+                        PngCompressionLevel = PngCompressionLevel.ZipLevel0
                     };
 
-                    using (PngOptions pngOptions = new PngOptions())
+                    // Set vector rasterization options for proper rendering of EMF
+                    var vectorOptions = new VectorRasterizationOptions
                     {
-                        pngOptions.VectorRasterizationOptions = rasterOptions;
-                        pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-                        emfImage.Save(outputPath, pngOptions);
-                    }
+                        PageSize = image.Size,
+                        BackgroundColor = Color.White
+                    };
+                    pngOptions.VectorRasterizationOptions = vectorOptions;
+
+                    // Save as PNG
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
