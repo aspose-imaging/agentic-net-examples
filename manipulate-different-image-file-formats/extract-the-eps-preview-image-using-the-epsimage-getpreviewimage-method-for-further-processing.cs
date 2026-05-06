@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "sample.eps";
-            string outputPath = "output/preview.png";
+            string inputPath = @"C:\Images\sample.eps";
+            string outputPath = @"C:\Images\Preview\preview.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,19 +27,17 @@ class Program
             // Load EPS image
             using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Retrieve the preview image (default format)
+                // Retrieve preview image (default format)
                 using (Image preview = epsImage.GetPreviewImage())
                 {
-                    if (preview != null)
-                    {
-                        // Save preview as PNG
-                        preview.Save(outputPath, new PngOptions());
-                        Console.WriteLine($"Preview image saved to: {outputPath}");
-                    }
-                    else
+                    if (preview == null)
                     {
                         Console.Error.WriteLine("No preview image found in the EPS file.");
+                        return;
                     }
+
+                    // Save preview image to the specified output path (PNG format)
+                    preview.Save(outputPath, new PngOptions());
                 }
             }
         }
