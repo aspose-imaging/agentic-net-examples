@@ -2,46 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\source.eps";
+        string outputPath = @"C:\Images\ResizedResult.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.eps";
-            string outputPath = "output.jpg";
-
-            // Verify input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
-            using (var image = Image.Load(inputPath) as EpsImage)
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
             {
-                if (image == null)
-                {
-                    Console.Error.WriteLine("Failed to load EPS image.");
-                    return;
-                }
-
-                // Calculate new height to maintain aspect ratio
+                // Calculate new height to keep aspect ratio for a width of 2000 pixels
                 int newWidth = 2000;
                 int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
 
-                // Resize using Mitchell interpolation
+                // Resize using Mitchell cubic interpolation (you can choose another ResizeType if desired)
                 image.Resize(newWidth, newHeight, ResizeType.Mitchell);
 
-                // Save as JPEG
-                var jpegOptions = new JpegOptions();
+                // Save the resized image as JPEG
+                var jpegOptions = new JpegOptions(); // default JPEG options
                 image.Save(outputPath, jpegOptions);
             }
         }
