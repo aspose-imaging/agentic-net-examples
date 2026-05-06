@@ -1,17 +1,19 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.emf";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output.png";
-
             // Validate input file existence
             if (!File.Exists(inputPath))
             {
@@ -20,24 +22,29 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the EMF image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG export options with DPI settings
-                var pngOptions = new PngOptions
+                // Cast to EmfImage to access size property
+                EmfImage emfImage = (EmfImage)image;
+
+                // Set up rasterization options for EMF to PNG conversion
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
-                    ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300) // DPI X, DPI Y
+                    PageSize = emfImage.Size
                 };
 
-                // Set vector rasterization options for proper rendering
-                pngOptions.VectorRasterizationOptions = new EmfRasterizationOptions
+                // Configure PNG options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
                 {
-                    PageSize = image.Size
+                    VectorRasterizationOptions = rasterOptions,
+                    // Set desired DPI (e.g., 300x300)
+                    ResolutionSettings = new ResolutionSetting(300, 300)
                 };
 
-                // Save as PNG
+                // Save the image as PNG with the specified DPI
                 image.Save(outputPath, pngOptions);
             }
         }
