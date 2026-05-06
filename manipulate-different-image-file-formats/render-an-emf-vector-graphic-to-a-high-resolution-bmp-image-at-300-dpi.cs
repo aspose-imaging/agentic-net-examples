@@ -1,47 +1,39 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.emf";
+        string outputPath = "Output\\sample.bmp";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output.bmp";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EMF vector image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure vector rasterization options for high‑resolution rendering
-                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
+                var rasterOptions = new EmfRasterizationOptions
                 {
                     PageSize = image.Size,
-                    // Optional: set background color if needed
-                    BackgroundColor = Color.White
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // Configure BMP save options with 300 DPI resolution
-                BmpOptions bmpOptions = new BmpOptions
+                var bmpOptions = new BmpOptions
                 {
-                    ResolutionSettings = new ResolutionSetting(300, 300),
-                    VectorRasterizationOptions = vectorOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the rendered bitmap
                 image.Save(outputPath, bmpOptions);
             }
         }
