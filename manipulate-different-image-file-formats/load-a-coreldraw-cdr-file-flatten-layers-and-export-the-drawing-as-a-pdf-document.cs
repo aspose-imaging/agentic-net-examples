@@ -8,34 +8,30 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\input\sample.cdr";
+        string outputPath = @"C:\output\sample.pdf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.cdr";
-            string outputPath = @"C:\temp\sample.pdf";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the CDR file
-            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Flatten layers if the API provides such a method
-                // Uncomment the following line if CdrDocument has a FlattenLayers method
-                // image.CdrDocument.FlattenLayers();
-
-                // Export the first page (page index 0) to PDF
+                // Assume we want to export the first page (index 0)
                 int pageNumber = 0;
-                CdrImagePage page = (CdrImagePage)image.Pages[pageNumber];
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[pageNumber];
 
-                // Configure PDF export options
+                // Set up PDF export options with rasterization settings
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
@@ -46,7 +42,7 @@ class Program
                 };
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the page as a PDF document
+                // Save the page as PDF
                 page.Save(outputPath, pdfOptions);
             }
         }
