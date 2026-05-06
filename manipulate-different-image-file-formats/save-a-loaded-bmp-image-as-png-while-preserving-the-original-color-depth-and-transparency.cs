@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -27,33 +26,8 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options
-                var pngOptions = new PngOptions();
-
-                // Preserve original color depth if possible
-                if (image is RasterImage raster)
-                {
-                    // Clamp to supported PNG bit depths (1,2,4,8,16)
-                    int bits = raster.BitsPerPixel;
-                    if (bits == 1 || bits == 2 || bits == 4 || bits == 8 || bits == 16)
-                    {
-                        pngOptions.BitDepth = (byte)bits;
-                    }
-                    else
-                    {
-                        // Default to 8 bits per channel for typical truecolor images
-                        pngOptions.BitDepth = 8;
-                    }
-
-                    // Preserve alpha channel if present
-                    if (raster.HasAlpha)
-                    {
-                        pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
-                    }
-                }
-
-                // Save as PNG
-                image.Save(outputPath, pngOptions);
+                // Save as PNG preserving original color depth and transparency
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
