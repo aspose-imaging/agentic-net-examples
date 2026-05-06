@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.bmp";
-            string outputPath = "Output/output.psd";
+            // Hardcoded input and output file paths
+            string inputPath = "sample.bmp";
+            string outputPath = "sample.psd";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,16 +24,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
+            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD options: RGB color mode
+                // Configure PSD save options
                 var psdOptions = new PsdOptions
                 {
-                    ColorMode = ColorModes.Rgb
+                    ColorMode = ColorModes.Rgb // Set color mode to RGB
                 };
 
-                // Save as PSD
+                // Save as PSD with the specified options
                 image.Save(outputPath, psdOptions);
             }
         }
