@@ -5,53 +5,51 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input HTML5 Canvas files
-            string[] inputPaths = new string[]
+            // Hardcoded input and output directories
+            string inputDir = "InputHtml5";
+            string outputDir = "OutputJpeg";
+
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDir))
             {
-                @"C:\Images\canvas1.html",
-                @"C:\Images\canvas2.html"
-            };
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
+            }
 
-            // Corresponding output JPEG files
-            string[] outputPaths = new string[]
+            // Get all HTML5 canvas files (assuming .html extension)
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.html");
+
+            // Uniform target dimensions
+            int targetWidth = 800;
+            int targetHeight = 600;
+
+            foreach (string inputPath in inputFiles)
             {
-                @"C:\Output\image1.jpg",
-                @"C:\Output\image2.jpg"
-            };
-
-            // Desired uniform dimensions
-            const int targetWidth = 800;
-            const int targetHeight = 600;
-
-            for (int i = 0; i < inputPaths.Length; i++)
-            {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
-
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Determine output file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
+
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the HTML5 Canvas image
+                // Load the HTML5 canvas image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Resize to uniform dimensions if necessary
-                    if (image.Width != targetWidth || image.Height != targetHeight)
-                    {
-                        image.Resize(targetWidth, targetHeight);
-                    }
+                    // Resize to uniform dimensions
+                    image.Resize(targetWidth, targetHeight);
 
-                    // Set JPEG save options
+                    // Set JPEG options
                     JpegOptions jpegOptions = new JpegOptions
                     {
                         Quality = 90
