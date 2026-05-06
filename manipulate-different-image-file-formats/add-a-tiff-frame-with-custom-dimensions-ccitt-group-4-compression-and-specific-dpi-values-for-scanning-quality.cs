@@ -1,49 +1,39 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = @"c:\temp\source.tif";   // placeholder input
-            string outputPath = @"c:\temp\scanned_output.tif";
-
-            // Input validation
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Output file path
+            string outputPath = "output\\custom.tif";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure options for a CCITT Group 4 compressed B/W frame
+            // Configure frame options with CCITT Group 4 compression
             TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions.Compression = TiffCompressions.CcittFax4;          // Group 4
-            frameOptions.Photometric = TiffPhotometrics.MinIsBlack;        // 0 = black, 1 = white
-            frameOptions.BitsPerSample = new ushort[] { 1 };               // 1‑bit per pixel
-            frameOptions.ByteOrder = TiffByteOrder.LittleEndian;           // typical for fax
+            frameOptions.BitsPerSample = new ushort[] { 1 };
+            frameOptions.ByteOrder = TiffByteOrder.LittleEndian;
+            frameOptions.Compression = TiffCompressions.CcittFax4;
+            frameOptions.Photometric = TiffPhotometrics.MinIsBlack;
+            frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
 
-            // Create a frame with custom dimensions
-            int frameWidth = 1024;   // custom width
-            int frameHeight = 768;   // custom height
-            TiffFrame frame = new TiffFrame(frameOptions, frameWidth, frameHeight);
+            // Create a TIFF frame with custom dimensions
+            TiffFrame frame = new TiffFrame(frameOptions, 1024, 768);
 
-            // Set DPI values for scanning quality
-            frame.HorizontalResolution = 300; // 300 DPI horizontal
-            frame.VerticalResolution = 300;   // 300 DPI vertical
-
-            // Assemble the TIFF image and save
+            // Create TIFF image from the frame and set DPI values
             using (TiffImage tiffImage = new TiffImage(frame))
             {
+                tiffImage.HorizontalResolution = 300; // DPI X
+                tiffImage.VerticalResolution = 300;   // DPI Y
+
+                // Save the TIFF image
                 tiffImage.Save(outputPath);
             }
         }
