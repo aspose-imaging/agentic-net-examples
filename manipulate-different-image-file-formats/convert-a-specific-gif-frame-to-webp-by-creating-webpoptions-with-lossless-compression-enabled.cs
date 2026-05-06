@@ -2,41 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.gif";
-        string outputPath = "output/output.webp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the GIF image
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.gif";
+            string outputPath = @"C:\temp\output_frame0.webp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF animation
             using (Image image = Image.Load(inputPath))
             {
-                // Configure WebP options for lossless compression and select the first frame (index 0)
-                WebPOptions webpOptions = new WebPOptions
+                // Prepare WebP options with lossless compression
+                WebPOptions exportOptions = new WebPOptions
                 {
                     Lossless = true,
-                    MultiPageOptions = new MultiPageOptions(new IntRange(0, 0))
+                    // Export only the first frame (index 0)
+                    MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(0, 1))
                 };
 
-                // Save the selected frame as a lossless WebP image
-                image.Save(outputPath, webpOptions);
+                // Save the selected frame as WebP
+                image.Save(outputPath, exportOptions);
             }
         }
         catch (Exception ex)
