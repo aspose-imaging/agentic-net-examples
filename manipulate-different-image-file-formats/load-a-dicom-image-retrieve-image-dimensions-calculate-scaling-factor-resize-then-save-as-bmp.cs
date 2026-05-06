@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
@@ -26,11 +25,11 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
                 // Retrieve original dimensions
-                int originalWidth = dicomImage.Width;
-                int originalHeight = dicomImage.Height;
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
 
                 // Calculate scaling factor (e.g., reduce size by 50%)
                 double scaleFactor = 0.5;
@@ -38,11 +37,11 @@ class Program
                 int newHeight = (int)(originalHeight * scaleFactor);
 
                 // Resize the image using nearest neighbour resampling
-                dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
                 // Save the resized image as BMP
                 BmpOptions bmpOptions = new BmpOptions();
-                dicomImage.Save(outputPath, bmpOptions);
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
