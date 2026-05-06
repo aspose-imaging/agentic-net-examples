@@ -8,12 +8,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directory
-        string inputPath = @"c:\temp\sample.djvu";
-        string outputDir = @"c:\temp\";
-
         try
         {
+            // Hardcoded input DjVu file path
+            string inputPath = @"C:\temp\sample.djvu";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,16 +20,19 @@ class Program
                 return;
             }
 
+            // Hardcoded output directory
+            string outputDir = @"C:\temp\output\";
+
             // Open the DjVu file as a stream
             using (Stream stream = File.OpenRead(inputPath))
             {
                 // Load DjVu image from the stream
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Iterate through each page
+                    // Iterate through each page in the DjVu document
                     foreach (DjvuPage djvuPage in djvuImage.Pages)
                     {
-                        // Build output file path for BMP
+                        // Build output file name based on page number
                         string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.bmp");
 
                         // Ensure the output directory exists
