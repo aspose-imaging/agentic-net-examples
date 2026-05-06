@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.jp2";
-            string outputPath = @"C:\temp\output.jpg";
+            string inputPath = @"C:\Images\input.jp2";
+            string outputPath = @"C:\Images\output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,19 +24,40 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG2000 image using a 1 MB buffered stream
-            using (FileStream fileStream = File.OpenRead(inputPath))
-            using (BufferedStream bufferedStream = new BufferedStream(fileStream, 1024 * 1024))
-            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(bufferedStream))
+            // Set up JPEG2000 load options with a 1 MB buffer hint
+            var loadOptions = new Jpeg2000Options
             {
-                // ----- Pixel processing can be performed here -----
-                // Example: invert colors (placeholder - actual pixel manipulation code would go here)
+                BufferSizeHint = 1 * 1024 * 1024 // 1 MB
+            };
 
-                // Save as JPEG with 85% quality
-                JpegOptions jpegOptions = new JpegOptions
+            // Load the JPEG2000 image
+            using (var jpeg2000Image = new Jpeg2000Image(inputPath))
+            {
+                // Example pixel processing: invert colors
+                var raster = jpeg2000Image as RasterImage;
+                if (raster != null)
+                {
+                    for (int y = 0; y < raster.Height; y++)
+                    {
+                        for (int x = 0; x < raster.Width; x++)
+                        {
+                            var color = raster.GetPixel(x, y);
+                            var inverted = Aspose.Imaging.Color.FromArgb(
+                                255 - color.R,
+                                255 - color.G,
+                                255 - color.B);
+                            raster.SetPixel(x, y, inverted);
+                        }
+                    }
+                }
+
+                // Prepare JPEG save options with 85% quality
+                var jpegOptions = new JpegOptions
                 {
                     Quality = 85
                 };
+
+                // Save the processed image as JPEG
                 jpeg2000Image.Save(outputPath, jpegOptions);
             }
         }
