@@ -21,7 +21,7 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
@@ -33,7 +33,7 @@ class Program
                     ColorType = JpegCompressionColorMode.Cmyk
                 };
 
-                // Save the image as CMYK JPEG
+                // Save the image as a CMYK JPEG
                 image.Save(outputPath, saveOptions);
             }
         }
