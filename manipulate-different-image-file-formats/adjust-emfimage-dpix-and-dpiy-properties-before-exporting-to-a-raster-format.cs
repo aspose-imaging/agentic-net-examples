@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -19,9 +20,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
+                PngOptions pngOptions = new PngOptions();
+                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
+                pngOptions.VectorRasterizationOptions = vectorOptions;
+
                 image.Save(outputPath, pngOptions);
             }
         }
