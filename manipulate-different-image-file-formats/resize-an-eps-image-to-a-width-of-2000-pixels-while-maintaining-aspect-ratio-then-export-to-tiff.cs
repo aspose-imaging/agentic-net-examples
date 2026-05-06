@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input/input.eps";
-            string outputPath = "output/output.tiff";
+            string inputPath = "input.eps";
+            string outputPath = "output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -21,15 +22,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (var image = (EpsImage)Image.Load(inputPath))
             {
-                int originalWidth = image.Width;
-                int originalHeight = image.Height;
-                int newWidth = 2000;
-                int newHeight = (int)Math.Round((double)originalHeight * newWidth / originalWidth);
-
-                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-                image.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                int targetWidth = 2000;
+                int targetHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
+                image.Resize(targetWidth, targetHeight, ResizeType.LanczosResample);
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
