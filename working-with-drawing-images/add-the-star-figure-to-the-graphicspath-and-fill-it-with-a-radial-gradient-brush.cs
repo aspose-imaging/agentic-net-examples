@@ -4,63 +4,59 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\star_output.png";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create PNG image options
-        PngOptions pngOptions = new PngOptions();
-
-        // Create a new raster image (500x500)
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        try
         {
-            // Initialize graphics object
-            Graphics graphics = new Graphics(image);
+            string outputPath = @"c:\temp\star.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Clear background to white
-            graphics.Clear(Color.White);
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Define points of a 5‑pointed star
-            PointF[] starPoints = new PointF[]
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                new PointF(250, 50),
-                new PointF(280, 180),
-                new PointF(400, 180),
-                new PointF(300, 250),
-                new PointF(340, 380),
-                new PointF(250, 300),
-                new PointF(160, 380),
-                new PointF(200, 250),
-                new PointF(100, 180),
-                new PointF(220, 180)
-            };
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-            // Create a figure representing the star
-            Figure starFigure = new Figure();
-            starFigure.IsClosed = true;
-            starFigure.AddShape(new PolygonShape(starPoints));
+                PointF[] starPoints = new PointF[]
+                {
+                    new PointF(250, 50),
+                    new PointF(280, 180),
+                    new PointF(400, 180),
+                    new PointF(300, 250),
+                    new PointF(340, 380),
+                    new PointF(250, 300),
+                    new PointF(160, 380),
+                    new PointF(200, 250),
+                    new PointF(100, 180),
+                    new PointF(220, 180)
+                };
 
-            // Add the figure to a graphics path
-            GraphicsPath starPath = new GraphicsPath();
-            starPath.AddFigure(starFigure);
+                Figure starFigure = new Figure();
+                starFigure.AddShape(new PolygonShape(starPoints, true));
 
-            // Create a radial gradient brush based on the star points
-            PathGradientBrush gradientBrush = new PathGradientBrush(starPoints);
-            gradientBrush.CenterColor = Color.Yellow;
-            gradientBrush.SurroundColors = new Color[] { Color.Orange };
+                GraphicsPath path = new GraphicsPath();
+                path.AddFigure(starFigure);
 
-            // Fill the star with the gradient brush
-            graphics.FillPath(gradientBrush, starPath);
+                using (SolidBrush brush = new SolidBrush())
+                {
+                    brush.Color = Color.Yellow;
+                    brush.Opacity = 100;
+                    graphics.FillPath(brush, path);
+                }
 
-            // Save the image to the specified path
-            image.Save(outputPath);
+                graphics.DrawPath(new Pen(Color.Black, 2), path);
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
