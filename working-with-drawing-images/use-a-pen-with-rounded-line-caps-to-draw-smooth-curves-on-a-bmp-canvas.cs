@@ -2,52 +2,66 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output BMP file path (hard‑coded)
-        string outputPath = @"C:\temp\smooth_curve.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up BMP options with a bound file source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Canvas dimensions
-        int width = 800;
-        int height = 600;
-
-        // Create the image bound to the output file
-        using (Image image = Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
-
-            // Pen with rounded line caps for smooth curves
-            Pen pen = new Pen(Color.Blue, 4);
-            pen.SetLineCap(LineCap.Round, LineCap.Round, DashCap.Flat);
-
-            // Points defining the curve
-            Point[] points = new Point[]
+            // Input file existence check (if you need to load an existing image)
+            if (!File.Exists(inputPath))
             {
-                new Point(100, 500),
-                new Point(200, 100),
-                new Point(400, 300),
-                new Point(600, 150),
-                new Point(700, 450)
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Draw the smooth curve
-            graphics.DrawCurve(pen, points);
+            // Load the input BMP image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Create a Graphics object for drawing
+                Graphics graphics = new Graphics(image);
 
-            // Save the bound image
-            image.Save();
+                // Create a Pen with rounded line caps
+                Pen pen = new Pen(Color.Blue, 5);
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+
+                // Build a smooth curve using a cubic Bezier shape
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                path.AddFigure(figure);
+
+                // Define control points for the Bezier curve
+                PointF[] bezierPoints = new PointF[]
+                {
+                    new PointF(100, 500),   // Start point
+                    new PointF(200, 100),   // First control point
+                    new PointF(600, 100),   // Second control point
+                    new PointF(700, 500)    // End point
+                };
+                figure.AddShape(new BezierShape(bezierPoints));
+
+                // Draw the path onto the image
+                graphics.DrawPath(pen, path);
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified image
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
