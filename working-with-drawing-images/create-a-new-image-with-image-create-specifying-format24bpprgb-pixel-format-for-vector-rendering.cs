@@ -11,22 +11,29 @@ class Program
         // Hardcoded output path
         string outputPath = @"C:\temp\output.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up BMP options with 24 bits per pixel
-        BmpOptions bmpOptions = new BmpOptions
+        try
         {
-            BitsPerPixel = 24,
-            // Create the file at the specified location (non‑temporal)
-            Source = new FileCreateSource(outputPath, false)
-        };
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a new 500x500 image using the specified options
-        using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Set up BMP options with 24 bits per pixel
+            BmpOptions bmpOptions = new BmpOptions
+            {
+                BitsPerPixel = 24,
+                // Create the file at the specified location (non‑temporal)
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            // Create a new 500x500 image using the specified options
+            using (Image image = Image.Create(bmpOptions, 500, 500))
+            {
+                // Save the image to the file defined in the options
+                image.Save();
+            }
+        }
+        catch (Exception ex)
         {
-            // No additional processing required; just save the image
-            image.Save();
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
