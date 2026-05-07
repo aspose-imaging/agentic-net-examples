@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -12,51 +10,41 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string inputPath1 = "input1.jpg";
+            string inputPath2 = "input2.jpg";
             string outputPath = "output.jpg";
 
-            // Validate input files
-            foreach (string path in inputPaths)
+            if (!File.Exists(inputPath1))
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            int totalWidth = 0;
+            int maxHeight = 0;
+            string[] inputPaths = new[] { inputPath1, inputPath2 };
+
             foreach (string path in inputPaths)
             {
                 using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
                 using (JpegImage img = new JpegImage(fs))
                 {
-                    sizes.Add(img.Size);
+                    totalWidth += img.Width;
+                    if (img.Height > maxHeight) maxHeight = img.Height;
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
 
-            // Prepare JPEG options for the output image
-            JpegOptions jpegOptions = new JpegOptions();
-            FileCreateSource src = new FileCreateSource(outputPath, false);
-            jpegOptions.Source = src;
-            jpegOptions.Quality = 90;
-
-            // Create the output canvas
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, newWidth, newHeight))
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
                 foreach (string path in inputPaths)
@@ -70,7 +58,6 @@ class Program
                     }
                 }
 
-                // Save the merged image
                 canvas.Save();
             }
         }

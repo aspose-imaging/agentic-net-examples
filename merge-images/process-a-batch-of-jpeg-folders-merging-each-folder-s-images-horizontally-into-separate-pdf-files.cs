@@ -1,97 +1,86 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputRoot = "Input";
-            string outputRoot = "Output";
+            // Hardcoded input and output root directories
+            string inputRoot = @"C:\InputImages";
+            string outputRoot = @"C:\OutputPdfs";
 
-            // Ensure input and output directories exist
-            if (!Directory.Exists(inputRoot))
-            {
-                Directory.CreateDirectory(inputRoot);
-                Console.WriteLine($"Input directory created at: {inputRoot}. Add folders with JPEG images and rerun.");
-                return;
-            }
-            if (!Directory.Exists(outputRoot))
-            {
-                Directory.CreateDirectory(outputRoot);
-            }
+            // Ensure the output root exists
+            Directory.CreateDirectory(outputRoot);
 
-            // Process each subfolder
+            // Process each subfolder in the input root
             foreach (string folderPath in Directory.GetDirectories(inputRoot))
             {
-                string folderName = Path.GetFileName(folderPath);
-                string[] allFiles = Directory.GetFiles(folderPath);
-                List<string> jpegFiles = new List<string>();
-                foreach (string f in allFiles)
+                // Build a simple output PDF file name based on the folder name
+                string folderName = new DirectoryInfo(folderPath).Name;
+                string outputPdfPath = Path.Combine(outputRoot, folderName + ".pdf");
+
+                // Get all JPEG files in the current folder
+                string[] jpegFiles = Directory.GetFiles(folderPath, "*.jpg");
+                string[] jpegFilesUpper = Directory.GetFiles(folderPath, "*.jpeg");
+                string[] allJpegFiles = new string[jpegFiles.Length + jpegFilesUpper.Length];
+                jpegFiles.CopyTo(allJpegFiles, 0);
+                jpegFilesUpper.CopyTo(allJpegFiles, jpegFiles.Length);
+
+                if (allJpegFiles.Length == 0)
                 {
-                    string ext = Path.GetExtension(f).ToLowerInvariant();
-                    if (ext == ".jpg" || ext == ".jpeg")
-                    {
-                        jpegFiles.Add(f);
-                    }
+                    // No images to process in this folder
+                    continue;
                 }
 
-                if (jpegFiles.Count == 0)
-                {
-                    continue; // No JPEGs in this folder
-                }
+                // Load images and collect dimensions
+                var images = new RasterImage[allJpegFiles.Length];
+                int totalWidth = 0;
+                int maxHeight = 0;
 
-                // Collect sizes
-                List<Size> sizes = new List<Size>();
-                foreach (string imgPath in jpegFiles)
+                for (int i = 0; i < allJpegFiles.Length; i++)
                 {
+                    string imgPath = allJpegFiles[i];
+
                     if (!File.Exists(imgPath))
                     {
                         Console.Error.WriteLine($"File not found: {imgPath}");
                         return;
                     }
-                    using (RasterImage img = (RasterImage)Image.Load(imgPath))
-                    {
-                        sizes.Add(img.Size);
-                    }
+
+                    images[i] = (RasterImage)Image.Load(imgPath);
+                    totalWidth += images[i].Width;
+                    if (images[i].Height > maxHeight)
+                        maxHeight = images[i].Height;
                 }
 
-                // Calculate canvas dimensions (horizontal merge)
-                int totalWidth = 0;
-                int maxHeight = 0;
-                foreach (Size sz in sizes)
+                // Create a blank canvas to hold the merged image
+                using (RasterImage merged = (RasterImage)Image.Create(new PngOptions(), totalWidth, maxHeight))
                 {
-                    totalWidth += sz.Width;
-                    if (sz.Height > maxHeight) maxHeight = sz.Height;
-                }
-
-                // Create canvas
-                using (RasterImage canvas = (RasterImage)Image.Create(new JpegOptions(), totalWidth, maxHeight))
-                {
+                    // Draw each image side by side
+                    var graphics = new Graphics(merged);
                     int offsetX = 0;
-                    foreach (string imgPath in jpegFiles)
+                    foreach (var img in images)
                     {
-                        using (RasterImage img = (RasterImage)Image.Load(imgPath))
-                        {
-                            Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                            canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                            offsetX += img.Width;
-                        }
+                        graphics.DrawImage(img, offsetX, 0);
+                        offsetX += img.Width;
                     }
 
-                    // Prepare output PDF path
-                    string outputPath = Path.Combine(outputRoot, folderName + ".pdf");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-                    // Save canvas as PDF
-                    PdfOptions pdfOptions = new PdfOptions();
-                    canvas.Save(outputPath, pdfOptions);
+                    // Save the merged image as a PDF
+                    merged.Save(outputPdfPath, new PdfOptions());
+                }
+
+                // Dispose loaded images
+                foreach (var img in images)
+                {
+                    img.Dispose();
                 }
             }
         }

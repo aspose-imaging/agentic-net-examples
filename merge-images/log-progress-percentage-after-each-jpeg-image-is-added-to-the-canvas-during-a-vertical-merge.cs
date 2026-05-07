@@ -9,18 +9,18 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = new string[]
-        {
-            "input1.jpg",
-            "input2.jpg",
-            "input3.jpg"
-        };
-        string outputPath = "output/merged.jpg";
-
         try
         {
-            // Validate each input file
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "output\\merged.jpg";
+
+            // Validate input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -30,10 +30,7 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Collect sizes of all input images
+            // Collect image sizes
             List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
             foreach (string path in inputPaths)
             {
@@ -44,36 +41,44 @@ class Program
             }
 
             // Calculate canvas dimensions for vertical merge
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (var sz in sizes)
+            int totalHeight = 0;
+            int maxWidth = 0;
+            foreach (Aspose.Imaging.Size sz in sizes)
             {
-                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
-                canvasHeight += sz.Height;
+                totalHeight += sz.Height;
+                if (sz.Width > maxWidth) maxWidth = sz.Width;
             }
 
-            // Create JPEG canvas with bound source
-            FileCreateSource src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            // Create JPEG canvas
+            FileCreateSource src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = src,
+                Quality = 90
+            };
+
+            using (Aspose.Imaging.FileFormats.Jpeg.JpegImage canvas = (Aspose.Imaging.FileFormats.Jpeg.JpegImage)Aspose.Imaging.Image.Create(jpegOptions, maxWidth, totalHeight))
             {
                 int offsetY = 0;
                 for (int i = 0; i < inputPaths.Length; i++)
                 {
-                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPaths[i]))
+                    string path = inputPaths[i];
+                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                     {
                         Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetY += img.Height;
                     }
 
-                    // Log progress percentage after each image is added
+                    // Log progress percentage
                     int percent = (i + 1) * 100 / inputPaths.Length;
                     Console.WriteLine($"Progress: {percent}%");
                 }
 
-                // Save the bound canvas (source already set)
+                // Save the merged image
                 canvas.Save();
             }
         }

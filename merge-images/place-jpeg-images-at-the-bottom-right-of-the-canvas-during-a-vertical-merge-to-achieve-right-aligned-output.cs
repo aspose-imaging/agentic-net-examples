@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -12,9 +13,16 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new[] { "image1.jpg", "image2.jpg", "image3.jpg" };
-            string outputPath = "merged_output.jpg";
+            // Hardcoded input image paths
+            string[] inputPaths = new[]
+            {
+                "Input/image1.jpg",
+                "Input/image2.jpg",
+                "Input/image3.jpg"
+            };
+
+            // Hardcoded output path
+            string outputPath = "Output/merged.jpg";
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -27,7 +35,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Collect sizes of all images
             List<Size> sizes = new List<Size>();
@@ -39,19 +47,15 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions (max width, total height)
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
-                canvasHeight += sz.Height;
-            }
+            // Determine canvas dimensions (max width, total height)
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Create JPEG canvas with bound source
+            // Create JPEG canvas with bound output file
+            FileCreateSource src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions
             {
-                Source = new FileCreateSource(outputPath, false),
+                Source = src,
                 Quality = 100
             };
 
@@ -69,7 +73,7 @@ class Program
                     }
                 }
 
-                // Save the bound image
+                // Save the bound canvas
                 canvas.Save();
             }
         }

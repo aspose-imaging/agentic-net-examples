@@ -13,60 +13,65 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input JPEG files
             string[] inputPaths = new string[]
             {
                 "input1.jpg",
                 "input2.jpg",
                 "input3.jpg"
             };
-            string outputPath = "output.jpg";
 
-            // Validate input files
-            foreach (string inputPath in inputPaths)
+            // Validate each input file
+            foreach (var path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
+
+            // Output JPEG file
+            string outputPath = "merged_output.jpg";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
+            foreach (var path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    widths.Add(img.Width);
+                    heights.Add(img.Height);
                 }
             }
 
-            // Calculate canvas dimensions (horizontal stitching, top‑left alignment)
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            // Calculate canvas size (horizontal merge, top‑left alignment)
+            int canvasWidth = widths.Sum();
+            int canvasHeight = heights.Max();
 
-            // Create JPEG canvas with bound source
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+            // Prepare JPEG options with bound source
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 };
 
+            // Create canvas and merge images
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string inputPath in inputPaths)
+                foreach (var path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the bound image
+                // Save the bound image (no need to pass path again)
                 canvas.Save();
             }
         }

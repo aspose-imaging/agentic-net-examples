@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,56 +12,46 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath1 = "input1.jpg";
-            string inputPath2 = "input2.jpg";
+            string jpegPath = "input.jpg";
+            string pngPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input files
-            if (!File.Exists(inputPath1))
+            if (!File.Exists(jpegPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
+                Console.Error.WriteLine($"File not found: {jpegPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            if (!File.Exists(pngPath))
+            {
+                Console.Error.WriteLine($"File not found: {pngPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG images as raster images
-            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
-            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+            using (RasterImage jpegImage = (RasterImage)Image.Load(jpegPath))
+            using (RasterImage pngImage = (RasterImage)Image.Load(pngPath))
             {
-                // Collect sizes
-                List<Size> sizes = new List<Size>();
-                sizes.Add(img1.Size);
-                sizes.Add(img2.Size);
+                int newWidth = jpegImage.Width + pngImage.Width;
+                int newHeight = Math.Max(jpegImage.Height, pngImage.Height);
 
-                // Calculate canvas dimensions (horizontal merge)
-                int newWidth = sizes.Sum(s => s.Width);
-                int newHeight = sizes.Max(s => s.Height);
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                // Create PNG options with bound source
-                Source src = new FileCreateSource(outputPath, false);
-                PngOptions pngOptions = new PngOptions() { Source = src };
-
-                // Create canvas
                 using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
                 {
-                    // Merge first image at (0,0)
-                    Rectangle bounds1 = new Rectangle(0, 0, img1.Width, img1.Height);
-                    canvas.SaveArgb32Pixels(bounds1, img1.LoadArgb32Pixels(img1.Bounds));
+                    // Copy JPEG onto canvas at (0,0)
+                    Rectangle jpegBounds = new Rectangle(0, 0, jpegImage.Width, jpegImage.Height);
+                    canvas.SaveArgb32Pixels(jpegBounds, jpegImage.LoadArgb32Pixels(jpegImage.Bounds));
 
-                    // Merge second image to the right of the first
-                    int offsetX = img1.Width;
-                    Rectangle bounds2 = new Rectangle(offsetX, 0, img2.Width, img2.Height);
-                    canvas.SaveArgb32Pixels(bounds2, img2.LoadArgb32Pixels(img2.Bounds));
+                    // Copy PNG onto canvas next to JPEG
+                    Rectangle pngBounds = new Rectangle(jpegImage.Width, 0, pngImage.Width, pngImage.Height);
+                    canvas.SaveArgb32Pixels(pngBounds, pngImage.LoadArgb32Pixels(pngImage.Bounds));
 
-                    // Save the merged PNG (source is already bound)
+                    // Save the merged image
                     canvas.Save();
                 }
             }

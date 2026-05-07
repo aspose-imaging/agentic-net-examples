@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,7 +14,7 @@ class Program
         try
         {
             // Hardcoded input JPEG file paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
 
             // Validate each input file exists
             foreach (string path in inputPaths)
@@ -47,10 +47,10 @@ class Program
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 90,
-                    Source = new StreamSource(outputStream, true)
+                    Source = new StreamSource(outputStream, false)
                 };
 
-                // Create a bound JPEG canvas
+                // Create a JPEG canvas bound to the memory stream
                 using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
                 {
                     int offsetX = 0;
@@ -64,14 +64,12 @@ class Program
                         }
                     }
 
-                    // Save the canvas to the bound stream
+                    // Save the bound image to the stream
                     canvas.Save();
                 }
 
-                // At this point, outputStream contains the merged JPEG data
-                // Example: write the stream to a file (optional)
-                // Directory.CreateDirectory("Output");
-                // File.WriteAllBytes("Output\\merged.jpg", outputStream.ToArray());
+                // Output the size of the combined image in bytes
+                Console.WriteLine($"Combined image size (bytes): {outputStream.Length}");
             }
         }
         catch (Exception ex)

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,14 +12,14 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files
-            string[] inputPaths = { "input1.jpg", "input2.jpg" };
-            // Temporary and final output paths
-            string tempOutputPath = "TempMerged\\merged.jpg";
-            string finalOutputPath = "Merged\\merged.jpg";
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
 
-            // Validate input files
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -29,12 +28,13 @@ class Program
                 }
             }
 
-            // Ensure temporary directory exists
+            string tempOutputPath = "temp\\merged.jpg";
+            string finalOutputPath = "output\\merged.jpg";
+
             Directory.CreateDirectory(Path.GetDirectoryName(tempOutputPath));
 
-            // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -42,19 +42,25 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (var sz in sizes)
+            {
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
+            }
 
-            // Create source and JPEG options for the output image
-            Source source = new FileCreateSource(tempOutputPath, false);
-            JpegOptions jpegOptions = new JpegOptions { Source = source, Quality = 90 };
+            FileCreateSource source = new FileCreateSource(tempOutputPath, false);
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = source,
+                Quality = 100
+            };
 
-            // Create a bound JPEG canvas and merge images
-            using (JpegImage canvas = new JpegImage(jpegOptions, newWidth, newHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (var path in inputPaths)
+                foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -63,22 +69,24 @@ class Program
                         offsetX += img.Width;
                     }
                 }
-                // Save the bound image
+
                 canvas.Save();
             }
 
-            // Verify the temporary file and move to final destination
-            if (File.Exists(tempOutputPath) && new FileInfo(tempOutputPath).Length > 0)
+            if (!File.Exists(tempOutputPath))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
-                if (File.Exists(finalOutputPath))
-                    File.Delete(finalOutputPath);
-                File.Move(tempOutputPath, finalOutputPath);
+                Console.Error.WriteLine("Failed to create temporary merged image.");
+                return;
             }
-            else
+
+            Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
+
+            if (File.Exists(finalOutputPath))
             {
-                Console.Error.WriteLine("Merged image verification failed.");
+                File.Delete(finalOutputPath);
             }
+
+            File.Move(tempOutputPath, finalOutputPath);
         }
         catch (Exception ex)
         {

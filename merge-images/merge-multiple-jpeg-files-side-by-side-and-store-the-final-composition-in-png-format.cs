@@ -9,62 +9,77 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input JPEG file paths
-        string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
-        // Hardcoded output PNG file path
-        string outputPath = "merged.png";
-
-        // Validate each input file exists
-        foreach (var inputPath in inputPaths)
+        try
         {
-            if (!File.Exists(inputPath))
+            // Hardcoded input JPEG file paths
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-        }
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Hardcoded output PNG path
+            string outputPath = "output.png";
 
-        // Collect sizes of all input images
-        List<Size> sizes = new List<Size>();
-        foreach (var inputPath in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(inputPath))
+            // Validate input files
+            foreach (string path in inputPaths)
             {
-                sizes.Add(img.Size);
-            }
-        }
-
-        // Calculate canvas dimensions for horizontal merge
-        int newWidth = 0;
-        int newHeight = 0;
-        foreach (var sz in sizes)
-        {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight)
-                newHeight = sz.Height;
-        }
-
-        // Create PNG canvas bound to the output file
-        Source src = new FileCreateSource(outputPath, false);
-        PngOptions pngOptions = new PngOptions() { Source = src };
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
-        {
-            int offsetX = 0;
-            // Merge each JPEG onto the canvas side by side
-            foreach (var inputPath in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                if (!File.Exists(path))
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
                 }
             }
-            // Save the bound canvas (output file is already specified in options)
-            canvas.Save();
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Collect image sizes
+            List<Size> sizes = new List<Size>();
+            foreach (string path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    sizes.Add(img.Size);
+                }
+            }
+
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (Size sz in sizes)
+            {
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
+            }
+
+            // Create PNG options with bound output source
+            Source src = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = src };
+
+            // Create canvas and merge images side by side
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
+            {
+                int offsetX = 0;
+                foreach (string path in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        int[] pixels = img.LoadArgb32Pixels(img.Bounds);
+                        canvas.SaveArgb32Pixels(bounds, pixels);
+                        offsetX += img.Width;
+                    }
+                }
+
+                // Save the bound canvas
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

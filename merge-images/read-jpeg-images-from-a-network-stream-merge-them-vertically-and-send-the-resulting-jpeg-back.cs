@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -12,32 +13,25 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath1 = "input1.jpg";
-            string inputPath2 = "input2.jpg";
-            string outputPath = "output.jpg";
-
-            // Validate input files
-            if (!File.Exists(inputPath1))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
+            // Hardcoded input URLs and output path
+            string[] imageUrls = {
+                "https://example.com/image1.jpg",
+                "https://example.com/image2.jpg"
+            };
+            string outputPath = "merged.jpg";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of input images
+            // Prepare HTTP client
+            HttpClient httpClient = new HttpClient();
+
+            // First pass: collect image sizes
             List<Size> sizes = new List<Size>();
-            string[] inputPaths = new string[] { inputPath1, inputPath2 };
-            foreach (string path in inputPaths)
+            foreach (string url in imageUrls)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (Stream stream = httpClient.GetStreamAsync(url).Result)
+                using (RasterImage img = (RasterImage)Image.Load(stream))
                 {
                     sizes.Add(img.Size);
                 }
@@ -52,20 +46,21 @@ class Program
                 canvasHeight += sz.Height;
             }
 
-            // Create JPEG canvas with bound source
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
+            // Create JPEG options with bound source
+            JpegOptions jpegOptions = new JpegOptions
             {
-                Source = source,
+                Source = new FileCreateSource(outputPath, false),
                 Quality = 90
             };
 
+            // Create canvas and merge images vertically
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (string path in inputPaths)
+                foreach (string url in imageUrls)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (Stream stream = httpClient.GetStreamAsync(url).Result)
+                    using (RasterImage img = (RasterImage)Image.Load(stream))
                     {
                         Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
