@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -20,30 +19,42 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the vector image (SVG) to be drawn
-        using (Image vectorImage = Image.Load(inputPath))
+        try
         {
-            // Create a PNG canvas bound to the output file
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-            using (Image canvas = Image.Create(pngOptions, 800, 600))
+            // Load the vector image (SVG)
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                // Initialize graphics for the canvas
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
+                // Define canvas size
+                int canvasWidth = 800;
+                int canvasHeight = 600;
 
-                // Apply translation and rotation transforms
-                graphics.TranslateTransform(200, 150); // move origin to (200,150)
-                graphics.RotateTransform(45);          // rotate 45 degrees around the new origin
+                // Create a blank PNG canvas
+                PngOptions pngOptions = new PngOptions();
+                using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
+                {
+                    // Obtain a Graphics object for drawing
+                    Graphics graphics = new Graphics(canvas);
 
-                // Draw the vector image at the transformed origin
-                graphics.DrawImage(vectorImage, 0, 0);
+                    // Clear the canvas with white background
+                    graphics.Clear(Color.White);
 
-                // Save the canvas (output file is already bound)
-                canvas.Save();
+                    // Apply translation and rotation transforms
+                    graphics.TranslateTransform(200, 150); // move origin to (200,150)
+                    graphics.RotateTransform(30);          // rotate 30 degrees around new origin
+
+                    // Draw the vector image at the transformed origin
+                    graphics.DrawImage(vectorImage, 0, 0);
+
+                    // Save the resulting image
+                    canvas.Save(outputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
