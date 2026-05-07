@@ -8,28 +8,34 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define image dimensions
-        int width = 800;
-        int height = 600;
-
-        // Define output file path
-        string outputPath = @"C:\temp\output.bmp";
+        // Hardcoded output path
+        string outputPath = @"c:\temp\output.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up BMP options with a file create source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image and a Graphics object for drawing
-        using (Image image = Image.Create(bmpOptions, width, height))
+        try
         {
-            Graphics graphics = new Graphics(image);
-            // Graphics object is ready for drawing operations here
+            // Set up BMP options with a FileCreateSource bound to the output file
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Save the image (file is already bound via FileCreateSource)
-            image.Save();
+            // Create a BMP image with specified width and height
+            using (Image image = Image.Create(bmpOptions, 400, 300))
+            {
+                // Instantiate a Graphics object for drawing on the image
+                Graphics graphics = new Graphics(image);
+
+                // Optional: clear the canvas with a background color
+                graphics.Clear(Color.White);
+
+                // Save the image (file is already bound via FileCreateSource)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
