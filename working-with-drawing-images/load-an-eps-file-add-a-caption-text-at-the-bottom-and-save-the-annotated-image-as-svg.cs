@@ -3,43 +3,59 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.eps";
-        string outputPath = "output.svg";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.eps";
+            string outputPath = "output.svg";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
-        {
-            var svgOptions = new SvgOptions();
-
-            using (Image canvas = Image.Create(svgOptions, epsImage.Width, epsImage.Height))
+            if (!File.Exists(inputPath))
             {
-                var graphics = new Graphics(canvas);
-
-                graphics.DrawImage(epsImage, new Point(0, 0));
-
-                var font = new Font("Arial", 24, FontStyle.Regular);
-                var brush = new SolidBrush(Color.Black);
-
-                int x = epsImage.Width / 2;
-                int y = epsImage.Height - 30;
-
-                graphics.DrawString("Caption Text", font, brush, new Point(x, y));
-
-                canvas.Save(outputPath, svgOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            {
+                int width = epsImage.Width;
+                int height = epsImage.Height;
+
+                var graphics = new SvgGraphics2D(width, height, 96);
+
+                // Rasterize EPS to PNG in memory
+                using (var ms = new MemoryStream())
+                {
+                    epsImage.Save(ms, new PngOptions());
+                    ms.Position = 0;
+                    using (var raster = (RasterImage)Image.Load(ms))
+                    {
+                        graphics.DrawImage(raster, new Point(0, 0));
+                    }
+                }
+
+                // Add caption text at the bottom
+                var font = new Font("Arial", 24, FontStyle.Regular);
+                string caption = "Sample Caption";
+                // Position near bottom-left corner
+                graphics.DrawString(font, caption, new Point(10, height - 30), Color.Black);
+
+                using (var svgImage = graphics.EndRecording())
+                {
+                    svgImage.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
