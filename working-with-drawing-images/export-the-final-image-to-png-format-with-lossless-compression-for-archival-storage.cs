@@ -7,32 +7,41 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\source.jpg";
+            string outputPath = @"C:\Images\output.png";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PNG export options for lossless archival storage
-            var pngOptions = new PngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Use the default (lossless) compression level
-                PngCompressionLevel = PngOptions.DefaultCompressionLevel
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PNG using the specified options
-            image.Save(outputPath, pngOptions);
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PNG options for lossless archival storage
+                PngOptions pngOptions = new PngOptions
+                {
+                    // Compression level 0 = no compression (still lossless)
+                    PngCompressionLevel = 0,
+                    // Preserve original metadata, if any
+                    KeepMetadata = true
+                };
+
+                // Save the image as PNG using the specified options
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
