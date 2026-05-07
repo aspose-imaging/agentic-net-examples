@@ -9,43 +9,52 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input EPS, output JPEG, and sRGB ICC profile paths
+        // Hard‑coded input EPS, output JPEG and sRGB ICC profile paths
         string inputPath = "input.eps";
         string outputPath = "output.jpg";
-        string srgbProfilePath = "sRGB.icc";
+        string iccProfilePath = "sRGB.icc";
 
-        // Verify input EPS file exists
+        // Verify input EPS exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Verify sRGB ICC profile file exists
-        if (!File.Exists(srgbProfilePath))
+        // Verify ICC profile exists
+        if (!File.Exists(iccProfilePath))
         {
-            Console.Error.WriteLine($"File not found: {srgbProfilePath}");
+            Console.Error.WriteLine($"File not found: {iccProfilePath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the sRGB ICC profile stream
-        using (var rgbProfileStream = File.OpenRead(srgbProfilePath))
+        try
         {
-            // Prepare JPEG save options with the sRGB profile
-            var jpegOptions = new JpegOptions
-            {
-                RgbColorProfile = new StreamSource(rgbProfileStream)
-            };
-
             // Load the EPS image
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Save the image as JPEG using the specified options
-                epsImage.Save(outputPath, jpegOptions);
+                // Open the sRGB ICC profile stream
+                using (Stream iccStream = File.OpenRead(iccProfilePath))
+                {
+                    // Prepare JPEG save options with the sRGB profile
+                    var jpegOptions = new JpegOptions
+                    {
+                        // Assign the RGB color profile for correct color conversion
+                        RgbColorProfile = new StreamSource(iccStream)
+                    };
+
+                    // Save the image as JPEG using the specified options
+                    epsImage.Save(outputPath, jpegOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
