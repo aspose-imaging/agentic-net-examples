@@ -2,68 +2,81 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define base directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Process only WMF files
-            if (!string.Equals(Path.GetExtension(inputPath), ".wmf", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Validate input directory
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Prepare output path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load WMF image and convert to PNG with transparent background
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDir))
             {
-                var pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.Transparent,
-                        PageSize = image.Size
-                    }
-                };
-
-                image.Save(outputPath, pngOptions);
+                Directory.CreateDirectory(outputDir);
             }
+
+            // Get all WMF files
+            string[] files = Directory.GetFiles(inputDir, "*.wmf");
+
+            foreach (var inputPath in files)
+            {
+                // Validate input file existence
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                // Prepare output path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".png");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load WMF image
+                using (Image image = Image.Load(inputPath))
+                {
+                    var wmfImage = image as WmfImage;
+                    if (wmfImage == null)
+                    {
+                        Console.Error.WriteLine($"Not a WMF image: {inputPath}");
+                        continue;
+                    }
+
+                    // Configure PNG options with transparent background and 32‑bit color depth
+                    var pngOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        VectorRasterizationOptions = new WmfRasterizationOptions
+                        {
+                            BackgroundColor = Color.Transparent,
+                            PageSize = wmfImage.Size
+                        }
+                    };
+
+                    // Save as PNG
+                    wmfImage.Save(outputPath, pngOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
