@@ -8,45 +8,59 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        Directory.CreateDirectory(outputDirectory);
-
-        string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
-
-        foreach (string inputPath in svgFiles)
+        try
         {
-            if (!File.Exists(inputPath))
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
-                    {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    };
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string file in files)
+            {
+                if (!Path.GetExtension(file).Equals(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string inputPath = file;
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string outputFileName = Path.GetFileNameWithoutExtension(file) + ".pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var pdfOptions = new PdfOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
+                        PdfCoreOptions = new PdfCoreOptions
+                        {
+                            PdfCompliance = PdfComplianceVersion.PdfA1b
+                        }
                     };
 
                     image.Save(outputPath, pdfOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
