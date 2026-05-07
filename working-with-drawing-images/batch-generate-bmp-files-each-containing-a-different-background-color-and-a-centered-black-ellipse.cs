@@ -1,59 +1,60 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
+using System.Collections.Generic;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output directory
-        string outputDir = "output";
-        Directory.CreateDirectory(outputDir);
-
-        // Image dimensions
-        int width = 400;
-        int height = 300;
-
-        // Background colors and corresponding file names
-        Aspose.Imaging.Color[] colors = { Aspose.Imaging.Color.Red, Aspose.Imaging.Color.Green, Aspose.Imaging.Color.Blue };
-        string[] fileNames = { "red.bmp", "green.bmp", "blue.bmp" };
-
-        for (int i = 0; i < colors.Length; i++)
+        try
         {
-            string outputPath = Path.Combine(outputDir, fileNames[i]);
+            string outputDir = @"C:\temp\BmpBatch";
+            Directory.CreateDirectory(outputDir);
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            int width = 500;
+            int height = 500;
 
-            // Set up BMP options with a file source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            int ellipseWidth = 300;
+            int ellipseHeight = 200;
+            int ellipseX = (width - ellipseWidth) / 2;
+            int ellipseY = (height - ellipseHeight) / 2;
 
-            // Create the image (output file is already bound)
-            using (Image image = Image.Create(bmpOptions, width, height))
+            List<Aspose.Imaging.Color> colors = new List<Aspose.Imaging.Color>
             {
-                // Create a Graphics instance for drawing
-                Graphics graphics = new Graphics(image);
+                Aspose.Imaging.Color.Red,
+                Aspose.Imaging.Color.Green,
+                Aspose.Imaging.Color.Blue,
+                Aspose.Imaging.Color.Yellow,
+                Aspose.Imaging.Color.Cyan,
+                Aspose.Imaging.Color.Magenta
+            };
 
-                // Clear the canvas with the background color
-                graphics.Clear(colors[i]);
+            int index = 1;
+            foreach (var bgColor in colors)
+            {
+                string outputPath = Path.Combine(outputDir, $"image_{index}.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Define a centered ellipse rectangle
-                int ellipseWidth = width / 2;
-                int ellipseHeight = height / 2;
-                int ellipseX = (width - ellipseWidth) / 2;
-                int ellipseY = (height - ellipseHeight) / 2;
-                Rectangle ellipseRect = new Rectangle(ellipseX, ellipseY, ellipseWidth, ellipseHeight);
+                FileCreateSource source = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions() { Source = source };
 
-                // Draw the black ellipse
-                Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
-                graphics.DrawEllipse(pen, ellipseRect);
+                using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(options, width, height))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                    graphics.Clear(bgColor);
+                    graphics.DrawEllipse(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), ellipseX, ellipseY, ellipseWidth, ellipseHeight);
+                    canvas.Save();
+                }
 
-                // Save the image (file is already bound to the source)
-                image.Save();
+                index++;
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
