@@ -7,71 +7,63 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Set up base, input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; create if missing
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Define base, input, and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDir = Path.Combine(baseDir, "Input");
+            string outputDir = Path.Combine(baseDir, "Output");
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure directories exist
+            Directory.CreateDirectory(inputDir);
+            Directory.CreateDirectory(outputDir);
 
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDir);
 
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            foreach (var inputPath in files)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Derive output file names
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string pdfOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-            string svgOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
-
-            // Ensure output directories exist (unconditional as per rules)
-            Directory.CreateDirectory(Path.GetDirectoryName(pdfOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
-
-            // Load the vector image
-            using (Image image = Image.Load(inputPath))
-            {
-                // ---------- Convert to PDF ----------
-                var pdfOptions = new PdfOptions
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
-                image.Save(pdfOutputPath, pdfOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                // ---------- Convert to SVG ----------
-                var svgOptions = new SvgOptions
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+
+                // Convert to PDF
+                string pdfOutputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(pdfOutputPath));
+
+                using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         PageSize = image.Size
-                    }
-                };
-                image.Save(svgOutputPath, svgOptions);
+                    };
+                    image.Save(pdfOutputPath, pdfOptions);
+                }
+
+                // Convert to SVG
+                string svgOutputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
+                Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
+
+                using (Image image = Image.Load(inputPath))
+                using (SvgOptions svgOptions = new SvgOptions())
+                {
+                    svgOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
+                    image.Save(svgOutputPath, svgOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
