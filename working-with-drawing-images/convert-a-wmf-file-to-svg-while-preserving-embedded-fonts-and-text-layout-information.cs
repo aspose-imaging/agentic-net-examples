@@ -1,53 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.wmf";
-        string outputPath = @"C:\temp\output.svg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Temp\input.wmf";
+            string outputPath = @"C:\Temp\output.svg";
+
+            // Verify that the input WMF file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WMF image
+            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            {
+                // Set up SVG save options
+                SvgOptions saveOptions = new SvgOptions
+                {
+                    // Preserve text as text (do not convert to shapes) to keep font information
+                    TextAsShapes = false
+                };
+
+                // Configure rasterization options for WMF
+                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                {
+                    BackgroundColor = Color.WhiteSmoke,
+                    PageSize = wmfImage.Size,
+                    RenderMode = WmfRenderMode.Auto
+                };
+
+                saveOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save the image as SVG
+                wmfImage.Save(outputPath, saveOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WMF image
-        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Set up SVG save options
-            SvgOptions saveOptions = new SvgOptions
-            {
-                // Render all text as shapes to preserve layout and embedded fonts
-                TextAsShapes = true
-            };
-
-            // Configure rasterization options for WMF
-            WmfRasterizationOptions rasterizationOptions = new WmfRasterizationOptions
-            {
-                // Background color for the drawing surface
-                BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
-                // Use the original WMF size as the page size
-                PageSize = wmfImage.Size,
-                // Automatically choose rendering mode (EMF or WMF)
-                RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
-            };
-
-            // Assign rasterization options to the SVG options
-            saveOptions.VectorRasterizationOptions = rasterizationOptions;
-
-            // Save the image as SVG
-            wmfImage.Save(outputPath, saveOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
