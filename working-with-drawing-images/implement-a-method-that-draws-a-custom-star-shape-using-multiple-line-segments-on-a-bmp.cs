@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -8,55 +7,62 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\star.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create BMP options with a file source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Define image size
-        int width = 500;
-        int height = 500;
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics
-            Graphics graphics = new Graphics(image);
+            // Output BMP file path
+            string outputPath = @"C:\temp\star.bmp";
 
-            // Clear background
-            graphics.Clear(Color.White);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Star parameters
-            int centerX = width / 2;
-            int centerY = height / 2;
-            int outerRadius = 200;
-            int innerRadius = 80;
-            int pointsCount = 5;
+            // Create BMP options with a file create source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Calculate star vertices
-            Point[] starPoints = new Point[pointsCount * 2];
-            double angleStep = Math.PI / pointsCount;
-            for (int i = 0; i < pointsCount * 2; i++)
+            // Define image dimensions
+            int width = 500;
+            int height = 500;
+
+            // Create the image canvas
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
             {
-                double radius = (i % 2 == 0) ? outerRadius : innerRadius;
-                double angle = i * angleStep - Math.PI / 2; // start at top
-                int x = centerX + (int)(radius * Math.Cos(angle));
-                int y = centerY + (int)(radius * Math.Sin(angle));
-                starPoints[i] = new Point(x, y);
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
+
+                // Pen for drawing the star
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
+
+                // Define star points (outer and inner vertices)
+                Aspose.Imaging.Point[] starPoints = new Aspose.Imaging.Point[]
+                {
+                    new Aspose.Imaging.Point(250, 50),   // top
+                    new Aspose.Imaging.Point(300, 200),
+                    new Aspose.Imaging.Point(450, 200),
+                    new Aspose.Imaging.Point(325, 300),
+                    new Aspose.Imaging.Point(375, 450),
+                    new Aspose.Imaging.Point(250, 350),
+                    new Aspose.Imaging.Point(125, 450),
+                    new Aspose.Imaging.Point(175, 300),
+                    new Aspose.Imaging.Point(50, 200),
+                    new Aspose.Imaging.Point(200, 200)
+                };
+
+                // Draw lines between consecutive points and close the shape
+                for (int i = 0; i < starPoints.Length; i++)
+                {
+                    Aspose.Imaging.Point start = starPoints[i];
+                    Aspose.Imaging.Point end = starPoints[(i + 1) % starPoints.Length];
+                    graphics.DrawLine(pen, start, end);
+                }
+
+                // Save the image (file is already bound to the output path)
+                image.Save();
             }
-
-            // Draw the star using a pen
-            Pen starPen = new Pen(Color.Gold, 3);
-            graphics.DrawPolygon(starPen, starPoints);
-
-            // Save the image (file is already bound to outputPath)
-            image.Save();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
