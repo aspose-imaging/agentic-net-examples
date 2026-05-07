@@ -6,63 +6,58 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Set up base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputSvgs";
+            string outputFolder = @"C:\OutputPdfs";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all SVG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // List of SVG files to convert
+            string[] svgFiles = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
+                Path.Combine(inputFolder, "illustration1.svg"),
+                Path.Combine(inputFolder, "illustration2.svg"),
+                Path.Combine(inputFolder, "illustration3.svg")
+            };
 
-            // Determine output PDF path
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure output directory for the file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load SVG image
-            using (Image image = Image.Load(inputPath))
+            foreach (string inputPath in svgFiles)
             {
-                // Prepare PDF options and set metadata (using file name as title)
-                PdfOptions pdfOptions = new PdfOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Determine the output PDF path
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the SVG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Configure PDF options and embed metadata (using the file name as title)
+                    var pdfOptions = new PdfOptions
                     {
-                        Title = Path.GetFileNameWithoutExtension(inputPath)
-                    }
-                };
+                        PdfDocumentInfo = new PdfDocumentInfo
+                        {
+                            Title = Path.GetFileNameWithoutExtension(inputPath)
+                            // Additional metadata fields (Author, Subject, etc.) can be set here if needed
+                        }
+                    };
 
-                // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                    // Save the image as PDF
+                    image.Save(outputPath, pdfOptions);
+                }
             }
-
-            Console.WriteLine($"Converted '{inputPath}' to PDF at '{outputPath}'.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
