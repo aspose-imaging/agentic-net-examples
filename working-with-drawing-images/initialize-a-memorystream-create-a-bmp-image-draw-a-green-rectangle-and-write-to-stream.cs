@@ -8,31 +8,40 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Initialize a memory stream to hold the BMP image data
-        using (MemoryStream memoryStream = new MemoryStream())
+        try
         {
-            // Set up BMP options and bind the stream as the image source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new StreamSource(memoryStream);
+            // Ensure the output directory exists (required by path-safety rules)
+            string outputPath = "output\\output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a 200x200 BMP image
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            // Create a memory stream to hold the BMP image
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                // Obtain a Graphics object for drawing
-                Graphics graphics = new Graphics(image);
+                // Configure BMP options to write to the memory stream
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(memoryStream);
 
-                // Draw a green rectangle with a 2-pixel pen
-                graphics.DrawRectangle(new Pen(Color.Green, 2), new Rectangle(20, 20, 160, 160));
+                // Create a 200x200 BMP image
+                using (Image image = Image.Create(bmpOptions, 200, 200))
+                {
+                    // Obtain a Graphics object for drawing
+                    Graphics graphics = new Graphics(image);
 
-                // Save the image; since the image is bound to the stream, no path is needed
-                image.Save();
+                    // Draw a green rectangle
+                    graphics.DrawRectangle(new Pen(Color.Green, 5), new Rectangle(20, 20, 160, 160));
+
+                    // Save changes (the image is bound to the stream)
+                    image.Save();
+                }
+
+                // At this point, memoryStream contains the BMP data.
+                // Example: write the stream to a file (optional)
+                // File.WriteAllBytes(outputPath, memoryStream.ToArray());
             }
-
-            // At this point, memoryStream contains the BMP image bytes
-            // (Optional) Example of writing the stream to a file for verification
-            // string outputPath = "output.bmp";
-            // Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-            // File.WriteAllBytes(outputPath, memoryStream.ToArray());
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
