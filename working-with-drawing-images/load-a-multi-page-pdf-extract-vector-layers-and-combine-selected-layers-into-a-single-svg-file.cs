@@ -1,47 +1,74 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.pdf";
-        string outputPath = @"C:\Temp\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.pdf";
+            string outputPath = "output/output.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PDF document
-        using (Image pdfImage = Image.Load(inputPath))
-        {
-            // Prepare SVG export options
-            SvgOptions exportOptions = new SvgOptions();
-
-            // Export only the first two pages (adjust as needed)
-            exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 2));
-
-            // Configure vector rasterization options
-            var vectorOptions = new VectorRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
-            exportOptions.VectorRasterizationOptions = vectorOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save combined layers as a single SVG file
-            pdfImage.Save(outputPath, exportOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PDF document
+            using (Image pdfImage = Image.Load(inputPath))
+            {
+                IMultipageImage multipage = pdfImage as IMultipageImage;
+                if (multipage == null)
+                {
+                    Console.Error.WriteLine("The input file is not a multipage vector image.");
+                    return;
+                }
+
+                // Select the first two pages (adjust as needed)
+                int pagesToTake = Math.Min(2, multipage.PageCount);
+                List<Image> selectedPages = new List<Image>();
+                for (int i = 0; i < pagesToTake; i++)
+                {
+                    selectedPages.Add(multipage.Pages[i]);
+                }
+
+                // Calculate canvas size for vertical stacking
+                int canvasWidth = selectedPages.Max(p => p.Width);
+                int canvasHeight = selectedPages.Sum(p => p.Height);
+
+                // Create SVG canvas
+                SvgOptions svgOptions = new SvgOptions();
+                using (SvgImage svgCanvas = new SvgImage(svgOptions, canvasWidth, canvasHeight))
+                {
+                    // Draw each selected page onto the SVG canvas
+                    Graphics graphics = new Graphics(svgCanvas);
+                    int offsetY = 0;
+                    foreach (var page in selectedPages)
+                    {
+                        graphics.DrawImage(page, new Point(0, offsetY));
+                        offsetY += page.Height;
+                    }
+
+                    // Save the combined SVG
+                    svgCanvas.Save(outputPath, svgOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
