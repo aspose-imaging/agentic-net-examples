@@ -1,59 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define output path
-        string outputPath = @"C:\Temp\vector_output.svg";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Canvas size
-        int width = 600;
-        int height = 400;
-        int dpi = 96;
-
-        // Create SVG graphics context
-        SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-        // Draw outer border
-        Pen borderPen = new Pen(Color.Black, 2);
-        graphics.DrawRectangle(borderPen, 0, 0, width, height);
-
-        // Fill a rectangle (solid brush)
-        Pen rectPen = new Pen(Color.Blue, 1);
-        using (SolidBrush rectBrush = new SolidBrush(Color.LightBlue))
+        try
         {
-            graphics.FillRectangle(rectPen, rectBrush, 50, 50, 200, 150);
+            // Output SVG file path
+            string outputPath = "output.svg";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Canvas size and DPI
+            int width = 400;
+            int height = 300;
+            int dpi = 96;
+
+            // Create SVG graphics context
+            var graphics = new SvgGraphics2D(width, height, dpi);
+
+            // Gradient brush for rectangle fill (red to blue)
+            var rectGradient = new LinearGradientBrush(new Point(0, 0), new Point(width, 0), Color.Red, Color.Blue);
+            var rectPen = new Pen(Color.Black, 2);
+            graphics.FillRectangle(rectPen, rectGradient, 50, 50, 300, 200);
+
+            // Create a circular shape
+            var circleFigure = new Figure { IsClosed = true };
+            var circlePath = new GraphicsPath();
+            circlePath.AddFigure(circleFigure);
+            var ellipse = new EllipseShape(new Rectangle(100, 80, 200, 200));
+            circleFigure.AddShape(ellipse);
+
+            // Gradient brush for circle fill (green to yellow)
+            var circleGradient = new LinearGradientBrush(new Point(100, 80), new Point(300, 280), Color.Green, Color.Yellow);
+            graphics.FillPath(rectPen, circleGradient, circlePath);
+
+            // Finalize and save SVG image
+            using (SvgImage svgImage = graphics.EndRecording())
+            {
+                svgImage.Save(outputPath);
+            }
         }
-
-        // Create an ellipse shape and fill it
-        Figure ellipseFigure = new Figure { IsClosed = true };
-        GraphicsPath ellipsePath = new GraphicsPath();
-        ellipsePath.AddFigure(ellipseFigure);
-        ellipseFigure.AddShapes(new Shape[]
+        catch (Exception ex)
         {
-            new EllipseShape(new Rectangle(300, 50, 150, 150))
-        });
-
-        Pen ellipsePen = new Pen(Color.Green, 2);
-        using (SolidBrush ellipseBrush = new SolidBrush(Color.Yellow))
-        {
-            graphics.FillPath(ellipsePen, ellipseBrush, ellipsePath);
-        }
-
-        // Finalize SVG image and save
-        using (SvgImage svgImage = graphics.EndRecording())
-        {
-            svgImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
