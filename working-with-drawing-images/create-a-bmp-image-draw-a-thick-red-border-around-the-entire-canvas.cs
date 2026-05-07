@@ -1,40 +1,32 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up BMP creation options with a file source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        int width = 500;
-        int height = 500;
-
-        // Create a bound BMP canvas
-        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
+            string outputPath = @"C:\temp\output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a thick red pen
-            Pen redPen = new Pen(Color.Red, 10);
+            BmpOptions options = new BmpOptions();
+            FileCreateSource src = new FileCreateSource(outputPath, false);
+            options.Source = src;
 
-            // Draw a red border around the entire canvas
-            graphics.DrawRectangle(redPen, 0, 0, canvas.Width, canvas.Height);
-
-            // Save the bound image to the specified file
-            canvas.Save();
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(options, 500, 500))
+            {
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                Aspose.Imaging.Pen redPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 10);
+                graphics.DrawRectangle(redPen, 0, 0, image.Width, image.Height);
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
