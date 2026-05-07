@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
@@ -9,50 +9,58 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = "output/checkerboard.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Define image dimensions and checkerboard parameters
-        int imageWidth = 400;
-        int imageHeight = 400;
-        int cellSize = 50; // size of each square
-
-        // Set up BMP options with a file create source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
+        try
         {
-            // Initialize Graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Output file path (hardcoded)
+            string outputPath = @"C:\temp\checkerboard.bmp";
 
-            // Prepare brushes for the two colors
-            using (SolidBrush blackBrush = new SolidBrush(Color.Black))
-            using (SolidBrush whiteBrush = new SolidBrush(Color.White))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create BMP options with a file source
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
+
+            // Define canvas size
+            int width = 400;
+            int height = 400;
+
+            // Create a BMP canvas bound to the output file
+            using (BmpImage canvas = (BmpImage)Aspose.Imaging.Image.Create(options, width, height))
             {
-                // Loop through rows and columns to draw squares
-                for (int y = 0; y < imageHeight; y += cellSize)
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+
+                // Checkerboard parameters
+                int tileSize = 50;
+                int rows = height / tileSize;
+                int cols = width / tileSize;
+
+                // Prepare brushes
+                using (SolidBrush blackBrush = new SolidBrush(Aspose.Imaging.Color.Black))
+                using (SolidBrush whiteBrush = new SolidBrush(Aspose.Imaging.Color.White))
                 {
-                    for (int x = 0; x < imageWidth; x += cellSize)
+                    for (int y = 0; y < rows; y++)
                     {
-                        // Choose brush based on position parity
-                        SolidBrush brush = ((x / cellSize) + (y / cellSize)) % 2 == 0 ? blackBrush : whiteBrush;
+                        for (int x = 0; x < cols; x++)
+                        {
+                            SolidBrush brush = ((x + y) % 2 == 0) ? blackBrush : whiteBrush;
+                            int posX = x * tileSize;
+                            int posY = y * tileSize;
 
-                        // Define rectangle for the current cell
-                        Rectangle rect = new Rectangle(x, y, cellSize, cellSize);
-
-                        // Fill the rectangle
-                        graphics.FillRectangle(brush, rect);
+                            // Fill the rectangle tile
+                            graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(posX, posY, tileSize, tileSize));
+                        }
                     }
                 }
-            }
 
-            // Save the image (output is already bound to the file)
-            image.Save();
+                // Save the bound image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
