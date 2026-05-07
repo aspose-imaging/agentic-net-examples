@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
@@ -9,46 +8,56 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = "output\\output.png";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up PNG options with a file create source bound to the output path
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a new image with the specified dimensions
-        using (Image image = Image.Create(pngOptions, 600, 400))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Output file path
+            string outputPath = "output.png";
 
-            // Clear the canvas with white background
-            graphics.Clear(Color.White);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a graphics path and a figure
-            GraphicsPath path = new GraphicsPath();
-            Figure figure = new Figure();
+            // Set up PNG options with a file create source
+            var pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Add a cubic Bezier curve to the figure using the specified control points
-            figure.AddShape(new BezierShape(new PointF[]
+            // Create a new image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 600, 400))
             {
-                new PointF(0, 0),          // Start point
-                new PointF(200, 133),      // First control point
-                new PointF(400, 166),      // Second control point
-                new PointF(600, 400)       // End point
-            }));
+                // Initialize graphics for drawing
+                var graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Add the figure to the path
-            path.AddFigure(figure);
+                // Create a graphics path and a figure
+                var path = new Aspose.Imaging.GraphicsPath();
+                var figure = new Aspose.Imaging.Figure();
 
-            // Draw the path with a red pen of width 2
-            graphics.DrawPath(new Pen(Color.Red, 2), path);
+                // (Optional) Add a rectangle shape to the figure
+                figure.AddShape(new Aspose.Imaging.Shapes.RectangleShape(
+                    new Aspose.Imaging.RectangleF(50f, 50f, 200f, 200f)));
+
+                // Add a cubic Bezier curve to the same figure using specified control points
+                figure.AddShape(new Aspose.Imaging.Shapes.BezierShape(
+                    new Aspose.Imaging.PointF[]
+                    {
+                        new Aspose.Imaging.PointF(0f, 0f),          // Start point
+                        new Aspose.Imaging.PointF(200f, 133f),    // First control point
+                        new Aspose.Imaging.PointF(400f, 166f),    // Second control point
+                        new Aspose.Imaging.PointF(600f, 400f)     // End point
+                    }));
+
+                // Add the figure to the graphics path
+                path.AddFigure(figure);
+
+                // Draw the path with a red pen
+                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2), path);
+
+                // Save the image
+                image.Save();
+            }
         }
-
-        // Save the image (the output path is already bound via FileCreateSource)
-        // Image.Save() was called implicitly by disposing the image in the using block
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
