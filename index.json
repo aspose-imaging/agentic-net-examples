@@ -5,7 +5,7 @@
   "package_version": "26.4.0",
   "total_examples": 2921,
   "total_categories": 17,
-  "last_updated": "2026-05-06",
+  "last_updated": "2026-05-07",
   "categories": [
     {
       "name": "conversion",
@@ -3910,15 +3910,15 @@
         "System",
         "System.IO",
         "Aspose.Imaging.ImageOptions",
-        "System.Collections.Generic",
         "Aspose.Imaging.Sources",
-        "Aspose.Imaging",
+        "System.Collections.Generic",
         "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging",
         "System.Linq",
-        "Aspose.Imaging.FileFormats.Pdf",
-        "Aspose.Imaging.Brushes",
         "Aspose.Imaging.FileFormats.Png",
-        "System.Threading"
+        "Aspose.Imaging.FileFormats.Pdf",
+        "System.Net.Http",
+        "Aspose.Imaging.Brushes"
       ],
       "key_apis": [
         "ApngImage",
