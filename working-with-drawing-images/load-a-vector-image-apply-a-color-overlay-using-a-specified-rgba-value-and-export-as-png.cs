@@ -2,60 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the vector image
-        using (Image vectorImage = Image.Load(inputPath))
-        {
-            // Prepare rasterization options for PNG
-            PngOptions rasterOptions = new PngOptions();
-            rasterOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                PageSize = vectorImage.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Rasterize the vector image into a memory stream
-            using (MemoryStream ms = new MemoryStream())
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the vector image
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                vectorImage.Save(ms, rasterOptions);
-                ms.Position = 0;
+                int width = vectorImage.Width;
+                int height = vectorImage.Height;
 
-                // Load the rasterized image
-                using (Image rasterImage = Image.Load(ms))
+                // Prepare PNG options with bound output file
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.Source = new FileCreateSource(outputPath, false);
+
+                // Create a raster canvas
+                using (Image canvas = Image.Create(pngOptions, width, height))
                 {
-                    // Apply color overlay using Graphics
-                    Graphics graphics = new Graphics(rasterImage);
-                    // Example RGBA overlay: 50% transparent red
-                    Color overlayColor = Color.FromArgb(128, 255, 0, 0);
-                    using (SolidBrush brush = new SolidBrush(overlayColor))
+                    // Draw the vector image onto the canvas
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.DrawImage(vectorImage, new Point(0, 0));
+
+                    // Apply color overlay (semi‑transparent red, RGBA 128,255,0,0)
+                    using (SolidBrush overlayBrush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
                     {
-                        graphics.FillRectangle(brush, rasterImage.Bounds);
+                        graphics.FillRectangle(overlayBrush, canvas.Bounds);
                     }
 
-                    // Save the final PNG image
-                    rasterImage.Save(outputPath, new PngOptions());
+                    // Save the final PNG
+                    canvas.Save();
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
