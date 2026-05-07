@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -13,107 +14,75 @@ class Program
     {
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Hardcoded input and output paths
+            string inputPath1 = "Input/image1.jpg";
+            string inputPath2 = "Input/image2.jpg";
+            string outputPath = "Output/merged.pdf";
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
+            // Validate input files
+            if (!File.Exists(inputPath1))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
                 return;
             }
 
             // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get JPEG files from input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpeg");
-            List<string> allFiles = new List<string>();
-            allFiles.AddRange(files);
-            allFiles.AddRange(jpegFiles);
-
-            if (allFiles.Count == 0)
-            {
-                Console.WriteLine("No JPEG files found in the input directory.");
-                return;
-            }
-
-            // Collect sizes of all images
+            // Collect image sizes
             List<Size> sizes = new List<Size>();
-            foreach (string path in allFiles)
+            using (JpegImage img1 = (JpegImage)Image.Load(inputPath1))
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
-
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    sizes.Add(img.Size);
-                }
+                sizes.Add(img1.Size);
+            }
+            using (JpegImage img2 = (JpegImage)Image.Load(inputPath2))
+            {
+                sizes.Add(img2.Size);
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = 0;
-            int newHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
-            }
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
 
-            // Prepare temporary source for canvas creation
-            string tempCanvasPath = Path.Combine(outputDirectory, "tempCanvas.jpg");
+            // Create a temporary JPEG canvas with 300 DPI
+            string tempCanvasPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_canvas.jpg");
             Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
-            Source canvasSource = new FileCreateSource(tempCanvasPath, false);
-
-            // Configure JPEG options with 300 DPI
+            Source tempSource = new FileCreateSource(tempCanvasPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = canvasSource,
+                Source = tempSource,
                 Quality = 100,
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                ResolutionSettings = new ResolutionSetting(300, 300),
                 ResolutionUnit = ResolutionUnit.Inch
             };
-
-            // Create JPEG canvas
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
-                // Merge images horizontally
+                // Merge first image
                 int offsetX = 0;
-                foreach (string path in allFiles)
+                using (JpegImage img1 = (JpegImage)Image.Load(inputPath1))
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
-                    {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetX += img.Width;
-                    }
+                    Rectangle bounds = new Rectangle(offsetX, 0, img1.Width, img1.Height);
+                    canvas.SaveArgb32Pixels(bounds, img1.LoadArgb32Pixels(img1.Bounds));
+                    offsetX += img1.Width;
                 }
 
-                // Ensure output PDF directory exists
-                string outputPdfPath = Path.Combine(outputDirectory, "merged.pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+                // Merge second image
+                using (JpegImage img2 = (JpegImage)Image.Load(inputPath2))
+                {
+                    Rectangle bounds = new Rectangle(offsetX, 0, img2.Width, img2.Height);
+                    canvas.SaveArgb32Pixels(bounds, img2.LoadArgb32Pixels(img2.Bounds));
+                    offsetX += img2.Width;
+                }
 
-                // Save canvas as PDF
+                // Save the merged canvas as PDF
                 PdfOptions pdfOptions = new PdfOptions();
-                canvas.Save(outputPdfPath, pdfOptions);
+                canvas.Save(outputPath, pdfOptions);
             }
-
-            // Cleanup temporary canvas file
-            if (File.Exists(tempCanvasPath))
-            {
-                File.Delete(tempCanvasPath);
-            }
-
-            Console.WriteLine("Merging completed successfully.");
         }
         catch (Exception ex)
         {
