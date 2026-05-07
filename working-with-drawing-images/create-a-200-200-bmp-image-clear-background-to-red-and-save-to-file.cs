@@ -8,26 +8,34 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a source bound to the output file
-        Source source = new FileCreateSource(outputPath, false);
-        // Set up BMP options with the source
-        BmpOptions options = new BmpOptions() { Source = source };
-
-        // Create a 200x200 BMP canvas bound to the file
-        using (RasterImage canvas = (RasterImage)Image.Create(options, 200, 200))
+        try
         {
-            // Obtain a Graphics object for drawing
-            Graphics graphics = new Graphics(canvas);
-            // Clear the canvas with red color
-            graphics.Clear(Color.Red);
-            // Save the bound image (no need to specify path/options)
-            canvas.Save();
+            // Output file path
+            string outputPath = "output.bmp";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Create source bound to the output file
+            Source fileSource = new FileCreateSource(outputPath, false);
+
+            // Set BMP options with the source
+            BmpOptions bmpOptions = new BmpOptions() { Source = fileSource };
+
+            // Create a 200x200 BMP canvas bound to the file
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 200, 200))
+            {
+                // Clear the canvas to red
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.Red);
+
+                // Save the bound image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
