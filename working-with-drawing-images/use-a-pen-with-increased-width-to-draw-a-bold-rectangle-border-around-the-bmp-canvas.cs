@@ -8,38 +8,46 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path (hardcoded)
+        // Hardcoded output path for the BMP image
         string outputPath = @"C:\Temp\output.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure BMP options with a file create source bound to the output path
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Define canvas dimensions
-        int width = 500;
-        int height = 400;
-
-        // Create the image; it is already bound to the output file
-        using (Image image = Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Optional: clear the canvas with a white background
-            graphics.Clear(Color.White);
+            // Create a file source bound to the output path
+            Source source = new FileCreateSource(outputPath, false);
 
-            // Create a thick pen (e.g., 5 pixels wide) for the bold rectangle border
-            Pen thickPen = new Pen(Color.Black, 5f);
+            // Set BMP options with the created source
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
 
-            // Draw the rectangle border around the entire canvas
-            graphics.DrawRectangle(thickPen, 0, 0, width, height);
+            // Define canvas size
+            int canvasWidth = 400;
+            int canvasHeight = 300;
 
-            // Save the image (writes to the bound output file)
-            image.Save();
+            // Create the BMP canvas (bound image)
+            using (Image canvas = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(canvas);
+
+                // Optional: fill background with white
+                graphics.Clear(Color.White);
+
+                // Create a thick pen for the bold border
+                Pen borderPen = new Pen(Color.Black, 5);
+
+                // Draw rectangle border around the entire canvas
+                graphics.DrawRectangle(borderPen, 0, 0, canvasWidth, canvasHeight);
+
+                // Save the bound image (output file)
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
