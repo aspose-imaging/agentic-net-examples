@@ -14,7 +14,12 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
             string outputPath = "output.jpg";
 
             // Validate input files
@@ -30,31 +35,29 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
+            // Collect image sizes
+            List<(int Width, int Height)> sizes = new List<(int, int)>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    sizes.Add((img.Width, img.Height));
                 }
             }
 
-            // Calculate canvas dimensions for vertical merge
+            // Calculate canvas size for vertical merge
             int canvasWidth = sizes.Max(s => s.Width);
             int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Create JPEG options with 4:2:0 subsampling
-            Source source = new FileCreateSource(outputPath, false);
+            // Create JPEG options
+            Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = source,
-                Quality = 90,
-                HorizontalSampling = new byte[] { 2, 1, 1 },
-                VerticalSampling = new byte[] { 2, 1, 1 }
+                Source = src,
+                Quality = 90
             };
 
-            // Create canvas and merge images vertically
+            // Create JPEG canvas bound to the output file
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
@@ -68,7 +71,7 @@ class Program
                     }
                 }
 
-                // Save the merged image (bound image)
+                // Save the bound image
                 canvas.Save();
             }
         }
