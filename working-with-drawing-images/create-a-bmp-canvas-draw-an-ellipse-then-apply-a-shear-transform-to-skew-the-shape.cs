@@ -3,34 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output/output.bmp";
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        using (Image canvas = Image.Create(bmpOptions, 500, 500))
+        try
         {
-            Graphics graphics = new Graphics(canvas);
-            graphics.Clear(Color.White);
+            string outputPath = "output/output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Pen pen = new Pen(Color.Black, 2);
-            graphics.DrawEllipse(pen, new RectangleF(50, 50, 300, 300));
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source, BitsPerPixel = 24 };
 
-            Matrix shear = new Matrix(1, 0.5f, 0, 1, 0, 0);
-            graphics.MultiplyTransform(shear);
+            using (Image image = Image.Create(options, 500, 500))
+            {
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.Wheat);
 
-            Pen penSkewed = new Pen(Color.Red, 2);
-            graphics.DrawEllipse(penSkewed, new RectangleF(50, 50, 300, 300));
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
 
-            canvas.Save();
+                // Create an ellipse shape
+                EllipseShape ellipse = new EllipseShape(new RectangleF(100, 100, 300, 200));
+
+                // Apply shear transform (shear factor 0.5 in X direction)
+                float shearFactor = 0.5f;
+                Matrix shearMatrix = new Matrix(1, 0, shearFactor, 1, 0, 0);
+                ellipse.Transform(shearMatrix);
+
+                figure.AddShape(ellipse);
+                path.AddFigure(figure);
+
+                graphics.DrawPath(new Pen(Color.Black, 2), path);
+
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
