@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -7,36 +8,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path
-        string outputPath = @"C:\Temp\output.bmp";
+        string outputPath = @"C:\temp\arc_output.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a source bound to the output file
-        FileCreateSource source = new FileCreateSource(outputPath, false);
-
-        // Set BMP options with the source
-        BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-        // Create a BMP canvas
-        using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(bmpOptions, 400, 400))
+        try
         {
-            // Initialize graphics for drawing
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Clear background
-            graphics.Clear(Aspose.Imaging.Color.White);
+            // Create a file source bound to the output path
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
 
-            // Draw a 90-degree arc within the defined rectangle
-            graphics.DrawArc(
-                new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
-                new Aspose.Imaging.Rectangle(50, 50, 300, 300),
-                0,
-                90);
+            // Create a BMP canvas of size 300x300
+            using (Image canvas = Image.Create(bmpOptions, 300, 300))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(canvas);
 
-            // Save the image (bound to the source)
-            canvas.Save();
+                // Draw a 90-degree arc within the defined rectangle
+                graphics.DrawArc(new Pen(Color.Black, 2), new Rectangle(50, 50, 200, 200), 0, 90);
+
+                // Save the bound image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
