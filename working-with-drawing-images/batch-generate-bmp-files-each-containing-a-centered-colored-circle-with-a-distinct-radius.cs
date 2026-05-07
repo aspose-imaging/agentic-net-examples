@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -10,49 +9,67 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output directory
-        string outputDir = "output";
-        Directory.CreateDirectory(outputDir);
-
-        // Radii and corresponding colors
-        var radii = new List<int> { 20, 40, 60, 80 };
-        var colors = new List<Color> { Color.Red, Color.Green, Color.Blue, Color.Yellow };
-
-        for (int i = 0; i < radii.Count; i++)
+        try
         {
-            int radius = radii[i];
-            Color circleColor = colors[i];
+            // Output directory for generated BMP files
+            string outputDir = @"C:\temp\circles";
+            Directory.CreateDirectory(outputDir);
 
-            // Canvas size with a 10‑pixel margin on each side
-            int canvasSize = radius * 2 + 20;
-            int center = canvasSize / 2;
-
-            string outputPath = Path.Combine(outputDir, $"circle_{radius}.bmp");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // BMP creation options bound to the output file
-            BmpOptions bmpOptions = new BmpOptions
+            // Define radii and colors for each image
+            int[] radii = new int[] { 50, 100, 150 };
+            Aspose.Imaging.Color[] colors = new Aspose.Imaging.Color[]
             {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
+                Aspose.Imaging.Color.Red,
+                Aspose.Imaging.Color.Green,
+                Aspose.Imaging.Color.Blue
             };
 
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, canvasSize, canvasSize))
+            for (int i = 0; i < radii.Length; i++)
             {
-                // Graphics instance for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                int radius = radii[i];
+                Aspose.Imaging.Color fillColor = colors[i % colors.Length];
 
-                // Draw a centered filled circle
-                using (SolidBrush brush = new SolidBrush(circleColor))
+                // Image size includes a margin around the circle
+                int canvasSize = radius * 2 + 20;
+                string outputPath = Path.Combine(outputDir, $"circle_{radius}.bmp");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Create file source and BMP options
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions bmpOptions = new BmpOptions
                 {
-                    graphics.FillEllipse(brush, new Rectangle(center - radius, center - radius, radius * 2, radius * 2));
-                }
+                    Source = source,
+                    BitsPerPixel = 24
+                };
 
-                // Save the bound image
-                image.Save();
+                // Create a BMP canvas bound to the file source
+                using (Image canvas = Image.Create(bmpOptions, canvasSize, canvasSize))
+                {
+                    // Draw on the canvas
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+
+                    // Calculate bounds for the centered circle
+                    int left = (canvasSize - radius * 2) / 2;
+                    int top = (canvasSize - radius * 2) / 2;
+                    Rectangle circleBounds = new Rectangle(left, top, radius * 2, radius * 2);
+
+                    // Fill the circle with the specified color
+                    using (SolidBrush brush = new SolidBrush(fillColor))
+                    {
+                        graphics.FillEllipse(brush, circleBounds);
+                    }
+
+                    // Save the bound image
+                    canvas.Save();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
