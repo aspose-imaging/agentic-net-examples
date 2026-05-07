@@ -3,82 +3,79 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input JPEG files
-        string[] inputPaths = new string[]
+        try
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
-        };
-
-        // Hardcoded output PNG file
-        string outputPath = "merged.png";
-
-        // Validate input files
-        foreach (string inputPath in inputPaths)
-        {
-            if (!File.Exists(inputPath))
+            // Hardcoded input JPEG files and output PNG file
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-        }
+                "Input/image1.jpg",
+                "Input/image2.jpg",
+                "Input/image3.jpg"
+            };
+            string outputPath = "Output/merged.png";
 
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrEmpty(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Lists to hold pixel data and sizes of flipped images
-        List<int[]> pixelDataList = new List<int[]>();
-        List<Size> sizeList = new List<Size>();
-
-        // Load each JPEG, flip horizontally, and store its pixel data and size
-        foreach (string inputPath in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(inputPath))
+            // Validate input files
+            foreach (string path in inputPaths)
             {
-                img.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                pixelDataList.Add(img.LoadArgb32Pixels(img.Bounds));
-                sizeList.Add(img.Size);
-            }
-        }
-
-        // Calculate canvas dimensions for horizontal composition
-        int newWidth = 0;
-        int newHeight = 0;
-        foreach (Size sz in sizeList)
-        {
-            newWidth += sz.Width;
-            if (sz.Height > newHeight)
-                newHeight = sz.Height;
-        }
-
-        // Create PNG canvas bound to the output file
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
-        {
-            int offsetX = 0;
-            for (int i = 0; i < pixelDataList.Count; i++)
-            {
-                Size sz = sizeList[i];
-                Rectangle bounds = new Rectangle(offsetX, 0, sz.Width, sz.Height);
-                canvas.SaveArgb32Pixels(bounds, pixelDataList[i]);
-                offsetX += sz.Width;
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
             }
 
-            // Save the bound canvas (output file already specified in options)
-            canvas.Save();
+            // Load, flip, and store pixel data of each image
+            var imagesData = new List<(int Width, int Height, int[] Pixels)>();
+            int totalWidth = 0;
+            int maxHeight = 0;
+
+            foreach (string path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    // Flip horizontally
+                    img.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                    // Store dimensions and pixel data
+                    int[] pixels = img.LoadArgb32Pixels(img.Bounds);
+                    imagesData.Add((img.Width, img.Height, pixels));
+
+                    totalWidth += img.Width;
+                    if (img.Height > maxHeight) maxHeight = img.Height;
+                }
+            }
+
+            // Create PNG canvas with the calculated size
+            Source src = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions { Source = src };
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
+            {
+                int offsetX = 0;
+                foreach (var data in imagesData)
+                {
+                    Rectangle bounds = new Rectangle(offsetX, 0, data.Width, data.Height);
+                    canvas.SaveArgb32Pixels(bounds, data.Pixels);
+                    offsetX += data.Width;
+                }
+
+                // Save the merged image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
