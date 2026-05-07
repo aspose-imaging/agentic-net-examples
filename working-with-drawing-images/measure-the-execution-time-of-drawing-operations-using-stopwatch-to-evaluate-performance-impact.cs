@@ -9,57 +9,49 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define output path (hard‑coded)
-        string outputPath = @"C:\temp\output.png";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a file stream for the output image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        try
         {
-            // Set PNG options with the stream as source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            // Hardcoded output path
+            string outputPath = @"c:\temp\draw_output.png";
 
-            // Create a 500x500 image
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set up PNG options with a FileCreateSource bound to the output file
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a new image canvas
             using (Image image = Image.Create(pngOptions, 500, 500))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-
-                // Clear background
                 graphics.Clear(Color.Wheat);
 
-                // Start timing
-                var stopwatch = new System.Diagnostics.Stopwatch();
-                stopwatch.Start();
+                // Start measuring drawing time
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-                // Draw a diagonal line
-                graphics.DrawLine(new Pen(Color.Black, 2), new Point(50, 50), new Point(450, 450));
+                // Perform drawing operations
+                graphics.DrawLine(new Pen(Color.Black, 2), new Point(50, 50), new Point(450, 50));
+                graphics.DrawRectangle(new Pen(Color.Red, 3), new Rectangle(100, 100, 300, 200));
+                graphics.DrawEllipse(new Pen(Color.Blue, 4), new Rectangle(150, 150, 200, 100));
 
-                // Fill a rectangle with a solid brush
-                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
+                using (SolidBrush brush = new SolidBrush(Color.Green))
                 {
-                    graphics.FillRectangle(brush, new Rectangle(100, 100, 200, 150));
+                    graphics.DrawString("Performance Test", new Font("Arial", 24), brush, new PointF(200, 300));
                 }
 
-                // Draw an ellipse
-                graphics.DrawEllipse(new Pen(Color.Red, 3), new Rectangle(150, 200, 100, 100));
-
-                // Draw a text string
-                using (SolidBrush textBrush = new SolidBrush(Color.DarkGreen))
-                {
-                    graphics.DrawString("Performance Test", new Font("Arial", 24), textBrush, new PointF(120, 350));
-                }
-
-                // Stop timing
+                // Stop timing and output the elapsed time
                 stopwatch.Stop();
                 Console.WriteLine($"Drawing time: {stopwatch.ElapsedMilliseconds} ms");
 
-                // Save the image (stream is already bound)
+                // Save the image (FileCreateSource binds the output path)
                 image.Save();
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
