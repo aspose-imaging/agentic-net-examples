@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.eps";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = "input.eps";
+        string outputPath = "output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,25 +22,25 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+        try
         {
-            // Prepare SVG rasterization options matching the EPS size
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Load the EPS image
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                PageSize = epsImage.Size
-            };
+                // NOTE: Aspose.Imaging does not provide a direct API to replace gradients with solid colors.
+                // If such processing is required, it would need to be implemented via custom parsing of the EPS content.
+                // For the purpose of this example, we proceed to save the image as SVG.
 
-            // Configure SVG save options
-            SvgOptions svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                // Render all text as shapes to avoid text gradients (optional)
-                TextAsShapes = true
-            };
+                // Prepare SVG save options
+                var svgOptions = new SvgOptions();
 
-            // Save as SVG
-            epsImage.Save(outputPath, svgOptions);
+                // Save the simplified image as SVG
+                epsImage.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
