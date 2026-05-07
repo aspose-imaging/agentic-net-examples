@@ -1,56 +1,59 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Output file path
+            string outputPath = @"output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a new PNG image
-        using (FileStream outputStream = new FileStream(outputPath, FileMode.Create))
-        {
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(outputStream);
-
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
+            // Create a PNG image with a bound stream
+            using (FileStream outStream = new FileStream(outputPath, FileMode.Create))
             {
-                // Initialize graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.Source = new StreamSource(outStream);
 
-                // Build a graphics path with a rectangle shape
-                Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
-                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
-                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(100f, 100f, 300f, 300f)));
-                path.AddFigure(figure);
-
-                // Create a solid brush, set its opacity, and fill the path
-                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                using (Image image = Image.Create(pngOptions, 400, 400))
                 {
-                    brush.Opacity = 0.5f; // 50% opacity
-                    graphics.FillPath(brush, path);
-                }
+                    // Initialize graphics
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                // Save the image
-                image.Save();
+                    // Build a simple rectangular path
+                    GraphicsPath path = new GraphicsPath();
+                    Figure figure = new Figure();
+                    figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 300f)));
+                    path.AddFigure(figure);
+
+                    // Create a brush with 50% opacity
+                    using (SolidBrush brush = new SolidBrush())
+                    {
+                        brush.Color = Color.Blue;
+                        brush.Opacity = 0.5f; // Opacity between 0 (transparent) and 1 (opaque)
+
+                        // Fill the path using the brush
+                        graphics.FillPath(brush, path);
+                    }
+
+                    // Save the image (stream is already bound)
+                    image.Save();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
