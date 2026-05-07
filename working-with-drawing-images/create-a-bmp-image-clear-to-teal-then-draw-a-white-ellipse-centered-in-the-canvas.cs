@@ -2,49 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output file path (hardcoded)
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a file source bound to the output path
-        Source source = new FileCreateSource(outputPath, false);
-
-        // Set BMP options with the source
-        BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-        // Define canvas size
-        int width = 500;
-        int height = 500;
-
-        // Create a BMP canvas bound to the file
-        using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
+            string outputPath = "output.bmp";
 
-            // Clear the canvas to teal color
-            graphics.Clear(Color.FromArgb(255, 0, 128, 128));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Create a white pen for the ellipse
-            Pen pen = new Pen(Color.White, 2);
+            // Create BMP canvas
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
+            using (Image canvas = Image.Create(bmpOptions, 500, 500))
+            {
+                // Clear to teal
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.Teal);
 
-            // Define ellipse bounds centered in the canvas (300x300)
-            Rectangle ellipseRect = new Rectangle((width - 300) / 2, (height - 300) / 2, 300, 300);
+                // Draw white ellipse centered
+                Pen pen = new Pen(Color.White, 2);
+                RectangleF ellipseRect = new RectangleF(50, 50, 400, 400);
+                graphics.DrawEllipse(pen, ellipseRect);
 
-            // Draw the ellipse
-            graphics.DrawEllipse(pen, ellipseRect);
-
-            // Save the bound image (file already specified in options)
-            canvas.Save();
+                // Save bound image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
