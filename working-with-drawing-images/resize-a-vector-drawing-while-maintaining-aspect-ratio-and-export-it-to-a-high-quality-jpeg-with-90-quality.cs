@@ -12,42 +12,41 @@ class Program
         string inputPath = @"C:\Images\input.svg";
         string outputPath = @"C:\Images\output.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the vector image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Desired maximum dimensions for the resized image
-            int maxWidth = 1024;
-            int maxHeight = 768;
-
-            // Compute scaling factor while preserving aspect ratio
-            double widthRatio = (double)maxWidth / image.Width;
-            double heightRatio = (double)maxHeight / image.Height;
-            double scale = Math.Min(widthRatio, heightRatio);
-
-            int newWidth = (int)(image.Width * scale);
-            int newHeight = (int)(image.Height * scale);
-
-            // Resize using a high‑quality resampling method
-            image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
-
-            // Configure JPEG export options with 90 % quality
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify that the source file exists
+            if (!File.Exists(inputPath))
             {
-                Quality = 90
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the resized image as JPEG
-            image.Save(outputPath, jpegOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the vector image (SVG, EPS, CDR, etc.)
+            using (Image image = Image.Load(inputPath))
+            {
+                // Desired width – height will be calculated to keep aspect ratio
+                int targetWidth = 800;
+                int targetHeight = (int)(image.Height * (targetWidth / (double)image.Width));
+
+                // Resize using a high‑quality resampling filter
+                image.Resize(targetWidth, targetHeight, ResizeType.LanczosResample);
+
+                // Configure JPEG export options (90 % quality)
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90
+                };
+
+                // Save the rasterized image as JPEG
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

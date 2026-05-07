@@ -8,35 +8,43 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = @"C:\temp\ellipse.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure BMP options
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a 500x500 image canvas
-        using (Image image = Image.Create(bmpOptions, 500, 500))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Output file path
+            string outputPath = @"C:\temp\ellipse.bmp";
 
-            // Fill background with a light gray color
-            graphics.Clear(Color.LightGray);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a pen with custom dash pattern
-            Pen pen = new Pen(Color.Blue, 3);
-            pen.DashPattern = new float[] { 5, 2 }; // dash length 5, gap 2
+            // Create a file source for the BMP image
+            Source source = new FileCreateSource(outputPath, false);
 
-            // Draw an ellipse using the custom pen
-            graphics.DrawEllipse(pen, new Rectangle(100, 100, 300, 200));
+            // Set BMP options with the source
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
 
-            // Save the image (output is already bound to the file)
-            image.Save();
+            // Create a BMP canvas of desired size
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 400, 300))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(canvas);
+
+                // Fill background with a solid color
+                graphics.Clear(Color.LightGray);
+
+                // Create a pen with custom dash pattern
+                Pen pen = new Pen(Color.Blue, 5);
+                pen.DashPattern = new float[] { 5, 2 };
+
+                // Draw an ellipse using the custom pen
+                graphics.DrawEllipse(pen, new Rectangle(50, 50, 200, 150));
+
+                // Save the image (bound to the file source)
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

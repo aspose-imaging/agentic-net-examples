@@ -6,41 +6,41 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output BMP file path (hardcoded)
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a file stream for the output image
-        using (FileStream outStream = new FileStream(outputPath, FileMode.Create))
+        try
         {
-            // Set BMP options with the stream source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new StreamSource(outStream);
+            // Output file path (hard‑coded)
+            string outputPath = "output\\result.bmp";
 
-            // Create a BMP image of size 200x200
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set BMP options with a bound file source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a new image canvas
+            using (Image image = Image.Create(bmpOptions, 400, 300))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Optional: clear background to white
-                graphics.Clear(Color.White);
-
-                // Draw a thick red line
+                // Thick red line
                 Pen redPen = new Pen(Color.Red, 10);
-                graphics.DrawLine(redPen, new Point(20, 20), new Point(180, 180));
+                graphics.DrawLine(redPen, new Point(50, 50), new Point(350, 250));
 
-                // Overlay a thinner black line for contrast
+                // Thinner black line for contrast
                 Pen blackPen = new Pen(Color.Black, 2);
-                graphics.DrawLine(blackPen, new Point(20, 20), new Point(180, 180));
+                graphics.DrawLine(blackPen, new Point(50, 50), new Point(350, 250));
 
-                // Save the image (stream is already bound to the file)
+                // Save the image (file is already bound via FileCreateSource)
                 image.Save();
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

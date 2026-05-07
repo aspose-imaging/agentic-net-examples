@@ -2,95 +2,82 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string inputFolder = @"C:\Icons\Input";
+            string outputFolder = @"C:\Icons\Output";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-
-        foreach (string inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputFolder))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputFolder);
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
                 return;
             }
 
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+            Directory.CreateDirectory(outputFolder);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
 
-            using (Image svgImage = Image.Load(inputPath))
+            foreach (var file in svgFiles)
             {
-                // Prepare PNG options for rasterization
-                PngOptions pngOptions = new PngOptions
+                string inputPath = file;
+                if (!File.Exists(inputPath))
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    BitDepth = 8,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.Transparent,
-                    PageSize = new SizeF(svgImage.Width, svgImage.Height)
-                };
-                pngOptions.VectorRasterizationOptions = vectorOptions;
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".png");
 
-                // Rasterize SVG to a temporary raster image
-                using (MemoryStream ms = new MemoryStream())
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    var rasterOptions = new SvgRasterizationOptions();
+                    rasterOptions.PageSize = svgImage.Size;
+
+                    var pngOptions = new PngOptions();
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        int offset = 5;
-                        int canvasWidth = raster.Width + offset;
-                        int canvasHeight = raster.Height + offset;
-
-                        // Create canvas with bound output file
-                        using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
+                        svgImage.Save(ms, pngOptions);
+                        ms.Position = 0;
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
                         {
-                            // Draw shadow and original image
-                            Graphics graphics = new Graphics(canvas);
-                            graphics.Clear(Color.Transparent);
+                            int shadowOffset = 5;
+                            int canvasWidth = raster.Width + shadowOffset;
+                            int canvasHeight = raster.Height + shadowOffset;
 
-                            using (SolidBrush shadowBrush = new SolidBrush())
+                            using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
                             {
-                                shadowBrush.Color = Color.FromArgb(128, 0, 0, 0);
-                                graphics.FillRectangle(shadowBrush, offset, offset, raster.Width, raster.Height);
+                                Graphics g = new Graphics(canvas);
+                                g.Clear(Color.Transparent);
+
+                                using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(128, 0, 0, 0)))
+                                {
+                                    g.FillRectangle(shadowBrush, shadowOffset, shadowOffset, raster.Width, raster.Height);
+                                }
+
+                                g.DrawImage(raster, new Point(0, 0));
+
+                                canvas.Save(outputPath, pngOptions);
                             }
-
-                            graphics.DrawImage(raster, new Point(0, 0));
-
-                            // Save the final PNG
-                            canvas.Save();
                         }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

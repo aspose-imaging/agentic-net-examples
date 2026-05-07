@@ -1,54 +1,63 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path for the BMP image
-        string outputPath = @"C:\temp\sharp_polygon.bmp";
+        // Hardcoded output path
+        string outputPath = @"C:\Temp\sharpPolygon.bmp";
 
-        // Ensure the output directory exists (unconditional)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create BMP options with 24 bits per pixel
-        BmpOptions bmpOptions = new BmpOptions
+        try
         {
-            BitsPerPixel = 24,
-            // Use FileCreateSource to specify the file to be created
-            Source = new FileCreateSource(outputPath, false)
-        };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a new image of size 400x400 pixels
-        using (Image image = Image.Create(bmpOptions, 400, 400))
-        {
-            // Initialize Graphics object for drawing
-            Graphics graphics = new Graphics(image);
+            // Configure BMP options with a file source
+            var bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Clear the background to white
-            graphics.Clear(Color.White);
-
-            // Create a Pen with a relatively thick width
-            Pen pen = new Pen(Color.Black, 5);
-            // Set a high MiterLimit to allow sharp corners without beveling
-            pen.MiterLimit = 10f;
-
-            // Define a sharp‑angled polygon (a thin triangle)
-            Point[] points = new Point[]
+            // Create a new image canvas
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
             {
-                new Point(200, 10),   // Top vertex
-                new Point(210, 200),  // Bottom‑right vertex
-                new Point(190, 200)   // Bottom‑left vertex
-            };
+                // Initialize graphics for drawing
+                var graphics = new Aspose.Imaging.Graphics(image);
 
-            // Draw the polygon using the configured Pen
-            graphics.DrawPolygon(pen, points);
+                // Clear background to white
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-            // Save the image (the file is already created by FileCreateSource)
-            image.Save();
+                // Create a pen with a high MiterLimit to preserve sharp angles
+                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
+                pen.MiterLimit = 10f; // high value for sharp‑angled joins
+
+                // Define points of a sharp‑angled polygon (star‑like shape)
+                var points = new Aspose.Imaging.Point[]
+                {
+                    new Aspose.Imaging.Point(250, 10),
+                    new Aspose.Imaging.Point(260, 200),
+                    new Aspose.Imaging.Point(400, 210),
+                    new Aspose.Imaging.Point(280, 300),
+                    new Aspose.Imaging.Point(300, 490),
+                    new Aspose.Imaging.Point(250, 380),
+                    new Aspose.Imaging.Point(200, 490),
+                    new Aspose.Imaging.Point(220, 300),
+                    new Aspose.Imaging.Point(100, 210),
+                    new Aspose.Imaging.Point(240, 200)
+                };
+
+                // Draw the polygon with the configured pen
+                graphics.DrawPolygon(pen, points);
+
+                // Save the image (output file is already bound via FileCreateSource)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

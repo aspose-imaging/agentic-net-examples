@@ -4,60 +4,71 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded output path
+        // Hard‑coded input/output paths (no argument validation)
         string outputPath = @"C:\temp\nested_rectangles.bmp";
 
         // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Set up BMP options
-        BmpOptions bmpOptions = new BmpOptions
+        try
         {
-            BitsPerPixel = 24,
-            Source = new FileCreateSource(outputPath, false)
-        };
-
-        // Create a 500x500 BMP image
-        using (Image image = Image.Create(bmpOptions, 500, 500))
-        {
-            // Initialize graphics object
-            Graphics graphics = new Graphics(image);
-
-            // Clear background to white
-            graphics.Clear(Color.White);
-
-            // Define rectangle parameters
-            int rectCount = 8;                     // Number of nested rectangles
-            int startSize = 400;                   // Size of the outermost rectangle
-            int startX = (image.Width - startSize) / 2;
-            int startY = (image.Height - startSize) / 2;
-            int decrement = 40;                    // Size reduction for each inner rectangle
-
-            // Colors to alternate between
-            Color[] colors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Yellow };
-
-            for (int i = 0; i < rectCount; i++)
+            // Set up BMP options (24‑bpp) and the file to be created
+            BmpOptions bmpOptions = new BmpOptions
             {
-                int size = startSize - i * decrement;
-                int x = startX + i * (decrement / 2);
-                int y = startY + i * (decrement / 2);
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-                // Choose color based on index
-                Color penColor = colors[i % colors.Length];
-                Pen pen = new Pen(penColor, 3f);
+            // Create a 500×500 image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
+            {
+                // Initialize graphics object
+                Graphics graphics = new Graphics(image);
 
-                // Draw the rectangle
-                graphics.DrawRectangle(pen, new Rectangle(x, y, size, size));
+                // Clear background to white
+                graphics.Clear(Color.White);
+
+                // Colors to alternate between
+                Color[] colors = new Color[]
+                {
+                    Color.Red,
+                    Color.Blue,
+                    Color.Green,
+                    Color.Orange
+                };
+
+                int rectCount = 10;          // Number of nested rectangles
+                int step = 20;               // Size reduction per level
+                int imageSize = 500;         // Width/height of the image
+
+                // Draw nested rectangles
+                for (int i = 0; i < rectCount; i++)
+                {
+                    int offset = i * step;
+                    int size = imageSize - 2 * offset;
+
+                    // Define rectangle bounds
+                    Rectangle rect = new Rectangle(offset, offset, size, size);
+
+                    // Create pen with alternating color
+                    Pen pen = new Pen(colors[i % colors.Length], 3f);
+
+                    // Draw the rectangle outline
+                    graphics.DrawRectangle(pen, rect);
+                }
+
+                // Save changes to the BMP file
+                image.Save();
             }
-
-            // Save changes (the source already points to outputPath)
-            image.Save();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

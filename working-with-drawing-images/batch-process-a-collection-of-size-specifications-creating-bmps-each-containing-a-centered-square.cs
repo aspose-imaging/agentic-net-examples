@@ -1,71 +1,58 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Collection of size specifications: width, height, and square side length
-        var specifications = new (int width, int height, int squareSize)[]
+        try
         {
-            (200, 200, 100),
-            (300, 150, 80),
-            (400, 300, 150)
-        };
-
-        // Output directory
-        string outputDirectory = "Output";
-        Directory.CreateDirectory(outputDirectory);
-
-        foreach (var spec in specifications)
-        {
-            int width = spec.width;
-            int height = spec.height;
-            int square = spec.squareSize;
-
-            // Ensure the square fits within the image bounds
-            if (square > width) square = width;
-            if (square > height) square = height;
-
-            // Output file path
-            string outputPath = Path.Combine(outputDirectory, $"image_{width}x{height}.bmp");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create BMP options with a file source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions
+            var specs = new (int width, int height)[]
             {
-                Source = source,
-                BitsPerPixel = 24
+                (200, 200),
+                (300, 150),
+                (400, 300)
             };
 
-            // Create a BMP canvas
-            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
+            foreach (var spec in specs)
             {
-                // Fill background with white
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
+                int width = spec.width;
+                int height = spec.height;
 
-                // Calculate centered square position
-                int offsetX = (width - square) / 2;
-                int offsetY = (height - square) / 2;
+                string outputPath = Path.Combine("Output", $"image_{width}x{height}.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Draw the centered square in red
-                using (SolidBrush squareBrush = new SolidBrush(Color.Red))
+                FileCreateSource source = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions
                 {
-                    graphics.FillRectangle(squareBrush, new Rectangle(offsetX, offsetY, square, square));
-                }
+                    Source = source,
+                    BitsPerPixel = 24
+                };
 
-                // Save the bound image
-                canvas.Save();
+                using (BmpImage canvas = (BmpImage)Aspose.Imaging.Image.Create(options, width, height))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+
+                    int squareSize = Math.Min(width, height) / 2;
+                    int offsetX = (width - squareSize) / 2;
+                    int offsetY = (height - squareSize) / 2;
+
+                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                    {
+                        graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(offsetX, offsetY, squareSize, squareSize));
+                    }
+
+                    canvas.Save();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

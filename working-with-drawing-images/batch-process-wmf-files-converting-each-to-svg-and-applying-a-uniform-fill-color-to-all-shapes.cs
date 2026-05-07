@@ -8,54 +8,59 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input directory and list of WMF files to process
-        string inputFolder = @"C:\Images\Input";
-        string[] inputFiles = new[] { "file1.wmf", "file2.wmf", "file3.wmf" };
-
-        // Uniform fill color that will be applied as the background during rasterization
-        Aspose.Imaging.Color uniformFillColor = Aspose.Imaging.Color.Red;
-
-        foreach (var fileName in inputFiles)
+        try
         {
-            // Build full input path
-            string inputPath = Path.Combine(inputFolder, fileName);
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputWmf";
+            string outputDir = @"C:\OutputSvg";
 
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Get all WMF files in the input directory
+            string[] wmfFiles = Directory.GetFiles(inputDir, "*.wmf");
+
+            foreach (string inputPath in wmfFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue; // Skip to next file
-            }
-
-            // Determine output path (same folder, .svg extension)
-            string outputPath = Path.ChangeExtension(inputPath, ".svg");
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the WMF image
-            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
-            {
-                // Prepare SVG save options
-                SvgOptions saveOptions = new SvgOptions
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    TextAsShapes = true // Render text as shapes
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                // Configure rasterization options with the uniform fill color
-                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                // Build the output SVG path
+                string outputPath = Path.Combine(outputDir,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the WMF image
+                using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
                 {
-                    BackgroundColor = uniformFillColor, // Apply uniform fill
-                    PageSize = wmfImage.Size,           // Preserve original size
-                    RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
-                };
+                    // Prepare SVG save options
+                    SvgOptions saveOptions = new SvgOptions
+                    {
+                        TextAsShapes = true // Render text as shapes
+                    };
 
-                // Attach rasterization options to the SVG options
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+                    // Configure rasterization options with a uniform fill color
+                    WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                    {
+                        // Uniform fill color for the drawing surface (applied to all shapes)
+                        BackgroundColor = Aspose.Imaging.Color.LightBlue,
+                        PageSize = wmfImage.Size,
+                        RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
+                    };
 
-                // Save as SVG
-                wmfImage.Save(outputPath, saveOptions);
+                    saveOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Save as SVG
+                    wmfImage.Save(outputPath, saveOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

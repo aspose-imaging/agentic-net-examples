@@ -1,55 +1,50 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\bordered.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Image dimensions
-        int width = 400;
-        int height = 400;
-
-        // Configure BMP options with a FileCreateSource
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the BMP image
-        using (Image image = Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize Graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Output file path (hard‑coded)
+            string outputPath = "output.bmp";
 
-            // Clear background to white
-            graphics.Clear(Color.White);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a thick border pen
-            Pen borderPen = new Pen(Color.Black, 10);
+            // Set BMP options with a file create source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Draw the outer border rectangle
-            graphics.DrawRectangle(borderPen, 0, 0, width, height);
+            // Define canvas size
+            int width = 400;
+            int height = 300;
 
-            // Define inset for inner rectangle (leaving space for the border)
-            int inset = 20;
-
-            // Fill the inner rectangle with a light gray color
-            using (SolidBrush innerBrush = new SolidBrush(Color.LightGray))
+            // Create the BMP image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
             {
-                graphics.FillRectangle(innerBrush, inset, inset, width - 2 * inset, height - 2 * inset);
-            }
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Save the image (output file is already bound via FileCreateSource)
-            image.Save();
+                // Draw a thick black border
+                Aspose.Imaging.Pen borderPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 10);
+                graphics.DrawRectangle(borderPen, 0, 0, width, height);
+
+                // Draw an inner rectangle inset from the border
+                int inset = 20;
+                Aspose.Imaging.Pen innerPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
+                graphics.DrawRectangle(innerPen, inset, inset, width - 2 * inset, height - 2 * inset);
+
+                // Save the image (source is already bound to the file)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

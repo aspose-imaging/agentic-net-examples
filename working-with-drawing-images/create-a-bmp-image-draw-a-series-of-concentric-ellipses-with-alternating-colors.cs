@@ -3,52 +3,66 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output file path (hardcoded)
-        string outputPath = @"c:\temp\concentric_ellipses.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set BMP options
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, 500, 500))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            // Hardcoded output path
+            string outputPath = @"c:\temp\concentric_ellipses.bmp";
 
-            // Parameters for concentric ellipses
-            int centerX = 250;
-            int centerY = 250;
-            int maxRadius = 200;
-            int step = 20;
-            bool useBlue = true;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Draw ellipses with alternating colors
-            for (int radius = maxRadius; radius > 0; radius -= step)
+            // Set up BMP options
+            BmpOptions bmpOptions = new BmpOptions
             {
-                Color ellipseColor = useBlue ? Color.Blue : Color.Red;
-                Pen pen = new Pen(ellipseColor, 2);
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-                int left = centerX - radius;
-                int top = centerY - radius;
-                int diameter = radius * 2;
+            int width = 500;
+            int height = 500;
+            int ellipseCount = 6;
+            int marginStep = 20;
 
-                graphics.DrawEllipse(pen, left, top, diameter, diameter);
-                useBlue = !useBlue;
+            // Create the image
+            using (Image image = Image.Create(bmpOptions, width, height))
+            {
+                // Initialize graphics
+                Graphics graphics = new Graphics(image);
+
+                // Clear background
+                graphics.Clear(Aspose.Imaging.Color.White);
+
+                // Draw concentric ellipses with alternating colors
+                for (int i = 0; i < ellipseCount; i++)
+                {
+                    int margin = i * marginStep;
+                    float rectX = margin;
+                    float rectY = margin;
+                    float rectWidth = width - 2 * margin;
+                    float rectHeight = height - 2 * margin;
+
+                    // Alternate between Red and Blue
+                    Aspose.Imaging.Color penColor = (i % 2 == 0) ? Aspose.Imaging.Color.Red : Aspose.Imaging.Color.Blue;
+                    Pen pen = new Pen(penColor, 2);
+
+                    // Draw the ellipse
+                    graphics.DrawEllipse(pen, new RectangleF(rectX, rectY, rectWidth, rectHeight));
+                }
+
+                // Save the image (writes to the path specified in FileCreateSource)
+                image.Save();
             }
-
-            // Save the image (output path already bound)
-            image.Save();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

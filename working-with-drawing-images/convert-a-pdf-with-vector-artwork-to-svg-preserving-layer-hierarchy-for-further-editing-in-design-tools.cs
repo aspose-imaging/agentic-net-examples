@@ -7,39 +7,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Input\sample.pdf";
-        string outputPath = @"C:\Output\sample.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Input\sample.pdf";
+            string outputPath = @"C:\Output\sample.svg";
+
+            // Verify that the input PDF exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists (creates it if missing)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PDF (vector image) using Aspose.Imaging
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure SVG rasterization options (page size matches source)
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
+                // Configure SVG save options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    // Render text as shapes to keep editability
+                    TextAsShapes = true,
+                    // Preserve original metadata (including layer information)
+                    KeepMetadata = true
+                };
+
+                // Save the PDF as SVG, preserving layer hierarchy
+                image.Save(outputPath, svgOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PDF document
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options (page size matches source)
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-
-            // Configure SVG export options
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                TextAsShapes = true,          // Preserve text as editable shapes
-                KeepMetadata = true           // Retain original metadata
-            };
-
-            // Save as SVG, preserving layer hierarchy where supported
-            image.Save(outputPath, svgOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

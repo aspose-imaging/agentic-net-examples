@@ -1,58 +1,59 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // List of image sizes (width, height)
-        var sizes = new List<(int width, int height)>
+        try
         {
-            (200, 200),
-            (300, 150),
-            (400, 400)
-        };
+            // Output directory
+            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            Directory.CreateDirectory(outputDirectory);
 
-        // Base output directory
-        string baseOutputDir = @"C:\Temp\BatchOutputs";
-
-        foreach (var (width, height) in sizes)
-        {
-            // Construct output file path
-            string outputPath = Path.Combine(baseOutputDir, $"output_{width}x{height}.bmp");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create BMP options with bound file source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // List of image sizes (width, height)
+            var sizes = new (int width, int height)[]
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                (200, 200),
+                (300, 150),
+                (400, 400)
+            };
 
-                // Determine ellipse size (half of canvas dimensions)
-                int ellipseWidth = width / 2;
-                int ellipseHeight = height / 2;
-                int ellipseX = (width - ellipseWidth) / 2;
-                int ellipseY = (height - ellipseHeight) / 2;
+            foreach (var size in sizes)
+            {
+                string fileName = $"image_{size.width}x{size.height}.bmp";
+                string outputPath = Path.Combine(outputDirectory, fileName);
 
-                // Draw centered red ellipse
-                Pen redPen = new Pen(Color.Red, 2);
-                Rectangle ellipseBounds = new Rectangle(ellipseX, ellipseY, ellipseWidth, ellipseHeight);
-                graphics.DrawEllipse(redPen, ellipseBounds);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the bound image
-                image.Save();
+                // BMP creation options
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.BitsPerPixel = 24;
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+                using (Image image = Image.Create(bmpOptions, size.width, size.height))
+                {
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
+
+                    using (SolidBrush brush = new SolidBrush(Color.Red))
+                    {
+                        graphics.FillEllipse(brush, new Rectangle(0, 0, size.width, size.height));
+                    }
+
+                    // Save the image (output path already bound)
+                    image.Save();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

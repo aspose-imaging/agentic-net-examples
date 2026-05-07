@@ -8,46 +8,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output file path (used to demonstrate directory creation and optional file write)
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a memory stream to hold the BMP image data
-        using (MemoryStream memoryStream = new MemoryStream())
+        try
         {
-            // Configure BMP options with a stream source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new StreamSource(memoryStream);
-
-            // Create a BMP image canvas of 500x500 pixels
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            using (MemoryStream ms = new MemoryStream())
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(ms);
 
-                // Optional: clear background to white
-                graphics.Clear(Color.White);
+                using (Image image = Image.Create(bmpOptions, 500, 500))
+                {
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                // Create a thick green pen
-                Pen greenPen = new Pen(Color.Green, 5);
+                    Pen pen = new Pen(Color.Green, 10);
+                    graphics.DrawEllipse(pen, new Rectangle(50, 50, 400, 400));
 
-                // Draw a thick green ellipse
-                graphics.DrawEllipse(greenPen, new Rectangle(50, 50, 400, 400));
+                    image.Save();
+                }
 
-                // Save the image data to the bound stream
-                image.Save();
+                byte[] imageBytes = ms.ToArray();
+                Console.WriteLine($"Generated BMP byte array length: {imageBytes.Length}");
             }
-
-            // Export the image as a byte array
-            byte[] imageBytes = memoryStream.ToArray();
-
-            // Optional: write the byte array to a file for verification
-            File.WriteAllBytes(outputPath, imageBytes);
-
-            Console.WriteLine($"Image byte array length: {imageBytes.Length}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

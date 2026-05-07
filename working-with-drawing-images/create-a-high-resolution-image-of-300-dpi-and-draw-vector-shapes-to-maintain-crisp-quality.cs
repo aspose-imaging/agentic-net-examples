@@ -2,60 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output file path (hardcoded)
-        string outputPath = "output/high_res_image.png";
+        string outputPath = @"C:\temp\highres.png";
 
-        // Ensure output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (string.IsNullOrEmpty(outputDir))
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        try
         {
-            outputDir = ".";
-        }
-        Directory.CreateDirectory(outputDir);
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-        // Define image dimensions (e.g., 3000x3000 for high resolution)
-        int width = 3000;
-        int height = 3000;
+            int width = 2000;
+            int height = 2000;
 
-        // Create PNG options with a bound file source
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas
-        using (Image image = Image.Create(pngOptions, width, height))
-        {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
-
-            // Define a pen for drawing outlines
-            Pen pen = new Pen(Color.Blue, 5);
-
-            // Draw a rectangle
-            graphics.DrawRectangle(pen, new Rectangle(100, 100, 2800, 2800));
-
-            // Draw an ellipse inside the rectangle
-            graphics.DrawEllipse(pen, new Rectangle(200, 200, 2600, 2600));
-
-            // Draw a diagonal line
-            graphics.DrawLine(pen, new Point(100, 100), new Point(2900, 2900));
-
-            // Fill a smaller rectangle with a solid brush
-            using (SolidBrush brush = new SolidBrush())
+            using (Image image = Image.Create(pngOptions, width, height))
             {
-                brush.Color = Color.LightGray;
-                graphics.FillRectangle(brush, new Rectangle(1200, 1200, 600, 600));
-            }
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-            // Save the image (bound to the output file)
-            image.Save();
+                Pen borderPen = new Pen(Color.Black, 5);
+                graphics.DrawRectangle(borderPen, new Rectangle(10, 10, width - 20, height - 20));
+
+                Pen ellipsePen = new Pen(Color.Red, 3);
+                graphics.DrawEllipse(ellipsePen, new Rectangle(100, 100, width - 200, height - 200));
+
+                Pen linePen = new Pen(Color.Blue, 2);
+                graphics.DrawLine(linePen, new Point(10, 10), new Point(width - 10, height - 10));
+
+                Pen polyPen = new Pen(Color.Green, 4);
+                graphics.DrawPolygon(polyPen, new[]
+                {
+                    new Point(width / 2, 100),
+                    new Point(100, height - 100),
+                    new Point(width - 100, height - 100)
+                });
+
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

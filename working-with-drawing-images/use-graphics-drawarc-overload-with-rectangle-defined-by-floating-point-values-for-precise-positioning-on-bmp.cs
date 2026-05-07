@@ -2,43 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\arc_output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create BMP options (24‑bit)
-        BmpOptions bmpOptions = new BmpOptions
+        try
         {
-            BitsPerPixel = 24
-        };
+            string outputPath = @"C:\Temp\arc_output.bmp";
 
-        // Create a new 500x500 image
-        using (Image image = Image.Create(bmpOptions, 500, 500))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            BmpOptions bmpOptions = new BmpOptions
+            {
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            using (Image image = Image.Create(bmpOptions, 400, 300))
+            {
+                Graphics graphics = new Graphics(image);
+
+                RectangleF rect = new RectangleF(50.5f, 30.25f, 200.75f, 150.5f);
+
+                Pen pen = new Pen(Color.Blue, 2);
+                graphics.DrawArc(pen, rect, 0f, 180f);
+
+                image.Save();
+            }
+        }
+        catch (Exception ex)
         {
-            // Initialize graphics object for drawing
-            Graphics graphics = new Graphics(image);
-
-            // Optional: clear background to white
-            graphics.Clear(Color.White);
-
-            // Pen with blue color and 2‑pixel width
-            Pen pen = new Pen(Color.Blue, 2);
-
-            // RectangleF with floating‑point coordinates for precise positioning
-            RectangleF rect = new RectangleF(50.5f, 50.5f, 300.75f, 200.25f);
-
-            // Draw an arc: start at 45°, sweep 270°
-            graphics.DrawArc(pen, rect, 45f, 270f);
-
-            // Save the resulting BMP image
-            image.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,63 +2,68 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    // Maps rotation angle to the corresponding RotateFlipType.
-    static RotateFlipType GetRotateFlipType(int angle)
+    static void Main(string[] args)
     {
-        switch (angle)
+        try
         {
-            case 90:
-                return RotateFlipType.Rotate90FlipNone;
-            case 180:
-                return RotateFlipType.Rotate180FlipNone;
-            case 270:
-                return RotateFlipType.Rotate270FlipNone;
-            default:
-                return RotateFlipType.RotateNoneFlipNone;
-        }
-    }
+            // Hardcoded paths
+            string baseImagePath = "base.bmp";
+            string outputDir = "output";
 
-    static void Main()
-    {
-        // Hard‑coded input path (base shape) and output directory.
-        string inputPath = @"C:\temp\baseShape.png";
-        string outputDir = @"C:\temp\RotatedBmp\";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-        // Verify that the input file exists.
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Create base BMP with a simple rectangle shape
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(baseImagePath, false);
+            int width = 300;
+            int height = 200;
 
-        // Angles for which rotated BMP files will be generated.
-        int[] angles = new[] { 0, 90, 180, 270 };
-
-        foreach (int angle in angles)
-        {
-            // Build the output file path.
-            string outputPath = Path.Combine(outputDir, $"rotated_{angle}.bmp");
-
-            // Ensure the output directory exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image, rotate it, and save as BMP.
-            using (Image img = Image.Load(inputPath))
+            using (Image baseImage = Image.Create(bmpOptions, width, height))
             {
-                img.RotateFlip(GetRotateFlipType(angle));
-
-                // BMP save options (24‑bpp).
-                var bmpOptions = new BmpOptions
-                {
-                    BitsPerPixel = 24
-                };
-
-                img.Save(outputPath, bmpOptions);
+                Graphics graphics = new Graphics(baseImage);
+                graphics.Clear(Color.White);
+                graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 30, 200, 140));
+                baseImage.Save(); // Saves to baseImagePath because source is bound
             }
+
+            // Define rotation/flip types to generate
+            RotateFlipType[] rotateTypes = new RotateFlipType[]
+            {
+                RotateFlipType.Rotate90FlipNone,
+                RotateFlipType.Rotate180FlipNone,
+                RotateFlipType.Rotate270FlipNone,
+                RotateFlipType.RotateNoneFlipX,
+                RotateFlipType.RotateNoneFlipY
+            };
+
+            foreach (RotateFlipType rotateType in rotateTypes)
+            {
+                // Verify base image exists
+                if (!File.Exists(baseImagePath))
+                {
+                    Console.Error.WriteLine($"File not found: {baseImagePath}");
+                    return;
+                }
+
+                string outputPath = Path.Combine(outputDir, $"base.{rotateType}.bmp");
+
+                // Load, rotate/flip, and save
+                using (Image img = Image.Load(baseImagePath))
+                {
+                    img.RotateFlip(rotateType);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    img.Save(outputPath, new BmpOptions());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

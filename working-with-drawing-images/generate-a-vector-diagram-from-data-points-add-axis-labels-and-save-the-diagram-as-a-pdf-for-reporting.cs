@@ -3,68 +3,79 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded data points for the diagram
-        Point[] dataPoints = new Point[]
+        try
         {
-            new Point(60, 340),
-            new Point(120, 280),
-            new Point(180, 220),
-            new Point(240, 160),
-            new Point(300, 120)
-        };
+            string outputPath = "Output/diagram.pdf";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        int canvasWidth = 400;
-        int canvasHeight = 400;
-        string outputPath = "Output/diagram.pdf";
+            int width = 800;
+            int height = 600;
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            PngOptions pngOptions = new PngOptions();
 
-        // Create a raster canvas (PNG options) to draw on
-        using (Image canvas = Image.Create(new PngOptions(), canvasWidth, canvasHeight))
-        {
-            Graphics graphics = new Graphics(canvas);
-            graphics.Clear(Color.White);
-
-            // Draw X and Y axes
-            Pen axisPen = new Pen(Color.Black, 2);
-            // X axis
-            graphics.DrawLine(axisPen, new Point(40, canvasHeight - 40), new Point(canvasWidth - 20, canvasHeight - 40));
-            // Y axis
-            graphics.DrawLine(axisPen, new Point(40, canvasHeight - 40), new Point(40, 20));
-
-            // Draw the data line
-            Pen dataPen = new Pen(Color.Blue, 2);
-            for (int i = 0; i < dataPoints.Length - 1; i++)
+            using (Image image = Image.Create(pngOptions, width, height))
             {
-                graphics.DrawLine(dataPen, dataPoints[i], dataPoints[i + 1]);
-            }
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-            // Draw markers at each data point
-            using (SolidBrush markerBrush = new SolidBrush(Color.Red))
-            {
-                foreach (Point pt in dataPoints)
+                // Axis lines
+                Pen axisPen = new Pen(Color.Black, 2);
+                // X axis
+                graphics.DrawLine(axisPen, new Point(50, height - 50), new Point(width - 50, height - 50));
+                // Y axis
+                graphics.DrawLine(axisPen, new Point(50, height - 50), new Point(50, 50));
+
+                // Labels
+                using (SolidBrush textBrush = new SolidBrush(Color.Black))
                 {
-                    graphics.FillEllipse(markerBrush, new Rectangle(pt.X - 3, pt.Y - 3, 6, 6));
+                    Font labelFont = new Font("Arial", 16, FontStyle.Regular);
+                    graphics.DrawString("X Axis", labelFont, textBrush, new PointF(width - 100, height - 40));
+                    graphics.DrawString("Y Axis", labelFont, textBrush, new PointF(10, 30));
                 }
-            }
 
-            // Add axis labels
-            Font labelFont = new Font("Arial", 12);
-            using (SolidBrush labelBrush = new SolidBrush(Color.Black))
-            {
-                graphics.DrawString("X Axis", labelFont, labelBrush, new Point(canvasWidth / 2, canvasHeight - 20));
-                graphics.DrawString("Y Axis", labelFont, labelBrush, new Point(10, canvasHeight / 2));
-            }
+                // Sample data points
+                double[] dataX = { 0, 1, 2, 3, 4, 5 };
+                double[] dataY = { 0, 2, 4, 3, 5, 7 };
 
-            // Save the diagram as PDF
-            PdfOptions pdfOptions = new PdfOptions();
-            canvas.Save(outputPath, pdfOptions);
+                int plotLeft = 50;
+                int plotBottom = height - 50;
+                int plotRight = width - 50;
+                int plotTop = 50;
+
+                double maxX = dataX[dataX.Length - 1];
+                double maxY = 7; // maximum Y value for scaling
+
+                double scaleX = (plotRight - plotLeft) / maxX;
+                double scaleY = (plotBottom - plotTop) / maxY;
+
+                Pen pointPen = new Pen(Color.Red, 2);
+                for (int i = 0; i < dataX.Length - 1; i++)
+                {
+                    int x1 = plotLeft + (int)(dataX[i] * scaleX);
+                    int y1 = plotBottom - (int)(dataY[i] * scaleY);
+                    int x2 = plotLeft + (int)(dataX[i + 1] * scaleX);
+                    int y2 = plotBottom - (int)(dataY[i + 1] * scaleY);
+
+                    // Draw line between points
+                    graphics.DrawLine(pointPen, new Point(x1, y1), new Point(x2, y2));
+
+                    // Draw point marker
+                    graphics.DrawEllipse(pointPen, new Rectangle(x1 - 2, y1 - 2, 4, 4));
+                }
+
+                // Save as PDF
+                image.Save(outputPath, new PdfOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

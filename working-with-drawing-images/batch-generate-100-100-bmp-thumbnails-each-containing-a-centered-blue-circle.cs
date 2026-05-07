@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
@@ -10,67 +8,67 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories
-        string inputFolder = "InputImages";
-        string outputFolder = "Thumbnails";
-
-        // Validate input directory
-        if (!Directory.Exists(inputFolder))
+        try
         {
-            Directory.CreateDirectory(inputFolder);
-            Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
-            return;
-        }
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputFolder))
-        {
-            Directory.CreateDirectory(outputFolder);
-        }
-
-        // Get all files from the input directory
-        string[] inputFiles = Directory.GetFiles(inputFolder);
-        foreach (string inputPath in inputFiles)
-        {
-            // Check that the input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
             }
 
-            // Prepare output path with .bmp extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + "_thumb.bmp");
-
-            // Ensure the output directory exists (redundant but follows rule)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create BMP options with bound file source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = source, BitsPerPixel = 24 };
-
-            // Create a 100x100 BMP image bound to the output file
-            using (Image image = Image.Create(bmpOptions, 100, 100))
+            if (!Directory.Exists(outputDir))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Draw a centered blue filled circle
-                int radius = 40;
-                int centerX = 50;
-                int centerY = 50;
-                int left = centerX - radius;
-                int top = centerY - radius;
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
+            string[] inputFiles = Directory.GetFiles(inputDir);
+            foreach (string inputPath in inputFiles)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    graphics.FillEllipse(brush, new Rectangle(left, top, radius * 2, radius * 2));
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
                 }
 
-                // Save the bound image
-                image.Save();
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + "_thumb.bmp");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (BmpOptions bmpOptions = new BmpOptions())
+                {
+                    bmpOptions.Source = new FileCreateSource(outputPath, false);
+                    using (Aspose.Imaging.Image canvas = Aspose.Imaging.Image.Create(bmpOptions, 100, 100))
+                    {
+                        Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                        graphics.Clear(Aspose.Imaging.Color.White);
+
+                        int radius = 40;
+                        int centerX = 50;
+                        int centerY = 50;
+                        int left = centerX - radius;
+                        int top = centerY - radius;
+                        int diameter = radius * 2;
+
+                        using (SolidBrush brush = new SolidBrush())
+                        {
+                            brush.Color = Aspose.Imaging.Color.Blue;
+                            brush.Opacity = 100;
+                            graphics.FillEllipse(brush, new Aspose.Imaging.Rectangle(left, top, diameter, diameter));
+                        }
+
+                        canvas.Save();
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

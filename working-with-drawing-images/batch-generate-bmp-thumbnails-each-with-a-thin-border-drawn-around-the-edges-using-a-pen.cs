@@ -2,91 +2,75 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Set up input and output directories relative to the current directory
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure the input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Input and output directories (hardcoded)
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-        // Ensure the output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files from the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        // Define thumbnail dimensions and border thickness
-        int thumbWidth = 100;
-        int thumbHeight = 100;
-        int borderThickness = 1;
-
-        foreach (var inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Validate input directory
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Build the output file path with a BMP extension
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + "_thumb.bmp");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image
-            using (Image srcImage = Image.Load(inputPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDir))
             {
-                RasterImage rasterSrc = (RasterImage)srcImage;
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Calculate canvas size (thumbnail plus border)
-                int canvasWidth = thumbWidth + 2 * borderThickness;
-                int canvasHeight = thumbHeight + 2 * borderThickness;
-
-                // Prepare BMP options with a FileCreateSource bound to the output path
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-                // Create the canvas image
-                using (Image canvas = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDir);
+            foreach (string inputPath in files)
+            {
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.White);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                    // Destination rectangle for the scaled thumbnail inside the border
-                    Rectangle destRect = new Rectangle(borderThickness, borderThickness, thumbWidth, thumbHeight);
-                    // Source rectangle covering the whole source image
-                    Rectangle srcRect = new Rectangle(0, 0, rasterSrc.Width, rasterSrc.Height);
+                // Prepare output path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + "_thumb.bmp");
 
-                    // Draw the scaled image onto the canvas
-                    graphics.DrawImage(rasterSrc, destRect, srcRect, GraphicsUnit.Pixel);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Draw a thin black border around the canvas
-                    Pen borderPen = new Pen(Color.Black, borderThickness);
-                    graphics.DrawRectangle(borderPen, 0, 0, canvasWidth - 1, canvasHeight - 1);
+                // Load the image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Determine thumbnail size (max 100x100 while preserving aspect ratio)
+                    const int maxThumbWidth = 100;
+                    const int maxThumbHeight = 100;
+                    double ratio = Math.Min((double)maxThumbWidth / image.Width, (double)maxThumbHeight / image.Height);
+                    int thumbWidth = (int)(image.Width * ratio);
+                    int thumbHeight = (int)(image.Height * ratio);
 
-                    // Save the canvas; the output path is already bound
-                    canvas.Save();
+                    // Resize to thumbnail dimensions
+                    image.Resize(thumbWidth, thumbHeight);
+
+                    // Draw a thin black border around the image
+                    Graphics graphics = new Graphics(image);
+                    Pen pen = new Pen(Color.Black, 1);
+                    graphics.DrawRectangle(pen, 0, 0, image.Width - 1, image.Height - 1);
+
+                    // Save as BMP
+                    image.Save(outputPath, new BmpOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

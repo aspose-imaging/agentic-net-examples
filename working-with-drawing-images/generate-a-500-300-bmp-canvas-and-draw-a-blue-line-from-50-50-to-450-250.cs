@@ -2,38 +2,31 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a source bound to the output file
-        Source source = new FileCreateSource(outputPath, false);
-
-        // BMP options with the bound source
-        BmpOptions options = new BmpOptions() { Source = source };
-
-        // Create a 500x300 BMP canvas
-        using (RasterImage canvas = (RasterImage)Image.Create(options, 500, 300))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Blue pen with default width
-            Pen pen = new Pen(Color.Blue, 1);
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
 
-            // Draw line from (50,50) to (450,250)
-            graphics.DrawLine(pen, 50, 50, 450, 250);
-
-            // Save the bound image
-            canvas.Save();
+            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, 500, 300))
+            {
+                Graphics graphics = new Graphics(canvas);
+                graphics.DrawLine(new Pen(Color.Blue, 1), new Point(50, 50), new Point(450, 250));
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

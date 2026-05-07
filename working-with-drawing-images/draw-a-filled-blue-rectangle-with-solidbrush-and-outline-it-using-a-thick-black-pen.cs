@@ -6,37 +6,40 @@ using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\filled_rectangle.png";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a PNG image of size 400x300
-        PngOptions pngOptions = new PngOptions();
-        using (Image image = Image.Create(pngOptions, 400, 300))
+        try
         {
-            // Initialize graphics object for drawing
-            Graphics graphics = new Graphics(image);
+            // Output file path
+            string outputPath = "output.png";
 
-            // Define rectangle dimensions
-            int rectX = 50;
-            int rectY = 50;
-            int rectWidth = 300;
-            int rectHeight = 200;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Fill the rectangle with blue color
-            SolidBrush blueBrush = new SolidBrush(Color.Blue);
-            graphics.FillRectangle(blueBrush, rectX, rectY, rectWidth, rectHeight);
+            // Create a PNG image canvas
+            PngOptions pngOptions = new PngOptions();
+            using (Image image = Image.Create(pngOptions, 200, 200))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-            // Outline the rectangle with a thick black pen (5 pixels)
-            Pen blackPen = new Pen(Color.Black, 5);
-            graphics.DrawRectangle(blackPen, rectX, rectY, rectWidth, rectHeight);
+                // Fill a blue rectangle
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(20, 20, 160, 160));
+                }
 
-            // Save the image to the specified path
-            image.Save(outputPath);
+                // Outline the rectangle with a thick black pen
+                Pen pen = new Pen(Aspose.Imaging.Color.Black, 5);
+                graphics.DrawRectangle(pen, new Rectangle(20, 20, 160, 160));
+
+                // Save the image to the specified path
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

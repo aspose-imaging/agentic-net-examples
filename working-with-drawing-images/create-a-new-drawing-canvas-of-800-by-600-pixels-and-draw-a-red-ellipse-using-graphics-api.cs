@@ -3,35 +3,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\ellipse.png";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up PNG options with a file create source
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a new image canvas of 800x600 pixels
-        using (Image image = Image.Create(pngOptions, 800, 600))
+        try
         {
-            // Initialize graphics object for drawing
-            Graphics graphics = new Graphics(image);
+            // Output file path (hardcoded)
+            string outputPath = @"C:\Temp\ellipse.png";
 
-            // Draw a red ellipse with a 2-pixel pen
-            // Rectangle(x, y, width, height) defines the bounding box of the ellipse
-            graphics.DrawEllipse(new Pen(Color.Red, 2), new Rectangle(100, 100, 600, 400));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the image (writes to the file specified in pngOptions.Source)
-            image.Save();
+            // Create a file source for the PNG image
+            Source source = new FileCreateSource(outputPath, false);
+            PngOptions options = new PngOptions() { Source = source };
+
+            // Create a new 800x600 PNG canvas
+            using (Image image = Image.Create(options, 800, 600))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
+
+                // Optional: clear background to white
+                graphics.Clear(Color.White);
+
+                // Draw a red ellipse
+                graphics.DrawEllipse(new Pen(Color.Red, 2), new Rectangle(100, 100, 600, 400));
+
+                // Save the image (bound to the file source)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

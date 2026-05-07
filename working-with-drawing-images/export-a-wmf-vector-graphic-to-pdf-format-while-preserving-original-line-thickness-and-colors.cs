@@ -6,41 +6,48 @@ using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\sample.pdf";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.wmf";
+            string outputPath = "Output\\sample.pdf";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load WMF image
+            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            {
+                // Configure rasterization options to preserve original appearance
+                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                {
+                    PageSize = wmfImage.Size,
+                    BackgroundColor = Color.White,
+                    RenderMode = WmfRenderMode.Auto
+                };
+
+                // Set up PDF save options with the rasterization options
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as PDF
+                wmfImage.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WMF image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options to keep original line thickness and colors
-            var rasterOptions = new WmfRasterizationOptions
-            {
-                PageSize = image.Size,                     // Preserve original size
-                SmoothingMode = Aspose.Imaging.SmoothingMode.None, // No smoothing to keep line thickness
-                TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel // Preserve text rendering
-            };
-
-            // Set up PDF export options with the rasterization settings
-            var pdfOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

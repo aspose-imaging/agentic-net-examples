@@ -8,34 +8,48 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.svg";
-        string outputPath = "Output/sample.pdf";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.svg";
+            string outputPath = "Output/sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PDF options with PDF/A compliance (PDF 1.7 compatible)
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.PdfCoreOptions = new PdfCoreOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PDF options with PDF/A compliance (PDF 1.7 compatible)
+                var pdfOptions = new PdfOptions
                 {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b // PDF/A-1b is based on PDF 1.7
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    },
+                    // Set vector rasterization to preserve fonts (no TextAsShapes)
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
                 };
 
-                // Save the SVG as PDF with embedded fonts
+                // Save as PDF with embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

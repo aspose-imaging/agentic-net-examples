@@ -1,68 +1,73 @@
 using System;
 using System.IO;
-using System.Xml;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded collection of SVG input files
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\SvgFiles\image1.svg",
-            @"C:\SvgFiles\image2.svg",
-            @"C:\SvgFiles\image3.svg"
-        };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        foreach (string inputPath in inputFiles)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Determine output PDF path (same folder, same name with .pdf extension)
-            string outputPath = Path.ChangeExtension(inputPath, ".pdf");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Extract title from SVG (fallback to file name without extension if not found)
-            string title = Path.GetFileNameWithoutExtension(inputPath);
-            try
+            if (!Directory.Exists(outputDirectory))
             {
-                XmlDocument svgDoc = new XmlDocument();
-                svgDoc.Load(inputPath);
-                XmlNode titleNode = svgDoc.SelectSingleNode("//title");
-                if (titleNode != null && !string.IsNullOrWhiteSpace(titleNode.InnerText))
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
+            foreach (var inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    title = titleNode.InnerText.Trim();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        pdfOptions.VectorRasterizationOptions = vectorOptions;
+                        pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+                        {
+                            Title = fileName
+                        };
+
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
-            catch
-            {
-                // If any error occurs while reading the SVG, keep the default title
-            }
-
-            // Load SVG image and save as PDF with title metadata
-            using (Image image = Image.Load(inputPath))
-            {
-                var pdfOptions = new PdfOptions();
-
-                // Set PDF document metadata
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
-                {
-                    Title = title
-                };
-
-                // Save to PDF
-                image.Save(outputPath, pdfOptions);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
@@ -8,44 +9,51 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path (hard‑coded)
-        string outputPath = @"C:\temp\highdpi_output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure BMP options with high DPI resolution
-        BmpOptions options = new BmpOptions();
-        options.BitsPerPixel = 24;
-        options.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300.0, 300.0);
-        options.Source = new FileCreateSource(outputPath, false);
-
-        // Desired canvas size
-        int width = 800;
-        int height = 600;
-
-        // Create the BMP image with the specified options
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(options, width, height))
+        try
         {
-            // Obtain a Graphics object for drawing
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+            // Output file path (high‑DPI BMP)
+            string outputPath = @"C:\temp\highdpi_output.bmp";
 
-            // Clear background to white
-            graphics.Clear(Aspose.Imaging.Color.White);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Draw a blue line and rectangle using a Pen
-            Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
-            graphics.DrawLine(pen, new Aspose.Imaging.Point(100, 100), new Aspose.Imaging.Point(700, 100));
-            graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(150, 150, 200, 100));
+            // Configure BMP options with resolution and source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300.0, 300.0);
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Fill an ellipse with a solid red brush
-            using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
+            // Create a BMP image canvas (800x600) bound to the output file
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 800, 600))
             {
-                graphics.FillEllipse(brush, new Aspose.Imaging.Rectangle(400, 300, 150, 100));
-            }
+                // Create a Graphics object for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Save the image (the output path is already bound via the source)
-            image.Save();
+                // Draw a red diagonal line
+                Aspose.Imaging.Pen redPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 5);
+                graphics.DrawLine(redPen,
+                    new Aspose.Imaging.Point(0, 0),
+                    new Aspose.Imaging.Point(image.Width - 1, image.Height - 1));
+
+                // Fill a blue rectangle
+                using (SolidBrush blueBrush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                {
+                    graphics.FillRectangle(blueBrush,
+                        new Aspose.Imaging.Rectangle(100, 100, 300, 200));
+                }
+
+                // Draw a green ellipse
+                Aspose.Imaging.Pen greenPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 3);
+                graphics.DrawEllipse(greenPen,
+                    new Aspose.Imaging.Rectangle(250, 150, 200, 150));
+
+                // Save the bound image (no path needed)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

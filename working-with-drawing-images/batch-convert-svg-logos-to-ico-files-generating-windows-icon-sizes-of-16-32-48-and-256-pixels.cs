@@ -2,63 +2,80 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Ico;
 
 class Program
 {
     static void Main()
     {
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure input and output directories exist
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
-            return;
-        }
-
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
-
-        foreach (string svgPath in svgFiles)
-        {
-            if (!File.Exists(svgPath))
+            // Hard‑coded input SVG files
+            string[] inputPaths = new[]
             {
-                Console.Error.WriteLine($"File not found: {svgPath}");
-                return;
-            }
+                @"C:\Images\logo1.svg",
+                @"C:\Images\logo2.svg"
+            };
 
-            // Load the SVG once; we'll reload for each size to avoid mutating the original
-            foreach (int size in new int[] { 16, 32, 48, 256 })
+            // Desired icon sizes
+            int[] iconSizes = new[] { 16, 32, 48, 256 };
+
+            foreach (string inputPath in inputPaths)
             {
-                // Reload SVG for each size to keep original dimensions
-                using (Image svgImage = Image.Load(svgPath))
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Resize to the desired icon size
-                    svgImage.Resize(size, size);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Prepare output ICO path
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(svgPath);
-                    string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}_{size}.ico");
+                // Determine output .ico path (same folder, same name, .ico extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".ico");
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Create ICO options (default PNG frames, 32bpp)
-                    IcoOptions icoOptions = new IcoOptions();
-
-                    // Create ICO image from the resized raster image
-                    using (Aspose.Imaging.FileFormats.Ico.IcoImage icoImage = new Aspose.Imaging.FileFormats.Ico.IcoImage((RasterImage)svgImage, icoOptions))
+                // Load the SVG image
+                using (Image svgImage = Image.Load(inputPath))
+                {
+                    // Create an ICO image with the smallest size as the base
+                    using (IcoImage icoImage = new IcoImage(iconSizes[0], iconSizes[0], new IcoOptions()))
                     {
+                        foreach (int size in iconSizes)
+                        {
+                            // Prepare PNG save options with rasterization to the required size
+                            var pngOptions = new PngOptions
+                            {
+                                VectorRasterizationOptions = new SvgRasterizationOptions
+                                {
+                                    PageSize = new Size(size, size)
+                                }
+                            };
+
+                            // Rasterize SVG to PNG in memory
+                            using (var ms = new MemoryStream())
+                            {
+                                svgImage.Save(ms, pngOptions);
+                                ms.Position = 0;
+
+                                // Load the rasterized PNG
+                                using (Image rasterImage = Image.Load(ms))
+                                {
+                                    // Add the raster page to the ICO image
+                                    icoImage.AddPage(rasterImage);
+                                }
+                            }
+                        }
+
+                        // Save the assembled ICO file
                         icoImage.Save(outputPath);
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

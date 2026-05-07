@@ -3,62 +3,71 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input CSV file path
-        string inputPath = "dimensions.csv";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Hardcoded output directory
-        string outputDir = "output";
-
-        // Read all lines from CSV
-        string[] lines = File.ReadAllLines(inputPath);
-        int index = 1;
-
-        foreach (string line in lines)
-        {
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-
-            // Expect format: width,height
-            string[] parts = line.Split(',');
-            if (parts.Length < 2)
-                continue;
-
-            int width = int.Parse(parts[0].Trim());
-            int height = int.Parse(parts[1].Trim());
-
-            // Build output file path
-            string outputPath = Path.Combine(outputDir, $"image_{index}.bmp");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create BMP options with file source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions()
+            // Input CSV containing width,height per line
+            string csvPath = "dimensions.csv";
+            if (!File.Exists(csvPath))
             {
-                Source = source,
-                BitsPerPixel = 24
-            };
-
-            // Create canvas and save
-            using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
-            {
-                canvas.Save();
+                Console.Error.WriteLine($"File not found: {csvPath}");
+                return;
             }
 
-            index++;
+            // Ensure output directory exists
+            string outputDir = "Output";
+            Directory.CreateDirectory(outputDir);
+
+            string[] lines = File.ReadAllLines(csvPath);
+            int index = 0;
+
+            foreach (string line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+                string[] parts = line.Split(',');
+                if (parts.Length < 2)
+                    continue;
+
+                if (!int.TryParse(parts[0].Trim(), out int width) ||
+                    !int.TryParse(parts[1].Trim(), out int height))
+                    continue;
+
+                string outputPath = Path.Combine(outputDir, $"image_{index}.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Create BMP options with bound source
+                FileCreateSource src = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions
+                {
+                    Source = src,
+                    BitsPerPixel = 24
+                };
+
+                // Create canvas
+                using (Image canvas = Image.Create(options, width, height))
+                {
+                    // Fill canvas with white background
+                    Graphics graphics = new Graphics((RasterImage)canvas);
+                    SolidBrush brush = new SolidBrush(Color.White);
+                    graphics.FillRectangle(brush, new Rectangle(0, 0, width, height));
+
+                    // Save bound image
+                    canvas.Save();
+                }
+
+                index++;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

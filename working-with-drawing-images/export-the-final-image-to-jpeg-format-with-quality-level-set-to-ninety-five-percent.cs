@@ -7,31 +7,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.jpg";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\sample_95.jpg";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Set JPEG save options with quality set to 95%
+            // Configure JPEG save options with 95% quality
             JpegOptions saveOptions = new JpegOptions
             {
-                Quality = 95
+                Quality = 95,
+                BitsPerChannel = 8,
+                CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive
             };
 
-            // Save the image as JPEG using the specified options
-            image.Save(outputPath, saveOptions);
+            // Load the source image and save as JPEG
+            using (Image image = Image.Load(inputPath))
+            {
+                image.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

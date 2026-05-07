@@ -1,45 +1,57 @@
+using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\filled_and_outlined.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output.png";
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        PngOptions pngOptions = new PngOptions
+        try
         {
-            Source = new FileCreateSource(outputPath, false)
-        };
+            // Set up PNG options with a file create source bound to the output path
+            var pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-        using (Image image = Image.Create(pngOptions, 500, 500))
-        {
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
-
-            GraphicsPath path = new GraphicsPath();
-            Figure figure = new Figure();
-
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 200f)));
-            figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 150f)));
-
-            path.AddFigure(figure);
-
-            Pen outlinePen = new Pen(Color.Black, 2);
-            using (SolidBrush fillBrush = new SolidBrush(Color.LightBlue))
+            // Create a new image canvas
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                graphics.FillPath(fillBrush, path);
+                // Initialize graphics for drawing
+                var graphics = new Graphics(image);
+                graphics.Clear(Color.Wheat);
+
+                // Build a graphics path with a rectangle and an ellipse
+                var path = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
+                path.AddFigure(figure);
+
+                // Fill the interior of the path
+                using (var brush = new SolidBrush(Color.Yellow))
+                {
+                    graphics.FillPath(brush, path);
+                }
+
+                // Draw the outline of the same path
+                graphics.DrawPath(new Pen(Color.Black, 2), path);
+
+                // Save the image (output path already bound)
+                image.Save();
             }
-
-            graphics.DrawPath(outlinePen, path);
-
-            image.Save();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

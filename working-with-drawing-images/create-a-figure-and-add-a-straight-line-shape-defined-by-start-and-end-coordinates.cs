@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -8,21 +7,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\line_figure.png";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        using (Image image = Image.Create(pngOptions, 200, 200))
+        try
         {
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            string outputPath = @"c:\temp\line_output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Pen pen = new Pen(Color.Black, 2);
-            graphics.DrawLine(pen, new PointF(10f, 10f), new PointF(190f, 190f));
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            image.Save();
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 200, 200))
+            {
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
+                graphics.DrawLine(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
+                    new Aspose.Imaging.PointF(20f, 20f),
+                    new Aspose.Imaging.PointF(180f, 180f));
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

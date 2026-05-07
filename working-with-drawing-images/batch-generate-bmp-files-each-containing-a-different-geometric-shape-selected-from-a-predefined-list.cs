@@ -1,76 +1,105 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output directory for generated BMP files
-        string outputDir = @"C:\temp\shapes";
-        Directory.CreateDirectory(outputDir);
-
-        int canvasWidth = 500;
-        int canvasHeight = 500;
-
-        // List of shape identifiers
-        var shapeNames = new List<string> { "Rectangle", "Ellipse", "Line", "Polygon", "Arc", "Pie" };
-
-        foreach (var shapeName in shapeNames)
+        try
         {
-            // Construct output file path for the current shape
-            string outputPath = Path.Combine(outputDir, $"shape_{shapeName.ToLower()}.bmp");
+            // Define output directory and ensure it exists
+            string outputDir = @"C:\temp\Shapes";
+            Directory.CreateDirectory(outputDir);
 
-            // Ensure the directory exists (already created above)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Define image size
+            int width = 300;
+            int height = 300;
 
-            // Configure BMP creation options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a bound BMP image canvas
-            using (Image image = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+            // Rectangle
+            string rectPath = Path.Combine(outputDir, "rectangle.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(rectPath));
+            CreateBmpWithShape(rectPath, width, height, (graphics) =>
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 50, 200, 150));
+            });
 
-                // Draw the specific shape
-                switch (shapeName)
+            // Ellipse
+            string ellipsePath = Path.Combine(outputDir, "ellipse.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(ellipsePath));
+            CreateBmpWithShape(ellipsePath, width, height, (graphics) =>
+            {
+                graphics.DrawEllipse(new Pen(Color.Blue, 2), new Rectangle(50, 50, 200, 150));
+            });
+
+            // Line
+            string linePath = Path.Combine(outputDir, "line.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(linePath));
+            CreateBmpWithShape(linePath, width, height, (graphics) =>
+            {
+                graphics.DrawLine(new Pen(Color.Red, 2), new Point(50, 50), new Point(250, 250));
+            });
+
+            // Polygon (triangle)
+            string polygonPath = Path.Combine(outputDir, "polygon.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(polygonPath));
+            CreateBmpWithShape(polygonPath, width, height, (graphics) =>
+            {
+                Point[] points = new Point[]
                 {
-                    case "Rectangle":
-                        graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 50, 400, 300));
-                        break;
-                    case "Ellipse":
-                        graphics.DrawEllipse(new Pen(Color.Blue, 2), new Rectangle(100, 100, 300, 200));
-                        break;
-                    case "Line":
-                        graphics.DrawLine(new Pen(Color.Red, 2), new Point(0, 0), new Point(canvasWidth, canvasHeight));
-                        break;
-                    case "Polygon":
-                        graphics.DrawPolygon(new Pen(Color.Green, 2), new[]
-                        {
-                            new Point(250, 50),
-                            new Point(450, 250),
-                            new Point(250, 450),
-                            new Point(50, 250)
-                        });
-                        break;
-                    case "Arc":
-                        graphics.DrawArc(new Pen(Color.Purple, 2), new Rectangle(100, 100, 300, 300), 0, 270);
-                        break;
-                    case "Pie":
-                        graphics.DrawPie(new Pen(Color.Orange, 2), new Rectangle(150, 150, 200, 200), 0, 120);
-                        break;
-                }
+                    new Point(150, 50),
+                    new Point(250, 200),
+                    new Point(50, 200)
+                };
+                graphics.DrawPolygon(new Pen(Color.Green, 2), points);
+            });
 
-                // Save the bound image to the file
-                image.Save();
-            }
+            // Filled Rectangle
+            string filledRectPath = Path.Combine(outputDir, "filled_rectangle.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(filledRectPath));
+            CreateBmpWithShape(filledRectPath, width, height, (graphics) =>
+            {
+                using (SolidBrush brush = new SolidBrush(Color.Yellow))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(60, 60, 180, 120));
+                }
+                graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(60, 60, 180, 120));
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    // Helper to create a BMP image and execute drawing actions
+    static void CreateBmpWithShape(string outputPath, int width, int height, Action<Graphics> drawAction)
+    {
+        // Ensure output directory exists (already called before, but safe)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Set up BMP options with file source
+        BmpOptions bmpOptions = new BmpOptions
+        {
+            BitsPerPixel = 24,
+            Source = new FileCreateSource(outputPath, false)
+        };
+
+        // Create image canvas
+        using (Image image = Image.Create(bmpOptions, width, height))
+        {
+            // Initialize graphics
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.White);
+
+            // Perform custom drawing
+            drawAction(graphics);
+
+            // Save bound image
+            image.Save();
         }
     }
 }

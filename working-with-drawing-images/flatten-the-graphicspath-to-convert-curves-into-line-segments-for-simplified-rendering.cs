@@ -1,44 +1,31 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
+        string inputPath = "sample.png";
         string outputPath = "output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-        // Load the input image to obtain its dimensions
-        using (Image inputImage = Image.Load(inputPath))
+        try
         {
-            int width = inputImage.Width;
-            int height = inputImage.Height;
-
-            // Create a new PNG image canvas with the same size
-            PngOptions pngOptions = new PngOptions();
-            using (Image canvas = Image.Create(pngOptions, width, height))
+            using (Image image = Image.Load(inputPath))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
-
-                // Build a GraphicsPath containing a Bezier curve
-                GraphicsPath path = new GraphicsPath();
+                // Create a figure with a Bezier curve and an arc
                 Figure figure = new Figure();
+
+                // Bezier shape (4 points, closed)
                 figure.AddShape(new BezierShape(
                     new PointF[]
                     {
@@ -48,17 +35,27 @@ class Program
                         new PointF(350f, 150f)
                     },
                     true));
+
+                // Arc shape
+                figure.AddShape(new ArcShape(new RectangleF(100f, 100f, 200f, 200f), 0f, 180f));
+
+                // Build the graphics path and flatten it
+                GraphicsPath path = new GraphicsPath();
                 path.AddFigure(figure);
+                path.Flatten(); // Convert curves to line segments
 
-                // Flatten the path to convert curves into line segments
-                path.Flatten();
-
-                // Draw the flattened path
+                // Draw the flattened path onto the image
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
                 graphics.DrawPath(new Pen(Color.Blue, 2), path);
 
-                // Save the resulting image
-                canvas.Save(outputPath, pngOptions);
+                // Save the result
+                image.Save(outputPath);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

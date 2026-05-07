@@ -7,65 +7,79 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Verify input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
-            return;
-        }
+            // Input and output directories (hardcoded)
+            string inputDir = "InputImages";
+            string outputDir = "Thumbnails";
 
-        // Get all files in the input directory
-        string[] inputFiles = Directory.GetFiles(inputDirectory);
-
-        foreach (string inputPath in inputFiles)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Validate input directory
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
             }
 
-            // Load the image as a raster image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDir))
             {
-                // Define thumbnail size
-                int thumbWidth = 100;
-                int thumbHeight = 100;
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Resize to thumbnail dimensions
-                image.Resize(thumbWidth, thumbHeight);
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDir);
+            foreach (string inputPath in files)
+            {
+                // Verify each input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                // Create Graphics instance for drawing
-                Graphics graphics = new Graphics(image);
+                // Prepare output path
+                string outputPath = Path.Combine(outputDir,
+                    Path.GetFileNameWithoutExtension(inputPath) + "_thumb.bmp");
 
-                // Calculate centered circle dimensions (leave a small margin)
-                int diameter = Math.Min(thumbWidth, thumbHeight) - 10;
-                int x = (thumbWidth - diameter) / 2;
-                int y = (thumbHeight - diameter) / 2;
-
-                // Draw the centered circle using a red pen
-                Pen pen = new Pen(Color.Red, 2);
-                graphics.DrawEllipse(pen, new Rectangle(x, y, diameter, diameter));
-
-                // Prepare output file path (BMP with same base name)
-                string fileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
-                string outputPath = Path.Combine(outputDirectory, fileName);
-
-                // Ensure the output directory for this file exists
+                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the thumbnail as BMP
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(outputPath, bmpOptions);
+                // Load source image (not used for content, only to trigger processing)
+                using (Image srcImage = Image.Load(inputPath))
+                {
+                    // Define thumbnail size
+                    int thumbWidth = 100;
+                    int thumbHeight = 100;
+
+                    // Create a blank BMP image for the thumbnail
+                    BmpOptions bmpOptions = new BmpOptions();
+                    using (Image thumbImage = Image.Create(bmpOptions, thumbWidth, thumbHeight))
+                    {
+                        // Initialize graphics for drawing
+                        Graphics graphics = new Graphics(thumbImage);
+                        graphics.Clear(Color.White);
+
+                        // Calculate centered circle parameters
+                        int radius = Math.Min(thumbWidth, thumbHeight) / 2 - 5; // 5px margin
+                        int centerX = thumbWidth / 2;
+                        int centerY = thumbHeight / 2;
+                        int left = centerX - radius;
+                        int top = centerY - radius;
+                        int diameter = radius * 2;
+
+                        // Draw the circle
+                        graphics.DrawEllipse(new Pen(Color.Red, 3), new Rectangle(left, top, diameter, diameter));
+
+                        // Save the thumbnail as BMP
+                        thumbImage.Save(outputPath, new BmpOptions());
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

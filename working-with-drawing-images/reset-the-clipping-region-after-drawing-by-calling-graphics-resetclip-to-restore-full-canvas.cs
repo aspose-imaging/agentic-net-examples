@@ -2,34 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            Graphics graphics = new Graphics(image);
-
-            using (SolidBrush brush = new SolidBrush(Color.Blue))
+            if (!File.Exists(inputPath))
             {
-                graphics.FillRectangle(brush, new Rectangle(0, 0, 300, 300));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            PngOptions pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                Graphics graphics = new Graphics(image);
+
+                graphics.DrawRectangle(new Pen(Color.Blue, 5), new Rectangle(0, 0, image.Width, image.Height));
+                graphics.DrawLine(new Pen(Color.Red, 3), new Point(0, 0), new Point(image.Width, image.Height));
+
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

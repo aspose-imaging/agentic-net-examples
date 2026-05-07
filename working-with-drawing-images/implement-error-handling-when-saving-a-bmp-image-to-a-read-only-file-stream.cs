@@ -1,42 +1,67 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.CoreExceptions;
+using Aspose.Imaging.CoreExceptions.ImageFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.bmp";
-        string outputPath = "Output/sample_readonly.bmp";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\readonly_output.bmp";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Ensure the output file exists and is marked read‑only
-        using (FileStream temp = File.Create(outputPath)) { }
-        File.SetAttributes(outputPath, FileAttributes.ReadOnly);
-
-        using (Image image = Image.Load(inputPath))
-        {
-            var saveOptions = new BmpOptions();
-
-            try
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                using (FileStream outStream = new FileStream(outputPath, FileMode.Open, FileAccess.ReadWrite))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create the output file and mark it read‑only
+            if (!File.Exists(outputPath))
+            {
+                using (var temp = new FileStream(outputPath, FileMode.Create, FileAccess.Write)) { }
+            }
+            File.SetAttributes(outputPath, FileAttributes.ReadOnly);
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Optional BMP save options
+                BmpOptions saveOptions = new BmpOptions();
+
+                // Open the target file as read‑only
+                using (FileStream roStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    image.Save(outStream, saveOptions);
+                    try
+                    {
+                        // Attempt to save to the read‑only stream
+                        image.Save(roStream, saveOptions);
+                        Console.WriteLine("Image saved successfully.");
+                    }
+                    catch (ImageSaveException ex)
+                    {
+                        Console.Error.WriteLine($"ImageSaveException: {ex.Message}");
+                    }
+                    catch (BmpImageException ex)
+                    {
+                        Console.Error.WriteLine($"BmpImageException: {ex.Message}");
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error saving image: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

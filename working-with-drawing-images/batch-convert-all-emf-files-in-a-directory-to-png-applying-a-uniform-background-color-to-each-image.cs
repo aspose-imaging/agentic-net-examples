@@ -5,53 +5,56 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define relative input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Get all EMF files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-        foreach (string inputPath in files)
+        try
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\EmfInput";
+            string outputDirectory = @"C:\PngOutput";
+
+            // Get all EMF files in the input directory
+            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (string inputPath in emfFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            // Prepare the output file path
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".png");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure rasterization options with a uniform background color
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = new SizeF(image.Width, image.Height)
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Set PNG save options and attach rasterization options
-                PngOptions pngOptions = new PngOptions
+                // Determine output path
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the EMF image
+                using (Image image = Image.Load(inputPath))
                 {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    // Configure rasterization options with a uniform background color
+                    var rasterOptions = new EmfRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageSize = image.Size
+                    };
 
-                // Save the rasterized image as PNG
-                image.Save(outputPath, pngOptions);
+                    // Set PNG save options
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Save as PNG
+                    image.Save(outputPath, pngOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

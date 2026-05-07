@@ -4,31 +4,49 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output\\output.png";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
+        try
         {
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
-            using (SolidBrush brush = new SolidBrush())
+            if (!File.Exists(inputPath))
             {
-                brush.Color = Color.LightBlue;
-                brush.Opacity = 100;
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
-                GraphicsPath path = new GraphicsPath();
-                path.AddFigure(figure);
-                graphics.FillPath(brush, path);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
-            image.Save();
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (Image image = Image.Load(inputPath))
+            {
+                Graphics graphics = new Graphics(image);
+
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                path.AddFigure(figure);
+
+                using (LinearGradientBrush brush = new LinearGradientBrush(
+                    new PointF(50f, 50f),
+                    new PointF(250f, 250f),
+                    Color.Blue,
+                    Color.Red))
+                {
+                    graphics.FillPath(brush, path);
+                }
+
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

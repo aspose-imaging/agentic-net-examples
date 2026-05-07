@@ -2,62 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all EPS files in the input directory
-        string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
-
-        foreach (string epsPath in epsFiles)
-        {
-            // Verify the EPS file exists
-            if (!File.Exists(epsPath))
+            // Hardcoded collection of EPS input files and corresponding PNG output files
+            var files = new (string input, string output)[]
             {
-                Console.Error.WriteLine($"File not found: {epsPath}");
-                continue;
-            }
+                ("C:\\Images\\input1.eps", "C:\\Images\\output1.png"),
+                ("C:\\Images\\input2.eps", "C:\\Images\\output2.png")
+            };
 
-            // Prepare output PNG path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(epsPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load, resize, and save the EPS as PNG
-            using (EpsImage epsImage = (EpsImage)Image.Load(epsPath))
+            foreach (var (inputPath, outputPath) in files)
             {
-                int newWidth = (int)(epsImage.Width * 1.5);
-                int newHeight = (int)(epsImage.Height * 1.5);
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Resize with high-quality Lanczos resampling
-                epsImage.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save as PNG preserving transparency
-                epsImage.Save(outputPath, new PngOptions());
+                // Load the EPS image
+                using (var image = (EpsImage)Image.Load(inputPath))
+                {
+                    // Compute new dimensions applying a scaling factor of 1.5
+                    int newWidth = (int)(image.Width * 1.5);
+                    int newHeight = (int)(image.Height * 1.5);
+
+                    // Resize the image (LanczosResample provides high-quality scaling)
+                    image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
+
+                    // Save the resized image as PNG, preserving transparency
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

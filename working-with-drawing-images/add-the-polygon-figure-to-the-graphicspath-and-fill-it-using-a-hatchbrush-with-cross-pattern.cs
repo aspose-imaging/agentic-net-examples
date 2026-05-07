@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
@@ -9,56 +10,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.png";
-        string outputPath = @"c:\temp\output\polygon.png";
+        string outputPath = @"c:\temp\output.png";
 
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create PNG options with a FileCreateSource bound to the output path
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a new image canvas (500x500)
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
+        try
         {
-            // Initialize graphics for drawing
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-            graphics.Clear(Aspose.Imaging.Color.White);
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a GraphicsPath
-            Aspose.Imaging.GraphicsPath graphicsPath = new Aspose.Imaging.GraphicsPath();
-
-            // Create a Figure and add a polygon shape
-            Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
-            Aspose.Imaging.PointF[] polygonPoints = new Aspose.Imaging.PointF[]
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                new Aspose.Imaging.PointF(100f, 100f),
-                new Aspose.Imaging.PointF(400f, 100f),
-                new Aspose.Imaging.PointF(350f, 300f),
-                new Aspose.Imaging.PointF(150f, 300f)
-            };
-            figure.AddShape(new PolygonShape(polygonPoints, true));
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-            // Add the figure to the graphics path
-            graphicsPath.AddFigure(figure);
+                GraphicsPath path = new GraphicsPath();
 
-            // Fill the polygon path with a solid brush
-            using (SolidBrush solidBrush = new SolidBrush(Aspose.Imaging.Color.Blue))
-            {
-                graphics.FillPath(solidBrush, graphicsPath);
+                Figure figure = new Figure();
+                PointF[] points = new PointF[]
+                {
+                    new PointF(100f, 100f),
+                    new PointF(400f, 100f),
+                    new PointF(350f, 300f),
+                    new PointF(150f, 300f)
+                };
+                figure.AddShape(new PolygonShape(points, true));
+
+                path.AddFigure(figure);
+
+                using (SolidBrush solidBrush = new SolidBrush(Color.LightGray))
+                {
+                    graphics.FillPath(solidBrush, path);
+                }
+
+                image.Save();
             }
-
-            // Save the image (output path already bound to the source)
-            image.Save();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

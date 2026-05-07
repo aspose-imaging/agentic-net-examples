@@ -8,37 +8,46 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Create a memory stream to hold the BMP image
-        using (MemoryStream memoryStream = new MemoryStream())
+        try
         {
-            // Set up BMP options with the stream as the output source
-            BmpOptions bmpOptions = new BmpOptions
+            // Create a memory stream to hold the BMP data
+            using (MemoryStream ms = new MemoryStream())
             {
-                Source = new StreamSource(memoryStream)
-            };
+                // Configure BMP options with the stream as the output source
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(ms);
 
-            // Create a 250x250 BMP image
-            using (Image image = Image.Create(bmpOptions, 250, 250))
-            {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                // Create a 250x250 BMP canvas
+                using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 250, 250))
+                {
+                    // Initialize graphics for drawing
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(Color.White);
 
-                // Draw a Bezier curve with four control points
-                Pen pen = new Pen(Color.Blue, 2);
-                graphics.DrawBezier(pen,
-                    new Point(20, 20),    // Start point
-                    new Point(80, 10),    // First control point
-                    new Point(150, 200),  // Second control point
-                    new Point(230, 230)   // End point
-                );
+                    // Define a blue pen for the Bezier curve
+                    Pen pen = new Pen(Color.Blue, 2);
 
-                // Save the image to the bound memory stream
-                image.Save();
+                    // Define four control points for the Bezier spline
+                    Point p1 = new Point(20, 200);
+                    Point p2 = new Point(70, 20);
+                    Point p3 = new Point(180, 20);
+                    Point p4 = new Point(230, 200);
+
+                    // Draw the Bezier curve
+                    graphics.DrawBezier(pen, p1, p2, p3, p4);
+
+                    // Save the image to the bound memory stream
+                    canvas.Save();
+                }
+
+                // Reset stream position if further processing is needed
+                ms.Position = 0;
+                Console.WriteLine($"MemoryStream length: {ms.Length}");
             }
-
-            // The memory stream now contains the BMP data
-            Console.WriteLine($"MemoryStream length: {memoryStream.Length}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

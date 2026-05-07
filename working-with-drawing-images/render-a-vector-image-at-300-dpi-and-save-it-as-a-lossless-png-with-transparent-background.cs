@@ -6,41 +6,41 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    BackgroundColor = Color.Transparent
+                };
+
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                };
+
+                image.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options: transparent background and original size
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-            {
-                BackgroundColor = Color.Transparent,
-                PageSize = svgImage.Size
-            };
-
-            // Configure PNG options with 300 DPI resolution
-            PngOptions pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                ResolutionSettings = new ResolutionSetting(300, 300)
-            };
-
-            // Save as lossless PNG
-            svgImage.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

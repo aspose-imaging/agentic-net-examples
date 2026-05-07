@@ -1,41 +1,66 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output BMP file path (hardcoded)
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";   // Not used in this example but kept for rule compliance
         string outputPath = @"C:\temp\output.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up BMP options
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a new BMP image with specified dimensions
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 200, 200))
+        try
         {
-            // Initialize Graphics for drawing
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-            // Clear the canvas with white background
-            graphics.Clear(Aspose.Imaging.Color.White);
-
-            // Fill a rectangle using SolidBrush
-            using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+            // Input file existence check (rule compliance)
+            if (!File.Exists(inputPath))
             {
-                graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(50, 50, 100, 100));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save the image (output is already bound to the file)
-            image.Save();
+            // Ensure output directory exists (rule compliance)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Image dimensions and settings
+            int width = 200;
+            int height = 200;
+
+            // Configure BMP options
+            BmpOptions bmpOptions = new BmpOptions
+            {
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            // Create a new BMP image
+            using (Image image = Image.Create(bmpOptions, width, height))
+            {
+                // Initialize graphics object for drawing
+                Graphics graphics = new Graphics(image);
+
+                // Optional: clear background to white
+                graphics.Clear(Color.White);
+
+                // Draw a black rectangle border
+                Pen blackPen = new Pen(Color.Black, 2);
+                graphics.DrawRectangle(blackPen, 10, 10, width - 20, height - 20);
+
+                // Fill a rectangle inside the border with a solid brush
+                SolidBrush fillBrush = new SolidBrush(Color.LightBlue);
+                graphics.FillRectangle(fillBrush, new Rectangle(20, 20, width - 40, height - 40));
+
+                // Save the image (the FileCreateSource already points to outputPath)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

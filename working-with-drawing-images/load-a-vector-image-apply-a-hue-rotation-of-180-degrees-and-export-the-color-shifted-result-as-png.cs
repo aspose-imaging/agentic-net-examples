@@ -5,44 +5,37 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the vector image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Apply a hue rotation of 180 degrees if the operation is supported
-            var vectorImg = image as VectorImage;
-            if (vectorImg != null)
+            if (!File.Exists(inputPath))
             {
-                // Use dynamic invocation to call AdjustHue if it exists at runtime
-                dynamic dyn = vectorImg;
-                try
-                {
-                    dyn.AdjustHue(180);
-                }
-                catch
-                {
-                    // If AdjustHue is not available, the image will be saved without hue change
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save the result as PNG
-            PngOptions pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageSize = new Size(image.Width, image.Height)
+                    }
+                };
+
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

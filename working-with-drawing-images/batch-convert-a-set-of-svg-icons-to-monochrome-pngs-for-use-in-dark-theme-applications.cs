@@ -3,70 +3,63 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define base directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string inputDir = "InputSvgs";
+            string outputDir = "OutputPngs";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all SVG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-
-        foreach (string inputPath in files)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Prepare output path
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+            Directory.CreateDirectory(outputDir);
 
-            // Ensure output directory for the file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
 
-            // Load SVG and rasterize to monochrome PNG
-            using (Image image = Image.Load(inputPath))
+            foreach (string inputPath in svgFiles)
             {
-                // Set up rasterization options for SVG
-                var rasterOptions = new SvgRasterizationOptions
+                if (!File.Exists(inputPath))
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Configure PNG options for monochrome output
-                var pngOptions = new PngOptions
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
                 {
-                    VectorRasterizationOptions = rasterOptions,
-                    ColorType = PngColorType.Grayscale,
-                    BitDepth = 1
-                };
+                    var rasterOptions = new SvgRasterizationOptions
+                    {
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        BackgroundColor = Color.White
+                    };
 
-                // Save the rasterized PNG
-                image.Save(outputPath, pngOptions);
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions,
+                        ColorType = PngColorType.Grayscale,
+                        BitDepth = 1
+                    };
+
+                    image.Save(outputPath, pngOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,45 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = @"C:\Temp\output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure BMP options with a file create source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a 200x200 BMP image
-        using (Image image = Image.Create(bmpOptions, 200, 200))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Output file path
+            string outputPath = "output\\image.bmp";
 
-            // Clear background to white
-            graphics.Clear(Color.White);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a black pen
-            Pen pen = new Pen(Color.Black, 2);
+            // BMP image options
+            BmpOptions bmpOptions = new BmpOptions();
 
-            // Draw a line
-            graphics.DrawLine(pen, new Point(20, 20), new Point(180, 20));
+            // Create a BMP image canvas
+            using (Image image = Image.Create(bmpOptions, 200, 100))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-            // Apply scaling to double the size
-            graphics.ScaleTransform(2.0f, 2.0f);
+                // Draw a black line
+                graphics.DrawLine(new Pen(Color.Black, 2), new Point(10, 50), new Point(100, 50));
 
-            // Draw another line (will appear twice as long due to scaling)
-            graphics.DrawLine(pen, new Point(20, 40), new Point(180, 40));
+                // Scale X axis by 2 to double subsequent drawing lengths
+                graphics.ScaleTransform(2.0f, 1.0f);
 
-            // Save the image (output path is already bound)
-            image.Save();
+                // Draw a red line (will appear twice as long due to scaling)
+                graphics.DrawLine(new Pen(Color.Red, 2), new Point(10, 70), new Point(100, 70));
+
+                // Save the image to the specified path
+                image.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

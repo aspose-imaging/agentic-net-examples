@@ -3,52 +3,91 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output BMP file path
-        string outputPath = @"C:\temp\gauge.bmp";
+        // Hardcoded paths
+        string outputPath = @"C:\Temp\gauge.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up BMP options with a bound file source
-        Source outputSource = new FileCreateSource(outputPath, false);
-        BmpOptions bmpOptions = new BmpOptions() { Source = outputSource };
-
-        int width = 400;
-        int height = 300;
-
-        // Create the canvas bound to the output file
-        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
-            graphics.Clear(Color.White);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define the rectangle that bounds the semi‑circular gauge
-            Rectangle gaugeRect = new Rectangle(50, 20, 300, 300);
+            // Create BMP options (24 bits per pixel)
+            BmpOptions bmpOptions = new BmpOptions
+            {
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-            // Background arc (light gray)
-            Pen backgroundPen = new Pen(Color.LightGray, 20);
-            graphics.DrawArc(backgroundPen, gaugeRect, 0, 180);
+            // Define image size
+            const int width = 400;
+            const int height = 200;
 
-            // Red range (0° to 60°)
-            Pen redPen = new Pen(Color.Red, 20);
-            graphics.DrawArc(redPen, gaugeRect, 0, 60);
+            // Create the image
+            using (Image image = Image.Create(bmpOptions, width, height))
+            {
+                // Initialize graphics object
+                Graphics graphics = new Graphics(image);
 
-            // Yellow range (60° to 120°)
-            Pen yellowPen = new Pen(Color.Yellow, 20);
-            graphics.DrawArc(yellowPen, gaugeRect, 60, 60);
+                // Clear background
+                graphics.Clear(Color.Wheat);
 
-            // Green range (120° to 180°)
-            Pen greenPen = new Pen(Color.Green, 20);
-            graphics.DrawArc(greenPen, gaugeRect, 120, 60);
+                // Define common pen for arcs
+                Pen arcPen = new Pen(Color.Blue, 4);
 
-            // Save the bound image
-            canvas.Save();
+                // Center of the gauge
+                int centerX = width / 2;
+                int centerY = height;
+
+                // Radius of the outer arc
+                int outerRadius = 180;
+
+                // Draw outer semi‑circular arc (180° sweep)
+                graphics.DrawArc(
+                    arcPen,
+                    new Rectangle(centerX - outerRadius, centerY - outerRadius, outerRadius * 2, outerRadius * 2),
+                    180,   // start angle (leftmost point)
+                    180);  // sweep angle (semi‑circle)
+
+                // Draw inner semi‑circular arc to create thickness
+                int innerRadius = 150;
+                graphics.DrawArc(
+                    arcPen,
+                    new Rectangle(centerX - innerRadius, centerY - innerRadius, innerRadius * 2, innerRadius * 2),
+                    180,
+                    180);
+
+                // Draw tick marks (small arcs) at 0°, 45°, 90°, 135°, 180°
+                int tickRadius = outerRadius;
+                int tickLength = 10;
+                Pen tickPen = new Pen(Color.Black, 2);
+                for (int angle = 180; angle <= 360; angle += 45)
+                {
+                    // Convert angle to radians
+                    double rad = angle * Math.PI / 180.0;
+                    // Start point on outer radius
+                    int x1 = (int)(centerX + (tickRadius - tickLength) * Math.Cos(rad));
+                    int y1 = (int)(centerY + (tickRadius - tickLength) * Math.Sin(rad));
+                    // End point on outer radius
+                    int x2 = (int)(centerX + tickRadius * Math.Cos(rad));
+                    int y2 = (int)(centerY + tickRadius * Math.Sin(rad));
+                    // Draw line as a very short arc (using DrawLine for simplicity)
+                    graphics.DrawLine(tickPen, x1, y1, x2, y2);
+                }
+
+                // Save the image (the FileCreateSource already points to outputPath)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,19 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.emf";
+        string outputPath = "output.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,46 +24,57 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image
-        using (Image emfImage = Image.Load(inputPath))
+        try
         {
-            // Rasterize EMF to a temporary PNG
-            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-            var pngOptions = new PngOptions
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = new EmfRasterizationOptions
+                // Rasterize EMF to PNG with default options
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    PageSize = emfImage.Size,
-                    // Use a transparent background to keep original colors
+                    PageSize = ((EmfImage)image).Size,
+                    // Optional: set background to transparent to keep only drawing
                     BackgroundColor = Color.Transparent
-                }
-            };
-            emfImage.Save(tempPngPath, pngOptions);
+                };
 
-            // Load the rasterized PNG to adjust opacity
-            using (RasterImage pngImage = (RasterImage)Image.Load(tempPngPath))
-            {
-                // Iterate over each pixel and set its alpha to 80% of the original
-                for (int y = 0; y < pngImage.Height; y++)
+                var pngOptions = new PngOptions
                 {
-                    for (int x = 0; x < pngImage.Width; x++)
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save rasterized PNG to a memory stream first
+                using (var ms = new MemoryStream())
+                {
+                    image.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    // Load the rasterized PNG for pixel manipulation
+                    using (PngImage pngImage = (PngImage)Image.Load(ms))
                     {
-                        Color pixel = pngImage.GetPixel(x, y);
-                        byte newAlpha = (byte)(pixel.A * 0.8);
-                        Color newPixel = Color.FromArgb(newAlpha, pixel.R, pixel.G, pixel.B);
-                        pngImage.SetPixel(x, y, newPixel);
+                        // Adjust opacity of each pixel to 80%
+                        // 80% of 255 ≈ 204
+                        const byte targetAlpha = 204;
+
+                        for (int y = 0; y < pngImage.Height; y++)
+                        {
+                            for (int x = 0; x < pngImage.Width; x++)
+                            {
+                                Color pixel = pngImage.GetPixel(x, y);
+                                // Preserve original RGB, set new alpha
+                                Color newPixel = Color.FromArgb(targetAlpha, pixel.R, pixel.G, pixel.B);
+                                pngImage.SetPixel(x, y, newPixel);
+                            }
+                        }
+
+                        // Save the final PNG with adjusted opacity
+                        pngImage.Save(outputPath);
                     }
                 }
-
-                // Save the final PNG with adjusted opacity
-                pngImage.Save(outputPath);
             }
-
-            // Clean up temporary file
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

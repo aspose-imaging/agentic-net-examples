@@ -2,14 +2,13 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.emf";
+        string inputPath = "input.svg";
         string outputPath = "output.emf";
 
         // Verify input file exists
@@ -22,23 +21,30 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the vector image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Create vector rasterization options manually
-            var vectorOptions = new EmfRasterizationOptions
+            // Load the vector drawing
+            using (Image image = Image.Load(inputPath))
             {
-                PageSize = image.Size
-            };
+                // Create rasterization options for EMF export
+                var vectorOptions = new EmfRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-            // Set up EMF export options
-            var exportOptions = new EmfOptions
-            {
-                VectorRasterizationOptions = vectorOptions
-            };
+                // Set up EMF save options
+                var emfOptions = new EmfOptions
+                {
+                    VectorRasterizationOptions = vectorOptions
+                };
 
-            // Save as flattened EMF
-            image.Save(outputPath, exportOptions);
+                // Save as EMF (flattened into a single layer)
+                image.Save(outputPath, emfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

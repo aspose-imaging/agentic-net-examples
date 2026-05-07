@@ -1,46 +1,56 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
-        {
-            int width = inputImage.Width;
-            int height = inputImage.Height;
-
-            Source outputSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = outputSource };
-
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
+            // Input file existence check
+            if (!File.Exists(inputPath))
             {
-                canvas.SaveArgb32Pixels(new Rectangle(0, 0, width, height), inputImage.LoadArgb32Pixels(inputImage.Bounds));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                Graphics graphics = new Graphics(canvas);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.Red)))
+            // Create a file source and PNG options for the output image
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            PngOptions options = new PngOptions() { Source = source };
+
+            // Create a canvas image (400x300) bound to the output file
+            using (Aspose.Imaging.Image canvasImage = Aspose.Imaging.Image.Create(options, 400, 300))
+            {
+                // Initialize Graphics for the canvas
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvasImage);
+
+                // Clear background to white
+                graphics.Clear(Aspose.Imaging.Color.White);
+
+                // Fill a rectangle with solid red color
+                using (SolidBrush brush = new SolidBrush())
                 {
-                    graphics.FillRectangle(brush, new Rectangle(50, 50, 200, 150));
+                    brush.Color = Aspose.Imaging.Color.Red;
+                    graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(50, 50, 200, 150));
                 }
 
-                canvas.Save();
+                // Save the bound image (no need to specify path again)
+                canvasImage.Save();
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
