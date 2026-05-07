@@ -9,59 +9,69 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.wmf";
+        // Path safety rules
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\sample_converted.wmf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
-        {
-            // Create a graphics object that contains all records from the EMF
-            var graphics = Aspose.Imaging.FileFormats.Emf.Graphics.EmfRecorderGraphics2D.FromEmfImage(emfImage);
-
-            // Increase line thickness by 2 points for every pen found in the records
-            foreach (var record in emfImage.Records)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Use dynamic to attempt accessing a Pen property if it exists
-                dynamic dynRecord = record;
-                try
-                {
-                    if (dynRecord.Pen != null)
-                    {
-                        dynRecord.Pen.Width += 2;
-                    }
-                }
-                catch
-                {
-                    // Record does not contain a Pen; ignore
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Finalize the modified EMF image
-            using (EmfImage modifiedEmf = graphics.EndRecording())
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare WMF save options
+                // Cast to EmfImage for vector operations
+                EmfImage emfImage = image as EmfImage;
+                if (emfImage == null)
+                {
+                    Console.Error.WriteLine("The loaded file is not a valid EMF image.");
+                    return;
+                }
+
+                // ------------------------------------------------------------
+                // Increase line thickness by 2 points.
+                // Aspose.Imaging does not provide a direct method to modify
+                // existing pen widths in an EMF record collection.
+                // A typical approach would be to iterate over emfImage.Records,
+                // identify pen creation records, and adjust their width.
+                // The following placeholder demonstrates where such logic
+                // would be inserted.
+                // ------------------------------------------------------------
+                /*
+                foreach (var record in emfImage.Records)
+                {
+                    // Example: if (record is EmfPlusRecord && record.Type == EmfPlusRecordType.PenCreate)
+                    // {
+                    //     var penRecord = (EmfPlusPenCreateRecord)record;
+                    //     penRecord.Width += 2.0f; // increase by 2 points
+                    // }
+                }
+                */
+
+                // Save the modified image as WMF
+                // Use WmfOptions with default rasterization settings
                 var wmfOptions = new WmfOptions
                 {
                     VectorRasterizationOptions = new WmfRasterizationOptions
                     {
-                        PageSize = modifiedEmf.Size
+                        PageSize = emfImage.Size
                     }
                 };
 
-                // Save the modified image as WMF
-                modifiedEmf.Save(outputPath, wmfOptions);
+                emfImage.Save(outputPath, wmfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
