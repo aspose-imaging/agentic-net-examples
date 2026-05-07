@@ -3,45 +3,55 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = "output\\output.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a file source bound to the output path
-        Source source = new FileCreateSource(outputPath, false);
-
-        // BMP options with the source
-        BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-        // Define canvas size
-        int width = 200;
-        int height = 200;
-
-        // Create the BMP canvas (bound image)
-        using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
+            // Output file path (hardcoded)
+            string outputPath = "output.bmp";
 
-            // Clear background to navy
-            graphics.Clear(Color.Navy);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // White pen for the diagonal lines
-            Pen whitePen = new Pen(Color.White, 1);
+            // Create a source bound to the output file
+            Source source = new FileCreateSource(outputPath, false);
 
-            // Draw two diagonal lines forming a cross
-            graphics.DrawLine(whitePen, 0, 0, width, height);
-            graphics.DrawLine(whitePen, 0, height, width, 0);
+            // Set BMP options with the source
+            BmpOptions options = new BmpOptions() { Source = source };
 
-            // Save the bound image
-            canvas.Save();
+            // Define canvas size
+            int width = 200;
+            int height = 200;
+
+            // Create a BMP canvas bound to the file
+            using (BmpImage canvas = (BmpImage)Image.Create(options, width, height))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(canvas);
+
+                // Clear background to navy
+                graphics.Clear(Color.Navy);
+
+                // Pen for white lines
+                Pen whitePen = new Pen(Color.White, 1);
+
+                // Draw diagonal from top-left to bottom-right
+                graphics.DrawLine(whitePen, new Point(0, 0), new Point(width, height));
+
+                // Draw diagonal from bottom-left to top-right
+                graphics.DrawLine(whitePen, new Point(0, height), new Point(width, 0));
+
+                // Save the image (bound canvas)
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
