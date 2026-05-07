@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,61 +14,73 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG file paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Hardcoded output PNG path
-            string outputPath = "output.png";
-
-            // Validate input files
-            foreach (var path in inputPaths)
+            if (!Directory.Exists(inputDirectory))
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load images in parallel
-            List<RasterImage> images = new List<RasterImage>();
-            System.Threading.Tasks.Parallel.ForEach(inputPaths, path =>
+            if (!Directory.Exists(outputDirectory))
             {
-                var img = (RasterImage)Image.Load(path);
-                lock (images)
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
+
+            var loadedImages = new List<RasterImage>();
+            var lockObj = new object();
+
+            System.Threading.Tasks.Parallel.ForEach(files, filePath =>
+            {
+                if (!File.Exists(filePath))
                 {
-                    images.Add(img);
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
+
+                var img = (RasterImage)Image.Load(filePath);
+                lock (lockObj)
+                {
+                    loadedImages.Add(img);
                 }
             });
 
-            // Calculate canvas size for vertical merge
-            int canvasWidth = images.Max(img => img.Width);
-            int canvasHeight = images.Sum(img => img.Height);
+            if (loadedImages.Count == 0)
+            {
+                Console.WriteLine("No images loaded.");
+                return;
+            }
 
-            // Create PNG canvas bound to the output file
-            Source source = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions { Source = source };
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+            int maxWidth = loadedImages.Max(i => i.Width);
+            int totalHeight = loadedImages.Sum(i => i.Height);
+
+            string outputPath = Path.Combine(outputDirectory, "merged.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            PngOptions pngOptions = new PngOptions
+            {
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, maxWidth, totalHeight))
             {
                 int offsetY = 0;
-                foreach (var img in images)
+                foreach (var img in loadedImages)
                 {
-                    var bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
                     canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                     offsetY += img.Height;
-                    img.Dispose();
                 }
-
-                // Save the merged image
                 canvas.Save();
+            }
+
+            foreach (var img in loadedImages)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)
