@@ -8,40 +8,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define output BMP file path
-        string outputPath = @"c:\temp\translated_output.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a file source for the BMP image
-        Source source = new FileCreateSource(outputPath, false);
-        // Set BMP options with the source
-        BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-        // Create a BMP canvas of size 400x300 bound to the output file
-        using (Image image = Image.Create(bmpOptions, 400, 300))
+        try
         {
-            // Initialize Graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Define output path (hard‑coded)
+            string outputPath = @"c:\temp\translated_output.bmp";
 
-            // Clear background with light gray color
-            graphics.Clear(Color.LightGray);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Shift the drawing origin by (50, 30)
-            graphics.TranslateTransform(50f, 30f);
+            // Create a file source bound to the output file
+            Source fileSource = new FileCreateSource(outputPath, false);
 
-            // Create a blue pen with thickness 2
-            Pen pen = new Pen(Color.Blue, 2);
+            // BMP options with the bound source
+            BmpOptions bmpOptions = new BmpOptions() { Source = fileSource };
 
-            // Draw a rectangle at the new origin (0,0) with size 100x50
-            graphics.DrawRectangle(pen, new Rectangle(0, 0, 100, 50));
+            // Create a BMP canvas of 400x300 pixels
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 400, 300))
+            {
+                // Initialize Graphics for the canvas
+                Graphics graphics = new Graphics(canvas);
 
-            // Draw a line from (0,0) to (100,100) using the same pen
-            graphics.DrawLine(pen, new Point(0, 0), new Point(100, 100));
+                // Shift the drawing origin by (50,30)
+                graphics.TranslateTransform(50, 30);
 
-            // Save the bound image (output file is already bound via FileCreateSource)
-            image.Save();
+                // Draw a rectangle at the new origin (will appear at (50,30) in the image)
+                graphics.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle(0, 0, 100, 50));
+
+                // Draw an ellipse relative to the translated origin
+                graphics.DrawEllipse(new Pen(Color.Red, 2), new Rectangle(120, 20, 80, 60));
+
+                // Save the bound image (writes to outputPath)
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
