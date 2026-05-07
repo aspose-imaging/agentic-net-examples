@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -21,10 +20,10 @@ class Program
                 "input2.jpg",
                 "input3.jpg"
             };
-            string outputPath = "output/merged_output.jpg";
+            string outputPath = "merged_output.jpg";
 
             // Validate input files
-            foreach (var inputPath in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -33,33 +32,37 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (Size sz in sizes)
+            {
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
+            }
 
-            // Create JPEG canvas with bound output file
+            // Prepare output options and source
             Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 90 };
+
+            // Create canvas bound to the output file
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
-                // Merge images side by side
+                // Merge images horizontally
                 int offsetX = 0;
-                foreach (var path in inputPaths)
+                foreach (string inputPath in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -69,15 +72,18 @@ class Program
 
                 // Add semi‑transparent watermark text
                 Graphics graphics = new Graphics(canvas);
-                SolidBrush brush = new SolidBrush(Color.White) { Opacity = 50 };
-                Font font = new Font("Arial", 36);
-                // Position watermark at bottom‑right corner with some padding
-                int padding = 10;
-                int textX = canvas.Width - padding - 200; // approximate width
-                int textY = canvas.Height - padding - 40; // approximate height
-                graphics.DrawString("Watermark", font, brush, new Point(textX, textY));
+                string watermarkText = "Sample Watermark";
+                Font font = new Font("Arial", 48);
+                Color semiTransparentWhite = Color.FromArgb(128, 255, 255, 255);
+                SolidBrush brush = new SolidBrush(semiTransparentWhite);
+                // Position watermark near bottom‑right corner
+                Point position = new Point(newWidth - 300, newHeight - 80);
+                graphics.DrawString(watermarkText, font, brush, position);
 
-                // Save the final image (already bound to output file)
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the bound canvas
                 canvas.Save();
             }
         }
