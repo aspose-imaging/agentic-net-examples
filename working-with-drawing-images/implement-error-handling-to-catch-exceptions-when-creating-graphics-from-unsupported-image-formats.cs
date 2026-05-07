@@ -1,48 +1,51 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.bmp";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            try
+            if (!File.Exists(inputPath))
             {
-                // Attempt to create a Graphics object
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-                // Simple drawing operations
-                graphics.Clear(Aspose.Imaging.Color.White);
-                graphics.DrawRectangle(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
-                    new Aspose.Imaging.Rectangle(10, 10, 100, 100));
-            }
-            catch (Exception ex)
-            {
-                // Handle unsupported format or other errors
-                Console.Error.WriteLine($"Failed to create Graphics: {ex.Message}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Save the modified image as PNG
-            image.Save(outputPath, new PngOptions());
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                Graphics graphics;
+                try
+                {
+                    graphics = new Graphics(image);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Failed to create Graphics: {ex.Message}");
+                    return;
+                }
+
+                graphics.Clear(Color.White);
+                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(10, 10, 100, 100));
+                }
+
+                image.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
