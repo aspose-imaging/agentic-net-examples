@@ -12,11 +12,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg" };
-            string outputPath = "merged.jpg";
-
-            // Validate input files
+            // Hardcoded input image paths
+            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            // Validate each input file exists
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -26,10 +24,12 @@ class Program
                 }
             }
 
+            // Hardcoded output path
+            string outputPath = "output/merged.jpg";
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect image sizes
+            // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -48,15 +48,16 @@ class Program
                 canvasHeight += sz.Height;
             }
 
-            // Create JPEG canvas with metadata removal
+            // Prepare JPEG options without metadata
             Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
+            JpegOptions jpegOptions = new JpegOptions()
             {
                 Source = src,
                 Quality = 90,
                 KeepMetadata = false
             };
 
+            // Create bound JPEG canvas
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
@@ -69,8 +70,7 @@ class Program
                         offsetY += img.Height;
                     }
                 }
-
-                // Save the bound image
+                // Save the merged image
                 canvas.Save();
             }
         }
