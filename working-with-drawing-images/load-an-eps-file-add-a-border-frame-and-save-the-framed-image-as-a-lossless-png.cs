@@ -2,62 +2,59 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "Output\\framed.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        // Wrap the whole logic to catch unexpected errors
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = "input.eps";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS image
-        using (var eps = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
-        {
-            // Prepare PNG options with rasterization settings matching EPS size
-            var pngOptions = new PngOptions
+            // Verify that the EPS source file exists
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new EpsRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the EPS image
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            {
+                // Configure PNG save options with rasterization settings that add a border
+                var pngOptions = new PngOptions
                 {
-                    PageWidth = eps.Width,
-                    PageHeight = eps.Height
-                }
-            };
+                    VectorRasterizationOptions = new EpsRasterizationOptions
+                    {
+                        // Add a 10‑pixel border on each side
+                        BorderX = 10,
+                        BorderY = 10,
+                        // Increase page size to accommodate the border
+                        PageWidth = epsImage.Width + 20,
+                        PageHeight = epsImage.Height + 20,
+                        // Optional: set background and drawing colors
+                        BackgroundColor = Color.White,
+                        DrawColor = Color.Black
+                    }
+                };
 
-            // Export EPS to PNG
-            eps.Save(outputPath, pngOptions);
+                // Save the framed image as a lossless PNG
+                epsImage.Save(outputPath, pngOptions);
+            }
         }
-
-        // Load the generated PNG to draw a border
-        using (var png = (RasterImage)Image.Load(outputPath))
+        catch (Exception ex)
         {
-            // Create Graphics object for drawing
-            var graphics = new Graphics(png);
-
-            // Define border thickness
-            int borderThickness = 10;
-
-            // Draw rectangle border around the image
-            var pen = new Pen(Color.Black, borderThickness);
-            // Adjust rectangle to stay within image bounds
-            var rect = new Rectangle(borderThickness / 2, borderThickness / 2, png.Width - borderThickness, png.Height - borderThickness);
-            graphics.DrawRectangle(pen, rect);
-
-            // Save changes back to the same file
-            png.Save();
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
