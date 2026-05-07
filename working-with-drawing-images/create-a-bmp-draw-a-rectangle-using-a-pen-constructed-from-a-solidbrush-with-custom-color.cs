@@ -2,45 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
-class Program
+namespace AsposeImagingExample
 {
-    static void Main(string[] args)
+    class Program
     {
-        // Output BMP file path
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure BMP options with a file create source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, 500, 500))
+        static void Main()
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
-
-            // Create a solid brush with a custom color
-            using (SolidBrush brush = new SolidBrush())
+            try
             {
-                brush.Color = Color.FromArgb(255, 0, 128, 255); // Custom light blue color
+                // Hardcoded output path
+                string outputPath = @"C:\Temp\output.bmp";
 
-                // Construct a pen from the solid brush with a specific width
-                Pen pen = new Pen(brush, 5f);
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Draw a rectangle using the pen
-                graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
+                // Create a new BMP image (200x200 pixels, 24 bits per pixel)
+                var bmpOptions = new BmpOptions();
+                using (Image image = Image.Create(bmpOptions, 200, 200))
+                {
+                    // Initialize graphics object for drawing
+                    var graphics = new Graphics(image);
+
+                    // Create a SolidBrush with a custom orange color
+                    var brush = new SolidBrush(Color.FromArgb(255, 255, 165, 0)); // Orange
+
+                    // Create a Pen from the SolidBrush with a width of 3 pixels
+                    var pen = new Pen(brush, 3);
+
+                    // Draw a rectangle at position (20,20) with size 160x160
+                    graphics.DrawRectangle(pen, 20, 20, 160, 160);
+
+                    // Save the BMP image to the specified path
+                    image.Save(outputPath);
+                }
             }
-
-            // Save the image (file is already bound via FileCreateSource)
-            image.Save();
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
