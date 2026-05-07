@@ -2,90 +2,80 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.jpg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.svg";
+            string outputPath = "output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image svgImage = Image.Load(inputPath))
-        {
-            // Configure rasterization options for high resolution
-            var rasterOptions = new SvgRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                PageSize = svgImage.Size,
-                SmoothingMode = SmoothingMode.AntiAlias,
-                TextRenderingHint = TextRenderingHint.AntiAlias,
-                ScaleX = 2.0f, // increase resolution
-                ScaleY = 2.0f
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // PNG options to rasterize the SVG into a memory stream
-            var pngOptions = new PngOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Rasterize SVG to PNG in memory
-            using (var pngStream = new MemoryStream())
-            {
-                svgImage.Save(pngStream, pngOptions);
-                pngStream.Position = 0;
-
-                // Load the rasterized image as a RasterImage
-                using (Image rasterImageBase = Image.Load(pngStream))
+                // Set up rasterization options for high‑resolution output
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    var rasterImage = (RasterImage)rasterImageBase;
+                    PageSize = vectorImage.Size,
+                    BackgroundColor = Color.White,
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    TextRenderingHint = TextRenderingHint.AntiAlias
+                };
 
-                    // Create a blurred copy of the raster image
-                    using (var blurredStream = new MemoryStream())
+                // Rasterize SVG to PNG in memory
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    vectorImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    using (Image rasterImg = Image.Load(ms))
                     {
-                        // Save original raster to a new stream for cloning
-                        rasterImage.Save(blurredStream, pngOptions);
-                        blurredStream.Position = 0;
+                        RasterImage raster = (RasterImage)rasterImg;
 
-                        using (Image blurredBase = Image.Load(blurredStream))
+                        int width = raster.Width;
+                        int height = raster.Height;
+                        int blurHeight = height / 5; // 20% of image height
+
+                        // Apply Gaussian blur to top region
+                        Rectangle topRect = new Rectangle(0, 0, width, blurHeight);
+                        raster.Filter(topRect, new GaussianBlurFilterOptions(5, 4.0));
+
+                        // Apply Gaussian blur to bottom region
+                        Rectangle bottomRect = new Rectangle(0, height - blurHeight, width, blurHeight);
+                        raster.Filter(bottomRect, new GaussianBlurFilterOptions(5, 4.0));
+
+                        // Save the result as high‑quality JPEG
+                        JpegOptions jpegOptions = new JpegOptions
                         {
-                            var blurredRaster = (RasterImage)blurredBase;
+                            Quality = 95
+                        };
 
-                            // Apply Gaussian blur to the copy (simulating tilt‑shift)
-                            blurredRaster.Filter(
-                                blurredRaster.Bounds,
-                                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(15, 5.0));
-
-                            // Blend the original (sharp) image over the blurred one
-                            // 128 = 50% opacity for the blurred layer
-                            rasterImage.Blend(new Point(0, 0), blurredRaster, 128);
-                        }
+                        raster.Save(outputPath, jpegOptions);
                     }
-
-                    // Prepare high‑quality JPEG options
-                    var jpegOptions = new JpegOptions
-                    {
-                        Quality = 95,
-                        VectorRasterizationOptions = rasterOptions // retain high‑res rasterization
-                    };
-
-                    // Save the final image as JPEG
-                    rasterImage.Save(outputPath, jpegOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
