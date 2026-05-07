@@ -6,67 +6,55 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Define output directory and file names
-        string outputDir = @"C:\Temp\BmpBatch";
-        string[] outputFiles = new string[]
+        try
         {
-            Path.Combine(outputDir, "pattern1.bmp"),
-            Path.Combine(outputDir, "pattern2.bmp"),
-            Path.Combine(outputDir, "pattern3.bmp"),
-            Path.Combine(outputDir, "pattern4.bmp"),
-            Path.Combine(outputDir, "pattern5.bmp")
-        };
+            // Output directory for generated BMP files
+            string outputDir = @"C:\Temp\BmpBatch";
+            Directory.CreateDirectory(outputDir);
 
-        // Image dimensions
-        int width = 200;
-        int height = 200;
+            Random rnd = new Random();
 
-        // Random generator for line positions and colors
-        Random rnd = new Random();
-
-        foreach (string outputPath in outputFiles)
-        {
-            // Ensure the output directory exists for each file
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create a bound BMP image using FileCreateSource and BmpOptions
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions()
+            // Generate 5 BMP files with random line patterns
+            for (int i = 0; i < 5; i++)
             {
-                Source = source,
-                BitsPerPixel = 24
-            };
+                string outputPath = Path.Combine(outputDir, $"pattern_{i + 1}.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
-            {
-                // Create a Graphics object for drawing (no using)
-                Graphics graphics = new Graphics(canvas);
-                // Clear background to white
-                graphics.Clear(Color.White);
-
-                // Draw a random number of lines (e.g., 10)
-                for (int i = 0; i < 10; i++)
+                // Create BMP options with a file source
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions
                 {
-                    // Random start and end points within the canvas bounds
-                    Point start = new Point(rnd.Next(width), rnd.Next(height));
-                    Point end = new Point(rnd.Next(width), rnd.Next(height));
+                    Source = source,
+                    BitsPerPixel = 24
+                };
 
-                    // Random color
-                    Color lineColor = Color.FromArgb(255, rnd.Next(256), rnd.Next(256), rnd.Next(256));
+                // Create a 500x500 BMP image
+                using (Image image = Image.Create(options, 500, 500))
+                {
+                    // Draw random lines on the image
+                    Graphics graphics = new Graphics(image);
+                    int lineCount = 10;
+                    for (int l = 0; l < lineCount; l++)
+                    {
+                        int x1 = rnd.Next(0, 500);
+                        int y1 = rnd.Next(0, 500);
+                        int x2 = rnd.Next(0, 500);
+                        int y2 = rnd.Next(0, 500);
+                        Color lineColor = Color.FromArgb(255, rnd.Next(256), rnd.Next(256), rnd.Next(256));
+                        Pen pen = new Pen(lineColor, 2);
+                        graphics.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
+                    }
 
-                    // Random pen width (1 to 5)
-                    int penWidth = rnd.Next(1, 6);
-
-                    // Create Pen (no using)
-                    Pen pen = new Pen(lineColor, penWidth);
-                    graphics.DrawLine(pen, start, end);
+                    // Save the image (bound to the source)
+                    image.Save();
                 }
-
-                // Save the bound image (no need to specify options again)
-                canvas.Save();
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
