@@ -2,14 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
+        string inputPath = "input\\sample.eps";
+        string outputPath = "output\\result.png";
 
         if (!File.Exists(inputPath))
         {
@@ -19,53 +21,54 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (var eps = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+        try
         {
-            var rasterOptions = new EpsRasterizationOptions
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                PageWidth = eps.Width,
-                PageHeight = eps.Height,
-                BackgroundColor = Color.Transparent
-            };
-
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            using (var ms = new MemoryStream())
-            {
-                eps.Save(ms, pngOptions);
-                ms.Position = 0;
-
-                using (var raster = (RasterImage)Image.Load(ms))
+                // Rasterize EPS to PNG in memory
+                var rasterOptions = new PngOptions
                 {
-                    var graphics = new Graphics(raster);
-                    int width = raster.Width;
-                    int height = raster.Height;
-                    int centerX = width / 2;
-                    int centerY = height / 2;
-                    int maxRadius = Math.Min(width, height) / 2;
-
-                    // Draw concentric ellipses to simulate a vignette effect
-                    for (int i = 0; i < 10; i++)
+                    VectorRasterizationOptions = new EpsRasterizationOptions
                     {
-                        double factor = (double)i / 9.0;
-                        int radius = maxRadius - (int)(maxRadius * factor);
-                        int alpha = (int)(255 * factor * 0.5); // Increase opacity towards the edges
-                        var pen = new Pen(Color.FromArgb(alpha, 0, 0, 0), 0);
-                        var rect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
-                        graphics.DrawEllipse(pen, rect);
+                        PageWidth = epsImage.Width,
+                        PageHeight = epsImage.Height
                     }
+                };
 
-                    var finalOptions = new PngOptions
+                using (var memoryStream = new MemoryStream())
+                {
+                    epsImage.Save(memoryStream, rasterOptions);
+                    memoryStream.Position = 0;
+
+                    using (var raster = (RasterImage)Image.Load(memoryStream))
                     {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
+                        // Apply a simple vignette by drawing concentric semi‑transparent ellipses
+                        var graphics = new Graphics(raster);
+                        int width = raster.Width;
+                        int height = raster.Height;
+                        int steps = 10;
+                        for (int i = 0; i < steps; i++)
+                        {
+                            float opacityFactor = (float)(i + 1) / steps * 0.5f; // up to 50% opacity
+                            var brush = new SolidBrush(Color.Black)
+                            {
+                                Opacity = (int)(opacityFactor * 100)
+                            };
+                            int inset = i * Math.Min(width, height) / (steps * 2);
+                            var rect = new Rectangle(inset, inset, width - 2 * inset, height - 2 * inset);
+                            graphics.FillEllipse(brush, rect);
+                        }
 
-                    raster.Save(outputPath, finalOptions);
+                        // Save the final PNG with transparency
+                        var finalOptions = new PngOptions();
+                        raster.Save(outputPath, finalOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
