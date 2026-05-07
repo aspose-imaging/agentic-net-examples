@@ -1,17 +1,15 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "output.svg";
+        string inputPath = @"C:\temp\input.emf";
+        string outputPath = @"C:\temp\output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -23,28 +21,37 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the EMF image
-        using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+        try
         {
-            // Configure SVG save options
-            SvgOptions saveOptions = new SvgOptions
+            // Load the EMF image
+            using (Aspose.Imaging.FileFormats.Emf.EmfImage emfImage = (Aspose.Imaging.FileFormats.Emf.EmfImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Keep text as text (default font will be used; Arial is the system default for many EMFs)
-                TextAsShapes = false
-            };
+                // Prepare SVG save options
+                SvgOptions saveOptions = new SvgOptions
+                {
+                    // Render text as shapes is disabled to keep text as text (default font will be used)
+                    TextAsShapes = false
+                };
 
-            // Configure rasterization options for the EMF source
-            EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = emfImage.Size,
-                RenderMode = EmfRenderMode.Auto
-            };
+                // Configure rasterization options for EMF to SVG conversion
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
+                    PageSize = emfImage.Size,
+                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                    BorderX = 0,
+                    BorderY = 0
+                };
 
-            saveOptions.VectorRasterizationOptions = rasterOptions;
+                saveOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save as SVG
-            emfImage.Save(outputPath, saveOptions);
+                // Save as SVG
+                emfImage.Save(outputPath, saveOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
