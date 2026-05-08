@@ -3,7 +3,7 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.5.0",
-  "total_examples": 2919,
+  "total_examples": 2863,
   "total_categories": 17,
   "last_updated": "2026-05-08",
   "categories": [
@@ -277,10 +277,8 @@
     },
     {
       "name": "convert-apng",
-      "file_count": 53,
+      "file_count": 51,
       "all_files": [
-        "28121-set-apng-metadata-software-field-to-indicate-processing-library-version-before-saving.cs",
-        "28123-save-an-apng-image-to-disk-with-lossless-compression-and-embed-color-profile-information.cs",
         "adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs",
         "batch-convert-a-collection-of-svg-files-to-apng-assigning-each-svg-a-random-frame-delay.cs",
         "batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs",
@@ -334,8 +332,6 @@
         "transform-a-multi-page-tiff-into-an-animated-apng-setting-loop-count-to-infinite.cs"
       ],
       "files": [
-        "28121-set-apng-metadata-software-field-to-indicate-processing-library-version-before-saving.cs",
-        "28123-save-an-apng-image-to-disk-with-lossless-compression-and-embed-color-profile-information.cs",
         "adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs",
         "batch-convert-a-collection-of-svg-files-to-apng-assigning-each-svg-a-random-frame-delay.cs",
         "batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs",
@@ -363,7 +359,9 @@
         "export-an-apng-to-gif-and-include-a-timestamp-comment-indicating-conversion-date-and-time.cs",
         "export-an-apng-to-gif-and-include-frame-specific-comments-indicating-original-frame-indices.cs",
         "export-an-existing-apng-animation-to-an-animated-gif-maintaining-original-frame-order.cs",
-        "export-apng-animation-to-gif-format-while-reducing-color-palette-to-256-colors-for-compatibility.cs"
+        "export-apng-animation-to-gif-format-while-reducing-color-palette-to-256-colors-for-compatibility.cs",
+        "generate-an-apng-from-a-single-page-png-specifying-a-100-ms-delay-for-each-frame.cs",
+        "load-a-multi-page-tiff-assign-each-page-a-unique-frame-delay-and-compile-into-an-apng.cs"
       ],
       "required_namespaces": [
         "System",
@@ -407,7 +405,7 @@
         "WebPImage"
       ],
       "more_files": {
-        "count": 23,
+        "count": 21,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-apng"
       }
     },
@@ -513,9 +511,8 @@
     },
     {
       "name": "convert-cmx-images",
-      "file_count": 35,
+      "file_count": 34,
       "all_files": [
-        "28194-convert-a-single-page-cmx-image-to-a-multi-page-tiff-file-by-adding-blank-pages.cs",
         "apply-rotation-to-cmx-image-before-converting-to-tiff-using-image-rotateflip-to-correct-orientation.cs",
         "convert-a-cmx-image-to-jpeg-format-with-progressive-encoding-enabled-for-smoother-loading.cs",
         "convert-a-cmx-image-to-jpeg-format-with-quality-set-to-90-using-jpegoptions.cs",
@@ -552,7 +549,6 @@
         "write-unit-tests-for-cmx-to-tiff-conversion-covering-single-page-and-multi-page-scenarios.cs"
       ],
       "files": [
-        "28194-convert-a-single-page-cmx-image-to-a-multi-page-tiff-file-by-adding-blank-pages.cs",
         "apply-rotation-to-cmx-image-before-converting-to-tiff-using-image-rotateflip-to-correct-orientation.cs",
         "convert-a-cmx-image-to-jpeg-format-with-progressive-encoding-enabled-for-smoother-loading.cs",
         "convert-a-cmx-image-to-jpeg-format-with-quality-set-to-90-using-jpegoptions.cs",
@@ -581,7 +577,8 @@
         "preserve-cmx-metadata-when-converting-to-pdf-by-copying-imageproperties-to-the-pdf-document.cs",
         "save-converted-tiff-images-with-ccitt-group-4-compression-for-monochrome-output.cs",
         "save-converted-tiff-images-with-lzw-compression-and-verify-file-size-reduction.cs",
-        "set-dpi-of-output-jpeg-image-to-300-using-jpegoptions-resolutionx-and-resolutiony.cs"
+        "set-dpi-of-output-jpeg-image-to-300-using-jpegoptions-resolutionx-and-resolutiony.cs",
+        "use-aspose-imaging-to-convert-cmx-stream-from-memory-to-tiff-without-temporary-files.cs"
       ],
       "required_namespaces": [
         "Aspose.Imaging",
@@ -625,7 +622,7 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 5,
+        "count": 4,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-cmx-images"
       }
     },
@@ -1831,13 +1828,8 @@
     },
     {
       "name": "kernel-filters",
-      "file_count": 469,
+      "file_count": 464,
       "all_files": [
-        "28811-validate-that-a-custom-sharpening-kernel-s-sum-exceeds-one-to-achieve-brightness-increase-on-png-image.cs",
-        "28830-apply-the-custom-edge-detection-kernel-to-an-svg-image-using-convolutionfilter.cs",
-        "28970-ensure-that-pixel-values-are-correctly-rounded-after-convolution-before-clamping-to-0-255.cs",
-        "28988-create-a-convolution-filter-with-custom-4x4-kernel-ensure-element-sum-equals-one-and-apply-to-png.cs",
-        "29001-iterate-over-each-page-of-a-multi-page-svg-applying-a-normalized-custom-kernel-then-save-combined-document.cs",
         "add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs",
         "adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs",
         "adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs",
@@ -2304,11 +2296,6 @@
         "write-a-unit-test-that-confirms-pixel-clamping-works-when-kernel-coefficients-exceed-normal-range.cs"
       ],
       "files": [
-        "28811-validate-that-a-custom-sharpening-kernel-s-sum-exceeds-one-to-achieve-brightness-increase-on-png-image.cs",
-        "28830-apply-the-custom-edge-detection-kernel-to-an-svg-image-using-convolutionfilter.cs",
-        "28970-ensure-that-pixel-values-are-correctly-rounded-after-convolution-before-clamping-to-0-255.cs",
-        "28988-create-a-convolution-filter-with-custom-4x4-kernel-ensure-element-sum-equals-one-and-apply-to-png.cs",
-        "29001-iterate-over-each-page-of-a-multi-page-svg-applying-a-normalized-custom-kernel-then-save-combined-document.cs",
         "add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs",
         "adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs",
         "adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs",
@@ -2333,7 +2320,12 @@
         "apply-a-blur-filter-to-a-tga-image-and-export-the-processed-file-preserving-its-original-format.cs",
         "apply-a-blur-filter-to-a-tiff-image-and-write-the-processed-image-to-storage.cs",
         "apply-a-blur-filter-to-a-webp-image-and-write-the-processed-image-to-a-new-file.cs",
-        "apply-a-blur-filter-to-a-wmf-image-and-save-the-processed-output-image.cs"
+        "apply-a-blur-filter-to-a-wmf-image-and-save-the-processed-output-image.cs",
+        "apply-a-blur-filter-to-a-wmz-image-and-save-the-processed-file-to-the-desired-location.cs",
+        "apply-a-blur-filter-to-an-apng-image-then-write-the-processed-output-to-disk.cs",
+        "apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs",
+        "apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs",
+        "apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs"
       ],
       "required_namespaces": [
         "System",
@@ -2408,42 +2400,14 @@
         "WebPOptions"
       ],
       "more_files": {
-        "count": 439,
+        "count": 434,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters"
       }
     },
     {
       "name": "manipulate-different-image-file-formats",
-      "file_count": 628,
+      "file_count": 600,
       "all_files": [
-        "29357-load-a-djvu-document-apply-flip-to-each-page-before-converting-to-tiff.cs",
-        "29393-load-a-dicom-image-retrieve-patient-id-metadata-embed-as-xmp-tag-then-export-to-pdf.cs",
-        "29414-change-dng-color-depth-from-16-bit-to-8-bit-and-save-as-jpeg.cs",
-        "29418-apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs",
-        "29422-rotate-a-tga-picture-ninety-degrees-clockwise-and-store-the-result-as-bmp.cs",
-        "29425-crop-a-tga-image-to-a-circular-region-with-radius-100-pixels-and-save-as-png.cs",
-        "29430-batch-rename-and-convert-emf-files-in-a-directory-to-sequentially-numbered-png-files.cs",
-        "29432-convert-a-multi-page-emf-document-to-separate-png-files-one-per-page.cs",
-        "29433-convert-an-emf-vector-to-a-high-resolution-pdf-with-embedded-fonts.cs",
-        "29436-convert-a-tga-background-image-to-lossless-png-while-maintaining-its-color-profile.cs",
-        "29437-convert-a-tga-sprite-sheet-into-individual-png-frames-using-a-64-64-pixel-grid.cs",
-        "29439-generate-a-thumbnail-of-a-dng-image-with-dimensions-150-150-pixels-and-save-as-jpeg.cs",
-        "29442-reduce-bmp-file-size-derived-from-emf-by-applying-lossy-compression.cs",
-        "29446-load-an-eps-file-from-disk-and-export-it-directly-to-jpeg-format.cs",
-        "29462-resize-an-eps-image-to-a-width-of-2000-pixels-while-maintaining-aspect-ratio-then-export-to-tiff.cs",
-        "29465-resize-an-eps-image-to-a-width-of-2000-pixels-then-export-to-pdf-with-pdfcomplianceversion-pdfa2b.cs",
-        "29478-modify-the-datetimeoriginal-exif-tag-in-a-jpeg-image-and-save-changes.cs",
-        "29479-write-custom-exif-gps-latitude-and-longitude-tags-into-a-jpeg-image-for-geotagging.cs",
-        "29488-generate-a-thumbnail-for-each-jpeg-image-in-a-directory-and-store-thumbnails-in-a-zip-archive.cs",
-        "29516-load-a-jpeg2000-image-with-a-1-mb-memory-buffer-process-pixels-and-save-as-jpeg-with-85-quality.cs",
-        "29517-create-a-new-jpeg2000-image-with-custom-memory-strategy-and-write-a-solid-color-background.cs",
-        "29519-create-a-jpeg2000-image-from-raw-pixel-data-specifying-bits-per-sample-and-color-space.cs",
-        "29522-create-a-jpeg2000-image-embed-a-custom-metadata-block-and-verify-its-presence-after-saving.cs",
-        "29535-batch-extract-all-exif-tags-from-jpeg-images-and-store-them-in-a-relational-database-for-analysis.cs",
-        "29551-create-an-indexed-psd-file-with-a-custom-256-color-palette-derived-from-rgb-space.cs",
-        "29567-initialize-a-psdimage-with-indexed-mode-and-custom-palette-for-image-creation.cs",
-        "29585-draw-a-polygon-on-an-indexed-psd-canvas-using-graphicspath-before-saving.cs",
-        "29586-draw-multiple-geometric-shapes-on-an-indexed-psd-canvas-before-saving.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -3046,36 +3010,36 @@
         "write-custom-exif-gps-latitude-and-longitude-tags-into-a-jpeg-image-for-geotagging.cs"
       ],
       "files": [
-        "29357-load-a-djvu-document-apply-flip-to-each-page-before-converting-to-tiff.cs",
-        "29393-load-a-dicom-image-retrieve-patient-id-metadata-embed-as-xmp-tag-then-export-to-pdf.cs",
-        "29414-change-dng-color-depth-from-16-bit-to-8-bit-and-save-as-jpeg.cs",
-        "29418-apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs",
-        "29422-rotate-a-tga-picture-ninety-degrees-clockwise-and-store-the-result-as-bmp.cs",
-        "29425-crop-a-tga-image-to-a-circular-region-with-radius-100-pixels-and-save-as-png.cs",
-        "29430-batch-rename-and-convert-emf-files-in-a-directory-to-sequentially-numbered-png-files.cs",
-        "29432-convert-a-multi-page-emf-document-to-separate-png-files-one-per-page.cs",
-        "29433-convert-an-emf-vector-to-a-high-resolution-pdf-with-embedded-fonts.cs",
-        "29436-convert-a-tga-background-image-to-lossless-png-while-maintaining-its-color-profile.cs",
-        "29437-convert-a-tga-sprite-sheet-into-individual-png-frames-using-a-64-64-pixel-grid.cs",
-        "29439-generate-a-thumbnail-of-a-dng-image-with-dimensions-150-150-pixels-and-save-as-jpeg.cs",
-        "29442-reduce-bmp-file-size-derived-from-emf-by-applying-lossy-compression.cs",
-        "29446-load-an-eps-file-from-disk-and-export-it-directly-to-jpeg-format.cs",
-        "29462-resize-an-eps-image-to-a-width-of-2000-pixels-while-maintaining-aspect-ratio-then-export-to-tiff.cs",
-        "29465-resize-an-eps-image-to-a-width-of-2000-pixels-then-export-to-pdf-with-pdfcomplianceversion-pdfa2b.cs",
-        "29478-modify-the-datetimeoriginal-exif-tag-in-a-jpeg-image-and-save-changes.cs",
-        "29479-write-custom-exif-gps-latitude-and-longitude-tags-into-a-jpeg-image-for-geotagging.cs",
-        "29488-generate-a-thumbnail-for-each-jpeg-image-in-a-directory-and-store-thumbnails-in-a-zip-archive.cs",
-        "29516-load-a-jpeg2000-image-with-a-1-mb-memory-buffer-process-pixels-and-save-as-jpeg-with-85-quality.cs",
-        "29517-create-a-new-jpeg2000-image-with-custom-memory-strategy-and-write-a-solid-color-background.cs",
-        "29519-create-a-jpeg2000-image-from-raw-pixel-data-specifying-bits-per-sample-and-color-space.cs",
-        "29522-create-a-jpeg2000-image-embed-a-custom-metadata-block-and-verify-its-presence-after-saving.cs",
-        "29535-batch-extract-all-exif-tags-from-jpeg-images-and-store-them-in-a-relational-database-for-analysis.cs",
-        "29551-create-an-indexed-psd-file-with-a-custom-256-color-palette-derived-from-rgb-space.cs",
-        "29567-initialize-a-psdimage-with-indexed-mode-and-custom-palette-for-image-creation.cs",
-        "29585-draw-a-polygon-on-an-indexed-psd-canvas-using-graphicspath-before-saving.cs",
-        "29586-draw-multiple-geometric-shapes-on-an-indexed-psd-canvas-before-saving.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
-        "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs"
+        "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
+        "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
+        "add-a-generated-thumbnail-to-both-jfif-and-exif-segments-of-a-jpeg-image-simultaneously.cs",
+        "add-a-new-frame-to-a-tiff-using-custom-compression-and-set-a-unique-description-tag.cs",
+        "add-a-new-frame-to-an-existing-tiff-using-jpeg-compression-and-set-a-custom-comment-tag.cs",
+        "add-a-new-tiff-frame-with-custom-dimensions-lzw-compression-and-specific-resolution-settings.cs",
+        "add-a-semi-transparent-watermark-text-to-a-dng-photo-and-save-as-png.cs",
+        "add-a-textual-watermark-to-a-bmp-image-at-the-bottom-right-corner-with-configurable-opacity.cs",
+        "add-a-tiff-frame-with-custom-dimensions-ccitt-group-4-compression-and-specific-dpi-values-for-scanning-quality.cs",
+        "add-a-tiff-frame-with-custom-photometric-interpretation-and-save-the-multi-frame-image-using-lzw-compression.cs",
+        "add-a-tiff-frame-with-custom-photometric-interpretation-and-save-the-updated-image-using-jpeg-compression.cs",
+        "add-a-tiff-frame-with-custom-tile-size-and-compression-then-save-the-multi-frame-image-to-disk.cs",
+        "adjust-brightness-and-contrast-of-a-bmp-image-with-custom-parameters-and-save-the-modified-copy.cs",
+        "adjust-dng-contrast-by-30-percent-and-save-the-result-as-tiff.cs",
+        "adjust-emfimage-dpix-and-dpiy-properties-before-exporting-to-a-raster-format.cs",
+        "adjust-the-gamma-of-a-dng-image-to-2-2-and-export-as-png.cs",
+        "append-additional-frames-with-varying-parameters-to-an-existing-tiff-image-using-the-tiff-format.cs",
+        "apply-a-custom-scaling-factor-of-1-5-to-an-eps-image-and-export-it-as-a-high-quality-jpeg.cs",
+        "apply-a-gaussian-blur-effect-to-a-bmp-image-for-background-softening-in-design-mockups.cs",
+        "apply-a-gaussian-blur-with-radius-five-to-an-emf-image-and-export-as-png.cs",
+        "apply-a-grayscale-filter-to-a-bmp-image-and-export-the-result-as-tiff-for-archival-storage.cs",
+        "apply-a-memory-saving-strategy-by-processing-each-webp-frame-individually-and-releasing-resources-after-saving.cs",
+        "apply-a-memory-saving-strategy-by-processing-tiff-pages-one-at-a-time-using-sequential-export-mode.cs",
+        "apply-a-sepia-tone-effect-to-an-emf-illustration-and-export-as-png.cs",
+        "apply-a-sharpening-filter-with-strength-three-to-a-tga-texture-and-export-as-bmp.cs",
+        "apply-a-solid-background-color-to-a-png-image-with-transparency-replacing-its-alpha-channel-uniformly.cs",
+        "apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs",
+        "apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs",
+        "apply-coordinate-offsets-to-crop-a-dicom-image-outputting-the-result-as-a-dicom-file.cs"
       ],
       "required_namespaces": [
         "System",
@@ -3190,7 +3154,7 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 598,
+        "count": 570,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulate-different-image-file-formats"
       }
     },
@@ -3968,28 +3932,8 @@
     },
     {
       "name": "working-with-drawing-images",
-      "file_count": 417,
+      "file_count": 397,
       "all_files": [
-        "29027-create-a-bmp-clear-to-dark-gray-then-draw-a-bright-yellow-diagonal-line.cs",
-        "29028-create-a-bmp-clear-to-ivory-then-draw-diagonal-lines-forming-a-hatch-pattern.cs",
-        "29029-create-a-bmp-image-clear-to-teal-then-draw-a-white-ellipse-centered-in-the-canvas.cs",
-        "29044-use-graphics-drawrectangle-overload-with-location-and-size-parameters-to-outline-a-green-square.cs",
-        "29055-create-a-bmp-image-draw-a-thick-black-line-then-overlay-a-thinner-white-line-for-outline-effect.cs",
-        "29057-create-a-bmp-image-draw-a-thick-red-border-around-the-entire-canvas.cs",
-        "29060-create-a-bmp-draw-an-ellipse-then-apply-a-rotation-transform-before-drawing-another-shape.cs",
-        "29066-generate-a-bmp-image-draw-a-diagonal-line-then-mirror-it-using-graphics-scaletransform.cs",
-        "29080-batch-process-a-list-of-image-sizes-creating-bmp-files-each-with-a-centered-red-ellipse.cs",
-        "29119-create-a-figure-and-add-a-straight-line-shape-defined-by-start-and-end-coordinates.cs",
-        "29124-fill-the-combined-graphicspath-on-the-image-using-graphics-fillpath-with-the-configured-hatchbrush.cs",
-        "29136-combine-translation-and-rotation-transforms-to-position-vector-graphics-at-a-custom-location.cs",
-        "29142-retrieve-the-bounding-rectangle-of-a-graphicspath-using-getbounds-to-align-additional-elements.cs",
-        "29144-flatten-the-graphicspath-to-convert-curves-into-line-segments-for-simplified-rendering.cs",
-        "29146-iterate-over-each-figure-in-the-graphicspath-to-log-the-number-of-contained-shapes.cs",
-        "29152-set-the-compositing-mode-of-graphics-to-sourceover-to-blend-vector-graphics-with-underlying-pixels.cs",
-        "29153-apply-a-clipping-region-using-graphics-setclip-with-the-graphicspath-to-restrict-drawing-area.cs",
-        "29155-create-a-figure-containing-multiple-line-segments-forming-a-star-shape-for-decorative-overlay.cs",
-        "29156-add-the-star-figure-to-the-graphicspath-and-fill-it-with-a-radial-gradient-brush.cs",
-        "29165-convert-a-multi-page-emf-document-to-separate-high-resolution-tiff-files-using-specified-dpi-settings.cs",
         "add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs",
         "add-a-custom-figure-overlay-onto-a-gif-image-ensuring-proper-frame-alignment-and-animation-compatibility.cs",
         "add-a-rectangle-shape-to-a-figure-using-figure-addshape-with-defined-coordinates.cs",
@@ -4389,26 +4333,6 @@
         "write-the-generated-output-to-a-png-file-ensuring-appropriate-encoding-and-image-fidelity.cs"
       ],
       "files": [
-        "29027-create-a-bmp-clear-to-dark-gray-then-draw-a-bright-yellow-diagonal-line.cs",
-        "29028-create-a-bmp-clear-to-ivory-then-draw-diagonal-lines-forming-a-hatch-pattern.cs",
-        "29029-create-a-bmp-image-clear-to-teal-then-draw-a-white-ellipse-centered-in-the-canvas.cs",
-        "29044-use-graphics-drawrectangle-overload-with-location-and-size-parameters-to-outline-a-green-square.cs",
-        "29055-create-a-bmp-image-draw-a-thick-black-line-then-overlay-a-thinner-white-line-for-outline-effect.cs",
-        "29057-create-a-bmp-image-draw-a-thick-red-border-around-the-entire-canvas.cs",
-        "29060-create-a-bmp-draw-an-ellipse-then-apply-a-rotation-transform-before-drawing-another-shape.cs",
-        "29066-generate-a-bmp-image-draw-a-diagonal-line-then-mirror-it-using-graphics-scaletransform.cs",
-        "29080-batch-process-a-list-of-image-sizes-creating-bmp-files-each-with-a-centered-red-ellipse.cs",
-        "29119-create-a-figure-and-add-a-straight-line-shape-defined-by-start-and-end-coordinates.cs",
-        "29124-fill-the-combined-graphicspath-on-the-image-using-graphics-fillpath-with-the-configured-hatchbrush.cs",
-        "29136-combine-translation-and-rotation-transforms-to-position-vector-graphics-at-a-custom-location.cs",
-        "29142-retrieve-the-bounding-rectangle-of-a-graphicspath-using-getbounds-to-align-additional-elements.cs",
-        "29144-flatten-the-graphicspath-to-convert-curves-into-line-segments-for-simplified-rendering.cs",
-        "29146-iterate-over-each-figure-in-the-graphicspath-to-log-the-number-of-contained-shapes.cs",
-        "29152-set-the-compositing-mode-of-graphics-to-sourceover-to-blend-vector-graphics-with-underlying-pixels.cs",
-        "29153-apply-a-clipping-region-using-graphics-setclip-with-the-graphicspath-to-restrict-drawing-area.cs",
-        "29155-create-a-figure-containing-multiple-line-segments-forming-a-star-shape-for-decorative-overlay.cs",
-        "29156-add-the-star-figure-to-the-graphicspath-and-fill-it-with-a-radial-gradient-brush.cs",
-        "29165-convert-a-multi-page-emf-document-to-separate-high-resolution-tiff-files-using-specified-dpi-settings.cs",
         "add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs",
         "add-a-custom-figure-overlay-onto-a-gif-image-ensuring-proper-frame-alignment-and-animation-compatibility.cs",
         "add-a-rectangle-shape-to-a-figure-using-figure-addshape-with-defined-coordinates.cs",
@@ -4418,7 +4342,27 @@
         "add-the-polygon-figure-to-the-graphicspath-and-fill-it-using-a-hatchbrush-with-cross-pattern.cs",
         "add-the-star-figure-to-the-graphicspath-and-fill-it-with-a-radial-gradient-brush.cs",
         "adjust-the-opacity-of-a-filling-brush-by-setting-its-alpha-value-before-calling-fillpath.cs",
-        "append-multiple-figure-objects-to-the-image-s-internal-array-collection-to-enable-further-manipulation-and-rendering.cs"
+        "append-multiple-figure-objects-to-the-image-s-internal-array-collection-to-enable-further-manipulation-and-rendering.cs",
+        "apply-a-clipping-region-using-graphics-setclip-with-the-graphicspath-to-restrict-drawing-area.cs",
+        "apply-a-custom-color-palette-to-a-loaded-svg-before-converting-it-to-an-8-bit-png-image.cs",
+        "apply-a-custom-dash-style-to-a-pen-and-draw-a-dashed-line-across-the-bmp.cs",
+        "apply-a-custom-stroke-pattern-to-all-paths-in-an-svg-file-and-export-the-styled-image-as-pdf.cs",
+        "apply-a-grayscale-color-matrix-to-a-loaded-svg-image-before-exporting-it-to-png-format.cs",
+        "apply-a-solidbrush-with-semi-transparent-red-color-to-fill-the-graphicspath-for-overlay-effect.cs",
+        "apply-fill-operations-to-defined-vector-paths-within-a-bmp-image-preserving-image-fidelity.cs",
+        "apply-fill-operations-to-defined-vector-paths-within-a-jpeg2000-image-preserving-pixel-fidelity.cs",
+        "apply-graphics-rotatetransform-to-rotate-the-path-45-degrees-around-its-center-point.cs",
+        "apply-the-full-graphicspath-source-to-render-vector-shapes-onto-an-image-programmatically-accurately.cs",
+        "batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm-for-storage-efficiency.cs",
+        "batch-convert-a-set-of-emf-files-to-pdf-embedding-each-file-s-original-filename-as-a-pdf-bookmark.cs",
+        "batch-convert-a-set-of-svg-icons-to-monochrome-pngs-for-use-in-dark-theme-applications.cs",
+        "batch-convert-all-emf-files-in-a-directory-to-png-applying-a-uniform-background-color-to-each-image.cs",
+        "batch-convert-eps-drawings-to-png-applying-a-uniform-scaling-factor-of-2-and-preserving-transparency.cs",
+        "batch-convert-svg-icons-to-pdf-embedding-each-icon-as-a-vector-object-for-scalable-printing.cs",
+        "batch-convert-svg-illustrations-to-pdf-embedding-each-file-s-description-as-pdf-metadata-for-cataloging.cs",
+        "batch-convert-svg-logos-to-ico-files-generating-windows-icon-sizes-of-16-32-48-and-256-pixels.cs",
+        "batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs",
+        "batch-create-bmp-files-each-containing-a-rotated-version-of-the-same-base-shape.cs"
       ],
       "required_namespaces": [
         "System",
@@ -4504,7 +4448,7 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 387,
+        "count": 367,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images"
       }
     }
