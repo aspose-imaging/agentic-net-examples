@@ -2,45 +2,55 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "Output/output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.bmp";
+            string outputPath = @"C:\Images\output.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Resize to 500x500
-            image.Resize(500, 500);
-
-            // Apply median filter (kernel size 5)
-            RasterImage raster = (RasterImage)image;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-
-            // Prepare SVG save options with rasterization settings
-            SvgOptions svgOptions = new SvgOptions();
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size
-            };
-            svgOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as SVG
-            image.Save(outputPath, svgOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Resize to 500x500 pixels
+                image.Resize(500, 500);
+
+                // Apply a median filter (size 5) to the whole image
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                // Prepare SVG save options with rasterization settings
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the processed image as SVG
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

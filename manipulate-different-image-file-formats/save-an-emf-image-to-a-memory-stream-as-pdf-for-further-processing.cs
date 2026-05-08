@@ -7,35 +7,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.emf";
-        string outputPath = @"C:\Temp\output.pdf";
+        // Hardcoded input path
+        string inputPath = @"C:\Temp\sample.emf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the EMF image
             using (Image emfImage = Image.Load(inputPath))
             {
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions();
-
-                // Save to a memory stream as PDF
+                // Create a memory stream to hold the PDF output
                 using (MemoryStream pdfStream = new MemoryStream())
                 {
+                    // Set up PDF save options (default settings)
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the EMF image into the memory stream as PDF
                     emfImage.Save(pdfStream, pdfOptions);
 
-                    // Example of further processing: write the PDF bytes to a file
-                    File.WriteAllBytes(outputPath, pdfStream.ToArray());
+                    // The PDF data is now available in pdfStream
+                    Console.WriteLine($"PDF saved to memory stream. Length = {pdfStream.Length} bytes.");
+                    
+                    // Example of further processing: reset position if needed
+                    // pdfStream.Position = 0;
+                    // ... process the PDF bytes ...
                 }
             }
         }

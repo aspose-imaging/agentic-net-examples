@@ -10,29 +10,24 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
-
-            foreach (string inputPath in bmpFiles)
+            // Enumerate all BMP files in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.bmp"))
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output file path with .webp extension
+                // Build the output file path with .webp extension
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".webp");
 
-                // Ensure the output directory for this file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the BMP image
@@ -44,7 +39,7 @@ class Program
                         Lossless = true
                     };
 
-                    // Save as WebP
+                    // Save the image as WebP
                     image.Save(outputPath, webpOptions);
                 }
             }

@@ -5,33 +5,41 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths (relative)
-        string inputPath = "Input/sample.bmp";
-        string outputPath = "Output/resized.bmp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.bmp";
+            string outputPath = @"C:\Images\output_resized.bmp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Resize to half of original dimensions (default NearestNeighbourResample)
-            image.Resize(image.Width / 2, image.Height / 2);
-
-            // Save the resized image as BMP
-            using (BmpOptions bmpOptions = new BmpOptions())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                image.Save(outputPath, bmpOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Calculate half dimensions
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+
+                // Resize the image
+                image.Resize(newWidth, newHeight);
+
+                // Save the resized image as BMP
+                image.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

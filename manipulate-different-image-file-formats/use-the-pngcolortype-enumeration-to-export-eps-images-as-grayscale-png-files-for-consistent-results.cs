@@ -2,44 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.eps";
-        string outputPath = "sample_grayscale.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample_grayscale.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
+            // Load EPS image and export as grayscale PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options to use grayscale color type
-                var pngOptions = new PngOptions
+                var epsImage = (EpsImage)image;
+
+                var options = new PngOptions
                 {
-                    ColorType = PngColorType.Grayscale
+                    ColorType = PngColorType.Grayscale,
+                    VectorRasterizationOptions = new EpsRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = epsImage.Width,
+                        PageHeight = epsImage.Height
+                    }
                 };
 
-                // Save the image as a grayscale PNG
-                image.Save(outputPath, pngOptions);
+                epsImage.Save(outputPath, options);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

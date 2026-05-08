@@ -3,66 +3,52 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "C:\\temp\\architectural.svg";
-        string outputPath = "C:\\temp\\architectural_filtered.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the SVG image
+            string inputPath = "architectural.svg";
+            string outputPath = "architectural_edges.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Rasterize SVG to a temporary PNG
+            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_raster.png");
             using (Image svgImage = Image.Load(inputPath))
             {
-                // Set up rasterization options for PNG output
-                VectorRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                VectorRasterizationOptions vectorOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
+                PngOptions pngOptions = new PngOptions { VectorRasterizationOptions = vectorOptions };
+                svgImage.Save(tempPngPath, pngOptions);
+            }
+
+            // Load raster image and apply horizontal edge detection filter
+            using (Image rasterImage = Image.Load(tempPngPath))
+            {
+                RasterImage raster = (RasterImage)rasterImage;
+
+                double[,] kernel = new double[,]
                 {
-                    PageSize = svgImage.Size
+                    { -1, -2, -1 },
+                    {  0,  0,  0 },
+                    {  1,  2,  1 }
                 };
 
-                // Rasterize SVG to a memory stream as PNG
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    // Load the rasterized PNG as a RasterImage
-                    using (Image rasterImageContainer = Image.Load(ms))
-                    {
-                        RasterImage rasterImage = (RasterImage)rasterImageContainer;
-
-                        // Define a custom kernel for horizontal edge detection (Sobel operator)
-                        double[,] kernel = new double[,]
-                        {
-                            { -1, -2, -1 },
-                            {  0,  0,  0 },
-                            {  1,  2,  1 }
-                        };
-
-                        // Apply the convolution filter with the custom kernel
-                        var convOptions = new ConvolutionFilterOptions(kernel);
-                        rasterImage.Filter(rasterImage.Bounds, convOptions);
-
-                        // Save the filtered image as PNG
-                        rasterImage.Save(outputPath, pngOptions);
-                    }
-                }
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                raster.Save(outputPath, new PngOptions());
             }
+
+            // Optional cleanup of temporary file
+            // File.Delete(tempPngPath);
         }
         catch (Exception ex)
         {

@@ -9,30 +9,29 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = "input.tif";
             string outputPath = "output.apng";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
             // Load the multi‑page TIFF
             using (Image image = Image.Load(inputPath))
             {
-                // Save as an animated PNG with infinite looping (NumPlays = 0)
-                image.Save(outputPath, new ApngOptions { NumPlays = 0 });
+                // Save as animated APNG with infinite looping (NumPlays defaults to 0)
+                image.Save(outputPath, new ApngOptions());
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

@@ -1,32 +1,36 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.cdr";
+            string outputPath = "output\\sample.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdr = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            // Load the CDR vector image
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions
+                // Configure PNG options with maximum compression
+                var pngOptions = new PngOptions
                 {
-                    PngCompressionLevel = PngCompressionLevel.ZipLevel9,
-                    ColorType = PngColorType.TruecolorWithAlpha,
+                    CompressionLevel = 9, // maximum compression (0-9)
                     VectorRasterizationOptions = new CdrRasterizationOptions
                     {
                         PageWidth = cdr.Width,
@@ -34,7 +38,8 @@ class Program
                     }
                 };
 
-                cdr.Save(outputPath, options);
+                // Save the rasterized PNG image
+                cdr.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

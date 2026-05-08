@@ -2,37 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input/sample.png";
-        string outputPath = "Output/processed.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/result.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-            if (!raster.IsCached)
-                raster.CacheData();
-
-            raster.Resize(1200, 800);
-
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.Source = new FileCreateSource(outputPath, false);
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                // Resize to 1200x800 using default nearest neighbour resampling
+                raster.Resize(1200, 800);
+
+                // Apply median filter with size 5
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+
+                // Save as PDF
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    raster.Save(outputPath, pdfOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

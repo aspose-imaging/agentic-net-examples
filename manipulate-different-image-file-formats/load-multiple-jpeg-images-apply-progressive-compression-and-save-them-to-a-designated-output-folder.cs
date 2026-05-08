@@ -8,7 +8,7 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output directories
+        // Hardcoded input and output directories
         string inputFolder = @"C:\Images\Input";
         string outputFolder = @"C:\Images\Output";
 
@@ -26,22 +26,22 @@ class Program
                     return;
                 }
 
-                // Build the corresponding output path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName + "_progressive.jpg");
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the source image
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure JPEG options for progressive compression
+                    // Configure JPEG save options for progressive compression
                     JpegOptions saveOptions = new JpegOptions
                     {
                         CompressionType = JpegCompressionMode.Progressive,
-                        Quality = 100 // optional: set desired quality (1‑100)
+                        Quality = 100
                     };
+
+                    // Build the output file path
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + "_progressive.jpg");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the image with the specified options
                     image.Save(outputPath, saveOptions);

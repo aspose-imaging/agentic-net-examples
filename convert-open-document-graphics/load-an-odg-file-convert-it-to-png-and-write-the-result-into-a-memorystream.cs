@@ -7,31 +7,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = "sample.odg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input ODG file path
+            string inputPath = @"C:\temp\sample.odg";
 
-        // Load the ODG image
-        using (Image odgImage = Image.Load(inputPath))
-        {
-            // Set PNG save options
-            var pngOptions = new PngOptions();
-
-            // Save the image to a memory stream in PNG format
-            using (MemoryStream pngStream = new MemoryStream())
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                odgImage.Save(pngStream, pngOptions);
-
-                // Example usage of the resulting PNG data
-                byte[] pngData = pngStream.ToArray();
-                Console.WriteLine($"PNG data size: {pngData.Length} bytes");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Load the ODG image
+            using (Image odgImage = Image.Load(inputPath))
+            {
+                // Prepare a memory stream to hold the PNG data
+                using (MemoryStream pngStream = new MemoryStream())
+                {
+                    // Save the image as PNG into the memory stream
+                    PngOptions pngOptions = new PngOptions();
+                    odgImage.Save(pngStream, pngOptions);
+
+                    // Optionally, display the size of the generated PNG data
+                    Console.WriteLine($"PNG data length: {pngStream.Length} bytes");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

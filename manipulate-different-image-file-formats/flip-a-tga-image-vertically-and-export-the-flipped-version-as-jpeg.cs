@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tga;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -22,15 +21,12 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TGA image, flip vertically, and save as JPEG
             using (TgaImage image = (TgaImage)Image.Load(inputPath))
             {
-                // Vertical flip
                 image.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-                // Save as JPEG (format inferred from .jpg extension)
                 image.Save(outputPath);
             }
         }

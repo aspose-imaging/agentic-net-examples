@@ -1,20 +1,21 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.dcm";
-        string outputDirectory = @"C:\Images\Output";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputPath = "output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,46 +23,37 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific features
+                // Cast to DicomImage for DICOM-specific operations
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Convert the image to grayscale (if not already)
+                // Ensure the image is in grayscale (optional, safe for already grayscale images)
                 dicomImage.Grayscale();
 
-                int pageIndex = 0;
-                // Iterate through each page of the DICOM image
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                // Prepare PNG save options with a custom palette
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Build the output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
+                    // Use indexed color so the palette is applied
+                    ColorType = PngColorType.IndexedColor,
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Generate a palette based on the image content (custom palette)
+                    Palette = ColorPaletteHelper.GetCloseImagePalette(
+                        (RasterImage)dicomImage,
+                        256,
+                        PaletteMiningMethod.Histogram)
+                };
 
-                    // Configure PNG options with an indexed color type and a custom grayscale palette
-                    var pngOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.IndexedColor,
-                        // Use an 8‑bit grayscale palette as the custom palette
-                        Palette = ColorPaletteHelper.Create8BitGrayscale(false)
-                    };
-
-                    // Save the current DICOM page as a PNG using the specified options
-                    dicomPage.Save(outputPath, pngOptions);
-
-                    pageIndex++;
-                }
+                // Save the PNG with the custom palette
+                dicomImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // Output any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

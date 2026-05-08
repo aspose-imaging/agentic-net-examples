@@ -10,35 +10,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Determine the central pixel coordinates
                 int centerX = raster.Width / 2;
                 int centerY = raster.Height / 2;
-                Rectangle centerRect = new Rectangle(centerX, centerY, 1, 1);
+                var rect = new Rectangle(centerX, centerY, 1, 1);
 
-                // Read the central pixel before filtering
-                int[] beforePixels = raster.LoadArgb32Pixels(centerRect);
+                // Load central pixel before filtering
+                int[] beforePixels = raster.LoadArgb32Pixels(rect);
                 int before = beforePixels[0];
 
-                // Define a simple edge‑detection (Laplacian) kernel
+                // Edge‑detection kernel (Laplacian)
                 double[,] kernel = new double[,]
                 {
                     { 0, -1, 0 },
@@ -46,26 +41,25 @@ class Program
                     { 0, -1, 0 }
                 };
 
-                // Apply the convolution filter using the kernel
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Read the central pixel after filtering
-                int[] afterPixels = raster.LoadArgb32Pixels(centerRect);
+                // Load central pixel after filtering
+                int[] afterPixels = raster.LoadArgb32Pixels(rect);
                 int after = afterPixels[0];
 
-                // Log the difference if any
+                // Log difference
                 if (before != after)
                 {
-                    Console.WriteLine($"Center pixel changed from 0x{before:X8} to 0x{after:X8}");
+                    Console.WriteLine($"Central pixel changed from 0x{before:X8} to 0x{after:X8}");
                 }
                 else
                 {
-                    Console.WriteLine("Center pixel unchanged after edge detection.");
+                    Console.WriteLine("Central pixel unchanged.");
                 }
 
-                // Save the processed image as PNG
-                PngOptions saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                // Save the filtered image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)

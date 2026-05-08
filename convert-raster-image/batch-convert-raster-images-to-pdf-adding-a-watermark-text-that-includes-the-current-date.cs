@@ -2,61 +2,74 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Prepare input and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                Graphics graphics = new Graphics(image);
-                Font font = new Font("Arial", 24);
-                SolidBrush brush = new SolidBrush(Color.Yellow);
-                string watermarkText = $"Watermark {DateTime.Now:yyyy-MM-dd}";
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Draw watermark at bottom-right with padding
-                float x = image.Width - 200;
-                float y = image.Height - 50;
-                graphics.DrawString(watermarkText, font, brush, new PointF(x, y));
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-                using (PdfOptions pdfOptions = new PdfOptions())
+            foreach (var inputPath in files)
+            {
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    image.Save(outputPath, pdfOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Determine output PDF path
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Work with raster image
+                    RasterImage raster = (RasterImage)image;
+                    raster.CacheData();
+
+                    // Add watermark text with current date
+                    string watermarkText = $"Generated on {DateTime.Now:yyyy-MM-dd}";
+                    var font = new Font("Arial", 24);
+                    var brush = new SolidBrush(Color.Yellow);
+                    var graphics = new Graphics(raster);
+                    // Position watermark near bottom-right corner
+                    var position = new PointF(raster.Width - 300, raster.Height - 50);
+                    graphics.DrawString(watermarkText, font, brush, position);
+
+                    // Save as PDF
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

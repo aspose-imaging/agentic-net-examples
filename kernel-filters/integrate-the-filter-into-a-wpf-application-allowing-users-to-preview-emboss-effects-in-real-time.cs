@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            string inputPath = "input\\sample.jpg";
+            string outputPath = "output\\sample_emboss.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,17 +24,20 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Prepare JPEG save options with a bound file source
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = source,
+                Quality = 90
+            };
+
+            // Load the image, apply the sharpen (emboss-like) filter, and save
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
-
-                // Apply an emboss-like effect using Sharpen filter (example)
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-
-                // Save the processed image as PNG
-                raster.Save(outputPath, new PngOptions());
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)

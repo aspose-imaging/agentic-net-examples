@@ -4,81 +4,67 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.svg";
+
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.svg";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Temporary files for raster processing
-            string tempPng = "temp.png";
-            string filteredPng = "filtered.png";
-
-            // Load SVG and rasterize to PNG
             using (Image image = Image.Load(inputPath))
             {
-                SvgImage svgImage = (SvgImage)image;
-
+                // Rasterize SVG to a raster image in memory
                 var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size
+                    PageSize = image.Size
                 };
-
                 var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                svgImage.Save(tempPng, pngOptions);
-            }
-
-            // Load rasterized PNG, apply custom convolution kernel, and save filtered PNG
-            using (RasterImage raster = (RasterImage)Image.Load(tempPng))
-            {
-                double[,] kernel = new double[,]
+                using (var ms = new MemoryStream())
                 {
-                    { -1, -1, -1 },
-                    { -1,  9, -1 },
-                    { -1, -1, -1 }
-                };
+                    image.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-                raster.Save(filteredPng, new PngOptions());
-            }
+                    using (Image rasterImg = Image.Load(ms))
+                    {
+                        var raster = (RasterImage)rasterImg;
 
-            // Create a new SVG and embed the filtered raster image
-            using (Image image = Image.Load(inputPath))
-            {
-                SvgImage originalSvg = (SvgImage)image;
-                int width = originalSvg.Width;
-                int height = originalSvg.Height;
-                int dpi = 96;
+                        // Apply a custom convolution kernel
+                        double[,] kernel = new double[,]
+                        {
+                            { 0, -1, 0 },
+                            { -1, 5, -1 },
+                            { 0, -1, 0 }
+                        };
+                        var convOptions = new ConvolutionFilterOptions(kernel);
+                        raster.Filter(raster.Bounds, convOptions);
 
-                var graphics = new SvgGraphics2D(width, height, dpi);
+                        // Create a new SVG and draw the filtered raster onto it
+                        var svgGraphics = new SvgGraphics2D(raster.Width, raster.Height, 96);
+                        svgGraphics.DrawImage(raster, new Point(0, 0));
 
-                using (RasterImage filteredRaster = (RasterImage)Image.Load(filteredPng))
-                {
-                    graphics.DrawImage(filteredRaster, new Point(0, 0));
-                }
-
-                using (SvgImage finalSvg = graphics.EndRecording())
-                {
-                    finalSvg.Save(outputPath, new SvgOptions());
+                        using (SvgImage finalSvg = svgGraphics.EndRecording())
+                        {
+                            var saveOptions = new SvgOptions();
+                            finalSvg.Save(outputPath, saveOptions);
+                        }
+                    }
                 }
             }
         }

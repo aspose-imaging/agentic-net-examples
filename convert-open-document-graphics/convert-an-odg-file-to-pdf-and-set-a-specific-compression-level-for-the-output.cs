@@ -3,48 +3,55 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.odg");
-        string outputPath = Path.Combine("Output", "sample.pdf");
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        // Validate input file existence
+        // Ensure the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load ODG image and convert to PDF with compression
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure rasterization options for ODG
-            var rasterOptions = new OdgRasterizationOptions
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
-                BackgroundColor = Color.White,
-                PageSize = image.Size
-            };
-
-            // Configure PDF save options with desired compression
-            var pdfOptions = new PdfOptions
-            {
-                VectorRasterizationOptions = rasterOptions,
-                PdfCoreOptions = new PdfCoreOptions
+                // Set up rasterization options for ODG
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    Compression = PdfImageCompressionOptions.Flate
-                }
-            };
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
+                };
 
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+                // Configure PDF save options with desired compression
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        // Example compression setting; adjust as needed
+                        Compression = PdfImageCompressionOptions.Flate
+                    }
+                };
+
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

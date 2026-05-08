@@ -2,72 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"C:\Temp\concentric_rectangles.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create BMP options with 24 bits per pixel
-        BmpOptions bmpOptions = new BmpOptions
+        try
         {
-            BitsPerPixel = 24,
-            Source = new FileCreateSource(outputPath, false) // The file will be created
-        };
+            // Hardcoded output path
+            string outputPath = @"C:\temp\concentric_rectangles.bmp";
 
-        // Define image dimensions
-        int imageWidth = 500;
-        int imageHeight = 500;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a new BMP image
-        using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
-        {
-            // Initialize graphics object
-            Graphics graphics = new Graphics(image);
-
-            // Clear background to white
-            graphics.Clear(Color.White);
-
-            // Number of concentric rectangles
-            int rectangleCount = 10;
-            // Pen width
-            float penWidth = 5f;
-
-            // Colors to alternate between
-            Color[] colors = new Color[] { Color.Red, Color.Blue, Color.Green, Color.Orange, Color.Purple };
-
-            for (int i = 0; i < rectangleCount; i++)
+            // Set up BMP options
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Calculate margin so each rectangle is smaller than the previous
-                int margin = i * 20;
-                int rectWidth = imageWidth - 2 * margin;
-                int rectHeight = imageHeight - 2 * margin;
+                BitsPerPixel = 24,
+                Source = new Aspose.Imaging.Sources.FileCreateSource(outputPath, false)
+            };
 
-                // Ensure dimensions stay positive
-                if (rectWidth <= 0 || rectHeight <= 0)
-                    break;
+            // Create a 500x500 BMP image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
+            {
+                // Initialize graphics
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Create rectangle
-                Rectangle rect = new Rectangle(margin, margin, rectWidth, rectHeight);
+                // Draw concentric rectangles
+                int rectCount = 10;
+                int marginStep = 20;
+                for (int i = 0; i < rectCount; i++)
+                {
+                    int margin = i * marginStep;
+                    int size = 500 - 2 * margin;
+                    if (size <= 0) break;
 
-                // Choose color cyclically
-                Color penColor = colors[i % colors.Length];
-                Pen pen = new Pen(penColor, penWidth);
+                    // Alternate pen colors
+                    Color penColor = (i % 2 == 0) ? Color.Red : Color.Blue;
+                    Pen pen = new Pen(penColor, 3f);
 
-                // Draw the rectangle
-                graphics.DrawRectangle(pen, rect);
+                    graphics.DrawRectangle(pen, margin, margin, size, size);
+                }
+
+                // Save the image
+                image.Save();
             }
-
-            // Save the image (the file was already created by FileCreateSource, but Save finalizes)
-            image.Save();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

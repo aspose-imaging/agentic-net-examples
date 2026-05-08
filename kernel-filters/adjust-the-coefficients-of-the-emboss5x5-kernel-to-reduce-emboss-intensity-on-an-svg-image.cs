@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -13,7 +13,8 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string tempPngPath = "temp/temp.png";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -21,47 +22,48 @@ class Program
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            // Rasterize SVG to a temporary PNG
+            using (Image svgImage = Image.Load(inputPath))
             {
                 var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = vectorImage.Size
+                    PageSize = ((SvgImage)svgImage).Size
                 };
-
-                var pngSaveOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
+                svgImage.Save(tempPngPath, pngOptions);
+            }
 
-                using (var ms = new MemoryStream())
+            // Load the rasterized PNG and apply a reduced-intensity emboss filter
+            using (Image img = Image.Load(tempPngPath))
+            {
+                var raster = (RasterImage)img;
+
+                double[,] originalKernel = ConvolutionFilter.Emboss5x5;
+                int size = originalKernel.GetLength(0);
+                double intensityFactor = 0.5;
+                double[,] kernel = new double[size, size];
+
+                for (int i = 0; i < size; i++)
                 {
-                    vectorImage.Save(ms, pngSaveOptions);
-                    ms.Position = 0;
-
-                    using (Image rasterImg = Image.Load(ms))
+                    for (int j = 0; j < size; j++)
                     {
-                        var raster = (RasterImage)rasterImg;
-
-                        double[,] embossKernel = ConvolutionFilter.Emboss5x5;
-                        double scale = 0.5;
-                        double[,] customKernel = new double[5, 5];
-                        for (int i = 0; i < 5; i++)
-                        {
-                            for (int j = 0; j < 5; j++)
-                            {
-                                customKernel[i, j] = embossKernel[i, j] * scale;
-                            }
-                        }
-
-                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(customKernel));
-
-                        var outputOptions = new PngOptions();
-                        raster.Save(outputPath, outputOptions);
+                        kernel[i, j] = originalKernel[i, j] * intensityFactor;
                     }
                 }
+
+                var convOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, convOptions);
+                raster.Save(outputPath, new PngOptions());
             }
+
+            // Clean up temporary file
+            File.Delete(tempPngPath);
         }
         catch (Exception ex)
         {

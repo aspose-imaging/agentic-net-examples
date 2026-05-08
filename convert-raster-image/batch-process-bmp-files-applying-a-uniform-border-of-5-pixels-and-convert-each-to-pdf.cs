@@ -1,86 +1,62 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
+using System.Linq;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
-            return;
-        }
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
-        // Get all BMP files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in bmpFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Determine output PDF path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-            // Ensure output directory exists for this file
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load source BMP image
-            using (RasterImage src = (RasterImage)Image.Load(inputPath))
-            {
-                // Ensure image data is cached
-                if (!src.IsCached)
+                if (!File.Exists(inputPath))
                 {
-                    src.CacheData();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Calculate canvas size with a 5-pixel border on each side
-                int border = 5;
-                int canvasWidth = src.Width + border * 2;
-                int canvasHeight = src.Height + border * 2;
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
 
-                // Create a blank canvas
-                using (BmpOptions canvasOptions = new BmpOptions())
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Aspose.Imaging.RasterImage src = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
                 {
-                    using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
+                    int border = 5;
+                    int newWidth = src.Width + border * 2;
+                    int newHeight = src.Height + border * 2;
+
+                    // Create a blank canvas
+                    BmpOptions canvasOptions = new BmpOptions();
+                    using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(canvasOptions, newWidth, newHeight))
                     {
-                        // Fill canvas with white background (border color)
-                        Graphics graphics = new Graphics(canvas);
+                        // Fill canvas with white background
+                        Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
                         graphics.Clear(Aspose.Imaging.Color.White);
 
-                        // Draw the original image onto the canvas at the offset (border, border)
-                        graphics.DrawImage(src, new Rectangle(border, border, src.Width, src.Height));
+                        // Draw the source image onto the canvas with border offset
+                        Aspose.Imaging.Rectangle destRect = new Aspose.Imaging.Rectangle(border, border, src.Width, src.Height);
+                        canvas.SaveArgb32Pixels(destRect, src.LoadArgb32Pixels(src.Bounds));
 
                         // Save the canvas as PDF
-                        using (PdfOptions pdfOptions = new PdfOptions())
-                        {
-                            canvas.Save(outputPath, pdfOptions);
-                        }
+                        canvas.Save(outputPath, new PdfOptions());
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

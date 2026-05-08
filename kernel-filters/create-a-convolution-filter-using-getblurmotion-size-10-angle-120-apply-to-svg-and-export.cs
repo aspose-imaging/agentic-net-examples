@@ -10,48 +10,65 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load SVG image
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Set up rasterization options for PNG
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Rasterize SVG to a memory stream
+            using (Image image = Image.Load(inputPath))
+            {
+                // Ensure the loaded image is an SVG vector image
+                SvgImage svgImage = image as SvgImage;
+                if (svgImage == null)
+                {
+                    Console.Error.WriteLine("The input file is not a valid SVG image.");
+                    return;
+                }
+
+                // Set up rasterization options for SVG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size
+                };
+
+                // Prepare PNG options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Rasterize SVG into a memory stream
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    svgImage.Save(ms, pngOptions);
+                    image.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    // Load rasterized image
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                    // Load the rasterized image
+                    using (Image rasterImg = Image.Load(ms))
                     {
-                        // Create convolution kernel using GetBlurMotion (size=10, angle=120)
-                        double[,] kernel = ConvolutionFilter.GetBlurMotion(10, 120.0);
-                        ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
+                        RasterImage raster = rasterImg as RasterImage;
+                        if (raster == null)
+                        {
+                            Console.Error.WriteLine("Failed to rasterize SVG image.");
+                            return;
+                        }
 
-                        // Apply filter to the entire image
-                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                        // Create motion blur kernel
+                        double[,] kernel = ConvolutionFilter.GetBlurMotion(10, 120);
 
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Apply convolution filter
+                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                        // Save the filtered image as PNG
-                        rasterImage.Save(outputPath, new PngOptions());
+                        // Save the filtered raster image
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
             }

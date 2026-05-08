@@ -1,47 +1,66 @@
 using System;
 using System.IO;
-using System.Linq;
+using System.Threading.Tasks;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
-        // Ensure directories exist
-        Directory.CreateDirectory(inputDirectory);
-        Directory.CreateDirectory(outputDirectory);
-
-        // Get all EPS files in the input directory
-        string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
-
-        // Process files in parallel using PLINQ
-        epsFiles.AsParallel().ForAll(epsPath =>
+        try
         {
-            // Verify input file exists
-            if (!File.Exists(epsPath))
+            // Hardcoded input EPS files
+            string[] inputFiles = new[]
             {
-                Console.Error.WriteLine($"File not found: {epsPath}");
-                return;
-            }
+                @"C:\Images\Input1.eps",
+                @"C:\Images\Input2.eps",
+                @"C:\Images\Input3.eps"
+            };
 
-            // Determine output PDF path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(epsPath) + ".pdf");
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Images\PdfOutput";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists (will also handle subfolders)
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load the EPS image and save as PDF
-            using (Image image = Image.Load(epsPath))
-            using (PdfOptions pdfOptions = new PdfOptions())
+            Parallel.ForEach(inputFiles, inputPath =>
             {
-                image.Save(outputPath, pdfOptions);
-            }
-        });
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Determine output PDF path
+                string outputPath = Path.Combine(
+                    outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load EPS image and save as PDF
+                using (var image = (EpsImage)Image.Load(inputPath))
+                {
+                    var pdfOptions = new PdfOptions
+                    {
+                        PdfCoreOptions = new PdfCoreOptions
+                        {
+                            PdfCompliance = PdfComplianceVersion.PdfA1b
+                        }
+                    };
+
+                    image.Save(outputPath, pdfOptions);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

@@ -11,7 +11,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"c:\temp\sample.djvu";
-        string outputDir = @"c:\temp\output\";
+        string outputDir = @"c:\temp\output";
 
         try
         {
@@ -21,6 +21,9 @@ class Program
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
+            // Ensure output directory exists (creates if missing)
+            Directory.CreateDirectory(outputDir);
 
             // Open the DjVu file as a stream
             using (Stream stream = File.OpenRead(inputPath))
@@ -32,16 +35,16 @@ class Program
                     TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                     tiffOptions.Compression = TiffCompressions.Lzw;
 
-                    // Iterate through each page and save as a separate TIFF file
+                    // Iterate through each page and save as separate TIFF
                     foreach (DjvuPage djvuPage in djvuImage.Pages)
                     {
-                        // Build output file name based on page number
+                        // Build output file path for the current page
                         string outputPath = Path.Combine(outputDir, $"sample_page_{djvuPage.PageNumber}.tif");
 
-                        // Ensure the output directory exists
+                        // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the page as TIFF with the specified options
+                        // Save the page as TIFF using the specified options
                         djvuPage.Save(outputPath, tiffOptions);
                     }
                 }

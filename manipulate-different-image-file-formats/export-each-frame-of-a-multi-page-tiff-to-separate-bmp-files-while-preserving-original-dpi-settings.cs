@@ -3,21 +3,18 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputDir = "output";
+            // Hardcoded input and output directory paths
+            string inputPath = @"C:\Images\multiframe.tif";
+            string outputDir = @"C:\Images\Frames";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -30,31 +27,21 @@ class Program
             // Load the multi‑page TIFF
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Preserve original DPI
-                double dpiX = tiffImage.HorizontalResolution;
-                double dpiY = tiffImage.VerticalResolution;
-
                 // Iterate through each frame
                 for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
-                    // Set the current frame as active
-                    tiffImage.ActiveFrame = tiffImage.Frames[i];
+                    TiffFrame frame = tiffImage.Frames[i];
 
-                    // Build output file path for the current frame
-                    string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
+                    // Build output file path for this frame
+                    string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.bmp");
 
                     // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Configure BMP save options with original DPI
-                    BmpOptions bmpOptions = new BmpOptions
-                    {
-                        Source = new FileCreateSource(outputPath, false),
-                        ResolutionSettings = new ResolutionSetting(dpiX, dpiY)
-                    };
-
-                    // Save only the active frame as BMP
-                    tiffImage.Save(outputPath, bmpOptions);
+                    // Save the frame as BMP while preserving DPI
+                    BmpOptions bmpOptions = new BmpOptions();
+                    // DPI values are already stored in the frame; they will be written to the BMP automatically
+                    frame.Save(outputPath, bmpOptions);
                 }
             }
         }

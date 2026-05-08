@@ -10,50 +10,46 @@ class Program
     {
         try
         {
-            // Hardcoded input and overlay image paths
-            string inputPngPath = "input.png";
-            string overlayPath = "overlay.png";
-            // Hardcoded output GIF path
-            string outputGifPath = "output.gif";
+            string inputPath = "Input/input.png";
+            string outputPath = "Output/output.gif";
 
-            // Validate input PNG exists
-            if (!File.Exists(inputPngPath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPngPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Validate overlay image exists
-            if (!File.Exists(overlayPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {overlayPath}");
-                return;
-            }
+                // Rotate PNG by 90 degrees clockwise
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
+                int width = image.Width;
+                int height = image.Height;
 
-            // Load the base PNG image as a raster image
-            using (RasterImage baseImage = (RasterImage)Image.Load(inputPngPath))
-            {
-                // Rotate the image 90 degrees clockwise, resize proportionally, white background
-                baseImage.Rotate(90f, true, Color.White);
+                // Create a semi‑transparent red overlay
+                string overlayTempPath = "overlay_temp.png";
+                Source overlaySource = new FileCreateSource(overlayTempPath, false);
+                PngOptions overlayOptions = new PngOptions { Source = overlaySource };
 
-                // Load the semi‑transparent overlay image
-                using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+                using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, width, height))
                 {
-                    // Blend overlay onto the rotated image at (0,0) with 50% opacity (128 out of 255)
-                    baseImage.Blend(new Point(0, 0), overlay, 128);
+                    int[] pixels = new int[width * height];
+                    int argb = (128 << 24) | (255 << 16) | (0 << 8) | 0; // 50% opaque red
+                    for (int i = 0; i < pixels.Length; i++)
+                        pixels[i] = argb;
+
+                    overlay.SaveArgb32Pixels(overlay.Bounds, pixels);
+
+                    // Blend overlay onto the rotated image
+                    image.Blend(new Point(0, 0), overlay, 255);
                 }
 
-                // Prepare GIF save options with a file source
-                GifOptions gifOptions = new GifOptions
-                {
-                    Source = new FileCreateSource(outputGifPath, false)
-                };
-
-                // Save the resulting image as a GIF
-                baseImage.Save(outputGifPath, gifOptions);
+                // Save the result as GIF
+                GifOptions gifOptions = new GifOptions { Source = new FileCreateSource(outputPath, false) };
+                image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)

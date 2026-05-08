@@ -2,68 +2,61 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Validate input directory
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        // Get all PNG files in the input folder
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
+            // Get all PNG files in the input folder
+            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
 
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in pngFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Build output SVG path preserving the original filename
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure vector rasterization options
-                var vectorOptions = new VectorRasterizationOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Set up SVG save options
-                using (SvgOptions saveOptions = new SvgOptions())
+                // Determine output SVG path (preserve original filename)
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PNG image
+                using (Image image = Image.Load(inputPath))
                 {
-                    saveOptions.VectorRasterizationOptions = vectorOptions;
+                    // Prepare SVG options with rasterization settings
+                    var vectorOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
+
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = vectorOptions
+                    };
+
                     // Save as SVG
-                    image.Save(outputPath, saveOptions);
+                    image.Save(outputPath, svgOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

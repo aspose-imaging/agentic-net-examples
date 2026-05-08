@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
@@ -11,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\input\sample.cdr";
-            string outputPath = @"C:\output\sample.pdf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Data\sample.cdr";
+            string outputPath = @"C:\Data\sample.cdr.page0.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,25 +25,25 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR image
-            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
                 // Select the first page (index 0)
-                CdrImagePage imagePage = (CdrImagePage)image.Pages[0];
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
 
                 // Prepare PDF export options with vector rasterization settings
                 PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterizationOptions = new CdrRasterizationOptions
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
-                    PageWidth = imagePage.Width,
-                    PageHeight = imagePage.Height
+                    PageWidth = page.Width,
+                    PageHeight = page.Height
                 };
 
-                pdfOptions.VectorRasterizationOptions = rasterizationOptions;
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save the selected page as PDF
-                imagePage.Save(outputPath, pdfOptions);
+                page.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

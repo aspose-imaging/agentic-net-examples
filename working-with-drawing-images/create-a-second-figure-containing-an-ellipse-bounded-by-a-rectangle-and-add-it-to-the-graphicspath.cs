@@ -1,38 +1,58 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\output.bmp";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+        try
         {
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-            graphics.Clear(Aspose.Imaging.Color.Wheat);
+            // Output file path (hardcoded)
+            string outputPath = @"c:\temp\output.bmp";
 
-            Aspose.Imaging.GraphicsPath graphicspath = new Aspose.Imaging.GraphicsPath();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Aspose.Imaging.Figure figure1 = new Aspose.Imaging.Figure();
-            figure1.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(10f, 10f, 300f, 300f)));
+            // Set up BMP options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            Aspose.Imaging.Figure figure2 = new Aspose.Imaging.Figure();
-            figure2.AddShape(new EllipseShape(new Aspose.Imaging.RectangleF(50f, 50f, 300f, 300f)));
+            // Create image canvas
+            using (Image image = Image.Create(bmpOptions, 500, 500))
+            {
+                // Initialize graphics
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.Wheat);
 
-            graphicspath.AddFigures(new[] { figure1, figure2 });
+                // Create a graphics path
+                GraphicsPath graphicspath = new GraphicsPath();
 
-            graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicspath);
+                // First figure (optional example)
+                Figure figure1 = new Figure();
+                figure1.AddShape(new RectangleShape(new RectangleF(10f, 10f, 300f, 300f)));
+                graphicspath.AddFigure(figure1);
 
-            image.Save();
+                // Second figure containing an ellipse bounded by a rectangle
+                Figure figure2 = new Figure();
+                // Ellipse bounded by the specified rectangle
+                figure2.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 150f)));
+                graphicspath.AddFigure(figure2);
+
+                // Draw the path
+                graphics.DrawPath(new Pen(Color.Black, 2), graphicspath);
+
+                // Save the image
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -8,9 +8,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.svg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\input.emf";
+        string outputPath = @"C:\Temp\output.svg";
 
         try
         {
@@ -30,7 +30,7 @@ class Program
                 // Prepare SVG save options
                 SvgOptions saveOptions = new SvgOptions
                 {
-                    TextAsShapes = true
+                    TextAsShapes = true // Preserve text as shapes
                 };
 
                 // Configure rasterization options for EMF
@@ -38,10 +38,8 @@ class Program
                 {
                     BackgroundColor = Color.WhiteSmoke,
                     PageSize = emfImage.Size,
-                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                    // Optional margins
-                    BorderX = 50,
-                    BorderY = 50
+                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto
+                    // Optional margins can be set here, e.g., BorderX = 50, BorderY = 50
                 };
 
                 saveOptions.VectorRasterizationOptions = rasterizationOptions;

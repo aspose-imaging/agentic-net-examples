@@ -5,62 +5,62 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output directories relative to the current directory
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure the output directory exists
-        if (!Directory.Exists(outputDirectory))
+        try
         {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputImages";
+            string outputFolder = @"C:\OutputSvgs";
 
-        // Get all files from the input directory
-        string[] files = Directory.GetFiles(inputDirectory);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        // Supported raster extensions
-        string[] rasterExtensions = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tif", ".tiff", ".webp" };
+            // Supported raster extensions
+            string[] extensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif", ".gif" };
 
-        foreach (string inputPath in files)
-        {
-            // Verify the file exists
-            if (!File.Exists(inputPath))
+            // Enumerate files in the input folder
+            foreach (string filePath in Directory.GetFiles(inputFolder))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Skip files that are not raster images
+                if (Array.IndexOf(extensions, Path.GetExtension(filePath).ToLowerInvariant()) < 0)
+                    continue;
 
-            // Process only supported raster files
-            string ext = Path.GetExtension(inputPath).ToLowerInvariant();
-            if (Array.IndexOf(rasterExtensions, ext) < 0)
-            {
-                continue; // Skip non‑raster files
-            }
-
-            // Build the output SVG path preserving the original filename
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the raster image and convert to SVG
-            using (Image image = Image.Load(inputPath))
-            {
-                using (SvgOptions options = new SvgOptions())
+                // Verify input file exists
+                if (!File.Exists(filePath))
                 {
-                    // Set rasterization options to match the source image size
-                    options.VectorRasterizationOptions = new SvgRasterizationOptions
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
+
+                // Build output file path preserving original filename
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(filePath) + ".svg");
+
+                // Ensure the output directory exists (unconditional)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the raster image and convert to SVG
+                using (Image image = Image.Load(filePath))
+                {
+                    // Set up rasterization options based on the source image size
+                    var vectorRasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     };
 
-                    // Save as SVG
-                    image.Save(outputPath, options);
+                    // Save as SVG using the specified options
+                    image.Save(outputPath, new SvgOptions
+                    {
+                        VectorRasterizationOptions = vectorRasterizationOptions
+                    });
                 }
+
+                Console.WriteLine($"Converted: {filePath} -> {outputPath}");
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

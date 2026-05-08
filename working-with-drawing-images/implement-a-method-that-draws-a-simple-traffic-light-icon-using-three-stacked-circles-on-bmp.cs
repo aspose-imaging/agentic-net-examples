@@ -1,8 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
@@ -10,55 +8,56 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path (hard‑coded)
-        string outputPath = @"C:\temp\traffic_light.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure BMP options with a bound file source
-        BmpOptions options = new BmpOptions();
-        options.BitsPerPixel = 24;
-        options.Source = new FileCreateSource(outputPath, false);
-
-        // Define canvas size
-        int canvasWidth = 100;
-        int canvasHeight = 300;
-
-        // Create the BMP image (bound to the output file)
-        using (Image image = Image.Create(options, canvasWidth, canvasHeight))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Output file path (hard‑coded)
+            string outputPath = @"output.bmp";
 
-            // Clear background (black)
-            graphics.Clear(Color.Black);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Circle parameters
-            int diameter = 80;
-            int offsetX = (canvasWidth - diameter) / 2;
-            int[] offsetY = { 20, 110, 200 }; // top, middle, bottom positions
+            // Set BMP options and bind the output file
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Red light
-            using (SolidBrush redBrush = new SolidBrush(Color.Red))
+            // Create a 100x300 image canvas
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 100, 300))
             {
-                graphics.FillEllipse(redBrush, new Rectangle(offsetX, offsetY[0], diameter, diameter));
-            }
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Yellow light
-            using (SolidBrush yellowBrush = new SolidBrush(Color.Yellow))
-            {
-                graphics.FillEllipse(yellowBrush, new Rectangle(offsetX, offsetY[1], diameter, diameter));
-            }
+                // Clear background (black)
+                graphics.Clear(Aspose.Imaging.Color.Black);
 
-            // Green light
-            using (SolidBrush greenBrush = new SolidBrush(Color.Green))
-            {
-                graphics.FillEllipse(greenBrush, new Rectangle(offsetX, offsetY[2], diameter, diameter));
-            }
+                // Circle size and horizontal position
+                int diameter = 80;
+                int x = (image.Width - diameter) / 2;
 
-            // Save the bound image
-            image.Save();
+                // Draw red circle (top)
+                using (SolidBrush redBrush = new SolidBrush(Aspose.Imaging.Color.Red))
+                {
+                    graphics.FillEllipse(redBrush, new Aspose.Imaging.Rectangle(x, 10, diameter, diameter));
+                }
+
+                // Draw yellow circle (middle)
+                using (SolidBrush yellowBrush = new SolidBrush(Aspose.Imaging.Color.Yellow))
+                {
+                    graphics.FillEllipse(yellowBrush, new Aspose.Imaging.Rectangle(x, 110, diameter, diameter));
+                }
+
+                // Draw green circle (bottom)
+                using (SolidBrush greenBrush = new SolidBrush(Aspose.Imaging.Color.Green))
+                {
+                    graphics.FillEllipse(greenBrush, new Aspose.Imaging.Rectangle(x, 210, diameter, diameter));
+                }
+
+                // Save the image (source already bound to file)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

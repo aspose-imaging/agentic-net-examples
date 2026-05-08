@@ -23,14 +23,12 @@ class Program
             {
                 var pdfOptions = new PdfOptions();
 
-                // Set custom A4 page size (595 x 842 points)
-                pdfOptions.PageSize = new Aspose.Imaging.SizeF(595f, 842f);
-
                 var rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                    PageSize = new Aspose.Imaging.SizeF(595f, 842f)
+                    Positioning = PositioningTypes.DefinedByDocument,
+                    PageSize = new Aspose.Imaging.SizeF(595, 842) // A4 size in points
                 };
 
                 pdfOptions.VectorRasterizationOptions = rasterOptions;

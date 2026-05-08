@@ -10,11 +10,12 @@ class Program
     {
         try
         {
-            // Directory setup
+            // Set up input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
+            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -22,44 +23,47 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            // Get all files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
-                // Process only DjVu files
-                if (!inputPath.EndsWith(".djvu", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Prepare output path and ensure its directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load DjVu with memory buffer hint
-                using (FileStream stream = File.OpenRead(inputPath))
+                using (var stream = File.OpenRead(inputPath))
                 {
-                    var loadOptions = new LoadOptions { BufferSizeHint = 1 * 1024 * 1024 };
-                    using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
+                    var loadOptions = new LoadOptions
                     {
-                        int pageIndex = 0;
-                        foreach (DjvuPage page in djvuImage.Pages)
+                        BufferSizeHint = 1 * 1024 * 1024 // 1 MB buffer
+                    };
+
+                    using (var djvu = new DjvuImage(stream, loadOptions))
+                    {
+                        // Configure GIF options with interlacing and export all pages
+                        var gifOptions = new GifOptions
                         {
-                            string baseName = Path.GetFileNameWithoutExtension(inputPath);
-                            string outputPath = Path.Combine(outputDirectory, $"{baseName}_page{pageIndex}.gif");
+                            Interlaced = true,
+                            MultiPageOptions = new DjvuMultiPageOptions()
+                        };
 
-                            // Ensure output directory exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            var gifOptions = new GifOptions { Interlaced = true };
-                            page.Save(outputPath, gifOptions);
-                            pageIndex++;
-                        }
+                        // Save as GIF
+                        djvu.Save(outputPath, gifOptions);
                     }
                 }
             }

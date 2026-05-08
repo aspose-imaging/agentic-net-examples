@@ -2,14 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
+        string inputPath = "input/input.png";
+        string outputPath = "output/output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -21,26 +22,26 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage for raster operations
-            RasterImage raster = (RasterImage)image;
-
-            // Resize to 640x480 using default nearest neighbour resample
-            raster.Resize(640, 480);
-
-            // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-            // Prepare SVG save options with default rasterization settings
-            SvgOptions svgOptions = new SvgOptions
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions()
-            };
+                // Resize to 640x480
+                image.Resize(640, 480);
 
-            // Save the processed image as SVG
-            raster.Save(outputPath, svgOptions);
+                // Apply Gaussian blur to the entire image
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the processed image as SVG
+                SvgOptions svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

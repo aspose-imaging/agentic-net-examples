@@ -8,52 +8,63 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input OTG file path
-        string inputPath = @"C:\Images\sample.otg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.jpg";
 
-        // Hardcoded output JPEG file path
-        string outputPath = @"C:\Images\output.jpg";
+            // Paths to ICC profile files
+            string rgbProfilePath = @"C:\Profiles\rgb.icc";
+            string cmykProfilePath = @"C:\Profiles\cmyk.icc";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Hardcoded ICC profile paths
-        string rgbIccPath = @"C:\Profiles\eciRGB_v2.icc";
-        string cmykIccPath = @"C:\Profiles\ISOcoated_v2_FullGamut4.icc";
-
-        // Load the OTG image
-        using (Image otgImage = Image.Load(inputPath))
-        {
-            // Prepare rasterization options for vector to raster conversion
-            OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+            // Verify input OTG file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = otgImage.Size // Preserve original size
-            };
-
-            // Configure JPEG save options with ICC profiles
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk,
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Attach ICC profiles
-            using (Stream rgbProfileStream = File.OpenRead(rgbIccPath))
-            using (Stream cmykProfileStream = File.OpenRead(cmykIccPath))
-            {
-                jpegOptions.RgbColorProfile = new StreamSource(rgbProfileStream);
-                jpegOptions.CmykColorProfile = new StreamSource(cmykProfileStream);
-
-                // Save the image as JPEG with embedded profiles
-                otgImage.Save(outputPath, jpegOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Verify ICC profile files exist
+            if (!File.Exists(rgbProfilePath))
+            {
+                Console.Error.WriteLine($"File not found: {rgbProfilePath}");
+                return;
+            }
+            if (!File.Exists(cmykProfilePath))
+            {
+                Console.Error.WriteLine($"File not found: {cmykProfilePath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare JPEG save options with ICC profiles
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk,
+                    RgbColorProfile = new StreamSource(File.OpenRead(rgbProfilePath)),
+                    CmykColorProfile = new StreamSource(File.OpenRead(cmykProfilePath))
+                };
+
+                // Set rasterization options for vector to raster conversion
+                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+                jpegOptions.VectorRasterizationOptions = otgRasterization;
+
+                // Save as JPEG with embedded ICC profiles
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

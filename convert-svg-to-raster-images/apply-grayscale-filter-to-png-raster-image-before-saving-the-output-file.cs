@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -7,24 +8,31 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.png";
-        string outputPath = @"C:\temp\sample.grayscale.png";
+        string inputPath = @"c:\temp\sample.png";
+        string outputPath = @"c:\temp\sample.grayscale.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image, apply grayscale, and save
+            using (PngImage pngImage = new PngImage(inputPath))
+            {
+                pngImage.Grayscale();
+                pngImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image, convert it to grayscale, and save the result
-        using (PngImage pngImage = new PngImage(inputPath))
+        catch (Exception ex)
         {
-            pngImage.Grayscale();
-            pngImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

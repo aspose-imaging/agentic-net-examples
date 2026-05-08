@@ -2,45 +2,56 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.svg";
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.svg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any runtime exception is reported cleanly
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Calculate half dimensions
-            int newWidth = image.Width / 2;
-            int newHeight = image.Height / 2;
-
-            // Resize using nearest neighbour resampling
-            image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-            // Prepare SVG export options with proper page size
-            SvgOptions svgOptions = new SvgOptions();
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = new Size(newWidth, newHeight)
-            };
-            svgOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the resized image as SVG
-            image.Save(outputPath, svgOptions);
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Calculate half size
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+
+                // Resize the image
+                image.Resize(newWidth, newHeight);
+
+                // Prepare SVG rasterization options using the resized image size
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the resized image as SVG
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

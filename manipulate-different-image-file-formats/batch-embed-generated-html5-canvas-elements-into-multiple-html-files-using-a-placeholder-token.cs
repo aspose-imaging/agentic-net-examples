@@ -1,9 +1,7 @@
 using System;
 using System.IO;
-using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,61 +9,76 @@ class Program
     {
         try
         {
-            // Hard‑coded input vector images, HTML templates and output files
-            string[] vectorPaths = { "input1.svg", "input2.svg" };
-            string[] templatePaths = { "template1.html", "template2.html" };
-            string[] outputPaths = { "output1.html", "output2.html" };
-            const string placeholder = "{{CANVAS_PLACEHOLDER}}";
+            // Hard‑coded input SVG files
+            string[] svgInputs = {
+                @"C:\Images\image1.svg",
+                @"C:\Images\image2.svg"
+            };
 
-            for (int i = 0; i < vectorPaths.Length; i++)
+            // Corresponding HTML template files containing the placeholder token
+            string[] htmlTemplates = {
+                @"C:\Templates\page1.html",
+                @"C:\Templates\page2.html"
+            };
+
+            // Desired output HTML files after embedding the canvas
+            string[] htmlOutputs = {
+                @"C:\Result\page1.html",
+                @"C:\Result\page2.html"
+            };
+
+            // Placeholder token to be replaced with the generated canvas markup
+            const string placeholderToken = "{{CANVAS_PLACEHOLDER}}";
+
+            // Process each pair (SVG → HTML)
+            for (int i = 0; i < svgInputs.Length; i++)
             {
-                string vectorPath = vectorPaths[i];
-                string templatePath = templatePaths[i];
-                string outputPath = outputPaths[i];
-
-                // Verify input files exist
-                if (!File.Exists(vectorPath))
+                string svgPath = svgInputs[i];
+                if (!File.Exists(svgPath))
                 {
-                    Console.Error.WriteLine($"File not found: {vectorPath}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {svgPath}");
+                    continue;
                 }
+
+                // Temporary file that will hold only the canvas tag
+                string tempCanvasPath = Path.Combine(Path.GetTempPath(), $"canvas_{i}.html");
+                // Ensure the temp directory exists (it always does, but follow the rule)
+                Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
+
+                // Generate the canvas HTML from the SVG source
+                using (Image image = Image.Load(svgPath))
+                {
+                    var options = new Html5CanvasOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions(),
+                        FullHtmlPage = false // Export only the <canvas> element
+                    };
+                    image.Save(tempCanvasPath, options);
+                }
+
+                // Read the generated canvas markup
+                string canvasHtml = File.ReadAllText(tempCanvasPath);
+
+                // Load the HTML template
+                string templatePath = htmlTemplates[i];
                 if (!File.Exists(templatePath))
                 {
                     Console.Error.WriteLine($"File not found: {templatePath}");
-                    return;
+                    continue;
                 }
 
-                // Ensure output directory exists
+                string templateContent = File.ReadAllText(templatePath);
+
+                // Replace the placeholder with the canvas markup
+                string resultContent = templateContent.Replace(placeholderToken, canvasHtml);
+
+                // Write the final HTML file
+                string outputPath = htmlOutputs[i];
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                File.WriteAllText(outputPath, resultContent);
 
-                // Load the vector image (e.g., SVG)
-                using (Image image = Image.Load(vectorPath))
-                {
-                    // Prepare HTML5 Canvas options – generate only the canvas tag
-                    var canvasOptions = new Html5CanvasOptions
-                    {
-                        FullHtmlPage = false,
-                        CanvasTagId = $"canvas{i + 1}",
-                        VectorRasterizationOptions = new SvgRasterizationOptions()
-                    };
-
-                    // Save canvas HTML to a memory stream
-                    string canvasHtml;
-                    using (var ms = new MemoryStream())
-                    {
-                        image.Save(ms, canvasOptions);
-                        canvasHtml = Encoding.UTF8.GetString(ms.ToArray());
-                    }
-
-                    // Load the HTML template
-                    string templateContent = File.ReadAllText(templatePath, Encoding.UTF8);
-
-                    // Replace the placeholder token with the generated canvas HTML
-                    string resultHtml = templateContent.Replace(placeholder, canvasHtml);
-
-                    // Write the final HTML file
-                    File.WriteAllText(outputPath, resultHtml, Encoding.UTF8);
-                }
+                // Clean up the temporary canvas file
+                try { File.Delete(tempCanvasPath); } catch { /* ignore cleanup errors */ }
             }
         }
         catch (Exception ex)

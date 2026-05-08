@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -11,71 +10,75 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input JPEG file paths
-        string[] inputPaths = new string[]
+        try
         {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
-        };
+            // Hardcoded input directory and output file
+            string inputDirectory = "Input";
+            string outputPath = "Output/merged.jpg";
 
-        // Hardcoded output path
-        string outputPath = "merged.jpg";
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Validate each input file exists
-        foreach (string inputPath in inputPaths)
-        {
-            if (!File.Exists(inputPath))
+            // Get all JPEG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
+
+            if (files.Length == 0)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.WriteLine("No JPEG files found in the input directory.");
                 return;
             }
-        }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Lists to hold rotated images and their dimensions
+            List<Aspose.Imaging.RasterImage> rotatedImages = new List<Aspose.Imaging.RasterImage>();
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
 
-        // First pass: load each image, rotate, and collect its size
-        List<Size> sizes = new List<Size>();
-        foreach (string inputPath in inputPaths)
-        {
-            using (RasterImage img = (RasterImage)Image.Load(inputPath))
+            // Load each image, rotate it, and store for merging
+            foreach (string filePath in files)
             {
-                img.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                sizes.Add(new Size(img.Width, img.Height));
-            }
-        }
-
-        // Calculate canvas dimensions for vertical merge
-        int canvasWidth = sizes.Max(s => s.Width);
-        int canvasHeight = sizes.Sum(s => s.Height);
-
-        // Create output JPEG canvas bound to the output file
-        Source outputSource = new FileCreateSource(outputPath, false);
-        JpegOptions jpegOptions = new JpegOptions()
-        {
-            Source = outputSource,
-            Quality = 90
-        };
-
-        using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-        {
-            int offsetY = 0;
-
-            // Second pass: load, rotate, and copy each image onto the canvas
-            foreach (string inputPath in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    img.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                    Rectangle destRect = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
                 }
+
+                // Load as RasterImage
+                Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(filePath);
+                // Rotate 90 degrees clockwise
+                img.RotateFlip(Aspose.Imaging.RotateFlipType.Rotate90FlipNone);
+
+                rotatedImages.Add(img);
+                widths.Add(img.Width);
+                heights.Add(img.Height);
             }
 
-            // Save the bound canvas (output file is already specified in options)
-            canvas.Save();
+            // Determine canvas size for vertical merge
+            int canvasWidth = widths.Max();
+            int canvasHeight = heights.Sum();
+
+            // Create JPEG canvas with bound source
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            {
+                int offsetY = 0;
+                // Paste each rotated image onto the canvas
+                foreach (Aspose.Imaging.RasterImage img in rotatedImages)
+                {
+                    var bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetY += img.Height;
+                    img.Dispose(); // Dispose after copying
+                }
+
+                // Save the final merged image
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

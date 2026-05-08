@@ -7,63 +7,33 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output_gaussian_blur.svg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Attempt to treat the loaded image as a raster image
-                RasterImage rasterImage = image as RasterImage;
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
 
-                // If the image is not already rasterized, rasterize it by saving to a temporary raster format
-                if (rasterImage == null)
-                {
-                    // Save the vector image to a temporary PNG to obtain a raster representation
-                    string tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
-                    image.Save(tempPath);
-                    using (Image tempImage = Image.Load(tempPath))
-                    {
-                        rasterImage = tempImage as RasterImage;
-                        if (rasterImage == null)
-                        {
-                            Console.Error.WriteLine("Failed to rasterize the SVG image.");
-                            return;
-                        }
+                // Apply Gaussian blur with kernel size 11 and sigma 4.5
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(11, 4.5));
 
-                        // Apply Gaussian blur filter
-                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(11, 4.5));
-
-                        // Save the processed image to the final output path
-                        rasterImage.Save(outputPath);
-                    }
-                    // Clean up temporary file
-                    if (File.Exists(tempPath))
-                    {
-                        File.Delete(tempPath);
-                    }
-                }
-                else
-                {
-                    // Apply Gaussian blur filter directly
-                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(11, 4.5));
-
-                    // Save the processed image
-                    rasterImage.Save(outputPath);
-                }
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)

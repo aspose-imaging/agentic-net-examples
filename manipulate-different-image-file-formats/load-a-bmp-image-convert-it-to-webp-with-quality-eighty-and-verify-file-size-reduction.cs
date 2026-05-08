@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.bmp";
-            string outputPath = @"C:\temp\output.webp";
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_converted.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,7 +26,7 @@ class Program
             // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as WebP with quality 80 (lossy)
+                // Save as WebP with quality 80
                 var webpOptions = new WebPOptions
                 {
                     Lossless = false,
@@ -39,16 +39,13 @@ class Program
             long originalSize = new FileInfo(inputPath).Length;
             long webpSize = new FileInfo(outputPath).Length;
 
-            Console.WriteLine($"Original BMP size: {originalSize} bytes");
-            Console.WriteLine($"Converted WebP size: {webpSize} bytes");
-
             if (webpSize < originalSize)
             {
-                Console.WriteLine("File size reduction verified.");
+                Console.WriteLine($"Success: WebP file size ({webpSize} bytes) is smaller than original BMP size ({originalSize} bytes).");
             }
             else
             {
-                Console.WriteLine("No size reduction detected.");
+                Console.WriteLine($"Warning: WebP file size ({webpSize} bytes) is not smaller than original BMP size ({originalSize} bytes).");
             }
         }
         catch (Exception ex)

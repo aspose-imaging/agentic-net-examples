@@ -1,50 +1,44 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Output file path
-        string outputPath = "Output\\diagonal_reflected.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create BMP canvas
-        Source source = new FileCreateSource(outputPath, false);
-        BmpOptions options = new BmpOptions() { Source = source };
-        int width = 200;
-        int height = 200;
-
-        using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
+        try
         {
-            // Initialize graphics
-            Graphics graphics = new Graphics(canvas);
-            graphics.Clear(Color.White);
+            string outputPath = "output/output.bmp";
 
-            // Pen for drawing
-            Pen pen = new Pen(Color.Black, 2);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Draw original diagonal line
-            graphics.DrawLine(pen, 0, 0, width, height);
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
+            using (BmpImage canvas = (BmpImage)Aspose.Imaging.Image.Create(options, 200, 200))
+            {
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
 
-            // Apply vertical axis reflection transform
-            // Matrix(a, b, c, d, e, f) corresponds to:
-            // [ a  c  e ]
-            // [ b  d  f ]
-            // [ 0  0  1 ]
-            // For horizontal reflection: a = -1, d = 1, e = width
-            graphics.MultiplyTransform(new Matrix(-1, 0, 0, 1, width, 0));
+                graphics.DrawLine(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
+                    new Aspose.Imaging.Point(0, 0),
+                    new Aspose.Imaging.Point(200, 200));
 
-            // Draw reflected diagonal line
-            graphics.DrawLine(pen, 0, 0, width, height);
+                graphics.ScaleTransform(-1, 1);
+                graphics.TranslateTransform(200, 0);
 
-            // Save the image (bound to the source)
-            canvas.Save();
+                graphics.DrawLine(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2),
+                    new Aspose.Imaging.Point(0, 0),
+                    new Aspose.Imaging.Point(200, 200));
+
+                canvas.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

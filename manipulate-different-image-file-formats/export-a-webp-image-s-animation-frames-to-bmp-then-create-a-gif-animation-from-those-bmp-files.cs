@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
@@ -13,19 +12,19 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputWebPPath = @"C:\temp\input.webp";
-            string bmpFramesDir = @"C:\temp\bmpFrames";
-            string outputGifPath = @"C:\temp\output.gif";
+            // Hardcoded input and output paths
+            string inputWebPPath = @"c:\temp\input.webp";
+            string bmpFramesDir = @"c:\temp\bmpframes\";
+            string outputGifPath = @"c:\temp\output.gif";
 
-            // Validate input file
+            // Validate input file existence
             if (!File.Exists(inputWebPPath))
             {
                 Console.Error.WriteLine($"File not found: {inputWebPPath}");
                 return;
             }
 
-            // Ensure output directories exist
+            // Ensure directories exist
             Directory.CreateDirectory(bmpFramesDir);
             Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
 
@@ -33,45 +32,37 @@ class Program
             using (WebPImage webPImage = new WebPImage(inputWebPPath))
             {
                 // Cast to multipage interface to access frames
-                IMultipageImage multipage = webPImage as IMultipageImage;
+                var multipage = webPImage as IMultipageImage;
                 if (multipage == null || multipage.PageCount == 0)
                 {
                     Console.Error.WriteLine("No frames found in the WebP image.");
                     return;
                 }
 
-                // Extract each frame to a BMP file
-                List<string> bmpPaths = new List<string>();
+                // Export each frame to a BMP file
                 for (int i = 0; i < multipage.PageCount; i++)
                 {
-                    // Each page is a RasterImage
-                    RasterImage frame = (RasterImage)multipage.Pages[i];
+                    var frame = (RasterImage)multipage.Pages[i];
                     string bmpPath = Path.Combine(bmpFramesDir, $"frame_{i}.bmp");
-
-                    // Ensure directory for this BMP (already created above, but keep rule)
-                    Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
-
-                    // Save frame as BMP
                     frame.Save(bmpPath, new BmpOptions());
-                    bmpPaths.Add(bmpPath);
                 }
 
-                // Create GIF from the extracted BMP frames
-                // Load the first frame to initialize the GIF image
-                using (RasterImage firstFrame = (RasterImage)Image.Load(bmpPaths[0]))
-                using (GifImage gifImage = new GifImage(new GifFrameBlock(firstFrame)))
+                // Create GIF animation from the exported BMP frames
+                // Load the first BMP as the initial frame block
+                string firstBmpPath = Path.Combine(bmpFramesDir, "frame_0.bmp");
+                var firstRaster = (RasterImage)Image.Load(firstBmpPath);
+                using (var gifImage = new GifImage(new GifFrameBlock(firstRaster)))
                 {
                     // Add remaining frames
-                    for (int i = 1; i < bmpPaths.Count; i++)
+                    for (int i = 1; i < multipage.PageCount; i++)
                     {
-                        using (RasterImage frame = (RasterImage)Image.Load(bmpPaths[i]))
-                        {
-                            gifImage.AddPage(frame);
-                        }
+                        string bmpPath = Path.Combine(bmpFramesDir, $"frame_{i}.bmp");
+                        var raster = (RasterImage)Image.Load(bmpPath);
+                        gifImage.AddPage(raster);
                     }
 
-                    // Save the GIF animation
-                    gifImage.Save(outputGifPath, new GifOptions());
+                    // Save the resulting GIF
+                    gifImage.Save(outputGifPath);
                 }
             }
         }

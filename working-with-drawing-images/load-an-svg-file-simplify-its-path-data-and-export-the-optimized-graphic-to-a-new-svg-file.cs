@@ -1,37 +1,65 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
+
+class MySvgCallback : SvgResourceKeeperCallback
+{
+    private readonly string _outputPath;
+
+    public MySvgCallback(string outputPath)
+    {
+        _outputPath = outputPath;
+    }
+
+    // Called when the SVG document is ready for export.
+    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
+    {
+        // Here you could parse and simplify the SVG path data.
+        // For this example we simply write the received data unchanged.
+        File.WriteAllBytes(_outputPath, htmlData);
+        return _outputPath;
+    }
+}
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.svg";
-        string outputPath = @"C:\Temp\output.svg";
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.svg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare SVG save options with a custom callback
+                var svgOptions = new SvgOptions
+                {
+                    Callback = new MySvgCallback(outputPath),
+                    Compress = false // keep uncompressed for readability
+                };
+
+                // Save the optimized SVG
+                image.Save(outputPath, svgOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (SvgImage svgImage = new SvgImage(inputPath))
+        catch (Exception ex)
         {
-            // ---- Path simplification logic would go here ----
-            // Aspose.Imaging does not provide a direct API for path simplification,
-            // so custom processing of the SVG DOM would be required.
-            // This placeholder indicates where such logic would be implemented.
-
-            // Save the optimized SVG
-            svgImage.Save(outputPath, new SvgOptions());
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

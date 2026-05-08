@@ -10,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.apng";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.apng";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,14 +25,14 @@ class Program
 
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                ApngOptions createOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100,
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    DefaultFrameTime = 100
                 };
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
                     apngImage.RemoveAllFrames();
                     apngImage.AddFrame(sourceImage);

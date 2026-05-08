@@ -9,49 +9,36 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/optimized.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/optimized.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-        using (EpsImage eps = (EpsImage)Image.Load(inputPath))
-        {
-            var rasterOptions = new VectorRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White,
-                PageWidth = eps.Width,
-                PageHeight = eps.Height
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            using (var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions })
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                eps.Save(tempPath, pngOptions);
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
+                };
+                image.Save(outputPath, pngOptions);
             }
         }
-
-        using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+        catch (Exception ex)
         {
-            var palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256, PaletteMiningMethod.Histogram);
-            raster.SetPalette(palette, true);
-            using (var finalOptions = new PngOptions())
-            {
-                raster.Save(outputPath, finalOptions);
-            }
-        }
-
-        // Optional cleanup of temporary file
-        if (File.Exists(tempPath))
-        {
-            File.Delete(tempPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

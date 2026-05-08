@@ -1,44 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded paths
             string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string tempPngPath = "temp.png";
+            string blurredPath = "blurred.png";
+            string deconvolvedPath = "deconvolved.png";
 
-            // Verify input file exists
+            // Input file existence check
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(blurredPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(deconvolvedPath));
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            // Rasterize SVG to PNG (temporary file)
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)image;
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size
+                };
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+                svgImage.Save(tempPngPath, pngOptions);
+            }
 
-                // Apply Gaussian blur with size 3 (odd) and sigma 0.5
-                var blurOptions = new GaussianBlurFilterOptions(3, 0.5);
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
+            // Load rasterized PNG and apply Gaussian blur
+            using (Image rasterImg = Image.Load(tempPngPath))
+            {
+                var raster = (RasterImage)rasterImg;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(1, 0.5));
+                raster.Save(blurredPath, new PngOptions());
 
-                // Apply Gaussian deconvolution (Gauss-Wiener) with the same kernel parameters
-                var deconvOptions = new GaussWienerFilterOptions(3, 0.5);
-                rasterImage.Filter(rasterImage.Bounds, deconvOptions);
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                // Apply deconvolution with identical kernel parameters
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(1, 0.5));
+                raster.Save(deconvolvedPath, new PngOptions());
             }
         }
         catch (Exception ex)

@@ -20,7 +20,7 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the image
@@ -29,14 +29,12 @@ class Program
                 // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply motion blur (size 2) using MotionWienerFilterOptions
-                // Parameters: length = 2, smooth = 1.0 (default), angle = 0 degrees
-                var motionOptions = new MotionWienerFilterOptions(2, 1.0, 0.0);
-                rasterImage.Filter(rasterImage.Bounds, motionOptions);
+                // Apply a motion blur (using MotionWienerFilterOptions) with size 2
+                // Length = 2, Brightness = 1.0 (default), Angle = 0 degrees
+                rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(2, 1.0, 0.0));
 
-                // Apply sharpen filter with a 3x3 kernel (size = 3, sigma = 1.0)
-                var sharpenOptions = new SharpenFilterOptions(3, 1.0);
-                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
+                // Apply a sharpen filter with kernel size 3 and sigma 1.0
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 1.0));
 
                 // Save the processed image
                 rasterImage.Save(outputPath);

@@ -1,102 +1,74 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
-
-            if (!Directory.Exists(inputDirectory))
+            // Hardcoded input JPEG file paths
+            string[] inputPaths = new string[]
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
-                return;
-            }
+                @"C:\Images\img1.jpg",
+                @"C:\Images\img2.jpg",
+                @"C:\Images\img3.jpg"
+            };
 
-            if (!Directory.Exists(outputDirectory))
+            // Hardcoded output PDF file path
+            string outputPath = @"C:\Images\merged.pdf";
+
+            // Verify each input file exists
+            foreach (var inputPath in inputPaths)
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*")
-                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-
-            if (files.Length == 0)
-            {
-                Console.WriteLine("No JPEG files found in input directory.");
-                return;
-            }
-
-            // First pass: determine canvas dimensions based on central square size of each image
-            List<(int Width, int Height)> squareSizes = new List<(int, int)>();
-            foreach (string file in files)
-            {
-                if (!File.Exists(file))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
-
-                using (JpegImage img = (JpegImage)Image.Load(file))
-                {
-                    if (!img.IsCached) img.CacheData();
-
-                    int side = Math.Min(img.Width, img.Height);
-                    squareSizes.Add((side, side));
-                }
             }
 
-            int canvasWidth = squareSizes.Max(s => s.Width);
-            int canvasHeight = squareSizes.Sum(s => s.Height);
+            // List to hold cropped images
+            List<Image> croppedImages = new List<Image>();
 
-            // Create an in‑memory canvas (PNG) to hold the merged image
-            using (RasterImage canvas = (RasterImage)Image.Create(new PngOptions(), canvasWidth, canvasHeight))
+            // Load each JPEG, crop to central square, and store
+            foreach (var inputPath in inputPaths)
             {
-                int offsetY = 0;
-                foreach (string file in files)
-                {
-                    if (!File.Exists(file))
-                    {
-                        Console.Error.WriteLine($"File not found: {file}");
-                        return;
-                    }
+                // Load JPEG image
+                JpegImage jpeg = new JpegImage(inputPath);
 
-                    using (JpegImage img = (JpegImage)Image.Load(file))
-                    {
-                        if (!img.IsCached) img.CacheData();
+                // Determine size of central square
+                int side = Math.Min(jpeg.Width, jpeg.Height);
+                int x = (jpeg.Width - side) / 2;
+                int y = (jpeg.Height - side) / 2;
+                var cropRect = new Rectangle(x, y, side, side);
 
-                        int side = Math.Min(img.Width, img.Height);
-                        int cropX = (img.Width - side) / 2;
-                        int cropY = (img.Height - side) / 2;
-                        Rectangle cropRect = new Rectangle(cropX, cropY, side, side);
-                        img.Crop(cropRect);
+                // Crop in place
+                jpeg.Crop(cropRect);
 
-                        Rectangle destRect = new Rectangle(0, offsetY, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
+                // Add to collection
+                croppedImages.Add(jpeg);
+            }
 
-                        offsetY += img.Height;
-                    }
-                }
+            // Create a multipage image from the cropped squares
+            Image merged = Image.Create(croppedImages.ToArray());
 
-                string outputPath = Path.Combine(outputDirectory, "Merged.pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    canvas.Save(outputPath, pdfOptions);
-                }
+            // Save merged image as PDF
+            var pdfOptions = new PdfOptions();
+            merged.Save(outputPath, pdfOptions);
+
+            // Dispose resources
+            merged.Dispose();
+            foreach (var img in croppedImages)
+            {
+                img.Dispose();
             }
         }
         catch (Exception ex)

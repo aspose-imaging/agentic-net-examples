@@ -10,35 +10,43 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.cdr";
-        string outputPath = @"C:\Temp\output.jpg";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "sample.cdr";
+        string outputPath = "sample.jpg";
 
         try
         {
-            // Load the CDR file into a memory stream
-            using (MemoryStream inputStream = new MemoryStream(File.ReadAllBytes(inputPath)))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Initialize load options for CDR
-                CdrLoadOptions loadOptions = new CdrLoadOptions();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR file into a memory stream
+            byte[] cdrBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream inputStream = new MemoryStream(cdrBytes))
+            {
+                // Initialize load options (default)
+                var loadOptions = new CdrLoadOptions();
 
                 // Create CdrImage from the memory stream
                 using (CdrImage cdrImage = new CdrImage(inputStream, loadOptions))
                 {
-                    // Prepare JPEG save options (default settings)
-                    JpegOptions jpegOptions = new JpegOptions();
+                    // Optional: cache all data to avoid further stream reads
+                    cdrImage.CacheData();
 
-                    // Save directly to the output JPG file
-                    cdrImage.Save(outputPath, jpegOptions);
+                    // Prepare output file stream
+                    using (FileStream outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        // Set JPEG save options (default quality)
+                        var jpegOptions = new JpegOptions();
+
+                        // Save directly to the output stream in JPEG format
+                        cdrImage.Save(outputStream, jpegOptions);
+                    }
                 }
             }
         }

@@ -11,11 +11,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/output.pdf";
+            // Define input and output paths
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\result.pdf";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,17 +25,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DjVu document
-            using (Image image = Image.Load(inputPath))
+            // Load DjVu document
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                // Configure PDF options with custom author metadata
-                var pdfOptions = new PdfOptions
+                // Prepare PDF options with custom author metadata
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Example" }
-                };
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    pdfOptions.PdfDocumentInfo.Author = "Example";
 
-                // Export the DjVu document to PDF
-                image.Save(outputPath, pdfOptions);
+                    // Export DjVu to PDF
+                    djvuImage.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)

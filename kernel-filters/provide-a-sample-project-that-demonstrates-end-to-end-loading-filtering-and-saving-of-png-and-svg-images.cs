@@ -10,64 +10,61 @@ namespace AsposeImagingSample
     {
         static void Main()
         {
-            // Wrap the whole process to catch any unexpected errors.
             try
             {
-                // Hard‑coded input and output file paths.
+                // ---------- PNG processing ----------
+                // Hard‑coded input and output paths
                 string pngInputPath = @"C:\temp\sample.png";
                 string pngOutputPath = @"C:\temp\sample.grayscale.png";
 
-                string svgInputPath = @"C:\temp\sample.svg";
-                string svgOutputPath = @"C:\temp\sample_from_svg.png";
-
-                // ---------- PNG processing ----------
-                // Verify the PNG source file exists.
+                // Verify input file exists
                 if (!File.Exists(pngInputPath))
                 {
                     Console.Error.WriteLine($"File not found: {pngInputPath}");
                     return;
                 }
 
-                // Ensure the output directory exists.
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
 
-                // Load the PNG, convert to grayscale, and save.
+                // Load PNG, apply grayscale filter, and save
                 using (PngImage pngImage = new PngImage(pngInputPath))
                 {
-                    pngImage.Grayscale();                     // Apply grayscale filter.
-                    pngImage.Save(pngOutputPath);             // Save the processed image.
+                    pngImage.Grayscale();               // filter
+                    pngImage.Save(pngOutputPath);       // save
                 }
 
                 // ---------- SVG processing ----------
-                // Verify the SVG source file exists.
+                // Hard‑coded input and output paths
+                string svgInputPath = @"C:\temp\sample.svg";
+                string svgOutputPath = @"C:\temp\sample_converted.png";
+
+                // Verify input file exists
                 if (!File.Exists(svgInputPath))
                 {
                     Console.Error.WriteLine($"File not found: {svgInputPath}");
                     return;
                 }
 
-                // Ensure the output directory exists.
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
 
-                // Load the SVG (vector) image.
+                // Load SVG (vector image) using the generic Image loader
                 using (Image svgImage = Image.Load(svgInputPath))
                 {
-                    // Prepare PNG save options (e.g., enable progressive loading).
+                    // Define PNG save options (e.g., progressive loading)
                     PngOptions pngOptions = new PngOptions
                     {
                         Progressive = true,
-                        // Optional: set compression level, filter type, etc.
-                        CompressionLevel = 9,
-                        FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive
+                        ResolutionSettings = new ResolutionSetting(96.0, 96.0)
                     };
 
-                    // Rasterize the SVG and save as PNG.
+                    // Save the SVG as a PNG using the defined options
                     svgImage.Save(svgOutputPath, pngOptions);
                 }
             }
             catch (Exception ex)
             {
-                // Report any runtime exception without crashing.
                 Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }

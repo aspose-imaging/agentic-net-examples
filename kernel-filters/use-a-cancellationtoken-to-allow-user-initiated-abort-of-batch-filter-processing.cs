@@ -5,97 +5,94 @@ using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Multithreading;
-using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDir = @"C:\Images\Input";
+        string outputDir = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = {
-                @"C:\Images\image1.png",
-                @"C:\Images\image2.png"
-            };
+            // Gather all PNG files from the input directory
+            string[] files = Directory.GetFiles(inputDir, "*.png");
 
-            string[] outputPaths = {
-                @"C:\Output\image1.bmp",
-                @"C:\Output\image2.bmp"
-            };
-
-            // Cancellation token source for user‑initiated abort
+            // Cancellation token source to allow user‑initiated abort
             var cts = new CancellationTokenSource();
 
-            // Task that waits for user to press 'c' to cancel processing
+            // Listen for user pressing 'c' to cancel processing
             Task.Run(() =>
             {
-                Console.WriteLine("Press 'c' to cancel processing...");
-                while (true)
+                Console.WriteLine("Press 'c' to cancel batch processing...");
+                while (Console.ReadKey(true).KeyChar != 'c')
                 {
-                    var key = Console.ReadKey(true);
-                    if (key.KeyChar == 'c' || key.KeyChar == 'C')
-                    {
-                        cts.Cancel();
-                        Console.WriteLine("Cancellation requested.");
-                        break;
-                    }
+                    // ignore other keys
                 }
+                cts.Cancel();
             });
 
-            // Process each image in the batch
-            for (int i = 0; i < inputPaths.Length; i++)
+            // Process each image in parallel, respecting the cancellation token
+            Parallel.ForEach(files, new ParallelOptions { CancellationToken = cts.Token }, inputPath =>
             {
-                // Abort if cancellation was requested
-                if (cts.Token.IsCancellationRequested)
-                    break;
-
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
-
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Ensure output directory exists
+                // Determine the corresponding output path (convert to BMP)
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".bmp");
+
+                // Ensure the output directory exists (unconditional)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
+                // Create an interrupt monitor for this thread
+                var monitor = new InterruptMonitor();
+
+                // If cancellation was requested before processing, interrupt immediately
+                if (cts.Token.IsCancellationRequested)
+                {
+                    monitor.Interrupt();
+                    return;
+                }
+
+                // Load the image using Aspose.Imaging
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set up an interrupt monitor for this thread
-                    var monitor = new InterruptMonitor();
+                    // Set the thread‑local interrupt monitor
                     InterruptMonitor.ThreadLocalInstance = monitor;
-
-                    // If cancellation was requested just before saving, interrupt the operation
-                    if (cts.Token.IsCancellationRequested)
-                    {
-                        monitor.Interrupt();
-                        break;
-                    }
-
-                    // Define save options (e.g., BMP format)
-                    var saveOptions = new BmpOptions();
 
                     try
                     {
-                        // Save the processed image
+                        // Save the image as BMP (simple conversion)
+                        var saveOptions = new BmpOptions();
                         image.Save(outputPath, saveOptions);
                     }
-                    catch (OperationInterruptedException)
+                    catch (Aspose.Imaging.CoreExceptions.OperationInterruptedException)
                     {
                         Console.WriteLine($"Processing of {inputPath} was interrupted.");
                     }
                     finally
                     {
-                        // Reset the thread‑local interrupt monitor
+                        // Reset the thread‑local monitor
                         InterruptMonitor.ThreadLocalInstance = null;
                     }
                 }
-            }
+
+                // If a cancellation request arrives after processing, signal interruption for any remaining work
+                if (cts.Token.IsCancellationRequested)
+                {
+                    monitor.Interrupt();
+                }
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("Batch processing was cancelled by the user.");
         }
         catch (Exception ex)
         {

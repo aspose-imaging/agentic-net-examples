@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -8,37 +7,46 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path (hard‑coded)
-        string outputPath = "Output\\example.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure BMP options
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, 500, 500))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Output BMP file path
+            string outputPath = "output.bmp";
 
-            // Clear background
-            graphics.Clear(Color.White);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Draw the first ellipse
-            graphics.DrawEllipse(new Pen(Color.Blue, 3), new RectangleF(100, 100, 300, 200));
+            // Set BMP options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Apply a rotation transform (45 degrees)
-            graphics.RotateTransform(45);
+            // Create image canvas
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            {
+                // Initialize graphics
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-            // Draw a rectangle after rotation
-            graphics.DrawRectangle(new Pen(Color.Red, 3), new RectangleF(150, 150, 200, 100));
+                // Draw an ellipse
+                graphics.DrawEllipse(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3),
+                    new Aspose.Imaging.Rectangle(100, 100, 200, 150));
 
-            // Save the image (output is already bound to the file)
-            image.Save();
+                // Apply rotation transform
+                graphics.RotateTransform(45);
+
+                // Draw a rectangle after rotation
+                graphics.DrawRectangle(
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2),
+                    new Aspose.Imaging.Rectangle(150, 150, 100, 100));
+
+                // Save the image
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

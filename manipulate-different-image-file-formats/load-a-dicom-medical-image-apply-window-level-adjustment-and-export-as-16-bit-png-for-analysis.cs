@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Temp\input.dcm";
-            string outputPath = @"C:\Temp\output.png";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.dcm";
+            string outputPath = @"C:\Images\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,20 +27,20 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM‑specific methods
+                // Cast to DicomImage to access DICOM‑specific operations
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply window‑level adjustment (approximated with brightness/contrast)
-                dicomImage.AdjustBrightness(50);      // example brightness value
-                dicomImage.AdjustContrast(30f);       // example contrast value
+                // Apply window level adjustment (simulated with brightness/contrast)
+                // AdjustBrightness: range [-255, 255]
+                // AdjustContrast: range [-100, 100]
+                dicomImage.AdjustBrightness(40);   // Example window level shift
+                dicomImage.AdjustContrast(30f);    // Example window width scaling
 
-                // Prepare PNG options for 16‑bit output
+                // Save as 16‑bit PNG
                 var pngOptions = new PngOptions
                 {
-                    BitDepth = 16
+                    BitDepth = 16 // 16‑bit per channel
                 };
-
-                // Save the adjusted image as a 16‑bit PNG
                 dicomImage.Save(outputPath, pngOptions);
             }
         }

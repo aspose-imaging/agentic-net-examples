@@ -11,33 +11,32 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output_compressed.tif";
+            // Hardcoded input and output file paths
+            string inputPath = "input.tif";
+            string outputPath = "output_compressed.tif";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the existing TIFF image
             using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
-                // Configure TIFF options for JPEG compression with 80% quality
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    Compression = TiffCompressions.Jpeg,
-                    CompressedQuality = 80,
-                    Photometric = TiffPhotometrics.Rgb,
-                    BitsPerSample = new ushort[] { 8, 8, 8 }
-                };
+                // Configure TIFF save options for JPEG compression with 80% quality
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Jpeg;
+                tiffOptions.CompressedQuality = 80;
+                // Preserve typical RGB settings
+                tiffOptions.Photometric = TiffPhotometrics.Rgb;
+                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
 
-                // Save the image with the specified options
+                // Save the compressed TIFF image
                 image.Save(outputPath, tiffOptions);
             }
         }

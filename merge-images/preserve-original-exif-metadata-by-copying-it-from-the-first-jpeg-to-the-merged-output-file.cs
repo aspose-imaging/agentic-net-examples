@@ -19,7 +19,7 @@ class Program
                 "input2.jpg",
                 "input3.jpg"
             };
-            string outputPath = "output.jpg";
+            string outputPath = "merged.jpg";
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -34,8 +34,9 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect image sizes
+            // Collect sizes
             List<Size> sizes = new List<Size>();
+
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
@@ -47,30 +48,24 @@ class Program
             // Calculate canvas dimensions for horizontal merge
             int newWidth = 0;
             int newHeight = 0;
-            foreach (Size sz in sizes)
+            foreach (var sz in sizes)
             {
                 newWidth += sz.Width;
                 if (sz.Height > newHeight) newHeight = sz.Height;
             }
 
-            // Create JPEG canvas with options
-            Source src = new FileCreateSource(outputPath, false);
+            // Create output source and JPEG options
+            Source outputSource = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = src,
+                Source = outputSource,
                 Quality = 100,
                 KeepMetadata = true
             };
 
+            // Create canvas bound to the output file
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
-                // Copy EXIF metadata from the first image
-                using (JpegImage firstImg = (JpegImage)Image.Load(inputPaths[0]))
-                {
-                    canvas.ExifData = firstImg.ExifData;
-                }
-
-                // Merge images horizontally
                 int offsetX = 0;
                 foreach (string path in inputPaths)
                 {
@@ -82,7 +77,7 @@ class Program
                     }
                 }
 
-                // Save the bound image (source already bound)
+                // Save the bound image
                 canvas.Save();
             }
         }

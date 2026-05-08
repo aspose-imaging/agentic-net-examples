@@ -8,45 +8,53 @@ class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-        foreach (var inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    tiffOptions.Compression = TiffCompressions.Lzw;
-                    image.Save(outputPath, tiffOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tif";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                    {
+                        tiffOptions.Compression = TiffCompressions.Lzw;
+                        tiffOptions.ResolutionSettings = new ResolutionSetting(150, 150);
+                        image.Save(outputPath, tiffOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

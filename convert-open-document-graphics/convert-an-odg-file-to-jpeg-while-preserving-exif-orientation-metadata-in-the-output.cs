@@ -2,32 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.odg";
-        string outputPath = "Output\\sample.jpg";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.jpg";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Aspose.Imaging.FileFormats.OpenDocument.OdgImage odgImage = (Aspose.Imaging.FileFormats.OpenDocument.OdgImage)Image.Load(inputPath))
-        {
-            using (JpegOptions jpegOptions = new JpegOptions
+            if (!File.Exists(inputPath))
             {
-                KeepMetadata = true
-            })
-            {
-                odgImage.Save(outputPath, jpegOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
+                };
+
+                var jpegOptions = new JpegOptions
+                {
+                    KeepMetadata = true,
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

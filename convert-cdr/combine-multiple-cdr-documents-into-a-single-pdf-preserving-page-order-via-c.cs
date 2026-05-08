@@ -10,17 +10,17 @@ class Program
     {
         try
         {
-            // Hardcoded input CDR file paths (preserve order)
+            // Hardcoded input CDR files
             string[] inputPaths = {
-                @"C:\Input\doc1.cdr",
-                @"C:\Input\doc2.cdr",
-                @"C:\Input\doc3.cdr"
+                @"C:\input1.cdr",
+                @"C:\input2.cdr",
+                @"C:\input3.cdr"
             };
 
-            // Hardcoded output PDF path
-            string outputPath = @"C:\Output\Combined.pdf";
+            // Hardcoded output PDF file
+            string outputPath = @"C:\output\combined.pdf";
 
-            // Validate each input file exists
+            // Validate each input file
             foreach (var inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
@@ -41,12 +41,12 @@ class Program
                 images.Add(img);
             }
 
-            // Combine loaded images into a multipage image
-            using (Image combined = Image.Create(images.ToArray(), true))
+            // Create a multipage image from the loaded CDR pages
+            using (Image multipage = Image.Create(images.ToArray()))
             {
-                // Configure PDF options with vector rasterization settings
-                var pdfOptions = new PdfOptions();
-                var rasterOptions = new CdrRasterizationOptions
+                // Configure PDF export options with CDR rasterization settings
+                PdfOptions pdfOptions = new PdfOptions();
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
@@ -54,11 +54,11 @@ class Program
                 };
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save combined PDF
-                combined.Save(outputPath, pdfOptions);
+                // Save the combined PDF
+                multipage.Save(outputPath, pdfOptions);
             }
 
-            // Dispose individual images
+            // Dispose the individual loaded images
             foreach (var img in images)
             {
                 img.Dispose();

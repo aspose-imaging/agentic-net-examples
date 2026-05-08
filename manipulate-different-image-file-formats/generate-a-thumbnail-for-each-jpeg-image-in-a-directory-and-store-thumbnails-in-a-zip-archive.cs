@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -10,35 +9,27 @@ class Program
     {
         try
         {
-            // Define input and output locations
-            string inputDirectory = "Input";
-            string outputZipPath = Path.Combine("Output", "thumbnails.zip");
+            // Hardcoded input directory and output zip file
+            string inputDirectory = "InputImages";
+            string outputZipPath = "Output/thumbnails.zip";
 
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
 
-            // Get JPEG files (both .jpg and .jpeg)
-            string[] jpgFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpeg");
-            string[] allFiles = new string[jpgFiles.Length + jpegFiles.Length];
-            jpgFiles.CopyTo(allFiles, 0);
-            jpegFiles.CopyTo(allFiles, jpgFiles.Length);
+            // Get all JPEG files in the input directory
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            string[] jpegFilesUpper = Directory.GetFiles(inputDirectory, "*.jpeg");
+            string[] allJpegFiles = new string[jpegFiles.Length + jpegFilesUpper.Length];
+            jpegFiles.CopyTo(allJpegFiles, 0);
+            jpegFilesUpper.CopyTo(allJpegFiles, jpegFiles.Length);
 
-            // Create the zip archive
-            using (FileStream zipFileStream = new FileStream(outputZipPath, FileMode.Create))
-            using (var zipArchive = new System.IO.Compression.ZipArchive(zipFileStream, System.IO.Compression.ZipArchiveMode.Create, true))
+            // Open (or create) the zip archive for updating
+            using (var zipStream = new FileStream(outputZipPath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            using (var zip = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Update))
             {
-                foreach (string inputPath in allFiles)
+                foreach (string inputPath in allJpegFiles)
                 {
-                    // Validate each input file
+                    // Validate input file existence
                     if (!File.Exists(inputPath))
                     {
                         Console.Error.WriteLine($"File not found: {inputPath}");
@@ -48,54 +39,54 @@ class Program
                     // Load the JPEG image
                     using (Image image = Image.Load(inputPath))
                     {
-                        // Determine thumbnail size while preserving aspect ratio (max 100x100)
-                        int maxSize = 100;
+                        // Determine thumbnail size (max dimension 100 pixels)
+                        const int maxDim = 100;
                         int thumbWidth = image.Width;
                         int thumbHeight = image.Height;
 
                         if (thumbWidth > thumbHeight)
                         {
-                            if (thumbWidth > maxSize)
+                            if (thumbWidth > maxDim)
                             {
-                                thumbHeight = thumbHeight * maxSize / thumbWidth;
-                                thumbWidth = maxSize;
+                                thumbHeight = thumbHeight * maxDim / thumbWidth;
+                                thumbWidth = maxDim;
                             }
                         }
                         else
                         {
-                            if (thumbHeight > maxSize)
+                            if (thumbHeight > maxDim)
                             {
-                                thumbWidth = thumbWidth * maxSize / thumbHeight;
-                                thumbHeight = maxSize;
+                                thumbWidth = thumbWidth * maxDim / thumbHeight;
+                                thumbHeight = maxDim;
                             }
                         }
 
                         // Resize to thumbnail dimensions
                         image.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
 
-                        // Save thumbnail to a memory stream using JPEG options
-                        using (var thumbStream = new MemoryStream())
+                        // Prepare JPEG save options for the thumbnail
+                        JpegOptions jpegOptions = new JpegOptions
                         {
-                            var jpegOptions = new JpegOptions
-                            {
-                                Quality = 80
-                            };
-                            image.Save(thumbStream, jpegOptions);
-                            thumbStream.Position = 0;
+                            Quality = 80
+                        };
 
-                            // Add thumbnail to zip archive
+                        // Save thumbnail to a memory stream
+                        using (var ms = new MemoryStream())
+                        {
+                            image.Save(ms, jpegOptions);
+                            ms.Position = 0;
+
+                            // Create a zip entry for the thumbnail
                             string entryName = Path.GetFileNameWithoutExtension(inputPath) + "_thumb.jpg";
-                            var entry = zipArchive.CreateEntry(entryName);
+                            var entry = zip.CreateEntry(entryName, System.IO.Compression.CompressionLevel.Optimal);
                             using (var entryStream = entry.Open())
                             {
-                                thumbStream.CopyTo(entryStream);
+                                ms.CopyTo(entryStream);
                             }
                         }
                     }
                 }
             }
-
-            Console.WriteLine($"Thumbnails have been saved to: {outputZipPath}");
         }
         catch (Exception ex)
         {

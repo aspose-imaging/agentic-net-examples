@@ -8,21 +8,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/result.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string inputPath = "input.eps";
+            string outputPath = "output/output.pdf";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image epsImage = Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions();
+                epsImage.Save(outputPath, pdfOptions);
+            }
         }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            var pdfOptions = new PdfOptions();
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

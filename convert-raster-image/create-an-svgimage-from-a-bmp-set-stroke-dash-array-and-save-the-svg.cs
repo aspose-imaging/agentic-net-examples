@@ -1,50 +1,47 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "sample.bmp";
+            string outputPath = "output.svg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
-        {
-            // Create an SVG graphics canvas with the same size as the bitmap
-            SvgGraphics2D graphics = new SvgGraphics2D(bmp.Width, bmp.Height, 96);
-
-            // Draw the bitmap onto the SVG canvas
-            graphics.DrawImage(bmp, new Point(0, 0), new Size(bmp.Width, bmp.Height));
-
-            // Create a pen with a dash pattern (stroke dash array)
-            Pen dashPen = new Pen(Color.Black, 2);
-            dashPen.DashPattern = new float[] { 5, 3 }; // 5 units dash, 3 units gap
-
-            // Draw a rectangle using the dash pen to demonstrate the dash array
-            graphics.DrawRectangle(dashPen, 0, 0, bmp.Width, bmp.Height);
-
-            // Finalize the SVG image
-            using (SvgImage svgImage = graphics.EndRecording())
+            if (!File.Exists(inputPath))
             {
-                // Save the SVG file
-                svgImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (Aspose.Imaging.RasterImage bmp = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                int width = bmp.Width;
+                int height = bmp.Height;
+
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, 96);
+
+                Aspose.Imaging.Pen dashPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
+                dashPen.DashPattern = new float[] { 5, 5 };
+
+                graphics.DrawImage(bmp, new Aspose.Imaging.Point(0, 0));
+                graphics.DrawRectangle(dashPen, 0, 0, width, height);
+
+                using (SvgImage svg = graphics.EndRecording())
+                {
+                    svg.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

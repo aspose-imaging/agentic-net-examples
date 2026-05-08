@@ -1,63 +1,68 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Output file path (hardcoded)
+            string outputPath = @"c:\temp\star.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Initialize graphics object for drawing
-            Graphics graphics = new Graphics(image);
+            // Create PNG options with file source bound to the output path
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a graphics path to hold the star figure
-            GraphicsPath graphicsPath = new GraphicsPath();
-
-            // Define star points (5‑pointed star)
-            PointF[] starPoints = new PointF[]
+            // Create a 500x500 image
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                new PointF(250f,  50f),   // top
-                new PointF(317f, 182f),
-                new PointF(460f, 200f),
-                new PointF(350f, 300f),
-                new PointF(380f, 440f),
-                new PointF(250f, 370f),
-                new PointF(120f, 440f),
-                new PointF(150f, 300f),
-                new PointF( 40f, 200f),
-                new PointF(183f, 182f)
-            };
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-            // Create a figure and add a closed polygon shape representing the star
-            Figure starFigure = new Figure();
-            starFigure.AddShape(new PolygonShape(starPoints, true));
+                // Create a graphics path and a figure
+                GraphicsPath graphicsPath = new GraphicsPath();
+                Figure figure = new Figure();
 
-            // Add the figure to the graphics path
-            graphicsPath.AddFigure(starFigure);
+                // Define star points (10-pointed star)
+                PointF[] starPoints = new PointF[]
+                {
+                    new PointF(250f, 50f),
+                    new PointF(300f, 200f),
+                    new PointF(450f, 200f),
+                    new PointF(325f, 300f),
+                    new PointF(375f, 450f),
+                    new PointF(250f, 350f),
+                    new PointF(125f, 450f),
+                    new PointF(175f, 300f),
+                    new PointF(50f, 200f),
+                    new PointF(200f, 200f)
+                };
 
-            // Draw the star path with a black pen of width 2
-            Pen pen = new Pen(Color.Black, 2);
-            graphics.DrawPath(pen, graphicsPath);
+                // Add a closed polygon shape representing the star
+                figure.AddShape(new PolygonShape(starPoints, true));
 
-            // Save the modified image to the output path
-            image.Save(outputPath);
+                // Add the figure to the graphics path
+                graphicsPath.AddFigure(figure);
+
+                // Draw the path with a black pen
+                graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
+
+                // Save the image (file is already bound to the source)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

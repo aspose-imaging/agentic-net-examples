@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf.Graphics;
 
 class Program
 {
@@ -19,30 +20,37 @@ class Program
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the WMF image
-        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+        try
         {
-            // Prepare SVG save options
-            SvgOptions svgOptions = new SvgOptions
+            // Load the WMF image
+            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
-                TextAsShapes = true // render text as shapes
-            };
+                // Prepare SVG save options
+                SvgOptions svgOptions = new SvgOptions
+                {
+                    TextAsShapes = true
+                };
 
-            // Configure rasterization options with a background tint (acts as a simple color tint)
-            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
-            {
-                BackgroundColor = Aspose.Imaging.Color.LightBlue, // tint color
-                PageSize = wmfImage.Size,
-                RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
-            };
+                // Configure rasterization options with a color tint (light blue background)
+                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.FromArgb(255, 200, 220, 255), // tint color
+                    PageSize = wmfImage.Size,
+                    RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
+                };
 
-            svgOptions.VectorRasterizationOptions = rasterOptions;
+                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Save the tinted image as SVG
-            wmfImage.Save(outputPath, svgOptions);
+                // Save as SVG
+                wmfImage.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

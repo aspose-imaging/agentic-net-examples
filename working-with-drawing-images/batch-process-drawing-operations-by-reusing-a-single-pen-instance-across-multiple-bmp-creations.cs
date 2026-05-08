@@ -1,49 +1,64 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Output file paths
-        string[] outputPaths = {
-            @"C:\Temp\output1.bmp",
-            @"C:\Temp\output2.bmp",
-            @"C:\Temp\output3.bmp"
-        };
-
-        // Reuse a single Pen instance for all drawings
-        Aspose.Imaging.Pen sharedPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3f);
-
-        foreach (string outputPath in outputPaths)
+        try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set BMP options with a FileCreateSource bound to the output file
-            BmpOptions bmpOptions = new BmpOptions
+            // Define the output BMP file paths (hard‑coded literals)
+            string[] outputPaths = new string[]
             {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
+                @"C:\temp\output1.bmp",
+                @"C:\temp\output2.bmp",
+                @"C:\temp\output3.bmp"
             };
 
-            // Create a new image canvas
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 200, 200))
+            // Create a single Pen instance that will be reused for all drawings
+            Pen sharedPen = new Pen(Color.Blue, 3f);
+
+            foreach (string outputPath in outputPaths)
             {
-                // Initialize graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                // Ensure the output directory exists (unconditional)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Clear background
-                graphics.Clear(Aspose.Imaging.Color.White);
+                // Set up BMP options with a FileCreateSource pointing to the output file
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 24,
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                // Draw a rectangle using the shared Pen
-                graphics.DrawRectangle(sharedPen, new Aspose.Imaging.Rectangle(20, 20, 160, 160));
+                // Create a new BMP image of size 400x400
+                using (Image image = Image.Create(bmpOptions, 400, 400))
+                {
+                    // Initialize graphics for the image
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                // Save the image (output path already bound)
-                image.Save();
+                    // Draw several rectangles using the shared Pen
+                    graphics.DrawRectangles(sharedPen, new[]
+                    {
+                        new Rectangle(50, 50, 100, 100),
+                        new Rectangle(200, 50, 100, 100),
+                        new Rectangle(125, 200, 150, 150)
+                    });
+
+                    // Save the image (FileCreateSource already points to the file)
+                    image.Save();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,44 +1,45 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (outputDir != null)
-                Directory.CreateDirectory(outputDir);
-            else
-                Directory.CreateDirectory(".");
-
-            // Load image and apply filters
+            // Load the image and cast to RasterImage
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply motion blur filter
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
+                // Apply motion blur (motion wiener) filter first
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
 
-                // Apply sharpen filter
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                // Apply sharpen filter second
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-                // Save the processed image
-                raster.Save(outputPath);
+                // Save the result as PNG
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

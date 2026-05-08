@@ -7,52 +7,63 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded list of input files (ODG and OTG)
-        string[] inputFiles = new[]
+        try
         {
-            @"C:\Images\sample1.odg",
-            @"C:\Images\sample2.otg",
-            @"C:\Images\sample3.odg",
-            @"C:\Images\sample4.otg"
-        };
+            // Hardcoded list of input files (ODG and OTG)
+            string[] inputFiles = new[]
+            {
+                @"C:\Images\sample1.odg",
+                @"C:\Images\sample2.otg"
+                // Add more file paths as needed
+            };
 
-        foreach (string inputPath in inputFiles)
+            foreach (var inputPath in inputFiles)
+            {
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Load the image (ODG or OTG)
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Prepare SVG export options
+                    SvgOptions svgOptions = new SvgOptions();
+
+                    // Choose rasterization options based on file type
+                    VectorRasterizationOptions rasterOptions;
+                    string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+                    if (ext == ".odg")
+                    {
+                        var odgRaster = new OdgRasterizationOptions();
+                        odgRaster.PageSize = image.Size;
+                        rasterOptions = odgRaster;
+                    }
+                    else // .otg
+                    {
+                        var otgRaster = new OtgRasterizationOptions();
+                        otgRaster.PageSize = image.Size;
+                        rasterOptions = otgRaster;
+                    }
+
+                    svgOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Define output path (same folder, same name with .svg extension)
+                    string outputPath = inputPath + ".svg";
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                    // Save the image as SVG
+                    image.Save(outputPath, svgOptions);
+                }
+            }
+        }
+        catch (Exception ex)
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Determine output SVG path
-            string outputPath = inputPath + ".svg";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image (ODG or OTG)
-            using (Image image = Image.Load(inputPath))
-            {
-                // Prepare SVG rasterization options preserving vector data
-                var svgRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Prepare SVG save options
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = svgRasterizationOptions,
-                    // Keep vectors; no compression needed for lossless SVG
-                    Compress = false
-                };
-
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
-            }
-
-            Console.WriteLine($"Converted '{inputPath}' to SVG at '{outputPath}'.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

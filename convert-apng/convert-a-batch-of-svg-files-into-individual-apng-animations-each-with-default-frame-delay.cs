@@ -10,14 +10,14 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputFolder = @"C:\InputSvgs";
-            string outputFolder = @"C:\OutputApngs";
+            string inputDirectory = @"C:\SvgInput";
+            string outputDirectory = @"C:\ApngOutput";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            // Get all SVG files in the input folder
-            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
+            // Get all SVG files in the input directory
+            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
             foreach (string inputPath in svgFiles)
             {
@@ -28,18 +28,23 @@ class Program
                     return;
                 }
 
-                // Determine the output file path (APNG uses .png extension)
+                // Determine output file path (same name with .png extension)
                 string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists (covers subfolders if any)
+                // Ensure the output directory exists (covers cases where outputDirectory may be a subfolder)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the SVG image
-                using (Image image = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    // Save as APNG with default frame time
-                    image.Save(outputPath, new ApngOptions());
+                    // Save as APNG with a default frame time (e.g., 100 ms)
+                    var apngOptions = new ApngOptions
+                    {
+                        DefaultFrameTime = 100 // default frame delay in milliseconds
+                    };
+
+                    svgImage.Save(outputPath, apngOptions);
                 }
             }
         }

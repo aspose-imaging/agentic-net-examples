@@ -1,58 +1,66 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string tempSvgPath = @"C:\Images\temp_modified.svg";
-        string outputPdfPath = @"C:\Images\output.pdf";
+        string inputPath = "Input/sample.svg";
+        string outputPath = "Output/output.pdf";
 
-        // Input file existence check
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(tempSvgPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the original SVG as XML
-        XDocument svgDoc = XDocument.Load(inputPath);
-
-        // Apply a custom dash pattern to all <path> elements
-        var pathElements = svgDoc.Descendants()
-                                 .Where(e => e.Name.LocalName.Equals("path", StringComparison.OrdinalIgnoreCase));
-
-        foreach (var pathElem in pathElements)
+        try
         {
-            // Set a dash pattern (e.g., 5 units dash, 5 units gap)
-            pathElem.SetAttributeValue("stroke-dasharray", "5,5");
-
-            // Ensure a stroke color is defined; default to black if missing
-            if (pathElem.Attribute("stroke") == null)
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                pathElem.SetAttributeValue("stroke", "black");
+                SvgImage svgImage = (SvgImage)image;
+
+                // Create a graphics object for editing the SVG
+                SvgGraphics2D graphics = new SvgGraphics2D(svgImage);
+
+                // Define a custom dash pattern pen
+                Pen dashPen = new Pen(Color.Blue, 2);
+                dashPen.DashPattern = new float[] { 5, 3 }; // 5 units dash, 3 units gap
+
+                // Example: apply the custom pen to a path covering the whole image.
+                // In a real scenario, iterate over existing paths and apply the pen.
+                Figure figure = new Figure { IsClosed = true };
+                RectangleShape rectShape = new RectangleShape(new RectangleF(0, 0, svgImage.Width, svgImage.Height));
+                figure.AddShape(rectShape);
+                GraphicsPath path = new GraphicsPath();
+                path.AddFigure(figure);
+                graphics.DrawPath(dashPen, path);
+
+                // Finalize SVG modifications
+                using (SvgImage modifiedSvg = graphics.EndRecording())
+                {
+                    // Save the styled SVG as PDF
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        modifiedSvg.Save(outputPath, pdfOptions);
+                    }
+                }
             }
         }
-
-        // Save the modified SVG to a temporary file
-        svgDoc.Save(tempSvgPath);
-
-        // Load the modified SVG with Aspose.Imaging
-        using (Image svgImage = Image.Load(tempSvgPath))
+        catch (Exception ex)
         {
-            // Export to PDF
-            var pdfOptions = new PdfOptions();
-            svgImage.Save(outputPdfPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

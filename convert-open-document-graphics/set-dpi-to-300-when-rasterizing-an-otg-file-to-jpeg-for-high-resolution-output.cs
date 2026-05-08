@@ -8,44 +8,47 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.jpg";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\input\sample.otg";
+        string outputPath = @"C:\output\sample.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure JPEG save options with 300 dpi resolution
+                var jpegOptions = new JpegOptions
+                {
+                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                    ResolutionUnit = ResolutionUnit.Inch
+                };
+
+                // Set vector rasterization options for OTG conversion
+                var otgRasterOptions = new OtgRasterizationOptions
+                {
+                    // Preserve the original page size
+                    PageSize = image.Size
+                };
+                jpegOptions.VectorRasterizationOptions = otgRasterOptions;
+
+                // Save the rasterized image as JPEG
+                image.Save(outputPath, jpegOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Prepare rasterization options for OTG vector image
-            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
-            {
-                // Preserve original page size
-                PageSize = image.Size
-            };
-
-            // Configure JPEG save options with 300 DPI resolution
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                // Set high resolution (300 DPI)
-                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-                ResolutionUnit = ResolutionUnit.Inch,
-                // Attach vector rasterization options so OTG is rasterized correctly
-                VectorRasterizationOptions = otgRasterizationOptions,
-                // Optional: set quality to maximum
-                Quality = 100
-            };
-
-            // Save the rasterized image as JPEG
-            image.Save(outputPath, jpegOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

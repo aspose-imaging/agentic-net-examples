@@ -7,38 +7,48 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    // Async entry point
     static async Task Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.cmx";
-        string outputPath = @"c:\temp\output.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = @"c:\temp\sample.cmx";
+            string outputPath = @"c:\temp\output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-        // Perform conversion asynchronously
-        await ConvertCmxToJpegAsync(inputPath, outputPath);
-    }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-    // Asynchronous conversion method
-    private static async Task ConvertCmxToJpegAsync(string inputPath, string outputPath)
-    {
-        // Load CMX image on a background thread
-        using (CmxImage cmxImage = await Task.Run(() => (CmxImage)Image.Load(inputPath)))
-        {
-            // Prepare JPEG save options (default options are sufficient for basic conversion)
+            // Load the CMX image on a background thread
+            CmxImage cmxImage = await Task.Run(() =>
+            {
+                // Image.Load returns a generic Image; cast to CmxImage
+                return (CmxImage)Image.Load(inputPath);
+            });
+
+            // Prepare JPEG save options (default options are sufficient for a basic conversion)
             var jpegOptions = new JpegOptions();
 
-            // Save JPEG image on a background thread
-            await Task.Run(() => cmxImage.Save(outputPath, jpegOptions));
+            // Save the image as JPEG on a background thread
+            await Task.Run(() =>
+            {
+                cmxImage.Save(outputPath, jpegOptions);
+            });
+
+            // Dispose the image to release resources
+            cmxImage.Dispose();
+
+            Console.WriteLine($"Conversion completed: {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

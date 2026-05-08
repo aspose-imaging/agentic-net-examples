@@ -9,50 +9,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path (hard‑coded)
         string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file source bound to the output path
-        Source source = new FileCreateSource(outputPath, false);
-
-        // Set up BMP options with the source
-        BmpOptions options = new BmpOptions() { Source = source };
-
-        // Create a BMP canvas of desired size (bound to the file)
-        using (Image canvas = Image.Create(options, 500, 300))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
+            int width = 400;
+            int height = 300;
 
-            // Clear the canvas to light blue
-            graphics.Clear(Color.LightBlue);
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // First semi‑transparent red rectangle
-            using (SolidBrush brush1 = new SolidBrush())
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                brush1.Color = Color.Red;
-                brush1.Opacity = 128; // 50% opacity (0‑255 range)
-                graphics.FillRectangle(brush1, new Rectangle(50, 50, 200, 150));
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.LightBlue);
+
+                // First semi‑transparent rectangle (red)
+                using (SolidBrush brush1 = new SolidBrush())
+                {
+                    brush1.Color = Color.FromArgb(128, 255, 0, 0);
+                    brush1.Opacity = 128;
+                    graphics.FillRectangle(brush1, new Rectangle(50, 50, 200, 150));
+                }
+
+                // Second semi‑transparent rectangle (blue) overlapping the first
+                using (SolidBrush brush2 = new SolidBrush())
+                {
+                    brush2.Color = Color.FromArgb(128, 0, 0, 255);
+                    brush2.Opacity = 128;
+                    graphics.FillRectangle(brush2, new Rectangle(150, 100, 200, 150));
+                }
+
+                // Save the bound image
+                image.Save();
             }
-
-            // Second semi‑transparent green rectangle overlapping the first
-            using (SolidBrush brush2 = new SolidBrush())
-            {
-                brush2.Color = Color.Green;
-                brush2.Opacity = 128; // 50% opacity
-                graphics.FillRectangle(brush2, new Rectangle(150, 100, 200, 150));
-            }
-
-            // Optional: draw borders around the rectangles
-            Pen pen = new Pen(Color.Black, 2);
-            graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
-            graphics.DrawRectangle(pen, new Rectangle(150, 100, 200, 150));
-
-            // Save the bound image (no path needed)
-            canvas.Save();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,59 +1,52 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.LightGray);
+
+                int width = image.Width;
+                int height = image.Height;
+                int step = 50;
+                Pen redPen = new Pen(Color.Red, 1);
+
+                for (int x = 0; x <= width; x += step)
+                {
+                    graphics.DrawLine(redPen, new Point(x, 0), new Point(x, height));
+                }
+
+                for (int y = 0; y <= height; y += step)
+                {
+                    graphics.DrawLine(redPen, new Point(0, y), new Point(width, y));
+                }
+
+                image.Save(outputPath, new BmpOptions());
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the BMP image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Create graphics object for drawing
-            Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-            // Clear the image to light gray
-            graphics.Clear(Aspose.Imaging.Color.LightGray);
-
-            // Define grid spacing
-            int spacing = 50;
-
-            // Draw vertical red lines
-            for (int x = 0; x <= image.Width; x += spacing)
-            {
-                graphics.DrawLine(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 1),
-                    new Aspose.Imaging.Point(x, 0),
-                    new Aspose.Imaging.Point(x, image.Height));
-            }
-
-            // Draw horizontal red lines
-            for (int y = 0; y <= image.Height; y += spacing)
-            {
-                graphics.DrawLine(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 1),
-                    new Aspose.Imaging.Point(0, y),
-                    new Aspose.Imaging.Point(image.Width, y));
-            }
-
-            // Save the modified image as BMP
-            var bmpOptions = new BmpOptions();
-            image.Save(outputPath, bmpOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

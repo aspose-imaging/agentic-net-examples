@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -11,23 +10,18 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+        string outputPath = "output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new[]
-            {
-                "image1.jpg",
-                "image2.jpg",
-                "image3.jpg"
-            };
-            string outputPath = "merged.jpg";
-
             // Validate input files
-            foreach (string inputPath in inputPaths)
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
@@ -45,30 +39,35 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            // Calculate canvas dimensions (horizontal merge)
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (Size sz in sizes)
+            {
+                canvasWidth += sz.Width;
+                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+            }
 
-            // Prepare JPEG options with bound source
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions { Source = src, Quality = 100 };
+            // Create JPEG canvas with bound source
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions options = new JpegOptions() { Source = source, Quality = 90 };
 
-            // Create canvas
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(options, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
                 foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        int offsetY = (canvasHeight - img.Height) / 2; // Center vertically
+                        // Center each image vertically on the canvas
+                        int offsetY = (canvasHeight - img.Height) / 2;
                         Rectangle bounds = new Rectangle(offsetX, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the bound image
+                // Save the bound image (outputPath already bound via source)
                 canvas.Save();
             }
         }

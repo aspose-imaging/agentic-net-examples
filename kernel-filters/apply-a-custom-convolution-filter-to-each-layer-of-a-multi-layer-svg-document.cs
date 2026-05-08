@@ -10,53 +10,42 @@ class Program
     static void Main(string[] args)
     {
         string inputPath = "input.svg";
-        string outputPath = "output\\output.png";
+        string outputPath = "output.svg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                var embeddedImages = (image as VectorImage)?.GetEmbeddedImages();
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image svgImage = Image.Load(inputPath))
-            {
-                var rasterOptions = new SvgRasterizationOptions
+                if (embeddedImages != null)
                 {
-                    PageSize = svgImage.Size
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-                svgImage.Save(tempPngPath, pngOptions);
-
-                using (Image rasterImg = Image.Load(tempPngPath))
-                {
-                    RasterImage raster = (RasterImage)rasterImg;
-
-                    double[,] kernel = new double[,]
+                    foreach (var embedded in embeddedImages)
                     {
-                        { -1, -1, -1 },
-                        { -1,  8, -1 },
-                        { -1, -1, -1 }
-                    };
+                        if (embedded.Image is RasterImage raster)
+                        {
+                            double[,] kernel = new double[,]
+                            {
+                                { 0, -1, 0 },
+                                { -1, 5, -1 },
+                                { 0, -1, 0 }
+                            };
 
-                    var filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
-                    raster.Filter(raster.Bounds, filterOptions);
-                    raster.Save(outputPath);
+                            var filterOptions = new ConvolutionFilterOptions(kernel, 0, 1);
+                            raster.Filter(raster.Bounds, filterOptions);
+                        }
+                    }
                 }
 
-                if (File.Exists(tempPngPath))
-                {
-                    File.Delete(tempPngPath);
-                }
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)

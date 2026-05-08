@@ -2,54 +2,67 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add EPS files and rerun.");
-            return;
-        }
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.eps");
-
-        foreach (string inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
             }
 
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            DateTime startTime = DateTime.Now;
-            Console.WriteLine($"Processing {Path.GetFileName(inputPath)} started at {startTime}");
-
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                image.Save(outputPath, new PngOptions());
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            DateTime endTime = DateTime.Now;
-            Console.WriteLine($"Processing {Path.GetFileName(inputPath)} finished at {endTime}. Duration: {endTime - startTime}");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var file in files)
+            {
+                if (!Path.GetExtension(file).Equals(".eps", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (!File.Exists(file))
+                {
+                    Console.Error.WriteLine($"File not found: {file}");
+                    continue;
+                }
+
+                Console.WriteLine($"Processing started: {file} at {DateTime.Now}");
+
+                using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(file))
+                {
+                    var options = new PngOptions
+                    {
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        }
+                    };
+
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    image.Save(outputPath, options);
+                }
+
+                Console.WriteLine($"Processing finished: {file} at {DateTime.Now}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

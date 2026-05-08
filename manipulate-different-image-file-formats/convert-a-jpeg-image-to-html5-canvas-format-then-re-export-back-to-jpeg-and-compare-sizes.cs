@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,58 +11,52 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputJpegPath = @"C:\Images\input.jpg";
-            string htmlPath = @"C:\Images\output.html";
-            string outputJpegPath = @"C:\Images\reconverted.jpg";
+            string inputJpegPath = @"C:\temp\input.jpg";
+            string canvasHtmlPath = @"C:\temp\output.html";
+            string reexportJpegPath = @"C:\temp\reexport.jpg";
 
-            // Verify input JPEG exists
+            // Input file existence check
             if (!File.Exists(inputJpegPath))
             {
                 Console.Error.WriteLine($"File not found: {inputJpegPath}");
                 return;
             }
 
-            // Load the JPEG image
-            using (Image image = Image.Load(inputJpegPath))
-            {
-                // Ensure directory for HTML output exists
-                Directory.CreateDirectory(Path.GetDirectoryName(htmlPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(canvasHtmlPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(reexportJpegPath));
 
+            // Load the original JPEG image
+            using (Image jpegImage = Image.Load(inputJpegPath))
+            {
                 // Save as HTML5 Canvas
-                var htmlOptions = new Html5CanvasOptions
+                var canvasOptions = new Html5CanvasOptions
                 {
+                    // Export a full HTML page; adjust as needed
                     FullHtmlPage = true,
-                    CanvasTagId = "canvas1"
+                    // Required for vector rasterization (even if source is raster)
+                    VectorRasterizationOptions = new SvgRasterizationOptions()
                 };
-                image.Save(htmlPath, htmlOptions);
+                jpegImage.Save(canvasHtmlPath, canvasOptions);
             }
 
-            // Verify HTML file exists before loading
-            if (!File.Exists(htmlPath))
+            // Load the generated HTML5 Canvas file
+            using (Image canvasImage = Image.Load(canvasHtmlPath))
             {
-                Console.Error.WriteLine($"File not found: {htmlPath}");
-                return;
-            }
-
-            // Load the HTML5 Canvas file back as an image
-            using (Image canvasImage = Image.Load(htmlPath))
-            {
-                // Ensure directory for JPEG output exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputJpegPath));
-
                 // Save back to JPEG
                 var jpegOptions = new JpegOptions
                 {
-                    Quality = 100
+                    Quality = 100 // Preserve maximum quality
                 };
-                canvasImage.Save(outputJpegPath, jpegOptions);
+                canvasImage.Save(reexportJpegPath, jpegOptions);
             }
 
             // Compare file sizes
             long originalSize = new FileInfo(inputJpegPath).Length;
-            long reconvertedSize = new FileInfo(outputJpegPath).Length;
+            long reexportSize = new FileInfo(reexportJpegPath).Length;
+
             Console.WriteLine($"Original JPEG size: {originalSize} bytes");
-            Console.WriteLine($"Reconverted JPEG size: {reconvertedSize} bytes");
+            Console.WriteLine($"Re‑exported JPEG size: {reexportSize} bytes");
         }
         catch (Exception ex)
         {

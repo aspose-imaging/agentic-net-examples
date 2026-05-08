@@ -14,7 +14,7 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG paths
+            // Hardcoded input JPEG files
             string[] inputPaths = new string[]
             {
                 "input1.jpg",
@@ -23,22 +23,25 @@ class Program
             };
 
             // Validate input files
-            foreach (string inputPath in inputPaths)
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            // Hardcoded output PDF path
-            string outputPath = "merged.pdf";
+            // Output PDF path
+            string outputPdfPath = "output/merged.pdf";
+            // Temporary JPEG used as intermediate canvas
+            string tempJpegPath = "output/temp.jpg";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
 
-            // Collect sizes of all input images
+            // Collect image sizes
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -52,13 +55,9 @@ class Program
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Temporary JPEG file to hold the merged image
-            string tempJpegPath = "temp_merged.jpg";
-            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
-            Source tempSource = new FileCreateSource(tempJpegPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
-
-            // Create JPEG canvas and merge images horizontally
+            // Create temporary JPEG canvas
+            Source jpegSource = new FileCreateSource(tempJpegPath, false);
+            JpegOptions jpegOptions = new JpegOptions { Source = jpegSource, Quality = 100 };
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
@@ -71,20 +70,19 @@ class Program
                         offsetX += img.Width;
                     }
                 }
-
-                // Save the merged JPEG to the temporary file
+                // Save the merged JPEG
                 canvas.Save();
             }
 
-            // Load the merged JPEG and save as PDF with custom author metadata
-            using (JpegImage mergedJpeg = (JpegImage)Image.Load(tempJpegPath))
+            // Load the merged JPEG and save as PDF with author metadata
+            using (Image mergedImage = Image.Load(tempJpegPath))
             {
                 PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo()
+                pdfOptions.PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo
                 {
                     Author = "Custom Author"
                 };
-                mergedJpeg.Save(outputPath, pdfOptions);
+                mergedImage.Save(outputPdfPath, pdfOptions);
             }
         }
         catch (Exception ex)

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -11,10 +10,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded paths
             string inputPath = "input.svg";
-            string outputPath = "output.png";
-            string tempPngPath = "temp.png";
+            string tempPngPath = "temp\\temp.png";
+            string outputPath = "output\\output.png";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -24,44 +23,47 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
             Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load SVG and rasterize to a temporary PNG
             using (Image svgImage = Image.Load(inputPath))
             {
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
+                };
+
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    }
+                    VectorRasterizationOptions = rasterOptions
                 };
+
                 svgImage.Save(tempPngPath, pngOptions);
             }
 
-            // Load the rasterized PNG
-            using (Image rasterImageContainer = Image.Load(tempPngPath))
+            // Load the rasterized PNG and apply an invalid convolution filter
+            using (Image rasterImg = Image.Load(tempPngPath))
             {
-                var rasterImage = (RasterImage)rasterImageContainer;
+                var raster = (RasterImage)rasterImg;
 
-                // Create an invalid custom kernel (non‑square matrix)
+                // Create an invalid (non‑square) kernel
                 double[,] invalidKernel = new double[2, 3];
-                var convOptions = new ConvolutionFilterOptions(invalidKernel);
+                invalidKernel[0, 0] = 0; invalidKernel[0, 1] = 1; invalidKernel[0, 2] = 0;
+                invalidKernel[1, 0] = 1; invalidKernel[1, 1] = -4; invalidKernel[1, 2] = 1;
 
-                // Apply convolution filter and catch any exceptions
                 try
                 {
-                    rasterImage.Filter(rasterImage.Bounds, convOptions);
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(invalidKernel));
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Filter error: {ex.Message}");
+                    Console.Error.WriteLine($"Convolution filter error: {ex.Message}");
                 }
 
-                // Save the (potentially unchanged) image to the final output
-                var saveOptions = new PngOptions();
-                rasterImage.Save(outputPath, saveOptions);
+                // Save the (possibly unchanged) image
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

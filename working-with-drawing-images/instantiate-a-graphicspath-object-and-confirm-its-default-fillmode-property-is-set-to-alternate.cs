@@ -20,17 +20,24 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Instantiate a GraphicsPath object
-        GraphicsPath graphicsPath = new GraphicsPath();
+        try
+        {
+            // Instantiate a GraphicsPath object
+            GraphicsPath graphicspath = new GraphicsPath();
 
-        // Confirm the default FillMode is Alternate
-        if (graphicsPath.FillMode == FillMode.Alternate)
-        {
-            Console.WriteLine("Default FillMode is Alternate.");
+            // Confirm the default FillMode is Alternate
+            if (graphicspath.FillMode == FillMode.Alternate)
+            {
+                Console.WriteLine("Default FillMode is Alternate.");
+            }
+            else
+            {
+                Console.WriteLine($"Default FillMode is {graphicspath.FillMode}.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine($"Default FillMode is {graphicsPath.FillMode}.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

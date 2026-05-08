@@ -8,37 +8,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample_converted.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\sample_converted.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare JPEG save options with quality 85
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Quality = 85,
-                // Configure rasterization for vector source
-                VectorRasterizationOptions = new OdgRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as JPEG
-            image.Save(outputPath, jpegOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare rasterization options for the vector ODG image
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                {
+                    // Use a white background and preserve the original page size
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageSize = image.Size
+                };
+
+                // Configure JPEG save options with quality 85%
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 85,
+                    // Attach the rasterization options so the vector image is rasterized correctly
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the image as JPEG using the configured options
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

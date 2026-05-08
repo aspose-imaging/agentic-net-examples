@@ -3,15 +3,14 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.pdf";
+        string inputPath = "Input/sample.png";
+        string outputPath = "Output/sample.pdf";
 
         if (!File.Exists(inputPath))
         {
@@ -21,26 +20,33 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            RasterImage raster = (RasterImage)image;
-
-            // Apply median filter with size 5
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-
-            // Draw footer with file name
-            Graphics graphics = new Graphics(image);
-            Font font = new Font("Arial", 12);
-            using (SolidBrush brush = new SolidBrush(Color.Black))
+            using (Image image = Image.Load(inputPath))
             {
-                float x = 10;
-                float y = image.Height - 20;
-                graphics.DrawString(Path.GetFileName(inputPath), font, brush, new PointF(x, y));
-            }
+                RasterImage raster = (RasterImage)image;
 
-            // Save as PDF
-            PdfOptions pdfOptions = new PdfOptions();
-            image.Save(outputPath, pdfOptions);
+                // Apply median filter with size 5
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                // Draw footer with file name
+                Graphics graphics = new Graphics(image);
+                Font font = new Font("Arial", 12);
+                using (SolidBrush brush = new SolidBrush(Color.Black))
+                {
+                    int margin = 10;
+                    int y = image.Height - margin - 12;
+                    graphics.DrawString(Path.GetFileName(inputPath), font, brush, new Point(margin, y));
+                }
+
+                // Save as PDF
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

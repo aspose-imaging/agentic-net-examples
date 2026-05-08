@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Tiff;
 
@@ -11,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
+            string inputPath = "Input/sample.jpg";
+            string outputPath = "Output/sample_geotagged.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,26 +23,19 @@ class Program
 
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                Aspose.Imaging.Exif.JpegExifData exif = image.ExifData;
-                if (exif == null)
-                {
-                    exif = new Aspose.Imaging.Exif.JpegExifData();
-                    image.ExifData = exif;
-                }
-
+                var exif = image.ExifData;
                 exif.GPSLatitude = new TiffRational[]
                 {
                     new TiffRational(37, 1),
-                    new TiffRational(0, 1),
-                    new TiffRational(0, 1)
+                    new TiffRational(46, 1),
+                    new TiffRational(2964, 100)
                 };
                 exif.GPSLatitudeRef = "N";
-
                 exif.GPSLongitude = new TiffRational[]
                 {
                     new TiffRational(122, 1),
-                    new TiffRational(0, 1),
-                    new TiffRational(0, 1)
+                    new TiffRational(25, 1),
+                    new TiffRational(984, 100)
                 };
                 exif.GPSLongitudeRef = "W";
 

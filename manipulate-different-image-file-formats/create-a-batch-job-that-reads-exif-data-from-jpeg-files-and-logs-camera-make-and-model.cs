@@ -10,37 +10,50 @@ class Program
     {
         try
         {
-            // Hardcoded list of JPEG files to process
-            string[] inputPaths = new[]
-            {
-                @"c:\temp\image1.jpg",
-                @"c:\temp\image2.jpg"
-            };
+            // Hardcoded input directory containing JPEG files
+            string inputDirectory = @"C:\Images\Input";
 
-            foreach (string inputPath in inputPaths)
-            {
-                // Verify that the input file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+            // Hardcoded output log file path
+            string outputLogPath = @"C:\Images\Output\exif_log.txt";
 
-                // Load the JPEG image
-                using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputLogPath));
+
+            // Open the log file for writing
+            using (var logWriter = new StreamWriter(outputLogPath, false))
+            {
+                // Get all JPEG files in the input directory
+                string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+
+                foreach (string filePath in jpegFiles)
                 {
-                    // Cast the generic ExifData to JpegExifData to access Make and Model
-                    JpegExifData jpegExif = image.ExifData as JpegExifData;
-                    if (jpegExif != null)
+                    // Verify the input file exists
+                    if (!File.Exists(filePath))
                     {
-                        Console.WriteLine($"File: {Path.GetFileName(inputPath)}");
-                        Console.WriteLine($"Camera Manufacturer (Make): {jpegExif.Make}");
-                        Console.WriteLine($"Camera Model: {jpegExif.Model}");
-                        Console.WriteLine();
+                        Console.Error.WriteLine($"File not found: {filePath}");
+                        continue;
                     }
-                    else
+
+                    // Load the JPEG image
+                    using (JpegImage image = (JpegImage)Image.Load(filePath))
                     {
-                        Console.WriteLine($"File: {Path.GetFileName(inputPath)} does not contain JPEG EXIF data.");
+                        // Cast EXIF data to JpegExifData to access Make and Model
+                        JpegExifData jpegExif = image.ExifData as JpegExifData;
+
+                        if (jpegExif != null)
+                        {
+                            string make = jpegExif.Make ?? "N/A";
+                            string model = jpegExif.Model ?? "N/A";
+                            string line = $"{Path.GetFileName(filePath)}: Make = {make}, Model = {model}";
+                            Console.WriteLine(line);
+                            logWriter.WriteLine(line);
+                        }
+                        else
+                        {
+                            string line = $"{Path.GetFileName(filePath)}: No EXIF data.";
+                            Console.WriteLine(line);
+                            logWriter.WriteLine(line);
+                        }
                     }
                 }
             }

@@ -2,18 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\texture.tga";
-        string outputPath = @"C:\Images\Processed\texture_sharpened.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\texture.tga";
+            string outputPath = @"C:\Images\sharpened.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,14 +26,14 @@ class Program
             // Load the TGA image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering functionality
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a sharpen filter with size 3 and sigma 1.0 (strength three)
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 1.0));
+                // Apply a sharpen filter with strength three (size=3, sigma=3.0)
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 3.0));
 
                 // Save the result as BMP
-                rasterImage.Save(outputPath, new BmpOptions());
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)

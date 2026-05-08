@@ -8,66 +8,65 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Set up base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Prepare output PDF path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the vector image
-            using (Image image = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                // Configure PDF options with PDF version 1.6 (using PDF/A-1b compliance as an example)
-                PdfOptions pdfOptions = new PdfOptions
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory);
+
+            foreach (var inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    PdfCoreOptions = new PdfCoreOptions
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
                     {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    },
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                        PdfCompliance = PdfComplianceVersion.PdfA1b // PDF version 1.6 equivalent
+                    };
+
+                    var vectorOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
                         PageHeight = image.Height,
                         TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                         SmoothingMode = SmoothingMode.None
-                    }
-                };
+                    };
 
-                // Save the image as PDF with embedded fonts
-                image.Save(outputPath, pdfOptions);
+                    pdfOptions.VectorRasterizationOptions = vectorOptions;
+
+                    image.Save(outputPath, pdfOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,19 +2,21 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.tif";
-            string outputPath = @"C:\temp\output_modified.tif";
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,17 +24,27 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                // Example modification: rotate the image 90 degrees clockwise
-                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                // Create graphics for the active frame
+                Graphics graphics = new Graphics(tiff.ActiveFrame);
 
-                // Save the modified image, overwriting if the file already exists
+                // Draw a gradient over the entire image
+                using (LinearGradientBrush brush = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(tiff.Width, tiff.Height),
+                    Color.Blue,
+                    Color.Yellow))
+                {
+                    graphics.FillRectangle(brush, tiff.Bounds);
+                }
+
+                // Save the modified image with overwrite enabled
                 var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, saveOptions);
+                tiff.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

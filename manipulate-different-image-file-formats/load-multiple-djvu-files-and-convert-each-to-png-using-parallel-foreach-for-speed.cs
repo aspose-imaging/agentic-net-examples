@@ -9,19 +9,18 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input DjVu files
+        string[] inputFiles = new string[]
+        {
+            @"C:\DjvuFiles\doc1.djvu",
+            @"C:\DjvuFiles\doc2.djvu"
+        };
+
+        // Hardcoded root output directory
+        string outputRoot = @"C:\PngOutput";
+
         try
         {
-            // Hardcoded input DjVu files
-            string[] inputFiles = new[]
-            {
-                @"C:\Input\sample1.djvu",
-                @"C:\Input\sample2.djvu"
-            };
-
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Output";
-
-            // Process each DjVu file in parallel
             Parallel.ForEach(inputFiles, inputPath =>
             {
                 // Verify input file exists
@@ -31,27 +30,25 @@ class Program
                     return;
                 }
 
-                // Ensure output directory exists (creates if missing)
-                Directory.CreateDirectory(outputDirectory);
+                // Create a subdirectory for each DjVu file's pages
+                string fileBaseName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputDir = Path.Combine(outputRoot, fileBaseName);
+                Directory.CreateDirectory(outputDir);
 
                 // Open the DjVu file stream
                 using (FileStream stream = File.OpenRead(inputPath))
                 {
-                    // Load DjVu image from stream
-                    using (DjvuImage djvuImage = new DjvuImage(stream))
+                    // Load the DjVu document using the provided LoadDocument method
+                    using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
                     {
-                        // Iterate through each page
-                        foreach (DjvuPage djvuPage in djvuImage.Pages)
+                        // Iterate through each page and save as PNG
+                        foreach (DjvuPage page in djvuImage.Pages)
                         {
-                            // Build output file name: <originalname>_page<Number>.png
-                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{djvuPage.PageNumber}.png";
-                            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
+                            string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.png");
                             // Ensure the directory for the output file exists
                             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save the page as PNG
-                            djvuPage.Save(outputPath, new PngOptions());
+                            // Save the page as PNG using the provided Save method
+                            page.Save(outputPath, new PngOptions());
                         }
                     }
                 }

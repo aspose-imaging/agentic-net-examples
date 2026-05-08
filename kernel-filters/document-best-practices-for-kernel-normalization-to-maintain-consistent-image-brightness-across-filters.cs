@@ -7,39 +7,47 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the image using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filter operations
+                // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // 1. Apply automatic adaptive brightness/contrast normalization.
-                // This step equalizes local brightness and contrast, providing a consistent baseline.
-                rasterImage.AutoBrightnessContrast();
+                // -----------------------------------------------------------------
+                // Best practice: Apply kernel-based filters (e.g., sharpen) and then
+                // normalize brightness/contrast to keep visual consistency across
+                // different filters. This prevents cumulative brightness shifts.
+                // -----------------------------------------------------------------
 
-                // 2. Apply a sharpen filter to enhance edges.
-                // Using default kernel size and sigma; these values are chosen to avoid over‑enhancement.
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                // Example: Apply a sharpen filter with a 5x5 kernel and sigma 4.0
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new SharpenFilterOptions(5, 4.0));
 
-                // 3. Normalize histogram after sharpening.
-                // This restores the overall brightness range that may have shifted during sharpening.
+                // After applying the filter, normalize the image histogram.
+                // This spreads pixel values across the full dynamic range.
                 rasterImage.NormalizeHistogram();
+
+                // Finally, perform adaptive brightness/contrast normalization.
+                // AutoBrightnessContrast uses CLAHE, adaptive white stretch,
+                // and auto white balance to achieve consistent brightness.
+                rasterImage.AutoBrightnessContrast();
 
                 // Save the processed image
                 rasterImage.Save(outputPath);

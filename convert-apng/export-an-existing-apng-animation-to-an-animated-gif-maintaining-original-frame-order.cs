@@ -21,13 +21,9 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the APNG image
+            // Load the APNG animation
             using (Image image = Image.Load(inputPath))
             {
                 // Save as animated GIF, preserving frame order

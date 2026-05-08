@@ -7,39 +7,42 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.svg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.svg";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure SVG export options
+                var svgOptions = new SvgOptions();
+
+                // Set vector rasterization options for SVG output
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size // preserve original size
+                };
+                svgOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save the image as SVG, preserving vector data
+                image.Save(outputPath, svgOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure OTG rasterization options – keep original page size
-            var otgRasterOptions = new OtgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-
-            // Set up SVG export options and attach the rasterization options
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = otgRasterOptions,
-                // Preserve vector data (default behavior); TextAsShapes left as false
-                TextAsShapes = false
-            };
-
-            // Save the image as SVG
-            image.Save(outputPath, svgOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

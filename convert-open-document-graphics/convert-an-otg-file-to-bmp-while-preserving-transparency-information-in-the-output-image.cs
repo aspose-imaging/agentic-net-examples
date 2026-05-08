@@ -7,37 +7,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/sample.otg";
-        string outputPath = "output/sample.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\output.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image otgImage = Image.Load(inputPath))
+            {
+                // Prepare BMP save options (default compression preserves transparency)
+                BmpOptions bmpOptions = new BmpOptions();
+
+                // Configure rasterization options for vector formats
+                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                {
+                    // Preserve original size
+                    PageSize = otgImage.Size
+                };
+                bmpOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save as BMP
+                otgImage.Save(outputPath, bmpOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Set up rasterization options to preserve vector content
-            var otgRasterizationOptions = new OtgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-
-            // Configure BMP save options (default compression supports transparency)
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = otgRasterizationOptions
-            };
-
-            // Save as BMP while preserving transparency
-            image.Save(outputPath, bmpOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

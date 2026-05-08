@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,10 +11,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            string inputPath = "input\\sample.png";
+            string outputPath = "output\\sample_filtered.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,24 +25,20 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load image data into a memory stream
-            byte[] inputBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream inputStream = new MemoryStream(inputBytes))
+            byte[] imageBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(imageBytes))
             {
-                using (Image image = Image.Load(inputStream))
+                using (Image image = Image.Load(ms))
                 {
-                    // Cast to RasterImage for filtering
                     RasterImage raster = (RasterImage)image;
 
-                    // Apply a Gaussian blur convolution filter
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                    // Apply Gaussian blur filter using ConvolutionFilterOptions
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
+                    raster.Filter(raster.Bounds, filterOptions);
 
-                    // Save the processed image to a memory stream, then write to file
-                    using (MemoryStream outputStream = new MemoryStream())
-                    {
-                        var pngOptions = new PngOptions();
-                        raster.Save(outputStream, pngOptions);
-                        File.WriteAllBytes(outputPath, outputStream.ToArray());
-                    }
+                    // Save the filtered image as PNG
+                    var pngOptions = new PngOptions();
+                    raster.Save(outputPath, pngOptions);
                 }
             }
         }

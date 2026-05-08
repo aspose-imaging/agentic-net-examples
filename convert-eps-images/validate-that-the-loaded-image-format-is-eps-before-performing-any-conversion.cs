@@ -2,39 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded relative input and output paths
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        // Load the image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Verify that the loaded image is an EPS image
-            var epsImage = image as Aspose.Imaging.FileFormats.Eps.EpsImage;
-            if (epsImage == null)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded image is not an EPS file.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Convert EPS to PNG
-            epsImage.Save(outputPath, new PngOptions());
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Verify the image format is EPS
+                if (image.FileFormat != FileFormat.Eps)
+                {
+                    Console.Error.WriteLine("The loaded file is not an EPS image.");
+                    return;
+                }
+
+                // Cast to EpsImage for EPS-specific operations
+                var epsImage = (EpsImage)image;
+
+                // Convert EPS to PNG
+                epsImage.Save(outputPath, new PngOptions());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

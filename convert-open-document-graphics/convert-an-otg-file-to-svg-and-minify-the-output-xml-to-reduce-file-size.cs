@@ -3,7 +3,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,41 +11,52 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.svg";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare SVG rasterization options
+                var svgRasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
+                // Configure SVG save options (no compression, we will minify manually)
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = svgRasterOptions,
+                    Compress = false
+                };
+
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
+            }
+
+            // Minify the saved SVG XML
+            string svgContent = File.ReadAllText(outputPath);
+            // Remove line breaks, tabs, and unnecessary spaces between tags
+            string minified = Regex.Replace(svgContent, @">\s+<", "><");
+            minified = Regex.Replace(minified, @"\s+", " ");
+            minified = minified.Trim();
+
+            File.WriteAllText(outputPath, minified);
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options for OTG
-            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-
-            // Set up SVG export options
-            SvgOptions svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = otgRasterizationOptions,
-                Compress = false // keep as plain SVG; we'll minify manually
-            };
-
-            // Save as SVG
-            image.Save(outputPath, svgOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Minify the SVG XML by removing whitespace between tags
-        string svgContent = File.ReadAllText(outputPath);
-        string minifiedSvg = Regex.Replace(svgContent, @">\s+<", "><");
-        File.WriteAllText(outputPath, minifiedSvg);
     }
 }

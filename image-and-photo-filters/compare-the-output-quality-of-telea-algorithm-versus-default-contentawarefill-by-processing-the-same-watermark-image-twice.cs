@@ -11,8 +11,8 @@ class Program
         try
         {
             string inputPath = "watermark.png";
-            string outputTelea = "output_telea.png";
-            string outputCaf = "output_caf.png";
+            string outputTeleaPath = "output_telea.png";
+            string outputCafPath = "output_caf.png";
 
             if (!File.Exists(inputPath))
             {
@@ -20,13 +20,15 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputTelea));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputCaf));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputTeleaPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputCafPath));
 
+            // Load the source image
             using (var image = Image.Load(inputPath))
             {
                 var pngImage = (PngImage)image;
 
+                // Define the mask
                 var mask = new GraphicsPath();
                 var figure = new Figure();
                 figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
@@ -36,17 +38,17 @@ class Program
                 var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
                 using (var teleaResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, teleaOptions))
                 {
-                    teleaResult.Save(outputTelea);
+                    teleaResult.Save(outputTeleaPath);
                 }
 
-                // ContentAwareFill algorithm (default)
+                // Content Aware Fill algorithm (default)
                 var cafOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
                 {
                     MaxPaintingAttempts = 4
                 };
                 using (var cafResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, cafOptions))
                 {
-                    cafResult.Save(outputCaf);
+                    cafResult.Save(outputCafPath);
                 }
             }
         }

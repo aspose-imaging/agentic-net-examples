@@ -3,65 +3,53 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define relative input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDir = Path.Combine(baseDir, "Input");
-        string outputDir = Path.Combine(baseDir, "Output");
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\Test\EpsFiles";
+        string outputFolder = @"C:\Test\PsdOutputs";
 
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDir))
+        try
         {
-            Directory.CreateDirectory(inputDir);
-            Console.WriteLine($"Input directory created at: {inputDir}. Add EPS files and rerun.");
-            return;
-        }
+            // Ensure the output root directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
+            // Get all EPS files in the input folder
+            string[] epsFiles = Directory.GetFiles(inputFolder, "*.eps");
 
-        // Get all EPS files in the input directory
-        string[] epsFiles = Directory.GetFiles(inputDir, "*.eps");
-
-        foreach (string inputPath in epsFiles)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in epsFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            // Prepare the output PSD file path
-            string outputFileName = Path.ChangeExtension(Path.GetFileName(inputPath), ".psd");
-            string outputPath = Path.Combine(outputDir, outputFileName);
-
-            // Ensure the output directory exists (in case of subfolders)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EPS image and convert to PSD
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
-            {
-                // Configure PSD save options (default settings)
-                PsdOptions psdOptions = new PsdOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Example: set color mode to RGB
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-                // Save as PSD
-                epsImage.Save(outputPath, psdOptions);
+                // Determine output PSD path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".psd");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the EPS image
+                using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+                {
+                    // Prepare PSD save options (default settings)
+                    var psdOptions = new PsdOptions();
+
+                    // Save as PSD
+                    epsImage.Save(outputPath, psdOptions);
+                }
             }
-
-            Console.WriteLine($"Converted '{Path.GetFileName(inputPath)}' to '{outputFileName}'.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

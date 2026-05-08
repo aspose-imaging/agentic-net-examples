@@ -1,62 +1,65 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = @"C:\temp\sample.otg";
+        string outputPath = @"C:\temp\sample_filtered.jpg";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image otgImage = Image.Load(inputPath))
+        try
         {
-            // Rasterize the OTG image to a raster format (PNG) using a memory stream
-            using (MemoryStream rasterStream = new MemoryStream())
+            // Load the OTG image
+            using (Image otgImage = Image.Load(inputPath))
             {
-                // Set up rasterization options for OTG
-                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                // Rasterize OTG to a PNG in memory
+                using (var memoryStream = new MemoryStream())
                 {
-                    PageSize = otgImage.Size
-                };
+                    var pngOptions = new PngOptions();
 
-                // Save the rasterized image to the memory stream as PNG
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                otgImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0; // Reset stream position for reading
+                    // Set rasterization options for OTG
+                    var otgRasterOptions = new OtgRasterizationOptions
+                    {
+                        PageSize = otgImage.Size
+                    };
+                    pngOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                // Load the rasterized image as a RasterImage
-                using (Image rasterImageBase = Image.Load(rasterStream))
-                {
-                    // Cast to RasterImage to access filtering functionality
-                    RasterImage rasterImage = (RasterImage)rasterImageBase;
+                    otgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0; // Reset stream position for reading
 
-                    // Apply a median filter with size 5 to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                    // Load the rasterized image
+                    using (Image rasterImage = Image.Load(memoryStream))
+                    {
+                        var raster = (RasterImage)rasterImage;
 
-                    // Save the filtered image as JPEG
-                    JpegOptions jpegOptions = new JpegOptions();
-                    rasterImage.Save(outputPath, jpegOptions);
+                        // Apply median filter with size 5 to the whole image
+                        raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the filtered image as JPEG
+                        var jpegOptions = new JpegOptions();
+                        raster.Save(outputPath, jpegOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

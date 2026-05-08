@@ -2,63 +2,81 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input EMF file and output directory
-        string inputPath = "input.emf";
-        string outputDirectory = "output";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input EMF file path
+            string inputPath = "input.emf";
 
-        // Ensure output directory exists (will be used for all pages)
-        Directory.CreateDirectory(outputDirectory);
-
-        // Load the multi‑page EMF document
-        using (Image image = Image.Load(inputPath))
-        {
-            // Verify the image supports multiple pages
-            if (image is IMultipageImage multipageImage)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                int pageCount = multipageImage.PageCount;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                for (int i = 0; i < pageCount; i++)
+            // Load the EMF document
+            using (Image image = Image.Load(inputPath))
+            {
+                // Try to treat the image as a multipage vector image
+                IMultipageImage multipage = image as IMultipageImage;
+
+                if (multipage == null)
                 {
-                    // Retrieve the page as an Image
-                    using (Image page = multipageImage.Pages[i])
+                    // Single‑page EMF: export to one PNG
+                    string outputPath = "output_page_1.png";
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                    PngOptions pngOptions = new PngOptions
                     {
-                        // Prepare PNG save options with vector rasterization settings
-                        PngOptions pngOptions = new PngOptions();
-
-                        // Configure rasterization to match the page size
-                        EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                        // Configure rasterization of the vector page
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
-                            PageSize = page.Size
+                            PageSize = image.Size,
+                            BackgroundColor = Color.White,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        }
+                    };
+
+                    image.Save(outputPath, pngOptions);
+                }
+                else
+                {
+                    // Multi‑page EMF: export each page to a separate PNG
+                    int pageCount = multipage.PageCount;
+
+                    for (int i = 0; i < pageCount; i++)
+                    {
+                        string outputPath = $"output_page_{i + 1}.png";
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                        PngOptions pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = new VectorRasterizationOptions
+                            {
+                                PageSize = image.Size,
+                                BackgroundColor = Color.White,
+                                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                                SmoothingMode = SmoothingMode.None
+                            },
+                            // Export only the current page
+                            MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
                         };
-                        pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as PNG
-                        page.Save(outputPath, pngOptions);
+                        image.Save(outputPath, pngOptions);
                     }
                 }
             }
-            else
-            {
-                Console.Error.WriteLine("The loaded image does not support multiple pages.");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

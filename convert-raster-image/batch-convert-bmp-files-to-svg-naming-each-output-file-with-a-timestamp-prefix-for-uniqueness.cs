@@ -1,56 +1,59 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputBmp";
+            string outputDirectory = @"C:\OutputSvg";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-        foreach (var inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            // Verify input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"Directory not found: {inputDirectory}");
                 return;
             }
 
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            string outputFileName = $"{timestamp}_{fileName}.svg";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
+            // Get all BMP files in the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            foreach (string bmpPath in bmpFiles)
             {
-                using (SvgOptions svgOptions = new SvgOptions())
+                // Verify each BMP file exists
+                if (!File.Exists(bmpPath))
                 {
-                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    };
-                    image.Save(outputPath, svgOptions);
+                    Console.Error.WriteLine($"File not found: {bmpPath}");
+                    return;
+                }
+
+                // Load BMP image
+                using (BmpImage bmpImage = new BmpImage(bmpPath))
+                {
+                    // Create a unique timestamp prefix
+                    string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+
+                    // Build output file name with timestamp prefix
+                    string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(bmpPath)}.svg";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as SVG using default options
+                    bmpImage.Save(outputPath, new SvgOptions());
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

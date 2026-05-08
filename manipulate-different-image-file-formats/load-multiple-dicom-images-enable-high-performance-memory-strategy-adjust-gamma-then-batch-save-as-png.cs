@@ -11,10 +11,18 @@ class Program
         try
         {
             // Hard‑coded input DICOM files
-            string[] inputPaths = { "input1.dcm", "input2.dcm" };
-            // Hard‑coded output directory
-            string outputDir = "output";
+            string[] inputPaths = {
+                @"C:\Images\dicom1.dcm",
+                @"C:\Images\dicom2.dcm"
+            };
 
+            // Hard‑coded output directory for PNG files
+            string outputDir = @"C:\Images\Converted";
+
+            // Ensure the output directory exists (called before any save)
+            Directory.CreateDirectory(outputDir);
+
+            // Process each DICOM file
             foreach (string inputPath in inputPaths)
             {
                 // Verify input file exists
@@ -24,37 +32,33 @@ class Program
                     return;
                 }
 
-                // Configure load options for a small buffer (high‑performance memory strategy)
-                var loadOptions = new LoadOptions
+                // Load the DICOM image using a stream and load options (high‑performance memory strategy)
+                using (FileStream stream = File.OpenRead(inputPath))
                 {
-                    BufferSizeHint = 256 * 1024 // 256 KB
-                };
-
-                // Open the DICOM file as a stream and load it with the specified options
-                using (Stream stream = File.OpenRead(inputPath))
-                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
-                {
-                    // Cache all pages to avoid further I/O during processing
-                    dicomImage.CacheData();
-
-                    // Apply gamma correction to the whole image
-                    dicomImage.AdjustGamma(2.2f);
-
-                    int pageIndex = 0;
-                    foreach (DicomPage page in dicomImage.DicomPages)
+                    // Set a modest buffer size hint to limit internal memory usage
+                    LoadOptions loadOptions = new LoadOptions
                     {
-                        // Build output file name for each page
-                        string outputPath = Path.Combine(
-                            outputDir,
-                            $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.png");
+                        BufferSizeHint = 256 * 1024 // 256 KB
+                    };
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
+                    {
+                        // Adjust gamma for the whole image (applies to all pages)
+                        dicomImage.AdjustGamma(2.0f); // example gamma value
 
-                        // Save the page as PNG
-                        page.Save(outputPath, new PngOptions());
+                        // Save each page as an individual PNG file
+                        foreach (DicomPage page in dicomImage.DicomPages)
+                        {
+                            // Build output file name: original name + page index
+                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png";
+                            string outputPath = Path.Combine(outputDir, outputFileName);
 
-                        pageIndex++;
+                            // Ensure the directory for this file exists (unconditional as required)
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save the page as PNG
+                            page.Save(outputPath, new PngOptions());
+                        }
                     }
                 }
             }

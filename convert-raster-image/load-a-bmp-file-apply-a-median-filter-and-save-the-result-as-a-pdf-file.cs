@@ -9,30 +9,39 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input/sample.bmp";
-        string outputPath = "output/result.pdf";
+        string inputPath = "input.bmp";
+        string outputPath = "output.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to apply filters
+                var rasterImage = (RasterImage)image;
+
+                // Apply median filter with size 5 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+                // Save the processed image as PDF
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering functionality
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Apply a median filter with size 5 to the whole image
-            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-            // Save the processed image as PDF
-            rasterImage.Save(outputPath, new PdfOptions());
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

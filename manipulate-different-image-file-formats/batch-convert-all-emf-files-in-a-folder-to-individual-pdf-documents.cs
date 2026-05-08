@@ -5,18 +5,22 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\InputEmf";
-            string outputFolder = @"C:\OutputPdf";
+            // Define input and output directories (relative to the current directory)
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDir = Path.Combine(baseDir, "Input");
+            string outputDir = Path.Combine(baseDir, "Output");
 
-            // Get all EMF files in the input folder
-            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            foreach (string inputPath in emfFiles)
+            // Get all EMF files in the input directory
+            string[] files = Directory.GetFiles(inputDir, "*.emf");
+
+            foreach (string inputPath in files)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -25,20 +29,31 @@ class Program
                     return;
                 }
 
-                // Build the corresponding PDF output path
-                string outputPath = Path.Combine(outputFolder,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                // Prepare the output PDF path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
 
-                // Ensure the output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image and save it as PDF
+                // Load the EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, new PdfOptions());
-                }
+                    // Configure PDF options with vector rasterization settings
+                    var pdfOptions = new PdfOptions();
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+                    pdfOptions.VectorRasterizationOptions = vectorOptions;
 
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                    // Save as PDF
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)

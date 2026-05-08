@@ -2,97 +2,97 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories (relative paths)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Get all image files in the input folder (common raster formats)
+            string[] files = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (string inputPath in files)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Load the image
-            using (Image image = Image.Load(inputPath))
-            {
-                // If the image is raster, crop to 16:9 aspect ratio
-                if (image is RasterImage rasterImage)
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    if (!rasterImage.IsCached)
-                        rasterImage.CacheData();
-
-                    int width = rasterImage.Width;
-                    int height = rasterImage.Height;
-                    double targetRatio = 16.0 / 9.0;
-                    double currentRatio = (double)width / height;
-
-                    Rectangle cropRect;
-
-                    if (currentRatio > targetRatio)
-                    {
-                        // Image is too wide – reduce width
-                        int cropWidth = (int)(height * targetRatio);
-                        int x = (width - cropWidth) / 2;
-                        cropRect = new Rectangle(x, 0, cropWidth, height);
-                    }
-                    else
-                    {
-                        // Image is too tall – reduce height
-                        int cropHeight = (int)(width / targetRatio);
-                        int y = (height - cropHeight) / 2;
-                        cropRect = new Rectangle(0, y, width, cropHeight);
-                    }
-
-                    rasterImage.Crop(cropRect);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Prepare output SVG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
-
-                // Ensure the output directory for this file exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Set up SVG export options with rasterization settings
-                var rasterizationOptions = new SvgRasterizationOptions
+                // Load the image
+                using (Image image = Image.Load(inputPath))
                 {
-                    PageSize = image.Size
-                };
+                    // Work only with raster images for cropping
+                    if (image is RasterImage rasterImage)
+                    {
+                        int width = rasterImage.Width;
+                        int height = rasterImage.Height;
 
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+                        // Desired aspect ratio 16:9
+                        const int targetRatioWidth = 16;
+                        const int targetRatioHeight = 9;
 
-                // Save the image as SVG
-                image.Save(outputPath, svgOptions);
+                        // Calculate target dimensions
+                        int targetWidth = height * targetRatioWidth / targetRatioHeight;
+                        int targetHeight = width * targetRatioHeight / targetRatioWidth;
+
+                        Rectangle cropArea;
+
+                        if (width > targetWidth)
+                        {
+                            // Crop horizontally: center the crop area
+                            int cropX = (width - targetWidth) / 2;
+                            cropArea = new Rectangle(cropX, 0, targetWidth, height);
+                        }
+                        else if (height > targetHeight)
+                        {
+                            // Crop vertically: center the crop area
+                            int cropY = (height - targetHeight) / 2;
+                            cropArea = new Rectangle(0, cropY, width, targetHeight);
+                        }
+                        else
+                        {
+                            // Image already matches or is smaller than the target ratio; no cropping needed
+                            cropArea = new Rectangle(0, 0, width, height);
+                        }
+
+                        // Perform cropping
+                        rasterImage.Crop(cropArea);
+                    }
+
+                    // Prepare output SVG path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+                    string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Set up SVG save options with rasterization settings
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageSize = image.Size
+                        }
+                    };
+
+                    // Save the (cropped) image as SVG
+                    image.Save(outputPath, svgOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

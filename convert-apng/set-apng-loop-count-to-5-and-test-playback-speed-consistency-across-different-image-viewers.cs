@@ -26,16 +26,15 @@ class Program
             // Load the source image (could be animated or single-frame)
             using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options:
-                // - Set loop count to 5
-                // - Set default frame time to 100 ms to test playback speed consistency
+                // Save as APNG with 5 loop cycles
                 var apngOptions = new ApngOptions
                 {
                     NumPlays = 5,
-                    DefaultFrameTime = 100 // milliseconds per frame
+                    // Preserve original frame timing if possible
+                    // If the source has no frame timing, a default can be set here
+                    // DefaultFrameTime = 100 // uncomment to set a fixed frame duration (ms)
                 };
 
-                // Save as APNG with the specified options
                 image.Save(outputPath, apngOptions);
             }
         }

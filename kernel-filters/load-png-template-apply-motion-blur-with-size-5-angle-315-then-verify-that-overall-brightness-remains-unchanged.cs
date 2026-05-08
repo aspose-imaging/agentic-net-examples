@@ -1,7 +1,7 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
         try
         {
             string inputPath = "template.png";
-            string outputPath = "output.png";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,37 +24,38 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Compute original average brightness
+                // Calculate original average brightness
                 int[] originalPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-                double originalSum = 0;
-                for (int i = 0; i < originalPixels.Length; i++)
+                double originalBrightness = originalPixels.Average(p =>
                 {
-                    int pixel = originalPixels[i];
-                    int r = (pixel >> 16) & 0xFF;
-                    int g = (pixel >> 8) & 0xFF;
-                    int b = pixel & 0xFF;
-                    originalSum += (r + g + b) / 3.0;
-                }
-                double originalBrightness = originalSum / originalPixels.Length;
+                    int r = (p >> 16) & 0xFF;
+                    int g = (p >> 8) & 0xFF;
+                    int b = p & 0xFF;
+                    return (r + g + b) / 3.0;
+                });
 
-                // Apply motion blur (size 5, angle 315)
-                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(5, 1.0, 315.0));
+                // Apply motion blur (motion wiener filter) with size 5 and angle 315
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 315.0));
 
-                // Compute new average brightness
+                // Calculate new average brightness
                 int[] newPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-                double newSum = 0;
-                for (int i = 0; i < newPixels.Length; i++)
+                double newBrightness = newPixels.Average(p =>
                 {
-                    int pixel = newPixels[i];
-                    int r = (pixel >> 16) & 0xFF;
-                    int g = (pixel >> 8) & 0xFF;
-                    int b = pixel & 0xFF;
-                    newSum += (r + g + b) / 3.0;
-                }
-                double newBrightness = newSum / newPixels.Length;
+                    int r = (p >> 16) & 0xFF;
+                    int g = (p >> 8) & 0xFF;
+                    int b = p & 0xFF;
+                    return (r + g + b) / 3.0;
+                });
 
-                Console.WriteLine($"Original brightness: {originalBrightness:F2}");
-                Console.WriteLine($"After filter brightness: {newBrightness:F2}");
+                double diff = Math.Abs(originalBrightness - newBrightness);
+                if (diff > 0.001)
+                {
+                    Console.WriteLine($"Brightness changed by {diff:F4}");
+                }
+                else
+                {
+                    Console.WriteLine("Brightness unchanged.");
+                }
 
                 raster.Save(outputPath);
             }

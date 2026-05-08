@@ -1,48 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.svg";
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.svg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (BmpImage bmp = new BmpImage(inputPath))
-        {
-            // Apply a custom color filter:
-            // Example: replace pure red pixels with pure blue
-            for (int y = 0; y < bmp.Height; y++)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                for (int x = 0; x < bmp.Width; x++)
-                {
-                    Color pixel = bmp.GetPixel(x, y);
-                    if (pixel.R == 255 && pixel.G == 0 && pixel.B == 0)
-                    {
-                        // Change red to blue while preserving alpha
-                        bmp.SetPixel(x, y, Color.FromArgb(pixel.A, 0, 0, 255));
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Save the filtered image as SVG with default options
-            var svgOptions = new SvgOptions();
-            bmp.Save(outputPath, svgOptions);
+            // Load BMP image
+            using (RasterImage bmpImage = Image.Load(inputPath) as RasterImage)
+            {
+                if (bmpImage == null)
+                {
+                    Console.Error.WriteLine("Failed to load BMP image.");
+                    return;
+                }
+
+                // Apply a simple color filter: swap Red and Blue channels
+                for (int y = 0; y < bmpImage.Height; y++)
+                {
+                    for (int x = 0; x < bmpImage.Width; x++)
+                    {
+                        Color original = bmpImage.GetPixel(x, y);
+                        Color transformed = Color.FromArgb(original.A, original.B, original.G, original.R);
+                        bmpImage.SetPixel(x, y, transformed);
+                    }
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the filtered image as SVG with default options
+                var svgOptions = new SvgOptions();
+                bmpImage.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

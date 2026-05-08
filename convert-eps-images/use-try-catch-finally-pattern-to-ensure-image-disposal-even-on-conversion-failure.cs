@@ -1,54 +1,61 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.CoreExceptions;
 
-class Program
+namespace ImageConversionExample
 {
-    static void Main()
+    class Program
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        static void Main()
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            try
+            {
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-        Image image = null;
-        try
-        {
-            // Load the source image
-            image = Image.Load(inputPath);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define PNG save options (default settings)
-            var pngOptions = new PngOptions();
+                Image image = null;
+                try
+                {
+                    // Load the image
+                    image = Image.Load(inputPath);
 
-            // Save the image to the output path
-            image.Save(outputPath, pngOptions);
-        }
-        catch (ImageSaveException ex)
-        {
-            // Handle errors that occur during saving
-            Console.Error.WriteLine($"Error saving image: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            // Handle any other processing errors
-            Console.Error.WriteLine($"Error processing image: {ex.Message}");
-        }
-        finally
-        {
-            // Ensure the image is disposed even if an exception occurs
-            if (image != null)
-                image.Dispose();
+                    // Save the image in a different format (based on output file extension)
+                    image.Save(outputPath);
+                }
+                catch (ImageLoadException ex)
+                {
+                    Console.Error.WriteLine($"Error loading image: {ex.Message}");
+                }
+                catch (ImageSaveException ex)
+                {
+                    Console.Error.WriteLine($"Error saving image: {ex.Message}");
+                }
+                finally
+                {
+                    // Ensure the image is disposed even if an exception occurs
+                    if (image != null)
+                    {
+                        image.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Catch any unexpected exceptions
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }

@@ -2,38 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/sample.bmp";
-        string outputPath = "output/sample_converted.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.jpg";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
+            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure JPEG save options with quality 85
-                JpegOptions saveOptions = new JpegOptions
+                var saveOptions = new JpegOptions
                 {
                     Quality = 85
                 };
 
-                // Save as JPEG preserving original dimensions
+                // Save the image as JPEG, preserving original dimensions
                 image.Save(outputPath, saveOptions);
             }
         }

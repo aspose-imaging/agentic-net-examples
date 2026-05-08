@@ -9,43 +9,50 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputSvgs";
-            string outputDir = @"C:\OutputApngs";
+            // Hardcoded input folder containing SVG files
+            string inputFolder = @"C:\SvgInput";
+            // Hardcoded output folder for generated APNG files
+            string outputFolder = @"C:\ApngOutput";
 
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-            // Get all SVG files in the input directory
-            var svgFiles = Directory.GetFiles(inputDir, "*.svg");
+            // Collection of SVG file names to process
+            string[] svgFiles = new string[]
+            {
+                "image1.svg",
+                "image2.svg",
+                "image3.svg"
+                // Add more file names as needed
+            };
 
             Random rnd = new Random();
 
-            foreach (var inputPath in svgFiles)
+            foreach (string fileName in svgFiles)
             {
-                // Verify the input file exists
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputFolder, fileName);
+                string outputFileName = Path.ChangeExtension(fileName, ".apng.png");
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Generate a random frame delay between 100ms and 1000ms
+                uint randomDelay = (uint)rnd.Next(100, 1001);
+
                 // Load the SVG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Assign a random frame delay between 100ms and 1000ms
-                    int delay = rnd.Next(100, 1001);
-                    var apngOptions = new ApngOptions { DefaultFrameTime = (uint)delay };
-
-                    // Build the output file path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".apng";
-                    string outputPath = Path.Combine(outputDir, outputFileName);
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the image as APNG with the random frame delay
-                    image.Save(outputPath, apngOptions);
+                    // Save as APNG with the random frame delay
+                    image.Save(outputPath, new ApngOptions() { DefaultFrameTime = randomDelay });
                 }
             }
         }

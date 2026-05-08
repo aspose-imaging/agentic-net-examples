@@ -7,17 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string[] inputPaths = { @"C:\Images\input1.tif", @"C:\Images\input2.tif" };
+        string outputPath = @"C:\Images\output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\input1.tif",
-                @"C:\Images\input2.tif",
-                @"C:\Images\input3.tif"
-            };
-            string outputPath = @"C:\Images\output.tif";
-
             // Verify each input file exists
             foreach (var inputPath in inputPaths)
             {
@@ -28,24 +23,24 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first TIFF image which will become the target image
-            using (TiffImage targetImage = (TiffImage)Image.Load(inputPaths[0]))
-            {
-                // Append remaining TIFF images, preserving each frame's original compression
-                for (int i = 1; i < inputPaths.Length; i++)
-                {
-                    using (TiffImage sourceImage = (TiffImage)Image.Load(inputPaths[i]))
-                    {
-                        targetImage.Add(sourceImage);
-                    }
-                }
+            // Load the first TIFF image – it will serve as the base image
+            TiffImage baseTiff = (TiffImage)Image.Load(inputPaths[0]);
 
-                // Save the concatenated multi‑page TIFF
-                targetImage.Save(outputPath);
+            // Append frames from the remaining TIFF images, preserving their original compression
+            for (int i = 1; i < inputPaths.Length; i++)
+            {
+                TiffImage nextTiff = (TiffImage)Image.Load(inputPaths[i]);
+                baseTiff.Add(nextTiff);
+                // Dispose the temporary image after adding its frames
+                nextTiff.Dispose();
             }
+
+            // Save the concatenated multi‑frame TIFF
+            baseTiff.Save(outputPath);
+            baseTiff.Dispose();
         }
         catch (Exception ex)
         {

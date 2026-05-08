@@ -6,51 +6,63 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string[] inputPaths = {
-            @"C:\Images\sample1.djvu",
-            @"C:\Images\sample2.djvu"
-        };
-
-        string[] outputPaths = {
-            @"C:\Output\sample1.bmp",
-            @"C:\Output\sample2.bmp"
-        };
-
         try
         {
-            for (int i = 0; i < inputPaths.Length; i++)
-            {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
+            // Hardcoded input DjVu files
+            string[] inputPaths = {
+                @"C:\Images\sample1.djvu",
+                @"C:\Images\sample2.djvu"
+            };
 
-                // Verify input file exists
+            // Define the page range to convert (inclusive)
+            int startPage = 1; // first page index (0‑based)
+            int endPage = 3;   // last page index (0‑based)
+
+            // Create an IntRange instance (required by the task)
+            IntRange range = new IntRange(startPage, endPage);
+
+            foreach (string inputPath in inputPaths)
+            {
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Prepare output directory (same folder as input)
+                string outputDirectory = Path.GetDirectoryName(inputPath);
+                Directory.CreateDirectory(outputDirectory);
 
-                // Load DjVu file from a stream
+                // Open the DjVu file as a stream
                 using (FileStream stream = File.OpenRead(inputPath))
+                // Load DjVu image
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Define the page range to export (e.g., pages 1‑3)
-                    IntRange pageRange = new IntRange(1, 3);
-
-                    // Set up BMP save options with the page range
-                    BmpOptions bmpOptions = new BmpOptions
+                    // Ensure the requested range does not exceed page count
+                    int maxPage = Math.Min(endPage, djvuImage.PageCount - 1);
+                    for (int pageIndex = startPage; pageIndex <= maxPage; pageIndex++)
                     {
-                        MultiPageOptions = new DjvuMultiPageOptions(pageRange)
-                    };
+                        // Build output BMP file path
+                        string outputPath = Path.Combine(
+                            outputDirectory,
+                            $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.bmp");
 
-                    // Save the selected pages as a single BMP file
-                    djvuImage.Save(outputPath, bmpOptions);
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Set BMP save options (MultiPageOptions not needed for BMP,
+                        // but we demonstrate usage with DjvuMultiPageOptions)
+                        BmpOptions bmpOptions = new BmpOptions
+                        {
+                            MultiPageOptions = new DjvuMultiPageOptions(range)
+                        };
+
+                        // Save the specific page as BMP
+                        djvuImage.Pages[pageIndex].Save(outputPath, bmpOptions);
+                    }
                 }
             }
         }

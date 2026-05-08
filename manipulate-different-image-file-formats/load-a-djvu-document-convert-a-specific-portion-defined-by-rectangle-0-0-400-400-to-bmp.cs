@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.djvu";
-            string outputPath = "output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,20 +25,17 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load DjVu document from file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Use the first page of the document
-                var page = djvuImage.Pages[0];
-
                 // Define the rectangle area to extract (0,0,400,400)
-                var bounds = new Rectangle(0, 0, 400, 400);
+                Rectangle exportArea = new Rectangle(0, 0, 400, 400);
 
-                // BMP save options
-                var bmpOptions = new BmpOptions();
+                // Set BMP save options
+                BmpOptions bmpOptions = new BmpOptions();
 
                 // Save the specified portion as BMP
-                page.Save(outputPath, bmpOptions, bounds);
+                djvuImage.Save(outputPath, bmpOptions, exportArea);
             }
         }
         catch (Exception ex)

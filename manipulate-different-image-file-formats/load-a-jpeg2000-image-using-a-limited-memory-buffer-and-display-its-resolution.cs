@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,31 +10,28 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\temp\sample.jp2";
-
-            // Verify that the input file exists
+            string inputPath = "sample.jp2";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Set up JPEG2000 load options with a limited memory buffer (e.g., 1 MB)
-            var loadOptions = new Jpeg2000LoadOptions
-            {
-                BufferSizeHint = 1024 * 1024 // 1 MB buffer size hint
-            };
+            string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the JPEG2000 image using the specified options
-            using (Image image = Image.Load(inputPath, loadOptions))
+            // Load JPEG2000 image (buffer size hint can be set via options if needed for saving)
+            using (Jpeg2000Image image = new Jpeg2000Image(inputPath))
             {
-                // Cast to Jpeg2000Image to access resolution properties
-                var jpeg2000Image = (Jpeg2000Image)image;
+                Console.WriteLine($"Width: {image.Width} px");
+                Console.WriteLine($"Height: {image.Height} px");
+                Console.WriteLine($"Horizontal Resolution: {image.HorizontalResolution} DPI");
+                Console.WriteLine($"Vertical Resolution: {image.VerticalResolution} DPI");
 
-                // Display horizontal and vertical resolution (pixels per inch)
-                Console.WriteLine($"Horizontal resolution: {jpeg2000Image.HorizontalResolution} DPI");
-                Console.WriteLine($"Vertical resolution: {jpeg2000Image.VerticalResolution} DPI");
+                // Save as PNG (demonstrates usage of output path handling)
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.BufferSizeHint = 10 * 1024 * 1024; // 10 MB buffer for saving
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

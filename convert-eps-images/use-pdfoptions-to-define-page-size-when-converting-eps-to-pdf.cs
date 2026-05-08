@@ -3,36 +3,37 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output paths
-        string inputPath = Path.Combine("Input", "sample.eps");
-        string outputPath = Path.Combine("Output", "sample.pdf");
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS image and convert to PDF with page size defined
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
-        {
-            var pdfOptions = new PdfOptions
+            if (!File.Exists(inputPath))
             {
-                // Set PDF page size to match EPS dimensions
-                PageSize = new SizeF(epsImage.Width, epsImage.Height)
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            epsImage.Save(outputPath, pdfOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                var options = new PdfOptions
+                {
+                    PageSize = new SizeF(600, 800) // Define page width and height
+                };
+
+                image.Save(outputPath, options);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

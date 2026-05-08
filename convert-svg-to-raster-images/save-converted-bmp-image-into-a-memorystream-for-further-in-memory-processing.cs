@@ -8,41 +8,42 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input path
-        string inputPath = @"C:\temp\sample.bmp";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input path
+            string inputPath = @"C:\temp\sample.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare BMP save options (default settings)
+                BmpOptions saveOptions = new BmpOptions();
+
+                // Save the image to a memory stream for further in‑memory processing
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    image.Save(memoryStream, saveOptions);
+
+                    // Example: output the size of the saved image in bytes
+                    Console.WriteLine($"Image saved to memory stream, size: {memoryStream.Length} bytes");
+
+                    // Reset stream position if further reading is required
+                    memoryStream.Position = 0;
+
+                    // Additional in‑memory processing can be performed here
+                }
+            }
         }
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // If the image is a BMP, perform a sample conversion (binarization)
-            if (image is BmpImage bmpImage)
-            {
-                bmpImage.BinarizeOtsu();
-            }
-
-            // Define save options (using BMP options as an example)
-            var saveOptions = new BmpOptions
-            {
-                BitsPerPixel = 24 // default 24‑bpp
-            };
-
-            // Save the entire image to a memory stream for further processing
-            using (var memoryStream = new MemoryStream())
-            {
-                image.Save(memoryStream, saveOptions);
-
-                // Example: output the size of the saved image in bytes
-                Console.WriteLine($"Image saved to memory stream, size: {memoryStream.Length} bytes");
-
-                // Further in‑memory processing can be performed here using memoryStream
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

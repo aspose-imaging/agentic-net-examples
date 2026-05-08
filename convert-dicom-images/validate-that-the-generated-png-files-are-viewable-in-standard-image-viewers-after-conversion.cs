@@ -8,38 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\temp\input.jpg";
         string outputPath = @"C:\temp\output.png";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image (any supported format)
             using (Image sourceImage = Image.Load(inputPath))
             {
-                // Save as PNG using default options
-                sourceImage.Save(outputPath, new PngOptions());
+                // Prepare PNG save options (default options are sufficient for viewable PNG)
+                PngOptions pngOptions = new PngOptions();
+
+                // Save the image as PNG
+                sourceImage.Save(outputPath, pngOptions);
             }
 
-            // Validate that the saved PNG can be loaded (viewable)
-            using (PngImage png = new PngImage(outputPath))
+            // Validate that the saved PNG can be loaded (ensures it is viewable)
+            using (PngImage savedPng = new PngImage(outputPath))
             {
-                // If loading succeeds, the PNG is considered viewable
-                Console.WriteLine("PNG file saved and verified successfully.");
+                // Simple validation: check dimensions are greater than zero
+                if (savedPng.Width > 0 && savedPng.Height > 0)
+                {
+                    Console.WriteLine("PNG file saved and validated successfully.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("Saved PNG appears to be invalid (zero dimensions).");
+                }
             }
         }
         catch (Exception ex)
         {
+            // Catch any runtime exception and report it without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

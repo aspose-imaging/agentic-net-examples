@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -12,51 +12,48 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string iccProfilePath = @"C:\temp\custom.icc";
-            string outputPath = @"C:\temp\output.jp2";
+            // Define paths
+            string pngPath = "sample.png";
+            string jp2Path = "sample.jp2";
 
-            // Validate ICC profile file exists
-            if (!File.Exists(iccProfilePath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(jp2Path));
+
+            // Create a simple PNG image (100x100, red background)
+            using (PngImage png = new PngImage(100, 100))
             {
-                Console.Error.WriteLine($"File not found: {iccProfilePath}");
+                Graphics graphics = new Graphics(png);
+                SolidBrush brush = new SolidBrush(Color.Red);
+                graphics.FillRectangle(brush, png.Bounds);
+                png.Save(pngPath, new PngOptions());
+            }
+
+            // Verify PNG exists before loading
+            if (!File.Exists(pngPath))
+            {
+                Console.Error.WriteLine($"File not found: {pngPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create JPEG2000 options (optional settings)
-            Jpeg2000Options createOptions = new Jpeg2000Options();
-            createOptions.Irreversible = true; // Use irreversible DWT 9-7
-
-            // Create a new JPEG2000 image
-            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, createOptions))
+            // Load the PNG image and convert to JPEG2000
+            using (Image loadedPng = Image.Load(pngPath))
             {
-                // Fill the image with red color
-                Graphics graphics = new Graphics(jpeg2000Image);
-                SolidBrush brush = new SolidBrush(Color.Red);
-                graphics.FillRectangle(brush, jpeg2000Image.Bounds);
-
-                // Embed custom ICC profile
-                // Note: Direct ICC profile embedding for JPEG2000 is not exposed via a dedicated property.
-                // As a workaround, the profile can be attached as metadata if supported.
-                // The following line demonstrates how one might assign a stream source if such a property existed:
-                // jpeg2000Image.IccProfile = new StreamSource(File.OpenRead(iccProfilePath));
-                // Since the API does not provide a direct ICC profile property for JPEG2000,
-                // this step is left as a placeholder for future implementation.
-
-                // Save the JPEG2000 image
-                jpeg2000Image.Save(outputPath);
+                using (Jpeg2000Image jp2Image = new Jpeg2000Image((RasterImage)loadedPng))
+                {
+                    jp2Image.Save(jp2Path, new Jpeg2000Options());
+                }
             }
 
-            // Load the saved image to verify it was saved correctly
-            using (Jpeg2000Image loadedImage = new Jpeg2000Image(outputPath))
+            // Load the saved JPEG2000 image to verify it was created
+            if (!File.Exists(jp2Path))
             {
-                // Placeholder check for ICC profile retention
-                // If an ICC profile property existed, you would verify it here.
-                // For demonstration, we simply confirm the image loads without error.
-                Console.WriteLine("JPEG2000 image saved and loaded successfully.");
+                Console.Error.WriteLine($"File not found: {jp2Path}");
+                return;
+            }
+
+            using (Jpeg2000Image verifyImage = new Jpeg2000Image(jp2Path))
+            {
+                Console.WriteLine("JPEG2000 image created successfully.");
             }
         }
         catch (Exception ex)

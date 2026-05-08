@@ -9,43 +9,51 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
+        string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output.svg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        // Ensure any unexpected exception is reported cleanly
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering and resizing
+                RasterImage raster = (RasterImage)image;
+
+                // Apply a median filter with a kernel size of 5 to the whole image
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+
+                // Resize to thumbnail dimensions (e.g., 150x150)
+                raster.Resize(150, 150);
+
+                // Prepare SVG save options with rasterization settings
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        // Use the current image size as the page size for the SVG
+                        PageSize = raster.Size
+                    }
+                };
+
+                // Save the processed image as SVG
+                raster.Save(outputPath, svgOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering and resizing
-            RasterImage raster = (RasterImage)image;
-
-            // Apply a median filter with a kernel size of 5 to the whole image
-            raster.Filter(raster.Bounds, new MedianFilterOptions(5));
-
-            // Resize to thumbnail size (e.g., 150x150)
-            raster.Resize(150, 150);
-
-            // Prepare SVG save options with rasterization settings
-            var rasterizationOptions = new SvgRasterizationOptions
-            {
-                PageSize = raster.Size // Preserve the resized dimensions
-            };
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterizationOptions
-            };
-
-            // Save the processed image as SVG
-            image.Save(outputPath, svgOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

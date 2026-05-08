@@ -2,51 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.odg";
-        string outputPath = "Output/sample.png";
-
-        // Validate input image existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.odg";
+            string iccProfilePath = "Input/profile.icc";
+            string outputPath = "Output/sample.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to OdgImage (vector format)
-            var odgImage = image as OdgImage;
-            if (odgImage == null)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Failed to load ODG image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Configure PNG save options
-            var pngOptions = new PngOptions();
-
-            // Set rasterization options for vector to raster conversion
-            var rasterOptions = new OdgRasterizationOptions
+            if (!File.Exists(iccProfilePath))
             {
-                BackgroundColor = Color.White,
-                PageSize = odgImage.Size
-            };
-            pngOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {iccProfilePath}");
+                return;
+            }
 
-            // Save as PNG
-            odgImage.Save(outputPath, pngOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            using (FileStream iccStream = File.OpenRead(iccProfilePath))
+            {
+                // Apply ICC profile if needed:
+                // image.RgbColorProfile = new StreamSource(iccStream);
+
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

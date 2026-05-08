@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
+            string inputPath = @"c:\temp\sample.bmp";
+            string outputPath = @"c:\temp\sample.grayscale.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,15 +24,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure JPEG save options to use Grayscale color mode
-            JpegOptions saveOptions = new JpegOptions
-            {
-                ColorType = JpegCompressionColorMode.Grayscale
-            };
-
-            // Load the source image and save it with the specified options
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
+                // Configure JPEG save options with Grayscale color type
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    ColorType = JpegCompressionColorMode.Grayscale,
+                    // Optional: set quality and other parameters as needed
+                    Quality = 100,
+                    BitsPerChannel = 8,
+                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
+                    ResolutionSettings = new ResolutionSetting(96.0, 96.0),
+                    ResolutionUnit = ResolutionUnit.Inch,
+                    Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false)
+                };
+
+                // Save the image as JPEG with the specified options
                 image.Save(outputPath, saveOptions);
             }
         }

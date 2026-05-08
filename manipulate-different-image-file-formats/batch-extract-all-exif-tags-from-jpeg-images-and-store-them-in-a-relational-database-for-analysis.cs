@@ -1,54 +1,67 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            // Default input directory containing JPEG files
+            // Input directory containing JPEG files
             string inputDirectory = "InputImages";
+            // Output CSV file to store extracted EXIF data
+            string outputCsvPath = "Output\\exif_data.csv";
 
-            // Log file path for EXIF data
-            string logFilePath = "Output\\exif_log.txt";
-            Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputCsvPath));
 
-            using (var logWriter = new StreamWriter(logFilePath, append: true))
+            // Prepare CSV writer
+            using (var writer = new StreamWriter(outputCsvPath, false))
             {
-                // Process each JPEG file in the input directory
-                foreach (var filePath in Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly))
+                // Write CSV header
+                writer.WriteLine("FilePath,Make,Model,DateTimeOriginal,ExposureTime,FNumber,ISOSpeed,FocalLength,Orientation");
+
+                // Get all JPEG files (case‑insensitive)
+                string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.AllDirectories);
+                foreach (string filePath in jpegFiles)
                 {
                     string ext = Path.GetExtension(filePath).ToLowerInvariant();
                     if (ext != ".jpg" && ext != ".jpeg")
                         continue;
 
+                    // Validate input file existence
                     if (!File.Exists(filePath))
                     {
                         Console.Error.WriteLine($"File not found: {filePath}");
                         return;
                     }
 
-                    // Load the JPEG image
-                    using (Aspose.Imaging.FileFormats.Jpeg.JpegImage image = (Aspose.Imaging.FileFormats.Jpeg.JpegImage)Aspose.Imaging.Image.Load(filePath))
+                    // Load JPEG image
+                    using (JpegImage image = (JpegImage)Image.Load(filePath))
                     {
-                        var exifData = image.ExifData;
+                        // Access EXIF data
+                        var exifData = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
                         if (exifData == null)
-                            continue;
-
-                        // Cast to JpegExifData to access the collection of tags
-                        var jpegExif = exifData as Aspose.Imaging.Exif.JpegExifData;
-                        if (jpegExif == null)
-                            continue;
-
-                        // Write each EXIF tag to the log file
-                        foreach (var tag in jpegExif.Properties)
                         {
-                            string tagId = tag.TagId.ToString();
-                            string tagValue = tag.Value?.ToString() ?? string.Empty;
-                            logWriter.WriteLine($"Image: {filePath}, TagId: {tagId}, TagValue: {tagValue}");
+                            // No EXIF data; write empty fields
+                            writer.WriteLine($"{filePath},,,,,,,,");
+                            continue;
                         }
+
+                        // Extract selected tags (null‑safe where applicable)
+                        string make = exifData.Make ?? "";
+                        string model = exifData.Model ?? "";
+                        string dateTimeOriginal = exifData.DateTimeOriginal ?? "";
+                        string exposureTime = exifData.ExposureTime != null ? exifData.ExposureTime.ToString() : "";
+                        string fNumber = exifData.FNumber != null ? exifData.FNumber.ToString() : "";
+                        string isoSpeed = exifData.ISOSpeed.ToString();
+                        string focalLength = exifData.FocalLength != null ? exifData.FocalLength.ToString() : "";
+                        string orientation = exifData.Orientation.ToString();
+
+                        // Write CSV line
+                        writer.WriteLine($"{filePath},{EscapeCsv(make)},{EscapeCsv(model)},{EscapeCsv(dateTimeOriginal)},{EscapeCsv(exposureTime)},{EscapeCsv(fNumber)},{EscapeCsv(isoSpeed)},{EscapeCsv(focalLength)},{EscapeCsv(orientation)}");
                     }
                 }
             }
@@ -57,5 +70,16 @@ class Program
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
+    }
+
+    // Helper to escape CSV fields containing commas or quotes
+    private static string EscapeCsv(string field)
+    {
+        if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
+        {
+            field = field.Replace("\"", "\"\"");
+            return $"\"{field}\"";
+        }
+        return field;
     }
 }

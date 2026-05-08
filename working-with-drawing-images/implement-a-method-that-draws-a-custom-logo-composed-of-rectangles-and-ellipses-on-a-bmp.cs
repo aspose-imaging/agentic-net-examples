@@ -3,53 +3,61 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Output BMP file path (hardcoded)
-        string outputPath = @"C:\temp\custom_logo.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create BMP options with a file create source bound to the output path
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.BitsPerPixel = 24;
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Define canvas size
-        int width = 500;
-        int height = 400;
-
-        // Create the image canvas
-        using (Image image = Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
+            // Define output path
+            string outputPath = @"C:\Temp\logo.bmp";
 
-            // Clear background to white
-            graphics.Clear(Color.White);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Draw a red rectangle (logo outer border)
-            Pen redPen = new Pen(Color.Red, 5);
-            graphics.DrawRectangle(redPen, new Rectangle(50, 50, 400, 300));
+            // Set BMP options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Draw a blue ellipse inside the rectangle
-            Pen bluePen = new Pen(Color.Blue, 3);
-            graphics.DrawEllipse(bluePen, new Rectangle(100, 100, 300, 200));
+            // Create a new image canvas
+            using (Image image = Image.Create(bmpOptions, 400, 400))
+            {
+                // Initialize graphics object
+                Graphics graphics = new Graphics(image);
 
-            // Draw a green smaller rectangle
-            Pen greenPen = new Pen(Color.Green, 2);
-            graphics.DrawRectangle(greenPen, new Rectangle(150, 150, 200, 100));
+                // Clear background
+                graphics.Clear(Color.White);
 
-            // Draw a purple ellipse overlapping the previous shapes
-            Pen purplePen = new Pen(Color.Purple, 4);
-            graphics.DrawEllipse(purplePen, new Rectangle(200, 120, 150, 150));
+                // Draw outer rectangle
+                Pen rectPen = new Pen(Color.Black, 3);
+                graphics.DrawRectangle(rectPen, 50, 50, 300, 300);
 
-            // Save the image (output path already bound)
-            image.Save();
+                // Fill first ellipse
+                using (SolidBrush blueBrush = new SolidBrush())
+                {
+                    blueBrush.Color = Color.Blue;
+                    blueBrush.Opacity = 100;
+                    graphics.FillEllipse(blueBrush, new Rectangle(100, 100, 200, 200));
+                }
+
+                // Fill second ellipse with a different color
+                using (SolidBrush redBrush = new SolidBrush())
+                {
+                    redBrush.Color = Color.Red;
+                    redBrush.Opacity = 80;
+                    graphics.FillEllipse(redBrush, new Rectangle(150, 150, 100, 100));
+                }
+
+                // Save the image (file is already bound to the source)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

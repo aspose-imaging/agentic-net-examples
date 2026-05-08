@@ -2,38 +2,35 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.png";
-        string outputPath = "Output/sample.jpg";
+        string inputPath = "Input/sample.jpg";
+        string outputPath = "Output/sample.tif";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as JPEG using default options
-                image.Save(outputPath, new JpegOptions());
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
         {
-            // Handle any unexpected errors gracefully
-            Console.Error.WriteLine($"Error during conversion: {ex.Message}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

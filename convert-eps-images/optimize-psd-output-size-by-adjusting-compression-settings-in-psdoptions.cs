@@ -8,33 +8,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.psd";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.bmp";
+            string outputPath = @"c:\temp\output.psd";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PSD save options with RLE compression to reduce file size
-            PsdOptions psdOptions = new PsdOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                CompressionMethod = CompressionMethod.RLE
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PSD using the configured options
-            image.Save(outputPath, psdOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD options with RLE compression to reduce file size
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    CompressionMethod = CompressionMethod.RLE
+                };
+
+                // Save the image as PSD using the configured options
+                image.Save(outputPath, psdOptions);
+            }
         }
-
-        Console.WriteLine($"Image saved to {outputPath}");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

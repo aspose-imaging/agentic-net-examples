@@ -3,56 +3,56 @@ using System.IO;
 using System.Net.Sockets;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.otg";
-        string outputPath = @"C:\output\sample.jpg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input OTG file path
+            string inputPath = @"C:\Images\sample.otg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure JPEG save options with OTG rasterization
-            JpegOptions jpegOptions = new JpegOptions();
-            OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size
-            };
-            jpegOptions.VectorRasterizationOptions = otgRaster;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the converted JPEG to a memory stream
-            using (MemoryStream memory = new MemoryStream())
+            // Load the OTG image
+            using (Image otgImage = Image.Load(inputPath))
             {
-                image.Save(memory, jpegOptions);
-                memory.Position = 0; // Reset stream position for reading
+                // Configure JPEG save options
+                JpegOptions jpegOptions = new JpegOptions();
 
-                // Send the JPEG data over a network stream
-                string host = "127.0.0.1";
+                // Set rasterization options so the vector OTG is rendered to raster before JPEG encoding
+                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = otgImage.Size
+                };
+                jpegOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Network destination (replace with actual server/port as needed)
+                string server = "127.0.0.1";
                 int port = 9000;
+
+                // Connect to the server and obtain a network stream
                 using (TcpClient client = new TcpClient())
                 {
-                    client.Connect(host, port);
+                    client.Connect(server, port);
                     using (NetworkStream netStream = client.GetStream())
                     {
-                        memory.CopyTo(netStream);
-                        netStream.Flush();
+                        // Save the JPEG directly into the network stream
+                        otgImage.Save(netStream, jpegOptions);
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

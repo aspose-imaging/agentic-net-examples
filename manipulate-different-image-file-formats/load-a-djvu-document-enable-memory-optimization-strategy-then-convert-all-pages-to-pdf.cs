@@ -1,18 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.djvu";
+        string outputDirectory = "output";
+
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = @"C:\Temp\sample.djvu";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,28 +21,31 @@ class Program
                 return;
             }
 
-            // Load DjVu document with memory optimization (buffer size hint)
-            LoadOptions loadOptions = new LoadOptions
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Configure load options for memory optimization (e.g., 1 MB buffer)
+            var loadOptions = new LoadOptions
             {
-                // Example: limit internal buffers to 1 MB
-                BufferSizeHint = 1 * 1024 * 1024
+                BufferSizeHint = 1 * 1024 * 1024 // 1 MB
+                // If the library exposes a MemoryOptimizationStrategy, it can be set here
+                // MemoryOptimizationStrategy = MemoryOptimizationStrategy.OnDemand
             };
 
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Load the DjVu document using the stream and load options
+            using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
             {
-                // Iterate through each page and save as PDF
-                foreach (DjvuPage djvuPage in djvuImage.Pages)
+                // Iterate through each page and save it as an individual PDF file
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    // Construct output PDF file path for the current page
-                    string outputDirectory = @"C:\Temp\PdfOutput";
-                    string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.pdf");
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.pdf");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as PDF
-                    djvuPage.Save(outputPath, new PdfOptions());
+                    // Save the current page as PDF
+                    page.Save(outputPath, new PdfOptions());
                 }
             }
         }

@@ -1,49 +1,56 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded relative input and output paths
-        string inputPath = Path.Combine("Input", "sample.odg");
-        string outputPath = Path.Combine("Output", "sample.bmp");
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.odg";
+            string outputPath = "output.bmp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG vector image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Configure BMP save options for 8‑bit palette
-            var bmpOptions = new BmpOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                BitsPerPixel = 8,
-                // Use a standard 8‑bit grayscale palette (suitable for size reduction)
-                Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false),
-                Compression = BitmapCompression.Rgb,
-                ResolutionSettings = new Aspose.Imaging.ResolutionSetting(96.0, 96.0),
-                // Rasterize the vector image onto a bitmap
-                VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the rasterized BMP image
-            image.Save(outputPath, bmpOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure BMP save options for 8‑bit palette
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 8
+                };
+
+                // Attempt to create a palette based on the source image
+                if (image is RasterImage raster)
+                {
+                    bmpOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
+                }
+                else
+                {
+                    // Fallback to a standard 8‑bit grayscale palette
+                    bmpOptions.Palette = ColorPaletteHelper.Create8BitGrayscale(false);
+                }
+
+                // Save the image as BMP using the configured options
+                image.Save(outputPath, bmpOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

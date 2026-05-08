@@ -8,32 +8,33 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = "Assets/Textures/source.png";
-        string outputPath = "Assets/Textures/embossed.png";
+        // Hardcoded input and output paths
+        string inputPath = "Assets/Textures/input.png";
+        string outputPath = "Assets/Textures/output_emboss.png";
 
         try
         {
-            // Verify that the source file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image using Aspose.Imaging
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
+                // Cast to RasterImage to access filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply the 3x3 emboss convolution kernel to the whole image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                // Create emboss filter options using the built‑in 3x3 emboss kernel
+                var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
+
+                // Apply the emboss filter to the whole image
+                rasterImage.Filter(rasterImage.Bounds, embossOptions);
 
                 // Save the processed image
                 rasterImage.Save(outputPath);
@@ -41,7 +42,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

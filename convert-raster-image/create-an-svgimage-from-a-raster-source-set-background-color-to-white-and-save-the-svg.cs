@@ -2,44 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+                outputDir = ".";
+            Directory.CreateDirectory(outputDir);
+
+            // Load the raster image
+            using (Image rasterImage = Image.Load(inputPath))
+            {
+                // Prepare SVG rasterization options with white background
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    PageSize = rasterImage.Size
+                };
+
+                // Prepare SVG save options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save as SVG
+                rasterImage.Save(outputPath, svgOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image
-        using (Image rasterImage = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options for SVG conversion
-            var rasterOptions = new SvgRasterizationOptions
-            {
-                PageSize = rasterImage.Size,
-                BackgroundColor = Aspose.Imaging.Color.White // Set background to white
-            };
-
-            // Set up SVG save options with the rasterization settings
-            var svgOptions = new SvgOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the image as SVG
-            rasterImage.Save(outputPath, svgOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

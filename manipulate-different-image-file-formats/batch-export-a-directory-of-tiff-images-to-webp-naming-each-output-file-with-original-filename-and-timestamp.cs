@@ -14,39 +14,30 @@ class Program
             string outputDirectory = @"C:\Images\WebP";
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (string filePath in tiffFiles)
-            {
-                // Process only .tif and .tiff extensions
-                string extension = Path.GetExtension(filePath).ToLowerInvariant();
-                if (extension != ".tif" && extension != ".tiff")
-                    continue;
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
 
-                // Verify input file exists
-                if (!File.Exists(filePath))
+            foreach (string inputPath in tiffFiles)
+            {
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
                 // Build output file name: original name + timestamp + .webp
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
                 string outputFileName = $"{fileNameWithoutExt}_{timestamp}.webp";
                 string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image and save as WebP
-                using (Image image = Image.Load(filePath))
+                // Load the TIFF image and save it as WebP
+                using (Image image = Image.Load(inputPath))
                 {
-                    var webpOptions = new WebPOptions
-                    {
-                        // Example: set quality to 80 (adjust as needed)
-                        Quality = 80,
-                        Lossless = false
-                    };
+                    var webpOptions = new WebPOptions();
                     image.Save(outputPath, webpOptions);
                 }
             }

@@ -13,18 +13,23 @@ class Program
     {
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure directories exist
-            Directory.CreateDirectory(inputDirectory);
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
             Directory.CreateDirectory(outputDirectory);
 
-            // Get JPEG files
-            string[] files = Directory.GetFiles(inputDirectory, "*.jpg")
-                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToArray();
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                                      .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                                  f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                                      .ToArray();
 
             if (files.Length == 0)
             {
@@ -32,79 +37,71 @@ class Program
                 return;
             }
 
-            // Load each image, convert to CMYK, and collect sizes
-            List<RasterImage> cmykImages = new List<RasterImage>();
-            List<Size> sizes = new List<Size>();
+            List<string> cmykTempPaths = new List<string>();
 
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Load original JPEG
-                using (JpegImage original = (JpegImage)Image.Load(inputPath))
+                string tempFileName = Path.GetFileNameWithoutExtension(inputPath) + "_cmyk.jpg";
+                string tempPath = Path.Combine(outputDirectory, tempFileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+
+                using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
                 {
-                    // Prepare CMYK save options
-                    JpegOptions cmykOptions = new JpegOptions
+                    JpegOptions options = new JpegOptions
                     {
                         ColorType = JpegCompressionColorMode.Cmyk,
-                        Quality = 100
+                        Quality = 100,
+                        Source = new FileCreateSource(tempPath, false)
                     };
+                    jpeg.Save();
+                }
 
-                    // Save to memory stream with CMYK profile
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        original.Save(ms, cmykOptions);
-                        ms.Position = 0;
+                cmykTempPaths.Add(tempPath);
+            }
 
-                        // Load the CMYK image back as RasterImage
-                        RasterImage cmykImg = (RasterImage)Image.Load(ms);
-                        cmykImages.Add(cmykImg);
-                        sizes.Add(cmykImg.Size);
-                    }
+            List<Size> sizes = new List<Size>();
+            foreach (string path in cmykTempPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    sizes.Add(img.Size);
                 }
             }
 
-            if (cmykImages.Count == 0)
-            {
-                Console.WriteLine("No valid images were processed.");
-                return;
-            }
-
-            // Calculate canvas size for vertical merge
             int canvasWidth = sizes.Max(s => s.Width);
             int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Output path
-            string outputPath = Path.Combine(outputDirectory, "merged.jpg");
+            string outputPath = Path.Combine(outputDirectory, "merged_cmyk.jpg");
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create JPEG canvas bound to the output file
+            Source outSource = new FileCreateSource(outputPath, false);
             JpegOptions canvasOptions = new JpegOptions
             {
-                Source = new FileCreateSource(outputPath, false),
-                Quality = 100
+                ColorType = JpegCompressionColorMode.Cmyk,
+                Quality = 100,
+                Source = outSource
             };
 
             using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (RasterImage img in cmykImages)
+                foreach (string path in cmykTempPaths)
                 {
-                    Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetY += img.Height;
-                    img.Dispose();
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetY += img.Height;
+                    }
                 }
-
-                // Save the bound canvas
                 canvas.Save();
             }
-
-            Console.WriteLine($"Merged image saved to: {outputPath}");
         }
         catch (Exception ex)
         {

@@ -1,49 +1,61 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Png; // For PNG support if needed
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Create a Graphics object for drawing
-            Graphics graphics = new Graphics(image);
-
-            // Build a simple GraphicsPath (a rectangle in this example)
-            GraphicsPath path = new GraphicsPath();
-            Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-            path.AddFigure(figure);
-
-            // Widen the path by 3 pixels using a thick pen (used for hit testing)
-            Pen widenPen = new Pen(Aspose.Imaging.Color.Black, 3);
-            path.Widen(widenPen);
-
-            // Optionally draw the widened path to visualize the result
-            graphics.DrawPath(new Pen(Aspose.Imaging.Color.Red, 1), path);
+            // Output file path (hard‑coded)
+            string outputPath = "output.png";
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Save the modified image
-            image.Save(outputPath);
+            // Set PNG options and bind the output stream
+            PngOptions pngOptions = new PngOptions();
+            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            {
+                pngOptions.Source = new StreamSource(stream);
+
+                // Create a blank image
+                using (Image image = Image.Create(pngOptions, 400, 300))
+                {
+                    // Obtain a graphics object for drawing
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
+
+                    // Build a simple path (a rectangle)
+                    GraphicsPath path = new GraphicsPath();
+                    Figure figure = new Figure();
+                    figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+                    path.AddFigure(figure);
+
+                    // Draw the original path with a thin blue pen
+                    Pen thinPen = new Pen(Color.Blue, 1);
+                    graphics.DrawPath(thinPen, path);
+
+                    // Widen the path by 3 pixels using a thick red pen (for hit‑testing)
+                    Pen thickPen = new Pen(Color.Red, 3);
+                    path.Widen(thickPen);
+
+                    // Draw the widened path with a green pen to visualize the result
+                    Pen widenedPen = new Pen(Color.Green, 1);
+                    graphics.DrawPath(widenedPen, path);
+
+                    // Save the image (the stream is already bound)
+                    image.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,19 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.dcm";
+        string outputPath = "sample_rotated.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.dcm";
-            string outputPath = "sample_rotated.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,19 +21,16 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
-                DicomImage dicomImage = (DicomImage)image;
-
                 // Rotate 90 degrees clockwise without flipping
-                dicomImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save the rotated image as PNG
-                dicomImage.Save(outputPath, new PngOptions());
+                // Save as PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

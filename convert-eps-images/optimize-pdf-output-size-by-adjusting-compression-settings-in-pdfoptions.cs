@@ -9,37 +9,41 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.pdf";
+        string inputPath = @"C:\Images\sample.png";
+        string outputPath = @"C:\Images\sample.pdf";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PDF options with compression to reduce file size
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.PdfCoreOptions = new PdfCoreOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PDF options with compression to reduce file size
+                var pdfOptions = new PdfOptions
                 {
-                    // Use Flate compression (good balance of size and speed)
-                    Compression = PdfImageCompressionOptions.Flate
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        // Use Flate compression (good balance of size and speed)
+                        Compression = PdfImageCompressionOptions.Flate
+                    }
                 };
 
-                // Optionally omit metadata to further reduce size
-                pdfOptions.KeepMetadata = false;
-
-                // Save the image as PDF with the specified options
+                // Save the image as PDF using the configured options
                 image.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

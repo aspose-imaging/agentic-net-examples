@@ -1,53 +1,51 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input raster image path
-        string inputPath = @"C:\temp\input.png";
-
-        // Hardcoded output SVG path
-        string outputPath = @"C:\temp\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.png";
+            string outputPath = "Output\\result.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image
-        using (Image rasterImage = Image.Load(inputPath))
-        {
-            // Define custom SVG dimensions (viewbox) and DPI
-            int svgWidth = 800;   // custom width in pixels
-            int svgHeight = 600;  // custom height in pixels
-            int dpi = 96;         // standard screen DPI
-
-            // Create a graphics context for SVG drawing
-            SvgGraphics2D graphics = new SvgGraphics2D(svgWidth, svgHeight, dpi);
-
-            // Draw the raster image onto the SVG canvas, scaling to fit the custom size
-            graphics.DrawImage(
-                (RasterImage)rasterImage,
-                new Point(0, 0),
-                new Size(svgWidth, svgHeight));
-
-            // Finalize recording and obtain the SVG image
-            using (SvgImage svgImage = graphics.EndRecording())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Save the SVG image to the specified output path
-                svgImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the raster image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Cast to RasterImage for drawing
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+
+                // Create an SVG canvas with custom viewbox dimensions (width=500, height=300, dpi=96)
+                SvgGraphics2D graphics = new SvgGraphics2D(500, 300, 96);
+
+                // Draw the raster image onto the SVG canvas, scaling to fit the canvas size
+                graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(500, 300));
+
+                // Finalize the SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
+                    // Save the SVG output
+                    svgImage.Save(outputPath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

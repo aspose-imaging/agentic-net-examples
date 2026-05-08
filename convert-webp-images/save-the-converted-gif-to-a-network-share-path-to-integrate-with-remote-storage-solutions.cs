@@ -8,31 +8,33 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.bmp";
-        string outputPath = @"\\RemoteServer\SharedFolder\converted.gif";
+        string inputPath = @"C:\Images\input.gif";
+        string outputPath = @"\\NetworkShare\Images\output.gif";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists (creates it if necessary)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure GIF save options (optional settings)
-            GifOptions options = new GifOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Interlaced = true,               // Enable interlaced GIF
-                DoPaletteCorrection = true       // Apply palette correction
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as a GIF to the network share
-            image.Save(outputPath, options);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save the image to the network share path
+                image.Save(outputPath);
+            }
+
+            Console.WriteLine("GIF saved successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

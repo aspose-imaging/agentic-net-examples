@@ -1,21 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output_laplacian.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,12 +25,12 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (PngImage pngImage = new PngImage(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage raster = (RasterImage)pngImage;
 
-                // Define a 3×3 Laplacian kernel
+                // Define a 3×3 Laplacian kernel for edge detection
                 double[,] laplacianKernel = new double[,]
                 {
                     { 0,  1, 0 },
@@ -39,11 +38,11 @@ class Program
                     { 0,  1, 0 }
                 };
 
-                // Apply convolution filter with the Laplacian kernel
+                // Apply the convolution filter with the Laplacian kernel
                 raster.Filter(raster.Bounds, new ConvolutionFilterOptions(laplacianKernel));
 
-                // Save the processed image as PNG
-                raster.Save(outputPath, new PngOptions());
+                // Save the processed image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)

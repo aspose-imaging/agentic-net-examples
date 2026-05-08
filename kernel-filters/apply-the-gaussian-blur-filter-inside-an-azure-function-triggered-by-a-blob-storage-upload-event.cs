@@ -1,17 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output\\blurred.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\input\sample.png";
+            string outputPath = @"C:\output\sample_blur.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,14 +24,12 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image and apply Gaussian blur
+            // Load image, apply Gaussian blur, and save
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                // Apply Gaussian blur with radius 5 and sigma 4.0
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                // Save the processed image
-                raster.Save(outputPath);
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

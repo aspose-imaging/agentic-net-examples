@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.bmp";
-            string outputPath = "thumbnails\\output_thumb.bmp";
+            string outputPath = "output_thumbnail.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,25 +24,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
+            // Load BMP image, resize to fixed thumbnail size, and save
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for resizing
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
+                // Resize to 150x150 pixels (fixed size)
+                image.Resize(150, 150);
 
-                // Resize to fixed thumbnail size (150x150) using nearest neighbour resampling
-                int thumbWidth = 150;
-                int thumbHeight = 150;
-                raster.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
-
-                // Save the thumbnail as BMP using BmpOptions
-                BmpOptions saveOptions = new BmpOptions();
-                image.Save(outputPath, saveOptions);
+                // Save as BMP using default options
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)

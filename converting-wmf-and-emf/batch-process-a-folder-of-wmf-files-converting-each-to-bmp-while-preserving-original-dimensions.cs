@@ -1,53 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Base directories (relative to the current working directory)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure the input directory exists; create it if missing and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputWmf";
+            string outputFolder = @"C:\OutputBmp";
+
+            // Get all WMF files in the input folder
+            string[] wmfFiles = Directory.GetFiles(inputFolder, "*.wmf");
+
+            foreach (string inputPath in wmfFiles)
+            {
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the output BMP file path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the WMF image and save it as BMP
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath);
+                }
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDirectory);
-
-        // Retrieve all WMF files in the input folder
-        string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
-
-        foreach (string inputPath in files)
+        catch (Exception ex)
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Build the output BMP file path (same name, .bmp extension)
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the WMF image and save it as BMP preserving original dimensions
-            using (Image image = Image.Load(inputPath))
-            {
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(outputPath, bmpOptions);
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

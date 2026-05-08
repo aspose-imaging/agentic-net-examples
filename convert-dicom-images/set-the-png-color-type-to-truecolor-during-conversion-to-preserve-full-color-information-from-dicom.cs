@@ -14,27 +14,27 @@ class Program
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (Image dicomImage = Image.Load(inputPath))
             {
-                // Configure PNG options with Truecolor color type
+                // Configure PNG options with Truecolor to preserve full color information
                 var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.Truecolor
                 };
 
-                // Save the image as PNG using the specified options
-                image.Save(outputPath, pngOptions);
+                // Save as PNG using the specified options
+                dicomImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

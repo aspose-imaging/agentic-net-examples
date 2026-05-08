@@ -2,62 +2,70 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        // Hardcoded paths
+        string inputPath = @"C:\Images\blurred.svg";
+        string tempPath = @"C:\Images\temp.png";
+        string outputPath = @"C:\Images\restored.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image svgImage = Image.Load(inputPath))
-        {
-            // Rasterize SVG to a memory stream as PNG
-            using (MemoryStream rasterStream = new MemoryStream())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Set up rasterization options
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure directories exist for temporary and output files
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image and rasterize it to a temporary PNG
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                // Set up rasterization options matching the SVG size
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
+                    PageSize = svgImage.Size
                 };
 
-                // Configure PNG save options with vector rasterization
-                PngOptions pngOptions = new PngOptions
+                // PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save rasterized image to memory stream
-                svgImage.Save(rasterStream, pngOptions);
-                rasterStream.Position = 0;
-
-                // Load rasterized image as RasterImage
-                using (Image rasterImageContainer = Image.Load(rasterStream))
-                {
-                    RasterImage rasterImage = (RasterImage)rasterImageContainer;
-
-                    // Apply deconvolution filter (Gauss-Wiener) to restore details
-                    rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
-
-                    // Save the processed image as PNG
-                    rasterImage.Save(outputPath, new PngOptions());
-                }
+                // Save rasterized image to temporary file
+                svgImage.Save(tempPath, pngOptions);
             }
+
+            // Load the rasterized PNG, apply deconvolution (Gauss-Wiener) filter, and save the result
+            using (Image rasterImage = Image.Load(tempPath))
+            {
+                var raster = (RasterImage)rasterImage;
+
+                // Apply Gauss-Wiener deconvolution filter (radius 5, sigma 1.0)
+                raster.Filter(raster.Bounds, new GaussWienerFilterOptions(5, 1.0));
+
+                // Save the filtered image
+                raster.Save(outputPath);
+            }
+
+            // Optional: clean up temporary file
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

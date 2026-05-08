@@ -2,63 +2,77 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input PDF file path
-        string inputPath = @"C:\Input\sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input PDF file path
+            string inputPath = @"C:\Data\input.pdf";
 
-        // Hardcoded output directory for EMF files
-        string outputDir = @"C:\Output";
+            // Hardcoded output directory for EMF files
+            string outputDir = @"C:\Data\Output";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(outputDir);
-
-        // Load the PDF document
-        using (Image pdfImage = Image.Load(inputPath))
-        {
-            // Cast to multipage image to get page count
-            IMultipageImage multipage = pdfImage as IMultipageImage;
-            if (multipage == null || multipage.PageCount == 0)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The loaded document does not contain any pages.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Iterate over each page and save as EMF
-            for (int i = 0; i < multipage.PageCount; i++)
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the PDF document
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare output file path for the current page
-                string outputPath = Path.Combine(outputDir, $"page_{i + 1}.emf");
+                // Try to treat the loaded image as a multipage image (PDF is multipage)
+                var multipage = image as IMultipageImage;
+                int pageCount = multipage?.PageCount ?? 1;
 
-                // Ensure the directory for the output file exists (redundant but follows the rule)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Set up EMF export options for the current page
-                EmfOptions exportOptions = new EmfOptions();
-
-                // Export only the current page
-                exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
-
-                // Configure vector rasterization options (page size)
-                exportOptions.VectorRasterizationOptions = new EmfRasterizationOptions
+                for (int i = 0; i < pageCount; i++)
                 {
-                    PageSize = pdfImage.Size
-                };
+                    // Obtain the image representing the current page
+                    Image pageImage;
+                    if (multipage != null)
+                    {
+                        // Access the specific page from the multipage collection
+                        pageImage = multipage.Pages[i];
+                    }
+                    else
+                    {
+                        // Single‑page fallback (should not happen for PDF)
+                        pageImage = image;
+                    }
 
-                // Save the current page as EMF
-                pdfImage.Save(outputPath, exportOptions);
+                    using (pageImage)
+                    {
+                        // Prepare EMF save options with rasterization settings matching the page size
+                        var emfOptions = new EmfOptions
+                        {
+                            VectorRasterizationOptions = new EmfRasterizationOptions
+                            {
+                                PageSize = pageImage.Size
+                            }
+                        };
+
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.emf");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as an EMF image
+                        pageImage.Save(outputPath, emfOptions);
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

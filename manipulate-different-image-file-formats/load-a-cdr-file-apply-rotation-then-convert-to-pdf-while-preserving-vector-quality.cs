@@ -8,27 +8,26 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample_rotated.pdf";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample_rotated.pdf";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR file
             using (Image image = Image.Load(inputPath))
             {
-                // Apply rotation (e.g., 90 degrees)
+                // Apply rotation (e.g., 90 degrees clockwise)
                 image.Rotate(90f);
 
                 // Prepare PDF save options with vector rasterization settings
@@ -36,10 +35,11 @@ class Program
                 {
                     VectorRasterizationOptions = new CdrRasterizationOptions
                     {
-                        // Preserve vector quality
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                        Positioning = Aspose.Imaging.ImageOptions.PositioningTypes.DefinedByDocument
+                        // Preserve vector quality by using document-defined positioning
+                        Positioning = PositioningTypes.DefinedByDocument,
+                        // Optional: set smoothing mode and text rendering hint as needed
+                        SmoothingMode = SmoothingMode.None,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel
                     }
                 };
 

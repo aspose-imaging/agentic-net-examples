@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.djvu";
-            string outputPath = "output\\result.tif";
+            string inputPath = @"C:\temp\sample.djvu";
+            string outputPath = @"C:\temp\sample.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,18 +22,19 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document from file stream
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Load the DjVu document from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
                 // Prepare TIFF save options with default settings
                 TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.MultiPageOptions = new DjvuMultiPageOptions(); // all pages will be saved
+                // Enable multi‑page output; default options will include all pages
+                saveOptions.MultiPageOptions = new DjvuMultiPageOptions();
 
-                // Save all pages as a multipage TIFF
+                // Save all pages as a multipage TIFF file
                 djvuImage.Save(outputPath, saveOptions);
             }
         }

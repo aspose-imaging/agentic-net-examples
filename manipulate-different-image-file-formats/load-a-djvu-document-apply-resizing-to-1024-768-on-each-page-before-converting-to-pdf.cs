@@ -8,25 +8,25 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "C:\\Temp\\sample.djvu";
+        string outputPath = "C:\\Temp\\output.pdf";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Temp\input.djvu";
-            string outputPath = @"C:\Temp\output.pdf";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DjVu document from a file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
             {
                 // Resize each page to 1024x768 using bilinear resampling
                 djvuImage.Resize(1024, 768, ResizeType.BilinearResample);

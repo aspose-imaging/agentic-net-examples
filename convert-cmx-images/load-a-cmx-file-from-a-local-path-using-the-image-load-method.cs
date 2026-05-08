@@ -2,36 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input path
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\output.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the CMX image
+            using (CmxImage image = (CmxImage)Image.Load(inputPath))
+            {
+                // Example: output some basic info
+                Console.WriteLine($"Loaded CMX image: {image.Width}x{image.Height}, {image.BitsPerPixel} bpp");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the image as PNG
+                image.Save(outputPath, new PngOptions());
+                Console.WriteLine($"Image saved to: {outputPath}");
+            }
         }
-
-        // Load the CMX image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to CmxImage to access CMX‑specific properties
-            if (image is CmxImage cmxImage)
-            {
-                Console.WriteLine($"CMX image loaded successfully.");
-                Console.WriteLine($"Width: {cmxImage.Width} pixels");
-                Console.WriteLine($"Height: {cmxImage.Height} pixels");
-                Console.WriteLine($"Page count: {cmxImage.PageCount}");
-            }
-            else
-            {
-                Console.WriteLine("The loaded image is not a CMX image.");
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

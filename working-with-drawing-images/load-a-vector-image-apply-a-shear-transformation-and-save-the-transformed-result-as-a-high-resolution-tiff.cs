@@ -3,76 +3,57 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.tif";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.svg";
+            string outputPath = "output.tif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Temporary rasterized PNG path
-        string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-        // Load SVG and rasterize to high resolution PNG
-        using (Image svgImg = Image.Load(inputPath))
-        {
-            var pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                VectorRasterizationOptions = new SvgRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image vectorImage = Image.Load(inputPath))
+            {
+                SvgImage svgImage = vectorImage as SvgImage;
+                if (svgImage == null)
                 {
-                    ScaleX = 5f,
-                    ScaleY = 5f,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    Console.Error.WriteLine("Failed to load SVG image.");
+                    return;
                 }
-            };
-            ((SvgImage)svgImg).Save(tempPngPath, pngOptions);
-        }
 
-        // Load the rasterized PNG
-        using (RasterImage rasterImg = (RasterImage)Image.Load(tempPngPath))
-        {
-            // Prepare TIFF save options with high resolution
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-            {
-                Source = new FileCreateSource(outputPath, false),
-                ResolutionSettings = new ResolutionSetting(300, 300)
-            };
+                int outWidth = svgImage.Width * 2;
+                int outHeight = svgImage.Height * 2;
 
-            // Create a TIFF image bound to the output file
-            using (RasterImage tiffImg = (RasterImage)Image.Create(tiffOptions, rasterImg.Width, rasterImg.Height))
-            {
-                // Apply shear transformation using a transformation matrix
-                var shearMatrix = new Matrix(1f, 0f, 0.5f, 1f, 0f, 0f);
-                Graphics graphics = new Graphics(tiffImg);
-                graphics.Transform = shearMatrix;
-                graphics.DrawImage(rasterImg, new Point(0, 0));
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
 
-                // Save the TIFF image (output path already bound)
-                tiffImg.Save();
+                using (Image tiffImage = Image.Create(tiffOptions, outWidth, outHeight))
+                {
+                    Graphics graphics = new Graphics(tiffImage);
+
+                    // Apply horizontal shear (shear factor 0.5)
+                    Matrix shearMatrix = new Matrix(1, 0, 0.5f, 1, 0, 0);
+                    graphics.Transform = shearMatrix;
+
+                    graphics.DrawImage(svgImage, new Point(0, 0));
+
+                    tiffImage.Save(outputPath);
+                }
             }
         }
-
-        // Clean up temporary file
-        if (File.Exists(tempPngPath))
+        catch (Exception ex)
         {
-            File.Delete(tempPngPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

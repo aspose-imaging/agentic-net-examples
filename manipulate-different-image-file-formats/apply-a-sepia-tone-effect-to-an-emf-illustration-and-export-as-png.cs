@@ -3,74 +3,88 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
-        string tempPath = "temp.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.emf";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the EMF image
             using (Image emfImage = Image.Load(inputPath))
             {
-                var rasterOptions = new EmfRasterizationOptions
+                // Set up rasterization options for EMF to PNG conversion
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
-                    PageSize = emfImage.Size,
-                    BackgroundColor = Color.White
+                    PageSize = emfImage.Size
                 };
-                var pngOptions = new PngOptions
+
+                // PNG save options with vector rasterization
+                PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions,
-                    Source = new FileCreateSource(tempPath, false)
+                    VectorRasterizationOptions = rasterOptions
                 };
-                emfImage.Save(tempPath, pngOptions);
-            }
 
-            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
-            {
-                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-                for (int i = 0; i < pixels.Length; i++)
+                // Rasterize EMF to a memory stream first
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    int argb = pixels[i];
-                    byte a = (byte)((argb >> 24) & 0xFF);
-                    byte r = (byte)((argb >> 16) & 0xFF);
-                    byte g = (byte)((argb >> 8) & 0xFF);
-                    byte b = (byte)(argb & 0xFF);
+                    emfImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                    int tr = (int)(0.393 * r + 0.769 * g + 0.189 * b);
-                    int tg = (int)(0.349 * r + 0.686 * g + 0.168 * b);
-                    int tb = (int)(0.272 * r + 0.534 * g + 0.131 * b);
+                    // Load the rasterized image (PNG) from the stream
+                    using (Image rasterImage = Image.Load(ms))
+                    {
+                        // Apply sepia tone effect pixel by pixel
+                        // Cast to RasterImage to access pixel manipulation methods
+                        var raster = rasterImage as Aspose.Imaging.RasterImage;
+                        if (raster != null)
+                        {
+                            for (int y = 0; y < raster.Height; y++)
+                            {
+                                for (int x = 0; x < raster.Width; x++)
+                                {
+                                    // Get original pixel color
+                                    var originalColor = raster.GetPixel(x, y);
+                                    int r = originalColor.R;
+                                    int g = originalColor.G;
+                                    int b = originalColor.B;
 
-                    byte nr = (byte)(tr > 255 ? 255 : tr);
-                    byte ng = (byte)(tg > 255 ? 255 : tg);
-                    byte nb = (byte)(tb > 255 ? 255 : tb);
+                                    // Compute sepia values
+                                    int tr = (int)(0.393 * r + 0.769 * g + 0.189 * b);
+                                    int tg = (int)(0.349 * r + 0.686 * g + 0.168 * b);
+                                    int tb = (int)(0.272 * r + 0.534 * g + 0.131 * b);
 
-                    pixels[i] = (a << 24) | (nr << 16) | (ng << 8) | nb;
+                                    // Clamp to byte range
+                                    tr = Math.Min(255, tr);
+                                    tg = Math.Min(255, tg);
+                                    tb = Math.Min(255, tb);
+
+                                    // Set new pixel color preserving original alpha
+                                    var sepiaColor = Aspose.Imaging.Color.FromArgb(originalColor.A, tr, tg, tb);
+                                    raster.SetPixel(x, y, sepiaColor);
+                                }
+                            }
+                        }
+
+                        // Save the final PNG with sepia effect
+                        rasterImage.Save(outputPath, new PngOptions());
+                    }
                 }
-                raster.SaveArgb32Pixels(raster.Bounds, pixels);
-                var finalOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                raster.Save(outputPath, finalOptions);
-            }
-
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
             }
         }
         catch (Exception ex)

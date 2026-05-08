@@ -24,22 +24,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open the DICOM file with a low‑memory load option
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Configure low‑memory load options (256 KB buffer)
+            LoadOptions loadOptions = new LoadOptions
             {
-                LoadOptions loadOptions = new LoadOptions
-                {
-                    BufferSizeHint = 256 * 1024 // 256 KB buffer size hint
-                };
+                BufferSizeHint = 256 * 1024
+            };
 
-                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
-                {
-                    // Apply Otsu threshold binarization
-                    dicomImage.BinarizeOtsu();
+            // Load DICOM image using a file stream and the low‑memory options
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
+            {
+                // Apply Otsu threshold binarization
+                dicomImage.BinarizeOtsu();
 
-                    // Save the result as PNG
-                    dicomImage.Save(outputPath, new PngOptions());
-                }
+                // Save the result as PNG
+                dicomImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

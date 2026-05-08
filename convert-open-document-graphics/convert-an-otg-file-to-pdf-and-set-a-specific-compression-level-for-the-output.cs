@@ -12,38 +12,46 @@ class Program
         string inputPath = @"C:\Images\sample.otg";
         string outputPath = @"C:\Images\sample.pdf";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure rasterization options for OTG to PDF conversion
-            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Set PDF-specific options, including compression level
-            PdfOptions pdfOptions = new PdfOptions
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = otgRasterizationOptions,
-                PdfCoreOptions = new PdfCoreOptions
+                // Configure PDF save options with desired compression
+                var pdfOptions = new PdfOptions
                 {
-                    // Example compression: Flate
-                    Compression = PdfImageCompressionOptions.Flate
-                }
-            };
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        // Set compression to Flate (you can change to another enum value as needed)
+                        Compression = PdfImageCompressionOptions.Flate
+                    }
+                };
 
-            // Save the image as PDF with the specified options
-            image.Save(outputPath, pdfOptions);
+                // Set vector rasterization options for OTG rendering
+                var otgRasterOptions = new OtgRasterizationOptions
+                {
+                    // Preserve original page size
+                    PageSize = image.Size
+                };
+                pdfOptions.VectorRasterizationOptions = otgRasterOptions;
+
+                // Save the image as PDF using the configured options
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

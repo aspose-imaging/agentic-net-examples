@@ -10,44 +10,56 @@ class Program
     {
         try
         {
-            // Define the batch of BMP files and the desired PSD compression for each.
-            // Input and output paths are hard‑coded string literals.
-            var jobs = new[]
+            // Define the batch of BMP files to convert.
+            // Each entry specifies the input BMP path, the desired output PSD path,
+            // and the PSD compression method to use for that file.
+            var batch = new[]
             {
-                new { Input = @"C:\Images\sample1.bmp", Output = @"C:\Output\sample1_Raw.psd", Compression = CompressionMethod.Raw },
-                new { Input = @"C:\Images\sample2.bmp", Output = @"C:\Output\sample2_RLE.psd", Compression = CompressionMethod.RLE },
-                new { Input = @"C:\Images\sample3.bmp", Output = @"C:\Output\sample3_Raw.psd", Compression = CompressionMethod.Raw }
+                new
+                {
+                    InputPath = @"C:\Images\sample1.bmp",
+                    OutputPath = @"C:\Converted\sample1.psd",
+                    Compression = CompressionMethod.RLE // RLE compression
+                },
+                new
+                {
+                    InputPath = @"C:\Images\sample2.bmp",
+                    OutputPath = @"C:\Converted\sample2.psd",
+                    Compression = CompressionMethod.Raw // No compression
+                },
+                // Add more entries as needed.
             };
 
-            foreach (var job in jobs)
+            foreach (var item in batch)
             {
                 // Verify that the input file exists.
-                if (!File.Exists(job.Input))
+                if (!File.Exists(item.InputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {job.Input}");
+                    Console.Error.WriteLine($"File not found: {item.InputPath}");
                     return;
                 }
 
-                // Ensure the output directory exists (creates it if necessary).
-                Directory.CreateDirectory(Path.GetDirectoryName(job.Output));
+                // Ensure the output directory exists.
+                Directory.CreateDirectory(Path.GetDirectoryName(item.OutputPath));
 
                 // Load the BMP image.
-                using (Image image = Image.Load(job.Input))
+                using (Image image = Image.Load(item.InputPath))
                 {
                     // Configure PSD save options with the specified compression method.
                     var psdOptions = new PsdOptions
                     {
-                        CompressionMethod = job.Compression,
-                        // Optional: keep other defaults (e.g., ColorMode, Version).
+                        CompressionMethod = item.Compression,
+                        // Optional: set other PSD options such as ColorMode, ChannelBitsCount, etc.
                     };
 
                     // Save the image as PSD using the configured options.
-                    image.Save(job.Output, psdOptions);
+                    image.Save(item.OutputPath, psdOptions);
                 }
             }
         }
         catch (Exception ex)
         {
+            // Any unexpected error is reported without crashing the application.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

@@ -8,34 +8,32 @@ class Program
 {
     static void Main()
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            using (var image = Image.Load(inputPath))
-            {
-                var pngImage = (PngImage)image;
+            string inputPath = "input.png";
+            string outputPath = "output/cleaned.png";
 
-                var mask = new GraphicsPath();
-                var figure = new Figure();
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                PngImage pngImage = (PngImage)image;
+
+                GraphicsPath mask = new GraphicsPath();
+                Figure figure = new Figure();
                 figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
-                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
-                {
-                    MaxPaintingAttempts = 4
-                };
+                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask);
 
-                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
+                using (RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                     result.Save(outputPath);
                 }
             }

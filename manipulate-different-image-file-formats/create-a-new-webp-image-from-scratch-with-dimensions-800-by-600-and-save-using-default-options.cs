@@ -1,25 +1,24 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
-public class Program
+class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define output file path
-            string outputPath = "output/output.webp";
+            // Hardcoded output path
+            string outputPath = @"c:\temp\output.webp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create default WebP options
+            // Default WebP options
             WebPOptions options = new WebPOptions();
 
-            // Create a new blank WebP image with the specified dimensions
+            // Create a blank WebP image with dimensions 800x600
             using (WebPImage webPImage = new WebPImage(800, 600, options))
             {
                 // Save the image using default options

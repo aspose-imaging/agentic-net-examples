@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Text;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -8,64 +7,71 @@ using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.wmf";
-        string outputPath = @"C:\temp\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\source.wmf";
+            string outputPath = @"C:\Images\localized_output.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WMF image
-        using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
-        {
-            // Prepare SVG save options (keep text as text for replacement)
-            SvgOptions saveOptions = new SvgOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                TextAsShapes = false // keep text as text nodes
-            };
-
-            // Configure rasterization options
-            WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
-            {
-                BackgroundColor = Color.WhiteSmoke,
-                PageSize = wmfImage.Size,
-                RenderMode = WmfRenderMode.Auto
-            };
-            saveOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save to a memory stream to obtain SVG content as string
-            string svgContent;
-            using (MemoryStream ms = new MemoryStream())
-            {
-                wmfImage.Save(ms, saveOptions);
-                svgContent = Encoding.UTF8.GetString(ms.ToArray());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Simple localization dictionary (replace original text with translations)
-            var translations = new Dictionary<string, string>
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load WMF image
+            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
-                { "Hello", "Bonjour" },
-                { "World", "Monde" }
-                // Add more key/value pairs as needed
+                // Prepare SVG save options (keep text as text for later replacement)
+                SvgOptions saveOptions = new SvgOptions
+                {
+                    TextAsShapes = false // keep text elements as text nodes
+                };
+
+                // Configure rasterization options
+                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
+                    PageSize = wmfImage.Size,
+                    RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
+                };
+
+                saveOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save WMF as SVG (temporary file)
+                wmfImage.Save(outputPath, saveOptions);
+            }
+
+            // Simple translation dictionary (original text -> localized text)
+            Dictionary<string, string> translations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Hello", "Hola" },
+                { "World", "Mundo" }
+                // Add more translations as needed
             };
 
-            // Perform text replacements
+            // Read the generated SVG content
+            string svgContent = File.ReadAllText(outputPath);
+
+            // Replace text elements based on the translation dictionary
             foreach (var kvp in translations)
             {
+                // Replace occurrences of the original text with the localized version
                 svgContent = svgContent.Replace(kvp.Key, kvp.Value);
             }
 
-            // Write the localized SVG to the output file
-            File.WriteAllText(outputPath, svgContent, Encoding.UTF8);
+            // Write the localized SVG back to the output file
+            File.WriteAllText(outputPath, svgContent);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

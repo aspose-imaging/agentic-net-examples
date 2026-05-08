@@ -10,50 +10,50 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputPath = "output.tif";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputPath = "output.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
             // Load the APNG image
-            using (Image image = Image.Load(inputPath))
+            using (Image loadedImage = Image.Load(inputPath))
             {
                 // Cast to ApngImage to access frames
-                ApngImage apngImage = (ApngImage)image;
+                ApngImage apngImage = (ApngImage)loadedImage;
 
-                // No frames? Exit gracefully
-                if (apngImage.PageCount == 0)
-                {
-                    Console.Error.WriteLine("No frames found in the APNG image.");
-                    return;
-                }
-
-                // Prepare TIFF options (RGB, 8 bits per sample)
+                // Prepare TIFF options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
                     Photometric = TiffPhotometrics.Rgb,
                     BitsPerSample = new ushort[] { 8, 8, 8 }
                 };
 
-                // Use the first frame to create the TIFF image container
-                RasterImage firstFrame = (RasterImage)apngImage.Pages[0];
-                using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, firstFrame.Width, firstFrame.Height))
+                // Ensure there is at least one frame
+                if (apngImage.PageCount == 0)
                 {
-                    // Add the first frame as the initial page
-                    tiffImage.AddFrame(new TiffFrame(firstFrame));
+                    Console.Error.WriteLine("APNG contains no frames.");
+                    return;
+                }
 
-                    // Add remaining frames
+                // Create the first TIFF frame from the first APNG frame
+                RasterImage firstFrame = (RasterImage)apngImage.Pages[0];
+                TiffFrame firstTiffFrame = new TiffFrame(firstFrame);
+
+                // Create the multi-page TIFF image with the first frame
+                using (TiffImage tiffImage = new TiffImage(firstTiffFrame))
+                {
+                    // Add remaining frames, if any
                     for (int i = 1; i < apngImage.PageCount; i++)
                     {
                         RasterImage frame = (RasterImage)apngImage.Pages[i];
@@ -61,7 +61,7 @@ class Program
                         tiffImage.AddFrame(tiffFrame);
                     }
 
-                    // Save the multi-page TIFF
+                    // Save the resulting TIFF file
                     tiffImage.Save(outputPath);
                 }
             }

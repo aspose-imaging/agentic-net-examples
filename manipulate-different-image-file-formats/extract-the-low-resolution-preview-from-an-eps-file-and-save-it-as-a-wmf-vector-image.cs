@@ -8,14 +8,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\preview.wmf";
-
-        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Verify that the input EPS file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.eps";
+            string outputPath = @"C:\Images\sample_preview.wmf";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,7 +27,7 @@ class Program
             // Load the EPS image
             using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Retrieve the WMF preview image (low‑resolution)
+                // Retrieve the WMF preview (low‑resolution vector preview)
                 using (Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF))
                 {
                     if (preview == null)
@@ -37,7 +36,7 @@ class Program
                         return;
                     }
 
-                    // Save the preview as a WMF vector image
+                    // Save the preview as a WMF file
                     preview.Save(outputPath, new WmfOptions());
                 }
             }

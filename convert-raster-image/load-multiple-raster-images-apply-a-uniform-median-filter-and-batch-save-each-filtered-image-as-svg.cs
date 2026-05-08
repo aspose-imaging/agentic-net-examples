@@ -8,44 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input file paths
-        string[] inputPaths = new[]
+        try
         {
-            @"C:\Images\sample1.png",
-            @"C:\Images\sample2.jpg",
-            @"C:\Images\sample3.bmp"
-        };
-
-        // Output directory (hardcoded)
-        string outputDir = @"C:\Images\FilteredSvg";
-
-        foreach (string inputPath in inputPaths)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input image paths (raster images)
+            string[] inputPaths = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\photo1.png",
+                @"C:\Images\photo2.jpg",
+                @"C:\Images\photo3.bmp"
+            };
 
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            // Process each image
+            foreach (string inputPath in inputPaths)
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Apply a median filter with size 5 to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                // Determine output path (same folder, same name, .svg extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".svg");
 
-                // Prepare output SVG path
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
-
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the filtered image as SVG
-                rasterImage.Save(outputPath, new SvgOptions());
+                // Load the raster image, apply median filter, and save as SVG
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to RasterImage to access Filter method
+                    RasterImage rasterImage = (RasterImage)image;
+
+                    // Apply median filter with size 5 to the whole image
+                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+                    // Save the filtered image as SVG using default SvgOptions
+                    rasterImage.Save(outputPath, new SvgOptions());
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

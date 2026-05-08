@@ -8,27 +8,32 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.odg";
-        string outputPath = @"C:\temp\sample.jpg";
+        string inputPath = "sample.odg";
+        string outputPath = "sample_converted.jpg";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Save the image as JPEG using default compression settings
+                image.Save(outputPath, new JpegOptions());
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Use default JPEG options (default compression settings)
-            var jpegOptions = new JpegOptions();
-
-            // Save the image as JPEG
-            image.Save(outputPath, jpegOptions);
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -5,48 +5,39 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output.tif";
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the multi‑page TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                // Iterate through each frame and set resolution based on its dimensions
-                for (int i = 0; i < tiffImage.Frames.Length; i++)
-                {
-                    // Make the current frame active
-                    tiffImage.ActiveFrame = tiffImage.Frames[i];
+                Directory.CreateDirectory(outputDir);
+            }
 
-                    // Example logic: higher resolution for larger frames
-                    if (tiffImage.ActiveFrame.Width > 1000 || tiffImage.ActiveFrame.Height > 1000)
-                    {
-                        tiffImage.HorizontalResolution = 300; // DPI
-                        tiffImage.VerticalResolution = 300;
-                    }
-                    else
-                    {
-                        tiffImage.HorizontalResolution = 150;
-                        tiffImage.VerticalResolution = 150;
-                    }
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                TiffFrame[] frames = tiff.Frames;
+                for (int i = 0; i < frames.Length; i++)
+                {
+                    TiffFrame frame = frames[i];
+                    // Example: set duration proportional to the sum of horizontal and vertical resolution
+                    int durationMs = (int)(frame.HorizontalResolution + frame.VerticalResolution);
+                    Console.WriteLine($"Frame {i}: Resolution {frame.HorizontalResolution}x{frame.VerticalResolution}, Duration {durationMs} ms");
+                    // Note: Actual setting of frame duration would require modifying TIFF tags,
+                    // which is beyond this simple demonstration.
                 }
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the modified TIFF
-                tiffImage.Save(outputPath);
+                tiff.Save(outputPath);
             }
         }
         catch (Exception ex)

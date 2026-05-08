@@ -2,44 +2,35 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output/output.png";
+
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output\\processed.png";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to SvgImage to access size
-                SvgImage svgImage = (SvgImage)image;
+                // Optional: apply any desired filtering here
+                // (e.g., modify image properties, apply transformations, etc.)
 
-                // Set up rasterization options for PNG output
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
-                };
-
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the rasterized PNG
+                // Save as PNG
+                var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
         }

@@ -3,44 +3,45 @@ using System.IO;
 using System.Net.Sockets;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input ODG file path
-        string inputPath = @"C:\temp\sample.odg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input ODG file path
+            string inputPath = "sample.odg";
 
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to OdgImage to access ODG‑specific features if needed
-            OdgImage odgImage = image as OdgImage;
-            if (odgImage == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Failed to load ODG image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare JPEG save options (default options are sufficient for basic conversion)
-            JpegOptions jpegOptions = new JpegOptions();
-
-            // Connect to the remote endpoint (hard‑coded host and port)
-            using (TcpClient client = new TcpClient("localhost", 9000))
-            using (NetworkStream networkStream = client.GetStream())
+            // Load the ODG image
+            using (Image odgImage = Image.Load(inputPath))
             {
-                // Send the JPEG data directly over the network stream
-                // The Save overload writes the image data to the provided stream using the specified options
-                odgImage.Save(networkStream, jpegOptions);
+                // Prepare JPEG save options
+                var jpegOptions = new JpegOptions();
+
+                // Network destination (hardcoded host and port)
+                string host = "127.0.0.1";
+                int port = 9000;
+
+                // Connect and obtain a network stream
+                using (TcpClient client = new TcpClient(host, port))
+                using (NetworkStream networkStream = client.GetStream())
+                {
+                    // Send the JPEG data through the network stream
+                    odgImage.Save(networkStream, jpegOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

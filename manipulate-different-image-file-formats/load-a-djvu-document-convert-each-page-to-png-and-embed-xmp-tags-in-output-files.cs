@@ -9,11 +9,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.djvu";
-        string outputDirectory = "Output";
-
         try
         {
+            string inputPath = "Input/sample.djvu";
+            string outputDirectory = "Output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,21 +22,15 @@ class Program
 
             Directory.CreateDirectory(outputDirectory);
 
-            using (Stream stream = File.OpenRead(inputPath))
+            using (FileStream stream = File.OpenRead(inputPath))
             {
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    foreach (Image img in djvuImage.Pages)
+                    foreach (DjvuPage page in djvuImage.Pages)
                     {
-                        DjvuPage djvuPage = img as DjvuPage;
-                        if (djvuPage == null)
-                            continue;
-
-                        string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
+                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        PngOptions pngOptions = new PngOptions();
-                        djvuPage.Save(outputPath, pngOptions);
+                        page.Save(outputPath, new PngOptions());
                     }
                 }
             }

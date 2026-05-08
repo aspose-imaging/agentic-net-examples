@@ -2,41 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output_300dpi.psd";
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.jpg";
+        string outputPath = "Output/sample.psd";
 
-        // Verify that the input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Configure PSD save options with a 300 DPI resolution
-            PsdOptions psdOptions = new PsdOptions
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Set horizontal and vertical resolution to 300 DPI
-                ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300.0, 300.0),
-
-                // Example: use RLE compression (optional)
-                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE
-            };
-
-            // Save the image as a PSD file with the specified options
-            image.Save(outputPath, psdOptions);
+                // Configure PSD save options with 300 DPI resolution
+                using (PsdOptions psdOptions = new PsdOptions())
+                {
+                    psdOptions.ResolutionSettings = new ResolutionSetting(300.0, 300.0);
+                    // Save the image as PSD with the specified options
+                    image.Save(outputPath, psdOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,70 +2,71 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\circle_bezier.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Create a BMP image with desired dimensions
-        BmpOptions bmpOptions = new BmpOptions();
-        using (Image image = Image.Create(bmpOptions, 400, 400))
+        try
         {
-            // Initialize graphics object for drawing
-            Graphics graphics = new Graphics(image);
+            string outputPath = "output/output.bmp";
 
-            // Fill background with white color
-            graphics.Clear(Color.White);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Parameters for circle approximation using 4 cubic Bezier curves
-            float radius = 150f;               // Circle radius
-            float cx = 200f;                   // Center X
-            float cy = 200f;                   // Center Y
-            float k = 0.552284749831f;         // Approximation constant (4/3 * tan(π/8))
-            float ox = radius * k;             // Horizontal offset for control points
-            float oy = radius * k;             // Vertical offset for control points
+            int width = 500;
+            int height = 500;
 
-            // Top‑right quadrant
-            graphics.DrawBezier(
-                new Pen(Color.Blue, 2),
-                new PointF(cx + radius, cy),
-                new PointF(cx + radius, cy - oy),
-                new PointF(cx + ox, cy - radius),
-                new PointF(cx, cy - radius));
+            using (BmpOptions bmpOptions = new BmpOptions())
+            {
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Bottom‑right quadrant
-            graphics.DrawBezier(
-                new Pen(Color.Blue, 2),
-                new PointF(cx, cy - radius),
-                new PointF(cx - ox, cy - radius),
-                new PointF(cx - radius, cy - oy),
-                new PointF(cx - radius, cy));
+                using (Image image = Image.Create(bmpOptions, width, height))
+                {
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-            // Bottom‑left quadrant
-            graphics.DrawBezier(
-                new Pen(Color.Blue, 2),
-                new PointF(cx - radius, cy),
-                new PointF(cx - radius, cy + oy),
-                new PointF(cx - ox, cy + radius),
-                new PointF(cx, cy + radius));
+                    Pen pen = new Pen(Color.Blue, 2);
+                    float cx = width / 2f;
+                    float cy = height / 2f;
+                    float r = 200f;
+                    float c = r * 0.5522847498f;
 
-            // Top‑left quadrant
-            graphics.DrawBezier(
-                new Pen(Color.Blue, 2),
-                new PointF(cx, cy + radius),
-                new PointF(cx + ox, cy + radius),
-                new PointF(cx + radius, cy + oy),
-                new PointF(cx + radius, cy));
+                    // Top-right quarter
+                    graphics.DrawBezier(pen,
+                        new PointF(cx + r, cy),
+                        new PointF(cx + r, cy - c),
+                        new PointF(cx + c, cy - r),
+                        new PointF(cx, cy - r));
 
-            // Save the image to the specified path
-            image.Save(outputPath);
+                    // Top-left quarter
+                    graphics.DrawBezier(pen,
+                        new PointF(cx, cy - r),
+                        new PointF(cx - c, cy - r),
+                        new PointF(cx - r, cy - c),
+                        new PointF(cx - r, cy));
+
+                    // Bottom-left quarter
+                    graphics.DrawBezier(pen,
+                        new PointF(cx - r, cy),
+                        new PointF(cx - r, cy + c),
+                        new PointF(cx - c, cy + r),
+                        new PointF(cx, cy + r));
+
+                    // Bottom-right quarter
+                    graphics.DrawBezier(pen,
+                        new PointF(cx, cy + r),
+                        new PointF(cx + c, cy + r),
+                        new PointF(cx + r, cy + c),
+                        new PointF(cx + r, cy));
+
+                    image.Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

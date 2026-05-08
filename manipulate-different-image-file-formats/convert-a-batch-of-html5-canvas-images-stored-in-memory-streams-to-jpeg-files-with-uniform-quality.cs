@@ -9,56 +9,53 @@ class Program
     {
         try
         {
-            // Hard‑coded list of HTML5 Canvas source files
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\canvas1.html",
-                @"C:\Images\canvas2.html",
-                @"C:\Images\canvas3.html"
-            };
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Hard‑coded output directory
-            string outputDir = @"C:\Images\JpegOutput";
-
-            // Ensure the output directory exists (rule 3)
+            // Ensure the output root directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Uniform JPEG quality for all images
-            int jpegQuality = 80;
-
-            foreach (string inputPath in inputPaths)
+            // List of input canvas image files (could be PNG, BMP, etc.)
+            string[] inputFiles = new string[]
             {
-                // Verify input file exists (rule 2)
+                Path.Combine(inputDir, "canvas1.png"),
+                Path.Combine(inputDir, "canvas2.png"),
+                Path.Combine(inputDir, "canvas3.png")
+            };
+
+            // JPEG save options with uniform quality
+            var jpegOptions = new JpegOptions
+            {
+                Quality = 80 // quality between 1 and 100
+            };
+
+            foreach (string inputPath in inputFiles)
+            {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the canvas image (using the provided load rule)
-                using (Image image = Image.Load(inputPath))
+                // Load the image from a memory stream
+                using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(inputPath)))
+                using (Image image = Image.Load(ms))
                 {
-                    // Build the output JPEG file path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
-                    string outputPath = Path.Combine(outputDir, outputFileName);
+                    // Determine output file path
+                    string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
 
-                    // Ensure the output directory exists before saving (rule 3)
+                    // Ensure the output directory for this file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Configure JPEG options with the desired quality
-                    JpegOptions jpegOptions = new JpegOptions
-                    {
-                        Quality = jpegQuality
-                    };
-
-                    // Save the image as JPEG (using the provided save rule)
+                    // Save as JPEG with the specified options
                     image.Save(outputPath, jpegOptions);
                 }
             }
         }
         catch (Exception ex)
         {
-            // Global error handling (rule 4)
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

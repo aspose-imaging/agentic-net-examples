@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -12,7 +12,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.jpg";
-        string outputPath = "mask.png";
+        string outputMaskPath = "mask.png";
 
         try
         {
@@ -24,22 +24,24 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputMaskPath));
 
             // Load the JPEG image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a mask using MagicWandTool.
-                // The coordinates (120, 100) and threshold 150 are example values.
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(120, 100) { Threshold = 150 })
-                    .Apply();
+                // Create a mask using MagicWandTool based on a sample pixel (e.g., 100,100)
+                // Adjust the coordinates and threshold as needed
+                ImageMask mask = MagicWandTool.Select(image, new MagicWandSettings(100, 100));
 
-                // Save the masked image as PNG with alpha channel for external editing
-                image.Save(outputPath, new PngOptions
+                // Apply the mask to the source image
+                mask.Apply();
+
+                // Save the resulting mask as a PNG with alpha channel
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha
-                });
+                };
+                image.Save(outputMaskPath, pngOptions);
             }
         }
         catch (Exception ex)

@@ -9,55 +9,54 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.svg";
-        string outputPath = "output.bmp";
+        string outputPath = "output/output.bmp";
 
-        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the SVG image
-        using (Image vectorImage = Image.Load(inputPath))
+        try
         {
-            // Set up rasterization options for SVG
-            var rasterOptions = new SvgRasterizationOptions
+            // Load the SVG image
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                PageSize = vectorImage.Size
-            };
-
-            // Use PNG options to rasterize the SVG into a memory stream
-            var pngOptions = new PngOptions
-            {
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            using (var memoryStream = new MemoryStream())
-            {
-                // Rasterize SVG to PNG in memory
-                vectorImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0;
-
-                // Load the rasterized image as a RasterImage for filtering
-                using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
+                // Rasterize SVG to a PNG in memory
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Apply sharpen filter
-                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                    PngOptions pngOptions = new PngOptions();
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = vectorImage.Size
+                    };
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Apply emboss filter using a predefined convolution kernel
-                    rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                    vectorImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                    // Save the processed image as BMP
-                    var bmpOptions = new BmpOptions();
-                    rasterImage.Save(outputPath, bmpOptions);
+                    // Load the rasterized image as RasterImage
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                    {
+                        // Apply sharpen filter
+                        rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                        // Apply emboss filter using convolution kernel
+                        rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+
+                        // Save the result as BMP
+                        BmpOptions bmpOptions = new BmpOptions();
+                        rasterImage.Save(outputPath, bmpOptions);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

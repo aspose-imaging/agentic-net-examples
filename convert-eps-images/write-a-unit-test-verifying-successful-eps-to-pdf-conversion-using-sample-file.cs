@@ -1,49 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS image and convert to PDF
-        using (Image image = Image.Load(inputPath))
-        {
-            var pdfOptions = new PdfOptions
+            if (!File.Exists(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var options = new PdfOptions
                 {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                }
-            };
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    }
+                };
 
-            image.Save(outputPath, pdfOptions);
-        }
+                image.Save(outputPath, options);
+            }
 
-        // Verify conversion succeeded
-        if (File.Exists(outputPath))
-        {
-            Console.WriteLine("EPS to PDF conversion succeeded.");
+            if (File.Exists(outputPath))
+            {
+                Console.WriteLine("EPS to PDF conversion succeeded.");
+            }
+            else
+            {
+                Console.Error.WriteLine("EPS to PDF conversion failed: output file not created.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Console.Error.WriteLine("Conversion failed: output file not created.");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

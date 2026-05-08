@@ -8,41 +8,40 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\multi_page.tif";
-        string outputPath = @"C:\Images\single.webp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.webp";
 
-        // Path‑safety checks as required
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         try
         {
-            // Load the multi‑page TIFF
+            // Load the multi‑page TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // If the source is a multipage image, limit export to the first page
-                if (image is IMultipageImage multipage && multipage.PageCount > 0)
+                // If the image supports page exporting actions, release each page after it is processed
+                if (image is RasterCachedMultipageImage rasterImage)
                 {
-                    // Export only the first page to keep memory usage low
-                    var exportOptions = new WebPOptions
+                    rasterImage.PageExportingAction = (index, page) =>
                     {
-                        MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(0, 1))
+                        // Force garbage collection to free memory of the processed page
+                        GC.Collect();
                     };
-                    image.Save(outputPath, exportOptions);
                 }
-                else
-                {
-                    // For single‑page images just save directly
-                    var exportOptions = new WebPOptions();
-                    image.Save(outputPath, exportOptions);
-                }
+
+                // Prepare WebP export options (default settings export all pages as animated frames)
+                var webpOptions = new WebPOptions();
+
+                // Save as a single WebP file
+                image.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)

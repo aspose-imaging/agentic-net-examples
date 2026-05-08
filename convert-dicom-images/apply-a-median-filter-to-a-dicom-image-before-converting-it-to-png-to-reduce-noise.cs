@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.dicom";
-        string outputPath = @"C:\temp\sample.filtered.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "sample.dicom";
+            string outputPath = "output\\sample.filtered.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,10 +28,9 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific functionality
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply a median filter with size 5 to the entire image
+                // Apply a median filter (size = 5) to the whole image
                 dicomImage.Filter(dicomImage.Bounds, new MedianFilterOptions(5));
 
                 // Save the filtered image as PNG

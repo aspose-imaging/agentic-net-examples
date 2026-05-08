@@ -6,31 +6,48 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string outputPath = "output/output.bmp";
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        int width = 200;
-        int height = 200;
-
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        using (Image image = Image.Create(bmpOptions, width, height))
+        try
         {
-            Graphics graphics = new Graphics(image);
+            // Define output path and ensure its directory exists
+            string outputPath = "Output\\output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Pen pen = new Pen(Color.Black, 2);
-            graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
+            // Create BMP options with a file source bound to the output path
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            graphics.ScaleTransform(-1, 1);
-            graphics.TranslateTransform(-width, 0);
+            // Define canvas size
+            int width = 200;
+            int height = 200;
 
-            graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
+            // Create the image canvas
+            using (Image image = Image.Create(bmpOptions, width, height))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-            image.Save();
+                // Create a black pen
+                Pen pen = new Pen(Color.Black, 2);
+
+                // Draw original diagonal line
+                graphics.DrawLine(pen, new Point(0, 0), new Point(width, height));
+
+                // Apply horizontal mirroring transform
+                graphics.TranslateTransform(width, 0); // Move origin to right edge
+                graphics.ScaleTransform(-1, 1);       // Flip horizontally
+
+                // Draw mirrored diagonal line
+                graphics.DrawLine(pen, new Point(0, 0), new Point(width, height));
+
+                // Save the image (file is already bound to the source)
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

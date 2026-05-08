@@ -8,13 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\highres.png";
-        string outputPath = @"C:\Images\canvas.html";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.svg";
+            string outputPath = @"C:\Images\canvas.html";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,27 +21,28 @@ class Program
                 return;
             }
 
-            // Prepare output directory
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the high‑resolution image
+            // Load the source image (vector format recommended for scaling)
             using (Image image = Image.Load(inputPath))
             {
-                // Define scaling factor to fit the desired viewport (e.g., 0.5 = 50%)
-                float scaleFactor = 0.5f;
+                // Configure rasterization options with scaling factors
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    // Example: double the size to fit a larger viewport
+                    ScaleX = 2.0f,
+                    ScaleY = 2.0f,
+                    // Optional: set background color for the canvas
+                    BackgroundColor = Color.White
+                };
 
-                // Configure HTML5 Canvas export options
+                // Set up HTML5 Canvas export options
                 var canvasOptions = new Html5CanvasOptions
                 {
-                    // Generate a full HTML page (set to false to export only the <canvas> tag)
-                    FullHtmlPage = true,
-
-                    // Set vector rasterization options with scaling
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        ScaleX = scaleFactor,
-                        ScaleY = scaleFactor
-                    }
+                    VectorRasterizationOptions = rasterOptions,
+                    FullHtmlPage = true,          // Generate a full HTML page
+                    CanvasTagId = "myCanvas"      // Identifier for the canvas element
                 };
 
                 // Save the image as an HTML5 Canvas file

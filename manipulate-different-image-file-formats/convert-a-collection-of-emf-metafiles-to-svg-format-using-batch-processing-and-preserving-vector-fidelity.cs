@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,33 +11,38 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\InputEmf";
-            string outputDir = @"C:\OutputSvg";
+            string inputDir = @"C:\Input";
+            string outputDir = @"C:\Output";
 
-            // Get all EMF files in the input directory
-            string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
-
-            foreach (string inputPath in emfFiles)
+            // List of EMF files to convert (file names only)
+            string[] emfFiles = new[]
             {
-                // Verify that the input file exists
+                "sample1.emf",
+                "sample2.emf",
+                "sample3.emf"
+            };
+
+            foreach (string fileName in emfFiles)
+            {
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputDir, fileName);
+                string outputPath = Path.Combine(outputDir, Path.ChangeExtension(fileName, ".svg"));
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output SVG file path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
-
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image and convert it to SVG
+                // Load EMF image and convert to SVG
                 using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
                     // Set up SVG save options
-                    SvgOptions saveOptions = new SvgOptions
+                    SvgOptions svgOptions = new SvgOptions
                     {
                         TextAsShapes = true
                     };
@@ -47,15 +52,15 @@ class Program
                     {
                         BackgroundColor = Color.WhiteSmoke,
                         PageSize = emfImage.Size,
-                        RenderMode = EmfRenderMode.Auto,
-                        BorderX = 0,
-                        BorderY = 0
+                        RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                        BorderX = 50,
+                        BorderY = 50
                     };
 
-                    saveOptions.VectorRasterizationOptions = rasterOptions;
+                    svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Save the SVG file
-                    emfImage.Save(outputPath, saveOptions);
+                    // Save as SVG
+                    emfImage.Save(outputPath, svgOptions);
                 }
             }
         }

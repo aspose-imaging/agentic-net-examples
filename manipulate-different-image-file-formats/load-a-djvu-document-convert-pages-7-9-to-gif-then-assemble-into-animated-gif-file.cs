@@ -1,21 +1,20 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.gif";
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\output.gif";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -31,53 +30,58 @@ class Program
             using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Pages to extract (7‑9, 1‑based indexing)
-                int[] pagesToExtract = new int[] { 7, 8, 9 };
-                List<RasterImage> rasterFrames = new List<RasterImage>();
+                // Pages 7‑9 (1‑based indexing)
+                int startPage = 7;
+                int endPage = 9;
 
-                foreach (int pageNumber in pagesToExtract)
+                // Guard against documents with fewer pages
+                if (djvuImage.PageCount < startPage)
                 {
-                    // DjvuImage.Pages is zero‑based
-                    if (pageNumber < 1 || pageNumber > djvuImage.PageCount)
-                        continue; // skip invalid page numbers
-
-                    var djvuPage = djvuImage.Pages[pageNumber - 1];
-
-                    // Save the page to a memory stream as PNG, then load as RasterImage
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        djvuPage.Save(ms, new PngOptions());
-                        ms.Position = 0;
-                        var raster = (RasterImage)Image.Load(ms);
-                        rasterFrames.Add(raster);
-                    }
-                }
-
-                if (rasterFrames.Count == 0)
-                {
-                    Console.Error.WriteLine("No pages were extracted.");
+                    Console.Error.WriteLine("DjVu document does not contain the required pages.");
                     return;
                 }
 
-                // Create animated GIF using the first frame
-                using (GifImage gifImage = new GifImage(new GifFrameBlock(rasterFrames[0])))
+                // Prepare GIF image
+                GifImage gifImage = null;
+
+                for (int pageNumber = startPage; pageNumber <= endPage && pageNumber <= djvuImage.PageCount; pageNumber++)
                 {
-                    // Add remaining frames
-                    for (int i = 1; i < rasterFrames.Count; i++)
+                    // DjVu pages collection is zero‑based
+                    var djvuPage = djvuImage.Pages[pageNumber - 1];
+
+                    // Save the page to a memory stream as PNG (any raster format works)
+                    using (var ms = new MemoryStream())
                     {
-                        gifImage.AddPage(new GifFrameBlock(rasterFrames[i]));
+                        djvuPage.Save(ms, new PngOptions());
+                        ms.Position = 0;
+
+                        // Load the raster image from the memory stream
+                        using (var rasterImage = (RasterImage)Image.Load(ms))
+                        {
+                            if (gifImage == null)
+                            {
+                                // First frame: create GifImage with a GifFrameBlock
+                                var firstBlock = new GifFrameBlock(rasterImage);
+                                gifImage = new GifImage(firstBlock);
+                            }
+                            else
+                            {
+                                // Subsequent frames: add as pages
+                                gifImage.AddPage(rasterImage);
+                            }
+                        }
                     }
-
-                    // Save the animated GIF
-                    GifOptions gifOptions = new GifOptions();
-                    gifImage.Save(outputPath, gifOptions);
                 }
 
-                // Dispose temporary raster frames
-                foreach (var frame in rasterFrames)
+                if (gifImage == null)
                 {
-                    frame.Dispose();
+                    Console.Error.WriteLine("No frames were added to the animated GIF.");
+                    return;
                 }
+
+                // Save the animated GIF
+                gifImage.Save(outputPath);
+                gifImage.Dispose();
             }
         }
         catch (Exception ex)

@@ -10,11 +10,11 @@ class Program
     {
         // Hardcoded input and output file paths
         string inputPath = "input.eps";
-        string outputPath = "output/output.psd";
+        string outputPath = "output.psd";
 
         try
         {
-            // Verify that the input EPS file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,9 +25,9 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                // Create default PSD save options
+                // Prepare PSD save options (default settings)
                 var psdOptions = new PsdOptions();
 
                 // Save the image as PSD
@@ -36,7 +36,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

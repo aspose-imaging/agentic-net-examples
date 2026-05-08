@@ -9,31 +9,47 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.odg";
-        string outputPath = "cropped.png";
+        string inputPath = "input.odg";
+        string outputPath = "output\\cropped.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to OdgImage to access ODG-specific functionality
+                OdgImage odgImage = (OdgImage)image;
+
+                // Define the cropping rectangle (example values)
+                int left = 50;
+                int top = 50;
+                int width = 200;
+                int height = 200;
+                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(left, top, width, height);
+
+                // Crop the image
+                odgImage.Crop(cropArea);
+
+                // Prepare PNG save options
+                PngOptions pngOptions = new PngOptions();
+
+                // Save the cropped image as PNG
+                odgImage.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Define the crop rectangle (x, y, width, height)
-            var cropRect = new Rectangle(50, 50, 200, 150);
-
-            // Crop the image
-            image.Crop(cropRect);
-
-            // Save the cropped image as PNG
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

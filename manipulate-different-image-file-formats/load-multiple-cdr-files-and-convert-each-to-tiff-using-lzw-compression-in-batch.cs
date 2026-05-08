@@ -3,7 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageLoadOptions;
 
 class Program
@@ -12,25 +12,19 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string[] inputPaths = new string[]
+            // Hard‑coded input CDR files
+            string[] inputPaths = new[]
             {
-                @"C:\input\file1.cdr",
-                @"C:\input\file2.cdr"
+                @"C:\Input\sample1.cdr",
+                @"C:\Input\sample2.cdr",
+                @"C:\Input\sample3.cdr"
             };
 
-            string[] outputPaths = new string[]
-            {
-                @"C:\output\file1.tif",
-                @"C:\output\file2.tif"
-            };
+            // Hard‑coded output directory
+            string outputDirectory = @"C:\Output";
 
-            // Process each file
-            for (int i = 0; i < inputPaths.Length; i++)
+            foreach (string inputPath in inputPaths)
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
-
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -38,29 +32,30 @@ class Program
                     return;
                 }
 
+                // Determine output TIFF path
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".tif");
+
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load CDR image
                 using (FileStream stream = File.OpenRead(inputPath))
+                using (CdrImage cdrImage = new CdrImage(stream, new CdrLoadOptions()))
                 {
-                    var loadOptions = new CdrLoadOptions(); // default options
-                    using (var cdrImage = new Aspose.Imaging.FileFormats.Cdr.CdrImage(stream, loadOptions))
+                    // Configure TIFF save options with LZW compression
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                     {
-                        // Configure TIFF save options with LZW compression
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                        {
-                            BitsPerSample = new ushort[] { 8, 8, 8 },
-                            ByteOrder = TiffByteOrder.BigEndian,
-                            Compression = TiffCompressions.Lzw,
-                            Photometric = TiffPhotometrics.Rgb,
-                            PlanarConfiguration = TiffPlanarConfigs.Contiguous,
-                            Predictor = TiffPredictor.Horizontal
-                        };
+                        BitsPerSample = new ushort[] { 8, 8, 8 },
+                        ByteOrder = TiffByteOrder.BigEndian,
+                        Compression = TiffCompressions.Lzw,
+                        Photometric = TiffPhotometrics.Rgb,
+                        PlanarConfiguration = TiffPlanarConfigs.Contiguous,
+                        Predictor = TiffPredictor.Horizontal
+                    };
 
-                        // Save as TIFF
-                        cdrImage.Save(outputPath, tiffOptions);
-                    }
+                    // Save as TIFF
+                    cdrImage.Save(outputPath, tiffOptions);
                 }
             }
         }

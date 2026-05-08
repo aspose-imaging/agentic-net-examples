@@ -2,19 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\sample.pdf";
+        // Hardcoded input and output paths
+        string inputPath = "input.cmx";
+        string outputPath = "output.pdf";
 
         try
         {
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,23 +23,25 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (Image image = Image.Load(inputPath))
+            // Load CMX with CMX-specific load options (allows custom font handling if needed)
+            var loadOptions = new Aspose.Imaging.ImageLoadOptions.CmxLoadOptions();
+
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Configure PDF export options
+                // Prepare PDF export options
                 var pdfOptions = new PdfOptions();
 
-                // Set vector rasterization options specific to CMX
-                var rasterOptions = new CmxRasterizationOptions
+                // Configure CMX rasterization options for vector fidelity
+                var cmxRasterOptions = new CmxRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.AntiAlias,
                     Positioning = PositioningTypes.DefinedByDocument
                 };
 
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                pdfOptions.VectorRasterizationOptions = cmxRasterOptions;
 
-                // Save the image as PDF with vector fidelity
+                // Save as PDF preserving vector data and embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
         }

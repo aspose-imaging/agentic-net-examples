@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
+            string outputPath = @"C:\Images\output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,14 +27,18 @@ class Program
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
+                // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur filter (size=5, sigma=4.0)
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur (size 5, sigma 4.0) to the whole image
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new GaussianBlurFilterOptions(5, 4.0));
 
-                // Apply Emboss filter using the 3x3 kernel
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                // Apply Emboss3x3 convolution filter to the whole image
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
                 // Save the processed image
                 rasterImage.Save(outputPath);

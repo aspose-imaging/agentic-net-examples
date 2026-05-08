@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.png";
-            string outputPath = "C:\\temp\\output.png";
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,18 +27,19 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access filtering
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Emboss 5x5 filter
+                // Apply Emboss5x5 filter
                 var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5);
-                raster.Filter(raster.Bounds, embossOptions);
+                rasterImage.Filter(rasterImage.Bounds, embossOptions);
 
                 // Apply Gaussian blur filter (radius 5, sigma 4.0)
                 var gaussianOptions = new GaussianBlurFilterOptions(5, 4.0);
-                raster.Filter(raster.Bounds, gaussianOptions);
+                rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
 
                 // Save the processed image
-                raster.Save(outputPath);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)

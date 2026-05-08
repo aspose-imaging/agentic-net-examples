@@ -2,53 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define input and output paths
-        string inputPath = "Input/sample.otg";
-        string outputPath = "Output/sample.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\output.png";
+            string rgbProfilePath = @"C:\Profiles\eciRGB_v2.icc";
+            string cmykProfilePath = @"C:\Profiles\ISOcoated_v2_FullGamut4.icc";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load ICC profile (example; not directly used for PNG)
-        using (FileStream iccStream = File.OpenRead("Input/profile.icc"))
-        {
-            StreamSource iccSource = new StreamSource(iccStream);
-            // ICC profile could be used with formats that support it (e.g., JPEG)
-            // For PNG, Aspose.Imaging does not expose a direct ICC property.
-        }
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure rasterization options for OTG
-            OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size
-                // Additional rasterization settings can be configured here
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Set PNG save options with the rasterization options
-            PngOptions pngOptions = new PngOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = otgOptions
-            };
+                // Load ICC profile streams
+                using (Stream rgbProfileStream = File.OpenRead(rgbProfilePath))
+                using (Stream cmykProfileStream = File.OpenRead(cmykProfilePath))
+                {
+                    // Attempt to set ICC profiles via reflection (both JpegImage and OtgImage expose these properties)
+                    var rgbProp = image.GetType().GetProperty("RgbColorProfile");
+                    var cmykProp = image.GetType().GetProperty("CmykColorProfile");
 
-            // Save the image as PNG
-            image.Save(outputPath, pngOptions);
+                    if (rgbProp != null && cmykProp != null && rgbProp.CanWrite && cmykProp.CanWrite)
+                    {
+                        rgbProp.SetValue(image, new StreamSource(rgbProfileStream));
+                        cmykProp.SetValue(image, new StreamSource(cmykProfileStream));
+                    }
+                }
+
+                // Prepare PNG save options (no special ICC handling needed for PNG)
+                PngOptions pngOptions = new PngOptions();
+
+                // Save the image as PNG
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,76 +1,68 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
-    static void Main(string[] args)
+    // Progress callback used for both load and save operations
+    private static void ProgressCallback(ProgressEventHandlerInfo info)
+    {
+        // Calculate percentage progress
+        double percent = info.MaxValue == 0 ? 0 : (double)info.Value / info.MaxValue * 100;
+        // Write progress on the same console line
+        Console.Write($"\r{info.EventType}: {percent:0.0}%   ");
+    }
+
+    static void Main()
     {
         try
         {
-            // Base directory of the application
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hard‑coded input and output directories
+            string inputDir = @"C:\InputCdr";
+            string outputDir = @"C:\OutputJpg";
 
-            // Ensure input folder exists
-            if (!Directory.Exists(inputDirectory))
+            // Get all CDR files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.cdr");
+
+            foreach (string inputPath in inputFiles)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            // Ensure output folder exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Get all CDR files in the input folder
-            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
-
-            foreach (var inputPath in files)
-            {
-                // Validate input file existence
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Build output JPEG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+                // Build output file path (same name with .jpg extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
-                // Ensure the output directory exists (handles possible subfolders)
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load CDR image with progress reporting
-                using (var image = Image.Load(inputPath, new LoadOptions
+                // Load CDR with progress reporting
+                var loadOptions = new CdrLoadOptions
                 {
-                    ProgressEventHandler = delegate (Aspose.Imaging.ProgressManagement.ProgressEventHandlerInfo info)
-                    {
-                        Console.WriteLine($"Load {info.EventType} : {info.Value}/{info.MaxValue}");
-                    }
-                }))
+                    ProgressEventHandler = ProgressCallback
+                };
+
+                using (var cdrImage = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath, loadOptions))
                 {
-                    // Configure JPEG options with progress reporting
+                    // Prepare JPEG save options with progress reporting
                     var jpegOptions = new JpegOptions
                     {
-                        Quality = 90,
-                        ProgressEventHandler = delegate (Aspose.Imaging.ProgressManagement.ProgressEventHandlerInfo info)
-                        {
-                            Console.WriteLine($"Save {info.EventType} : {info.Value}/{info.MaxValue}");
-                        }
+                        ProgressEventHandler = ProgressCallback
                     };
 
-                    // Save the image as JPEG
-                    image.Save(outputPath, jpegOptions);
+                    // Save as JPEG
+                    cdrImage.Save(outputPath, jpegOptions);
                 }
 
+                // Move to next line after each file conversion
+                Console.WriteLine();
                 Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }

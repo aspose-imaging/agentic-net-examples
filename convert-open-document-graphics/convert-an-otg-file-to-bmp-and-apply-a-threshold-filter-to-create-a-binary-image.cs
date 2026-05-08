@@ -2,58 +2,66 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string bmpOutputPath = @"C:\Images\sample.bmp";
-        string binaryOutputPath = @"C:\Images\sample_binary.bmp";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string rasterizedPath = @"C:\Images\sample.bmp";
+            string binaryPath = @"C:\Images\sample_binary.bmp";
 
-        // Ensure output directories exist before any save operation
-        Directory.CreateDirectory(Path.GetDirectoryName(bmpOutputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(binaryOutputPath));
-
-        // Load the OTG image
-        using (Image otgImage = Image.Load(inputPath))
-        {
-            // Configure rasterization options for vector to raster conversion
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = otgImage.Size // preserve original dimensions
-            };
-
-            // Set BMP save options and attach rasterization options
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = otgRasterOptions
-            };
-
-            // Save the rasterized image as BMP
-            otgImage.Save(bmpOutputPath, bmpOptions);
-        }
-
-        // Load the generated BMP as a raster image
-        using (Image bmpImage = Image.Load(bmpOutputPath))
-        {
-            // Cast to RasterImage to access raster-specific methods
-            if (bmpImage is RasterImage rasterImage)
-            {
-                // Apply Otsu threshold binarization
-                rasterImage.BinarizeOtsu();
-
-                // Save the binary image as BMP
-                rasterImage.Save(binaryOutputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(rasterizedPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(binaryPath));
+
+            // Load the OTG image
+            using (Image otgImage = Image.Load(inputPath))
+            {
+                // Prepare BMP save options with OTG rasterization settings
+                BmpOptions bmpOptions = new BmpOptions();
+                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                {
+                    PageSize = otgImage.Size // preserve original size
+                };
+                bmpOptions.VectorRasterizationOptions = otgRasterization;
+
+                // Save the rasterized image as BMP
+                otgImage.Save(rasterizedPath, bmpOptions);
+            }
+
+            // Load the rasterized BMP for binarization
+            using (Image bmpImage = Image.Load(rasterizedPath))
+            {
+                // Cast to RasterImage to access BinarizeOtsu
+                if (bmpImage is RasterImage rasterImage)
+                {
+                    // Apply Otsu thresholding to create a binary image
+                    rasterImage.BinarizeOtsu();
+
+                    // Save the binary BMP
+                    rasterImage.Save(binaryPath);
+                }
+                else
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

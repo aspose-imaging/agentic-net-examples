@@ -2,13 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Images\input.webp";
-        string outputPath = @"C:\Images\output.bmp";
+        string inputPath = Path.Combine("Input", "sample.webp");
+        string outputPath = Path.Combine("Output", "sample.bmp");
 
         if (!File.Exists(inputPath))
         {
@@ -20,15 +21,15 @@ class Program
 
         try
         {
-            using (Image image = Image.Load(inputPath))
+            using (WebPImage webpImage = new WebPImage(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                BmpOptions bmpOptions = new BmpOptions
+                var bmpOptions = new BmpOptions
                 {
                     KeepMetadata = true,
-                    ResolutionSettings = new ResolutionSetting(raster.HorizontalResolution, raster.VerticalResolution)
+                    ResolutionSettings = new ResolutionSetting(webpImage.HorizontalResolution, webpImage.VerticalResolution)
                 };
-                image.Save(outputPath, bmpOptions);
+
+                webpImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)

@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded paths
+        // Hardcoded input and output paths
         string inputPath = "sample.dcm";
-        string outputPath = "output.png";
+        string outputPath = "output/sample.png";
 
         try
         {
@@ -22,34 +21,28 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load DICOM image
+            // Load DICOM image and convert to PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage (safe because we loaded a DICOM file)
-                using (DicomImage dicomImage = (DicomImage)image)
-                {
-                    // Save first page as PNG (single‑page DICOMs have one page)
-                    dicomImage.Save(outputPath, new PngOptions());
-                }
+                image.Save(outputPath, new PngOptions());
             }
 
             // Compare file sizes
-            long inputSize = new FileInfo(inputPath).Length;
-            long outputSize = new FileInfo(outputPath).Length;
+            long dicomSize = new FileInfo(inputPath).Length;
+            long pngSize = new FileInfo(outputPath).Length;
 
-            Console.WriteLine($"Input DICOM size: {inputSize} bytes");
-            Console.WriteLine($"Output PNG size: {outputSize} bytes");
+            // Simple verification: PNG file must have non‑zero size
+            if (pngSize == 0)
+            {
+                Console.Error.WriteLine("Conversion failed: PNG file size is zero.");
+                return;
+            }
 
-            if (outputSize == 0)
-            {
-                Console.Error.WriteLine("Conversion failed: output file is empty.");
-            }
-            else
-            {
-                Console.WriteLine("Conversion succeeded.");
-            }
+            Console.WriteLine($"DICOM size: {dicomSize} bytes");
+            Console.WriteLine($"PNG size:   {pngSize} bytes");
+            Console.WriteLine("Test passed.");
         }
         catch (Exception ex)
         {

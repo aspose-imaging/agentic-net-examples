@@ -6,40 +6,41 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.wmf";
-        string outputPath = "output.jpg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.wmf";
+            string outputPath = @"C:\Images\output.jpg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load WMF image and convert to progressive JPEG
-        using (Image image = Image.Load(inputPath))
-        {
-            JpegOptions jpegOptions = new JpegOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Enable progressive encoding
-                CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                // Set desired quality (1-100)
-                Quality = 90,
-                // Rasterize vector WMF using appropriate options
-                VectorRasterizationOptions = new WmfRasterizationOptions
-                {
-                    PageSize = image.Size
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as JPEG with the specified options
-            image.Save(outputPath, jpegOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure JPEG options for progressive encoding
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 90 // Adjust quality as needed (1-100)
+                };
+
+                // Save the image as a progressive JPEG
+                image.Save(outputPath, jpegOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

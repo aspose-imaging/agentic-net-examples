@@ -8,49 +8,35 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully.
         try
         {
-            // Hardcoded input path to the JPEG file.
-            string inputPath = @"C:\Images\sample.jpg";
+            // Hardcoded input path
+            string inputPath = "C:\\temp\\sample.jpg";
 
-            // Verify that the input file exists.
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the JPEG image using Aspose.Imaging.
+            // Load JPEG image and access EXIF data
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Access the EXIF data container.
-                ExifData exifData = image.ExifData;
-
-                // Ensure EXIF data is present.
-                if (exifData != null)
+                // Cast to JpegExifData to access Model property
+                var jpegExif = image.ExifData as JpegExifData;
+                if (jpegExif != null && !string.IsNullOrEmpty(jpegExif.Model))
                 {
-                    // Cast to JpegExifData to access JPEG‑specific tags like Model.
-                    JpegExifData jpegExif = exifData as JpegExifData;
-                    if (jpegExif != null)
-                    {
-                        // Print the camera model tag.
-                        Console.WriteLine($"Camera model: {jpegExif.Model}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("JPEG EXIF data not available.");
-                    }
+                    Console.WriteLine($"Camera model: {jpegExif.Model}");
                 }
                 else
                 {
-                    Console.WriteLine("No EXIF data found in the image.");
+                    Console.WriteLine("Camera model tag not found.");
                 }
             }
         }
         catch (Exception ex)
         {
-            // Output any runtime exception message without crashing.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

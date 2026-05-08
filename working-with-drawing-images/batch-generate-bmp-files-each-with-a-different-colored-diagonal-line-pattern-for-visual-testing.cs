@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -9,50 +8,63 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define output directory and ensure it exists
-        string outputDir = @"C:\Temp\BmpDiagonalLines";
-        Directory.CreateDirectory(outputDir);
-
-        // Image dimensions
-        int width = 200;
-        int height = 200;
-
-        // Define colors and corresponding file names
-        var colorInfos = new List<(Color color, string fileName)>
+        try
         {
-            (Color.Red, "Diagonal_Red.bmp"),
-            (Color.Green, "Diagonal_Green.bmp"),
-            (Color.Blue, "Diagonal_Blue.bmp"),
-            (Color.Yellow, "Diagonal_Yellow.bmp"),
-            (Color.Magenta, "Diagonal_Magenta.bmp"),
-            (Color.Cyan, "Diagonal_Cyan.bmp")
-        };
+            // Output directory for generated BMP files
+            string outputDir = @"C:\temp\BmpBatch";
+            Directory.CreateDirectory(outputDir);
 
-        foreach (var (color, fileName) in colorInfos)
-        {
-            string outputPath = Path.Combine(outputDir, fileName);
-            // Ensure the directory for the output file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create BmpOptions with a bound file source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions
+            // Define colors for diagonal lines
+            List<Aspose.Imaging.Color> colors = new List<Aspose.Imaging.Color>
             {
-                BitsPerPixel = 24,
-                Source = source
+                Aspose.Imaging.Color.Red,
+                Aspose.Imaging.Color.Green,
+                Aspose.Imaging.Color.Blue,
+                Aspose.Imaging.Color.Yellow,
+                Aspose.Imaging.Color.Purple
             };
 
-            // Create a new BMP image bound to the output file
-            using (Image image = Image.Create(options, width, height))
-            {
-                // Draw a diagonal line using the specified color
-                Graphics graphics = new Graphics(image);
-                Pen pen = new Pen(color, 5);
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
+            // Corresponding color names for file naming
+            List<string> colorNames = new List<string> { "Red", "Green", "Blue", "Yellow", "Purple" };
 
-                // Save the bound image
-                image.Save();
+            int width = 200;
+            int height = 200;
+
+            for (int i = 0; i < colors.Count; i++)
+            {
+                // Build output file path
+                string outputPath = Path.Combine(outputDir, $"diag_{colorNames[i]}.bmp");
+
+                // Ensure the directory exists before saving
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Set up BMP creation options
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 24,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Create a new image canvas
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
+                {
+                    // Initialize graphics for drawing
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+
+                    // Create a pen with the current color
+                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(colors[i], 5);
+
+                    // Draw a diagonal line from top-left to bottom-right
+                    graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width, height));
+
+                    // Save the image (output path is already bound via FileCreateSource)
+                    image.Save();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

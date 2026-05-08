@@ -14,7 +14,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/output.apng";
+            string outputPath = "output.apng";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,38 +24,40 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Load the source PNG as a raster image
+            // Load the source PNG image
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
                 // Configure APNG creation options
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100u, // 100 ms per frame
+                    DefaultFrameTime = 100, // 100 ms default frame duration
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create the APNG image with the same dimensions as the source
+                // Create the APNG image canvas
                 using (ApngImage apngImage = (ApngImage)Image.Create(
                     createOptions,
                     sourceImage.Width,
                     sourceImage.Height))
                 {
-                    // Remove the default single frame
+                    // Remove the initial default frame
                     apngImage.RemoveAllFrames();
 
-                    // Define number of frames for the animation
-                    const int frameCount = 5;
-
-                    // Add the same source image repeatedly to create animation frames
+                    // Add multiple frames with a 100 ms delay each
+                    int frameCount = 5; // example: 5 frames
                     for (int i = 0; i < frameCount; i++)
                     {
-                        apngImage.AddFrame(sourceImage);
+                        apngImage.AddFrame(sourceImage, 100);
                     }
 
-                    // Save the APNG (output is already bound via FileCreateSource)
+                    // Save the APNG file
                     apngImage.Save();
                 }
             }

@@ -4,51 +4,55 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image vectorImage = Image.Load(inputPath))
-        {
-            var rasterOptions = new SvgRasterizationOptions
+            string inputPath = "input.svg";
+            if (!File.Exists(inputPath))
             {
-                PageSize = vectorImage.Size,
-                BackgroundColor = Color.White
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            var pngOptions = new PngOptions
+            string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterOptions,
-                ResolutionSettings = new ResolutionSetting(300, 300)
-            };
-
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                vectorImage.Save(memoryStream, pngOptions);
-                memoryStream.Position = 0;
-
-                using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
+                var rasterizeOptions = new PngOptions
                 {
-                    using (Image outputImage = Image.Create(pngOptions, rasterImage.Width, rasterImage.Height))
+                    ResolutionSettings = new ResolutionSetting(300, 300),
+                    VectorRasterizationOptions = new SvgRasterizationOptions
                     {
-                        Graphics graphics = new Graphics(outputImage);
-                        graphics.DrawImage(rasterImage, new Point(0, 0));
-                        outputImage.Save(outputPath);
+                        PageSize = vectorImage.Size
+                    }
+                };
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    vectorImage.Save(ms, rasterizeOptions);
+                    ms.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        var saveOptions = new PngOptions
+                        {
+                            ResolutionSettings = new ResolutionSetting(300, 300),
+                            Source = new FileCreateSource(outputPath, false)
+                        };
+                        raster.Save(outputPath, saveOptions);
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

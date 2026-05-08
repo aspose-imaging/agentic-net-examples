@@ -2,57 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.CoreExceptions;
-using Aspose.Imaging.CoreExceptions.ImageFormats;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+        // Wrap the entire logic in a try-catch to handle unexpected errors.
         try
         {
-            // Load the source image
+            // Hardcoded input and output file paths.
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.svg";
+
+            // Verify that the input file exists.
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image.
             using (Image image = Image.Load(inputPath))
             {
-                // Set SVG save options
-                var svgOptions = new SvgOptions
+                // Attempt to save the image as SVG and capture any save-specific exceptions.
+                try
                 {
-                    // Optional: customize options here if needed
-                };
-
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
+                    image.Save(outputPath, new SvgOptions());
+                }
+                catch (Exception ex)
+                {
+                    // Record the file path and exception message for save failures.
+                    Console.Error.WriteLine($"Error saving {outputPath}: {ex.Message}");
+                    return;
+                }
             }
-        }
-        catch (SvgImageException ex)
-        {
-            // Record SVG-specific errors
-            Console.Error.WriteLine($"SVG save error for '{outputPath}': {ex.Message}");
-        }
-        catch (ImageSaveException ex)
-        {
-            // Record generic image save errors
-            Console.Error.WriteLine($"Image save error for '{outputPath}': {ex.Message}");
         }
         catch (Exception ex)
         {
-            // Record any other unexpected errors
-            Console.Error.WriteLine($"Unexpected error for '{outputPath}': {ex.Message}");
+            // Log any other unexpected errors.
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

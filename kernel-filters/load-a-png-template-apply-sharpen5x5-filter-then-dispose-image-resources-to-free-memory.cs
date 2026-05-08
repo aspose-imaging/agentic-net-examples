@@ -1,38 +1,44 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\template.png";
+        string outputPath = @"C:\temp\output_sharpened.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "template.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG template, apply Sharpen5x5 filter, and save
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                raster.Save(outputPath);
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply a 5x5 sharpen filter (kernel size 5, sigma 4.0)
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,17 +12,19 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input image paths
             string[] inputPaths = new string[]
             {
                 "input1.jpg",
                 "input2.jpg",
                 "input3.jpg"
             };
-            string outputPath = "merged_output.jpg";
+
+            // Hardcoded output path
+            string outputPath = "output.jpg";
 
             // Validate input files
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -33,20 +33,12 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            // Prepare cancellation token
-            CancellationTokenSource cts = new CancellationTokenSource();
-            CancellationToken token = cts.Token;
+            // Cancellation token source (can be triggered elsewhere if needed)
+            var cts = new System.Threading.CancellationTokenSource();
 
             // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            var sizes = new List<Aspose.Imaging.Size>();
+            foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -55,39 +47,46 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (var sz in sizes)
+            {
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
+            }
 
-            // Create output source and JPEG options
-            Source outputSource = new FileCreateSource(outputPath, false);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create JPEG options with bound source
+            Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = outputSource,
+                Source = src,
                 Quality = 90
             };
 
-            // Create JPEG canvas bound to the output source
+            // Create canvas image
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                foreach (var path in inputPaths)
                 {
-                    // Check for cancellation request
-                    if (token.IsCancellationRequested)
+                    if (cts.Token.IsCancellationRequested)
                     {
                         Console.WriteLine("Operation cancelled.");
-                        return;
+                        break;
                     }
 
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the bound image
+                // Save the bound image (already linked to outputPath)
                 canvas.Save();
             }
         }

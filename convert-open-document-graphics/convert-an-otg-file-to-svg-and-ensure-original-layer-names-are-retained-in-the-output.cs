@@ -21,29 +21,32 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Prepare SVG save options
-            var svgOptions = new SvgOptions
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
             {
-                // Preserve original metadata (including layer names if present)
-                KeepMetadata = true,
-                // Do not convert text to shapes; keep original text representation
-                TextAsShapes = false
-            };
+                // Prepare SVG export options
+                var svgOptions = new SvgOptions
+                {
+                    // Preserve original metadata (including layer names)
+                    KeepMetadata = true
+                };
 
-            // Configure OTG rasterization options
-            var otgRasterOptions = new OtgRasterizationOptions
-            {
-                // Use the original image size for the SVG page
-                PageSize = image.Size
-            };
+                // Configure OTG rasterization options
+                var otgRasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+                svgOptions.VectorRasterizationOptions = otgRasterOptions;
 
-            svgOptions.VectorRasterizationOptions = otgRasterOptions;
-
-            // Save as SVG
-            image.Save(outputPath, svgOptions);
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

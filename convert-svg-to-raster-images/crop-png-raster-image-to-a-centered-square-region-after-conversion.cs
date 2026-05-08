@@ -1,13 +1,13 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output_cropped.png";
 
@@ -21,26 +21,32 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage for cropping
-            RasterImage rasterImage = (RasterImage)image;
+            // Load the image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage for cropping
+                RasterImage rasterImage = (RasterImage)image;
 
-            // Determine the size of the centered square
-            int side = Math.Min(rasterImage.Width, rasterImage.Height);
-            int left = (rasterImage.Width - side) / 2;
-            int top = (rasterImage.Height - side) / 2;
+                // Determine the size of the centered square
+                int side = Math.Min(rasterImage.Width, rasterImage.Height);
+                int left = (rasterImage.Width - side) / 2;
+                int top = (rasterImage.Height - side) / 2;
 
-            // Define the cropping rectangle
-            Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(left, top, side, side);
+                // Create the cropping rectangle
+                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(left, top, side, side);
 
-            // Perform the crop
-            rasterImage.Crop(cropArea);
+                // Perform the crop
+                rasterImage.Crop(cropArea);
 
-            // Save the cropped image as PNG
-            PngOptions pngOptions = new PngOptions();
-            rasterImage.Save(outputPath, pngOptions);
+                // Save the cropped image as PNG
+                rasterImage.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

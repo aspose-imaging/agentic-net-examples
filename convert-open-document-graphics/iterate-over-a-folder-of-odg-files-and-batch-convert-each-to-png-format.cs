@@ -5,62 +5,57 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputOdg";
+            string outputFolder = @"C:\OutputPng";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        // Get all ODG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.odg");
+            // Get all ODG files in the input folder
+            string[] odgFiles = Directory.GetFiles(inputFolder, "*.odg");
 
-        foreach (string inputPath in files)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in odgFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Prepare output path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-            // Ensure output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the ODG image and convert to PNG
-            using (Image image = Image.Load(inputPath))
-            {
-                // Set up PNG options with vector rasterization
-                PngOptions pngOptions = new PngOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Save as PNG
-                image.Save(outputPath, pngOptions);
+                // Determine the output PNG file path
+                string outputPath = Path.Combine(outputFolder,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+                // Ensure the output directory exists (unconditional)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the ODG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Prepare PNG save options with rasterization settings
+                    PngOptions pngOptions = new PngOptions();
+                    OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                    {
+                        // Preserve original size
+                        PageSize = image.Size,
+                        BackgroundColor = Color.White
+                    };
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Save as PNG
+                    image.Save(outputPath, pngOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

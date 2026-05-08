@@ -7,64 +7,61 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.bmp";
-        string outputPath = @"C:\Images\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_converted.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare rasterization options for SVG conversion
-            var vectorRasterizationOptions = new SvgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as SVG
-            var svgOptions = new SvgOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load BMP image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = vectorRasterizationOptions
-            };
-            image.Save(outputPath, svgOptions);
-        }
+                // Set up SVG rasterization options based on source image size
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-        // Embed a custom XML comment describing the conversion
-        const string comment = "<!-- Converted from BMP to SVG using Aspose.Imaging -->";
+                // Configure SVG save options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-        string svgContent = File.ReadAllText(outputPath);
-        string updatedContent;
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
+            }
 
-        // Preserve XML declaration if present
-        if (svgContent.StartsWith("<?xml"))
-        {
-            int endOfDeclaration = svgContent.IndexOf("?>", StringComparison.Ordinal);
-            if (endOfDeclaration != -1)
+            // Embed a custom XML comment describing the conversion
+            string svgContent = File.ReadAllText(outputPath);
+            string comment = "<!-- Converted from BMP to SVG using Aspose.Imaging -->";
+
+            int insertPos = svgContent.IndexOf("?>");
+            if (insertPos != -1)
             {
-                int insertPos = endOfDeclaration + 2;
-                updatedContent = svgContent.Insert(insertPos, Environment.NewLine + comment);
+                insertPos += 2; // Move past the XML declaration
             }
             else
             {
-                // Fallback: prepend comment
-                updatedContent = comment + Environment.NewLine + svgContent;
+                insertPos = 0; // No XML declaration, insert at start
             }
-        }
-        else
-        {
-            // No XML declaration, prepend comment
-            updatedContent = comment + Environment.NewLine + svgContent;
-        }
 
-        File.WriteAllText(outputPath, updatedContent);
+            string newContent = svgContent.Insert(insertPos, "\n" + comment + "\n");
+            File.WriteAllText(outputPath, newContent);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

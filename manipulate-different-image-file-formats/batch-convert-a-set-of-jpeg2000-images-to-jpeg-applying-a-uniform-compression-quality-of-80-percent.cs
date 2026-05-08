@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg2000;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,29 +11,26 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
             // Get all JPEG2000 files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.jp2");
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.jp2");
 
             foreach (string inputPath in inputFiles)
             {
-                // Verify input file exists
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output path with .jpg extension
+                // Construct output path with .jpg extension
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load JPEG2000 image and save as JPEG with quality 80

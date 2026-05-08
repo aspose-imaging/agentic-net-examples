@@ -14,11 +14,11 @@ class Program
             string inputDir = @"C:\Images\Input\";
             string outputDir = @"C:\Images\Output\";
 
-            // Ensure the base output directory exists
+            // Ensure output directory exists (will also handle subfolders)
             Directory.CreateDirectory(outputDir);
 
-            // Retrieve all DNG files from the input directory
-            string[] dngFiles = Directory.GetFiles(inputDir, "*.dng");
+            // Get all DNG files in the input directory
+            string[] dngFiles = Directory.GetFiles(inputDir, "*.dng", SearchOption.TopDirectoryOnly);
 
             foreach (string inputPath in dngFiles)
             {
@@ -29,22 +29,27 @@ class Program
                     return;
                 }
 
-                // Construct the output JPEG file path
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                // Build output file path with .jpg extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
 
-                // Ensure the output directory exists
+                // Ensure the output directory exists (covers cases where outputPath may include subfolders)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the DNG image and save it as JPEG with quality 85
+                // Load the DNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    DngImage dngImage = (DngImage)image;
+                    // Prepare JPEG save options with quality set to 85
                     JpegOptions jpegOptions = new JpegOptions
                     {
                         Quality = 85
                     };
-                    dngImage.Save(outputPath, jpegOptions);
+
+                    // Save as JPEG
+                    image.Save(outputPath, jpegOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)

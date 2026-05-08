@@ -9,41 +9,52 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "c:\\temp\\input.webp";
+            string outputPath = "c:\\temp\\output.gif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WebP image
-        using (WebPImage webPImage = new WebPImage(inputPath))
-        {
-            int originalWidth = webPImage.Width;
-            int originalHeight = webPImage.Height;
-
-            // Convert and save as GIF
-            webPImage.Save(outputPath, new GifOptions());
-
-            // Load the resulting GIF to compare dimensions
-            using (GifImage gifImage = (GifImage)Image.Load(outputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int gifWidth = gifImage.Width;
-                int gifHeight = gifImage.Height;
-
-                bool sizeMatches = originalWidth == gifWidth && originalHeight == gifHeight;
-
-                Console.WriteLine($"Original WebP size: {originalWidth}x{originalHeight}");
-                Console.WriteLine($"Resulting GIF size: {gifWidth}x{gifHeight}");
-                Console.WriteLine($"Size consistency: {(sizeMatches ? "PASS" : "FAIL")}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the WebP image
+            using (WebPImage webPImage = new WebPImage(inputPath))
+            {
+                int originalWidth = webPImage.Width;
+                int originalHeight = webPImage.Height;
+
+                // Save as GIF
+                webPImage.Save(outputPath, new GifOptions());
+
+                // Load the resulting GIF image
+                using (GifImage gifImage = (GifImage)Image.Load(outputPath))
+                {
+                    int gifWidth = gifImage.Width;
+                    int gifHeight = gifImage.Height;
+
+                    // Compare dimensions
+                    if (originalWidth == gifWidth && originalHeight == gifHeight)
+                    {
+                        Console.WriteLine($"Dimensions match: {gifWidth}x{gifHeight}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Dimension mismatch. WebP: {originalWidth}x{originalHeight}, GIF: {gifWidth}x{gifHeight}");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

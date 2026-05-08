@@ -3,73 +3,86 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output_sharpened.png";
+        // Hardcoded input and output paths
+        string inputPath = "input/input.png";
+        string outputPath = "output/output.png";
 
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
+            // Load PNG image as RasterImage
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Load original pixels and compute histogram
+                // Compute histogram before filtering
                 int[] beforePixels = raster.LoadArgb32Pixels(raster.Bounds);
-                var beforeHist = new Dictionary<int, int>();
-                foreach (int pixel in beforePixels)
-                {
-                    if (beforeHist.ContainsKey(pixel))
-                        beforeHist[pixel]++;
-                    else
-                        beforeHist[pixel] = 1;
-                }
+                int[] beforeHistogram = ComputeGrayscaleHistogram(beforePixels);
 
-                // Apply Sharpen filter (default SharpenFilterOptions)
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+                // Apply Sharpen filter (default SharpenFilterOptions corresponds to 3x3 kernel)
+                raster.Filter(raster.Bounds, new SharpenFilterOptions());
 
                 // Save the processed image
-                raster.Save(outputPath, new PngOptions());
+                raster.Save(outputPath);
 
-                // Load processed pixels and compute histogram
+                // Compute histogram after filtering
                 int[] afterPixels = raster.LoadArgb32Pixels(raster.Bounds);
-                var afterHist = new Dictionary<int, int>();
-                foreach (int pixel in afterPixels)
-                {
-                    if (afterHist.ContainsKey(pixel))
-                        afterHist[pixel]++;
-                    else
-                        afterHist[pixel] = 1;
-                }
+                int[] afterHistogram = ComputeGrayscaleHistogram(afterPixels);
 
                 // Output histograms
-                Console.WriteLine("Histogram before filter:");
-                foreach (var kvp in beforeHist)
-                {
-                    Console.WriteLine($"{kvp.Key:X8}: {kvp.Value}");
-                }
+                Console.WriteLine("Histogram before sharpening:");
+                PrintHistogram(beforeHistogram);
 
-                Console.WriteLine("Histogram after filter:");
-                foreach (var kvp in afterHist)
-                {
-                    Console.WriteLine($"{kvp.Key:X8}: {kvp.Value}");
-                }
+                Console.WriteLine("\nHistogram after sharpening:");
+                PrintHistogram(afterHistogram);
             }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    // Computes a grayscale histogram (256 bins) from ARGB pixel array
+    static int[] ComputeGrayscaleHistogram(int[] argbPixels)
+    {
+        int[] histogram = new int[256];
+        foreach (int argb in argbPixels)
+        {
+            int r = (argb >> 16) & 0xFF;
+            int g = (argb >> 8) & 0xFF;
+            int b = argb & 0xFF;
+            int gray = (r + g + b) / 3;
+            histogram[gray]++;
+        }
+        return histogram;
+    }
+
+    // Prints non-zero histogram entries
+    static void PrintHistogram(int[] histogram)
+    {
+        for (int i = 0; i < histogram.Length; i++)
+        {
+            if (histogram[i] > 0)
+            {
+                Console.WriteLine($"Gray {i}: {histogram[i]}");
+            }
         }
     }
 }

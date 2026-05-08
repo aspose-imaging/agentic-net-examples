@@ -10,10 +10,10 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.eps";
-            string outputPath = @"C:\Images\sample.jpg";
+            string inputPath = "input.eps";
+            string outputPath = "output\\result.jpg";
 
-            // Verify that the input EPS file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,10 +23,10 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
+            // Load the EPS image from disk
             using (Image image = Image.Load(inputPath))
             {
-                // Use default JPEG options
+                // Create default JPEG options
                 var jpegOptions = new JpegOptions();
 
                 // Save the image as JPEG
@@ -35,6 +35,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

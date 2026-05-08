@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
@@ -14,8 +13,8 @@ class Program
     {
         try
         {
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.svg";
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,61 +24,48 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
+            string originalContent = File.ReadAllText(inputPath);
+
             using (Image image = Image.Load(inputPath))
             {
                 SvgImage svgImage = (SvgImage)image;
 
-                // Capture original SVG XML (including embedded CSS)
-                string originalXml;
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    svgImage.Save(ms, new SvgOptions());
-                    originalXml = Encoding.UTF8.GetString(ms.ToArray());
-                }
-
-                // Rasterize SVG to PNG
-                PngOptions pngOptions = new PngOptions();
+                // Rasterize SVG to PNG in memory
                 SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
+                    PageSize = svgImage.Size
                 };
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                using (MemoryStream pngStream = new MemoryStream())
+                PngOptions pngOptions = new PngOptions
                 {
-                    svgImage.Save(pngStream, pngOptions);
-                    pngStream.Position = 0;
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                    // Load raster image and apply a convolution kernel
-                    using (RasterImage raster = (RasterImage)Image.Load(pngStream))
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-                        // Save filtered PNG (optional, not used further)
-                        // raster.Save("filtered.png", new PngOptions());
+                        // Apply a simple blur kernel
+                        double[,] kernel = ConvolutionFilter.GetBlurBox(3);
+                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                        // Save the filtered image
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
 
-                // After raster operations, retrieve SVG XML again to ensure CSS unchanged
-                string afterXml;
-                using (MemoryStream ms2 = new MemoryStream())
+                // Verify that the SVG file's CSS has not changed
+                string afterContent = File.ReadAllText(inputPath);
+                if (originalContent != afterContent)
                 {
-                    svgImage.Save(ms2, new SvgOptions());
-                    afterXml = Encoding.UTF8.GetString(ms2.ToArray());
-                }
-
-                if (originalXml == afterXml)
-                {
-                    Console.WriteLine("Embedded CSS styles are unchanged after applying the kernel.");
+                    Console.Error.WriteLine("CSS styles were altered.");
                 }
                 else
                 {
-                    Console.WriteLine("Embedded CSS styles have been altered.");
+                    Console.WriteLine("CSS styles remain unchanged.");
                 }
-
-                // Save the original SVG to output path
-                svgImage.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)

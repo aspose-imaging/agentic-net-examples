@@ -8,40 +8,47 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access pixel data
-            RasterImage raster = (RasterImage)image;
-
-            // Generate a palette with at most 16 colors using the histogram method
-            IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(
-                raster,
-                16,
-                PaletteMiningMethod.Histogram);
-
-            // Prepare SVG save options and assign the palette
-            SvgOptions svgOptions = new SvgOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Palette = palette
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as SVG, preserving the reduced palette
-            image.Save(outputPath, svgOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to work with palettes
+                RasterImage raster = (RasterImage)image;
+
+                // Create a 16‑color palette using the histogram mining method
+                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(
+                    raster,
+                    16,
+                    PaletteMiningMethod.Histogram);
+
+                // Prepare SVG save options and assign the palette
+                var svgOptions = new SvgOptions
+                {
+                    Palette = palette
+                };
+
+                // Save the image as SVG with the reduced palette
+                image.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

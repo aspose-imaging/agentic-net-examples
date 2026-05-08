@@ -7,31 +7,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = "C:\\temp\\sample.odg";
+            string outputPath = "C:\\temp\\sample.png";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PNG options to enable progressive (interlaced) rendering
-            PngOptions pngOptions = new PngOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                Progressive = true
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PNG with the specified options
-            image.Save(outputPath, pngOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Set PNG options with progressive (interlaced) encoding
+                PngOptions pngOptions = new PngOptions
+                {
+                    Progressive = true
+                };
+
+                // Save the image as PNG with the specified options
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

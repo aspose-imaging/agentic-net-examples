@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -12,11 +13,12 @@ class Program
     {
         try
         {
-            // Hardcoded input PNG file paths
-            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
+            // Hardcoded input PNG files and output APNG path
+            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png", "frame4.png" };
+            string outputPath = "output_animation.png";
 
             // Verify each input file exists
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -25,43 +27,39 @@ class Program
                 }
             }
 
-            // Hardcoded output APNG path
-            string outputPath = "output\\animation.apng";
-
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load first frame to obtain dimensions
-            using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
+            // Load the first image to obtain dimensions
+            using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
             {
-                int width = first.Width;
-                int height = first.Height;
-
-                // Set up APNG creation options
-                ApngOptions createOptions = new ApngOptions
+                // Create APNG options with bound output source
+                Source outputSource = new FileCreateSource(outputPath, false);
+                ApngOptions apngOptions = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
+                    Source = outputSource,
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create APNG image bound to the output file
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+                // Create the APNG canvas
+                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, firstImage.Width, firstImage.Height))
                 {
+                    // Remove the default empty frame
                     apngImage.RemoveAllFrames();
 
                     Random rnd = new Random();
 
-                    // Add each frame with a random delay between 50 and 150 ms
-                    foreach (var path in inputPaths)
+                    // Add each PNG as a frame with a random delay between 50 and 150 ms
+                    foreach (string path in inputPaths)
                     {
                         using (RasterImage frame = (RasterImage)Image.Load(path))
                         {
-                            uint delay = (uint)rnd.Next(50, 151); // Upper bound is exclusive
-                            apngImage.AddFrame(frame, delay);
+                            int delayMs = rnd.Next(50, 151); // 50 to 150 inclusive
+                            apngImage.AddFrame(frame, (uint)delayMs);
                         }
                     }
 
-                    // Save the APNG (output file already bound via FileCreateSource)
+                    // Save the bound APNG image
                     apngImage.Save();
                 }
             }

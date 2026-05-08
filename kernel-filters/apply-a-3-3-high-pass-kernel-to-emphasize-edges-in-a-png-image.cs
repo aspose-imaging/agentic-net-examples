@@ -2,35 +2,31 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Define a 3×3 high‑pass kernel
+                // 3x3 high-pass kernel
                 double[,] kernel = new double[,]
                 {
                     { -1, -1, -1 },
@@ -38,16 +34,9 @@ class Program
                     { -1, -1, -1 }
                 };
 
-                // Apply the convolution filter with the custom kernel
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                // Prepare PNG save options
-                PngOptions saveOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                // Save the processed image
+                PngOptions saveOptions = new PngOptions();
                 raster.Save(outputPath, saveOptions);
             }
         }

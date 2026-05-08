@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -10,35 +11,34 @@ class Program
     {
         try
         {
-            string outputPath = "output.psd";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            string outputPath = @"C:\Temp\output_indexed.psd";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            int width = 200;
+            int height = 200;
 
             Source source = new FileCreateSource(outputPath, false);
 
             PsdOptions options = new PsdOptions
             {
                 Source = source,
-                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Indexed,
-                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                Version = 6,
-                Palette = new ColorPalette(new Aspose.Imaging.Color[]
-                {
-                    Aspose.Imaging.Color.Red,
-                    Aspose.Imaging.Color.Green,
-                    Aspose.Imaging.Color.Blue,
-                    Aspose.Imaging.Color.Black,
-                    Aspose.Imaging.Color.White
-                }),
+                ColorMode = ColorModes.Indexed,
+                CompressionMethod = CompressionMethod.RLE,
                 ChannelsCount = (short)1,
-                ChannelBitsCount = (short)8
+                ChannelBitsCount = (short)8,
+                Palette = new ColorPalette(new Color[]
+                {
+                    Color.Red,
+                    Color.Green,
+                    Color.Blue,
+                    Color.White,
+                    Color.Black
+                })
             };
 
-            int canvasWidth = 200;
-            int canvasHeight = 200;
-
-            using (Image canvas = Image.Create(options, canvasWidth, canvasHeight))
+            using (var psd = Image.Create(options, width, height))
             {
-                canvas.Save();
+                psd.Save();
             }
         }
         catch (Exception ex)

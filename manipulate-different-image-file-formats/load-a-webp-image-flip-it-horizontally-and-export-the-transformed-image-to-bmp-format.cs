@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.webp";
-        string outputPath = @"c:\temp\output.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.webp";
+            string outputPath = "C:\\temp\\output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,16 +21,16 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image, flip horizontally, and save as BMP
+            // Load the WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Horizontal flip
+                // Flip the image horizontally
                 webPImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
-                // Save to BMP format
+                // Save the transformed image as BMP
                 webPImage.Save(outputPath, new BmpOptions());
             }
         }

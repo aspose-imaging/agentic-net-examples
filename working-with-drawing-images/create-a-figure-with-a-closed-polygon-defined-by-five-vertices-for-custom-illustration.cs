@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
@@ -8,53 +9,56 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path (hard‑coded)
+        // Hardcoded output path
         string outputPath = @"C:\temp\polygon.png";
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Create a file stream for the output image
-        using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+        try
         {
-            // Set PNG options and bind the stream as the source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new StreamSource(stream);
+            // Set up PNG options with a file source
+            var pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 500x500 image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
+            // Create a new image canvas (500x500)
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
                 // Initialize graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
                 // Create a graphics path and a figure
-                Aspose.Imaging.GraphicsPath graphicspath = new Aspose.Imaging.GraphicsPath();
-                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                GraphicsPath graphicPath = new GraphicsPath();
+                Figure figure = new Figure();
 
                 // Define five vertices for the closed polygon
-                Aspose.Imaging.PointF[] points = new Aspose.Imaging.PointF[]
+                PointF[] points = new PointF[]
                 {
-                    new Aspose.Imaging.PointF(100f, 50f),
-                    new Aspose.Imaging.PointF(200f, 80f),
-                    new Aspose.Imaging.PointF(250f, 200f),
-                    new Aspose.Imaging.PointF(150f, 250f),
-                    new Aspose.Imaging.PointF(80f, 150f)
+                    new PointF(50f, 50f),
+                    new PointF(200f, 30f),
+                    new PointF(350f, 100f),
+                    new PointF(300f, 250f),
+                    new PointF(100f, 200f)
                 };
 
-                // Create a closed PolygonShape and add it to the figure
-                Aspose.Imaging.Shapes.PolygonShape polygon = new Aspose.Imaging.Shapes.PolygonShape(points, true);
+                // Create the polygon shape (closed)
+                PolygonShape polygon = new PolygonShape(points, true);
+
+                // Add the polygon to the figure and the figure to the path
                 figure.AddShape(polygon);
+                graphicPath.AddFigure(figure);
 
-                // Add the figure to the graphics path
-                graphicspath.AddFigure(figure);
+                // Draw the path with a blue pen
+                graphics.DrawPath(new Pen(Color.Blue, 2), graphicPath);
 
-                // Draw the path with a black pen
-                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicspath);
-
-                // Save the image (stream is already bound)
+                // Save the image (file is already bound to the source)
                 image.Save();
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

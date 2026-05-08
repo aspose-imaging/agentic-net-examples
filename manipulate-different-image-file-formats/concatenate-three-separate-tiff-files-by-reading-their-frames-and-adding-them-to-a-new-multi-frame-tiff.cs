@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 
@@ -9,13 +10,13 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath1 = @"C:\Images\input1.tif";
-            string inputPath2 = @"C:\Images\input2.tif";
-            string inputPath3 = @"C:\Images\input3.tif";
-            string outputPath = @"C:\Images\output.tif";
+            // Hardcoded input and output paths
+            string inputPath1 = "input1.tif";
+            string inputPath2 = "input2.tif";
+            string inputPath3 = "input3.tif";
+            string outputPath = "output.tif";
 
-            // Verify each input file exists
+            // Verify input files exist
             if (!File.Exists(inputPath1))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1}");
@@ -37,23 +38,19 @@ class Program
             using (TiffImage tiff2 = (TiffImage)Image.Load(inputPath2))
             using (TiffImage tiff3 = (TiffImage)Image.Load(inputPath3))
             {
-                // Create a new multi‑frame TIFF using the first frame of the first image
-                using (TiffImage result = new TiffImage(tiff1.Frames[0]))
+                // Collect all frames from the source images
+                var allFrames = new List<TiffFrame>();
+                allFrames.AddRange(tiff1.Frames);
+                allFrames.AddRange(tiff2.Frames);
+                allFrames.AddRange(tiff3.Frames);
+
+                // Create a new multi‑frame TIFF from the collected frames
+                using (TiffImage result = new TiffImage(allFrames.ToArray()))
                 {
-                    // Append remaining frames from the first image (if any)
-                    for (int i = 1; i < tiff1.Frames.Length; i++)
-                    {
-                        result.AddFrame(tiff1.Frames[i]);
-                    }
-
-                    // Append all frames from the second and third images
-                    result.Add(tiff2);
-                    result.Add(tiff3);
-
                     // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the concatenated multi‑frame TIFF
+                    // Save the concatenated TIFF
                     result.Save(outputPath);
                 }
             }

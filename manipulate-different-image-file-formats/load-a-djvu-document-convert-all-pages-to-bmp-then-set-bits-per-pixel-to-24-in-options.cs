@@ -10,8 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = "input.djvu";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\sample.djvu";
+            string outputDirectory = @"C:\Temp\DjvuToBmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,24 +21,25 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists (CreateDirectory works even if the directory already exists)
+            Directory.CreateDirectory(outputDirectory);
+
             // Open the DjVu file as a stream
             using (FileStream stream = File.OpenRead(inputPath))
             {
                 // Load DjVu document
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Iterate through all pages
-                    for (int i = 0; i < djvuImage.PageCount; i++)
+                    // Iterate through each page
+                    foreach (DjvuPage page in djvuImage.Pages)
                     {
-                        var page = djvuImage.Pages[i];
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.bmp");
 
-                        // Construct output file name for each page
-                        string outputPath = $"output_page_{i + 1}.bmp";
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Ensure the output directory exists (handles null for current directory)
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                        // Prepare BMP save options with 24 bits per pixel
+                        // Set BMP save options with 24 bits per pixel
                         BmpOptions bmpOptions = new BmpOptions
                         {
                             BitsPerPixel = 24
@@ -51,7 +53,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

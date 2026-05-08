@@ -1,46 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.bmp");
-        string outputPath = Path.Combine("Output", "output.svg");
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.bmp";
+            string outputPath = "output.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (Image bmpImage = Image.Load(inputPath))
-        {
-            // Create an SVG canvas with custom size (viewbox)
-            int svgWidth = 500;   // custom width
-            int svgHeight = 500;  // custom height
-            int dpi = 96;
-
-            SvgGraphics2D graphics = new SvgGraphics2D(svgWidth, svgHeight, dpi);
-
-            // Draw the BMP onto the SVG canvas
-            graphics.DrawImage((RasterImage)bmpImage, new Point(0, 0), new Size(svgWidth, svgHeight));
-
-            // Finalize SVG image
-            using (SvgImage svgImage = graphics.EndRecording())
+            if (!File.Exists(inputPath))
             {
-                // Save the SVG file
-                svgImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (Image bmpImage = Image.Load(inputPath))
+            {
+                RasterImage raster = bmpImage as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Failed to load BMP as raster image.");
+                    return;
+                }
+
+                // Define custom viewbox dimensions
+                int viewBoxWidth = 200;
+                int viewBoxHeight = 200;
+                int dpi = 96;
+
+                // Create SVG canvas with custom size
+                var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(viewBoxWidth, viewBoxHeight, dpi);
+
+                // Draw the raster image onto the SVG canvas, scaling to fit the viewbox
+                graphics.DrawImage(raster, new Point(0, 0), new Size(viewBoxWidth, viewBoxHeight));
+
+                // Finalize SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
+                    // Save the SVG image
+                    svgImage.Save(outputPath, new SvgOptions());
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

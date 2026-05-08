@@ -7,71 +7,59 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output directories relative to the current directory
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDir = Path.Combine(baseDir, "Input");
-        string outputDir = Path.Combine(baseDir, "Output");
-
-        // Validate input directory
-        if (!Directory.Exists(inputDir))
+        try
         {
-            Directory.CreateDirectory(inputDir);
-            Console.WriteLine($"Input directory created at: {inputDir}. Add BMP files and rerun.");
-            return;
-        }
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
-        // Get all BMP files in the input directory
-        string[] files = Directory.GetFiles(inputDir, "*.bmp");
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputFolder))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                Directory.CreateDirectory(inputFolder);
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add BMP files and rerun.");
+                return;
             }
 
-            // Prepare output file path with .svg extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
+            Directory.CreateDirectory(outputFolder);
 
-            // Ensure the output directory exists (unconditional as required)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
 
-            // Load the BMP image, adjust brightness, and save as SVG
-            using (Image image = Image.Load(inputPath))
+            foreach (string inputPath in bmpFiles)
             {
-                RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
+                if (!File.Exists(inputPath))
                 {
-                    raster.CacheData();
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Increase brightness by approximately 10% (value 25 out of 255)
-                raster.AdjustBrightness(25);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
 
-                // Configure SVG export options
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = raster.Size
-                };
+                    RasterImage raster = (RasterImage)image;
+                    if (!raster.IsCached)
+                        raster.CacheData();
 
-                SvgOptions svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = vectorOptions
-                };
+                    raster.AdjustBrightness(25); // approx 10% increase
 
-                // Save the processed image as SVG
-                raster.Save(outputPath, svgOptions);
+                    var vectorOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = raster.Size
+                    };
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = vectorOptions
+                    };
+
+                    raster.Save(outputPath, svgOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,7 +10,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,19 +20,19 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            double[,] sobelKernel = new double[,]
+            using (Image image = Image.Load(inputPath))
             {
-                { -1, -2, -1 },
-                { 0, 0, 0 },
-                { 1, 2, 1 }
-            };
+                RasterImage raster = (RasterImage)image;
 
-            var filterOptions = new ConvolutionFilterOptions(sobelKernel, 1.0, 0);
-
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                image.Filter(image.Bounds, filterOptions);
-                image.Save(outputPath, new PngOptions());
+                double[,] kernel = new double[,]
+                {
+                    { -1, 0, 1 },
+                    { -2, 0, 2 },
+                    { -1, 0, 1 }
+                };
+                var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, options);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)

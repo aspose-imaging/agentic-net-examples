@@ -29,15 +29,17 @@ class Program
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Configure TIFF save options for multipage output
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    Compression = TiffCompressions.Deflate,
-                    BitsPerSample = new ushort[] { 1 },
-                    MultiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 }) // pages 5‑7 (zero‑based)
-                };
+                // Configure TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Deflate;
+                // Convert to B/W (optional)
+                tiffOptions.BitsPerSample = new ushort[] { 1 };
 
-                // Save selected pages as a multipage TIFF
+                // Specify pages 5‑7 (zero‑based indexes 4,5,6)
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 });
+                tiffOptions.MultiPageOptions.PageTitles = new string[] { "Page 5", "Page 6", "Page 7" };
+
+                // Save as multipage TIFF
                 djvuImage.Save(outputPath, tiffOptions);
             }
         }

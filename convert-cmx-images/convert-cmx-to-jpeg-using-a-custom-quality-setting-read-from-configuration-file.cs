@@ -3,50 +3,56 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded paths – no argument validation
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\output.jpg";
-        string configPath = @"C:\Images\config.txt";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded paths
+            string inputPath = "input.cmx";
+            string outputPath = "output.jpg";
+            string configPath = "config.txt";
 
-        // Read JPEG quality from configuration (default to 90 if missing or invalid)
-        int quality = 90;
-        if (File.Exists(configPath))
-        {
-            string text = File.ReadAllText(configPath).Trim();
-            if (int.TryParse(text, out int parsed))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Clamp to valid JPEG quality range (1‑100)
-                quality = Math.Max(1, Math.Min(100, parsed));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Verify config file exists (optional, default quality will be used if missing)
+            int quality = 90; // default quality
+            if (File.Exists(configPath))
+            {
+                string text = File.ReadAllText(configPath).Trim();
+                if (int.TryParse(text, out int parsed) && parsed >= 1 && parsed <= 100)
+                {
+                    quality = parsed;
+                }
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load CMX image with specific load options
+            using (Image image = Image.Load(inputPath, new CmxLoadOptions()))
+            {
+                // Prepare JPEG save options with custom quality
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = quality
+                };
+
+                // Save as JPEG
+                image.Save(outputPath, saveOptions);
             }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the CMX image using CMX load options
-        var loadOptions = new CmxLoadOptions();
-        using (Image cmxImage = Image.Load(inputPath, loadOptions))
+        catch (Exception ex)
         {
-            // Prepare JPEG save options with the custom quality
-            var jpegOptions = new JpegOptions
-            {
-                Quality = quality
-            };
-
-            // Save the image as JPEG
-            cmxImage.Save(outputPath, jpegOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

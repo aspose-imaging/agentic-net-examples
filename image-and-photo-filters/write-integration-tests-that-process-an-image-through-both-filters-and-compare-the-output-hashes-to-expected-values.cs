@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,44 +10,53 @@ class Program
     {
         try
         {
+            // Hardcoded paths
             string inputPath = "sample.png";
-            string outputMedianPath = "output_median.png";
-            string outputSharpenPath = "output_sharpen.png";
+            string sharpenOutputPath = "sharpened.png";
+            string gaussianOutputPath = "gaussian.png";
 
+            // Input validation
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputMedianPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputSharpenPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(sharpenOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(gaussianOutputPath));
 
-            // Apply Median filter
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-                raster.Save(outputMedianPath, new PngOptions());
-            }
+            // Expected simple checksums (replace with real values)
+            const int expectedSharpenChecksum = 123456789;
+            const int expectedGaussianChecksum = 987654321;
 
             // Apply Sharpen filter
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage raster = (RasterImage)img;
                 raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                raster.Save(outputSharpenPath, new PngOptions());
+                raster.Save(sharpenOutputPath);
             }
 
-            // Simple checksum verification
-            int expectedMedianChecksum = 12345678; // replace with actual expected checksum
-            int expectedSharpenChecksum = 87654321; // replace with actual expected checksum
+            // Compute checksum for Sharpen output
+            byte[] sharpenBytes = File.ReadAllBytes(sharpenOutputPath);
+            int sharpenChecksum = sharpenBytes.Aggregate(0, (a, b) => (a * 31 + b) & 0x7fffffff);
+            Console.WriteLine($"Sharpen checksum: {sharpenChecksum}");
+            Console.WriteLine(sharpenChecksum == expectedSharpenChecksum ? "Sharpen test passed." : "Sharpen test failed.");
 
-            int medianChecksum = File.ReadAllBytes(outputMedianPath).Sum(b => (int)b);
-            int sharpenChecksum = File.ReadAllBytes(outputSharpenPath).Sum(b => (int)b);
+            // Apply Gaussian Blur filter
+            using (Image img = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)img;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                raster.Save(gaussianOutputPath);
+            }
 
-            Console.WriteLine($"Median filter checksum match: {medianChecksum == expectedMedianChecksum}");
-            Console.WriteLine($"Sharpen filter checksum match: {sharpenChecksum == expectedSharpenChecksum}");
+            // Compute checksum for Gaussian output
+            byte[] gaussianBytes = File.ReadAllBytes(gaussianOutputPath);
+            int gaussianChecksum = gaussianBytes.Aggregate(0, (a, b) => (a * 31 + b) & 0x7fffffff);
+            Console.WriteLine($"Gaussian checksum: {gaussianChecksum}");
+            Console.WriteLine(gaussianChecksum == expectedGaussianChecksum ? "Gaussian test passed." : "Gaussian test failed.");
         }
         catch (Exception ex)
         {

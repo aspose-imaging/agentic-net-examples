@@ -1,16 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\animation.apng";
-        string outputPath = "Output\\animation.gif";
+        string inputPath = "Input\\input.apng";
+        string outputPath = "Output\\output.gif";
 
         if (!File.Exists(inputPath))
         {
@@ -24,29 +25,17 @@ class Program
         {
             using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                ushort width = (ushort)apng.Width;
-                ushort height = (ushort)apng.Height;
-
-                using (GifFrameBlock firstBlock = new GifFrameBlock(width, height))
+                using (GifImage gif = new GifImage(new GifFrameBlock((ushort)apng.Width, (ushort)apng.Height)))
                 {
-                    Graphics graphics = new Graphics(firstBlock);
-                    using (RasterImage firstFrame = (RasterImage)apng.Pages[0])
+                    for (int i = 0; i < apng.PageCount; i++)
                     {
-                        graphics.DrawImage(firstFrame, new Point(0, 0));
-                    }
-
-                    using (GifImage gif = new GifImage(firstBlock))
-                    {
-                        for (int i = 1; i < apng.PageCount; i++)
+                        using (RasterImage frame = (RasterImage)apng.Pages[i])
                         {
-                            using (RasterImage frame = (RasterImage)apng.Pages[i])
-                            {
-                                gif.AddPage(frame);
-                            }
+                            gif.AddPage(frame);
                         }
-
-                        gif.Save(outputPath);
                     }
+
+                    gif.Save(outputPath, new GifOptions());
                 }
             }
         }

@@ -1,17 +1,19 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = @"C:\input\sample.cdr";
+        string outputPath = @"C:\output\sample.psd";
+
         try
         {
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.psd";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,23 +22,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Cdr.CdrImage cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                var exportOptions = new PsdOptions
+                var psdOptions = new PsdOptions
                 {
-                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
+                    CompressionMethod = CompressionMethod.RLE,
+                    ColorMode = ColorModes.Rgb,
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        BackgroundColor = Aspose.Imaging.Color.White,
                         PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                        PageHeight = cdr.Height
                     }
                 };
 
-                cdr.Save(outputPath, exportOptions);
+                cdr.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)

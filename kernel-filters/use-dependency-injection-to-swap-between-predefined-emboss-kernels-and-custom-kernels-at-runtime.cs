@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -22,41 +24,39 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image as a RasterImage
-            using (Image image = Image.Load(inputPath))
+            // Choose kernel source: true for predefined emboss, false for custom kernel
+            bool usePredefinedKernel = true;
+
+            // Kernel provider delegate
+            Func<double[,]> kernelProvider;
+
+            if (usePredefinedKernel)
             {
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Choose kernel at runtime (dependency injection simulation)
-                string kernelChoice = "Emboss3x3"; // Change to "Emboss5x5" or "Custom" as needed
-                double[,] kernel;
-
-                if (kernelChoice == "Emboss3x3")
+                // Predefined emboss kernel (3x3)
+                kernelProvider = () => ConvolutionFilter.Emboss3x3;
+            }
+            else
+            {
+                // Custom kernel example
+                kernelProvider = () =>
                 {
-                    kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
-                }
-                else if (kernelChoice == "Emboss5x5")
-                {
-                    kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
-                }
-                else // Custom kernel example
-                {
-                    kernel = new double[,]
+                    double[,] customKernel = new double[,]
                     {
-                        { 0, 1, 0 },
-                        { 1, -4, 1 },
-                        { 0, 1, 0 }
+                        { -2, -1, 0 },
+                        { -1,  1, 1 },
+                        {  0,  1, 2 }
                     };
-                }
+                    return customKernel;
+                };
+            }
 
-                // Create convolution filter options with the selected kernel
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-
-                // Apply the filter to the entire image
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+            // Load image, apply filter, and save
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            {
+                double[,] kernel = kernelProvider();
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)

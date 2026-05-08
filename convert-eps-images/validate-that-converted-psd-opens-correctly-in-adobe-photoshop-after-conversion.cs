@@ -8,55 +8,54 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.bmp";
-        string outputPath = @"c:\temp\output.psd";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PSD save options
-            PsdOptions psdOptions = new PsdOptions
-            {
-                CompressionMethod = CompressionMethod.RLE,               // Use RLE compression
-                ColorMode = ColorModes.Rgb,                               // Set color mode to RGB
-                ChannelBitsCount = 8,                                     // 8 bits per channel
-                ChannelsCount = 4,                                        // RGBA
-                Version = 6                                                // PSD version 6
-            };
-
-            // Save as PSD
-            image.Save(outputPath, psdOptions);
-        }
-
-        // Validate that the saved PSD can be loaded (Photoshop compatibility check)
-        if (!Image.CanLoad(outputPath))
-        {
-            Console.Error.WriteLine("Saved PSD cannot be loaded. It may be incompatible with Photoshop.");
-            return;
-        }
-
-        // Additional load test to ensure no runtime exception occurs
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.psd";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD save options
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    CompressionMethod = CompressionMethod.RLE,
+                    ColorMode = ColorModes.Rgb,
+                    // Use default version (6) and other defaults
+                };
+
+                // Save as PSD
+                image.Save(outputPath, psdOptions);
+            }
+
+            // Validate that the saved PSD can be loaded (basic sanity check)
             using (Image psdImage = Image.Load(outputPath))
             {
-                Console.WriteLine("PSD file saved successfully and opened without errors.");
+                // Simple validation: check dimensions are non-zero
+                if (psdImage.Width > 0 && psdImage.Height > 0)
+                {
+                    Console.WriteLine("PSD conversion succeeded and file is loadable.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("Loaded PSD has invalid dimensions.");
+                }
             }
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"Error loading saved PSD: {ex.Message}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

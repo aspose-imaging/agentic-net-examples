@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -12,8 +11,8 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string originalRasterPath = "output_original.png";
-            string blurredRasterPath = "output_blurred.png";
+            string originalOutputPath = "original.png";
+            string blurredOutputPath = "blurred.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,42 +22,45 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(originalRasterPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(blurredRasterPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(originalOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(blurredOutputPath));
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            // Load SVG image
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Cast to SvgImage
-                SvgImage svgImage = (SvgImage)image;
-
-                // Set up rasterization options for PNG output
+                // Set up rasterization options for SVG to PNG conversion
                 SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size,
                     BackgroundColor = Color.White
                 };
 
+                // PNG save options with vector rasterization
                 PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save the original rasterized PNG
-                svgImage.Save(originalRasterPath, pngOptions);
+                using (FileStream originalStream = new FileStream(originalOutputPath, FileMode.Create, FileAccess.Write))
+                {
+                    svgImage.Save(originalStream, pngOptions);
+                }
             }
 
-            // Load the rasterized PNG to apply Gaussian blur
-            using (Image rasterImageContainer = Image.Load(originalRasterPath))
+            // Load the rasterized PNG as a RasterImage
+            using (Image loadedImage = Image.Load(originalOutputPath))
             {
-                RasterImage rasterImage = (RasterImage)rasterImageContainer;
+                RasterImage rasterImage = (RasterImage)loadedImage;
 
-                // Apply Gaussian blur with radius 5 and sigma 4.0
-                rasterImage.Filter(rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur filter (radius 5, sigma 4.0)
+                rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
                 // Save the blurred image
-                rasterImage.Save(blurredRasterPath, new PngOptions());
+                using (FileStream blurredStream = new FileStream(blurredOutputPath, FileMode.Create, FileAccess.Write))
+                {
+                    rasterImage.Save(blurredStream, new PngOptions());
+                }
             }
         }
         catch (Exception ex)

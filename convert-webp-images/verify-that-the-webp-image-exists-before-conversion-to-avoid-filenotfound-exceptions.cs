@@ -4,17 +4,17 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
-namespace WebPToPngConverter
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\test.webp";
-            string outputPath = @"C:\temp\test.output.png";
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\test.webp";
+            string outputPath = @"c:\temp\test.output.png";
 
-            // Verify that the input WebP file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,9 +27,12 @@ namespace WebPToPngConverter
             // Load the WebP image and save it as PNG
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Save only the active frame to PNG
                 webPImage.Save(outputPath, new PngOptions());
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

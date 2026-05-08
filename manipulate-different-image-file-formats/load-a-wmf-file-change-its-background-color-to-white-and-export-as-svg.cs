@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\sample.svg";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Temp\input.wmf";
+            string outputPath = @"C:\Temp\output.svg";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,9 +28,9 @@ class Program
             using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
                 // Prepare SVG save options
-                SvgOptions svgOptions = new SvgOptions
+                SvgOptions saveOptions = new SvgOptions
                 {
-                    TextAsShapes = true // optional: render text as shapes
+                    TextAsShapes = true // Render text as shapes
                 };
 
                 // Configure rasterization options with a white background
@@ -41,10 +41,10 @@ class Program
                     RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
                 };
 
-                svgOptions.VectorRasterizationOptions = rasterOptions;
+                saveOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save the image as SVG
-                wmfImage.Save(outputPath, svgOptions);
+                wmfImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

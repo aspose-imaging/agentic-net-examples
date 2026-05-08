@@ -10,11 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\temp\input.jpg";
             string outputPath = @"C:\temp\output_ycbcr.jpg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,10 +27,11 @@ class Program
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options to use YCbCr color type
+                // Configure JPEG save options to use YCbCr color mode
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    ColorType = JpegCompressionColorMode.YCbCr
+                    ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.YCbCr,
+                    Quality = 100 // optional: set quality to maximum
                 };
 
                 // Save the image with the specified options

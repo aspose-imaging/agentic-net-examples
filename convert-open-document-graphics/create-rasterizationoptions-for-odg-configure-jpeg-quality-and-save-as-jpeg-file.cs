@@ -2,45 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.jpg";
+        string outputPath = @"C:\Images\sample_converted.jpg";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure rasterization options for ODG
+                var rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    // Preserve original size; if needed, you can set PageSize = image.Size
+                    PageSize = image.Size
+                };
+
+                // Configure JPEG save options, including quality
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90, // Set desired JPEG quality (1-100)
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the image as JPEG using the configured options
+                image.Save(outputPath, jpegOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG vector image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure rasterization options for ODG
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
-            {
-                BackgroundColor = Color.White,
-                PageSize = image.Size // preserve aspect ratio if needed
-            };
-
-            // Configure JPEG save options, including quality
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Quality = 90, // value between 1 and 100
-                VectorRasterizationOptions = rasterOptions
-            };
-
-            // Save the rasterized image as JPEG
-            image.Save(outputPath, jpegOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

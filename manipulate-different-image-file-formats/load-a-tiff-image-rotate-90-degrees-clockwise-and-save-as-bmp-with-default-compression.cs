@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -26,12 +25,15 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Rotate 90 degrees clockwise without changing canvas size
+                // Cast to TiffImage to access rotation methods
+                TiffImage tiffImage = (TiffImage)image;
+
+                // Rotate 90 degrees clockwise without flipping
                 tiffImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save as BMP with default options
+                // Save as BMP using default options
                 tiffImage.Save(outputPath, new BmpOptions());
             }
         }

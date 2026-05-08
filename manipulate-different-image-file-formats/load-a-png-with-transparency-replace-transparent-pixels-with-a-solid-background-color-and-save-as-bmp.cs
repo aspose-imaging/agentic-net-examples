@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
@@ -10,8 +10,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.bmp";
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output.bmp";
 
         try
         {
@@ -28,16 +28,15 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to PngImage to access transparency properties
-                if (image is PngImage pngImage && pngImage.HasTransparentColor)
+                // If the image is a PNG, set a solid background color to replace transparency
+                if (image is PngImage pngImage)
                 {
-                    // Set a solid background color to replace transparent pixels
+                    // Example solid background color (white)
+                    pngImage.BackgroundColor = Color.FromArgb(255, 255, 255, 255);
                     pngImage.HasBackgroundColor = true;
-                    pngImage.BackgroundColor = Aspose.Imaging.Color.White;
                 }
 
-                // Save the image as BMP (default compression preserves transparency,
-                // but the background color set above will fill transparent areas)
+                // Save the result as BMP
                 image.Save(outputPath, new BmpOptions());
             }
         }

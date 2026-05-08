@@ -8,36 +8,45 @@ class Program
 {
     static void Main()
     {
-        string inputPath = "input.otg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (Image image = Image.Load(inputPath))
-        {
-            var pngOptions = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                VectorRasterizationOptions = new OtgRasterizationOptions()
-            };
-
-            var otgRasterOptions = (OtgRasterizationOptions)pngOptions.VectorRasterizationOptions;
-            otgRasterOptions.BackgroundColor = Color.Transparent;
-            otgRasterOptions.PageSize = image.Size;
-
-            var otgImage = image as Aspose.Imaging.FileFormats.OpenDocument.OtgImage;
-            if (otgImage != null)
-            {
-                otgImage.RemoveBackground(new Aspose.Imaging.RemoveBackgroundSettings());
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            image.Save(outputPath, pngOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare PNG save options
+                var pngOptions = new PngOptions();
+
+                // Configure OTG rasterization to keep transparency
+                var otgRasterizationOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    BackgroundColor = Color.Transparent // preserve transparent background
+                };
+
+                // Attach rasterization options to PNG options
+                pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
+
+                // Save as PNG with the specified options
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

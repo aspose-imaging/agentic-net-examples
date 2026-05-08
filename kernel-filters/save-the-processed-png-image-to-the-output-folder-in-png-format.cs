@@ -7,13 +7,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output\output.png";
-
         try
         {
-            // Check if the input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,7 +26,7 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Set PNG save options (default configuration)
+                // Set up default PNG save options
                 PngOptions pngOptions = new PngOptions();
 
                 // Save the image as PNG to the specified output path
@@ -35,6 +35,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

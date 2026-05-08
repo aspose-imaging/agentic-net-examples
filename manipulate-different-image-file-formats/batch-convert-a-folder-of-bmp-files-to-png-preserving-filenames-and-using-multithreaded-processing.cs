@@ -8,42 +8,46 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\Images\BmpInput";
+        string outputFolder = @"C:\Images\PngOutput";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
-
-            // Get all BMP files in the input folder
+            // Retrieve all BMP files in the input folder
             string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp", SearchOption.TopDirectoryOnly);
 
             // Process files in parallel
             Parallel.ForEach(bmpFiles, bmpPath =>
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(bmpPath))
                 {
                     Console.Error.WriteLine($"File not found: {bmpPath}");
                     return;
                 }
 
-                // Build output PNG path preserving the filename
+                // Build the output PNG path, preserving the filename
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(bmpPath);
                 string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP and save as PNG
+                // Load the BMP image
                 using (Image image = Image.Load(bmpPath))
                 {
+                    // Define PNG save options (default settings)
                     var pngOptions = new PngOptions();
+
+                    // Save the image as PNG
                     image.Save(outputPath, pngOptions);
                 }
             });
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

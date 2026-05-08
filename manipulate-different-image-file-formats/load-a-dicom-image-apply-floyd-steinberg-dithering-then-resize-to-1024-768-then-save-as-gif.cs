@@ -1,39 +1,34 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.dcm";
         string outputPath = "output.gif";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Apply Floyd‑Steinberg dithering (1‑bit palette)
-                dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+                // Apply Floyd‑Steinberg dithering with an 8‑bit palette
+                dicomImage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8, null);
 
                 // Resize to 1024×768 using nearest‑neighbour resampling
-                dicomImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+                dicomImage.Resize(1024, 768, Aspose.Imaging.ResizeType.NearestNeighbourResample);
 
-                // Save the result as a GIF
+                // Save the result as a GIF image
                 GifOptions gifOptions = new GifOptions();
                 dicomImage.Save(outputPath, gifOptions);
             }

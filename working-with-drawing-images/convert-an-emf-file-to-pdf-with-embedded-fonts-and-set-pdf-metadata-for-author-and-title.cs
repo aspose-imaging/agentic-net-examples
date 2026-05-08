@@ -8,44 +8,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "output.pdf";
+        // Hardcoded input and output paths (relative to the executable directory)
+        string inputPath = Path.Combine("Input", "sample.emf");
+        string outputPath = Path.Combine("Output", "sample.pdf");
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure vector rasterization options for EMF rendering
-            var vectorOptions = new EmfRasterizationOptions
+            // Verify that the input EMF file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size,
-                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                SmoothingMode = SmoothingMode.None
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Set PDF options with embedded fonts and metadata
-            var pdfOptions = new PdfOptions
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = vectorOptions,
-                PdfDocumentInfo = new PdfDocumentInfo
+                // Prepare PDF options with metadata
+                var pdfOptions = new PdfOptions
                 {
-                    Author = "Author Name",
-                    Title = "Document Title"
-                }
-            };
+                    PdfDocumentInfo = new PdfDocumentInfo
+                    {
+                        Author = "Author Name",
+                        Title = "Document Title"
+                    }
+                };
 
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+                // Save the image as PDF (fonts are embedded by default)
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
@@ -9,29 +8,36 @@ class Program
     {
         try
         {
-            string inputPath = "sample.jpg";
-            string outputPath = "resolution.txt";
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.txt";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load the image
+            using (Aspose.Imaging.Image img = Aspose.Imaging.Image.Load(inputPath))
             {
-                JpegImage jpegImage = image as JpegImage;
-                if (jpegImage == null)
+                // Cast to JpegImage to access EXIF resolution data
+                JpegImage jpeg = img as JpegImage;
+                if (jpeg == null)
                 {
                     Console.Error.WriteLine("The file is not a JPEG image.");
                     return;
                 }
 
-                double horizontalResolution = jpegImage.HorizontalResolution;
-                double verticalResolution = jpegImage.VerticalResolution;
+                // Read horizontal and vertical resolution from EXIF
+                double horizontalResolution = jpeg.HorizontalResolution;
+                double verticalResolution = jpeg.VerticalResolution;
 
+                // Simulate storing in a database by writing to a text file
                 string record = $"HorizontalResolution={horizontalResolution},VerticalResolution={verticalResolution}";
                 File.WriteAllText(outputPath, record);
             }

@@ -11,11 +11,12 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output locations
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\multi_page.tif";
-            string outputDir = @"C:\Images\WebPPages";
+            string outputDirectory = @"C:\Images\WebPOutput";
+            string outputBaseName = Path.Combine(outputDirectory, "page");
 
-            // Verify input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,30 +24,34 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputBaseName));
 
-            // Load the multi‑page TIFF
+            // Load the multi‑page TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Set batch processing action – executed before each page is saved
-                tiffImage.PageExportingAction = (int index, Image page) =>
+                // Set batch processing action for each page
+                tiffImage.PageExportingAction = delegate (int index, Image page)
                 {
-                    // Cast to RasterImage to access Save
-                    if (page is RasterImage rasterPage)
-                    {
-                        // Build per‑page output path
-                        string outPath = Path.Combine(outputDir, $"page_{index}.webp");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                    // Optional: force garbage collection to free previous page resources
+                    GC.Collect();
 
-                        // Save the current page as WebP
-                        var webpOptions = new WebPOptions();
-                        rasterPage.Save(outPath, webpOptions);
-                    }
+                    // Build output file name for the current page
+                    string outputPath = $"{outputBaseName}_{index}.webp";
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the current page as a WebP image
+                    page.Save(outputPath, new WebPOptions());
                 };
 
-                // Trigger the batch export by saving the source image.
-                // The actual saved file is not needed; the action handles per‑page output.
-                tiffImage.Save(Path.Combine(outputDir, "placeholder.tif"));
+                // Trigger the batch processing by invoking Save on the TIFF.
+                // The actual TIFF output is not needed; we save to a temporary file.
+                string tempTiffPath = Path.Combine(outputDirectory, "temp.tif");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempTiffPath));
+                tiffImage.Save(tempTiffPath);
+                // Optionally delete the temporary file
+                try { File.Delete(tempTiffPath); } catch { /* ignore */ }
             }
         }
         catch (Exception ex)

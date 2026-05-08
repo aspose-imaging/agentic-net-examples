@@ -1,36 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input EPS file path
-        string inputPath = @"C:\temp\sample.eps";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.eps";
+            string outputPath = @"C:\Images\output.png";
 
-        // Load the EPS image using default load options
-        using (Image image = Image.Load(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load EPS image with default load options
+            using (Image image = Image.Load(inputPath))
+            {
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Example: save the loaded image as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
         {
-            // The loaded image is stored in the 'image' variable.
-            // Example: output basic information about the image.
-            Console.WriteLine($"Image loaded successfully.");
-            Console.WriteLine($"Width: {image.Width} px, Height: {image.Height} px");
-            Console.WriteLine($"File format: {image.FileFormat}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
-
-        // Example output path (not used for saving in this task)
-        string outputPath = @"C:\temp\output.png";
-
-        // Ensure the output directory exists before any potential save operation
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
     }
 }

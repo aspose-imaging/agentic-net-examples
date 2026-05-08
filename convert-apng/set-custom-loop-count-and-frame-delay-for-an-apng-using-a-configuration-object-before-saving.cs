@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/source_image.png";
-        string outputPath = "output/apng_result.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.apng";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,20 +23,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image (can be any raster image)
-            using (Image sourceImage = Image.Load(inputPath))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options: custom loop count and frame delay
-                ApngOptions apngOptions = new ApngOptions
+                // Configure APNG options: custom frame delay and loop count
+                var apngOptions = new ApngOptions
                 {
-                    // Number of times the animation should loop (0 = infinite)
-                    NumPlays = 4,
-                    // Default frame duration in milliseconds
-                    DefaultFrameTime = 150
+                    DefaultFrameTime = 200, // frame duration in milliseconds
+                    NumPlays = 3            // number of animation loops (0 = infinite)
                 };
 
-                // Save the image as APNG with the configured options
-                sourceImage.Save(outputPath, apngOptions);
+                // Save as APNG with the configured options
+                image.Save(outputPath, apngOptions);
             }
         }
         catch (Exception ex)

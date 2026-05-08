@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
@@ -7,43 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.otg";
-        string outputPath = "Output/sample.pdf";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Data\sample.otg";
+            string outputPath = @"C:\Data\sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Configure rasterization options for OTG
-            OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = image.Size,
-                BackgroundColor = Aspose.Imaging.Color.White
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Set PDF options with custom metadata
-            PdfOptions pdfOptions = new PdfOptions
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterOptions,
-                PdfDocumentInfo = new PdfDocumentInfo
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions();
+
+                // Set custom PDF metadata
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
                 {
                     Author = "Custom Author",
                     Title = "Custom Title"
-                }
-            };
+                };
 
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+                // Configure OTG rasterization options
+                var otgRasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size // preserve original size
+                };
+                pdfOptions.VectorRasterizationOptions = otgRasterOptions;
+
+                // Save the image as PDF with metadata
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

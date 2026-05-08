@@ -1,42 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\sample.subpixel.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            int width = 200;
+            int height = 200;
+
+            using (Image image = Image.Create(bmpOptions, width, height))
+            {
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
+                Pen pen = new Pen(Color.Black, 1);
+                graphics.DrawLine(pen, 10.5f, 10.5f, 190.3f, 190.7f);
+
+                image.Save();
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the BMP image
-        using (BmpImage bmp = new BmpImage(inputPath))
+        catch (Exception ex)
         {
-            // Create a Graphics object for drawing
-            Graphics graphics = new Graphics(bmp);
-
-            // Define a pen (blue, 1 pixel wide)
-            Pen pen = new Pen(Color.Blue, 1);
-
-            // Draw a line with sub‑pixel (floating‑point) coordinates
-            // Example: from (20.3, 30.7) to (200.8, 150.2)
-            graphics.DrawLine(pen, 20.3f, 30.7f, 200.8f, 150.2f);
-
-            // Save the modified image
-            bmp.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

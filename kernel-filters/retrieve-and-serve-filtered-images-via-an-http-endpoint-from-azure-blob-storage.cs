@@ -1,10 +1,9 @@
 using System;
 using System.IO;
-using System.Net;
-using System.Net.Http;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -12,54 +11,105 @@ class Program
     {
         try
         {
-            // Azure Blob URL of the source image
-            string blobUrl = "https://example.blob.core.windows.net/container/sample.webp";
+            // Hardcoded input/output paths for safety checks
+            string inputPath = "input.jpg";
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Output file path
-            string outputPath = Path.Combine("Output", "filtered.webp");
-
-            // Ensure output directory exists
+            string outputPath = "output\\output.jpg";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Download image from Azure Blob Storage
-            byte[] imageData;
-            using (var httpClient = new HttpClient())
-            {
-                imageData = httpClient.GetByteArrayAsync(blobUrl).Result;
-            }
+            // Hardcoded HTTP prefix
+            string prefix = "http://localhost:5000/";
 
-            // Load image from memory, apply grayscale filter, and save to output file
-            using (var inputStream = new MemoryStream(imageData))
-            using (RasterImage raster = (RasterImage)Image.Load(inputStream))
+            // Initialize HttpListener
+            using (var listener = new System.Net.HttpListener())
             {
-                raster.Grayscale();
+                listener.Prefixes.Add(prefix);
+                listener.Start();
+                Console.WriteLine($"Listening on {prefix}");
 
-                using (var outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                while (true)
                 {
-                    var options = new WebPOptions();
-                    raster.Save(outStream, options);
+                    // Wait for an incoming request
+                    var context = listener.GetContext();
+                    var request = context.Request;
+                    var response = context.Response;
+
+                    // Expect a query parameter "url" containing the Azure Blob URL
+                    string blobUrl = request.QueryString["url"];
+                    if (string.IsNullOrEmpty(blobUrl))
+                    {
+                        response.StatusCode = 400; // Bad Request
+                        using (var writer = new StreamWriter(response.OutputStream))
+                        {
+                            writer.Write("Missing 'url' query parameter.");
+                        }
+                        response.Close();
+                        continue;
+                    }
+
+                    // Download the image from the blob URL
+                    using (var httpClient = new System.Net.Http.HttpClient())
+                    {
+                        System.Net.Http.HttpResponseMessage httpResponse;
+                        try
+                        {
+                            httpResponse = httpClient.GetAsync(blobUrl).Result;
+                        }
+                        catch
+                        {
+                            response.StatusCode = 500;
+                            using (var writer = new StreamWriter(response.OutputStream))
+                            {
+                                writer.Write("Error retrieving the image from the provided URL.");
+                            }
+                            response.Close();
+                            continue;
+                        }
+
+                        if (!httpResponse.IsSuccessStatusCode)
+                        {
+                            response.StatusCode = (int)httpResponse.StatusCode;
+                            using (var writer = new StreamWriter(response.OutputStream))
+                            {
+                                writer.Write($"Failed to retrieve image. HTTP {(int)httpResponse.StatusCode}");
+                            }
+                            response.Close();
+                            continue;
+                        }
+
+                        using (var inputStream = httpResponse.Content.ReadAsStreamAsync().Result)
+                        {
+                            // Load image using Aspose.Imaging
+                            using (Image image = Image.Load(inputStream))
+                            {
+                                // Prepare JPEG options for output
+                                var jpegOptions = new JpegOptions
+                                {
+                                    Quality = 90
+                                };
+
+                                // Save processed image to a memory stream
+                                using (var outputStream = new MemoryStream())
+                                {
+                                    image.Save(outputStream, jpegOptions);
+                                    byte[] imageBytes = outputStream.ToArray();
+
+                                    // Return the image bytes in the HTTP response
+                                    response.ContentType = "image/jpeg";
+                                    response.ContentLength64 = imageBytes.Length;
+                                    response.OutputStream.Write(imageBytes, 0, imageBytes.Length);
+                                    response.OutputStream.Flush();
+                                    response.Close();
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-
-            // Start simple HTTP server to serve the filtered image
-            var listener = new HttpListener();
-            listener.Prefixes.Add("http://localhost:8080/");
-            listener.Start();
-            Console.WriteLine("Listening on http://localhost:8080/ ...");
-
-            while (true)
-            {
-                var context = listener.GetContext();
-                var response = context.Response;
-
-                using (var fileStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read))
-                {
-                    response.ContentLength64 = fileStream.Length;
-                    response.ContentType = "image/webp";
-                    fileStream.CopyTo(response.OutputStream);
-                }
-
-                response.OutputStream.Close();
             }
         }
         catch (Exception ex)

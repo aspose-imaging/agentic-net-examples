@@ -1,61 +1,65 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Temporary file for intermediate rasterization
-        string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-        // Load SVG and rasterize to PNG (color)
-        using (Image svgImage = Image.Load(inputPath))
-        {
-            // Set rasterization options based on SVG size
-            var rasterOptions = new SvgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = svgImage.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // PNG save options with rasterization settings
-            var pngOptions = new PngOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image svgImage = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterOptions
-            };
+                // Prepare rasterization options for SVG -> PNG conversion
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size
+                };
 
-            // Save rasterized PNG to temporary file
-            svgImage.Save(tempPngPath, pngOptions);
+                // Prepare PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Rasterize SVG to PNG in memory
+                using (var memoryStream = new MemoryStream())
+                {
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    // Load the rasterized PNG image
+                    using (PngImage pngImage = (PngImage)Image.Load(memoryStream))
+                    {
+                        // Apply grayscale transformation
+                        pngImage.Grayscale();
+
+                        // Save the final grayscale PNG to the output path
+                        pngImage.Save(outputPath);
+                    }
+                }
+            }
         }
-
-        // Load the rasterized PNG, apply grayscale, and save to final output
-        using (PngImage pngImage = new PngImage(tempPngPath))
+        catch (Exception ex)
         {
-            pngImage.Grayscale();
-            pngImage.Save(outputPath);
-        }
-
-        // Clean up temporary file
-        if (File.Exists(tempPngPath))
-        {
-            File.Delete(tempPngPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

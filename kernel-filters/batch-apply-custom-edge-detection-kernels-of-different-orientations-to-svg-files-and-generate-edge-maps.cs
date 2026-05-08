@@ -12,72 +12,82 @@ class Program
     {
         try
         {
+            // Define input and output directories relative to the current directory
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            // Get all SVG files in the input directory
+            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            // Define custom edge‑detection kernels and their suffixes
+            // Define custom edge‑detection kernels
             var kernels = new Dictionary<string, double[,]>
             {
-                { "horizontal", new double[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } } }, // Sobel horizontal
-                { "vertical",   new double[,] { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } } }, // Sobel vertical
-                { "diag1",      new double[,] { { 0, 1, 2 }, { -1, 0, 1 }, { -2, -1, 0 } } }, // 45° diagonal
-                { "diag2",      new double[,] { { -2, -1, 0 }, { -1, 0, 1 }, { 0, 1, 2 } } }  // 135° diagonal
+                { "Horizontal", new double[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } } },
+                { "Vertical",   new double[,] { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } } }
             };
 
-            foreach (string inputPath in files)
+            foreach (string inputPath in svgFiles)
             {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
 
+                // Load the SVG image
                 using (Image svgImage = Image.Load(inputPath))
                 {
-                    var rasterOptions = new SvgRasterizationOptions
+                    // Set up rasterization options for SVG -> PNG conversion
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                     {
-                        PageSize = svgImage.Size,
-                        BackgroundColor = Color.White
-                    };
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
+                        PageSize = svgImage.Size
                     };
 
-                    foreach (var kvp in kernels)
+                    // Prepare PNG save options with the rasterization settings
+                    using (PngOptions pngOptions = new PngOptions())
                     {
-                        string suffix = kvp.Key;
-                        double[,] kernel = kvp.Value;
+                        pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                        string outputPath = Path.Combine(outputDirectory, $"{baseName}_{suffix}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        using (var ms = new MemoryStream())
+                        // Rasterize SVG to a memory stream
+                        using (MemoryStream pngStream = new MemoryStream())
                         {
-                            svgImage.Save(ms, pngOptions);
-                            ms.Position = 0;
+                            svgImage.Save(pngStream, pngOptions);
+                            byte[] pngBytes = pngStream.ToArray();
 
-                            using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                            // Apply each kernel to a fresh raster copy
+                            foreach (var kvp in kernels)
                             {
-                                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
-                                rasterImage.Save(outputPath, new PngOptions());
+                                string orientation = kvp.Key;
+                                double[,] kernel = kvp.Value;
+
+                                // Load raster image from the PNG bytes
+                                using (MemoryStream rasterStream = new MemoryStream(pngBytes))
+                                using (Image rasterImg = Image.Load(rasterStream))
+                                {
+                                    RasterImage raster = (RasterImage)rasterImg;
+
+                                    // Apply convolution filter with the custom kernel
+                                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                                    // Build output path
+                                    string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}_{orientation}_edge.png");
+
+                                    // Ensure output directory exists
+                                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                                    // Save the edge map as PNG
+                                    using (PngOptions saveOptions = new PngOptions())
+                                    {
+                                        raster.Save(outputPath, saveOptions);
+                                    }
+                                }
                             }
                         }
                     }

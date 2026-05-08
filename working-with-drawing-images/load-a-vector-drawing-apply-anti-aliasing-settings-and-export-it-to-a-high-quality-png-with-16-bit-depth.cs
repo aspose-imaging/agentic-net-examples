@@ -2,47 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/vector.svg";
-        string outputPath = "Output/high_quality.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the vector image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare PNG export options with 16‑bit depth and truecolor with alpha
-            PngOptions pngOptions = new PngOptions
+            if (!File.Exists(inputPath))
             {
-                BitDepth = 16,
-                ColorType = PngColorType.TruecolorWithAlpha,
-                // Configure vector rasterization (anti‑aliasing)
-                VectorRasterizationOptions = new VectorRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                var svgImage = (SvgImage)image;
+
+                // Configure rasterization options with anti-aliasing
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size,
+                    PageSize = svgImage.Size,
                     SmoothingMode = SmoothingMode.AntiAlias,
                     TextRenderingHint = TextRenderingHint.AntiAlias
-                }
-            };
+                };
 
-            // Save the rasterized PNG
-            image.Save(outputPath, pngOptions);
+                // Set PNG options with 16-bit depth
+                var pngOptions = new PngOptions
+                {
+                    BitDepth = 16,
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as high-quality PNG
+                svgImage.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

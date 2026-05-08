@@ -2,16 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
+            // Hardcoded input and output paths
             string inputPath = "input.svg";
             string outputPath = "output.png";
 
@@ -25,38 +24,51 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image. Aspose.Imaging will rasterize it internally when treated as a RasterImage.
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to gain access to filtering methods
-                RasterImage rasterImage = (RasterImage)image;
+                // Prepare SVG rasterization options for PNG conversion
+                var svgRasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-                // -------------------------------------------------
-                // 1. Apply a predefined Gaussian blur filter
-                // -------------------------------------------------
-                // Radius = 5, Sigma = 4.0 (adjust as needed)
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(5, 4.0));
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = svgRasterOptions
+                };
 
-                // -------------------------------------------------
-                // 2. Apply a custom edge‑detection kernel
-                // -------------------------------------------------
-                // Using a simple 3×3 Laplacian kernel for edge detection:
-                //  0  -1   0
-                // -1   4  -1
-                //  0  -1   0
-                // Aspose.Imaging provides a SharpenFilterOptions constructor that accepts
-                // kernel size and sigma; we use it here as a stand‑in for a custom kernel.
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new SharpenFilterOptions(3, 1.0));
+                // Rasterize SVG to a memory stream
+                using (var ms = new MemoryStream())
+                {
+                    image.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                // -------------------------------------------------
-                // Save the processed image as PNG
-                // -------------------------------------------------
-                var pngOptions = new PngOptions();
-                rasterImage.Save(outputPath, pngOptions);
+                    // Load the rasterized image
+                    using (Image rasterImageWrapper = Image.Load(ms))
+                    {
+                        var rasterImage = (RasterImage)rasterImageWrapper;
+
+                        // Apply predefined Gaussian blur filter
+                        rasterImage.Filter(rasterImage.Bounds,
+                            new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                        // Define a custom edge‑detection kernel
+                        double[,] edgeKernel = new double[,]
+                        {
+                            { -1, -1, -1 },
+                            { -1,  8, -1 },
+                            { -1, -1, -1 }
+                        };
+
+                        // Apply the custom convolution filter
+                        rasterImage.Filter(rasterImage.Bounds,
+                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel));
+
+                        // Save the final raster image as PNG
+                        rasterImage.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)

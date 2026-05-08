@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.cdr";
+        string outputPath = @"C:\temp\sample.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.cdr";
-            string outputPath = @"C:\temp\sample.png";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,11 +23,11 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CorelDRAW (CDR) file
+            // Load the CorelDRAW file
             using (Image image = Image.Load(inputPath))
             {
                 // Save the image as PNG using default options
-                PngOptions pngOptions = new PngOptions();
+                var pngOptions = new PngOptions(); // default settings
                 image.Save(outputPath, pngOptions);
             }
         }

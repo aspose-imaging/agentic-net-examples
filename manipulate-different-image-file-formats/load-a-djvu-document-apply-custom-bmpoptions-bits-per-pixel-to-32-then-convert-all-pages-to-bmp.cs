@@ -6,14 +6,13 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output locations
-        string inputPath = @"C:\Images\sample.djvu";
-        string outputDirectory = @"C:\Images\Output";
-
         try
         {
+            // Hardcoded input DjVu file path
+            string inputPath = "sample.djvu";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,22 +20,25 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Open the DjVu file stream
+            // Open the DjVu file as a stream
             using (Stream stream = File.OpenRead(inputPath))
             {
-                // Load the DjVu document
+                // Load DjVu document
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Iterate through each page and save as BMP with 32 bits per pixel
+                    int pageIndex = 0;
+                    // Iterate through each page in the document
                     foreach (DjvuPage page in djvuImage.Pages)
                     {
-                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.bmp");
+                        // Define output BMP file name for the current page
+                        string outputPath = $"page_{pageIndex}.bmp";
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the output directory exists (handles null or empty directory)
+                        string outputDir = Path.GetDirectoryName(outputPath);
+                        if (!string.IsNullOrWhiteSpace(outputDir))
+                        {
+                            Directory.CreateDirectory(outputDir);
+                        }
 
                         // Configure BMP options with 32 bits per pixel
                         BmpOptions bmpOptions = new BmpOptions
@@ -44,14 +46,17 @@ class Program
                             BitsPerPixel = 32
                         };
 
-                        // Save the page as BMP
+                        // Save the page as a BMP file using the specified options
                         page.Save(outputPath, bmpOptions);
+
+                        pageIndex++;
                     }
                 }
             }
         }
         catch (Exception ex)
         {
+            // Output any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

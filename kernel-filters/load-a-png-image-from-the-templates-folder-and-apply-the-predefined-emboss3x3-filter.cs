@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.ImageOptions;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "templates/input.png";
+        string outputPath = "output/embossed.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "templates/input.png";
-            string outputPath = "output/embossed.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -31,11 +30,11 @@ public class Program
                 // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Apply the predefined Emboss3x3 convolution filter
+                // Apply the predefined Emboss3x3 filter
                 raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                // Save the filtered image as PNG
-                raster.Save(outputPath, new PngOptions());
+                // Save the filtered image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)

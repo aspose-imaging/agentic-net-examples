@@ -3,13 +3,12 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jp2";
+        string inputPath = "sample.jp2";
         string outputPath = "output.png";
 
         try
@@ -20,21 +19,17 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Jpeg2000Image jpeg2000Image = (Jpeg2000Image)Image.Load(inputPath))
+            using (Jpeg2000Image image = new Jpeg2000Image(inputPath))
             {
-                if (!jpeg2000Image.IsCached)
-                    jpeg2000Image.CacheData();
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+                image.Resize(newWidth, newHeight);
 
-                int newWidth = jpeg2000Image.Width / 2;
-                int newHeight = jpeg2000Image.Height / 2;
+                PngOptions options = new PngOptions();
 
-                jpeg2000Image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-                PngOptions pngOptions = new PngOptions();
-
-                jpeg2000Image.Save(outputPath, pngOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)

@@ -2,48 +2,62 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main()
     {
-        // Define input and output paths
-        string inputPath = Path.Combine("Input", "sample.odg");
-        string outputPath = Path.Combine("Output", "sample.pdf");
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\sample.odg";
+            string outputPath = @"C:\Temp\sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Set up rasterization options for ODG
-            OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Color.White,
-                PageSize = image.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Configure PDF save options
-            PdfOptions pdfOptions = new PdfOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = rasterOptions,
-                PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo
+                // Configure rasterization options for ODG
+                var rasterizationOptions = new OdgRasterizationOptions
                 {
-                    Title = "My Document Title"
-                }
-            };
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
+                };
 
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+                // Configure PDF save options
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions,
+                    PdfDocumentInfo = new PdfDocumentInfo()
+                };
+
+                // Set the PDF document title metadata
+                pdfOptions.PdfDocumentInfo.Title = "Converted ODG Document";
+
+                // Optionally set the ODG metadata title as well
+                if (image is OdgImage odgImage)
+                {
+                    odgImage.Metadata.Title = "Converted ODG Document";
+                }
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.webp";
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output.webp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,23 +23,26 @@ class Program
 
         try
         {
-            // Load the TIFF image
-            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+            // Load the TIFF image as a raster image
+            using (RasterImage image = Image.Load(inputPath) as RasterImage)
             {
-                // Auto-rotate based on EXIF orientation
-                rasterImage.AutoRotate();
-
-                // Convert to WebP with lossless compression
-                using (WebPImage webpImage = new WebPImage(rasterImage))
+                if (image == null)
                 {
-                    var webpOptions = new WebPOptions
-                    {
-                        Lossless = true
-                    };
-
-                    // Save as WebP
-                    webpImage.Save(outputPath, webpOptions);
+                    Console.Error.WriteLine("Failed to load the image as a raster image.");
+                    return;
                 }
+
+                // Rotate according to EXIF orientation
+                image.AutoRotate();
+
+                // Prepare lossless WebP options
+                var webpOptions = new WebPOptions
+                {
+                    Lossless = true
+                };
+
+                // Save as WebP with lossless compression
+                image.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)

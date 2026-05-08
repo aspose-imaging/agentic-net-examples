@@ -7,37 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "blurred.png";
-        string outputPath = "restored.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\blurred.png";
+        string outputPath = @"C:\Images\restored.png";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply a motion deblurring (deconvolution) filter
+                // Parameters: length = 10, sigma = 1.0, angle = 0 degrees
+                var deconvolutionOptions = new MotionWienerFilterOptions(10, 1.0, 0.0);
+                rasterImage.Filter(rasterImage.Bounds, deconvolutionOptions);
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access filtering capabilities
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Configure a Gauss-Wiener deconvolution filter (radius, sigma)
-            var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
-            // Optional: adjust additional parameters if needed
-            deconvOptions.Snr = 0.007;          // default signal‑to‑noise ratio
-            deconvOptions.Brightness = 1.15;    // default brightness
-
-            // Apply the filter to the whole image
-            rasterImage.Filter(rasterImage.Bounds, deconvOptions);
-
-            // Save the restored image
-            rasterImage.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

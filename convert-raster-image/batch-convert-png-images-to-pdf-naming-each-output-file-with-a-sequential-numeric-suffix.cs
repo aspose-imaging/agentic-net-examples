@@ -5,47 +5,51 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
-        if (!Directory.Exists(outputDirectory))
-        {
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDirectory);
-        }
 
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
-        int index = 1;
-        foreach (string inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            // Get all PNG files in the input directory
+            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+
+            int index = 1;
+            foreach (string inputPath in pngFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputFileName = $"output_{index}.pdf";
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                using (PdfOptions options = new PdfOptions())
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    image.Save(outputPath, options);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build the output PDF file path with a sequential numeric suffix
+                string outputPath = Path.Combine(outputDirectory, $"output_{index}.pdf");
+                index++;
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PNG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Set up PDF export options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the image as PDF
+                    image.Save(outputPath, pdfOptions);
                 }
             }
-
-            index++;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

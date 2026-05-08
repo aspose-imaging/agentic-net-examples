@@ -6,44 +6,49 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = Path.Combine("Input", "multipage.tif");
-            string outputDirectory = "Output";
+            // Hard‑coded input and output locations
+            string inputPath = @"C:\temp\input.tif";
+            string outputDirectory = @"C:\temp\output";
 
-            // Validate input file existence
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
             // Load the multi‑page TIFF
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Iterate through each frame (page)
-                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                // Ensure the loaded image is a TIFF image
+                if (image is TiffImage tiffImage)
                 {
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.jpg");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure JPEG options with quality 80
-                    var jpegOptions = new JpegOptions
+                    // Iterate through each frame (page) in the TIFF
+                    for (int i = 0; i < tiffImage.Frames.Length; i++)
                     {
-                        Quality = 80
-                    };
+                        // Build the output JPEG file path
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.jpg");
 
-                    // Save the current frame as a JPEG file
-                    tiffImage.Frames[i].Save(outputPath, jpegOptions);
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Configure JPEG options with quality 80
+                        JpegOptions jpegOptions = new JpegOptions
+                        {
+                            Quality = 80
+                        };
+
+                        // Save the current frame as a JPEG file
+                        tiffImage.Frames[i].Save(outputPath, jpegOptions);
+                    }
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded file is not a TIFF image.");
                 }
             }
         }

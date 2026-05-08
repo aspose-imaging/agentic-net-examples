@@ -6,68 +6,66 @@ using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Set up base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add WMF files and rerun.");
-            return;
-        }
+            // Hardcoded input directory containing WMF files
+            string inputDirectory = @"C:\Images\Input";
+            // Hardcoded output directory for PNG files
+            string outputDirectory = @"C:\Images\Output";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDirectory);
+
+            // List of WMF files to process (hardcoded for the example)
+            string[] wmfFiles = new[]
+            {
+                "sample1.wmf",
+                "sample2.wmf",
+                "sample3.wmf"
+            };
+
+            foreach (var fileName in wmfFiles)
+            {
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputDirectory, fileName);
+                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(fileName, ".png"));
+
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the WMF image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Configure rasterization options with a uniform background color (e.g., white)
+                    var rasterOptions = new WmfRasterizationOptions
+                    {
+                        PageSize = image.Size,
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    };
+
+                    // Set PNG save options and attach rasterization options
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Save the rasterized PNG image
+                    image.Save(outputPath, pngOptions);
+                }
+            }
         }
-
-        // Get all files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        foreach (string inputPath in files)
+        catch (Exception ex)
         {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Prepare output path with .png extension
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the WMF image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to WmfImage for vector rasterization options
-                WmfImage wmfImage = (WmfImage)image;
-
-                // Configure rasterization options with a uniform white background
-                var rasterOptions = new WmfRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = wmfImage.Size
-                };
-
-                // Set PNG save options and attach rasterization options
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the rasterized PNG image
-                wmfImage.Save(outputPath, pngOptions);
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

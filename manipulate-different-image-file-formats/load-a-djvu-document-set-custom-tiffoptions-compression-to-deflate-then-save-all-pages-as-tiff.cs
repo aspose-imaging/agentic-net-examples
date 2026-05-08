@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.djvu";
-            string outputPath = @"c:\temp\sample.tif";
+            string inputPath = "input.djvu";
+            string outputPath = "output.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -33,7 +33,10 @@ class Program
                 TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
                 saveOptions.Compression = TiffCompressions.Deflate;
 
-                // Save all pages as a multi‑page TIFF file
+                // Use MultiPageOptions to export all pages (default behavior)
+                saveOptions.MultiPageOptions = new DjvuMultiPageOptions();
+
+                // Save all pages as a multi-page TIFF file
                 djvuImage.Save(outputPath, saveOptions);
             }
         }

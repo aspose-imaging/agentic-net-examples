@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,100 +13,67 @@ class Program
     {
         try
         {
-            // Hardcoded input directory and output file path
-            string inputDirectory = "Input";
-            string outputPath = "Output\\contact_sheet.jpg";
+            string inputDir = "Input";
+            string outputPath = "ContactSheet.jpg";
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect JPEG files from the input directory
-            string[] allFiles = Directory.GetFiles(inputDirectory);
-            List<string> jpegFiles = new List<string>();
-            foreach (var file in allFiles)
-            {
-                string ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext == ".jpg" || ext == ".jpeg")
-                {
-                    jpegFiles.Add(file);
-                }
-            }
+            var files = Directory.GetFiles(inputDir, "*.jpg");
 
-            // List to hold extracted thumbnails
-            List<RasterImage> thumbnails = new List<RasterImage>();
-            List<Size> thumbSizes = new List<Size>();
+            var thumbSizes = new List<Size>();
+            var thumbFiles = new List<string>();
 
-            // Extract EXIF thumbnails
-            foreach (var jpegPath in jpegFiles)
+            foreach (var file in files)
             {
-                if (!File.Exists(jpegPath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {jpegPath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
 
-                using (JpegImage jpegImage = (JpegImage)Image.Load(jpegPath))
+                using (JpegImage jpeg = (JpegImage)Image.Load(file))
                 {
-                    // Ensure EXIF data exists
-                    var exif = jpegImage.ExifData;
-                    if (exif != null && exif.Thumbnail != null)
+                    var thumb = jpeg.ExifData?.Thumbnail;
+                    if (thumb != null)
                     {
-                        // Load the thumbnail as a RasterImage
-                        RasterImage thumb = (RasterImage)exif.Thumbnail;
-                        // Keep a reference to the thumbnail for later merging
-                        thumbnails.Add(thumb);
                         thumbSizes.Add(thumb.Size);
+                        thumbFiles.Add(file);
                     }
                 }
             }
 
-            if (thumbnails.Count == 0)
+            if (thumbFiles.Count == 0)
             {
-                Console.WriteLine("No EXIF thumbnails found.");
+                Console.WriteLine("No thumbnails found.");
                 return;
             }
 
-            // Calculate canvas size (vertical stacking)
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (var size in thumbSizes)
-            {
-                if (size.Width > canvasWidth) canvasWidth = size.Width;
-                canvasHeight += size.Height;
-            }
+            int totalWidth = thumbSizes.Sum(s => s.Width);
+            int maxHeight = thumbSizes.Max(s => s.Height);
 
-            // Prepare JPEG options for the contact sheet
-            Source outputSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
-            {
-                Source = outputSource,
-                Quality = 90
-            };
+            Source outSource = new FileCreateSource(outputPath, false);
+            JpegOptions outOptions = new JpegOptions() { Source = outSource, Quality = 90 };
 
-            // Create the canvas bound to the output file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(outOptions, totalWidth, maxHeight))
             {
-                int offsetY = 0;
-                for (int i = 0; i < thumbnails.Count; i++)
+                int offsetX = 0;
+                for (int i = 0; i < thumbFiles.Count; i++)
                 {
-                    RasterImage thumb = thumbnails[i];
-                    Rectangle bounds = new Rectangle(0, offsetY, thumb.Width, thumb.Height);
-                    // Copy thumbnail pixels onto the canvas
-                    canvas.SaveArgb32Pixels(bounds, thumb.LoadArgb32Pixels(thumb.Bounds));
-                    offsetY += thumb.Height;
+                    string file = thumbFiles[i];
+                    using (JpegImage jpeg = (JpegImage)Image.Load(file))
+                    {
+                        var thumb = jpeg.ExifData?.Thumbnail;
+                        if (thumb != null)
+                        {
+                            Rectangle bounds = new Rectangle(offsetX, 0, thumb.Width, thumb.Height);
+                            canvas.SaveArgb32Pixels(bounds, thumb.LoadArgb32Pixels(thumb.Bounds));
+                            offsetX += thumb.Width;
+                        }
+                    }
                 }
 
-                // Save the bound canvas
                 canvas.Save();
             }
-
-            // Dispose thumbnails
-            foreach (var thumb in thumbnails)
-            {
-                thumb.Dispose();
-            }
-
-            Console.WriteLine($"Contact sheet saved to: {outputPath}");
         }
         catch (Exception ex)
         {

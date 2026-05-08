@@ -4,6 +4,7 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -22,35 +23,36 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
             using (Image svgImage = Image.Load(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var rasterOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size
                 };
-                PngOptions pngSaveOptions = new PngOptions
+
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    svgImage.Save(ms, pngSaveOptions);
+                    svgImage.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    // Load rasterized image
                     using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
                         // Apply predefined Sharpen3x3 filter
-                        raster.Filter(raster.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3));
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                            Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3);
+                        raster.Filter(raster.Bounds, filterOptions);
 
-                        // Save sharpened image as PNG
-                        PngOptions outOptions = new PngOptions();
-                        raster.Save(outputPath, outOptions);
+                        // Save the sharpened image as PNG
+                        var saveOptions = new PngOptions
+                        {
+                            Source = new FileCreateSource(outputPath, false)
+                        };
+                        raster.Save(outputPath, saveOptions);
                     }
                 }
             }

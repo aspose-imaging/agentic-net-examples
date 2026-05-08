@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.apng";
-            string outputPath = "output\\output.png";
+            string inputPath = @"C:\Images\animated.apng";
+            string outputPath = @"C:\Images\first_frame.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -34,6 +34,7 @@ class Program
                 ApngFrame firstFrame = (ApngFrame)apng.Pages[0];
 
                 // Save the first frame as a static PNG
+                // The frame itself is a RasterImage, so we can call Save directly
                 firstFrame.Save(outputPath, new PngOptions());
             }
         }

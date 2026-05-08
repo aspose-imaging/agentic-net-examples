@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -10,12 +11,11 @@ class Program
     {
         try
         {
-            // Set up base, input, and output directories
+            // Set up input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists; if not, create it and exit
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -23,7 +23,6 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
@@ -34,29 +33,31 @@ class Program
 
             foreach (string inputPath in files)
             {
-                // Verify the input file exists
+                // Process only DjVu files
+                if (!inputPath.EndsWith(".djvu", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Build the output PDF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
-                // Ensure the output directory for this file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the DjVu image and save as PDF with custom author metadata
-                using (Image image = Image.Load(inputPath))
-                {
-                    var pdfOptions = new PdfOptions
-                    {
-                        PdfDocumentInfo = new PdfDocumentInfo { Author = "Custom Author" }
-                    };
+                // Prepare PDF options with custom author metadata
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                pdfOptions.PdfDocumentInfo.Author = "Custom Author";
 
-                    image.Save(outputPath, pdfOptions);
+                // Load DjVu image and save as PDF
+                using (FileStream stream = File.OpenRead(inputPath))
+                using (DjvuImage djvuImage = new DjvuImage(stream))
+                {
+                    djvuImage.Save(outputPath, pdfOptions);
                 }
             }
         }

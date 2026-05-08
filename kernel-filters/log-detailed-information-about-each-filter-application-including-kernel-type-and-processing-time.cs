@@ -9,63 +9,79 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = "sample.png";
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
 
-            // Verify input file exists
+            // Ensure input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare output directory
+            // Base output directory
             string outputDir = "output";
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDir); // unconditional as per requirements
 
-            // Define filters to apply
-            var filters = new (string Name, Aspose.Imaging.ImageFilters.FilterOptions.FilterOptionsBase Options)[]
+            // Load the image
+            using (Image image = Image.Load(inputPath))
             {
-                ("GaussianBlur", new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0)),
-                ("Sharpen", new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0)),
-                ("Median", new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5)),
-                ("Bilateral", new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5))
-            };
+                // Cast to RasterImage for filtering
+                RasterImage raster = (RasterImage)image;
 
-            foreach (var filter in filters)
-            {
-                // Load image fresh for each filter to avoid cumulative effects
-                using (Image image = Image.Load(inputPath))
-                {
-                    var raster = (RasterImage)image;
+                // ---------- Gaussian Blur ----------
+                var gaussianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
+                LogAndApplyFilter(raster, gaussianOptions, Path.Combine(outputDir, "gaussian.png"));
 
-                    // Measure processing time
-                    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                    raster.Filter(raster.Bounds, filter.Options);
-                    stopwatch.Stop();
+                // ---------- Sharpen ----------
+                var sharpenOptions = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0);
+                LogAndApplyFilter(raster, sharpenOptions, Path.Combine(outputDir, "sharpen.png"));
 
-                    // Retrieve kernel type information if available
-                    string kernelInfo = "N/A";
-                    var kernelProp = filter.Options.GetType().GetProperty("Kernel");
-                    if (kernelProp != null)
-                    {
-                        var kernel = kernelProp.GetValue(filter.Options);
-                        kernelInfo = kernel?.GetType().Name ?? "null";
-                    }
+                // ---------- Median ----------
+                var medianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5);
+                LogAndApplyFilter(raster, medianOptions, Path.Combine(outputDir, "median.png"));
 
-                    // Save the filtered image
-                    string outputPath = Path.Combine(outputDir, $"sample_{filter.Name}.png");
-                    // Ensure directory exists (already created above)
-                    raster.Save(outputPath, new PngOptions());
-
-                    // Log details
-                    Console.WriteLine($"{filter.Name} filter applied. Kernel: {kernelInfo}. Time: {stopwatch.ElapsedMilliseconds} ms.");
-                }
+                // ---------- Bilateral Smoothing ----------
+                var bilateralOptions = new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5);
+                LogAndApplyFilter(raster, bilateralOptions, Path.Combine(outputDir, "bilateral.png"));
             }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
+    }
+
+    // Helper method to log kernel type, processing time and save the image
+    static void LogAndApplyFilter(RasterImage raster, Aspose.Imaging.ImageFilters.FilterOptions.FilterOptionsBase options, string outputPath)
+    {
+        // Log kernel type (if available)
+        string kernelInfo = "None";
+        try
+        {
+            var kernelProp = options.GetType().GetProperty("Kernel");
+            if (kernelProp != null)
+            {
+                var kernel = kernelProp.GetValue(options);
+                kernelInfo = kernel?.GetType().Name ?? "None";
+            }
+        }
+        catch { /* ignore reflection errors */ }
+
+        Console.WriteLine($"Applying {options.GetType().Name} (Kernel: {kernelInfo})");
+
+        // Measure processing time
+        DateTime start = DateTime.Now;
+        raster.Filter(raster.Bounds, options);
+        DateTime end = DateTime.Now;
+        TimeSpan duration = end - start;
+        Console.WriteLine($"Processing time: {duration.TotalMilliseconds} ms");
+
+        // Ensure output directory exists (already created in Main, but called as per rule)
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Save the result as PNG
+        raster.Save(outputPath, new PngOptions());
+        Console.WriteLine($"Saved output to {outputPath}");
     }
 }

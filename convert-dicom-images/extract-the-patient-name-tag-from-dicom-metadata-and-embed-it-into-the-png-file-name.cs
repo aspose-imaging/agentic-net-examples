@@ -11,7 +11,7 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.dcm";
+            string inputPath = "input.dcm";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -20,35 +20,21 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDirectory = "Output";
+            // Prepare output directory
+            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
             Directory.CreateDirectory(outputDirectory);
 
             // Load DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
+                // Build output PNG path
+                string outputPath = Path.Combine(outputDirectory, "output.png");
 
-                // Use a default patient name (metadata extraction not supported in this version)
-                string patientName = "Unknown";
-
-                // Sanitize patient name for file name
-                foreach (char c in Path.GetInvalidFileNameChars())
-                {
-                    patientName = patientName.Replace(c.ToString(), "_");
-                }
-
-                // Build output file path with patient name embedded
-                string outputPath = Path.Combine(outputDirectory, $"Image_{patientName}.png");
-
-                // Ensure output directory for the file exists
+                // Ensure output directory exists before saving
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save as PNG
-                using (var pngOptions = new PngOptions())
-                {
-                    dicomImage.Save(outputPath, pngOptions);
-                }
+                dicomImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

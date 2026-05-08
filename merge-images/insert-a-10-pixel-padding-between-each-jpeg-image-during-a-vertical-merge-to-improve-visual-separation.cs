@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -11,18 +13,16 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG file paths
+            // Hardcoded input and output paths
             string[] inputPaths = new string[]
             {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
+                "Input\\image1.jpg",
+                "Input\\image2.jpg",
+                "Input\\image3.jpg"
             };
+            string outputPath = "Output\\merged.jpg";
 
-            // Hardcoded output JPEG file path
-            string outputPath = "output.jpg";
-
-            // Validate each input file exists
+            // Validate each input file
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -33,49 +33,43 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            // Collect image sizes
+            List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                using (JpegImage img = (JpegImage)Image.Load(path))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Determine canvas dimensions (max width, total height + padding)
-            int canvasWidth = 0;
-            int canvasHeight = 0;
+            // Determine canvas dimensions (vertical merge with 10‑pixel padding)
             int padding = 10;
-            foreach (var sz in sizes)
-            {
-                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
-                canvasHeight += sz.Height;
-            }
-            canvasHeight += padding * (inputPaths.Length - 1);
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height) + padding * (inputPaths.Length - 1);
 
-            // Create JPEG canvas with bound source
-            FileCreateSource src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 };
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            // Create JPEG canvas bound to the output file
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions options = new JpegOptions() { Source = source, Quality = 100 };
+            using (JpegImage canvas = (JpegImage)Image.Create(options, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
                 foreach (string path in inputPaths)
                 {
-                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                    using (JpegImage img = (JpegImage)Image.Load(path))
                     {
-                        // Copy image pixels onto canvas at current offset
-                        Aspose.Imaging.Rectangle destRect = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
+                        // Define destination rectangle on the canvas
+                        Rectangle destRect = new Rectangle(0, offsetY, img.Width, img.Height);
+                        // Copy pixel data
                         canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
-
-                        // Increment offset by image height plus padding
+                        // Move offset down, adding padding after each image except the last
                         offsetY += img.Height + padding;
                     }
                 }
 
-                // Save the bound canvas to the output file
+                // Save the bound canvas
                 canvas.Save();
             }
         }

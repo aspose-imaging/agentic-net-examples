@@ -8,41 +8,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure rasterization options for OTG
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
+                // Prepare PDF save options and set custom author metadata
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = otgOptions,
+                    PdfDocumentInfo = new PdfDocumentInfo
+                    {
+                        Author = "Custom Author"
+                    }
+                };
+
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Prepare PDF save options
-            PdfOptions pdfOptions = new PdfOptions();
-
-            // Set custom author metadata
-            pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
-            {
-                Author = "Custom Author"
-            };
-
-            // Configure vector rasterization for OTG
-            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
-            {
-                PageSize = image.Size
-            };
-            pdfOptions.VectorRasterizationOptions = otgRasterizationOptions;
-
-            // Save as PDF
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,48 +1,64 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.PathResources;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        string inputPath = "input.tif";
-        string outputDir = "output_paths";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(outputDir);
-
         try
         {
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            // Hardcoded input TIFF path
+            string inputPath = "input.tif";
+            if (!File.Exists(inputPath))
             {
-                var pathResources = tiffImage.ActiveFrame.PathResources;
-                int index = 0;
-                foreach (var pathResource in pathResources)
-                {
-                    var graphicsPath = PathResourceConverter.ToGraphicsPath(new[] { pathResource }, tiffImage.ActiveFrame.Size);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                    var svgOptions = new SvgOptions();
-                    string outputPath = Path.Combine(outputDir, $"path_{index}.svg");
+            // Load the TIFF image
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                int frameCount = tiff.Frames.Count();
+                for (int i = 0; i < frameCount; i++)
+                {
+                    // Activate current frame
+                    tiff.ActiveFrame = tiff.Frames[i];
+
+                    // Retrieve clipping paths
+                    var pathResources = tiff.ActiveFrame.PathResources;
+                    if (pathResources == null || pathResources.Count == 0)
+                        continue; // No paths to export
+
+                    // Convert PathResources to a GraphicsPath
+                    var graphicsPath = PathResourceConverter.ToGraphicsPath(pathResources.ToArray(), tiff.ActiveFrame.Size);
+
+                    // Prepare output SVG path
+                    string outputDir = "output";
+                    Directory.CreateDirectory(outputDir);
+                    string outputPath = Path.Combine(outputDir, $"frame_{i}.svg");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (Image svgImage = Image.Create(svgOptions, tiffImage.ActiveFrame.Width, tiffImage.ActiveFrame.Height))
+                    // Create SVG image bound to the output file
+                    var svgOptions = new SvgOptions
                     {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    using (Image svgImage = Image.Create(svgOptions, tiff.ActiveFrame.Width, tiff.ActiveFrame.Height))
+                    {
+                        // Draw the clipping path onto the SVG canvas
                         var graphics = new Graphics(svgImage);
                         graphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
-                        svgImage.Save(outputPath);
-                    }
 
-                    index++;
+                        // Save the bound SVG image
+                        svgImage.Save();
+                    }
                 }
             }
         }

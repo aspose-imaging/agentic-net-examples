@@ -1,65 +1,65 @@
 using System;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input and output directories (relative paths)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; create if missing and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Temp\WebPInput";
+            string outputDir = @"C:\Temp\PdfOutput";
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
 
-        // Get all WebP files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.webp");
+            // Get all WebP files in the input directory
+            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp");
 
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in webpFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
-
-            // Build output PDF path
-            string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Record memory usage before processing
-            long memoryBefore = GC.GetTotalMemory(true);
-
-            // Load WebP image and convert to PDF
-            using (Image image = Image.Load(inputPath))
-            {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    image.Save(outputPath, pdfOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
-            }
 
-            // Record memory usage after processing
-            long memoryAfter = GC.GetTotalMemory(true);
-            Console.WriteLine($"Processed {inputPath} -> {outputPath}. Memory change: {memoryAfter - memoryBefore} bytes.");
+                // Build the corresponding PDF output path
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Record memory usage before conversion
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                long memoryBefore = Process.GetCurrentProcess().PrivateMemorySize64;
+
+                // Load the WebP image and save it as PDF
+                using (WebPImage webpImage = new WebPImage(inputPath))
+                {
+                    webpImage.Save(outputPath, new PdfOptions());
+                }
+
+                // Record memory usage after conversion
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                long memoryAfter = Process.GetCurrentProcess().PrivateMemorySize64;
+
+                // Output conversion and memory information
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                Console.WriteLine($"Memory before: {memoryBefore / 1024} KB, after: {memoryAfter / 1024} KB, delta: {(memoryAfter - memoryBefore) / 1024} KB");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -8,28 +9,35 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.emf";
+        string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            {
+                // Rotate 90 degrees clockwise without flipping
+                emfImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                // Save as PNG
+                var pngOptions = new PngOptions();
+                emfImage.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Rotate 90 degrees clockwise without flipping
-            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-            // Save the rotated image as PNG
-            var pngOptions = new PngOptions();
-            image.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

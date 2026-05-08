@@ -2,72 +2,71 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                var svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output\\vignette.png";
 
-                // Configure rasterization options
-                var rasterOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                // Set up rasterization options for SVG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    PageSize = svgImage.Size
                 };
 
-                // Set PNG save options with the rasterization settings
-                var pngOptions = new Aspose.Imaging.ImageOptions.PngOptions
+                // Configure PNG save options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
                 // Rasterize SVG to a memory stream
-                using (MemoryStream ms = new MemoryStream())
+                using (MemoryStream rasterStream = new MemoryStream())
                 {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    svgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0;
 
-                    // Load the rasterized image
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    // Load the rasterized image as a RasterImage
+                    using (Image rasterImageContainer = Image.Load(rasterStream))
                     {
-                        // Define a soft‑edge (vignette) kernel
+                        RasterImage rasterImage = (RasterImage)rasterImageContainer;
+
+                        // Define a custom soft‑edge (vignette) kernel
                         double[,] kernel = new double[,]
                         {
-                            { 0, 0, 1, 0, 0 },
-                            { 0, 2, 2, 2, 0 },
-                            { 1, 2, 5, 2, 1 },
-                            { 0, 2, 2, 2, 0 },
-                            { 0, 0, 1, 0, 0 }
+                            { 0.0, 0.0, 0.0, 0.0, 0.0 },
+                            { 0.0, 1.0, 2.0, 1.0, 0.0 },
+                            { 0.0, 2.0, 4.0, 2.0, 0.0 },
+                            { 0.0, 1.0, 2.0, 1.0, 0.0 },
+                            { 0.0, 0.0, 0.0, 0.0, 0.0 }
                         };
 
-                        // Apply the convolution filter using the custom kernel
-                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                        raster.Filter(raster.Bounds, filterOptions);
+                        // Apply the custom convolution filter to the entire image
+                        ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
                         // Save the processed image
-                        raster.Save(outputPath);
+                        rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
             }

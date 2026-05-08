@@ -2,50 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "Input/input.png";
-        string outputPath = "Output/output.pdf";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/input.png";
+            string outputPdfPath = "Output/output.pdf";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage src = (RasterImage)Image.Load(inputPath))
-        {
-            if (!src.IsCached) src.CacheData();
-
-            const int targetSize = 800;
-            double scale = Math.Min((double)targetSize / src.Width, (double)targetSize / src.Height);
-            int newWidth = (int)(src.Width * scale);
-            int newHeight = (int)(src.Height * scale);
-
-            src.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
-
-            using (PngImage canvas = new PngImage(targetSize, targetSize))
+            if (!File.Exists(inputPath))
             {
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.Transparent);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                int offsetX = (targetSize - newWidth) / 2;
-                int offsetY = (targetSize - newHeight) / 2;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-                Rectangle destRect = new Rectangle(offsetX, offsetY, newWidth, newHeight);
-                canvas.SaveArgb32Pixels(destRect, src.LoadArgb32Pixels(src.Bounds));
+            using (RasterImage original = (RasterImage)Image.Load(inputPath))
+            {
+                const int targetSize = 800;
+                float scale = Math.Min((float)targetSize / original.Width, (float)targetSize / original.Height);
+                int newWidth = (int)(original.Width * scale);
+                int newHeight = (int)(original.Height * scale);
 
-                using (PdfOptions pdfOptions = new PdfOptions())
+                original.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                using (RasterImage canvas = (RasterImage)Image.Create(new PngOptions(), targetSize, targetSize))
                 {
-                    canvas.Save(outputPath, pdfOptions);
+                    Graphics g = new Graphics(canvas);
+                    g.Clear(Color.Transparent);
+
+                    int offsetX = (targetSize - newWidth) / 2;
+                    int offsetY = (targetSize - newHeight) / 2;
+
+                    canvas.SaveArgb32Pixels(
+                        new Rectangle(offsetX, offsetY, newWidth, newHeight),
+                        original.LoadArgb32Pixels(original.Bounds));
+
+                    PdfOptions pdfOptions = new PdfOptions();
+                    canvas.Save(outputPdfPath, pdfOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

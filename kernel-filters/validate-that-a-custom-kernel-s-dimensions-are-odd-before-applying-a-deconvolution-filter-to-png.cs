@@ -2,53 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input/input.png";
+            string outputPath = "output/output.png";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-        using (Image image = Image.Load(inputPath))
-        {
-            RasterImage raster = (RasterImage)image;
-
-            int kernelSize = 5;
-            if (kernelSize % 2 == 0)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Kernel size must be an odd number.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            double[,] kernel = new double[kernelSize, kernelSize];
-            double value = 1.0 / (kernelSize * kernelSize);
-            for (int y = 0; y < kernelSize; y++)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            double[,] kernel = new double[,]
             {
-                for (int x = 0; x < kernelSize; x++)
-                {
-                    kernel[y, x] = value;
-                }
+                { 0, -1, 0 },
+                { -1, 5, -1 },
+                { 0, -1, 0 }
+            };
+
+            int rows = kernel.GetLength(0);
+            int cols = kernel.GetLength(1);
+            if (rows % 2 == 0 || cols % 2 == 0)
+            {
+                Console.Error.WriteLine("Kernel dimensions must be odd.");
+                return;
             }
 
-            var deconvOptions = new DeconvolutionFilterOptions(kernel);
-            raster.Filter(raster.Bounds, deconvOptions);
-
-            var saveOptions = new PngOptions
+            using (Image image = Image.Load(inputPath))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
-            raster.Save(outputPath, saveOptions);
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new DeconvolutionFilterOptions(kernel));
+
+                PngOptions pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

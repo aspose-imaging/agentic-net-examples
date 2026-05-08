@@ -9,24 +9,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = @"C:\temp\input.tif";
             string outputPath = @"C:\temp\output.jpg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as JPEG using default options
+                // Save the image as JPEG using default options
                 image.Save(outputPath, new JpegOptions());
             }
         }

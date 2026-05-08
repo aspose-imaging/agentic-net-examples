@@ -9,9 +9,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = "sample.eps";
-            string outputPath = "preview.jpg";
+            string outputPath = "output/preview.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,23 +20,25 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
+            // Load EPS image
             using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Retrieve the raster preview image (default format)
-                var previewImage = epsImage.GetPreviewImage();
-
-                if (previewImage == null)
+                // Get the preview image (default format)
+                var preview = epsImage.GetPreviewImage();
+                if (preview == null)
                 {
                     Console.Error.WriteLine("No preview image found in the EPS file.");
                     return;
                 }
 
-                // Save the preview image as JPEG using default settings
-                previewImage.Save(outputPath);
+                // Save preview as JPEG with default settings
+                using (preview)
+                {
+                    preview.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)

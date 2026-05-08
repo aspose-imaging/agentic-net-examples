@@ -3,50 +3,54 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/result.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Sample.eps";
+            string outputPath = "Sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to the specific EPS image type
-            var epsImage = image as Aspose.Imaging.FileFormats.Eps.EpsImage;
-            if (epsImage == null)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Loaded image is not an EPS image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Configure PDF options with custom metadata
-            var pdfOptions = new PdfOptions
-            {
-                PdfDocumentInfo = new PdfDocumentInfo
-                {
-                    Title = "Document Title",
-                    Author = "Author Name",
-                    Subject = "Subject Text",
-                    Keywords = "keyword1, keyword2"
-                }
-            };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Save the EPS as PDF with the metadata
-            epsImage.Save(outputPath, pdfOptions);
+            // Load EPS image
+            using (var image = (EpsImage)Image.Load(inputPath))
+            {
+                // Prepare PDF options with compliance and custom metadata
+                var pdfOptions = new PdfOptions
+                {
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    },
+                    PdfDocumentInfo = new PdfDocumentInfo
+                    {
+                        Author = "MyApp",
+                        Title = image.Title ?? "Converted EPS",
+                        Subject = "EPS to PDF conversion",
+                        Keywords = $"Creator={image.Creator};Created={image.CreationDate:O}"
+                    }
+                };
+
+                // Save as PDF with the specified options
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

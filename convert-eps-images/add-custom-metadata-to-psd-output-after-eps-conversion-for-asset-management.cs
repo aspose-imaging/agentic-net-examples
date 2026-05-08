@@ -3,32 +3,33 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.psd";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/result.psd";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
-        {
-            using (PsdOptions psdOptions = new PsdOptions())
+            if (!File.Exists(inputPath))
             {
-                psdOptions.CompressionMethod = CompressionMethod.RLE;
-                psdOptions.ColorMode = ColorModes.Rgb;
-
-                epsImage.Save(outputPath, psdOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (EpsImage eps = (EpsImage)Image.Load(inputPath))
+            {
+                PsdOptions psdOptions = new PsdOptions();
+                eps.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

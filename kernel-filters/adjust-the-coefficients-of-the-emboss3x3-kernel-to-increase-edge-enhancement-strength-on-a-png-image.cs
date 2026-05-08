@@ -25,7 +25,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image as a RasterImage
+            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
@@ -33,8 +33,8 @@ class Program
                 // Retrieve the default Emboss3x3 kernel (2D array)
                 double[,] originalKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
 
-                // Increase edge enhancement strength by scaling the kernel
-                double strengthFactor = 1.5; // adjust as needed
+                // Increase edge enhancement strength by a factor (e.g., 2.0)
+                double factor = 2.0;
                 int rows = originalKernel.GetLength(0);
                 int cols = originalKernel.GetLength(1);
                 double[,] enhancedKernel = new double[rows, cols];
@@ -42,20 +42,20 @@ class Program
                 {
                     for (int j = 0; j < cols; j++)
                     {
-                        enhancedKernel[i, j] = originalKernel[i, j] * strengthFactor;
+                        enhancedKernel[i, j] = originalKernel[i, j] * factor;
                     }
                 }
 
-                // Apply the custom convolution filter
-                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(enhancedKernel);
-                raster.Filter(raster.Bounds, convOptions);
+                // Apply the custom convolution filter with the enhanced kernel
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(enhancedKernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
                 // Save the processed image as PNG
-                var pngOptions = new PngOptions
+                PngOptions saveOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
-                raster.Save(outputPath, pngOptions);
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

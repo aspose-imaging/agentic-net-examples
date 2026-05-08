@@ -1,67 +1,57 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
 
-        // Validate input directory exists before enumeration
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
-            return;
-        }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Get all PNG files in the input folder
+            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
 
-        // Get all PNG files in the input directory
-        string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
-
-        foreach (string inputPath in pngFiles)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in pngFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Determine output JPEG path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-            string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PNG image as a raster image
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)image;
-
-                // Apply a predefined blur box filter (size 5)
-                double[,] blurKernel = ConvolutionFilter.GetBlurBox(5);
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(blurKernel));
-
-                // Save the processed image as JPEG
-                var jpegOptions = new JpegOptions
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Quality = 90 // optional quality setting
-                };
-                raster.Save(outputPath, jpegOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Load the image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to RasterImage to apply filters
+                    RasterImage rasterImage = (RasterImage)image;
+
+                    // Apply a Gaussian blur filter (acts as a blur box filter)
+                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                    // Prepare the output JPEG path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
+                    string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the processed image as JPEG
+                    rasterImage.Save(outputPath);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

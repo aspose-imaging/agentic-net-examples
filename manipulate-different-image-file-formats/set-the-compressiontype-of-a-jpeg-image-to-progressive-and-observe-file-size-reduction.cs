@@ -8,31 +8,33 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\sample_progressive.jpg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"c:\temp\sample.bmp";
-            string outputPath = @"c:\temp\sample_progressive.jpg";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up JPEG save options with progressive compression
+                // Configure JPEG save options with progressive compression
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    BitsPerChannel = 8,
-                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    Quality = 90, // Adjust quality as needed
+                    // Set progressive compression mode
+                    CompressionType = JpegCompressionMode.Progressive,
+                    // Optional: set quality (1-100)
+                    Quality = 100,
+                    // Preserve original resolution
                     ResolutionSettings = new ResolutionSetting(96.0, 96.0),
                     ResolutionUnit = ResolutionUnit.Inch
                 };
@@ -43,7 +45,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

@@ -9,11 +9,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.cdr";
+        string outputPath = "output.psd";
+
         try
         {
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.psd";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,17 +24,18 @@ class Program
 
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                var psdOptions = new PsdOptions
+                PsdOptions psdOptions = new PsdOptions
                 {
-                    MultiPageOptions = null,
+                    MultiPageOptions = new MultiPageOptions(new IntRange(0, cdr.PageCount)),
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        BackgroundColor = Color.White,
                         PageWidth = cdr.Width,
                         PageHeight = cdr.Height,
                         TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                         SmoothingMode = SmoothingMode.None
-                    }
+                    },
+                    CompressionMethod = CompressionMethod.RLE,
+                    ColorMode = ColorModes.Rgb
                 };
 
                 cdr.Save(outputPath, psdOptions);

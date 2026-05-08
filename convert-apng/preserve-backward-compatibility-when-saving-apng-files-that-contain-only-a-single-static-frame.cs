@@ -8,45 +8,47 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output\\result.png";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\source.png";
-            string outputPath = @"C:\Images\result.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Determine if the image is an animated PNG with more than one frame
-                bool isAnimatedApng = image is ApngImage apng && apng.PageCount > 1;
-
-                if (isAnimatedApng)
+                // Determine whether the image has more than one frame
+                bool isMultiFrame = false;
+                if (image is IMultipageImage multiPageImage)
                 {
-                    // Save as APNG preserving animation
-                    // Use .apng extension for clarity; adjust outputPath if needed
-                    string apngOutput = Path.ChangeExtension(outputPath, ".apng");
-                    Directory.CreateDirectory(Path.GetDirectoryName(apngOutput));
-                    image.Save(apngOutput, new ApngOptions());
+                    isMultiFrame = multiPageImage.PageCount > 1;
+                }
+
+                if (isMultiFrame)
+                {
+                    // Save as animated PNG (APNG) when multiple frames are present
+                    image.Save(outputPath, new ApngOptions());
                 }
                 else
                 {
-                    // Single-frame image – save as regular PNG for maximum compatibility
+                    // Save as regular PNG to maintain compatibility for single‑frame images
                     image.Save(outputPath, new PngOptions());
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

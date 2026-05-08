@@ -22,37 +22,28 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to CmxImage to access vector-specific methods
-                var cmxImage = image as CmxImage;
-                if (cmxImage == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a CMX image.");
-                    return;
-                }
-
                 // Rotate 90 degrees clockwise
-                cmxImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Set up EMF rasterization options (page size matches the rotated image)
-                var emfRasterOptions = new EmfRasterizationOptions
+                // Set up EMF rasterization options
+                var vectorOptions = new EmfRasterizationOptions
                 {
-                    PageSize = cmxImage.Size
+                    PageSize = image.Size
                 };
 
-                // Create EMF save options with the rasterization settings
                 var emfOptions = new EmfOptions
                 {
-                    VectorRasterizationOptions = emfRasterOptions
+                    VectorRasterizationOptions = vectorOptions
                 };
 
                 // Save the rotated image as EMF
-                cmxImage.Save(outputPath, emfOptions);
+                image.Save(outputPath, emfOptions);
             }
         }
         catch (Exception ex)

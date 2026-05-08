@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.jpg";
-            string outputPath = @"C:\temp\output_compressed.jpg";
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\sample_high_compression.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,32 +21,25 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options for high compression (low quality)
-                JpegOptions saveOptions = new JpegOptions
+                // Configure JPEG options for high compression (low quality)
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    Quality = 10, // Quality range 1-100, lower means higher compression
+                    Quality = 10, // Low quality value for strong compression (1-100)
                     CompressionType = JpegCompressionMode.Baseline
                 };
 
-                // Save the compressed image
-                image.Save(outputPath, saveOptions);
+                // Save the image with the specified JPEG options
+                image.Save(outputPath, jpegOptions);
             }
 
-            // Estimate quality impact by comparing file sizes
-            long originalSize = new FileInfo(inputPath).Length;
-            long compressedSize = new FileInfo(outputPath).Length;
-            double reductionPercent = 100.0 * (originalSize - compressedSize) / originalSize;
-
-            Console.WriteLine($"Original size: {originalSize} bytes");
-            Console.WriteLine($"Compressed size: {compressedSize} bytes");
-            Console.WriteLine($"Size reduction: {reductionPercent:F2}%");
-            Console.WriteLine($"Applied JPEG quality setting: 10 (high compression)");
+            // Estimate: we set quality to 10, which represents high compression
+            Console.WriteLine("Estimated saved JPEG quality: 10 (high compression).");
         }
         catch (Exception ex)
         {

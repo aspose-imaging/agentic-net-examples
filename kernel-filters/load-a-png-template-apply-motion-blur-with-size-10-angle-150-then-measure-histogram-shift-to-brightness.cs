@@ -1,9 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,8 +8,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\template.png";
-            string outputPath = "Output\\output.png";
+            string inputPath = "template.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -26,40 +23,40 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                int[] pixelsBefore = raster.GetDefaultArgb32Pixels(raster.Bounds);
-                double sumBefore = 0;
-                foreach (int argb in pixelsBefore)
+                // Compute original average brightness
+                int[] originalPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
+                double originalSum = 0;
+                for (int i = 0; i < originalPixels.Length; i++)
                 {
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-                    double lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                    sumBefore += lum;
+                    int pixel = originalPixels[i];
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    originalSum += (r + g + b) / 3.0;
                 }
-                double avgBefore = sumBefore / pixelsBefore.Length;
+                double originalAvg = originalSum / originalPixels.Length;
 
-                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 150.0));
+                // Apply motion blur (size 10, smooth 1.0, angle 150)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 150.0));
 
-                int[] pixelsAfter = raster.GetDefaultArgb32Pixels(raster.Bounds);
-                double sumAfter = 0;
-                foreach (int argb in pixelsAfter)
+                // Compute new average brightness
+                int[] newPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
+                double newSum = 0;
+                for (int i = 0; i < newPixels.Length; i++)
                 {
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-                    double lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                    sumAfter += lum;
+                    int pixel = newPixels[i];
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    newSum += (r + g + b) / 3.0;
                 }
-                double avgAfter = sumAfter / pixelsAfter.Length;
+                double newAvg = newSum / newPixels.Length;
 
-                double brightnessShift = avgAfter - avgBefore;
+                double brightnessShift = newAvg - originalAvg;
                 Console.WriteLine($"Brightness shift: {brightnessShift}");
 
-                PngOptions options = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                raster.Save(outputPath, options);
+                // Save the processed image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)

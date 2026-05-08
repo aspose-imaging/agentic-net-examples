@@ -10,42 +10,47 @@ class Program
         try
         {
             // Hardcoded input image path
-            string inputPath = @"c:\temp\sample.png";
+            string inputPath = @"C:\temp\sample.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Sigma values for the Gaussian blur filters
+            // Define sigma values to test
             double[] sigmaValues = { 0.5, 1.5, 2.5 };
-            // Fixed kernel size (must be a positive odd integer)
+            // Use a fixed odd kernel size (must be positive and odd)
             int kernelSize = 5;
 
+            // Process each sigma value
             foreach (double sigma in sigmaValues)
             {
-                // Load the image fresh for each iteration
+                // Construct output file path that includes sigma value in the name
+                string outputPath = Path.Combine(
+                    @"C:\temp\output",
+                    $"sample.GaussianBlur_{sigma}.png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the image, apply Gaussian blur, and save the result
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access the Filter method
+                    // Cast to RasterImage to access filtering capabilities
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply Gaussian blur with the current sigma
+                    // Apply Gaussian blur filter with specified size and sigma
                     rasterImage.Filter(
                         rasterImage.Bounds,
                         new GaussianBlurFilterOptions(kernelSize, sigma));
 
-                    // Construct output path that includes the sigma value
-                    string outputPath = $@"c:\temp\sample.GaussianBlur_{sigma}.png";
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                     // Save the processed image
                     rasterImage.Save(outputPath);
                 }
+
+                Console.WriteLine($"Saved blurred image with sigma {sigma} to {outputPath}");
             }
         }
         catch (Exception ex)

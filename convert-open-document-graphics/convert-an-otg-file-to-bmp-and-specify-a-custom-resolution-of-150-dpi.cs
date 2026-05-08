@@ -8,58 +8,53 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\Result\sample.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\output.bmp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image otgImage = Image.Load(inputPath))
-        {
-            // Prepare rasterization options for OTG conversion
-            OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                PageSize = otgImage.Size // Preserve original size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Set up BMP save options with vector rasterization
-            BmpOptions bmpOptions = new BmpOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image otgImage = Image.Load(inputPath))
             {
-                VectorRasterizationOptions = otgRasterizationOptions
-            };
+                // Configure rasterization options for OTG
+                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+                {
+                    // Preserve original page size
+                    PageSize = otgImage.Size
+                };
 
-            // Save the OTG as BMP (initial resolution)
-            otgImage.Save(outputPath, bmpOptions);
-        }
+                // Set up BMP save options and attach rasterization options
+                BmpOptions bmpSaveOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = otgRasterOptions
+                };
 
-        // Load the newly created BMP to adjust resolution
-        using (Image bmpImageBase = Image.Load(outputPath))
-        {
-            // Cast to BmpImage to access SetResolution
-            if (bmpImageBase is BmpImage bmpImage)
+                // Save as BMP (initial resolution may be default)
+                otgImage.Save(outputPath, bmpSaveOptions);
+            }
+
+            // Re-open the saved BMP to set custom resolution (150 DPI)
+            using (BmpImage bmpImage = new BmpImage(outputPath))
             {
-                // Set custom resolution to 150 DPI
                 bmpImage.SetResolution(150.0, 150.0);
-
-                // Ensure output directory exists (again, safe)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Overwrite the BMP with the new resolution
+                // Overwrite the file with the new resolution
                 bmpImage.Save(outputPath);
             }
-            else
-            {
-                Console.Error.WriteLine("Failed to cast loaded image to BmpImage.");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

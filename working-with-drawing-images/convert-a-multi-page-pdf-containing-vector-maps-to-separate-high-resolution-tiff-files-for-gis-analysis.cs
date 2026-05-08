@@ -8,69 +8,63 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Input PDF path (hard‑coded)
-        string inputPath = "Input\\maps.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Input PDF path (hardcoded)
+            string inputPath = "Input\\maps.pdf";
 
-        // Output directory (hard‑coded)
-        string outputDirectory = "Output";
-
-        // Ensure output directory exists
-        if (!string.IsNullOrWhiteSpace(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Load the PDF document
-        using (Image pdfImage = Image.Load(inputPath))
-        {
-            // Cast to multipage interface
-            IMultipageImage multipage = pdfImage as IMultipageImage;
-            if (multipage == null)
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("The input file is not a multipage vector image.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            int pageCount = multipage.PageCount;
+            // Output directory (hardcoded)
+            string outputDir = "Output";
+            Directory.CreateDirectory(outputDir);
 
-            // Export each page to a separate high‑resolution TIFF
-            for (int i = 0; i < pageCount; i++)
+            // Load the PDF document
+            using (Image image = Image.Load(inputPath))
             {
-                string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
-
-                // Ensure the directory for this file exists
-                string outDir = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrWhiteSpace(outDir))
+                IMultipageImage multipage = image as IMultipageImage;
+                if (multipage == null || multipage.PageCount == 0)
                 {
-                    Directory.CreateDirectory(outDir);
+                    Console.Error.WriteLine("No pages found in the PDF.");
+                    return;
                 }
 
-                // Configure TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Vector rasterization for high‑resolution output
-                tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                // Iterate through each page and export to a separate TIFF file
+                for (int i = 0; i < multipage.PageCount; i++)
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = pdfImage.Width,
-                    PageHeight = pdfImage.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.tif");
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Export only the current page
-                tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+                    // Configure TIFF export options
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                    {
+                        // Rasterize the vector page at high resolution
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        },
+                        // Export only the current page
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
+                    };
 
-                // Save the page as TIFF
-                pdfImage.Save(outputPath, tiffOptions);
+                    // Save the current page as a TIFF file
+                    image.Save(outputPath, tiffOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

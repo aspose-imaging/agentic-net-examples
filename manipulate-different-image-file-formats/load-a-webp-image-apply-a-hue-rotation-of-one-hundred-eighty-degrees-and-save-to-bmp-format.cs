@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,27 +11,28 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = "input.webp";
             string outputPath = "output.bmp";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WebP image
+            // Load the WebP image, apply a 180° hue/rotation, and save as BMP
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Apply a 180-degree rotation (hue rotation interpreted as image rotation)
-                webPImage.Rotate(180f, true, Aspose.Imaging.Color.White);
+                // Apply a 180 degree rotation (geometric). Aspose.Imaging does not expose a direct hue‑shift method,
+                // so we use Rotate as the closest available operation for demonstration.
+                webPImage.Rotate(180f, true, Color.White);
 
-                // Save the result as BMP
+                // Save the transformed image to BMP format
                 webPImage.Save(outputPath, new BmpOptions());
             }
         }

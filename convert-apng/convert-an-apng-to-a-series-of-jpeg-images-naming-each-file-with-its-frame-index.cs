@@ -10,9 +10,8 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input path
             string inputPath = "input.apng";
-            string outputDir = "output";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,24 +20,33 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
             // Load the APNG image
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // JPEG save options
-                JpegOptions jpegOptions = new JpegOptions();
+                // Cast to ApngImage to access frames
+                ApngImage apng = image as ApngImage;
+                if (apng == null)
+                {
+                    Console.Error.WriteLine("The loaded image is not an APNG.");
+                    return;
+                }
 
-                // Export each frame as a separate JPEG file
+                // Iterate over each frame and save as JPEG
                 for (int i = 0; i < apng.PageCount; i++)
                 {
-                    string outPath = Path.Combine(outputDir, $"frame_{i}.jpg");
-                    // Ensure directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                    // Extract the frame as a RasterImage
+                    using (RasterImage frame = (RasterImage)apng.Pages[i])
+                    {
+                        // Output file name with frame index
+                        string outputPath = $"frame_{i}.jpg";
 
-                    // Save the current frame
-                    apng.Pages[i].Save(outPath, jpegOptions);
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                        // Save the frame as JPEG
+                        var jpegOptions = new JpegOptions();
+                        frame.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }

@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputPath = @"c:\temp\sample.BinarizeOtsu.png";
+        string inputPath = @"C:\temp\sample.dicom";
+        string outputPath = @"C:\temp\sample.BinarizeOtsu.png";
 
         try
         {
@@ -39,7 +39,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

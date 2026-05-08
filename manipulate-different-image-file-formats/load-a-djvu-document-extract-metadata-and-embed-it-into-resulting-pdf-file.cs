@@ -1,45 +1,35 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
+        string inputPath = "sample.djvu";
+        string outputPath = "sample.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/result.pdf";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            using (FileStream stream = File.OpenRead(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DjVu document
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to DjvuImage to access metadata
-                DjvuImage djvu = image as DjvuImage;
-
-                // Extract XMP metadata (if any)
-                var xmpData = djvu?.XmpData;
-
-                // Prepare PDF options and embed metadata
-                using (PdfOptions pdfOptions = new PdfOptions())
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    pdfOptions.XmpData = xmpData;
+                    var metadata = djvuImage.XmpData;
 
-                    // Save the document as PDF with embedded metadata
-                    image.Save(outputPath, pdfOptions);
+                    PdfOptions pdfOptions = new PdfOptions();
+                    pdfOptions.XmpData = metadata;
+
+                    djvuImage.Save(outputPath, pdfOptions);
                 }
             }
         }

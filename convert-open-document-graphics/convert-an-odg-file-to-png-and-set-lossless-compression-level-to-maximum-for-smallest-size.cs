@@ -8,37 +8,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "input.odg";
+            string outputPath = "output\\converted.png";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Prepare PNG save options with maximum compression
-            var pngOptions = new PngOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                CompressionLevel = 9,
-                // Configure rasterization for vector ODG source
-                VectorRasterizationOptions = new OdgRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Set rasterization options for vector to raster conversion
+                var rasterOptions = new OdgRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = image.Size
-                }
-            };
+                };
 
-            // Save as PNG
-            image.Save(outputPath, pngOptions);
+                // Configure PNG save options with maximum lossless compression
+                var pngOptions = new PngOptions
+                {
+                    CompressionLevel = 9,
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as PNG
+                image.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

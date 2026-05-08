@@ -7,30 +7,30 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define relative input and output paths
-        string inputPath = "Input\\sample.webp";
-        string outputPath = "Output\\sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input\\sample.webp";
+            string outputPath = "Output\\sample.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the WebP image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PDF options with A4 page size (595x842 points at 72 DPI)
-            using (PdfOptions pdfOptions = new PdfOptions())
+            if (!File.Exists(inputPath))
             {
-                pdfOptions.PageSize = new SizeF(595f, 842f);
-                // Save the image as PDF
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.PageSize = new SizeF(595f, 842f); // A4 size in points
+
                 image.Save(outputPath, pdfOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

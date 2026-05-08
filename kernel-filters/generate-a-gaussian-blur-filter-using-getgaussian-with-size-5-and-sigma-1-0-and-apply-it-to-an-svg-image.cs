@@ -1,47 +1,41 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.svg";
-        string tempPath = "temp.png";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.svg";
+        string outputPath = @"C:\Images\output\sample_gaussian_blur.png";
 
         try
         {
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG and rasterize to a temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
-                svgImage.Save(tempPath, pngOptions);
-            }
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
 
-            // Load the rasterized PNG, apply Gaussian blur, and save the result
-            using (Image rasterImage = Image.Load(tempPath))
-            {
-                RasterImage raster = (RasterImage)rasterImage;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
-                var outPngOptions = new PngOptions();
-                raster.Save(outputPath, outPngOptions);
-            }
+                // Apply Gaussian blur filter with size 5 and sigma 1.0
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new GaussianBlurFilterOptions(5, 1.0));
 
-            // Clean up temporary file
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)

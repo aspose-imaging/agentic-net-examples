@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDirectory = @"C:\temp\output";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\sample.djvu";
+            string outputDir = @"C:\Temp\Output";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,8 +21,11 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
             // Load the DjVu document from a file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
                 // Retrieve and log the total number of pages
@@ -32,10 +35,9 @@ class Program
                 // Convert each page to PNG
                 foreach (DjvuPage djvuPage in djvuImage.Pages)
                 {
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDirectory, $"sample.{djvuPage.PageNumber}.png");
+                    string outputPath = Path.Combine(outputDir, $"page_{djvuPage.PageNumber}.png");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the page as PNG

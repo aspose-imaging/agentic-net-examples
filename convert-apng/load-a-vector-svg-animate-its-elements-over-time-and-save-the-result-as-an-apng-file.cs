@@ -2,8 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -26,60 +27,51 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Temporary rasterized PNG path
-            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-
-            // Load SVG and rasterize to PNG
-            using (Image svgImage = Image.Load(inputPath))
+            // Load the SVG image
+            using (Image img = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                svgImage.Save(tempPngPath, pngOptions);
-            }
+                SvgImage svgImage = (SvgImage)img;
+                int width = svgImage.Width;
+                int height = svgImage.Height;
 
-            // Load the rasterized PNG as a RasterImage
-            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
-            {
-                // Create APNG options
-                var apngOptions = new ApngOptions
+                // Set up APNG creation options
+                ApngOptions apngOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
                     DefaultFrameTime = 100, // 100 ms per frame
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create APNG image canvas
-                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, raster.Width, raster.Height))
+                // Create the APNG canvas
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
                 {
                     apng.RemoveAllFrames();
 
                     int frameCount = 10;
+                    int step = width / frameCount; // horizontal shift per frame
+
                     for (int i = 0; i < frameCount; i++)
                     {
-                        // Add the base raster frame
-                        apng.AddFrame(raster);
+                        // Create a raster frame
+                        using (RasterImage frame = (RasterImage)Image.Create(
+                            new PngOptions { Source = new FileCreateSource(Path.GetTempFileName(), false) },
+                            width,
+                            height))
+                        {
+                            // Draw the SVG at a varying offset
+                            Graphics graphics = new Graphics(frame);
+                            graphics.Clear(Color.Transparent);
+                            int offsetX = i * step;
+                            graphics.DrawImage(svgImage, new Point(offsetX, 0));
 
-                        // Adjust gamma to create a simple fade animation
-                        ApngFrame lastFrame = (ApngFrame)apng.Pages[apng.PageCount - 1];
-                        float gamma = (float)i / (frameCount - 1);
-                        lastFrame.AdjustGamma(gamma);
+                            // Add the frame to the APNG
+                            apng.AddFrame(frame);
+                        }
                     }
 
-                    // Save the APNG file
+                    // Save the animated PNG
                     apng.Save();
                 }
-            }
-
-            // Clean up temporary file
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)

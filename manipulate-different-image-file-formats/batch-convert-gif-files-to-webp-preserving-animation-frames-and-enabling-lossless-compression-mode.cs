@@ -10,10 +10,10 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\GifInput";
-            string outputDirectory = @"C:\Images\WebpOutput";
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (unconditional)
             Directory.CreateDirectory(outputDirectory);
 
             // Get all GIF files in the input directory
@@ -32,7 +32,7 @@ class Program
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
 
-                // Ensure the output directory for this file exists
+                // Ensure the directory for the output file exists (unconditional)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the GIF image (preserves animation frames)
@@ -43,7 +43,7 @@ class Program
                     {
                         Lossless = true,
                         // Quality can be set; for lossless it influences compression efficiency
-                        Quality = 100
+                        Quality = 100f
                     };
 
                     // Save as animated WebP

@@ -3,32 +3,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.psd";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.bmp";
-            string outputPath = @"C:\Images\output.psd";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the BMP image
-            using (Image bmpImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Create a custom 8‑bit palette (example: red, green, blue, black, white)
+                // Prepare PSD save options
+                var psdOptions = new PsdOptions
+                {
+                    // Use RLE compression
+                    CompressionMethod = CompressionMethod.RLE,
+                    // Set color mode to Indexed (8‑bit palette)
+                    ColorMode = ColorModes.Indexed,
+                    // 8 bits per channel
+                    ChannelBitsCount = 8
+                };
+
+                // Define a custom palette (example with five colors)
                 Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[]
                 {
                     Aspose.Imaging.Color.Red,
@@ -37,29 +47,10 @@ class Program
                     Aspose.Imaging.Color.Black,
                     Aspose.Imaging.Color.White
                 };
-                IColorPalette customPalette = new ColorPalette(paletteColors);
+                psdOptions.Palette = new ColorPalette(paletteColors);
 
-                // Configure PSD save options for 8‑bit indexed mode
-                PsdOptions psdOptions = new PsdOptions
-                {
-                    // Use RLE compression (optional)
-                    CompressionMethod = CompressionMethod.RLE,
-
-                    // Set the color mode to Indexed (if supported)
-                    ColorMode = ColorModes.Indexed,
-
-                    // Define 8 bits per channel
-                    ChannelBitsCount = 8,
-
-                    // One channel for indexed color
-                    ChannelsCount = 1,
-
-                    // Assign the custom palette
-                    Palette = customPalette
-                };
-
-                // Save the image as PSD with the specified options
-                bmpImage.Save(outputPath, psdOptions);
+                // Save as PSD using the defined options
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)

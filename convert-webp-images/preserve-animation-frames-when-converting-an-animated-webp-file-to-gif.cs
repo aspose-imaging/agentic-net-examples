@@ -7,30 +7,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\animation.webp";
+            string outputPath = @"C:\Images\animation_converted.gif";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the animated WebP image (preserves all frames)
-        using (Image image = Image.Load(inputPath))
-        {
-            // Save as animated GIF, keeping all frames
-            var gifOptions = new GifOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                FullFrame = true // ensures each frame is saved
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            image.Save(outputPath, gifOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the animated WebP image (it implements IMultipageImage)
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure GIF options to preserve all frames
+                var gifOptions = new GifOptions
+                {
+                    FullFrame = true
+                };
+
+                // Save as animated GIF
+                image.Save(outputPath, gifOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -10,32 +10,31 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-            string fontFolder = "Fonts";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            Directory.CreateDirectory(outputDirectory);
-            Directory.CreateDirectory(fontFolder);
-
-            var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource((fontArgs) =>
+            if (!Directory.Exists(inputDirectory))
             {
-                string fontsPath = fontArgs.Length > 0 ? fontArgs[0]?.ToString() : string.Empty;
-                var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-                {
-                    foreach (var file in Directory.GetFiles(fontsPath))
-                    {
-                        byte[] data = File.ReadAllBytes(file);
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
-                    }
-                }
-                return fonts.ToArray();
-            }, fontFolder);
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
-            foreach (var inputPath in files)
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            string fontFolder = Path.Combine(baseDir, "Fonts");
+            if (!Directory.Exists(fontFolder))
+            {
+                Directory.CreateDirectory(fontFolder);
+            }
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -43,14 +42,45 @@ class Program
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                if (!string.Equals(Path.GetExtension(inputPath), ".wmf", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(Path.GetFileName(inputPath), ".jpg"));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath, loadOptions))
+                var loadOptions = new LoadOptions();
+                loadOptions.AddCustomFontSource((args) =>
                 {
-                    using (JpegOptions jpegOptions = new JpegOptions())
+                    string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                    var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                    if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                     {
-                        jpegOptions.Quality = 90;
+                        foreach (var fontFile in Directory.GetFiles(fontsPath))
+                        {
+                            byte[] data = File.ReadAllBytes(fontFile);
+                            string name = Path.GetFileNameWithoutExtension(fontFile);
+                            fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                        }
+                    }
+                    return fonts.ToArray();
+                }, fontFolder);
+
+                using (var image = Image.Load(inputPath, loadOptions))
+                {
+                    var rasterOptions = new WmfRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = image.Size
+                    };
+
+                    using (var jpegOptions = new JpegOptions
+                    {
+                        Quality = 90,
+                        VectorRasterizationOptions = rasterOptions
+                    })
+                    {
                         image.Save(outputPath, jpegOptions);
                     }
                 }

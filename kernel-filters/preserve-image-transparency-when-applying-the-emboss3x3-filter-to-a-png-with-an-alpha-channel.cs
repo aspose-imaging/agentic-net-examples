@@ -30,20 +30,21 @@ class Program
                 // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Apply Emboss3x3 filter while preserving alpha channel
-                raster.Filter(
-                    raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                // Create Emboss3x3 convolution filter options
+                var embossFilter = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
 
-                // Prepare PNG save options to keep alpha channel
-                PngOptions pngOptions = new PngOptions
+                // Apply the filter to the entire image, preserving alpha channel
+                raster.Filter(raster.Bounds, embossFilter);
+
+                // Prepare PNG save options with alpha support
+                var saveOptions = new PngOptions
                 {
                     ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha
                 };
 
                 // Save the processed image
-                raster.Save(outputPath, pngOptions);
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

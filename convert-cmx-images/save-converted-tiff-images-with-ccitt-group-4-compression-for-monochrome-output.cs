@@ -8,32 +8,39 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.tif";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.png";
+            string outputPath = "C:\\temp\\output.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Set up TIFF options for CCITT Group 4 compression (monochrome)
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.CcittFax4;          // CCITT Group 4
+                tiffOptions.BitsPerSample = new ushort[] { 1 };               // 1 bit per pixel
+                tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;       // Black is 0
+                tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+                // Save the image as a TIFF with the specified options
+                image.Save(outputPath, tiffOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the source image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Configure TIFF options for 1‑bit monochrome with CCITT Group 4 compression
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.BitsPerSample = new ushort[] { 1 };                     // 1 bit per pixel
-            tiffOptions.Compression = TiffCompressions.CcittFax4;              // CCITT Group 4
-            tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;            // 0 = black, 1 = white
-            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;   // single plane
-
-            // Save the image as a TIFF using the configured options
-            image.Save(outputPath, tiffOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,45 +8,41 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sprite_sheet.tga";
-            string outputDirectory = "Frames";
+            string inputPath = "sprite.tga";
+            string outputDir = "Frames";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
-            // Load the TGA sprite sheet as a raster image
-            using (RasterImage sheet = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage sprite = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                const int frameWidth = 64;
-                const int frameHeight = 64;
-
-                int columns = sheet.Width / frameWidth;
-                int rows = sheet.Height / frameHeight;
+                int frameWidth = 64;
+                int frameHeight = 64;
+                int cols = sprite.Width / frameWidth;
+                int rows = sprite.Height / frameHeight;
                 int frameIndex = 0;
 
                 for (int row = 0; row < rows; row++)
                 {
-                    for (int col = 0; col < columns; col++)
+                    for (int col = 0; col < cols; col++)
                     {
-                        // Build output file path for the current frame
-                        string outputPath = Path.Combine(outputDirectory, $"frame_{frameIndex:D4}.png");
+                        int offsetX = col * frameWidth;
+                        int offsetY = row * frameHeight;
 
-                        // Ensure the directory for the output file exists
+                        string outputPath = Path.Combine(outputDir, $"frame_{frameIndex}.png");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Define the region to extract
-                        var region = new Rectangle(col * frameWidth, row * frameHeight, frameWidth, frameHeight);
-
-                        // Save the region as a PNG file
-                        sheet.Save(outputPath, new PngOptions(), region);
+                        using (Aspose.Imaging.RasterImage frame = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(new PngOptions(), frameWidth, frameHeight))
+                        {
+                            int[] pixels = sprite.LoadArgb32Pixels(new Aspose.Imaging.Rectangle(offsetX, offsetY, frameWidth, frameHeight));
+                            frame.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, frameWidth, frameHeight), pixels);
+                            frame.Save(outputPath);
+                        }
 
                         frameIndex++;
                     }

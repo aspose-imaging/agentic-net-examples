@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -12,11 +11,11 @@ class Program
     {
         try
         {
-            // Define input and output paths
+            // Hardcoded input and output paths
             string inputPath = "Input/sample.djvu";
             string outputPath = "Output/portion.tiff";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,21 +25,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document
+            // Load the DjVu document
             using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                // Define export rectangle (x, y, width, height)
+                // Define the rectangle area to export (x, y, width, height)
                 Rectangle exportArea = new Rectangle(100, 100, 200, 200);
 
                 // Configure TIFF save options
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    // Export only the first page (index 0) with the specified area
-                    tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(0, exportArea);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Export only the first page (index 0) with the specified area
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(0, exportArea);
 
-                    // Save the selected portion as TIFF
-                    djvuImage.Save(outputPath, tiffOptions);
-                }
+                // Save the selected portion as TIFF
+                djvuImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

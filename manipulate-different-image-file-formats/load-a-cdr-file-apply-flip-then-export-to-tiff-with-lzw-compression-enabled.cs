@@ -3,42 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.cdr";
-        string outputPath = @"C:\temp\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"C:\input\sample.cdr";
+        string outputPath = @"C:\output\sample.tif";
 
         try
         {
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Apply a horizontal flip
-                cdrImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Prepare TIFF save options with LZW compression
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Apply a horizontal flip (you can change the flip type as needed)
+                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                // Configure TIFF save options with LZW compression
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
                     Compression = TiffCompressions.Lzw
                 };
 
-                // Save as TIFF
-                cdrImage.Save(outputPath, tiffOptions);
+                // Save the flipped image as TIFF
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

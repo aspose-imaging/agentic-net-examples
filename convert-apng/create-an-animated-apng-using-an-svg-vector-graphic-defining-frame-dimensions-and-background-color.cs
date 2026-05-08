@@ -12,65 +12,48 @@ class Program
     {
         try
         {
-            // Hardcoded paths
             string inputPath = "input.svg";
-            string tempRasterPath = "temp.png";
             string outputPath = "output.apng";
 
-            // Validate input file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG vector image
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                // Rasterize SVG to PNG
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageWidth = svgImage.Width,
-                        PageHeight = svgImage.Height,
-                        BackgroundColor = Color.White
-                    }
-                };
-                svgImage.Save(tempRasterPath, pngOptions);
-            }
+                int width = vectorImage.Width;
+                int height = vectorImage.Height;
 
-            // Load rasterized PNG as source frame
-            using (RasterImage sourceImage = (RasterImage)Image.Load(tempRasterPath))
-            {
-                // Create APNG options with output binding
-                var createOptions = new ApngOptions
+                ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 200, // 200 ms per frame
+                    DefaultFrameTime = 100,
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create APNG image canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
                 {
-                    // Remove default frame
                     apngImage.RemoveAllFrames();
 
-                    // Define number of frames
-                    int frameCount = 5;
+                    Color[] frameBackgrounds = new Color[] { Color.Red, Color.Green, Color.Blue };
 
-                    // Add frames (same image for simplicity)
-                    for (int i = 0; i < frameCount; i++)
+                    foreach (Color bgColor in frameBackgrounds)
                     {
-                        apngImage.AddFrame(sourceImage);
+                        using (RasterImage frame = (RasterImage)Image.Create(new BmpOptions(), width, height))
+                        {
+                            Graphics graphics = new Graphics(frame);
+                            graphics.Clear(bgColor);
+                            // Optionally draw the vector image onto the frame if needed:
+                            // graphics.DrawImage(vectorImage, new Point(0, 0));
+                            apngImage.AddFrame(frame);
+                        }
                     }
 
-                    // Save the APNG (output already bound via FileCreateSource)
+                    apngImage.BackgroundColor = Color.White;
                     apngImage.Save();
                 }
             }

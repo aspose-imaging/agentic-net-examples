@@ -1,40 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output/result.svg";
-
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "input.bmp";
+            string outputPath = "output.svg";
 
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
-        {
-            bmp.Resize(1024, 1024);
-
-            if (!bmp.IsCached) bmp.CacheData();
-
-            var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0);
-            bmp.Filter(bmp.Bounds, blurOptions);
-
-            var svgGraphics = new SvgGraphics2D(1024, 1024, 96);
-            svgGraphics.DrawImage(bmp, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(1024, 1024));
-
-            using (SvgImage svgImage = svgGraphics.EndRecording())
+            if (!File.Exists(inputPath))
             {
-                svgImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                // Resize to 1024x1024
+                raster.Resize(1024, 1024);
+
+                // Apply Gaussian blur (radius 5, sigma 4.0)
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save as SVG
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = raster.Size
+                    }
+                };
+
+                raster.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

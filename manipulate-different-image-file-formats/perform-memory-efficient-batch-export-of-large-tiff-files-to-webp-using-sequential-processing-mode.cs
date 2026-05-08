@@ -3,49 +3,74 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\large.tif";
-            string outputDirectory = @"C:\Images\WebPOutput";
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Process .tif files
+            string[] tifFiles = Directory.GetFiles(inputDir, "*.tif");
+            foreach (string tiffPath in tifFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                if (!File.Exists(tiffPath))
+                {
+                    Console.Error.WriteLine($"File not found: {tiffPath}");
+                    continue;
+                }
+
+                string baseName = Path.GetFileNameWithoutExtension(tiffPath);
+                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffPath))
+                {
+                    tiffImage.PageExportingAction = delegate (int index, Image page)
+                    {
+                        string outPath = Path.Combine(outputDir, $"{baseName}_page{index}.webp");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                        page.Save(outPath, new WebPOptions());
+                    };
+
+                    // Trigger sequential processing
+                    using (var ms = new MemoryStream())
+                    {
+                        tiffImage.Save(ms);
+                    }
+                }
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Load the multi‑page TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            // Process .tiff files
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tiff");
+            foreach (string tiffPath in tiffFiles)
             {
-                // Process each page sequentially to keep memory usage low
-                for (int pageIndex = 0; pageIndex < tiffImage.PageCount; pageIndex++)
+                if (!File.Exists(tiffPath))
                 {
-                    // Retrieve the current page (loaded on demand)
-                    using (Image page = tiffImage.Pages[pageIndex])
+                    Console.Error.WriteLine($"File not found: {tiffPath}");
+                    continue;
+                }
+
+                string baseName = Path.GetFileNameWithoutExtension(tiffPath);
+                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffPath))
+                {
+                    tiffImage.PageExportingAction = delegate (int index, Image page)
                     {
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.webp");
+                        string outPath = Path.Combine(outputDir, $"{baseName}_page{index}.webp");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                        page.Save(outPath, new WebPOptions());
+                    };
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as WebP
-                        var webpOptions = new WebPOptions(); // default options; adjust if needed
-                        page.Save(outputPath, webpOptions);
+                    // Trigger sequential processing
+                    using (var ms = new MemoryStream())
+                    {
+                        tiffImage.Save(ms);
                     }
-
-                    // Force garbage collection to release page resources promptly
-                    GC.Collect();
                 }
             }
         }

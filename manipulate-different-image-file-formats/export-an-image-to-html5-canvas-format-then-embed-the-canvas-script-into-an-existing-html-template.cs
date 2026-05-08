@@ -8,26 +8,33 @@ class Program
     static void Main()
     {
         // Hardcoded paths
-        string inputPath = @"Sample.svg";
-        string canvasSnippetPath = @"CanvasSnippet.html";
-        string templatePath = @"Template.html";
-        string resultPath = @"Result.html";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(canvasSnippetPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(resultPath));
+        string inputImagePath = "input.svg";
+        string templatePath = "template.html";
+        string canvasTempPath = "canvas.html";
+        string finalOutputPath = "output.html";
 
         try
         {
-            // Load the vector image
-            using (Image image = Image.Load(inputPath))
+            // Validate input image
+            if (!File.Exists(inputImagePath))
+            {
+                Console.Error.WriteLine($"File not found: {inputImagePath}");
+                return;
+            }
+
+            // Validate HTML template
+            if (!File.Exists(templatePath))
+            {
+                Console.Error.WriteLine($"File not found: {templatePath}");
+                return;
+            }
+
+            // Ensure directories for temporary and final outputs exist
+            Directory.CreateDirectory(Path.GetDirectoryName(canvasTempPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath) ?? string.Empty);
+
+            // Load the source image (e.g., SVG)
+            using (var image = Image.Load(inputImagePath))
             {
                 // Export only the canvas tag (no full HTML page)
                 var options = new Html5CanvasOptions
@@ -35,22 +42,20 @@ class Program
                     VectorRasterizationOptions = new SvgRasterizationOptions(),
                     FullHtmlPage = false
                 };
-
-                // Save canvas snippet
-                image.Save(canvasSnippetPath, options);
+                image.Save(canvasTempPath, options);
             }
 
             // Read generated canvas HTML
-            string canvasHtml = File.ReadAllText(canvasSnippetPath);
+            string canvasHtml = File.ReadAllText(canvasTempPath);
 
             // Read the existing HTML template
             string templateHtml = File.ReadAllText(templatePath);
 
-            // Embed the canvas HTML into the template (placeholder {{CANVAS}})
+            // Embed the canvas HTML into the template (replace placeholder {{CANVAS}})
             string finalHtml = templateHtml.Replace("{{CANVAS}}", canvasHtml);
 
             // Write the final HTML file
-            File.WriteAllText(resultPath, finalHtml);
+            File.WriteAllText(finalOutputPath, finalHtml);
         }
         catch (Exception ex)
         {

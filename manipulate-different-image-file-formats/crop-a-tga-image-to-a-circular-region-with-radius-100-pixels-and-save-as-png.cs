@@ -2,52 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tga;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.tga";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.tga";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TGA image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel operations
-                RasterImage raster = (RasterImage)image;
-
-                // Define circle parameters (centered in the image, radius 100)
                 int radius = 100;
-                int centerX = raster.Width / 2;
-                int centerY = raster.Height / 2;
+                int side = radius * 2;
+                int x = (image.Width - side) / 2;
+                int y = (image.Height - side) / 2;
 
-                // Create a circular mask
-                CircleMask mask = new CircleMask(centerX, centerY, radius);
+                var rect = new Rectangle(x, y, side, side);
+                image.Crop(rect);
 
-                // Apply the mask to make pixels outside the circle transparent
-                mask.ApplyTo(raster);
-
-                // Crop to the bounding square of the circle
-                Rectangle cropRect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
-                raster.Crop(cropRect);
-
-                // Save the result as PNG
-                raster.Save(outputPath, new PngOptions());
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

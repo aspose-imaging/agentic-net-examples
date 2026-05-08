@@ -8,48 +8,55 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample.bmp";
-        string binaryOutputPath = "sample_binary.bmp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string rasterOutputPath = @"C:\Images\sample.bmp";
+            string binaryOutputPath = @"C:\Images\sample_binary.bmp";
 
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-        Directory.CreateDirectory(Path.GetDirectoryName(binaryOutputPath) ?? string.Empty);
-
-        // Load the ODG image
-        using (Image odgImage = Image.Load(inputPath))
-        {
-            // Prepare BMP save options with rasterization settings for ODG
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.VectorRasterizationOptions = new OdgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Use the original image size for rasterization
-                PageSize = odgImage.Size
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the rasterized BMP
-            odgImage.Save(outputPath, bmpOptions);
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(rasterOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(binaryOutputPath));
+
+            // Load ODG image
+            using (Image odgImage = Image.Load(inputPath))
+            {
+                // Rasterize ODG to BMP
+                var bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 24
+                };
+                odgImage.Save(rasterOutputPath, bmpOptions);
+            }
+
+            // Load the rasterized BMP as a RasterImage
+            using (Image bmpImage = Image.Load(rasterOutputPath))
+            {
+                // Cast to RasterImage to access BinarizeOtsu
+                var raster = (RasterImage)bmpImage;
+
+                // Apply Otsu threshold to create binary image
+                raster.BinarizeOtsu();
+
+                // Save the binary image
+                var bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 1 // 1-bit per pixel for binary image
+                };
+                raster.Save(binaryOutputPath, bmpOptions);
+            }
         }
-
-        // Load the rasterized BMP as a RasterImage to apply thresholding
-        using (Image bmpImage = Image.Load(outputPath))
+        catch (Exception ex)
         {
-            // Cast to RasterImage to access BinarizeOtsu
-            RasterImage raster = (RasterImage)bmpImage;
-
-            // Apply Otsu thresholding to create a binary image
-            raster.BinarizeOtsu();
-
-            // Save the binary image
-            raster.Save(binaryOutputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

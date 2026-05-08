@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
+            string inputPath = @"C:\temp\input.tif";
+            string outputPath = @"C:\temp\output.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,30 +22,25 @@ class Program
                 return;
             }
 
-            // Load the TIFF image from a memory stream
-            using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(inputPath)))
-            using (Image image = Image.Load(ms))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load TIFF image from a memory stream
+            byte[] fileBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream inputStream = new MemoryStream(fileBytes))
             {
-                // Cast to TiffImage to access frame operations
-                TiffImage tiffImage = (TiffImage)image;
+                using (TiffImage tiffImage = (TiffImage)Image.Load(inputStream))
+                {
+                    // Create a new blank frame with same dimensions as the existing image
+                    TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    TiffFrame newFrame = new TiffFrame(frameOptions, tiffImage.Width, tiffImage.Height);
 
-                // Create options for the new frame (default format)
-                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                // Optionally set basic properties
-                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                frameOptions.Photometric = TiffPhotometrics.Rgb;
+                    // Add the new frame to the TIFF image
+                    tiffImage.AddFrame(newFrame);
 
-                // Create a new blank frame with the same dimensions as the existing image
-                TiffFrame newFrame = new TiffFrame(frameOptions, tiffImage.Width, tiffImage.Height);
-
-                // Add the new frame to the TIFF image
-                tiffImage.AddFrame(newFrame);
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the modified TIFF image
-                tiffImage.Save(outputPath);
+                    // Save the modified TIFF image
+                    tiffImage.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)

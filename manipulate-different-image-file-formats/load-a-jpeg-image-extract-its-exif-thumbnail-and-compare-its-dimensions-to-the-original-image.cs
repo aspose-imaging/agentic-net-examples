@@ -9,56 +9,51 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.jpg";
-        string outputPath = "thumbnail_output.jpg";
+        string inputPath = @"C:\Images\sample.jpg";
+        string thumbnailOutputPath = @"C:\Images\thumbnail.jpg";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
             // Load the JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Original image dimensions
-                int originalWidth = jpegImage.Width;
-                int originalHeight = jpegImage.Height;
-
-                // Access EXIF data and retrieve the thumbnail
+                // Retrieve EXIF data
                 JpegExifData jpegExifData = jpegImage.ExifData as JpegExifData;
-                if (jpegExifData == null || jpegExifData.Thumbnail == null)
+
+                if (jpegExifData == null)
                 {
-                    Console.WriteLine("No EXIF thumbnail found in the image.");
+                    Console.WriteLine("No EXIF data found in the image.");
+                    return;
                 }
-                else
+
+                // Get the thumbnail image from EXIF
+                RasterImage thumbnail = jpegExifData.Thumbnail;
+
+                if (thumbnail == null)
                 {
-                    // The thumbnail is a RasterImage; ensure proper disposal
-                    using (RasterImage thumbnail = jpegExifData.Thumbnail)
-                    {
-                        // Thumbnail dimensions
-                        int thumbWidth = thumbnail.Width;
-                        int thumbHeight = thumbnail.Height;
-
-                        // Output dimension comparison
-                        Console.WriteLine($"Original dimensions: {originalWidth}x{originalHeight}");
-                        Console.WriteLine($"Thumbnail dimensions: {thumbWidth}x{thumbHeight}");
-
-                        // Ensure output directory exists before saving
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the thumbnail to the output path
-                        thumbnail.Save(outputPath);
-                    }
+                    Console.WriteLine("No EXIF thumbnail present in the image.");
+                    return;
                 }
+
+                // Compare dimensions
+                Console.WriteLine($"Original image size: {jpegImage.Width}x{jpegImage.Height}");
+                Console.WriteLine($"EXIF thumbnail size: {thumbnail.Width}x{thumbnail.Height}");
+
+                // Save the thumbnail (output path handling)
+                Directory.CreateDirectory(Path.GetDirectoryName(thumbnailOutputPath));
+                thumbnail.Save(thumbnailOutputPath);
+                Console.WriteLine($"Thumbnail saved to: {thumbnailOutputPath}");
             }
         }
         catch (Exception ex)
         {
-            // Catch any runtime exceptions and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

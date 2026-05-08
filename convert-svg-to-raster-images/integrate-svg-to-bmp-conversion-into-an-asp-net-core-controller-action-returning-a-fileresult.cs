@@ -2,41 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Svg;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.svg";
-        string outputPath = "Output/sample.bmp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            string inputPath = "Input/sample.svg";
+            string outputPath = "Output/sample.bmp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure BMP save options with vector rasterization
-            var bmpOptions = new BmpOptions();
-            var vectorOptions = new VectorRasterizationOptions
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Aspose.Imaging.Color.White,
-                PageWidth = image.Width,
-                PageHeight = image.Height
-            };
-            bmpOptions.VectorRasterizationOptions = vectorOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as BMP
-            image.Save(outputPath, bmpOptions);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                using (BmpOptions bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
+                })
+                {
+                    image.Save(outputPath, bmpOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

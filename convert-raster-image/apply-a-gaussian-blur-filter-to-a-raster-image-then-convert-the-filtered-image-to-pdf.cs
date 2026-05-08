@@ -1,39 +1,53 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input\\sample.png";
-        string outputPath = "Output\\filtered.pdf";
+        string inputPath = "input.png";
+        string outputImagePath = "output\\blurred.png";
+        string outputPdfPath = "output\\blurred.pdf";
 
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the image, apply Gaussian blur, and save as PDF
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-            // Apply Gaussian blur with radius 5 and sigma 4.0
-            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-            // Save the filtered image to PDF
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                image.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputImagePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply Gaussian blur with size 5 and sigma 4.0 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the blurred image (optional intermediate step)
+                rasterImage.Save(outputImagePath);
+
+                // Prepare PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Save the blurred image as PDF
+                rasterImage.Save(outputPdfPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

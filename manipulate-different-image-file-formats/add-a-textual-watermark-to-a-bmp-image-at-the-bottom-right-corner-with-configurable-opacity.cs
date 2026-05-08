@@ -10,7 +10,6 @@ class Program
     {
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
-        float opacity = 0.5f; // Opacity between 0 (transparent) and 1 (opaque)
 
         try
         {
@@ -24,35 +23,25 @@ class Program
 
             using (var image = Image.Load(inputPath))
             {
-                var raster = (RasterImage)image;
+                var graphics = new Graphics(image);
 
-                // Create graphics for drawing
-                Graphics graphics = new Graphics(raster);
-
-                // Prepare brush with configurable opacity
-                using (var brush = new SolidBrush(Aspose.Imaging.Color.White))
+                string watermarkText = "Sample Watermark";
+                var font = new Font("Arial", 24);
+                using (var brush = new SolidBrush())
                 {
-                    brush.Opacity = opacity;
+                    brush.Color = Color.White;
+                    brush.Opacity = 0.5f;
 
-                    // Font for the watermark text
-                    var font = new Font("Arial", 24);
+                    var textSize = graphics.MeasureString(watermarkText, font, new SizeF(image.Width, image.Height), null);
 
-                    // Watermark text
-                    string watermarkText = "Sample Watermark";
-
-                    // Measure text size to position it at bottom‑right
-                    var textSize = graphics.MeasureString(watermarkText, font, new SizeF(raster.Width, raster.Height), null);
                     float margin = 10f;
-                    float x = raster.Width - textSize.Width - margin;
-                    float y = raster.Height - textSize.Height - margin;
+                    float x = image.Width - textSize.Width - margin;
+                    float y = image.Height - textSize.Height - margin;
 
-                    // Draw the watermark
                     graphics.DrawString(watermarkText, font, brush, new PointF(x, y));
                 }
 
-                // Save the result as BMP
-                var bmpOptions = new BmpOptions();
-                raster.Save(outputPath, bmpOptions);
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)

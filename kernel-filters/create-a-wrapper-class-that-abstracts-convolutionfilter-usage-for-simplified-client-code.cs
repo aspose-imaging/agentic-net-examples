@@ -2,7 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -25,11 +26,12 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5);
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
-
+                double[,] kernel = ConvolutionFilter.GetBlurBox(3);
+                var filterOptions = new ConvolutionFilterOptions(kernel, factor: 1.0, bias: 0);
                 raster.Filter(raster.Bounds, filterOptions);
-                raster.Save(outputPath, new PngOptions());
+
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

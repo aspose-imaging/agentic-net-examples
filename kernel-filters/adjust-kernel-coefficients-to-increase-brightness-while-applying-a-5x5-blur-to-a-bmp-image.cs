@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -18,20 +17,24 @@ class Program
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            RasterImage raster = (RasterImage)image;
-
-            var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0)
+            using (Image image = Image.Load(inputPath))
             {
-                Bias = 20
-            };
+                RasterImage raster = (RasterImage)image;
 
-            raster.Filter(raster.Bounds, blurOptions);
-            raster.AdjustBrightness(30);
+                // Apply a 5x5 Gaussian blur (size=5, sigma=1.0)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
 
-            var saveOptions = new BmpOptions();
-            raster.Save(outputPath, saveOptions);
+                // Increase brightness (value range -255 to 255)
+                raster.AdjustBrightness(30);
+
+                raster.Save(outputPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

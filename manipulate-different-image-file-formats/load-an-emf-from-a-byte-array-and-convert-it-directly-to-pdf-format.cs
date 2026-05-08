@@ -2,37 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input\\sample.emf";
+        string outputPath = "Output\\sample.pdf";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Temp\input.emf";
-            string outputPath = @"C:\Temp\output.pdf";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image from a byte array
+            // Load EMF from byte array
             byte[] emfBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream ms = new MemoryStream(emfBytes))
-            using (Image image = Image.Load(ms))
+            using (var memoryStream = new MemoryStream(emfBytes))
             {
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions();
-
-                // Convert and save the image directly to PDF
-                image.Save(outputPath, pdfOptions);
+                using (EmfImage emfImage = (EmfImage)Image.Load(memoryStream))
+                {
+                    // Convert to PDF
+                    PdfOptions pdfOptions = new PdfOptions();
+                    emfImage.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)

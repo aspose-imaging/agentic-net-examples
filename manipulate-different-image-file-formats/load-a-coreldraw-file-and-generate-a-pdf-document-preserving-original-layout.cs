@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Data\sample.cdr";
+        string outputPath = @"C:\Data\sample.cdr.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Input\sample.cdr";
-            string outputPath = @"C:\Output\sample.cdr.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -31,14 +31,14 @@ class Program
                 var pdfOptions = new PdfOptions();
 
                 // Configure rasterization options specific for CDR
-                var rasterOptions = new CdrRasterizationOptions
+                var rasterizationOptions = new CdrRasterizationOptions
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
                     Positioning = PositioningTypes.DefinedByDocument
                 };
 
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
+                pdfOptions.VectorRasterizationOptions = rasterizationOptions;
 
                 // Save as PDF preserving original layout
                 image.Save(outputPath, pdfOptions);

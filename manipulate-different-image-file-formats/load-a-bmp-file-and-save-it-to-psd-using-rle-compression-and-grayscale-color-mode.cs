@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\sample.bmp";
-            string outputPath = "C:\\temp\\output.psd";
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.psd";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,20 +21,20 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD save options
+                // Configure PSD save options: RLE compression and Grayscale color mode
                 PsdOptions psdOptions = new PsdOptions
                 {
                     CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
                     ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale
                 };
 
-                // Save the image as PSD with the specified options
+                // Save as PSD with the specified options
                 image.Save(outputPath, psdOptions);
             }
         }

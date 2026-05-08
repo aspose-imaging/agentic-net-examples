@@ -9,46 +9,58 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\LargeInput.eps";
-        string outputPath = @"C:\Temp\Converted\LargeOutput.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Input\LargeFile.eps";
+            string outputPath = @"C:\Output\LargeFile.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load EPS with a buffer size hint to limit memory usage (tiling-like behavior)
-        var loadOptions = new EpsLoadOptions
-        {
-            BufferSizeHint = 10 * 1024 * 1024 // 10 MB buffer hint
-        };
-
-        using (var epsImage = (EpsImage)Image.Load(inputPath, loadOptions))
-        {
-            // Configure PDF options
-            var pdfOptions = new PdfOptions
+            // Verify that the source EPS file exists
+            if (!File.Exists(inputPath))
             {
-                PdfCoreOptions = new PdfCoreOptions
-                {
-                    PdfCompliance = PdfComplianceVersion.PdfA1b
-                },
-                // Optional: set rasterization options if you want to control page size
-                VectorRasterizationOptions = new EpsRasterizationOptions
-                {
-                    PageWidth = epsImage.Width,   // preserve original width
-                    PageHeight = epsImage.Height, // preserve original height
-                    BackgroundColor = Color.White
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image with a buffer size hint to limit memory usage
+            var loadOptions = new EpsLoadOptions
+            {
+                // Example hint: 100 MB maximum internal buffer size
+                BufferSizeHint = 100 * 1024 * 1024
             };
 
-            // Save the EPS as PDF
-            epsImage.Save(outputPath, pdfOptions);
+            using (var epsImage = (EpsImage)Image.Load(inputPath, loadOptions))
+            {
+                // Configure PDF conversion options
+                var pdfOptions = new PdfOptions
+                {
+                    // Set PDF compliance if required
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    },
+
+                    // Use vector rasterization options to control how the EPS is rendered.
+                    // Setting PageWidth/PageHeight to the original dimensions keeps the
+                    // rasterization in a single tile; for very large files you could
+                    // split the rendering into smaller tiles by adjusting these values.
+                    VectorRasterizationOptions = new EpsRasterizationOptions
+                    {
+                        PageWidth = epsImage.Width,
+                        PageHeight = epsImage.Height
+                    }
+                };
+
+                // Save the EPS as a PDF using the configured options
+                epsImage.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

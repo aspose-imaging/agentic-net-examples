@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 
@@ -10,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.bmp";
-            string outputPath = @"C:\temp\output.webp";
+            string inputPath = "C:\\temp\\input.bmp";
+            string outputPath = "C:\\temp\\output.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,16 +21,16 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
+            // Load the BMP image
             using (BmpImage bmpImage = new BmpImage(inputPath))
             {
-                // Set lossless WebP options
+                // Configure lossless WebP options
                 var webpOptions = new WebPOptions { Lossless = true };
 
-                // Save as WebP
+                // Save the image as WebP
                 bmpImage.Save(outputPath, webpOptions);
             }
         }

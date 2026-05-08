@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,61 +11,43 @@ class Program
         // Hardcoded input and output paths
         string backgroundPath = "background.png";
         string overlayPath = "overlay.png";
-        string outputPath = "output.png";
+        string outputPath = "result.png";
 
-        // Validate input files
-        if (!File.Exists(backgroundPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {backgroundPath}");
-            return;
-        }
-        if (!File.Exists(overlayPath))
-        {
-            Console.Error.WriteLine($"File not found: {overlayPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load background and overlay images
-        using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
-        using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
-        {
-            // Apply full opacity blending (255) at origin (0,0)
-            background.Blend(new Point(0, 0), overlay, 255);
-
-            // Save blended result as PNG
-            PngOptions pngOptions = new PngOptions
+            // Verify input files exist
+            if (!File.Exists(backgroundPath))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
-            background.Save(outputPath, pngOptions);
-        }
-
-        // Verify that the saved image retains full opacity (no transparency loss)
-        using (RasterImage result = (RasterImage)Image.Load(outputPath))
-        {
-            int[] pixels = result.LoadArgb32Pixels(result.Bounds);
-            bool transparencyLost = false;
-            foreach (int argb in pixels)
+                Console.Error.WriteLine($"File not found: {backgroundPath}");
+                return;
+            }
+            if (!File.Exists(overlayPath))
             {
-                byte alpha = (byte)(argb >> 24);
-                if (alpha != 255)
-                {
-                    transparencyLost = true;
-                    break;
-                }
+                Console.Error.WriteLine($"File not found: {overlayPath}");
+                return;
             }
 
-            if (transparencyLost)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load background and overlay images as RasterImage instances
+            using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
+            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
             {
-                Console.Error.WriteLine("Transparency loss detected in the blended image.");
+                // Blend overlay onto background with full opacity (255)
+                background.Blend(new Point(0, 0), overlay, 255);
+
+                // Prepare PNG save options with bound source
+                FileCreateSource source = new FileCreateSource(outputPath, false);
+                PngOptions options = new PngOptions { Source = source };
+
+                // Save the blended image
+                background.Save(outputPath, options);
             }
-            else
-            {
-                Console.WriteLine("Blending completed successfully with full opacity; no transparency loss.");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -1,67 +1,59 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputDirectory = @"C:\temp\output";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.djvu";
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = "output";
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output directory exists (creates parent directories if needed)
+            Directory.CreateDirectory(outputDirectory);
 
-            // Enable memory optimization via LoadOptions
+            // Set up load options to limit memory usage (e.g., 1 MB buffer)
             LoadOptions loadOptions = new LoadOptions
             {
-                BufferSizeHint = 1 * 1024 * 1024 // 1 MB buffer
+                BufferSizeHint = 1 * 1024 * 1024 // 1 MB
             };
 
-            // Load DjVu document with memory optimization
+            // Open the DjVu file with memory‑optimized loading
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
             {
-                // Convert pages 3‑7 to GIF
-                for (int pageNum = 3; pageNum <= 7; pageNum++)
+                // Iterate through all pages and process pages 3‑7
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    DjvuPage targetPage = null;
-                    foreach (DjvuPage page in djvuImage.DjvuPages)
+                    if (page.PageNumber >= 3 && page.PageNumber <= 7)
                     {
-                        if (page.PageNumber == pageNum)
-                        {
-                            targetPage = page;
-                            break;
-                        }
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as a GIF image
+                        page.Save(outputPath, new GifOptions());
                     }
-
-                    if (targetPage == null)
-                    {
-                        Console.Error.WriteLine($"Page {pageNum} not found.");
-                        continue;
-                    }
-
-                    string outputPath = Path.Combine(outputDir, $"page_{pageNum}.gif");
-                    // Ensure directory exists for each output file
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as GIF
-                    targetPage.Save(outputPath, new GifOptions());
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

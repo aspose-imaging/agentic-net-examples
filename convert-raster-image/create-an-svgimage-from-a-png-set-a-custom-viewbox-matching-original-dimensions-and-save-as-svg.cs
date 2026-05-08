@@ -1,46 +1,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.png";
-        string outputPath = @"C:\Images\result.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.svg";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG raster image
-        using (RasterImage raster = (RasterImage)Image.Load(inputPath))
-        {
-            int width = raster.Width;
-            int height = raster.Height;
-            int dpi = 96; // Standard screen DPI
-
-            // Create an SVG graphics context with the same dimensions as the PNG
-            SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
-
-            // Draw the raster image onto the SVG canvas, preserving original size
-            graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
-
-            // Finalize SVG recording and obtain the SvgImage instance
-            using (SvgImage svgImage = graphics.EndRecording())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Save the SVG file
-                svgImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image pngImage = Image.Load(inputPath))
+            {
+                // Set up SVG rasterization options with a viewbox matching the PNG dimensions
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = pngImage.Size // ViewBox = original dimensions
+                };
+
+                // Configure SVG save options
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as SVG
+                pngImage.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

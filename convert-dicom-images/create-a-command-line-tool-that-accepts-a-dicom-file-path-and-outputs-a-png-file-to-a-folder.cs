@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input DICOM file and output folder
-        string inputPath = @"C:\temp\sample.dicom";
-        string outputFolder = @"C:\temp\output\";
+        string inputPath = @"c:\temp\sample.dicom";
+        string outputFolder = @"c:\temp\output";
 
         try
         {
@@ -21,7 +21,7 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists (unconditional)
+            // Ensure the output folder exists
             Directory.CreateDirectory(outputFolder);
 
             // Open the DICOM file as a stream
@@ -30,13 +30,13 @@ class Program
                 // Load the DICOM image from the stream
                 using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    // Iterate through each page and save as PNG
+                    // Iterate through each page in the DICOM image
                     foreach (DicomPage dicomPage in dicomImage.DicomPages)
                     {
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputFolder, $"sample.{dicomPage.Index}.png");
+                        // Build the output PNG file path for the current page
+                        string outputPath = Path.Combine(outputFolder, $"page_{dicomPage.Index}.png");
 
-                        // Ensure the directory for the output file exists (unconditional)
+                        // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Save the page as PNG
@@ -47,6 +47,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

@@ -8,54 +8,55 @@ class Program
 {
     static void Main()
     {
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
-            return;
-        }
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input\";
+            string outputDir = @"C:\Images\Output\";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-        foreach (var inputPath in files)
-        {
-            if (!File.Exists(inputPath))
+            // List of PNG files to process
+            string[] inputFiles = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
-            }
+                Path.Combine(inputDir, "image1.png"),
+                Path.Combine(inputDir, "image2.png")
+                // Add more file names as needed
+            };
 
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            foreach (var inputPath in inputFiles)
             {
-                // Apply Gaussian blur to the entire image
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                // Save the blurred image as SVG
-                using (SvgOptions svgOptions = new SvgOptions())
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    };
-                    svgOptions.VectorRasterizationOptions = vectorOptions;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Build output SVG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PNG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Apply Gaussian blur to the entire image
+                    RasterImage rasterImage = (RasterImage)image;
+                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                    // Set up SVG save options with rasterization settings
+                    var vectorOptions = new SvgRasterizationOptions { PageSize = rasterImage.Size };
+                    var svgOptions = new SvgOptions { VectorRasterizationOptions = vectorOptions };
+
+                    // Save the blurred image as SVG
                     image.Save(outputPath, svgOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

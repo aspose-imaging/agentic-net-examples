@@ -7,13 +7,13 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = "sample.eps";
+        string outputPath = "sample.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.eps";
-            string outputPath = "output.png";
-
-            // Verify that the input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,10 +21,10 @@ class Program
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image and save it as PNG
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
@@ -32,6 +32,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

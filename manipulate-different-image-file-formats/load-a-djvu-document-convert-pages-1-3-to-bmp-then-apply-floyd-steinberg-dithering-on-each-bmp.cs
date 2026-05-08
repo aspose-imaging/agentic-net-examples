@@ -1,47 +1,50 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.djvu";
+        string outputDir = "output";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.djvu";
-            string outputDir = @"C:\temp\output";
-
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the DjVu document
-            using (Image image = Image.Load(inputPath))
-            {
-                DjvuImage djvuImage = (DjvuImage)image;
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-                // Iterate over pages 1‑3
-                foreach (DjvuPage page in djvuImage.Pages)
+            // Load DjVu document
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                DjvuImage djvu = (DjvuImage)image;
+
+                // Process pages 1‑3 (indices 0‑2)
+                int pagesToProcess = Math.Min(3, djvu.Pages.Length);
+                for (int i = 0; i < pagesToProcess; i++)
                 {
-                    if (page.PageNumber < 1 || page.PageNumber > 3)
-                        continue;
+                    DjvuPage page = (DjvuPage)djvu.Pages[i];
 
                     // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                    page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1);
+                    page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
 
-                    // Prepare output file path
-                    string outputPath = Path.Combine(outputDir, $"page{page.PageNumber}.bmp");
+                    // Prepare output BMP path
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.bmp");
 
-                    // Ensure output directory exists
+                    // Ensure output directory for the file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as BMP
+                    // Save the dithered page as BMP
                     page.Save(outputPath, new BmpOptions());
                 }
             }

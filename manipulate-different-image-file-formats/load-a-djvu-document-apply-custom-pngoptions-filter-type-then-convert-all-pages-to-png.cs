@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -10,6 +10,7 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "Input/sample.djvu";
             if (!File.Exists(inputPath))
             {
@@ -17,22 +18,27 @@ class Program
                 return;
             }
 
-            string outputDir = "Output";
-            Directory.CreateDirectory(outputDir);
+            string outputDirectory = "Output";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            PngOptions options = new PngOptions
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                FilterType = PngFilterType.Sub
-            };
-
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvu = new DjvuImage(stream))
-            {
-                foreach (DjvuPage page in djvu.Pages)
+                // Configure PNG options with a custom filter type
+                PngOptions pngOptions = new PngOptions
                 {
-                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.png");
+                    FilterType = PngFilterType.Sub
+                };
+
+                // Iterate through all pages and save each as PNG
+                foreach (DjvuPage page in djvuImage.Pages)
+                {
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    page.Save(outputPath, options);
+                    page.Save(outputPath, pngOptions);
                 }
             }
         }

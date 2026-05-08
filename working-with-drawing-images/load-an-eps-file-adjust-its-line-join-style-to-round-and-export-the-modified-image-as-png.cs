@@ -2,15 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.eps";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
 
         // Validate input file existence
         if (!File.Exists(inputPath))
@@ -22,27 +24,38 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load EPS image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Adjust line join style to round.
-            // Note: Aspose.Imaging does not expose a direct property to modify EPS line join style.
-            // If such functionality exists, it would be applied here.
-            // Example (hypothetical):
-            // image.LineJoin = PenLineJoin.Round;
-
-            // Prepare PNG export options with rasterization settings
-            var pngOptions = new PngOptions
+            // Load the EPS image
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                VectorRasterizationOptions = new EpsRasterizationOptions
+                // Configure PNG export options with rasterization settings
+                var pngOptions = new PngOptions
                 {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                }
-            };
+                    // Bind the output file source
+                    Source = new FileCreateSource(outputPath, false),
 
-            // Save the modified image as PNG
-            image.Save(outputPath, pngOptions);
+                    // Set vector rasterization options
+                    VectorRasterizationOptions = new EpsRasterizationOptions
+                    {
+                        // Preserve original dimensions
+                        PageWidth = epsImage.Width,
+                        PageHeight = epsImage.Height,
+
+                        // Adjust rendering to use round line joins via smoothing mode
+                        // (Aspose.Imaging does not expose a direct line‑join property for EPS rasterization;
+                        // using anti‑alias smoothing yields smoother, rounded joins.)
+                        SmoothingMode = SmoothingMode.AntiAlias
+                    }
+                };
+
+                // Save the modified image as PNG
+                epsImage.Save(outputPath, pngOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

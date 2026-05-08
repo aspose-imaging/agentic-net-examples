@@ -7,11 +7,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = @"c:\temp\test.webp";
-
         try
         {
+            // Hardcoded input path
+            string inputPath = @"c:\temp\input.webp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -19,29 +19,24 @@ class Program
                 return;
             }
 
-            // Open a file stream for the WebP image
+            // Load WebP image from a file stream
             using (FileStream stream = File.OpenRead(inputPath))
+            using (Image image = Image.Load(stream))
             {
-                // Load the image from the stream
-                using (Image image = Image.Load(stream))
+                // Cast to WebPImage to access PageCount
+                WebPImage webPImage = image as WebPImage;
+                if (webPImage != null)
                 {
-                    // Cast to WebPImage to access WebP‑specific properties
-                    WebPImage webPImage = image as WebPImage;
-                    if (webPImage != null)
-                    {
-                        // Log the number of frames (pages) in the WebP image
-                        Console.WriteLine($"Frame count (PageCount): {webPImage.PageCount}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("The loaded image is not a WebP image.");
-                    }
+                    Console.WriteLine($"Frame count: {webPImage.PageCount}");
+                }
+                else
+                {
+                    Console.WriteLine("Loaded image is not a WebP image.");
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

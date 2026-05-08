@@ -7,38 +7,14 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Asynchronous conversion of a DICOM file to PNG images (one per page)
-    static async Task ConvertDicomToPngAsync(string inputPath, string outputDirectory)
+    static async Task Main()
     {
-        await Task.Run(() =>
-        {
-            // Load the DICOM image from a file stream
-            using (Stream stream = File.OpenRead(inputPath))
-            using (DicomImage dicomImage = new DicomImage(stream))
-            {
-                // Iterate through each page and save as PNG
-                foreach (DicomPage page in dicomImage.DicomPages)
-                {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.Index}.png");
-
-                    // Ensure the directory exists before saving
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as PNG using the provided PngOptions
-                    page.Save(outputPath, new PngOptions());
-                }
-            }
-        });
-    }
-
-    static void Main()
-    {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputDirectory = "output";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputDir = "output";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -46,15 +22,39 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists (covers the case where no pages are processed)
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            // Run the conversion asynchronously and wait for completion
-            ConvertDicomToPngAsync(inputPath, outputDirectory).GetAwaiter().GetResult();
+            // Perform conversion asynchronously
+            await ConvertDicomToPngAsync(inputPath, outputDir);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
+    }
+
+    // Asynchronous conversion using Task.Run
+    static Task ConvertDicomToPngAsync(string inputPath, string outputDir)
+    {
+        return Task.Run(() =>
+        {
+            // Load DICOM image from a file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DicomImage dicomImage = new DicomImage(stream))
+            {
+                // Iterate through each DICOM page and save as PNG
+                foreach (DicomPage page in dicomImage.DicomPages)
+                {
+                    string outputPath = Path.Combine(outputDir, $"page_{page.Index}.png");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as PNG using provided save rule
+                    page.Save(outputPath, new PngOptions());
+                }
+            }
+        });
     }
 }

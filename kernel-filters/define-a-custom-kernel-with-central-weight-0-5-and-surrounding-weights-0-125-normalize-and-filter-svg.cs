@@ -2,61 +2,67 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string tempPngPath = "temp/temp.png";
+        string outputPath = "output.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directories exist
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string tempPath = "temp\\temp.png";
-            string outputPath = "output\\filtered.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure directories for temporary and final output exist
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load SVG and rasterize to a temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-                svgImage.Save(tempPath, pngOptions);
+                SvgImage svgImage = (SvgImage)image;
+
+                // Set up rasterization options
+                var rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = svgImage.Size;
+
+                // Configure PNG save options with vector rasterization
+                var pngSaveOptions = new PngOptions();
+                pngSaveOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save rasterized PNG to temporary file
+                svgImage.Save(tempPngPath, pngSaveOptions);
             }
 
-            // Load the rasterized PNG, apply custom convolution filter, and save result
-            using (Image rasterImage = Image.Load(tempPath))
+            // Load the rasterized PNG for filtering
+            using (Image img = Image.Load(tempPngPath))
             {
-                var raster = (RasterImage)rasterImage;
+                var rasterImage = (RasterImage)img;
 
-                // Define custom 3x3 kernel (central 0.333..., surrounding 0.08333...)
+                // Define custom 3x3 kernel (central 0.33333, surrounding 0.08333)
                 double[,] kernel = new double[,]
                 {
-                    { 0.0833333333, 0.0833333333, 0.0833333333 },
-                    { 0.0833333333, 0.3333333333, 0.0833333333 },
-                    { 0.0833333333, 0.0833333333, 0.0833333333 }
+                    { 0.08333, 0.08333, 0.08333 },
+                    { 0.08333, 0.33333, 0.08333 },
+                    { 0.08333, 0.08333, 0.08333 }
                 };
 
-                var convOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
-                raster.Filter(raster.Bounds, convOptions);
-                raster.Save(outputPath, new PngOptions());
+                // Apply convolution filter with the custom kernel
+                var filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                // Save the filtered image to the final output path
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

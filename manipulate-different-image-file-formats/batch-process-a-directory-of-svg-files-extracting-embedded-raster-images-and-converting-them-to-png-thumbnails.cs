@@ -17,64 +17,54 @@ class Program
             // Ensure the base output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Get all SVG files in the input directory
-            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg", SearchOption.TopDirectoryOnly);
-
-            foreach (string inputPath in svgFiles)
+            // Process each SVG file in the input directory
+            foreach (string svgPath in Directory.GetFiles(inputDir, "*.svg"))
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Verify the SVG file exists
+                if (!File.Exists(svgPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {svgPath}");
                     return;
                 }
 
                 // Load the SVG image
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(svgPath))
                 {
-                    // Cast to VectorImage to access embedded raster images
+                    // Cast to VectorImage to access embedded resources
                     var vectorImage = image as VectorImage;
                     if (vectorImage == null)
+                    {
+                        Console.Error.WriteLine($"Not a vector image: {svgPath}");
                         continue;
+                    }
 
-                    // Retrieve embedded images
+                    // Retrieve embedded raster images
                     EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
                     int index = 0;
 
-                    foreach (var embedded in embeddedImages)
+                    foreach (EmbeddedImage embedded in embeddedImages)
                     {
                         using (embedded)
                         {
-                            // Create a thumbnail of size 150 (preserving aspect ratio)
-                            const int thumbSize = 150;
-                            int originalWidth = embedded.Image.Width;
-                            int originalHeight = embedded.Image.Height;
-                            int newWidth, newHeight;
+                            // The actual raster image
+                            Image raster = embedded.Image;
 
-                            if (originalWidth >= originalHeight)
-                            {
-                                newWidth = thumbSize;
-                                newHeight = (int)(originalHeight * (thumbSize / (float)originalWidth));
-                            }
-                            else
-                            {
-                                newHeight = thumbSize;
-                                newWidth = (int)(originalWidth * (thumbSize / (float)originalHeight));
-                            }
-
-                            // Resize the embedded raster image
-                            embedded.Image.Resize(newWidth, newHeight);
+                            // Create a thumbnail (max width 150px, preserve aspect ratio)
+                            const int thumbWidth = 150;
+                            int thumbHeight = (int)(raster.Height * (thumbWidth / (double)raster.Width));
+                            raster.Resize(thumbWidth, thumbHeight);
 
                             // Build output file path
-                            string baseName = Path.GetFileNameWithoutExtension(inputPath);
-                            string outFile = Path.Combine(outputDir, $"{baseName}_image{index}.png");
+                            string outFileName = Path.Combine(
+                                outputDir,
+                                $"{Path.GetFileNameWithoutExtension(svgPath)}_img{index}.png");
 
                             // Ensure the directory for the output file exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outFile));
+                            Directory.CreateDirectory(Path.GetDirectoryName(outFileName));
 
                             // Save the thumbnail as PNG
                             var pngOptions = new PngOptions();
-                            embedded.Image.Save(outFile, pngOptions);
+                            raster.Save(outFileName, pngOptions);
                         }
 
                         index++;

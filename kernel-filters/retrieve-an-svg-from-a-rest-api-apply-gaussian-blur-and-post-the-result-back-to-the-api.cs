@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,71 +12,81 @@ class Program
     {
         try
         {
-            // Hardcoded URLs and file paths
-            string inputUrl = "https://example.com/input.svg";
-            string tempInputPath = "temp_input.svg";
-            string tempRasterPath = "temp_raster.png";
-            string outputPath = "output.png";
+            // Define URLs and temporary file paths
+            string downloadUrl = "https://example.com/input.svg";
+            string uploadUrl = "https://example.com/upload";
+            string tempSvgPath = Path.Combine(Path.GetTempPath(), "downloaded.svg");
+            string outputPath = Path.Combine(Path.GetTempPath(), "blurred.png");
 
             // Download SVG from REST API
-            var httpClient = new System.Net.Http.HttpClient();
-            var svgBytes = httpClient.GetByteArrayAsync(inputUrl).Result;
-            File.WriteAllBytes(tempInputPath, svgBytes);
-
-            // Verify input file exists
-            if (!File.Exists(tempInputPath))
+            using (System.Net.Http.HttpClient httpClient = new System.Net.Http.HttpClient())
             {
-                Console.Error.WriteLine($"File not found: {tempInputPath}");
+                using (System.IO.Stream downloadStream = httpClient.GetStreamAsync(downloadUrl).Result)
+                using (FileStream fileStream = new FileStream(tempSvgPath, FileMode.Create, FileAccess.Write))
+                {
+                    downloadStream.CopyTo(fileStream);
+                }
+            }
+
+            // Verify the SVG file was saved
+            if (!File.Exists(tempSvgPath))
+            {
+                Console.Error.WriteLine($"File not found: {tempSvgPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load SVG and rasterize to PNG
-            using (Image image = Image.Load(tempInputPath))
+            // Load SVG image from the temporary file
+            using (FileStream svgFileStream = new FileStream(tempSvgPath, FileMode.Open, FileAccess.Read))
+            using (SvgImage svgImage = new SvgImage(svgFileStream))
             {
-                var svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
+                // Prepare rasterization options for PNG output
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = svgImage.Size;
 
-                var rasterOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Rasterize SVG to a memory stream
+                using (MemoryStream rasterStream = new MemoryStream())
                 {
-                    PageSize = svgImage.Size
-                };
+                    svgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0;
 
-                var pngOptions = new Aspose.Imaging.ImageOptions.PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    // Load rasterized image as RasterImage
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
+                    {
+                        // Apply Gaussian blur filter (radius 5, sigma 4.0)
+                        rasterImage.Filter(rasterImage.Bounds,
+                            new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                svgImage.Save(tempRasterPath, pngOptions);
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the blurred image to PNG file
+                        rasterImage.Save(outputPath);
+                    }
+                }
             }
 
-            // Verify rasterized PNG exists
-            if (!File.Exists(tempRasterPath))
+            // Verify the output file was created
+            if (!File.Exists(outputPath))
             {
-                Console.Error.WriteLine($"File not found: {tempRasterPath}");
+                Console.Error.WriteLine($"File not found: {outputPath}");
                 return;
             }
 
-            // Load raster PNG, apply Gaussian blur, and save final output
-            using (Image rasterImageContainer = Image.Load(tempRasterPath))
+            // Upload the blurred PNG back to the REST API
+            using (System.Net.Http.HttpClient httpClient = new System.Net.Http.HttpClient())
+            using (FileStream uploadStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read))
             {
-                var rasterImage = (RasterImage)rasterImageContainer;
-
-                // Apply Gaussian blur with radius 5 and sigma 4.0
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                rasterImage.Save(outputPath);
-            }
-
-            // Post the processed image back to the API
-            var resultBytes = File.ReadAllBytes(outputPath);
-            var content = new System.Net.Http.ByteArrayContent(resultBytes);
-            var postResponse = httpClient.PostAsync("https://example.com/upload", content).Result;
-            if (!postResponse.IsSuccessStatusCode)
-            {
-                Console.Error.WriteLine($"Failed to upload: {postResponse.StatusCode}");
+                System.Net.Http.StreamContent content = new System.Net.Http.StreamContent(uploadStream);
+                content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
+                System.Net.Http.HttpResponseMessage response = httpClient.PostAsync(uploadUrl, content).Result;
+                // Optionally handle response
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.Error.WriteLine($"Upload failed: {response.StatusCode}");
+                }
             }
         }
         catch (Exception ex)

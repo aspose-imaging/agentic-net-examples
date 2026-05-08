@@ -10,27 +10,27 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = "input.png";
-            string outputPath = "output_emboss.png";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\Images\\input.png";
+            string outputPath = "C:\\Images\\output_emboss.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image using Aspose.Imaging
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to access filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply the 3x3 emboss convolution kernel
+                // Apply the 3x3 emboss convolution filter to the whole image
                 rasterImage.Filter(
                     rasterImage.Bounds,
                     new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
@@ -41,7 +41,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

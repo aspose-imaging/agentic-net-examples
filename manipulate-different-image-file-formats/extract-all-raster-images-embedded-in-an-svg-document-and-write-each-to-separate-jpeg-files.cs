@@ -2,17 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input SVG file path
+        // Hardcoded input and output paths
         string inputPath = "input.svg";
-
-        // Hardcoded directory where extracted JPEGs will be saved
-        string outputDirectory = "extracted_images";
+        string outputDirectory = "output";
 
         try
         {
@@ -26,27 +23,20 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(outputDirectory);
 
-            // Load the SVG (or any vector) image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to VectorImage to access embedded images
-                var vectorImage = image as VectorImage;
-                if (vectorImage == null)
-                {
-                    Console.Error.WriteLine("The provided file is not a vector image.");
-                    return;
-                }
-
-                // Retrieve embedded raster images
+                var vectorImage = (VectorImage)image;
                 EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
 
                 int index = 0;
-                foreach (EmbeddedImage embedded in embeddedImages)
+                foreach (var embedded in embeddedImages)
                 {
-                    // Build output file path for each extracted image
-                    string outputPath = Path.Combine(outputDirectory, $"image{index++}.jpg");
+                    // Prepare output file path
+                    string outputPath = Path.Combine(outputDirectory, $"image{index}.jpg");
 
-                    // Ensure the directory for the output file exists (unconditional as required)
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the embedded raster image as JPEG
@@ -54,6 +44,8 @@ class Program
                     {
                         embedded.Image.Save(outputPath, new JpegOptions());
                     }
+
+                    index++;
                 }
             }
         }

@@ -5,63 +5,55 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Define base, input, and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-            return;
-        }
+            // Hard‑coded input BMP files
+            string[] inputFiles = {
+                @"C:\Images\sample1.bmp",
+                @"C:\Images\sample2.bmp"
+            };
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
+            // Hard‑coded output “bucket” folder for SVG files
+            string outputBucket = @"C:\CloudBucket\svgs";
 
-        // Get all BMP files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-        foreach (var inputPath in files)
-        {
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            foreach (string inputPath in inputFiles)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Determine output SVG path
-            string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
-
-            // Ensure the output directory for this file exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load BMP image and save as SVG
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure vector rasterization options
-                var vectorOptions = new SvgRasterizationOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    PageSize = image.Size
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Set SVG save options
-                var svgOptions = new SvgOptions
+                // Build output SVG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputBucket, fileNameWithoutExt + ".svg");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load BMP and convert to SVG
+                using (Image image = Image.Load(inputPath))
                 {
-                    VectorRasterizationOptions = vectorOptions
-                };
+                    var vectorOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
 
-                // Save the image as SVG
-                image.Save(outputPath, svgOptions);
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = vectorOptions
+                    };
+
+                    image.Save(outputPath, svgOptions);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

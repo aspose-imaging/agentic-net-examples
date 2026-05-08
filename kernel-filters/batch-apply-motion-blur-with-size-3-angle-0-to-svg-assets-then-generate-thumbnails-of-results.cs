@@ -9,58 +9,61 @@ class Program
     {
         try
         {
-            // Hardcoded directories
-            string inputDir = "InputSvg";
-            string outputDir = "OutputSvg";
-            string thumbDir = "Thumbnails";
-            string tempDir = "Temp";
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Ensure output directories exist
+            Directory.CreateDirectory(inputDir);
             Directory.CreateDirectory(outputDir);
-            Directory.CreateDirectory(thumbDir);
-            Directory.CreateDirectory(tempDir);
 
-            // Process each SVG file in the input directory
-            foreach (var inputPath in Directory.GetFiles(inputDir, "*.svg"))
+            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
+
+            foreach (var svgPath in svgFiles)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(svgPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {svgPath}");
                     continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string tempPngPath = Path.Combine(tempDir, fileName + ".png");
+                string fileName = Path.GetFileNameWithoutExtension(svgPath);
                 string blurredPath = Path.Combine(outputDir, fileName + "_blur.png");
-                string thumbPath = Path.Combine(thumbDir, fileName + "_thumb.png");
+                string thumbPath = Path.Combine(outputDir, fileName + "_thumb.png");
+                string tempPngPath = Path.Combine(outputDir, fileName + "_temp.png");
 
-                // Ensure directories for each output file
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(blurredPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(thumbPath));
-
-                // Rasterize SVG to PNG
-                using (Image svgImage = Image.Load(inputPath))
+                // Rasterize SVG to PNG (temporary file)
+                using (Image svgImage = Image.Load(svgPath))
                 {
-                    PngOptions pngOptions = new PngOptions();
-                    pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
+                    var rasterOptions = new SvgRasterizationOptions();
+                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
                     svgImage.Save(tempPngPath, pngOptions);
                 }
 
-                // Apply motion blur filter to the rasterized image
-                using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+                // Load rasterized PNG, apply motion blur, and save blurred image
+                using (Image rasterImg = Image.Load(tempPngPath))
                 {
+                    var raster = (RasterImage)rasterImg;
                     raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(3, 1.0, 0.0));
-                    raster.Save(blurredPath);
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(blurredPath));
+                    raster.Save(blurredPath, new PngOptions());
                 }
 
-                // Generate thumbnail from the blurred image
-                using (RasterImage thumb = (RasterImage)Image.Load(blurredPath))
+                // Create thumbnail from blurred image
+                using (Image thumbImg = Image.Load(blurredPath))
                 {
-                    int thumbWidth = 150;
-                    int thumbHeight = (int)(thumb.Height * (150.0 / thumb.Width));
-                    thumb.Resize(thumbWidth, thumbHeight);
-                    thumb.Save(thumbPath);
+                    var thumbRaster = (RasterImage)thumbImg;
+                    thumbRaster.Resize(200, 200, ResizeType.NearestNeighbourResample);
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(thumbPath));
+                    thumbRaster.Save(thumbPath, new PngOptions());
+                }
+
+                // Clean up temporary file
+                if (File.Exists(tempPngPath))
+                {
+                    File.Delete(tempPngPath);
                 }
             }
         }

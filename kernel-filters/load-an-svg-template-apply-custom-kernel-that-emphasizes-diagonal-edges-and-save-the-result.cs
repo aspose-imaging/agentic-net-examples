@@ -9,56 +9,61 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "template.svg";
+        string outputPath = "result.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Temporary rasterized PNG path
-            string tempPath = "temp.png";
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-            // Load SVG and rasterize to temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
-            {
-                var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
-                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                svgImage.Save(tempPath, pngOptions);
-            }
-
-            // Load the rasterized image, apply custom diagonal edge kernel, and save result
-            using (Image rasterImage = Image.Load(tempPath))
-            {
-                var raster = (RasterImage)rasterImage;
-
-                // Custom 3x3 kernel emphasizing diagonal edges
-                double[,] kernel = new double[,]
+                // Set up SVG rasterization options
+                var svgRasterOptions = new SvgRasterizationOptions
                 {
-                    { -1, 0, 1 },
-                    {  0, 0, 0 },
-                    {  1, 0,-1 }
+                    PageSize = vectorImage.Size,
+                    BackgroundColor = Color.White
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                raster.Filter(raster.Bounds, filterOptions);
-                raster.Save(outputPath, new PngOptions());
-            }
+                // Prepare PNG save options with the rasterization settings
+                var pngSaveOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = svgRasterOptions
+                };
 
-            // Clean up temporary file
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
+                // Rasterize SVG to a memory stream
+                using (var rasterStream = new MemoryStream())
+                {
+                    vectorImage.Save(rasterStream, pngSaveOptions);
+                    rasterStream.Position = 0;
+
+                    // Load the rasterized image
+                    using (Image rasterImageContainer = Image.Load(rasterStream))
+                    {
+                        var rasterImage = (RasterImage)rasterImageContainer;
+
+                        // Define a custom 3x3 kernel emphasizing diagonal edges
+                        double[,] diagonalKernel = new double[,]
+                        {
+                            { -1, 0, 1 },
+                            { 0, 0, 0 },
+                            { 1, 0, -1 }
+                        };
+
+                        // Apply convolution filter with the custom kernel
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(diagonalKernel);
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                        // Save the filtered raster image
+                        rasterImage.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)

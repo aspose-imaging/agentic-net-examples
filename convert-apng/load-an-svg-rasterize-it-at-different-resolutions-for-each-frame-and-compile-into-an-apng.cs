@@ -1,10 +1,9 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -14,94 +13,70 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string svgPath = "input.svg";
+            string inputSvgPath = "input.svg";
             string outputApngPath = "output.apng";
 
             // Validate input file existence
-            if (!File.Exists(svgPath))
+            if (!File.Exists(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {svgPath}");
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputApngPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputApngPath));
+
+            // Define frame sizes (different resolutions)
+            int[] frameSizes = new int[] { 200, 400, 600 };
+            int maxSize = 0;
+            foreach (int s in frameSizes)
+                if (s > maxSize) maxSize = s;
+
+            // Load the SVG once
+            using (Image svgImage = Image.Load(inputSvgPath))
             {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            // Load the SVG image
-            using (Image svgImage = Image.Load(svgPath))
-            {
-                // Define desired widths for each frame (heights will keep aspect ratio)
-                int[] frameWidths = new int[] { 100, 200, 300 };
-
-                // Prepare list to hold rasterized frames
-                List<RasterImage> rasterFrames = new List<RasterImage>();
-
-                // Rasterize each resolution and store the RasterImage
-                foreach (int targetWidth in frameWidths)
-                {
-                    // Calculate height to preserve aspect ratio
-                    int targetHeight = (int)((double)svgImage.Height / svgImage.Width * targetWidth);
-
-                    // Set up PNG save options with vector rasterization settings
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageWidth = targetWidth,
-                            PageHeight = targetHeight
-                        }
-                    };
-
-                    // Rasterize to a memory stream
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        svgImage.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        // Load the rasterized image
-                        RasterImage raster = (RasterImage)Image.Load(ms);
-                        rasterFrames.Add(raster);
-                    }
-                }
-
-                // Use the first frame dimensions for the APNG canvas
-                RasterImage firstFrame = rasterFrames[0];
-                int canvasWidth = firstFrame.Width;
-                int canvasHeight = firstFrame.Height;
-
                 // Set up APNG creation options
-                ApngOptions apngCreateOptions = new ApngOptions
+                ApngOptions apngOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputApngPath, false),
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = 100 // default frame duration in ms
+                    DefaultFrameTime = 200 // milliseconds per frame
                 };
 
-                // Create the APNG image bound to the output file
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngCreateOptions, canvasWidth, canvasHeight))
+                // Create APNG canvas with the largest size
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, maxSize, maxSize))
                 {
-                    // Remove the default empty frame
-                    apngImage.RemoveAllFrames();
+                    apng.RemoveAllFrames();
 
-                    // Add each raster frame to the APNG
-                    foreach (RasterImage frame in rasterFrames)
+                    // Generate each frame at its specific resolution
+                    foreach (int size in frameSizes)
                     {
-                        // Ensure the frame matches canvas size (optional scaling could be added here)
-                        apngImage.AddFrame(frame);
+                        // Rasterization options for current resolution
+                        SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                        {
+                            PageWidth = size,
+                            PageHeight = size
+                        };
+                        PngOptions pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = rasterOptions
+                        };
+
+                        // Rasterize SVG to a memory stream and load as RasterImage
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            svgImage.Save(ms, pngOptions);
+                            ms.Position = 0;
+                            using (RasterImage raster = (RasterImage)Image.Load(ms))
+                            {
+                                // Add the rasterized frame to the APNG
+                                apng.AddFrame(raster);
+                            }
+                        }
                     }
 
-                    // Save the APNG (output path already bound via FileCreateSource)
-                    apngImage.Save();
-                }
-
-                // Dispose raster frames
-                foreach (RasterImage frame in rasterFrames)
-                {
-                    frame.Dispose();
+                    // Save the compiled APNG
+                    apng.Save();
                 }
             }
         }

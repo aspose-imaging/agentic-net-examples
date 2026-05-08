@@ -1,100 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.png";
+        string outputPath = "output.png";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (PngImage image = new PngImage(inputPath))
+        try
         {
-            int width = image.Width;
-            int height = image.Height;
-            var bounds = image.Bounds;
-
-            // Load all ARGB32 pixels
-            int[] srcPixels = image.LoadArgb32Pixels(bounds);
-            int[] dstPixels = new int[srcPixels.Length];
-
-            // Zero‑sum edge detection kernel (Laplacian)
-            int[,] kernel = new int[,]
+            using (Image image = Image.Load(inputPath))
             {
-                { -1, -1, -1 },
-                { -1,  8, -1 },
-                { -1, -1, -1 }
-            };
+                RasterImage raster = (RasterImage)image;
 
-            // Apply convolution (skip border pixels)
-            for (int y = 1; y < height - 1; y++)
-            {
-                for (int x = 1; x < width - 1; x++)
+                double[,] kernel = new double[,]
                 {
-                    int sum = 0;
-                    for (int ky = -1; ky <= 1; ky++)
-                    {
-                        for (int kx = -1; kx <= 1; kx++)
-                        {
-                            int srcIndex = (y + ky) * width + (x + kx);
-                            int argb = srcPixels[srcIndex];
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
+                };
 
-                            // Extract RGB components
-                            int r = (argb >> 16) & 0xFF;
-                            int g = (argb >> 8) & 0xFF;
-                            int b = argb & 0xFF;
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                            // Simple intensity (grayscale) value
-                            int intensity = (r + g + b) / 3;
-
-                            int k = kernel[ky + 1, kx + 1];
-                            sum += intensity * k;
-                        }
-                    }
-
-                    // Absolute value and clamp to [0,255]
-                    int v = Math.Abs(sum);
-                    if (v > 255) v = 255;
-
-                    // Construct ARGB pixel (opaque)
-                    int dstArgb = (255 << 24) | (v << 16) | (v << 8) | v;
-                    dstPixels[y * width + x] = dstArgb;
-                }
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
-
-            // Set border pixels to black
-            for (int x = 0; x < width; x++)
-            {
-                dstPixels[x] = 0; // top row
-                dstPixels[(height - 1) * width + x] = 0; // bottom row
-            }
-            for (int y = 0; y < height; y++)
-            {
-                dstPixels[y * width] = 0; // left column
-                dstPixels[y * width + (width - 1)] = 0; // right column
-            }
-
-            // Write processed pixels back to the image
-            image.SaveArgb32Pixels(bounds, dstPixels);
-
-            // Save the result
-            image.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

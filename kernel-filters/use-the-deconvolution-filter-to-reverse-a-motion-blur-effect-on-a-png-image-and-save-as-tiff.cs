@@ -23,20 +23,28 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage to apply filters
-            RasterImage rasterImage = (RasterImage)image;
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access Filter method
+                RasterImage rasterImage = (RasterImage)image;
 
-            // Apply a motion deconvolution filter (MotionWienerFilterOptions)
-            // Parameters: length = 10, smooth = 1.0, angle = 90.0 degrees
-            var motionOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
-            rasterImage.Filter(rasterImage.Bounds, motionOptions);
+                // Apply a motion deconvolution filter to reverse motion blur
+                // Parameters: length = 10, smooth = 1.0, angle = 0 degrees (horizontal motion)
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new MotionWienerFilterOptions(10, 1.0, 0.0));
 
-            // Save the result as a TIFF file
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            rasterImage.Save(outputPath, tiffOptions);
+                // Save the processed image as TIFF
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                rasterImage.Save(outputPath, tiffOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

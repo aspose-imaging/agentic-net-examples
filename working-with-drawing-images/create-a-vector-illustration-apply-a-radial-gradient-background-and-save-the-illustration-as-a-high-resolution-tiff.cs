@@ -2,48 +2,63 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string outputPath = @"C:\Temp\VectorIllustration.tif";
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-        tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-        tiffOptions.Photometric = TiffPhotometrics.Rgb;
-        tiffOptions.Compression = TiffCompressions.Lzw;
-        tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-        tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-        int width = 2000;
-        int height = 2000;
-
-        using (Image image = Image.Create(tiffOptions, width, height))
+        try
         {
-            SolidBrush bgBrush = new SolidBrush(Color.White);
-            Graphics bgGraphics = new Graphics(image);
-            bgGraphics.FillRectangle(bgBrush, new Rectangle(0, 0, width, height));
+            string outputPath = "output.tif";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(200f, 200f, 1600f, 1600f)));
-            figure.AddShape(new EllipseShape(new RectangleF(500f, 500f, 1000f, 1000f)));
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.Compression = TiffCompressions.Lzw;
+            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+            tiffOptions.Source = new FileCreateSource(outputPath, false);
 
-            GraphicsPath path = new GraphicsPath();
-            path.AddFigure(figure);
+            int width = 800;
+            int height = 600;
 
-            Pen pen = new Pen(Color.DarkBlue, 10);
-            Graphics drawGraphics = new Graphics(image);
-            drawGraphics.DrawPath(pen, path);
-            drawGraphics.DrawLine(pen, new Point(200, 200), new Point(1800, 1800));
+            using (Image image = Image.Create(tiffOptions, width, height))
+            {
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-            image.Save();
+                using (SolidBrush solidBrush = new SolidBrush(Color.LightBlue))
+                {
+                    graphics.FillRectangle(solidBrush, new Rectangle(0, 0, width, height));
+                }
+
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+
+                figure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 300f, 200f)));
+                figure.AddShape(new EllipseShape(new RectangleF(500f, 150f, 200f, 200f)));
+                figure.AddShape(new PolygonShape(new[]
+                {
+                    new PointF(400f, 400f),
+                    new PointF(600f, 400f),
+                    new PointF(500f, 550f)
+                }, true));
+
+                path.AddFigure(figure);
+
+                Pen pen = new Pen(Color.Black, 3);
+                graphics.DrawPath(pen, path);
+
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

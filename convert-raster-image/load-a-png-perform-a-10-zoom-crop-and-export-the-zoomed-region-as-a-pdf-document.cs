@@ -1,50 +1,52 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.png";
-        string outputPath = "Output/zoomed.pdf";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.pdf";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            // Cast to RasterImage for cropping operations
-            Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-            // Cache data for better performance
-            if (!raster.IsCached)
-                raster.CacheData();
-
-            // Calculate a central rectangle that is 90% of the original size (10% zoom)
-            int cropWidth = (int)(raster.Width * 0.9);
-            int cropHeight = (int)(raster.Height * 0.9);
-            int offsetX = (raster.Width - cropWidth) / 2;
-            int offsetY = (raster.Height - cropHeight) / 2;
-            Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(offsetX, offsetY, cropWidth, cropHeight);
-
-            // Perform the crop
-            raster.Crop(cropRect);
-
-            // Save the cropped region as a PDF document
-            using (PdfOptions pdfOptions = new PdfOptions())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                raster.Save(outputPath, pdfOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Calculate a 10% zoom crop (keep 90% of the original size, centered)
+                int cropWidth = (int)(image.Width * 0.9);
+                int cropHeight = (int)(image.Height * 0.9);
+                int offsetX = (image.Width - cropWidth) / 2;
+                int offsetY = (image.Height - cropHeight) / 2;
+
+                var cropRect = new Rectangle(offsetX, offsetY, cropWidth, cropHeight);
+
+                // Perform the crop
+                image.Crop(cropRect);
+
+                // Prepare PDF export options
+                var pdfOptions = new PdfOptions();
+
+                // Save the cropped region as a PDF document
+                image.Save(outputPath, pdfOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

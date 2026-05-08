@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,9 +10,12 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Define input and output directories relative to the current directory
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
+            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -21,39 +23,42 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            // Get all DjVu files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
 
-            foreach (string filePath in files)
+            // Define the rectangle region to extract (example values)
+            var exportRect = new Rectangle(0, 0, 200, 200); // Adjust as needed
+
+            foreach (var inputPath in files)
             {
-                if (!File.Exists(filePath))
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                using (Stream stream = File.OpenRead(filePath))
+                // Load the DjVu image
+                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
                 {
-                    using (DjvuImage djvuImage = new DjvuImage(stream))
+                    // Iterate through each page of the DjVu document
+                    foreach (DjvuPage page in djvu.Pages)
                     {
-                        int pageCount = djvuImage.PageCount;
-                        for (int i = 0; i < pageCount; i++)
-                        {
-                            Rectangle exportArea = new Rectangle(0, 0, 200, 200);
-                            PngOptions options = new PngOptions();
-                            options.MultiPageOptions = new DjvuMultiPageOptions(i, exportArea);
+                        // Construct the output file path
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.PageNumber}.png";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                            string outputFileName = $"{Path.GetFileNameWithoutExtension(filePath)}_page{i}.png";
-                            string outputPath = Path.Combine(outputDirectory, outputFileName);
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            djvuImage.Save(outputPath, options);
-                        }
+                        // Save the specified rectangle region as a PNG image
+                        page.Save(outputPath, new PngOptions(), exportRect);
                     }
                 }
             }

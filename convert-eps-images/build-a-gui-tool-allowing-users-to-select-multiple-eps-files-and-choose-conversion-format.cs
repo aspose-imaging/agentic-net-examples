@@ -5,86 +5,121 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define base, input and output directories (relative paths)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists; if not, create it and exit
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add EPS files and rerun.");
-            return;
-        }
+            // Define input and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all files from the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-        if (files.Length == 0)
-        {
-            Console.WriteLine("No files found in the input directory.");
-            return;
-        }
-
-        // Ask user for desired output format
-        Console.WriteLine("Enter desired output format (png, jpg, pdf):");
-        string format = Console.ReadLine()?.Trim().ToLowerInvariant();
-
-        // Validate format selection
-        if (format != "png" && format != "jpg" && format != "pdf")
-        {
-            Console.Error.WriteLine("Unsupported format selected.");
-            return;
-        }
-
-        foreach (string inputPath in files)
-        {
-            // Verify the input file exists
-            if (!File.Exists(inputPath))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                continue;
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add EPS files and rerun.");
+                return;
             }
 
-            // Build output file path with new extension
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "." + format;
-            string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-            // Ensure the output directory exists (unconditional as per safety rule)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load EPS image and save in selected format
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
             {
-                switch (format)
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Get all EPS files in the input directory
+            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+            if (epsFiles.Length == 0)
+            {
+                Console.WriteLine("No EPS files found in the Input directory.");
+                return;
+            }
+
+            // Prompt user for target format
+            Console.WriteLine("Enter target format (png, jpg, pdf, bmp, gif, webp, tiff):");
+            string format = Console.ReadLine()?.Trim().ToLower();
+
+            foreach (string inputPath in epsFiles)
+            {
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    case "png":
-                        image.Save(outputPath, new PngOptions());
-                        break;
-                    case "jpg":
-                        image.Save(outputPath, new JpegOptions());
-                        break;
-                    case "pdf":
-                        image.Save(outputPath, new PdfOptions());
-                        break;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
+
+                // Determine output file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + GetExtension(format));
+
+                // Ensure output directory exists for this file
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load EPS image and save in the chosen format
+                using (Image image = Image.Load(inputPath))
+                {
+                    switch (format)
+                    {
+                        case "png":
+                            image.Save(outputPath, new PngOptions());
+                            break;
+                        case "jpg":
+                        case "jpeg":
+                            image.Save(outputPath, new JpegOptions());
+                            break;
+                        case "pdf":
+                            image.Save(outputPath, new PdfOptions());
+                            break;
+                        case "bmp":
+                            image.Save(outputPath, new BmpOptions());
+                            break;
+                        case "gif":
+                            image.Save(outputPath, new GifOptions());
+                            break;
+                        case "webp":
+                            image.Save(outputPath, new WebPOptions());
+                            break;
+                        case "tiff":
+                            image.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                            break;
+                        default:
+                            Console.WriteLine($"Unsupported format: {format}");
+                            return;
+                    }
+                }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
-
-            Console.WriteLine($"Converted '{Path.GetFileName(inputPath)}' to '{outputFileName}'.");
         }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
 
-        Console.WriteLine("Conversion process completed.");
+    // Helper to map format string to file extension
+    static string GetExtension(string format)
+    {
+        switch (format)
+        {
+            case "png": return ".png";
+            case "jpg":
+            case "jpeg": return ".jpg";
+            case "pdf": return ".pdf";
+            case "bmp": return ".bmp";
+            case "gif": return ".gif";
+            case "webp": return ".webp";
+            case "tiff": return ".tiff";
+            default: return "";
+        }
     }
 }

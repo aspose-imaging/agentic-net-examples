@@ -8,54 +8,63 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Directory validation (must be before any file operations)
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        if (!Directory.Exists(inputDirectory))
+        try
         {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
-            return;
-        }
+            // Input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-        foreach (string inputPath in files)
-        {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            string outputPath = Path.Combine(outputDirectory,
-                Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                // Resize to 640x480
-                image.Resize(640, 480);
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                // Apply sharpening filter
-                image.Filter(image.Bounds, new SharpenFilterOptions());
+            // Get all PNG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-                // Save as PDF
-                using (PdfOptions pdfOptions = new PdfOptions())
+            foreach (string inputPath in files)
+            {
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Prepare output PDF path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+                // Ensure output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load PNG as raster image
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                {
+                    // Apply sharpening filter
+                    image.Filter(image.Bounds, new SharpenFilterOptions());
+
+                    // Resize to 640x480
+                    image.Resize(640, 480);
+
+                    // Save as PDF
+                    PdfOptions pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

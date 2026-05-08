@@ -1,51 +1,57 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\temp\input";
-            string outputDir = @"C:\temp\output";
+            string inputDirectory = "InputJp2";
+            string outputDirectory = "OutputPng";
 
-            // Get all JPEG2000 files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.jp2");
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Get all JPEG2000 files
+            string[] files = Directory.GetFiles(inputDirectory, "*.jp2");
 
             // Process files in parallel
-            Parallel.ForEach(inputFiles, inputPath =>
+            System.Threading.Tasks.Parallel.ForEach(files, inputPath =>
             {
-                // Verify input file exists
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path (convert to PNG)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Determine output path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set load options with a memory buffer size hint (e.g., 50 MB)
-                var loadOptions = new Jpeg2000LoadOptions
+                // Load JPEG2000 image and save as PNG
+                using (Jpeg2000Image jp2Image = new Jpeg2000Image(inputPath))
                 {
-                    BufferSizeHint = 50
-                };
-
-                // Load the JPEG2000 image using Aspose.Imaging
-                using (Image image = Image.Load(inputPath, loadOptions))
-                {
-                    // Save as PNG with default options (could also set BufferSizeHint here if needed)
-                    var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
+                    jp2Image.Save(outputPath, new PngOptions());
                 }
             });
         }

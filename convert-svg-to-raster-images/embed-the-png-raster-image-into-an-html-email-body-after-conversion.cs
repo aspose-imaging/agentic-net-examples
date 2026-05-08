@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -8,43 +7,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Emails\email.html";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.png";
+            string outputPath = @"C:\Emails\email.html";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the PNG image using Aspose.Imaging
-        using (Image image = Image.Load(inputPath))
-        {
-            // Save the image to a memory stream (PNG format) to obtain raw bytes
-            using (var ms = new MemoryStream())
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                image.Save(ms, new PngOptions());
-                byte[] imageBytes = ms.ToArray();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Convert image bytes to Base64 string
-                string base64 = Convert.ToBase64String(imageBytes);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Build HTML email body with embedded image
-                string html = $"<html><body>" +
-                              $"<p>Hello,</p>" +
-                              $"<img src=\"data:image/png;base64,{base64}\" alt=\"Embedded Image\"/>" +
-                              $"</body></html>";
+            // Load the PNG image using Aspose.Imaging
+            using (var image = Image.Load(inputPath))
+            {
+                // Save the image to a memory stream to obtain its byte array
+                using (var ms = new MemoryStream())
+                {
+                    image.Save(ms, new PngOptions());
+                    byte[] imageData = ms.ToArray();
 
-                // Write the HTML to the output file
-                File.WriteAllText(outputPath, html, Encoding.UTF8);
+                    // Convert image bytes to Base64 string
+                    string base64 = Convert.ToBase64String(imageData);
+
+                    // Build HTML email body with embedded image
+                    string html = $"<html><body>" +
+                                  $"<p>Here is the image:</p>" +
+                                  $"<img src=\"data:image/png;base64,{base64}\" alt=\"Embedded Image\" />" +
+                                  $"</body></html>";
+
+                    // Write the HTML to the output file
+                    File.WriteAllText(outputPath, html);
+                }
             }
         }
-
-        Console.WriteLine("Email HTML with embedded image has been created.");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

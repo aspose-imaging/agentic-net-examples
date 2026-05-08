@@ -2,67 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists (null‑safe)
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrEmpty(outputDir))
+            Directory.CreateDirectory(outputDir);
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load the source image
+            using (var image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                var pngImage = (PngImage)image;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Build a mask consisting of multiple ellipses
+                var mask = new GraphicsPath();
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to PNG image (required for PaintOver)
-                PngImage pngImage = (PngImage)image;
+                var fig1 = new Figure();
+                fig1.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
+                mask.AddFigure(fig1);
 
-                // Create a graphics path mask composed of multiple ellipses
-                GraphicsPath mask = new GraphicsPath();
+                var fig2 = new Figure();
+                fig2.AddShape(new EllipseShape(new RectangleF(250, 120, 180, 130)));
+                mask.AddFigure(fig2);
 
-                // First ellipse
-                Figure ellipseFigure1 = new Figure();
-                ellipseFigure1.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
-                mask.AddFigure(ellipseFigure1);
+                var fig3 = new Figure();
+                fig3.AddShape(new EllipseShape(new RectangleF(180, 200, 220, 160)));
+                mask.AddFigure(fig3);
 
-                // Second ellipse
-                Figure ellipseFigure2 = new Figure();
-                ellipseFigure2.AddShape(new EllipseShape(new RectangleF(300, 200, 180, 120)));
-                mask.AddFigure(ellipseFigure2);
+                // Configure Telea algorithm options with the custom mask
+                var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
-                // Third ellipse (optional, add more for complex shapes)
-                Figure ellipseFigure3 = new Figure();
-                ellipseFigure3.AddShape(new EllipseShape(new RectangleF(200, 350, 250, 180)));
-                mask.AddFigure(ellipseFigure3);
+                // Remove the watermark
+                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
 
-                // Configure watermark removal options
-                var options = new ContentAwareFillWatermarkOptions(mask)
-                {
-                    MaxPaintingAttempts = 4
-                };
-
-                // Perform the paint-over operation
-                using (Image result = WatermarkRemover.PaintOver(pngImage, options))
-                {
-                    // Save the processed image
-                    result.Save(outputPath);
-                }
+                // Save the cleaned image
+                result.Save(outputPath);
             }
         }
         catch (Exception ex)

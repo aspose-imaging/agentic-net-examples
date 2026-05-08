@@ -8,40 +8,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input EPS file path
-        string inputPath = @"C:\Images\sample.eps";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input EPS file path
+            string inputPath = @"C:\temp\sample.eps";
 
-        // Build custom output PSD file name: original name + "_converted.psd"
-        string outputDirectory = @"C:\Images\Converted";
-        string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_converted.psd";
-        string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Configure PSD saving options
-            PsdOptions psdOptions = new PsdOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Example settings – adjust as needed
-                CompressionMethod = CompressionMethod.RLE,
-                ColorMode = ColorModes.Rgb,
-                // Keep default version (6) and other defaults
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as PSD using the custom output path and options
-            image.Save(outputPath, psdOptions);
+            // Create output PSD file path using a custom pattern
+            string outputPath = Path.Combine(
+                Path.GetDirectoryName(inputPath) ?? string.Empty,
+                Path.GetFileNameWithoutExtension(inputPath) + "_converted.psd");
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD saving options
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    // Example: use RLE compression and RGB color mode
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
+                    // Default version (6) is sufficient; can be set explicitly if needed
+                    Version = 6
+                };
+
+                // Save the image as PSD with the specified options
+                image.Save(outputPath, psdOptions);
+            }
+
+            Console.WriteLine($"Conversion completed: {outputPath}");
         }
-
-        Console.WriteLine($"Conversion completed: {outputPath}");
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

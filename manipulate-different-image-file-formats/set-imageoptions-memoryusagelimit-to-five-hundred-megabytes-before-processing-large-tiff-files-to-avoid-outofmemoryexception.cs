@@ -9,43 +9,41 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\large.tif";
-        string outputPath = @"C:\Images\output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"C:\Images\large_input.tif";
+        string outputPath = @"C:\Images\processed_output.tif";
 
         try
         {
-            // Set memory usage limit (500 MB) when loading the TIFF
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image with a memory usage limit of 500 MB
             var loadOptions = new LoadOptions
             {
-                BufferSizeHint = 500 // MB
+                BufferSizeHint = 500 // limit internal buffers to 500 MB
             };
 
-            // Load the large TIFF with the memory limit applied
             using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Prepare TIFF save options with the same memory limit
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                // Prepare save options with the same memory limit
+                var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    BufferSizeHint = 500 // MB
+                    BufferSizeHint = 500 // limit internal buffers during save
                 };
 
                 // Save the image to the output path
-                image.Save(outputPath, tiffOptions);
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

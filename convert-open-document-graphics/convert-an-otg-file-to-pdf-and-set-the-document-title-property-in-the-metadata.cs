@@ -8,42 +8,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.pdf";
+        string outputPath = @"C:\Images\sample_converted.pdf";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare PDF export options
+                var pdfOptions = new PdfOptions();
+
+                // Set PDF document title metadata
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+                {
+                    Title = "Converted OTG Document"
+                };
+
+                // Configure OTG rasterization options
+                var otgRasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size // preserve original size
+                };
+                pdfOptions.VectorRasterizationOptions = otgRasterOptions;
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Prepare PDF export options
-            var pdfOptions = new PdfOptions();
-
-            // Set document title metadata
-            pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
-            {
-                Title = "My OTG Document Title"
-            };
-
-            // Configure vector rasterization for OTG
-            var otgRasterization = new OtgRasterizationOptions
-            {
-                // Preserve original page size
-                PageSize = image.Size
-            };
-            pdfOptions.VectorRasterizationOptions = otgRasterization;
-
-            // Save the image as PDF
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

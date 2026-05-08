@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,9 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.emf";
-            string intermediatePath = @"C:\Images\temp.png";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample_blur.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,26 +21,21 @@ class Program
                 return;
             }
 
-            // Ensure directories exist for intermediate and final output
-            Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image and rasterize it to a temporary PNG
-            using (Image emfImage = Image.Load(inputPath))
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                // Save as PNG using default rasterization options
-                emfImage.Save(intermediatePath, new PngOptions());
-            }
-
-            // Load the rasterized PNG, apply Gaussian blur, and save the final PNG
-            using (Image img = Image.Load(intermediatePath))
-            {
-                RasterImage rasterImage = (RasterImage)img;
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
 
                 // Apply Gaussian blur with radius 5 and sigma 4.0
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the blurred image as PNG
+                // Save as PNG
                 rasterImage.Save(outputPath, new PngOptions());
             }
         }

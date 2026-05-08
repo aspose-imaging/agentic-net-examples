@@ -2,15 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"input.png";
-        string canvasPath = @"canvas.html";
-        string outputPath = @"output.html";
+        string inputPath = @"C:\Images\sample.png";
+        string canvasTagPath = @"C:\Images\canvas_tag.html";
+        string finalHtmlPath = @"C:\Images\output.html";
 
         // Input file existence check
         if (!File.Exists(inputPath))
@@ -20,30 +21,41 @@ class Program
         }
 
         // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(canvasTagPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(finalHtmlPath));
 
         try
         {
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Save only the canvas tag (no full HTML page)
-                var canvasOptions = new Html5CanvasOptions
+                // Export only the canvas tag (no full HTML page)
+                var options = new Html5CanvasOptions
                 {
-                    FullHtmlPage = false
+                    FullHtmlPage = false,
+                    VectorRasterizationOptions = new SvgRasterizationOptions()
                 };
-                image.Save(canvasPath, canvasOptions);
+
+                image.Save(canvasTagPath, options);
             }
 
             // Read the generated canvas tag
-            string canvasTag = File.ReadAllText(canvasPath);
+            string canvasTag = File.ReadAllText(canvasTagPath);
 
-            // Build a full HTML page embedding the canvas
-            string htmlPage = $"<html><head><meta charset=\"UTF-8\"><title>Canvas Export</title></head><body>{canvasTag}</body></html>";
+            // Build a full HTML page that embeds the canvas tag
+            string htmlContent = @"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <title>Canvas Image</title>
+</head>
+<body>
+    " + canvasTag + @"
+</body>
+</html>";
 
             // Write the final HTML page
-            File.WriteAllText(outputPath, htmlPage);
+            File.WriteAllText(finalHtmlPath, htmlContent);
         }
         catch (Exception ex)
         {

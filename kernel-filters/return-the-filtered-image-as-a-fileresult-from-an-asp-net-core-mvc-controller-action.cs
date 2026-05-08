@@ -7,21 +7,19 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = "output.png";
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load image, apply Gaussian blur filter, and save
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;

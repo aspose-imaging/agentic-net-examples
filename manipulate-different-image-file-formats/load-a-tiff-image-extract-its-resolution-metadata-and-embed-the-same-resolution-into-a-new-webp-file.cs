@@ -6,40 +6,37 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
             string inputPath = "input.tif";
             string outputPath = "output.webp";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
             using (Image tiffImage = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access resolution properties
-                TiffImage tiff = (TiffImage)tiffImage;
-                double dpiX = tiff.HorizontalResolution;
-                double dpiY = tiff.VerticalResolution;
+                TiffImage tif = tiffImage as TiffImage;
+                if (tif == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a TIFF.");
+                    return;
+                }
 
-                // Apply the same resolution to the image before saving
-                tiff.SetResolution(dpiX, dpiY);
+                double dpiX = tif.HorizontalResolution;
+                double dpiY = tif.VerticalResolution;
 
-                // Prepare WebP save options (default settings)
                 WebPOptions webpOptions = new WebPOptions();
+                webpOptions.ResolutionSettings = new ResolutionSetting(dpiX, dpiY);
 
-                // Save as WebP with the same resolution metadata
-                tiff.Save(outputPath, webpOptions);
+                tiffImage.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)

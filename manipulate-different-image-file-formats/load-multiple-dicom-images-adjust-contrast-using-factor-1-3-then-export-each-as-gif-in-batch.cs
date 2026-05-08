@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
@@ -10,18 +10,17 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Define input DICOM files and corresponding output GIF files
             string[] inputPaths = {
-                @"C:\Images\Input1.dcm",
-                @"C:\Images\Input2.dcm"
+                @"C:\Images\input1.dcm",
+                @"C:\Images\input2.dcm"
             };
 
             string[] outputPaths = {
-                @"C:\Images\Output1.gif",
-                @"C:\Images\Output2.gif"
+                @"C:\Images\output1.gif",
+                @"C:\Images\output2.gif"
             };
 
-            // Process each file
             for (int i = 0; i < inputPaths.Length; i++)
             {
                 string inputPath = inputPaths[i];
@@ -37,12 +36,16 @@ class Program
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DICOM image, adjust contrast, and save as GIF
+                // Load DICOM image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Cast to DicomImage to access AdjustContrast
                     DicomImage dicomImage = (DicomImage)image;
-                    // Increase contrast by 30 (approx. 1.3 factor)
+
+                    // Adjust contrast by a factor of 1.3 (30% increase)
                     dicomImage.AdjustContrast(30f);
+
+                    // Save as GIF
                     dicomImage.Save(outputPath, new GifOptions());
                 }
             }

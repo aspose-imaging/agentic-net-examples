@@ -1,55 +1,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output/output.svg";
 
-        // Verify that the input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load the PNG image
-        using (Image rasterImage = Image.Load(inputPath))
+        try
         {
-            // Cast to RasterImage for drawing
-            var raster = rasterImage as RasterImage;
-            if (raster == null)
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine("The input file is not a raster image.");
-                return;
+                // Configure SVG rasterization to match original image size (viewbox)
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
+                // Set up SVG save options with the rasterization settings
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
             }
-
-            int width = raster.Width;
-            int height = raster.Height;
-            int dpi = 96; // Standard screen DPI
-
-            // Create an SVG canvas with the same dimensions as the PNG
-            var graphics = new SvgGraphics2D(width, height, dpi);
-
-            // Embed the raster image into the SVG
-            graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
-
-            // Finalize the SVG recording
-            using (SvgImage svgImage = graphics.EndRecording())
-            {
-                // The viewbox is automatically set to match the canvas size (width x height)
-                // Save the SVG to the output path
-                svgImage.Save(outputPath);
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

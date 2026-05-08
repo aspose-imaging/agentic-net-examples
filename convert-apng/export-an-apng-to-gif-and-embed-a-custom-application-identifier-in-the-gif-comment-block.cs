@@ -5,12 +5,12 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.apng";
-            string outputPath = "output.gif";
+            string inputPath = "Input\\animation.apng";
+            string outputPath = "Output\\animation.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,7 +22,7 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                GifOptions gifOptions = new GifOptions();
+                var gifOptions = new GifOptions();
                 image.Save(outputPath, gifOptions);
             }
         }

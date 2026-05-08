@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -10,38 +9,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.pdf";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample.pdf";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
+            // Load the EMF image (returns an EmfImage instance)
             using (Image image = Image.Load(inputPath))
             {
-                // Set up PDF save options with vector rasterization for EMF
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
-                };
-
-                // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                // Convert and save the image as PDF
+                image.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

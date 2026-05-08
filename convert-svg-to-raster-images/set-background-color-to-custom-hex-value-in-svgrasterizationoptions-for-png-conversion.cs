@@ -8,36 +8,53 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to SvgImage to access SVG-specific properties
+                SvgImage svgImage = image as SvgImage;
+                if (svgImage == null)
+                {
+                    Console.Error.WriteLine("Input file is not a valid SVG image.");
+                    return;
+                }
+
+                // Configure rasterization options with a custom background color (#FF5733)
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.FromArgb(255, 0xFF, 0x57, 0x33), // opaque custom color
+                    PageSize = svgImage.Size
+                };
+
+                // Set PNG save options and attach rasterization options
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the rasterized PNG
+                svgImage.Save(outputPath, pngOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the SVG image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            SvgImage svgImage = (SvgImage)image;
-
-            // Configure rasterization options with custom background color
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-            rasterOptions.BackgroundColor = Color.FromArgb(255, 0x12, 0x34, 0x56); // Hex #123456
-            rasterOptions.PageSize = svgImage.Size;
-
-            // Set PNG save options
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.VectorRasterizationOptions = rasterOptions;
-
-            // Save the rasterized PNG
-            svgImage.Save(outputPath, pngOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

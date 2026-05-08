@@ -8,22 +8,28 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input folder containing JPEG files
+        string inputFolder = @"C:\Images";
+
         try
         {
-            // Hardcoded input directory containing JPEG files
-            string inputDirectory = @"C:\Images";
+            // Get all JPEG files in the folder (non‑recursive)
+            string[] files = Directory.GetFiles(inputFolder, "*.jpg");
 
-            // Get all JPEG files in the directory
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-
-            foreach (string inputPath in jpegFiles)
+            foreach (string inputPath in files)
             {
-                // Verify the input file exists
+                // Verify the file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
+
+                // Output path is the same as input (in‑place modification)
+                string outputPath = inputPath;
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the JPEG image
                 using (JpegImage image = (JpegImage)Image.Load(inputPath))
@@ -36,11 +42,8 @@ class Program
                         jpegExif.Artist = "New Artist";
                     }
 
-                    // Ensure the output directory exists (in-place save)
-                    Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
-
                     // Save changes back to the same file
-                    image.Save(inputPath);
+                    image.Save(outputPath);
                 }
             }
         }

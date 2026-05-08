@@ -1,50 +1,54 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = Path.Combine("Input", "sample.odg");
-        string outputPath = Path.Combine("Output", "sample_filtered.bmp");
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string intermediatePath = @"C:\Images\temp.bmp";
+            string outputPath = @"C:\Images\sample_filtered.bmp";
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG vector image and rasterize it to BMP
-        using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-        {
-            var odgImage = (Aspose.Imaging.FileFormats.OpenDocument.OdgImage)image;
-
-            var bmpOptions = new BmpOptions();
-            var rasterOptions = new Aspose.Imaging.ImageOptions.OdgRasterizationOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                BackgroundColor = Aspose.Imaging.Color.White,
-                PageSize = odgImage.Size
-            };
-            bmpOptions.VectorRasterizationOptions = rasterOptions;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the rasterized BMP (temporary)
-            odgImage.Save(outputPath, bmpOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
+
+            // Load the ODG image
+            using (Image odgImage = Image.Load(inputPath))
+            {
+                // Save it as a temporary BMP to obtain a raster image
+                odgImage.Save(intermediatePath, new BmpOptions());
+            }
+
+            // Load the temporary BMP as a raster image
+            using (Image bmpImage = Image.Load(intermediatePath))
+            {
+                var rasterImage = (RasterImage)bmpImage;
+
+                // Apply a median filter with size 5 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+                // Save the filtered image as BMP
+                rasterImage.Save(outputPath);
+            }
         }
-
-        // Load the rasterized BMP, apply median filter, and save the final result
-        using (Aspose.Imaging.Image bmpImage = Aspose.Imaging.Image.Load(outputPath))
+        catch (Exception ex)
         {
-            var raster = (Aspose.Imaging.RasterImage)bmpImage;
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-            raster.Save(outputPath);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

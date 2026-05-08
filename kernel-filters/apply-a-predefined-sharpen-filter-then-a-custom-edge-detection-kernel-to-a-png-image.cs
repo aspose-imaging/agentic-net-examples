@@ -27,23 +27,26 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
                 // Apply Sharpen filter (kernel size 5, sigma 4.0)
                 raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Apply custom edge‑detection kernel (Laplacian)
-                double[,] kernel = new double[,]
+                // Define a custom edge‑detection kernel
+                double[,] edgeKernel = new double[,]
                 {
                     { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
+                    {  0,  0,  0 },
+                    {  1,  1,  1 }
                 };
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                // Apply the custom convolution filter
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(edgeKernel));
 
                 // Save the processed image as PNG
-                PngOptions options = new PngOptions();
-                raster.Save(outputPath, options);
+                PngOptions pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

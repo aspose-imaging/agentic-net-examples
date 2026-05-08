@@ -7,12 +7,12 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,16 +21,15 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Desired maximum dimensions
-                int targetWidth = 800;
-                int targetHeight = 600;
+                // Desired dimensions while preserving aspect ratio
+                int targetWidth = 800;   // example target width
+                int targetHeight = 600;  // example target height
 
-                // Calculate scaling factor to maintain aspect ratio
                 double widthRatio = (double)targetWidth / image.Width;
                 double heightRatio = (double)targetHeight / image.Height;
                 double scale = Math.Min(widthRatio, heightRatio);
@@ -41,9 +40,8 @@ class Program
                 // Resize the image
                 image.Resize(newWidth, newHeight);
 
-                // Save as BMP
-                BmpOptions options = new BmpOptions();
-                image.Save(outputPath, options);
+                // Save the resized image as BMP
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)

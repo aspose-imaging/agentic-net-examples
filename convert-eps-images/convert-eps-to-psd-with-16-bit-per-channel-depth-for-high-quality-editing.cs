@@ -9,34 +9,39 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\sample.psd";
+        string inputPath = "input.eps";
+        string outputPath = "output.psd";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EPS image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Set up PSD options for 16‑bit per channel depth
-            var psdOptions = new PsdOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                ChannelBitsCount = 16,               // 16 bits per channel
-                ChannelsCount = 4,                   // RGBA channels
-                ColorMode = ColorModes.Rgb,          // RGB color mode
-                CompressionMethod = CompressionMethod.Raw, // No compression
-                Version = 6                          // Default PSD version
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as PSD using the configured options
-            image.Save(outputPath, psdOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure PSD saving options with 16‑bit per channel depth
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    ChannelBitsCount = 16,                     // 16‑bit per channel
+                    ColorMode = ColorModes.Rgb,                // Use RGB color mode
+                    CompressionMethod = CompressionMethod.Raw // No compression (optional)
+                };
+
+                // Save the image as PSD using the configured options
+                image.Save(outputPath, psdOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

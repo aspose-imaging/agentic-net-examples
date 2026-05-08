@@ -8,38 +8,53 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Data\sample.odg";
-        string outputPath = @"C:\Data\sample.svg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.odg";
+            string outputPath = @"C:\temp\sample.svg";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the ODG image
-        using (Image odgImage = Image.Load(inputPath))
-        {
-            // Prepare SVG export options
-            var svgOptions = new SvgOptions
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Vector rasterization options are required for SVG export
-                VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    // Preserve the original page size
-                    PageSize = odgImage.Size,
-                    // Preserve layer (group) names – Aspose.Imaging keeps them by default
-                    // No additional configuration is needed
-                }
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save as SVG; layer names are retained in the generated SVG
-            odgImage.Save(outputPath, svgOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to OdgImage to access ODG‑specific features
+                OdgImage odgImage = image as OdgImage;
+                if (odgImage == null)
+                {
+                    Console.Error.WriteLine("The input file is not a valid ODG image.");
+                    return;
+                }
+
+                // Configure SVG export options
+                SvgOptions svgOptions = new SvgOptions
+                {
+                    // Preserve original metadata (including layer names)
+                    KeepMetadata = true,
+                    // Set rasterization options matching the source size
+                    VectorRasterizationOptions = new OdgRasterizationOptions
+                    {
+                        PageSize = odgImage.Size,
+                        BackgroundColor = Color.White
+                    }
+                };
+
+                // Save the image as SVG while preserving layer information
+                odgImage.Save(outputPath, svgOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

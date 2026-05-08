@@ -2,14 +2,13 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.svg";
-        string tempPath = "temp.png";
         string outputPath = "output.png";
 
         try
@@ -20,25 +19,58 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath) ?? ".");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG and rasterize to a temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            // Temporary rasterized PNG path
+            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_raster.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
+            // Rasterize SVG to PNG
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size,
+                    BackgroundColor = Color.White
+                };
 
-                var pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                svgImage.Save(tempPath, pngOptions);
+                image.Save(tempPngPath, pngOptions);
             }
 
-            // Load the rasterized PNG and save as output PNG
-            using (Image img = Image.Load(tempPath))
+            // Load rasterized PNG and apply custom convolution filter
+            using (Image img = Image.Load(tempPngPath))
             {
-                img.Save(outputPath, new PngOptions());
+                var rasterImage = (RasterImage)img;
+
+                // Define 5x5 kernel: surrounding elements = 1, center = 5
+                double[,] kernel = new double[5, 5];
+                for (int i = 0; i < 5; i++)
+                {
+                    for (int j = 0; j < 5; j++)
+                    {
+                        kernel[i, j] = 1.0;
+                    }
+                }
+                kernel[2, 2] = 5.0;
+
+                // Apply convolution filter
+                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
+
+                // Save the filtered image
+                var saveOptions = new PngOptions();
+                rasterImage.Save(outputPath, saveOptions);
+            }
+
+            // Clean up temporary file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)

@@ -1,9 +1,11 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
@@ -11,17 +13,19 @@ class Program
     {
         try
         {
-            // Hard‑coded input BMP files (replace with your actual file names)
+            // Hard‑coded input BMP files (adjust paths as needed)
             string[] inputPaths = new string[]
             {
                 @"C:\temp\frame1.bmp",
                 @"C:\temp\frame2.bmp",
                 @"C:\temp\frame3.bmp"
-                // add more paths as needed
             };
 
+            // Hard‑coded output WebP file
+            string outputPath = @"C:\temp\animated.webp";
+
             // Verify each input file exists
-            foreach (var inputPath in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -30,43 +34,43 @@ class Program
                 }
             }
 
-            // Hard‑coded output WebP file
-            string outputPath = @"C:\temp\animated_output.webp";
-
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first BMP to obtain width/height
+            // Load the first BMP to obtain dimensions
             using (RasterImage firstBmp = (RasterImage)Image.Load(inputPaths[0]))
             {
+                int width = firstBmp.Width;
+                int height = firstBmp.Height;
+
                 // Configure animation options
-                WebPOptions options = new WebPOptions
+                WebPOptions createOptions = new WebPOptions
                 {
                     Lossless = true,
                     Quality = 100f,
-                    AnimBackgroundColor = (uint)Aspose.Imaging.Color.Gray.ToArgb(),
-                    AnimLoopCount = 0 // 0 = infinite loop
+                    AnimLoopCount = 0, // 0 = infinite loop
+                    AnimBackgroundColor = (uint)Color.White.ToArgb()
                 };
 
-                // Create an empty animated WebP image with the size of the first frame
-                using (WebPImage webPImage = new WebPImage(firstBmp.Width, firstBmp.Height, options))
+                // Create an empty animated WebP image
+                using (WebPImage webPImage = new WebPImage(width, height, createOptions))
                 {
+                    // Define a uniform frame delay (in milliseconds)
+                    const int frameDelay = 100; // 0.1 second per frame
+
                     // Add each BMP as a frame
-                    foreach (var inputPath in inputPaths)
+                    foreach (string inputPath in inputPaths)
                     {
                         using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
                         {
                             // Create a frame block from the raster image
-                            WebPFrameBlock frameBlock = new WebPFrameBlock(bmp);
+                            WebPFrameBlock block = new WebPFrameBlock(bmp);
 
-                            // Set frame delay (in milliseconds). Adjust as needed.
-                            // The property name for delay may differ; replace with the correct one if required.
-                            // Example: frameBlock.Duration = 100; // 100 ms per frame
-                            // If the API uses a different member, set it accordingly.
-                            // frameBlock.Delay = 100;
+                            // Set the frame duration (delay)
+                            block.Duration = frameDelay;
 
-                            // Add the frame to the animated WebP
-                            webPImage.AddBlock(frameBlock);
+                            // Add the block to the animated WebP
+                            webPImage.AddBlock(block);
                         }
                     }
 

@@ -7,39 +7,48 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.pdf";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access Width/Height and Crop
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Define the top‑right quadrant rectangle
+                int rectX = rasterImage.Width / 2;          // start at middle of width
+                int rectY = 0;                              // top edge
+                int rectWidth = rasterImage.Width / 2;      // half width
+                int rectHeight = rasterImage.Height / 2;    // half height
+                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(rectX, rectY, rectWidth, rectHeight);
+
+                // Crop the image to the defined rectangle
+                rasterImage.Crop(cropArea);
+
+                // Prepare PDF save options
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Save the cropped image as a PDF document
+                rasterImage.Save(outputPath, pdfOptions);
+            }
         }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the raster image
-        using (Image image = Image.Load(inputPath))
+        catch (Exception ex)
         {
-            // Determine the rectangle for the top‑right quadrant
-            int rectX = image.Width / 2;          // start at middle of width
-            int rectY = 0;                        // top edge
-            int rectWidth = image.Width - rectX;  // right half width
-            int rectHeight = image.Height / 2;    // top half height
-
-            var cropArea = new Rectangle(rectX, rectY, rectWidth, rectHeight);
-
-            // Crop the image to the specified rectangle
-            image.Crop(cropArea);
-
-            // Prepare PDF save options
-            var pdfOptions = new PdfOptions();
-
-            // Save the cropped image as a PDF document
-            image.Save(outputPath, pdfOptions);
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

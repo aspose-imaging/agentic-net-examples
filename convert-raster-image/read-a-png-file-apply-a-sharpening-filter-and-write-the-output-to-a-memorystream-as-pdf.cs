@@ -7,34 +7,41 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input path (relative)
-        string inputPath = "Input/sample.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/sample.pdf";
 
-        // Load the PNG image
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage for filtering
-            RasterImage raster = (RasterImage)image;
-
-            // Apply sharpening filter (kernel size 5, sigma 4.0)
-            raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-
-            // Save the processed image to a MemoryStream as PDF
-            using (MemoryStream pdfStream = new MemoryStream())
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(pdfStream, pdfOptions);
-
-                // Example output: report the size of the generated PDF
-                Console.WriteLine($"PDF saved to memory stream, size: {pdfStream.Length} bytes");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Apply sharpening filter
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+                // Save the result to a MemoryStream as PDF
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    PdfOptions pdfOptions = new PdfOptions();
+                    image.Save(ms, pdfOptions);
+                    Console.WriteLine($"PDF saved to memory stream, length: {ms.Length} bytes.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

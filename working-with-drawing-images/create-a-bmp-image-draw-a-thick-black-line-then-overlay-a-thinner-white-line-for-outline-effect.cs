@@ -8,39 +8,37 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Output file path (hardcoded)
-        string outputPath = "output\\result.bmp";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\outline.bmp";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Set up BMP options with a bound file source
-        BmpOptions bmpOptions = new BmpOptions();
-        bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Define canvas size
-        int width = 400;
-        int height = 300;
-
-        // Create the image canvas bound to the output file
-        using (Image canvas = Image.Create(bmpOptions, width, height))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(canvas);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Line coordinates
-            int x1 = 50, y1 = 50, x2 = 350, y2 = 250;
+            // Set BMP options with file source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Draw a thick black line
-            Pen blackPen = new Pen(Color.Black, 10);
-            graphics.DrawLine(blackPen, x1, y1, x2, y2);
+            // Create a 200x200 BMP image
+            using (Image image = Image.Create(bmpOptions, 200, 200))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-            // Overlay a thinner white line for outline effect
-            Pen whitePen = new Pen(Color.White, 4);
-            graphics.DrawLine(whitePen, x1, y1, x2, y2);
+                // Draw a thick black line
+                graphics.DrawLine(new Pen(Color.Black, 10), new Point(20, 20), new Point(180, 180));
 
-            // Save the bound image
-            canvas.Save();
+                // Overlay a thinner white line for outline effect
+                graphics.DrawLine(new Pen(Color.White, 4), new Point(20, 20), new Point(180, 180));
+
+                // Save the image
+                image.Save();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

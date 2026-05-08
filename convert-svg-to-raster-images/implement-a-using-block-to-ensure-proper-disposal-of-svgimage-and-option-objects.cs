@@ -8,9 +8,9 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output paths
-        string inputPath = "Input/sample.svg";
-        string outputPath = "Output/sample.svg";
+        // Hardcoded input and output file paths
+        string inputPath = "input.svg";
+        string outputPath = "output.svg";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -22,26 +22,30 @@ class Program
         // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-        // Load SVG image and ensure proper disposal
-        using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+        try
         {
-            // Create SVG options and ensure proper disposal
-            using (SvgOptions options = new SvgOptions())
+            // Load SVG image with disposal handling
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                // Configure rasterization options (optional)
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Configure rasterization options
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
+                    PageSize = svgImage.Size
                 };
-                options.VectorRasterizationOptions = rasterOptions;
 
-                // Example: enable compression
-                options.Compress = true;
+                // Configure SVG save options
+                var saveOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Save the SVG image with the specified options
-                svgImage.Save(outputPath, options);
+                // Save the SVG image using the specified options
+                svgImage.Save(outputPath, saveOptions);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

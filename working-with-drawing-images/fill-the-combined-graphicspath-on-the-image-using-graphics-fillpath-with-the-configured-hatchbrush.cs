@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
@@ -10,50 +9,53 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\output.png";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Configure PNG options with a file create source
-        PngOptions pngOptions = new PngOptions();
-        pngOptions.Source = new FileCreateSource(outputPath, false);
-
-        // Create a new image canvas (500x500)
-        using (Image image = Image.Create(pngOptions, 500, 500))
+        try
         {
-            // Initialize graphics for drawing
-            Graphics graphics = new Graphics(image);
-            graphics.Clear(Color.White);
+            // Output file path (hard‑coded)
+            string outputPath = @"C:\temp\output.png";
 
-            // Build a combined GraphicsPath
-            GraphicsPath combinedPath = new GraphicsPath();
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // First figure: rectangle
-            Figure rectFigure = new Figure();
-            rectFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-            combinedPath.AddFigure(rectFigure);
+            // Set up PNG options with a file create source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Second figure: ellipse
-            Figure ellipseFigure = new Figure();
-            ellipseFigure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 150f)));
-            combinedPath.AddFigure(ellipseFigure);
-
-            // Configure a HatchBrush
-            using (HatchBrush hatchBrush = new HatchBrush())
+            // Create a new image canvas
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
             {
-                hatchBrush.HatchStyle = HatchStyle.Cross;
-                hatchBrush.ForegroundColor = Color.Blue;
-                hatchBrush.BackgroundColor = Color.Yellow;
-                hatchBrush.Opacity = 0.5f; // 50% opacity
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.Wheat);
 
-                // Fill the combined path with the hatch brush
-                graphics.FillPath(hatchBrush, combinedPath);
+                // Build a combined GraphicsPath
+                Aspose.Imaging.GraphicsPath combinedPath = new Aspose.Imaging.GraphicsPath();
+
+                // First figure with a rectangle and an ellipse
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 200f, 200f)));
+                figure.AddShape(new EllipseShape(new Aspose.Imaging.RectangleF(100f, 100f, 200f, 200f)));
+
+                // Add the figure to the path
+                combinedPath.AddFigure(figure);
+
+                // Configure a HatchBrush
+                using (HatchBrush hatchBrush = new HatchBrush())
+                {
+                    hatchBrush.BackgroundColor = Aspose.Imaging.Color.LightGray;
+                    hatchBrush.ForegroundColor = Aspose.Imaging.Color.Blue;
+
+                    // Fill the interior of the combined path
+                    graphics.FillPath(hatchBrush, combinedPath);
+                }
+
+                // Save the image (the output file is already bound to the source)
+                image.Save();
             }
-
-            // Save the image (output path already bound)
-            image.Save();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

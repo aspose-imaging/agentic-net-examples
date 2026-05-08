@@ -1,8 +1,9 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -24,34 +25,38 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a custom 3x3 kernel whose coefficients sum to 1
+            // Define a custom convolution kernel
             double[,] kernel = new double[,]
             {
-                { 0.0, -1.0, 0.0 },
-                { -1.0, 5.0, -1.0 },
-                { 0.0, -1.0, 0.0 }
+                { 0.0, 0.5, 0.0 },
+                { 0.5, -2.0, 0.5 },
+                { 0.0, 0.5, 0.0 }
             };
 
             // Validate that the sum of kernel coefficients equals 1
-            double sum = kernel.Cast<double>().Sum();
+            double sum = 0.0;
+            foreach (double value in kernel)
+                sum += value;
+
             if (Math.Abs(sum - 1.0) > 1e-6)
             {
                 Console.Error.WriteLine("Kernel coefficients must sum to 1.");
                 return;
             }
 
-            // Load the image as a RasterImage
-            using (Image image = Image.Load(inputPath))
+            // Load the image, apply the filter, and save the result
+            using (Image img = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)img;
 
-                // Apply the custom convolution filter
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                // Create filter options with the custom kernel
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+
+                // Apply the filter to the entire image
+                raster.Filter(raster.Bounds, filterOptions);
 
                 // Save the processed image as PNG
-                var pngOptions = new PngOptions();
-                rasterImage.Save(outputPath, pngOptions);
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

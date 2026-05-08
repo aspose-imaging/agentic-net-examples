@@ -1,43 +1,36 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Output file path (relative)
+            string outputPath = Path.Combine("Output", "converted.png");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load DICOM data into a byte array
-            byte[] dicomData = File.ReadAllBytes(inputPath);
+            // Example DICOM data in a byte array (replace with actual data)
+            byte[] dicomData = new byte[0];
 
-            // Use MemoryStream for in‑memory processing
+            // Load DICOM image from the byte array using a MemoryStream
             using (MemoryStream inputStream = new MemoryStream(dicomData))
             using (DicomImage dicomImage = new DicomImage(inputStream))
-            using (FileStream outputStream = File.OpenWrite(outputPath))
+            using (MemoryStream outputStream = new MemoryStream())
             {
-                // Define PNG save options
+                // Set PNG save options
                 PngOptions pngOptions = new PngOptions();
 
-                // Save the entire image as PNG
-                dicomImage.Save(outputStream, pngOptions, new Rectangle(0, 0, dicomImage.Width, dicomImage.Height));
+                // Save the DICOM image to the output stream as PNG
+                dicomImage.Save(outputStream, pngOptions);
+
+                // Write the PNG bytes to the output file
+                File.WriteAllBytes(outputPath, outputStream.ToArray());
             }
         }
         catch (Exception ex)

@@ -12,7 +12,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input JPEG files and output path
             string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
             string outputPath = "output.jpg";
 
@@ -29,11 +29,12 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images using memory‑limited loading
+            // Collect sizes of all input images using memory‑limited load options
             List<Size> sizes = new List<Size>();
             foreach (var path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path, new LoadOptions { BufferSizeHint = 50 }))
+                var loadOptions = new LoadOptions { BufferSizeHint = 50 };
+                using (RasterImage img = (RasterImage)Image.Load(path, loadOptions))
                 {
                     sizes.Add(img.Size);
                 }
@@ -48,15 +49,21 @@ class Program
                 if (sz.Height > newHeight) newHeight = sz.Height;
             }
 
-            // Create JPEG canvas with bound output file
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions { Source = src, Quality = 90 };
+            // Create output JPEG canvas bound to the output file
+            Source outSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = outSource,
+                Quality = 90
+            };
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
+                // Merge each image onto the canvas
                 int offsetX = 0;
                 foreach (var path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path, new LoadOptions { BufferSizeHint = 50 }))
+                    var loadOptions = new LoadOptions { BufferSizeHint = 50 };
+                    using (RasterImage img = (RasterImage)Image.Load(path, loadOptions))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -64,7 +71,7 @@ class Program
                     }
                 }
 
-                // Save the bound canvas
+                // Save the bound canvas (output path already set in options)
                 canvas.Save();
             }
         }

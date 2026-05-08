@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = "input.dcm";
-            string outputPath = "output.png";
+            string inputPath = "sample.dcm";
+            string outputPath = "sample.png";
 
             // Verify that the input DICOM file exists
             if (!File.Exists(inputPath))
@@ -22,16 +22,17 @@ class Program
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the DICOM image and save it as PNG in a single call
+            // Load the DICOM image and save it as PNG in a single API call
             using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                dicomImage.SaveAll(outputPath, new PngOptions());
+                dicomImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

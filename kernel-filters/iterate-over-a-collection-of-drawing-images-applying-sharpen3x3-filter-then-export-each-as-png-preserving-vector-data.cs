@@ -2,54 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded collection of input image paths
             string[] inputPaths = new string[]
             {
-                "input1.cdr",
-                "input2.svg",
-                "input3.png"
+                @"C:\Images\image1.tif",
+                @"C:\Images\image2.tif",
+                @"C:\Images\image3.tif"
             };
 
-            foreach (string inputPath in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string outputDirectory = "Output";
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    if (image is RasterImage raster)
-                    {
-                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
-                    }
+                    // Cast to RasterImage to apply filters
+                    var rasterImage = (RasterImage)image;
 
+                    // Apply the 3x3 sharpen convolution filter to the whole image
+                    rasterImage.Filter(
+                        rasterImage.Bounds,
+                        new ConvolutionFilterOptions(ConvolutionFilter.Sharpen3x3));
+
+                    // Determine output PNG path (same name, .png extension)
+                    string outputPath = Path.ChangeExtension(inputPath, ".png");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the processed image as PNG
                     var pngOptions = new PngOptions();
-
-                    if (image is VectorImage)
-                    {
-                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        };
-                    }
-
-                    image.Save(outputPath, pngOptions);
+                    rasterImage.Save(outputPath, pngOptions);
                 }
             }
         }

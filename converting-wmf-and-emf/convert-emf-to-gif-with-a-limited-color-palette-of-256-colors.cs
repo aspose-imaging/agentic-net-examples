@@ -7,34 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.gif";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.emf";
+            string outputPath = @"C:\Images\output.gif";
 
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the EMF image
-        using (Image emfImage = Image.Load(inputPath))
-        {
-            // Configure GIF save options with a 256‑color palette
-            GifOptions gifOptions = new GifOptions
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Enable palette correction to build an optimal 256‑color palette
-                DoPaletteCorrection = true,
-                // ColorResolution = 7 means 8 bits per primary color (2^8 = 256 colors)
-                ColorResolution = 7
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Save the image as GIF using the configured options
-            emfImage.Save(outputPath, gifOptions);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Configure GIF options with palette correction (max 256 colors)
+                GifOptions gifOptions = new GifOptions
+                {
+                    DoPaletteCorrection = true,   // Analyze source colors to build optimal 256‑color palette
+                    ColorResolution = 7           // Maximum color resolution (8 bits per channel)
+                };
+
+                // Save the image as GIF using the configured options
+                image.Save(outputPath, gifOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Report any runtime errors without crashing
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }

@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output\\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,13 +24,12 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel manipulation
                 RasterImage raster = (RasterImage)image;
 
-                // Define a zero‑sum edge‑detection kernel (3x3 Laplacian)
+                // Zero‑sum edge‑detection kernel
                 double[,] kernel = new double[,]
                 {
                     { -1, -1, -1 },
@@ -39,19 +37,33 @@ class Program
                     { -1, -1, -1 }
                 };
 
-                // Apply the convolution filter
-                var convOptions = new ConvolutionFilterOptions(kernel);
-                raster.Filter(raster.Bounds, convOptions);
-
-                // Prepare PNG save options
-                var pngOptions = new PngOptions
-                {
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
-                    CompressionLevel = 9
-                };
+                // Apply convolution filter with the kernel
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
                 // Save the processed image as PNG
-                raster.Save(outputPath, pngOptions);
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
+
+                // Verify that the background is near‑black
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                long total = 0;
+                foreach (int argb in pixels)
+                {
+                    int r = (argb >> 16) & 0xFF;
+                    int g = (argb >> 8) & 0xFF;
+                    int b = argb & 0xFF;
+                    total += r + g + b;
+                }
+                double avg = total / (double)(pixels.Length * 3);
+                Console.WriteLine($"Average RGB value after edge detection: {avg:F2}");
+                if (avg < 30)
+                {
+                    Console.WriteLine("Resulting background is near black as expected.");
+                }
+                else
+                {
+                    Console.WriteLine("Background is not near black.");
+                }
             }
         }
         catch (Exception ex)

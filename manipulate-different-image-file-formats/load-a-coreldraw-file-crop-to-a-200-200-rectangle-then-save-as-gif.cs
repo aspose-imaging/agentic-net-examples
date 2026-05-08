@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "c:\\temp\\sample.cdr";
-            string outputPath = "c:\\temp\\output.gif";
+            string inputPath = "C:\\temp\\sample.cdr";
+            string outputPath = "C:\\temp\\sample_cropped.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,11 +27,13 @@ class Program
             // Load the CorelDRAW file
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to CdrImage for vector operations
+                // Cast to CdrImage to access vector-specific methods
                 CdrImage cdrImage = (CdrImage)image;
 
-                // Crop to a 200×200 rectangle (top‑left corner)
+                // Define a 200×200 rectangle (top‑left corner)
                 var cropRect = new Rectangle(0, 0, 200, 200);
+
+                // Crop the image
                 cdrImage.Crop(cropRect);
 
                 // Save the cropped image as GIF

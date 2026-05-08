@@ -5,38 +5,35 @@ using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
             string inputPath = "input.tif";
-            string outputDir = "output";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
+            string outputDirectory = "output";
+            Directory.CreateDirectory(outputDirectory);
 
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                int frameIndex = 0;
-                foreach (TiffFrame frame in tiffImage.Frames)
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
-                    string outputPath = Path.Combine(outputDir, $"frame{frameIndex}.svg");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    TiffFrame frame = tiffImage.Frames[i];
 
                     var svgGraphics = new SvgGraphics2D(frame.Width, frame.Height, 96);
                     using (SvgImage svgImage = svgGraphics.EndRecording())
                     {
+                        string outputPath = Path.Combine(outputDirectory, $"frame_{i}.svg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                         svgImage.Save(outputPath);
                     }
-
-                    frameIndex++;
                 }
             }
         }

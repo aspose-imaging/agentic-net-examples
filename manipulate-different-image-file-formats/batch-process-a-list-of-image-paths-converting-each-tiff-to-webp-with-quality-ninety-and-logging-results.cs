@@ -9,14 +9,17 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            // Hardcoded list of TIFF input files
+            string[] inputPaths = new string[]
+            {
+                @"C:\Images\sample1.tif",
+                @"C:\Images\sample2.tif"
+            };
 
-            // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Images\WebPOutput";
 
-            foreach (string inputPath in tiffFiles)
+            foreach (var inputPath in inputPaths)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -26,24 +29,25 @@ class Program
                 }
 
                 // Build output path with .webp extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load TIFF image and save as WebP with quality 90
+                // Load the TIFF image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Configure WebP options with quality 90
                     var webpOptions = new WebPOptions
                     {
                         Quality = 90
                     };
+
+                    // Save as WebP
                     image.Save(outputPath, webpOptions);
                 }
 
-                // Log successful conversion
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
         }
         catch (Exception ex)

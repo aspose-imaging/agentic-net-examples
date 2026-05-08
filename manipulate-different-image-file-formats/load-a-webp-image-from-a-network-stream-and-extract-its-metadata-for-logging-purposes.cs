@@ -1,60 +1,61 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static async Task Main(string[] args)
     {
-        // Hardcoded paths (not used for input stream, but required by the task)
-        string inputUrl = "https://example.com/sample.webp";
-        string outputPath = @"C:\Temp\WebPMetadata.txt";
+        // Hardcoded input (network URL) and output (metadata file) paths
+        string url = "https://example.com/sample.webp";
+        string outputPath = @"C:\temp\metadata.txt";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Download the WebP image as a stream
+            using var httpClient = new HttpClient();
+            using var response = await httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            using var stream = await response.Content.ReadAsStreamAsync();
 
-            // Download the WebP image into a memory stream
-            using (HttpClient httpClient = new HttpClient())
-            using (Stream networkStream = httpClient.GetStreamAsync(inputUrl).Result)
-            using (MemoryStream memoryStream = new MemoryStream())
+            // Load the WebP image from the stream
+            using var webPImage = new WebPImage(stream);
+
+            // Gather metadata
+            var sb = new StringBuilder();
+            sb.AppendLine($"File Format: {webPImage.FileFormat}");
+            sb.AppendLine($"Dimensions: {webPImage.Width}x{webPImage.Height}");
+
+            // Retrieve original options which may contain Exif and XMP data
+            var originalOptions = webPImage.GetOriginalOptions() as WebPOptions;
+            if (originalOptions != null)
             {
-                networkStream.CopyTo(memoryStream);
-                memoryStream.Position = 0; // Reset stream position for reading
-
-                // Load the WebP image from the stream
-                using (WebPImage webPImage = new WebPImage(memoryStream))
+                if (originalOptions.ExifData != null)
                 {
-                    // Extract basic metadata
-                    string format = webPImage.FileFormat.ToString();
-                    int width = webPImage.Width;
-                    int height = webPImage.Height;
+                    sb.AppendLine("Exif Data:");
+                    sb.AppendLine(originalOptions.ExifData.ToString());
+                }
 
-                    // Attempt to retrieve original EXIF data via original options
-                    string exifInfo = "No EXIF data";
-                    ImageOptionsBase originalOptions = webPImage.GetOriginalOptions();
-                    if (originalOptions is WebPOptions webPOptions && webPOptions.ExifData != null)
-                    {
-                        exifInfo = webPOptions.ExifData.ToString();
-                    }
-
-                    // Prepare log message
-                    string log = $"WebP Image Metadata:{Environment.NewLine}" +
-                                 $"Format: {format}{Environment.NewLine}" +
-                                 $"Dimensions: {width}x{height}{Environment.NewLine}" +
-                                 $"EXIF: {exifInfo}{Environment.NewLine}";
-
-                    // Output to console
-                    Console.WriteLine(log);
-
-                    // Save metadata to a file
-                    File.WriteAllText(outputPath, log);
+                if (originalOptions.XmpData != null)
+                {
+                    sb.AppendLine("XMP Data:");
+                    sb.AppendLine(originalOptions.XmpData.ToString());
                 }
             }
+
+            // Log metadata to console
+            Console.WriteLine(sb.ToString());
+
+            // Save metadata to a text file
+            File.WriteAllText(outputPath, sb.ToString());
         }
         catch (Exception ex)
         {

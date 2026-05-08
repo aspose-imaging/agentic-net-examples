@@ -1,48 +1,60 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input\\sample.cdr";
             string outputPath = "Output\\sample.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR with default load options (fonts embedded automatically)
-            var loadOptions = new Aspose.Imaging.ImageLoadOptions.CdrLoadOptions();
+            var loadOptions = new LoadOptions();
+            string fontFolder = "Fonts";
+
+            loadOptions.AddCustomFontSource(
+                (object[] args) =>
+                {
+                    string fontsPath = args.Length > 0 ? args[0]?.ToString() ?? string.Empty : string.Empty;
+                    var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                    if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+                    {
+                        foreach (var file in Directory.GetFiles(fontsPath))
+                        {
+                            byte[] data = File.ReadAllBytes(file);
+                            string name = Path.GetFileNameWithoutExtension(file);
+                            fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                        }
+                    }
+                    return fonts.ToArray();
+                },
+                fontFolder);
 
             using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Prepare PDF save options
                 var pdfOptions = new PdfOptions();
-
-                // Configure rasterization to preserve embedded fonts
-                var rasterizationOptions = new CdrRasterizationOptions
+                var rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
                     Positioning = PositioningTypes.DefinedByDocument,
                     BackgroundColor = Color.White
                 };
-
-                pdfOptions.VectorRasterizationOptions = rasterizationOptions;
-
-                // Save as PDF with embedded fonts
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
                 image.Save(outputPath, pdfOptions);
             }
         }

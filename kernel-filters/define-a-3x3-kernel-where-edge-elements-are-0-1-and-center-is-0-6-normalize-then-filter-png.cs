@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,10 +11,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input\\sample.png";
-            string outputPath = "output\\filtered.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,39 +22,42 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
+
+            // Define a 3x3 kernel with edge elements 0.1 and center 0.6
+            double[,] kernel = new double[3, 3]
+            {
+                { 0.1, 0.1, 0.1 },
+                { 0.1, 0.6, 0.1 },
+                { 0.1, 0.1, 0.1 }
+            };
+
+            // Normalize the kernel so that the sum of all elements equals 1
+            double sum = 0;
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++)
+                    sum += kernel[i, j];
+
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++)
+                    kernel[i, j] /= sum;
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Define a 3x3 kernel with edge elements 0.1 and center 0.6
-                double[,] kernel = new double[3, 3];
-                for (int y = 0; y < 3; y++)
+                // Apply the custom convolution filter to the entire image
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+                // Prepare PNG save options
+                PngOptions saveOptions = new PngOptions
                 {
-                    for (int x = 0; x < 3; x++)
-                    {
-                        kernel[y, x] = (x == 1 && y == 1) ? 0.6 : 0.1;
-                    }
-                }
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                // Normalize the kernel
-                double sum = 0;
-                foreach (double v in kernel) sum += v;
-                for (int y = 0; y < 3; y++)
-                {
-                    for (int x = 0; x < 3; x++)
-                    {
-                        kernel[y, x] /= sum;
-                    }
-                }
-
-                // Apply the convolution filter to the entire image
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-                // Save the filtered image as PNG
-                PngOptions saveOptions = new PngOptions();
+                // Save the filtered image
                 raster.Save(outputPath, saveOptions);
             }
         }

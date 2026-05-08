@@ -2,40 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputDicom";
-            string outputDir = @"C:\OutputPng";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Get all DICOM files in the input directory
-            string[] dicomFiles = Directory.GetFiles(inputDir, "*.dcm");
-
-            foreach (string dicomPath in dicomFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
-                if (!File.Exists(dicomPath))
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
+
+            foreach (string inputPath in dicomFiles)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {dicomPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the DICOM image
-                using (Image dicomImage = Image.Load(dicomPath))
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
                 {
-                    // Build the output PNG file path (preserve original filename)
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(dicomPath);
-                    string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the image as PNG
                     dicomImage.Save(outputPath, new PngOptions());
                 }
             }

@@ -5,42 +5,52 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        string inputPath = "input.emf";
-        if (!File.Exists(inputPath))
+        try
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        string outputDir = "output";
-        Directory.CreateDirectory(outputDir);
-
-        using (Image image = Image.Load(inputPath))
-        {
-            IMultipageImage multipage = image as IMultipageImage;
-            int pageCount = multipage != null ? multipage.PageCount : 1;
-
-            for (int i = 0; i < pageCount; i++)
+            string inputPath = "input.emf";
+            if (!File.Exists(inputPath))
             {
-                string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                PngOptions pngOptions = new PngOptions
-                {
-                    ResolutionSettings = new ResolutionSetting(300, 300),
-                    MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
-                };
-
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-                {
-                    PageSize = new SizeF(image.Width, image.Height)
-                };
-                pngOptions.VectorRasterizationOptions = vectorOptions;
-
-                image.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            using (Image image = Image.Load(inputPath))
+            {
+                int pageCount = 1;
+                if (image is IMultipageImage multipage)
+                {
+                    pageCount = multipage.PageCount;
+                }
+
+                for (int i = 0; i < pageCount; i++)
+                {
+                    string outputDir = "output";
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+
+                    var pngOptions = new PngOptions
+                    {
+                        ResolutionSettings = new ResolutionSetting(300, 300),
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1)),
+                        VectorRasterizationOptions = vectorOptions
+                    };
+
+                    image.Save(outputPath, pngOptions);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
