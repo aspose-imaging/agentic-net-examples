@@ -6,10 +6,10 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 2863 |
+| Total Examples | 2914 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-05-08 |
+| Last Updated | 2026-05-29 |
 
 ## Repository Structure
 
@@ -40,7 +40,7 @@ README.md
 | Category | Examples | Pass Rate | Details |
 |----------|----------|-----------|---------|
 | [Conversion](./conversion/) | 162 | 100.0% | [agents.md](./conversion/agents.md) |
-| [Convert APNG](./convert-apng/) | 51 | 100.0% | [agents.md](./convert-apng/agents.md) |
+| [Convert APNG](./convert-apng/) | 102 | 100.0% | [agents.md](./convert-apng/agents.md) |
 | [Convert CDR](./convert-cdr/) | 30 | 100.0% | [agents.md](./convert-cdr/agents.md) |
 | [Convert CMX Images](./convert-cmx-images/) | 34 | 100.0% | [agents.md](./convert-cmx-images/agents.md) |
 | [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
@@ -114,7 +114,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.5.0 | 2863 | 100.0% | net9.0 |
+| 26.5.0 | 2914 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
@@ -133,4 +133,4 @@ To trigger validation:
 Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260508_060236` | 2026-05-08*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260529_141531` | 2026-05-29*
