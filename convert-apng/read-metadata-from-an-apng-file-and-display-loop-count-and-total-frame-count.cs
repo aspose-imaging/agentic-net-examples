@@ -7,36 +7,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = "input.apng";
-
-        // Check if the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
+            // Hardcoded input path
+            string inputPath = "sample.apng";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to ApngImage to access APNG-specific properties
                 ApngImage apng = image as ApngImage;
-                if (apng != null)
+                if (apng == null)
                 {
-                    // Retrieve loop count (NumPlays) and total frame count (PageCount)
-                    int loopCount = apng.NumPlays;
-                    int frameCount = apng.PageCount;
+                    Console.Error.WriteLine("The file is not a valid APNG image.");
+                    return;
+                }
 
-                    Console.WriteLine($"Loop count: {loopCount}");
-                    Console.WriteLine($"Total frames: {frameCount}");
-                }
-                else
-                {
-                    Console.WriteLine("The specified file is not an APNG image.");
-                }
+                // Retrieve loop count (NumPlays) and total frame count (PageCount)
+                int loopCount = apng.NumPlays; // 0 indicates infinite looping
+                int frameCount = apng.PageCount;
+
+                // Display the metadata
+                Console.WriteLine($"Loop count (NumPlays): {loopCount}");
+                Console.WriteLine($"Total frame count: {frameCount}");
             }
         }
         catch (Exception ex)
