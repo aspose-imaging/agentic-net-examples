@@ -6,46 +6,31 @@ using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = "input.apng";
-
-            // Verify input file exists
+            string inputPath = "Input/animation.apng";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the APNG image
-            using (Image image = Image.Load(inputPath))
+            string outputDirectory = "Output";
+
+            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
             {
-                // Cast to ApngImage to access frames
-                ApngImage apng = image as ApngImage;
-                if (apng == null)
+                int frameCount = apng.PageCount;
+                for (int i = 0; i < frameCount; i++)
                 {
-                    Console.Error.WriteLine("The loaded image is not an APNG.");
-                    return;
-                }
-
-                // Iterate over each frame and save as JPEG
-                for (int i = 0; i < apng.PageCount; i++)
-                {
-                    // Extract the frame as a RasterImage
-                    using (RasterImage frame = (RasterImage)apng.Pages[i])
+                    var frame = apng.Pages[i];
+                    using (RasterImage raster = (RasterImage)frame)
                     {
-                        // Output file name with frame index
-                        string outputPath = $"frame_{i}.jpg";
-
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                        // Save the frame as JPEG
-                        var jpegOptions = new JpegOptions();
-                        frame.Save(outputPath, jpegOptions);
+                        string outputPath = Path.Combine(outputDirectory, $"frame_{i}.jpg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        JpegOptions jpegOptions = new JpegOptions();
+                        raster.Save(outputPath, jpegOptions);
                     }
                 }
             }
