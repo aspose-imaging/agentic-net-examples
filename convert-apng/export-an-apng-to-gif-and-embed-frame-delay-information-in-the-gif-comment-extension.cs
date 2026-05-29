@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -21,9 +22,9 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                apng.Save(outputPath, new GifOptions());
+                image.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
