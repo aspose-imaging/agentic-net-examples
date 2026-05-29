@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output.apng";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.apng";
-            string outputPath = "output.apng";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,24 +25,17 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the APNG image
-            using (Image image = Image.Load(inputPath))
+            using (ApngImage apngImage = (ApngImage)Image.Load(inputPath))
             {
-                // Cast to ApngImage to access APNG‑specific properties
-                ApngImage apngImage = image as ApngImage;
-                if (apngImage == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not an APNG.");
-                    return;
-                }
-
                 // Set background color to fully transparent
                 apngImage.BackgroundColor = Aspose.Imaging.Color.Transparent;
                 apngImage.HasBackgroundColor = true;
 
-                // Save the modified APNG using default APNG options
-                ApngOptions saveOptions = new ApngOptions();
-                apngImage.Save(outputPath, saveOptions);
+                // Save the modified APNG
+                apngImage.Save(outputPath);
             }
+
+            Console.WriteLine("APNG saved with transparent background.");
         }
         catch (Exception ex)
         {
