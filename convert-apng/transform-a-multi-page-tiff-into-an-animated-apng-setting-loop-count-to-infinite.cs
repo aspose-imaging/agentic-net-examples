@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputPath = "output\\animated.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.apng";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,14 +20,19 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the multi‑page TIFF
             using (Image image = Image.Load(inputPath))
             {
-                // Save as animated APNG with infinite looping (NumPlays defaults to 0)
-                image.Save(outputPath, new ApngOptions());
+                // Save as animated APNG with infinite looping (NumPlays = 0)
+                var apngOptions = new ApngOptions
+                {
+                    NumPlays = 0 // 0 indicates infinite looping
+                };
+
+                image.Save(outputPath, apngOptions);
             }
         }
         catch (Exception ex)
