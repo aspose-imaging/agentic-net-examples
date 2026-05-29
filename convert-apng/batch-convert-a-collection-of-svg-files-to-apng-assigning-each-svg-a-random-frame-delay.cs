@@ -9,49 +9,40 @@ class Program
     {
         try
         {
-            // Hardcoded input folder containing SVG files
-            string inputFolder = @"C:\SvgInput";
-            // Hardcoded output folder for generated APNG files
-            string outputFolder = @"C:\ApngOutput";
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputSvgs";
+            string outputDir = @"C:\OutputApngs";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            // Collection of SVG file names to process
-            string[] svgFiles = new string[]
-            {
-                "image1.svg",
-                "image2.svg",
-                "image3.svg"
-                // Add more file names as needed
-            };
+            // Get all SVG files in the input directory
+            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
 
             Random rnd = new Random();
 
-            foreach (string fileName in svgFiles)
+            foreach (string inputPath in svgFiles)
             {
-                // Build full input and output paths
-                string inputPath = Path.Combine(inputFolder, fileName);
-                string outputFileName = Path.ChangeExtension(fileName, ".apng.png");
-                string outputPath = Path.Combine(outputFolder, outputFileName);
-
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure the directory for the output file exists
+                // Build the output file path (APNG uses .png extension)
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".png");
+
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Generate a random frame delay between 100ms and 1000ms
-                uint randomDelay = (uint)rnd.Next(100, 1001);
+                // Assign a random frame delay between 100ms and 999ms
+                uint randomDelay = (uint)rnd.Next(100, 1000);
 
-                // Load the SVG image
+                // Load the SVG and save it as an APNG with the random delay
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save as APNG with the random frame delay
                     image.Save(outputPath, new ApngOptions() { DefaultFrameTime = randomDelay });
                 }
             }
