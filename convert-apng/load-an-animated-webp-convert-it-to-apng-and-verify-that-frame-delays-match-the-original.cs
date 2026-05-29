@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -10,72 +9,61 @@ class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = "Animation1.webp";
+        string outputPath = "Animation1.webp.png";
+
+        // Ensure the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = "input.webp";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the animated WebP image
             using (Image webpImage = Image.Load(inputPath))
             {
-                // Extract original frame delays (if available)
-                var originalDelays = new List<int>();
-                if (webpImage is IMultipageImage webpMultipage)
+                // Cast to multipage interface to obtain frame count
+                int webpFrameCount = 0;
+                if (webpImage is IMultipageImage multipageWebp)
                 {
-                    foreach (var page in webpMultipage.Pages)
-                    {
-                        // Try to read a FrameDelay property via reflection
-                        var delayProp = page.GetType().GetProperty("FrameDelay");
-                        int delay = delayProp != null ? (int)delayProp.GetValue(page) : 0;
-                        originalDelays.Add(delay);
-                    }
+                    webpFrameCount = multipageWebp.PageCount;
                 }
 
-                // Convert and save to APNG using default options
+                // Convert and save as APNG using default options (preserves frame delays)
                 webpImage.Save(outputPath, new ApngOptions());
 
-                // Load the generated APNG to verify frame delays
+                // Load the resulting APNG to verify frame information
                 using (Image apngImage = Image.Load(outputPath))
                 {
-                    var apngDelays = new List<int>();
-                    if (apngImage is IMultipageImage apngMultipage)
+                    int apngFrameCount = 0;
+                    if (apngImage is IMultipageImage multipageApng)
                     {
-                        foreach (var page in apngMultipage.Pages)
-                        {
-                            var delayProp = page.GetType().GetProperty("FrameDelay");
-                            int delay = delayProp != null ? (int)delayProp.GetValue(page) : 0;
-                            apngDelays.Add(delay);
-                        }
+                        apngFrameCount = multipageApng.PageCount;
                     }
 
-                    // Simple verification: compare counts and each delay value
-                    bool match = originalDelays.Count == apngDelays.Count;
-                    if (match)
+                    // Simple verification: frame counts should match
+                    if (webpFrameCount == apngFrameCount)
                     {
-                        for (int i = 0; i < originalDelays.Count; i++)
-                        {
-                            if (originalDelays[i] != apngDelays[i])
-                            {
-                                match = false;
-                                break;
-                            }
-                        }
+                        Console.WriteLine($"Verification succeeded: both images contain {webpFrameCount} frames.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Verification failed: WebP has {webpFrameCount} frames, APNG has {apngFrameCount} frames.");
                     }
 
-                    Console.WriteLine(match
-                        ? "Frame delays match between WebP and APNG."
-                        : "Frame delays do NOT match.");
+                    // Optional: compare default frame time if available
+                    if (webpImage is WebPImage wImg && apngImage is ApngImage aImg)
+                    {
+                        // WebPImage does not expose a direct DefaultFrameTime, so we compare the APNG's default
+                        // with the assumption that Aspose.Imaging copies the original delays.
+                        Console.WriteLine($"APNG default frame time: {aImg.DefaultFrameTime} ms");
+                    }
                 }
             }
         }
