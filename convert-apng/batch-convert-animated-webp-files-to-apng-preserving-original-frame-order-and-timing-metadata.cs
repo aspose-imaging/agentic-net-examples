@@ -10,33 +10,39 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputFolder = @"C:\InputWebp";
-            string outputFolder = @"C:\OutputApng";
+            string inputDirectory = @"C:\InputWebp";
+            string outputDirectory = @"C:\OutputApng";
 
-            // Get all animated WEBP files in the input folder
-            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Get all animated WEBP files in the input directory
+            string[] webpFiles = Directory.GetFiles(inputDirectory, "*.webp");
 
             foreach (string inputPath in webpFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output path (same name with .png extension)
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Build the output file path (same name with .png extension)
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the animated WEBP image
+                // Load the animated WEBP image and save it as APNG preserving frames and timing
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save as APNG preserving frames and timing
+                    // ApngOptions without custom settings preserves original frame order and timing
                     image.Save(outputPath, new ApngOptions());
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
