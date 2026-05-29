@@ -2,37 +2,61 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input\\animation.webp";
+        string outputPath = "output\\animation.apng.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\animation_input.webp";
-            string outputPath = @"C:\Images\animation_resized_apng.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the animated WebP image (preserves all frames)
-            using (Image image = Image.Load(inputPath))
+            using (Image webpImage = Image.Load(inputPath))
             {
-                // Reduce dimensions by half
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
-                image.Resize(newWidth, newHeight);
+                IMultipageImage multipage = webpImage as IMultipageImage;
+                if (multipage == null || multipage.PageCount == 0)
+                {
+                    Console.Error.WriteLine("No animation frames found in the WebP image.");
+                    return;
+                }
 
-                // Save as APNG (animated PNG) using default options
-                image.Save(outputPath, new ApngOptions());
+                int newWidth = webpImage.Width / 2;
+                int newHeight = webpImage.Height / 2;
+
+                ApngOptions apngOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, newWidth, newHeight))
+                {
+                    apngImage.RemoveAllFrames();
+
+                    foreach (Image page in multipage.Pages)
+                    {
+                        RasterImage frame = page as RasterImage;
+                        if (frame == null)
+                            continue;
+
+                        frame.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                        apngImage.AddFrame(frame);
+                    }
+
+                    apngImage.Save();
+                }
             }
         }
         catch (Exception ex)
