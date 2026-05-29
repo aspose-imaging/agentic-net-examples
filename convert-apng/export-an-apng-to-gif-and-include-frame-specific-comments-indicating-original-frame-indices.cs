@@ -2,41 +2,36 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\input.apng";
-        string outputPath = "Output\\output.gif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
-            {
-                using (GifImage gif = new GifImage(new GifFrameBlock((ushort)apng.Width, (ushort)apng.Height)))
-                {
-                    for (int i = 0; i < apng.PageCount; i++)
-                    {
-                        using (RasterImage frame = (RasterImage)apng.Pages[i])
-                        {
-                            gif.AddPage(frame);
-                        }
-                    }
+            string inputPath = "Input\\animation.apng";
+            string outputPath = "Output\\animation.gif";
 
-                    gif.Save(outputPath, new GifOptions());
-                }
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
+
+            using (Aspose.Imaging.FileFormats.Apng.ApngImage apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)Image.Load(inputPath))
+            {
+                // Add a comment for each frame during export
+                apng.PageExportingAction = (pageIndex, page) =>
+                {
+                    Console.WriteLine($"Exporting frame {pageIndex} (original index {pageIndex})");
+                };
+
+                GifOptions gifOptions = new GifOptions();
+                apng.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
