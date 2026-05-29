@@ -10,53 +10,51 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\InputWebp";
-            string outputFolder = @"C:\OutputApng";
-            string csvPath = Path.Combine(outputFolder, "summary.csv");
+            // Hardcoded paths
+            string inputDirectory = @"C:\WebpInput";
+            string outputDirectory = @"C:\ApngOutput";
+            string csvPath = Path.Combine(outputDirectory, "summary.csv");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
+            // Ensure output directory exists for CSV and images
+            Directory.CreateDirectory(outputDirectory);
 
-            // Write CSV header (overwrite if exists)
+            // Prepare CSV writer
             using (var csvWriter = new StreamWriter(csvPath, false))
             {
-                csvWriter.WriteLine("InputFile,OutputFile,ConversionTimeMs");
-            }
+                csvWriter.WriteLine("FileName,ConversionTimeMs");
 
-            // Get all animated WEBP files
-            string[] inputFiles = Directory.GetFiles(inputFolder, "*.webp");
+                // Get all .webp files in the input directory
+                string[] webpFiles = Directory.GetFiles(inputDirectory, "*.webp");
 
-            foreach (string inputPath in inputFiles)
-            {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                foreach (string inputPath in webpFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                    // Verify input file exists
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                // Determine output file path (append .png to keep original name)
-                string outputPath = Path.Combine(outputFolder, Path.GetFileName(inputPath) + ".png");
+                    // Determine output file path (same name with .png extension)
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Measure conversion time
-                Stopwatch sw = Stopwatch.StartNew();
+                    // Measure conversion time
+                    Stopwatch sw = Stopwatch.StartNew();
 
-                // Load WEBP and save as APNG
-                using (Image image = Image.Load(inputPath))
-                {
-                    image.Save(outputPath, new ApngOptions());
-                }
+                    // Load the animated WebP image and save as APNG
+                    using (Image image = Image.Load(inputPath))
+                    {
+                        image.Save(outputPath, new ApngOptions());
+                    }
 
-                sw.Stop();
+                    sw.Stop();
 
-                // Append result to CSV
-                using (var csvWriter = new StreamWriter(csvPath, true))
-                {
-                    csvWriter.WriteLine($"{inputPath},{outputPath},{sw.ElapsedMilliseconds}");
+                    // Write result to CSV
+                    csvWriter.WriteLine($"{Path.GetFileName(inputPath)},{sw.ElapsedMilliseconds}");
                 }
             }
         }
