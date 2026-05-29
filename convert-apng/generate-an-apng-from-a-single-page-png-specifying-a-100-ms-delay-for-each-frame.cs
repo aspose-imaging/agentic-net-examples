@@ -24,40 +24,33 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source PNG image
+            // Load the source PNG as a raster image
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
                 // Configure APNG creation options
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100, // 100 ms default frame duration
+                    DefaultFrameTime = 100u, // 100 ms per frame
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create the APNG image canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    createOptions,
-                    sourceImage.Width,
-                    sourceImage.Height))
+                // Create the APNG image with the same dimensions as the source
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
                 {
-                    // Remove the initial default frame
+                    // Remove the default single frame
                     apngImage.RemoveAllFrames();
 
-                    // Add multiple frames with a 100 ms delay each
-                    int frameCount = 5; // example: 5 frames
+                    // Add multiple frames (example: 5 frames) using the same source image
+                    int frameCount = 5;
                     for (int i = 0; i < frameCount; i++)
                     {
-                        apngImage.AddFrame(sourceImage, 100);
+                        apngImage.AddFrame(sourceImage);
                     }
 
-                    // Save the APNG file
+                    // Save the APNG (output path already bound via FileCreateSource)
                     apngImage.Save();
                 }
             }
