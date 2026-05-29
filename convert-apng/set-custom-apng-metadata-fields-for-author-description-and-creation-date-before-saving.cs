@@ -10,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.apng";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.apng";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,8 +28,8 @@ class Program
                 ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = 100
+                    DefaultFrameTime = 100,
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
                 using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
