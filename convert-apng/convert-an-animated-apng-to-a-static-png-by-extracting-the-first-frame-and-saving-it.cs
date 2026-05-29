@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\animated.apng";
-            string outputPath = @"C:\Images\first_frame.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,20 +22,25 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the animated APNG
+            // Load the APNG image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to ApngImage to access frames
-                ApngImage apng = (ApngImage)image;
+                ApngImage apngImage = image as ApngImage;
+                if (apngImage == null || apngImage.PageCount == 0)
+                {
+                    Console.Error.WriteLine("No frames found in the APNG image.");
+                    return;
+                }
 
-                // Get the first frame (index 0)
-                ApngFrame firstFrame = (ApngFrame)apng.Pages[0];
-
-                // Save the first frame as a static PNG
-                // The frame itself is a RasterImage, so we can call Save directly
-                firstFrame.Save(outputPath, new PngOptions());
+                // Extract the first frame (as RasterImage)
+                using (RasterImage firstFrame = (RasterImage)apngImage.Pages[0])
+                {
+                    // Save the first frame as a static PNG
+                    firstFrame.Save(outputPath, new PngOptions());
+                }
             }
         }
         catch (Exception ex)
