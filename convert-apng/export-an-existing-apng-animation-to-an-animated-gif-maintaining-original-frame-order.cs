@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputPath = "output.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputPath = "output.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,7 +21,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the APNG animation
             using (Image image = Image.Load(inputPath))
