@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,64 +13,57 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
             string outputPath = "output.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (Image img = Image.Load(inputPath))
+            // Load SVG and rasterize to a raster image (PNG in memory)
+            using (Image svgImage = Image.Load(inputPath))
             {
-                SvgImage svgImage = (SvgImage)img;
-                int width = svgImage.Width;
-                int height = svgImage.Height;
+                var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
 
-                // Set up APNG creation options
-                ApngOptions apngOptions = new ApngOptions
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100, // 100 ms per frame
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                // Create the APNG canvas
-                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
-                {
-                    apng.RemoveAllFrames();
-
-                    int frameCount = 10;
-                    int step = width / frameCount; // horizontal shift per frame
-
-                    for (int i = 0; i < frameCount; i++)
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        // Create a raster frame
-                        using (RasterImage frame = (RasterImage)Image.Create(
-                            new PngOptions { Source = new FileCreateSource(Path.GetTempFileName(), false) },
-                            width,
-                            height))
-                        {
-                            // Draw the SVG at a varying offset
-                            Graphics graphics = new Graphics(frame);
-                            graphics.Clear(Color.Transparent);
-                            int offsetX = i * step;
-                            graphics.DrawImage(svgImage, new Point(offsetX, 0));
+                        const int animationDuration = 1000; // total ms
+                        const int frameDuration = 100; // ms per frame
+                        int totalFrames = animationDuration / frameDuration;
 
-                            // Add the frame to the APNG
-                            apng.AddFrame(frame);
+                        var createOptions = new ApngOptions
+                        {
+                            Source = new FileCreateSource(outputPath, false),
+                            DefaultFrameTime = (uint)frameDuration,
+                            ColorType = PngColorType.TruecolorWithAlpha
+                        };
+
+                        using (ApngImage apng = (ApngImage)Image.Create(createOptions, raster.Width, raster.Height))
+                        {
+                            apng.RemoveAllFrames();
+
+                            // Add frames with varying gamma to create a simple fade animation
+                            for (int i = 0; i < totalFrames; i++)
+                            {
+                                apng.AddFrame(raster);
+                                ApngFrame lastFrame = (ApngFrame)apng.Pages[apng.PageCount - 1];
+                                float gamma = (float)i / totalFrames;
+                                lastFrame.AdjustGamma(gamma);
+                            }
+
+                            apng.Save();
                         }
                     }
-
-                    // Save the animated PNG
-                    apng.Save();
                 }
             }
         }
