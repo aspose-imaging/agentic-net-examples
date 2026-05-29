@@ -11,7 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.tif";
-            string outputPath = "output.png";
+            string outputPath = "output\\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,11 +26,11 @@ class Program
             // Load the multi‑page TIFF
             using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options (lossless PNG compression is default)
+                // Configure APNG options for lossless PNG compression
                 var apngOptions = new ApngOptions
                 {
-                    // Set a reasonable default frame duration (in milliseconds)
-                    DefaultFrameTime = 100
+                    // PNG compression level 0 = no compression (still lossless)
+                    PngCompressionLevel = 0
                 };
 
                 // Save as APNG
