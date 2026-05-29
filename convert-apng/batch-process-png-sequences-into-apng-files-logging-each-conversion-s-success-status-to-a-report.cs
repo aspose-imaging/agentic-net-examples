@@ -1,10 +1,9 @@
 using System;
 using System.IO;
-using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,9 +12,11 @@ class Program
     {
         try
         {
+            // Define relative input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
+            // Validate input directory; create if missing and exit
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -23,59 +24,75 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            // Path for the conversion report
             string reportPath = Path.Combine(outputDirectory, "report.txt");
-            StringBuilder reportBuilder = new StringBuilder();
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
 
-            foreach (string inputPath in files)
+            // Open report writer
+            using (var reportWriter = new StreamWriter(reportPath, false))
             {
-                if (!File.Exists(inputPath))
+                foreach (var inputPath in files)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    reportBuilder.AppendLine($"{Path.GetFileName(inputPath)} -> N/A : File not found");
-                    continue;
-                }
-
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".apng.png");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                try
-                {
-                    using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+                    // Verify the input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        ApngOptions createOptions = new ApngOptions
-                        {
-                            Source = new FileCreateSource(outputPath, false),
-                            DefaultFrameTime = 100, // 100 ms per frame
-                            ColorType = PngColorType.TruecolorWithAlpha
-                        };
-
-                        using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
-                        {
-                            apngImage.RemoveAllFrames();
-                            apngImage.AddFrame(sourceImage);
-                            apngImage.Save();
-                        }
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
                     }
 
-                    reportBuilder.AppendLine($"{Path.GetFileName(inputPath)} -> {Path.GetFileName(outputPath)} : Success");
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Error processing {inputPath}: {ex.Message}");
-                    reportBuilder.AppendLine($"{Path.GetFileName(inputPath)} -> {Path.GetFileName(outputPath)} : Failed ({ex.Message})");
+                    // Determine output APNG path
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".apng");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    try
+                    {
+                        // Load the source PNG as a raster image
+                        using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+                        {
+                            // Configure APNG creation options
+                            using (ApngOptions createOptions = new ApngOptions
+                            {
+                                Source = new FileCreateSource(outputPath, false),
+                                DefaultFrameTime = 100, // 100 ms per frame
+                                ColorType = PngColorType.TruecolorWithAlpha
+                            })
+                            {
+                                // Create the APNG image bound to the output file
+                                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                                {
+                                    // Remove the default single frame
+                                    apngImage.RemoveAllFrames();
+
+                                    // Add the source image as the only frame
+                                    apngImage.AddFrame(sourceImage);
+
+                                    // Save the APNG (output path already bound via FileCreateSource)
+                                    apngImage.Save();
+                                }
+                            }
+                        }
+
+                        // Log success to the report
+                        reportWriter.WriteLine($"Success: {inputPath} -> {outputPath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log failure to the report
+                        reportWriter.WriteLine($"Failed: {inputPath} -> {outputPath} : {ex.Message}");
+                    }
                 }
             }
-
-            File.WriteAllText(reportPath, reportBuilder.ToString());
         }
         catch (Exception ex)
         {
