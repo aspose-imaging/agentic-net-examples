@@ -5,38 +5,44 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\input.tif";
+            string outputPath = @"C:\Images\output.tif";
 
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the multi‑page TIFF
             using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                TiffFrame[] frames = tiff.Frames;
-                for (int i = 0; i < frames.Length; i++)
+                // Iterate through each frame (page)
+                foreach (var frame in tiff.Frames)
                 {
-                    TiffFrame frame = frames[i];
-                    // Example: set duration proportional to the sum of horizontal and vertical resolution
-                    int durationMs = (int)(frame.HorizontalResolution + frame.VerticalResolution);
-                    Console.WriteLine($"Frame {i}: Resolution {frame.HorizontalResolution}x{frame.VerticalResolution}, Duration {durationMs} ms");
-                    // Note: Actual setting of frame duration would require modifying TIFF tags,
-                    // which is beyond this simple demonstration.
+                    // Example: calculate a frame duration based on the page resolution
+                    double hRes = frame.HorizontalResolution; // pixels per inch
+                    double vRes = frame.VerticalResolution;   // pixels per inch
+
+                    // Simple formula – you can replace it with any logic you need
+                    int duration = (int)(1000 / (hRes * vRes));
+
+                    // If you need to store the duration in the TIFF metadata, you could set a custom tag here.
+                    // The actual tag name/value depends on the TIFF specification and Aspose.Imaging support.
+                    // Example (commented out because the exact API may differ):
+                    // frame.Metadata.SetTagValue(Aspose.Imaging.FileFormats.Tiff.Enums.TiffTag.FrameDelay, duration);
                 }
 
+                // Save the modified TIFF
                 tiff.Save(outputPath);
             }
         }
