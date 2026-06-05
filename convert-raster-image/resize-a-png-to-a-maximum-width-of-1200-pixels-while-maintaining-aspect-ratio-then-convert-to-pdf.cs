@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
@@ -27,24 +26,19 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Determine new dimensions while preserving aspect ratio
-                int maxWidth = 1200;
-                int newWidth = image.Width;
-                int newHeight = image.Height;
-
+                // Determine if resizing is needed (max width 1200)
+                const int maxWidth = 1200;
                 if (image.Width > maxWidth)
                 {
-                    newWidth = maxWidth;
-                    newHeight = (int)Math.Round((double)image.Height * maxWidth / image.Width);
+                    // Calculate new height to maintain aspect ratio
+                    double scale = (double)maxWidth / image.Width;
+                    int newHeight = (int)Math.Round(image.Height * scale);
+
+                    // Resize the image
+                    image.Resize(maxWidth, newHeight);
                 }
 
-                // Resize if needed
-                if (newWidth != image.Width || newHeight != image.Height)
-                {
-                    image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
-                }
-
-                // Convert to PDF using PdfOptions
+                // Convert and save as PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
