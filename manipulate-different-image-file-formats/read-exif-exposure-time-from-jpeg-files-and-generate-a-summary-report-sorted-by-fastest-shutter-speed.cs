@@ -11,60 +11,66 @@ class Program
     {
         try
         {
-            // Hardcoded input directory and output report file
-            string inputDirectory = "InputImages";
-            string outputPath = "Report\\ExposureReport.txt";
+            // Hardcoded input JPEG files
+            string[] inputFiles = { "photo1.jpg", "photo2.jpg", "photo3.jpg" };
+            // Hardcoded output report path
+            string outputPath = "Output/report.txt";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
+            var exposures = new List<(string File, double Value, string Text)>();
+
+            foreach (var inputPath in inputFiles)
             {
-                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
-                return;
-            }
-
-            // Get all JPEG files in the input directory
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
-                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToArray();
-
-            var exposureData = new List<(string FileName, double ExposureTime)>();
-
-            foreach (string filePath in jpegFiles)
-            {
-                if (!File.Exists(filePath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
                 }
 
-                using (JpegImage image = (JpegImage)Image.Load(filePath))
+                using (JpegImage image = (JpegImage)Image.Load(inputPath))
                 {
                     var exif = image.ExifData;
                     if (exif != null)
                     {
-                        dynamic d = exif;
-                        double exposure = (double)d.ExposureTime.ToDouble();
-                        exposureData.Add((Path.GetFileName(filePath), exposure));
+                        var exposureObj = exif.ExposureTime;
+                        if (exposureObj != null)
+                        {
+                            double value = 0;
+                            string text = exposureObj.ToString();
+
+                            // Attempt numeric conversion
+                            try
+                            {
+                                value = Convert.ToDouble(exposureObj);
+                            }
+                            catch
+                            {
+                                // Fallback parsing from string representation
+                                var numericPart = text.Split('(')[0];
+                                double.TryParse(numericPart, out value);
+                            }
+
+                            exposures.Add((Path.GetFileName(inputPath), value, text));
+                        }
                     }
                 }
             }
 
             // Sort by fastest shutter speed (smallest exposure time)
-            var sorted = exposureData.OrderBy(item => item.ExposureTime).ToList();
+            var sorted = exposures.OrderBy(e => e.Value).ToList();
 
-            // Prepare report lines
-            var reportLines = new List<string>();
-            reportLines.Add("Exposure Time Report (sorted by fastest shutter speed):");
+            var lines = new List<string>
+            {
+                "Exposure Time Report (sorted by fastest shutter speed):"
+            };
             foreach (var item in sorted)
             {
-                reportLines.Add($"{item.FileName}: {item.ExposureTime}");
+                lines.Add($"{item.File}: {item.Text}");
             }
 
-            // Write report to the output file
-            File.WriteAllLines(outputPath, reportLines);
+            File.WriteAllLines(outputPath, lines);
         }
         catch (Exception ex)
         {
@@ -72,3 +78,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a photographer wants to audit a batch of JPEG images to identify which shots were captured with the fastest shutter speed, a developer can use this C# code with Aspose.Imaging to read EXIF exposure times and produce a sorted report.
+ * 2. When a media archive needs to catalog image files by their exposure settings for quick retrieval of high‑speed action shots, the code extracts EXIF exposure time from JPEGs and generates a text summary ordered by fastest shutter speed.
+ * 3. When a wildlife research project requires analyzing camera trap photos to determine which images were taken with the shortest exposure, developers can employ this snippet to parse JPEG EXIF data and rank the files by shutter speed.
+ * 4. When an e‑commerce platform wants to showcase product photos taken with optimal motion blur control, the solution reads JPEG EXIF exposure values and creates a report that highlights the images with the quickest shutter times.
+ * 5. When a digital forensics analyst needs to verify the sequence of events by comparing exposure times across multiple JPEG evidence files, the code reads the EXIF exposure time using Aspose.Imaging and outputs a sorted list of the fastest captures.
+ */
