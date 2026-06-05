@@ -1,8 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -11,8 +9,8 @@ class Program
         try
         {
             string inputPath = "watermark.png";
-            string outputTeleaPath = "output_telea.png";
-            string outputCafPath = "output_caf.png";
+            string outputTelea = "output_telea.png";
+            string outputCaf = "output_caf.png";
 
             if (!File.Exists(inputPath))
             {
@@ -20,35 +18,31 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputTeleaPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputCafPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputTelea));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputCaf));
 
-            // Load the source image
-            using (var image = Image.Load(inputPath))
+            using (var image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var pngImage = (PngImage)image;
+                var pngImage = (Aspose.Imaging.FileFormats.Png.PngImage)image;
 
-                // Define the mask
-                var mask = new GraphicsPath();
-                var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
+                var mask = new Aspose.Imaging.GraphicsPath();
+                var figure = new Aspose.Imaging.Figure();
+                figure.AddShape(new Aspose.Imaging.Shapes.EllipseShape(new Aspose.Imaging.RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
-                // Telea algorithm
                 var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
                 using (var teleaResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, teleaOptions))
                 {
-                    teleaResult.Save(outputTeleaPath);
+                    teleaResult.Save(outputTelea);
                 }
 
-                // Content Aware Fill algorithm (default)
                 var cafOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
                 {
                     MaxPaintingAttempts = 4
                 };
                 using (var cafResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, cafOptions))
                 {
-                    cafResult.Save(outputCafPath);
+                    cafResult.Save(outputCaf);
                 }
             }
         }
