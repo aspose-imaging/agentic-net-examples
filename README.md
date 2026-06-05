@@ -6,7 +6,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 3608 |
+| Total Examples | 4040 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-06-05 |
@@ -52,7 +52,7 @@ README.md
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 58 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 208 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 695 | 100.0% | [agents.md](./kernel-filters/agents.md) |
-| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 600 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
+| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 1032 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
 | [Manipulating Images](./manipulating-images/) | 407 | 100.0% | [agents.md](./manipulating-images/agents.md) |
 | [Merge Images](./merge-images/) | 135 | 100.0% | [agents.md](./merge-images/agents.md) |
 | [Working With Drawing Images](./working-with-drawing-images/) | 397 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
@@ -114,7 +114,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.5.0 | 3608 | 100.0% | net9.0 |
+| 26.5.0 | 4040 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
@@ -133,4 +133,4 @@ To trigger validation:
 Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260605_061900` | 2026-06-05*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260605_063209` | 2026-06-05*
