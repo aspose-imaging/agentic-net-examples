@@ -10,60 +10,61 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\sample.svg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded input BMP files
+            string[] inputPaths = new[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                @"C:\Images\image1.bmp",
+                @"C:\Images\image2.bmp"
+            };
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Custom CSS to embed in each SVG
+            string customCss = @"
+                /* Custom CSS */
+                .myClass { fill: red; }
+            ";
 
-            // Load BMP image
-            using (Image image = Image.Load(inputPath))
+            foreach (string inputPath in inputPaths)
             {
-                // Prepare SVG rasterization options
-                var rasterizationOptions = new SvgRasterizationOptions
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    PageSize = image.Size
-                };
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                // Prepare SVG save options
-                var svgOptions = new SvgOptions
+                // Determine output SVG path (same folder, .svg extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".svg");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load BMP image
+                using (Image image = Image.Load(inputPath))
                 {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    // Do not compress to keep SVG readable for CSS injection
-                    Compress = false
-                };
+                    // Prepare SVG options with rasterization settings
+                    var vectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
 
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
-            }
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = vectorRasterizationOptions
+                    };
 
-            // Embed custom CSS stylesheet into the generated SVG
-            const string customCss = @"
-    <style type=""text/css"">
-        /* Custom CSS */
-        .customClass { fill: #ff0000; stroke: #0000ff; stroke-width: 2; }
-    </style>
-";
+                    // Save as SVG
+                    image.Save(outputPath, svgOptions);
+                }
 
-            // Read the SVG content
-            string svgContent = File.ReadAllText(outputPath);
-
-            // Find the position after the opening <svg> tag
-            int insertPos = svgContent.IndexOf('>') + 1;
-            if (insertPos > 0 && insertPos < svgContent.Length)
-            {
-                // Insert the CSS after the <svg> tag
-                svgContent = svgContent.Insert(insertPos, customCss);
-                // Write back the modified SVG
-                File.WriteAllText(outputPath, svgContent);
+                // Embed custom CSS into the generated SVG
+                string svgContent = File.ReadAllText(outputPath);
+                int insertPos = svgContent.IndexOf('>'); // after the opening <svg ...> tag
+                if (insertPos != -1)
+                {
+                    string styleElement = $"\n<style type=\"text/css\">\n{customCss}\n</style>\n";
+                    svgContent = svgContent.Insert(insertPos + 1, styleElement);
+                    File.WriteAllText(outputPath, svgContent);
+                }
             }
         }
         catch (Exception ex)
