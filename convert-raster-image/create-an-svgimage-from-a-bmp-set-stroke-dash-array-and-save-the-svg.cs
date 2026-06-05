@@ -1,41 +1,53 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "sample.bmp";
-            string outputPath = "output.svg";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\sample.bmp";
+            string outputPath = "C:\\temp\\output.svg";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.RasterImage bmp = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            // Load the BMP image
+            using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
+                int dpi = 96;
 
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, 96);
+                // Create an SVG graphics canvas with the same dimensions as the BMP
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                Aspose.Imaging.Pen dashPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                dashPen.DashPattern = new float[] { 5, 5 };
+                // Create a pen with a dash pattern
+                Pen dashPen = new Pen(Color.Black, 2);
+                dashPen.DashPattern = new float[] { 5, 3 }; // 5 units dash, 3 units gap
 
-                graphics.DrawImage(bmp, new Aspose.Imaging.Point(0, 0));
+                // Draw a dashed rectangle border around the image area
                 graphics.DrawRectangle(dashPen, 0, 0, width, height);
 
-                using (SvgImage svg = graphics.EndRecording())
+                // Draw the BMP onto the SVG canvas
+                graphics.DrawImage(bmp, new Point(0, 0), new Size(width, height));
+
+                // Finalize the SVG image and save it
+                using (SvgImage svgImage = graphics.EndRecording())
                 {
-                    svg.Save(outputPath);
+                    svgImage.Save(outputPath);
                 }
             }
         }
