@@ -1562,19 +1562,19 @@
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
+        "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Wmf",
-        "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "Aspose.Imaging.Sources",
         "Aspose.Imaging.FileFormats.Emf",
-        "System.Net.Http",
-        "Aspose.Imaging.FileFormats.Bmp",
-        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Tiff.Enums",
         "System.Threading.Tasks",
+        "Aspose.Imaging.FileFormats.Png",
+        "Aspose.Imaging.Sources",
+        "System.Net.Http",
         "System.IO.Compression",
-        "System.Collections.Generic"
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.FileFormats.Tiff"
       ],
       "key_apis": [
         "BmpImage",
