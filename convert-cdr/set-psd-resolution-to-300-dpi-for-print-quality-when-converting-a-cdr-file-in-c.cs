@@ -8,11 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "sample.cdr";
+        string outputPath = "output.psd";
+
         try
         {
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\output.psd";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,10 +23,8 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var psdOptions = new PsdOptions
-                {
-                    ResolutionSettings = new ResolutionSetting(300, 300)
-                };
+                PsdOptions psdOptions = new PsdOptions();
+                psdOptions.ResolutionSettings = new ResolutionSetting(300, 300);
 
                 if (image is VectorImage)
                 {
