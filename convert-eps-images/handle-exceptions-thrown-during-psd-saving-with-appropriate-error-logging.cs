@@ -2,57 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.CoreExceptions;
-using Aspose.Imaging.CoreExceptions.ImageFormats;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.psd";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output.psd";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD specific options
+                // Configure PSD saving options
                 var psdOptions = new PsdOptions
                 {
                     CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
                     ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale
                 };
 
-                // Attempt to save the image as PSD and handle save‑related exceptions
-                try
-                {
-                    image.Save(outputPath, psdOptions);
-                }
-                catch (ImageSaveException ise)
-                {
-                    Console.Error.WriteLine($"Image save error: {ise.Message}");
-                }
-                catch (PsdImageException psi)
-                {
-                    Console.Error.WriteLine($"PSD image error: {psi.Message}");
-                }
+                // Save the image as PSD with the specified options
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
         {
-            // Catch any other unexpected exceptions
+            // Log any errors that occur during processing or saving
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
