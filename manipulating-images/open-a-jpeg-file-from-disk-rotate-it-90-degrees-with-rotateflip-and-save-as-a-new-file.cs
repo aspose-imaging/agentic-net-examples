@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_rotated.jpg";
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output_rotated.jpg";
 
         try
         {
