@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -33,18 +32,19 @@ class Program
                 {
                     for (int x = 0; x < bmp.Width; x++)
                     {
-                        var original = bmp.GetPixel(x, y);
+                        var pixel = bmp.GetPixel(x, y);
                         var inverted = Color.FromArgb(
-                            original.A,
-                            255 - original.R,
-                            255 - original.G,
-                            255 - original.B);
+                            255,
+                            255 - pixel.R,
+                            255 - pixel.G,
+                            255 - pixel.B);
                         bmp.SetPixel(x, y, inverted);
                     }
                 }
 
                 // Save the inverted image into a PDF file
-                bmp.Save(outputPath, new PdfOptions());
+                var pdfOptions = new PdfOptions();
+                bmp.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
