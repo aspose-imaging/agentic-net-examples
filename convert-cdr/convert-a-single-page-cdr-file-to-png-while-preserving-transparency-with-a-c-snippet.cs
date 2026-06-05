@@ -2,17 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\sample.png";
+            string inputPath = "input.cdr";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,18 +24,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            // Load the CDR file
+            using (var cdr = (Aspose.Imaging.FileFormats.Cdr.CdrImage)Image.Load(inputPath))
             {
-                // Get the first (single) page
-                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+                // Configure PNG options with vector rasterization to keep transparency
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent
+                    }
+                };
 
-                // Preserve transparency by disabling background color
-                page.HasBackgroundColor = false;
-
-                // Save the page as PNG with default options (preserves alpha channel)
-                PngOptions pngOptions = new PngOptions();
-                page.Save(outputPath, pngOptions);
+                // Save as PNG
+                cdr.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
