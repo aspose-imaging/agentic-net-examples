@@ -2,53 +2,77 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the CDR vector image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            string inputPath = @"C:\Images\input.cdr";
+            string outputPath = @"C:\Images\output.png";
+            string tempPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
+
+            if (!File.Exists(inputPath))
             {
-                // Define the rectangular area for selective background removal
-                // (example rectangle: X=100, Y=100, Width=400, Height=300)
-                Rectangle selectionRect = new Rectangle(100, 100, 400, 300);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Crop the image to the selected rectangle
-                cdrImage.Crop(selectionRect);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-                // Remove background from the cropped vector image
-                cdrImage.RemoveBackground(new RemoveBackgroundSettings());
+            using (var vectorImage = Image.Load(inputPath) as VectorImage)
+            {
+                if (vectorImage == null)
+                {
+                    Console.Error.WriteLine("Failed to load vector image.");
+                    return;
+                }
 
-                // Prepare PNG options with transparent background for rasterization
-                var pngOptions = new PngOptions
+                vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+
+                var rasterOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    Source = new FileCreateSource(tempPath, false)
+                };
+                vectorImage.Save(tempPath, rasterOptions);
+            }
+
+            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
+            {
+                var maskingOptions = new AutoMaskingGraphCutOptions
+                {
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    BackgroundReplacementColor = Color.Transparent,
+                    ExportOptions = new PngOptions
                     {
-                        BackgroundColor = Color.Transparent,
-                        PageSize = cdrImage.Size
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
                     }
                 };
 
-                // Save the rasterized image as PNG
-                cdrImage.Save(outputPath, pngOptions);
+                var masking = new ImageMasking(raster);
+                using (MaskingResult result = masking.Decompose(maskingOptions))
+                using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                {
+                    var finalOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    };
+                    foreground.Save(outputPath, finalOptions);
+                }
             }
+
+            if (File.Exists(tempPath))
+                File.Delete(tempPath);
         }
         catch (Exception ex)
         {
