@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.gif";
-        string outputPath = @"c:\temp\output_contrast.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.gif";
+            string outputPath = "C:\\temp\\output_contrast.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,14 +27,18 @@ class Program
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF-specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Adjust contrast (value in range [-100, 100]; 50 increases contrast)
+                // Increase contrast (range -100 to 100)
                 gifImage.AdjustContrast(50f);
 
-                // Save the modified GIF (preserves animation)
-                gifImage.Save(outputPath, new GifOptions());
+                // Save with palette correction for better colors
+                GifOptions saveOptions = new GifOptions
+                {
+                    DoPaletteCorrection = true
+                };
+
+                gifImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
