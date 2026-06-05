@@ -2,46 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    // Hardcoded paths
-    private const string InputPath = @"C:\input\sample.jpg";
-    private const string OutputPath = @"C:\output\sample_converted.png";
-
-    // Maximum allowed output file size (bytes)
-    private const long MaxOutputSizeBytes = 5 * 1024 * 1024; // 5 MB
-
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = Path.Combine("Input", "sample.jpg");
+        string outputPath = Path.Combine("Output", "sample.tif");
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Define maximum allowed output file size (e.g., 5 MB)
+        long maxSizeBytes = 5L * 1024 * 1024;
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(InputPath))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {InputPath}");
-                return;
+                // Set TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the image as TIFF
+                image.Save(outputPath, tiffOptions);
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
-
-            // Load the image with an optional memory buffer hint
-            using (Image image = Image.Load(InputPath, new LoadOptions { BufferSizeHint = 50 }))
+            // Verify the output file size
+            FileInfo outputInfo = new FileInfo(outputPath);
+            if (outputInfo.Length > maxSizeBytes)
             {
-                // Prepare PNG save options
-                var pngOptions = new PngOptions();
-
-                // Save the image to the output path
-                image.Save(OutputPath, pngOptions);
+                Console.Error.WriteLine($"Output file exceeds size limit: {outputInfo.Length} bytes (limit: {maxSizeBytes} bytes)");
             }
-
-            // Validate output file size
-            var outputInfo = new FileInfo(OutputPath);
-            if (outputInfo.Length > MaxOutputSizeBytes)
+            else
             {
-                Console.Error.WriteLine($"Output file size {outputInfo.Length} exceeds limit of {MaxOutputSizeBytes} bytes.");
+                Console.WriteLine($"Conversion successful. Output size: {outputInfo.Length} bytes");
             }
         }
         catch (Exception ex)
