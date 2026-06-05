@@ -10,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = @"c:\temp\sample.bmp";
             string outputPath = @"c:\temp\output.psd";
 
@@ -27,7 +27,7 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD options with RLE compression to reduce file size
+                // Configure PSD saving options with RLE compression to reduce file size
                 PsdOptions psdOptions = new PsdOptions
                 {
                     CompressionMethod = CompressionMethod.RLE
