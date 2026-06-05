@@ -5,7 +5,7 @@
   "package_version": "26.5.0",
   "total_examples": 2863,
   "total_categories": 17,
-  "last_updated": "2026-05-29",
+  "last_updated": "2026-06-05",
   "categories": [
     {
       "name": "conversion",
@@ -479,19 +479,17 @@
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging",
+        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Cdr",
         "Aspose.Imaging.FileFormats.Psd",
-        "System.Collections.Generic",
-        "Aspose.Imaging.ImageLoadOptions",
-        "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.Sources",
+        "Aspose.Imaging.ImageLoadOptions",
         "System.Threading.Tasks",
         "Aspose.Imaging.ProgressManagement",
-        "Aspose.Imaging.Exif"
+        "Aspose.Imaging.FileFormats.Png"
       ],
       "key_apis": [
         "CdrImage",
