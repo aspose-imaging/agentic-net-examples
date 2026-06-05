@@ -8,15 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\InputPngs";
+        string outputFolder = @"C:\OutputSvgs";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
-
             // Get all PNG files in the input folder
             string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
 
@@ -29,16 +26,16 @@ class Program
                     return;
                 }
 
-                // Determine output SVG path (preserve original filename)
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                // Build the output SVG path, preserving the original filename
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PNG image
+                // Load the PNG image and save it as SVG
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare SVG options with rasterization settings
                     var vectorOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
@@ -49,7 +46,6 @@ class Program
                         VectorRasterizationOptions = vectorOptions
                     };
 
-                    // Save as SVG
                     image.Save(outputPath, svgOptions);
                 }
             }
