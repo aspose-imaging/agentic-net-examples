@@ -1,10 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
@@ -12,50 +10,82 @@ class Program
     {
         try
         {
-            string inputPath = "C:\\Windows\\System32\\drivers\\etc\\hosts";
-            string outputPath = "output.png";
+            // Temporary paths (not used for loading, only for directory creation compliance)
+            string tempDir = Path.Combine(Path.GetTempPath(), "MaskInversionTests");
+            string dummyOutputPath = Path.Combine(tempDir, "dummy.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(dummyOutputPath));
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Test 1: Invert a fully white mask (expect fully transparent)
+            bool whiteTestResult = TestInvertWhiteMask();
+            Console.WriteLine($"Invert fully white mask test passed: {whiteTestResult}");
 
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            using (RasterImage whiteImg = (RasterImage)Image.Create(
-                new PngOptions { Source = new StreamSource(new MemoryStream()) }, 10, 10))
-            {
-                int[] whitePixels = new int[10 * 10];
-                for (int i = 0; i < whitePixels.Length; i++)
-                    whitePixels[i] = unchecked((int)0xFFFFFFFF);
-                whiteImg.SaveArgb32Pixels(new Rectangle(0, 0, 10, 10), whitePixels);
-
-                var whiteMask = MagicWandTool.Select(whiteImg, new MagicWandSettings(0, 0));
-                var invertedWhiteMask = whiteMask.Invert();
-
-                bool whiteTest = whiteMask.IsOpaque(0, 0) && invertedWhiteMask.IsTransparent(0, 0);
-                Console.WriteLine($"White mask inversion test: {(whiteTest ? "PASS" : "FAIL")}");
-            }
-
-            using (RasterImage blackImg = (RasterImage)Image.Create(
-                new PngOptions { Source = new StreamSource(new MemoryStream()) }, 10, 10))
-            {
-                int[] blackPixels = new int[10 * 10];
-                for (int i = 0; i < blackPixels.Length; i++)
-                    blackPixels[i] = unchecked((int)0xFF000000);
-                blackImg.SaveArgb32Pixels(new Rectangle(0, 0, 10, 10), blackPixels);
-
-                var blackMask = MagicWandTool.Select(blackImg, new MagicWandSettings(0, 0));
-                var invertedBlackMask = blackMask.Invert();
-
-                bool blackTest = blackMask.IsOpaque(0, 0) && invertedBlackMask.IsTransparent(0, 0);
-                Console.WriteLine($"Black mask inversion test: {(blackTest ? "PASS" : "FAIL")}");
-            }
+            // Test 2: Invert a fully black mask (expect fully opaque)
+            bool blackTestResult = TestInvertBlackMask();
+            Console.WriteLine($"Invert fully black mask test passed: {blackTestResult}");
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
+    }
+
+    static bool TestInvertWhiteMask()
+    {
+        const int width = 10;
+        const int height = 10;
+
+        // Create a fully white grayscale mask
+        var whiteMask = new ImageGrayscaleMask(width, height);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                whiteMask[x, y] = 255; // opaque
+            }
+        }
+
+        // Invert the mask
+        var invertedMask = whiteMask.Invert();
+
+        // Verify that all pixels are now transparent (opacity 0)
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (invertedMask.GetByteOpacity(x, y) != 0)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    static bool TestInvertBlackMask()
+    {
+        const int width = 10;
+        const int height = 10;
+
+        // Create a fully black (transparent) grayscale mask
+        var blackMask = new ImageGrayscaleMask(width, height);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                blackMask[x, y] = 0; // transparent
+            }
+        }
+
+        // Invert the mask
+        var invertedMask = blackMask.Invert();
+
+        // Verify that all pixels are now opaque (opacity 255)
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (invertedMask.GetByteOpacity(x, y) != 255)
+                    return false;
+            }
+        }
+        return true;
     }
 }
