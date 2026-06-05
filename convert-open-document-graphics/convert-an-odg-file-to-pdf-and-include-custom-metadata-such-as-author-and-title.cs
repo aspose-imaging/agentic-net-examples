@@ -11,45 +11,38 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = @"C:\Input\sample.odg";
             string outputPath = @"C:\Output\sample.pdf";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Optional: set ODG metadata (author and title)
-                if (image is OdImage odImage)
-                {
-                    odImage.Metadata.Title = "Custom Title";
-                    odImage.Metadata.Creator = "Custom Author";
-                }
-
-                // Configure rasterization options for ODG to PDF conversion
+                // Configure rasterization options for ODG → PDF conversion
                 OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = image.Size
                 };
 
-                // Configure PDF options and embed custom metadata
+                // Configure PDF options and attach custom metadata
                 PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = rasterOptions,
                     PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        Author = "Custom Author",
-                        Title = "Custom Title"
+                        Author = "John Doe",
+                        Title = "Sample ODG to PDF"
                     }
                 };
 
