@@ -4,50 +4,50 @@ using System.Reflection;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace OtgToPngExample
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded paths
-            // Name of the embedded OTG resource (adjust namespace and file name as needed)
-            const string resourceName = "MyNamespace.Resources.Sample.otg";
-            // Output PNG file path
-            const string outputPath = @"C:\Output\sample.png";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the OTG file from the embedded resource
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
+            try
             {
-                if (resourceStream == null)
-                {
-                    Console.Error.WriteLine($"Embedded resource not found: {resourceName}");
-                    return;
-                }
+                // Hardcoded resource name and output file path
+                string inputResourceName = "OtgToPngExample.Resources.sample.otg";
+                string outputPath = @"C:\Temp\output.png";
 
-                // Load the image from the stream
-                using (Image image = Image.Load(resourceStream))
+                // Load OTG image from embedded resource
+                Assembly assembly = typeof(Program).Assembly;
+                using (Stream resourceStream = assembly.GetManifestResourceStream(inputResourceName))
                 {
-                    // Set up PNG save options with OTG rasterization
-                    var pngOptions = new PngOptions();
-                    var otgRasterization = new OtgRasterizationOptions
+                    if (resourceStream == null)
                     {
-                        PageSize = image.Size // Preserve original size
-                    };
-                    pngOptions.VectorRasterizationOptions = otgRasterization;
+                        Console.Error.WriteLine($"Embedded resource not found: {inputResourceName}");
+                        return;
+                    }
 
-                    // Save the image as PNG
-                    image.Save(outputPath, pngOptions);
+                    using (Image image = Image.Load(resourceStream))
+                    {
+                        // Configure PNG save options with OTG rasterization
+                        var pngOptions = new PngOptions();
+                        var otgRasterization = new OtgRasterizationOptions
+                        {
+                            PageSize = image.Size
+                        };
+                        pngOptions.VectorRasterizationOptions = otgRasterization;
+
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the image as PNG
+                        image.Save(outputPath, pngOptions);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
