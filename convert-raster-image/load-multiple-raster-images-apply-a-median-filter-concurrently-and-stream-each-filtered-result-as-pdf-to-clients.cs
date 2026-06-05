@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Drawing;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -14,45 +13,52 @@ class Program
         {
             // Hardcoded input and output file paths
             string[] inputPaths = {
-                @"C:\Images\input1.png",
-                @"C:\Images\input2.png"
+                @"C:\Images\image1.png",
+                @"C:\Images\image2.jpg"
             };
 
             string[] outputPaths = {
-                @"C:\Output\output1.pdf",
-                @"C:\Output\output2.pdf"
+                @"C:\Output\image1.pdf",
+                @"C:\Output\image2.pdf"
             };
 
             // Process each image concurrently
-            Parallel.ForEach(inputPaths, (inputPath, state, index) =>
+            Parallel.For(0, inputPaths.Length, i =>
             {
-                // Validate input file existence
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Corresponding output path
-                string outputPath = outputPaths[index];
-
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the raster image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to apply filters
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply median filter with size 5 to the whole image
+                    // Apply a median filter (size = 5) to the whole image
                     rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                    // Prepare PDF save options
+                    // Prepare PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
 
-                    // Save the filtered image as PDF
+                    // Save the filtered image as a PDF file
                     rasterImage.Save(outputPath, pdfOptions);
+
+                    // Additionally, stream the PDF to a memory stream (simulating client streaming)
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        rasterImage.Save(ms, pdfOptions);
+                        // Example: output the size of the streamed PDF
+                        Console.WriteLine($"Processed {Path.GetFileName(inputPath)} -> {Path.GetFileName(outputPath)} ({ms.Length} bytes)");
+                    }
                 }
             });
         }
