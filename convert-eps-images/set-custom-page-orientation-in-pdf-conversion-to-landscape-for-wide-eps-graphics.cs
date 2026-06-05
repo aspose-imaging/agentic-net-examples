@@ -1,6 +1,9 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,7 +15,7 @@ class Program
             string inputPath = "Input/sample.eps";
             string outputPath = "Output/sample.pdf";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,25 +26,23 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
-            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Aspose.Imaging.Image.Load(inputPath))
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Retrieve original dimensions
+                // Determine landscape page size (width > height)
                 int width = epsImage.Width;
                 int height = epsImage.Height;
+                if (width < height)
+                {
+                    // Swap dimensions for landscape orientation
+                    int temp = width;
+                    width = height;
+                    height = temp;
+                }
 
-                // Configure PDF options for landscape orientation
+                // Configure PDF options with landscape page size
                 var pdfOptions = new PdfOptions
                 {
-                    // Swap width and height for landscape page size
-                    PageSize = new Aspose.Imaging.SizeF(height, width),
-
-                    // Set vector rasterization options matching the landscape dimensions
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        PageWidth = height,
-                        PageHeight = width
-                    }
+                    PageSize = new SizeF(width, height)
                 };
 
                 // Save as PDF with the specified options
