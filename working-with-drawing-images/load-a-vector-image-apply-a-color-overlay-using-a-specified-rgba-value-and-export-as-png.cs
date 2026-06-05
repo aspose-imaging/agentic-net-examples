@@ -2,9 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -23,31 +21,38 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector image
+            // Load the vector image (SVG)
             using (Image vectorImage = Image.Load(inputPath))
             {
                 int width = vectorImage.Width;
                 int height = vectorImage.Height;
 
-                // Prepare PNG options with bound output file
+                // Create a PNG canvas
                 PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(outputPath, false);
-
-                // Create a raster canvas
-                using (Image canvas = Image.Create(pngOptions, width, height))
+                using (Image pngImage = Image.Create(pngOptions, width, height))
                 {
-                    // Draw the vector image onto the canvas
-                    Graphics graphics = new Graphics(canvas);
+                    // Draw the vector image onto the PNG canvas
+                    Graphics graphics = new Graphics(pngImage);
                     graphics.DrawImage(vectorImage, new Point(0, 0));
 
-                    // Apply color overlay (semi‑transparent red, RGBA 128,255,0,0)
-                    using (SolidBrush overlayBrush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+                    // Define overlay color (RGBA)
+                    int overlayR = 255;
+                    int overlayG = 0;
+                    int overlayB = 0;
+                    int overlayA = 128; // 0-255
+
+                    Color overlayColor = Color.FromArgb(overlayA, overlayR, overlayG, overlayB);
+
+                    // Apply color overlay
+                    using (SolidBrush overlayBrush = new SolidBrush())
                     {
-                        graphics.FillRectangle(overlayBrush, canvas.Bounds);
+                        overlayBrush.Color = overlayColor;
+                        overlayBrush.Opacity = (int)(overlayA * 100.0 / 255.0); // convert to percentage
+                        graphics.FillRectangle(overlayBrush, new Rectangle(0, 0, width, height));
                     }
 
-                    // Save the final PNG
-                    canvas.Save();
+                    // Save the result as PNG
+                    pngImage.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -57,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a branded thumbnail by overlaying a semi‑transparent corporate color onto an SVG logo and saving it as a PNG for web use.
+ * 2. When an e‑commerce platform wants to apply a promotional red tint to product vector illustrations before exporting them as PNGs for email campaigns.
+ * 3. When a mobile app creates custom map markers by loading SVG icons, adding a user‑selected RGBA highlight, and rendering them as PNG assets.
+ * 4. When a reporting tool converts SVG charts into PNG images with a colored overlay to indicate status levels such as warning or error.
+ * 5. When a UI designer automates the production of theme‑aware icons by applying a theme color overlay to SVG files and exporting the results as PNG files for Windows applications.
+ */
