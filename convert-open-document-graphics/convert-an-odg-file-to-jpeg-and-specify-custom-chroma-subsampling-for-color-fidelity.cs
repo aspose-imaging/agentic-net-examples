@@ -1,48 +1,35 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.odg";
+        string outputPath = "Output/sample.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.odg";
-            string outputPath = "Output\\sample.jpg";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure JPEG options with custom chroma subsampling
-                JpegOptions jpegOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
-                    // 4:2:0 subsampling (example)
-                    HorizontalSampling = new byte[] { 2, 1, 1 },
-                    VerticalSampling = new byte[] { 2, 1, 1 },
                     Quality = 90,
-                    // Vector rasterization for converting vector ODG to raster JPEG
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
+                    ColorType = JpegCompressionColorMode.YCbCr,
+                    HorizontalSampling = new byte[] { 2, 1, 1 },
+                    VerticalSampling = new byte[] { 2, 1, 1 }
                 };
 
-                // Save as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
