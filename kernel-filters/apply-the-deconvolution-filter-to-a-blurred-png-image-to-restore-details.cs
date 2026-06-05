@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\blurred.png";
-        string outputPath = @"C:\Images\restored.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,15 +26,15 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to access filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a motion deblurring (deconvolution) filter
-                // Parameters: length = 10, sigma = 1.0, angle = 0 degrees
-                var deconvolutionOptions = new MotionWienerFilterOptions(10, 1.0, 0.0);
-                rasterImage.Filter(rasterImage.Bounds, deconvolutionOptions);
+                // Apply a Gauss‑Wiener deconvolution filter (deblurring)
+                // Parameters: radius = 5, sigma = 4.0 (adjust as needed)
+                var filterOptions = new GaussWienerFilterOptions(5, 4.0);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                // Save the processed image
+                // Save the restored image
                 rasterImage.Save(outputPath);
             }
         }
@@ -44,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to restore details in a blurred PNG photograph taken with a low‑light camera by applying a Gauss‑Wiener deconvolution filter using Aspose.Imaging for .NET.
+ * 2. When an e‑commerce platform wants to automatically sharpen product PNG images that appear out of focus before publishing them on the website, using C# and the RasterImage.Filter method.
+ * 3. When a medical imaging application must improve the clarity of scanned PNG slides that suffered motion blur, by loading the image with Aspose.Imaging and applying a deconvolution filter.
+ * 4. When a document management system processes uploaded PNG scans and needs to enhance legibility of text by deblurring with a Gauss‑Wiener filter in a .NET service.
+ * 5. When a game developer prepares PNG texture assets that were unintentionally blurred during export and wants to programmatically restore sharpness during the build pipeline using Aspose.Imaging’s deconvolution filter.
+ */
