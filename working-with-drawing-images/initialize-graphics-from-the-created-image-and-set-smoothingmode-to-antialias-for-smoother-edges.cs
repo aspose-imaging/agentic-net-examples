@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -9,34 +10,30 @@ class Program
     {
         try
         {
-            // Hardcoded output path
+            // Define output path (hard‑coded)
             string outputPath = @"C:\temp\output.png";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a file stream for the output image
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            // Set up PNG options with a FileCreateSource bound to the output file
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a new image canvas (500x500)
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                // Set up PNG options with the stream as source
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(stream);
+                // Initialize Graphics for the image
+                Graphics graphics = new Graphics(image);
 
-                // Create a new image (500x500)
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
-                {
-                    // Initialize Graphics from the created image
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                // Enable anti‑aliasing for smoother edges
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                    // Set smoothing mode for anti-aliasing
-                    graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+                // Optional: clear background to white
+                graphics.Clear(Color.White);
 
-                    // Optional: clear background
-                    graphics.Clear(Aspose.Imaging.Color.Wheat);
-
-                    // Save the image (stream is already bound)
-                    image.Save();
-                }
+                // Save the image (output is already bound to the file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -45,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When generating a PNG thumbnail with smooth vector shapes, a developer can create a blank image, initialize Graphics, and set SmoothingMode to AntiAlias to avoid jagged edges.
+ * 2. When programmatically drawing a company logo onto a 500x500 canvas for a web banner, using Graphics with AntiAlias ensures the logo’s curves render cleanly.
+ * 3. When exporting a diagram or flowchart to a high‑resolution PNG file, initializing Graphics and enabling anti‑aliasing produces professional‑grade line quality.
+ * 4. When building a PDF‑to‑image conversion tool that rasterizes vector content into PNG, setting SmoothingMode to AntiAlias during drawing improves visual fidelity.
+ * 5. When creating custom UI icons on the fly in a C# desktop application, using Graphics with AntiAlias on a newly created image prevents pixelated edges in the final PNG file.
+ */
