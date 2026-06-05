@@ -8,31 +8,31 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.svg";
+        string outputPath = @"C:\temp\output.png";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image from a file stream
+            // Load SVG from file stream
             using (Stream stream = File.OpenRead(inputPath))
             using (SvgImage svgImage = new SvgImage(stream))
             {
-                // Remove the background using default analysis
+                // Remove background using default analysis
                 svgImage.RemoveBackground();
 
                 // Set up rasterization options for PNG output
-                var rasterOptions = new SvgRasterizationOptions
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
                     // Use the original SVG size as the page size
                     PageSize = svgImage.Size
@@ -40,7 +40,7 @@ class Program
 
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Save the rasterized image as PNG
@@ -49,7 +49,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
