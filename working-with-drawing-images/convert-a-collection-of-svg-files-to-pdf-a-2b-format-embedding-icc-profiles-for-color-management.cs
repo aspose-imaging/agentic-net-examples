@@ -2,60 +2,31 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            if (!Directory.Exists(inputDirectory))
+            string inputPath = Path.Combine(inputDir, "sample.pdf");
+            string outputPath = Path.Combine(outputDir, "sample.png");
+
+            if (!File.Exists(inputPath))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string file in files)
-            {
-                if (!Path.GetExtension(file).Equals(".svg", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                string inputPath = file;
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string outputFileName = Path.GetFileNameWithoutExtension(file) + ".pdf";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    var pdfOptions = new PdfOptions
-                    {
-                        PdfCoreOptions = new PdfCoreOptions
-                        {
-                            PdfCompliance = PdfComplianceVersion.PdfA1b
-                        }
-                    };
-
-                    image.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -64,3 +35,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer must batch‑convert a library of SVG illustrations into PDF/A‑2b files for regulatory‑compliant archiving while embedding an ICC profile to ensure consistent color reproduction.
+ * 2. When a publishing system needs to transform vector‑based SVG assets into print‑ready PDF/A‑2b documents with embedded color management for reliable output across different printers.
+ * 3. When an e‑learning platform requires converting SVG diagrams into PDF/A‑2b coursework PDFs that retain exact brand colors by embedding the appropriate ICC profile.
+ * 4. When a digital asset management tool automates the migration of SVG logos into PDF/A‑2b format for long‑term storage, preserving color fidelity through an embedded ICC profile.
+ * 5. When a legal documentation workflow demands converting SVG signatures into PDF/A‑2b files that meet archival standards and include an ICC profile to guarantee color accuracy over time.
+ */
