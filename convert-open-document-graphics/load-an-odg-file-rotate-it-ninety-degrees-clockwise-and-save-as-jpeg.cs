@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.odg";
-            string outputPath = "output\\rotated.jpg";
+            string inputPath = @"C:\temp\sample.odg";
+            string outputPath = @"C:\temp\sample_rotated.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,18 +24,11 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            // Load ODG image, rotate, and save as JPEG
+            using (OdgImage odgImage = (OdgImage)Image.Load(inputPath))
             {
-                // Cast to OdgImage to access specific methods
-                OdgImage odgImage = (OdgImage)image;
-
-                // Rotate 90 degrees clockwise
                 odgImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Save as JPEG
-                JpegOptions jpegOptions = new JpegOptions();
-                odgImage.Save(outputPath, jpegOptions);
+                odgImage.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
