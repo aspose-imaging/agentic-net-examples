@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -12,7 +11,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output.tif";
+            string outputPath = "output/output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,33 +21,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                SvgImage svgImage = vectorImage as SvgImage;
-                if (svgImage == null)
-                {
-                    Console.Error.WriteLine("Failed to load SVG image.");
-                    return;
-                }
-
-                int outWidth = svgImage.Width * 2;
-                int outHeight = svgImage.Height * 2;
-
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-
-                using (Image tiffImage = Image.Create(tiffOptions, outWidth, outHeight))
+                tiffOptions.VectorRasterizationOptions = new SvgRasterizationOptions
                 {
-                    Graphics graphics = new Graphics(tiffImage);
+                    PageSize = image.Size
+                };
 
-                    // Apply horizontal shear (shear factor 0.5)
-                    Matrix shearMatrix = new Matrix(1, 0, 0.5f, 1, 0, 0);
-                    graphics.Transform = shearMatrix;
-
-                    graphics.DrawImage(svgImage, new Point(0, 0));
-
-                    tiffImage.Save(outputPath);
-                }
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -57,3 +39,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert an SVG illustration into a 300 dpi TIFF for high‑quality print while applying a shear transformation to correct skewed artwork, this C# code using Aspose.Imaging provides a quick solution.
+ * 2. When an e‑commerce platform must generate catalog images from vector product drawings, applying a shear to align the view and saving as a high‑resolution TIFF ensures consistent printing standards.
+ * 3. When a GIS application requires rasterizing map symbols stored as SVG, applying a shear to match map projection and exporting to TIFF at 300 dpi enables seamless integration with legacy raster layers.
+ * 4. When a medical imaging system needs to archive vector‑based diagrams (e.g., SVG scans) with a shear correction for orientation and store them as lossless TIFF files for regulatory compliance, this snippet handles the process in .NET.
+ * 5. When a publishing workflow automates the preparation of SVG logos for magazine layouts, applying a shear to adjust the logo’s angle and saving the result as a high‑resolution TIFF guarantees crisp, print‑ready assets.
+ */

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
@@ -8,50 +9,37 @@ class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output/output.png";
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Output file path
-            string outputPath = "output.png";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up PNG options with a file create source
-            var pngOptions = new PngOptions();
+            PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 600, 400))
+            using (Image image = Image.Create(pngOptions, 600, 400))
             {
-                // Initialize graphics for drawing
-                var graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Create a graphics path and a figure
-                var path = new Aspose.Imaging.GraphicsPath();
-                var figure = new Aspose.Imaging.Figure();
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
 
-                // (Optional) Add a rectangle shape to the figure
-                figure.AddShape(new Aspose.Imaging.Shapes.RectangleShape(
-                    new Aspose.Imaging.RectangleF(50f, 50f, 200f, 200f)));
+                figure.AddShape(new RectangleShape(new RectangleF(50, 50, 200, 100)));
 
-                // Add a cubic Bezier curve to the same figure using specified control points
-                figure.AddShape(new Aspose.Imaging.Shapes.BezierShape(
-                    new Aspose.Imaging.PointF[]
-                    {
-                        new Aspose.Imaging.PointF(0f, 0f),          // Start point
-                        new Aspose.Imaging.PointF(200f, 133f),    // First control point
-                        new Aspose.Imaging.PointF(400f, 166f),    // Second control point
-                        new Aspose.Imaging.PointF(600f, 400f)     // End point
-                    }));
+                figure.AddShape(new BezierShape(new PointF[]
+                {
+                    new PointF(0, 0),
+                    new PointF(200, 133),
+                    new PointF(400, 166),
+                    new PointF(600, 400)
+                }));
 
-                // Add the figure to the graphics path
                 path.AddFigure(figure);
 
-                // Draw the path with a red pen
-                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2), path);
+                graphics.DrawPath(new Pen(Color.Red, 2), path);
 
-                // Save the image
                 image.Save();
             }
         }
@@ -61,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a PNG report that visualizes a custom data trend using a red cubic Bezier curve over a rectangle background.
+ * 2. When creating dynamic chart graphics in a C# web application where the curve represents a smooth transition between data points and must be drawn on a 600x400 image.
+ * 3. When producing a printable flyer in .NET that combines vector shapes like rectangles and Bezier curves, saved as a high‑resolution PNG for downstream design tools.
+ * 4. When implementing a signature capture preview that renders the user’s stroke as a cubic Bezier curve on a white canvas using Aspose.Imaging’s GraphicsPath.
+ * 5. When automating the generation of UI mockups that require a curved connector line between two rectangular components, rendered as a red BezierShape in a PNG file.
+ */

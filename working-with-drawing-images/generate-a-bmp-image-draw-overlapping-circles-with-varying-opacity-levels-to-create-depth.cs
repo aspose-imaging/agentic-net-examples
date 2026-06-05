@@ -1,7 +1,7 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -10,49 +10,45 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\circles.bmp";
+            // Output file path
+            string outputPath = "output.bmp";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Configure BMP options with a file source
+            // Create BMP options
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 500x500 BMP image bound to the output file
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            // Create a blank image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize Graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                // Initialize graphics
+                Graphics graphics = new Graphics(image);
                 graphics.Clear(Aspose.Imaging.Color.White);
 
                 // First overlapping circle (red, 50% opacity)
-                using (SolidBrush brush = new SolidBrush())
+                using (SolidBrush brush1 = new SolidBrush(Aspose.Imaging.Color.Red))
                 {
-                    brush.Color = Aspose.Imaging.Color.Red;
-                    brush.Opacity = 0.5f; // 0 = fully visible, 1 = fully opaque
-                    graphics.FillEllipse(brush, new Aspose.Imaging.Rectangle(50, 50, 200, 200));
+                    brush1.Opacity = 0.5f;
+                    graphics.FillEllipse(brush1, new Rectangle(50, 50, 200, 200));
                 }
 
-                // Second overlapping circle (blue, 30% opacity)
-                using (SolidBrush brush = new SolidBrush())
+                // Second overlapping circle (green, 30% opacity)
+                using (SolidBrush brush2 = new SolidBrush(Aspose.Imaging.Color.Green))
                 {
-                    brush.Color = Aspose.Imaging.Color.Blue;
-                    brush.Opacity = 0.3f;
-                    graphics.FillEllipse(brush, new Aspose.Imaging.Rectangle(150, 150, 200, 200));
+                    brush2.Opacity = 0.3f;
+                    graphics.FillEllipse(brush2, new Rectangle(150, 100, 200, 200));
                 }
 
-                // Third overlapping circle (green, 70% opacity)
-                using (SolidBrush brush = new SolidBrush())
+                // Third overlapping circle (blue, 70% opacity)
+                using (SolidBrush brush3 = new SolidBrush(Aspose.Imaging.Color.Blue))
                 {
-                    brush.Color = Aspose.Imaging.Color.Green;
-                    brush.Opacity = 0.7f;
-                    graphics.FillEllipse(brush, new Aspose.Imaging.Rectangle(250, 80, 200, 200));
+                    brush3.Opacity = 0.7f;
+                    graphics.FillEllipse(brush3, new Rectangle(250, 50, 200, 200));
                 }
 
-                // Save the bound image (no need to specify options again)
-                image.Save();
+                // Save the image
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -61,3 +57,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to create a BMP placeholder image with semi‑transparent overlapping circles to illustrate layering concepts in a C# tutorial using Aspose.Imaging graphics.
+ * 2. When a reporting tool must generate a simple bitmap legend where colored circles with different opacity levels indicate confidence intervals for data points.
+ * 3. When a game UI designer wants to programmatically produce a BMP texture that shows overlapping colored orbs to test blending modes in a C# game engine using Aspose.Imaging.
+ * 4. When an e‑learning platform requires a lightweight BMP diagram that demonstrates how opacity affects the visual depth of overlapping shapes in image processing courses.
+ * 5. When an automated testing suite needs to create a deterministic BMP file containing three translucent circles to verify that the Aspose.Imaging rendering pipeline preserves opacity and color blending across formats.
+ */

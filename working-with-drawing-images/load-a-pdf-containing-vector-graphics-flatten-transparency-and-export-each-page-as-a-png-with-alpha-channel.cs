@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -9,72 +11,46 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.pdf";
             string outputDirectory = "output";
 
-            // Validate input file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
 
-            // Load the PDF document
-            using (Aspose.Imaging.Image pdfImage = Aspose.Imaging.Image.Load(inputPath))
+            using (Image pdfImage = Image.Load(inputPath))
             {
-                if (pdfImage is Aspose.Imaging.IMultipageImage multipageImage)
+                int pageCount = 1;
+                if (pdfImage is IMultipageImage multipage)
                 {
-                    int pageCount = multipageImage.PageCount;
+                    pageCount = multipage.PageCount;
+                }
 
-                    for (int i = 0; i < pageCount; i++)
+                for (int i = 0; i < pageCount; i++)
+                {
+                    using (PngOptions pngOptions = new PngOptions())
                     {
+                        pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
+
+                        if (pdfImage is VectorImage)
+                        {
+                            var vectorOptions = new VectorRasterizationOptions();
+                            vectorOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
+                            vectorOptions.SmoothingMode = SmoothingMode.None;
+                            pngOptions.VectorRasterizationOptions = vectorOptions;
+                        }
+
+                        pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+
                         string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        var vectorOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Aspose.Imaging.Color.White,
-                            SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                            PageWidth = pdfImage.Width,
-                            PageHeight = pdfImage.Height
-                        };
-
-                        var pngOptions = new PngOptions
-                        {
-                            ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
-                            VectorRasterizationOptions = vectorOptions,
-                            MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(i, i + 1))
-                        };
-
                         pdfImage.Save(outputPath, pngOptions);
                     }
-                }
-                else
-                {
-                    string outputPath = Path.Combine(outputDirectory, "page_1.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        PageWidth = pdfImage.Width,
-                        PageHeight = pdfImage.Height
-                    };
-
-                    var pngOptions = new PngOptions
-                    {
-                        ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
-                        VectorRasterizationOptions = vectorOptions
-                    };
-
-                    pdfImage.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -84,3 +60,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to display each page of a PDF brochure as a transparent PNG thumbnail while preserving vector sharpness, it can use this code to rasterize and export the pages.
+ * 2. When an e‑learning platform wants to convert PDF slide decks containing vector diagrams into PNG images with an alpha channel for overlay on interactive backgrounds, this snippet handles the conversion.
+ * 3. When a desktop publishing tool must flatten PDF transparency and generate high‑quality PNG assets for print‑ready PDFs that include vector graphics, the code provides the necessary rasterization.
+ * 4. When a mobile app requires on‑device preview of multi‑page PDF invoices as PNGs with transparent backgrounds for custom UI composition, developers can employ this routine.
+ * 5. When an automated CI/CD pipeline processes design PDFs to produce per‑page PNG sprites with preserved vector detail and alpha transparency for game development pipelines, this example performs the task.
+ */

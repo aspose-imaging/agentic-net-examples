@@ -7,56 +7,46 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Output BMP file path
+            string outputPath = "wave_output.bmp";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Image dimensions
             int width = 800;
             int height = 200;
 
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24
-            };
+            // Create BMP options
+            BmpOptions bmpOptions = new BmpOptions();
 
+            // Create a blank image
             using (Image image = Image.Create(bmpOptions, width, height))
             {
+                // Initialize graphics
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
+                // Pen for drawing the wave
                 Pen pen = new Pen(Color.Blue, 2);
 
-                Point[] wavePoints = new Point[]
+                // Define Bezier segments to form a wave pattern
+                var segments = new[]
                 {
-                    new Point(0, height / 2),
-                    new Point(100, 0),
-                    new Point(200, height),
-                    new Point(300, height / 2),
-                    new Point(400, 0),
-                    new Point(500, height),
-                    new Point(600, height / 2),
-                    new Point(700, 0),
-                    new Point(800, height / 2)
+                    new { p1 = new Point(0,   100), p2 = new Point(100, 0),   p3 = new Point(200, 200), p4 = new Point(300, 100) },
+                    new { p1 = new Point(300, 100), p2 = new Point(400, 0),   p3 = new Point(500, 200), p4 = new Point(600, 100) },
+                    new { p1 = new Point(600, 100), p2 = new Point(700, 0),   p3 = new Point(800, 200), p4 = new Point(800, 100) }
                 };
 
-                for (int i = 0; i + 3 < wavePoints.Length; i += 3)
+                // Draw each Bezier segment
+                foreach (var s in segments)
                 {
-                    graphics.DrawBezier(pen,
-                                        wavePoints[i],
-                                        wavePoints[i + 1],
-                                        wavePoints[i + 2],
-                                        wavePoints[i + 3]);
+                    graphics.DrawBezier(pen, s.p1, s.p2, s.p3, s.p4);
                 }
 
+                // Save the image
                 image.Save(outputPath, bmpOptions);
             }
         }
@@ -66,3 +56,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a BMP file that visualizes a sinusoidal wave using Bezier curves for a scientific report or data visualization.
+ * 2. When an application must programmatically create custom wave‑shaped graphics for UI elements, such as a loading bar or decorative header, and save them as BMP images.
+ * 3. When a game developer wants to pre‑render background wave patterns as BMP assets using C# and Aspose.Imaging to avoid runtime drawing overhead.
+ * 4. When an automation script has to produce printable wave diagrams for engineering documentation, requiring precise control over points and pen thickness in a BMP output.
+ * 5. When a web service generates on‑the‑fly BMP thumbnails that include a stylized wave motif for branding or watermarking purposes.
+ */

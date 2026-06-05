@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -28,23 +27,24 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (var filePath in files)
             {
-                if (!Path.GetExtension(inputPath).Equals(".svg", StringComparison.OrdinalIgnoreCase))
+                if (!Path.GetExtension(filePath).Equals(".svg", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                if (!File.Exists(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                string outputPath = Path.ChangeExtension(Path.Combine(outputDirectory, Path.GetFileName(inputPath)), ".pdf");
+                string outputFileName = Path.GetFileNameWithoutExtension(filePath) + ".pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(filePath))
                 {
-                    PdfOptions pdfOptions = new PdfOptions
+                    var pdfOptions = new PdfOptions
                     {
                         VectorRasterizationOptions = new VectorRasterizationOptions
                         {
@@ -63,3 +63,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate print‑ready PDF catalogs of UI icons stored as SVG files, they can use this code to batch convert each icon into a vector PDF that scales without loss of quality.
+ * 2. When an e‑learning platform requires downloadable PDF handouts that contain scalable SVG diagrams, the code enables automated conversion of all diagram files in a folder to vector PDFs.
+ * 3. When a branding agency must deliver client logo assets as PDFs for high‑resolution printing, this script quickly processes a directory of SVG logos into vector PDFs with exact page dimensions.
+ * 4. When a CI/CD pipeline must validate that all SVG assets in a repository can be rendered as PDFs for documentation builds, the code provides a simple C# step to batch convert and verify each file.
+ * 5. When a desktop publishing workflow needs to embed SVG icons into PDF templates without rasterizing them, this example converts each icon to a vector PDF preserving editability and crispness.
+ */

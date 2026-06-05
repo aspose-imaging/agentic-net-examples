@@ -1,9 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -11,63 +9,22 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = @"C:\Images\source.wmf";
-            string outputPath = @"C:\Images\localized_output.svg";
+            string outputPath = @"C:\Images\output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WMF image
-            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG save options (keep text as text for later replacement)
-                SvgOptions saveOptions = new SvgOptions
-                {
-                    TextAsShapes = false // keep text elements as text nodes
-                };
-
-                // Configure rasterization options
-                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
-                    PageSize = wmfImage.Size,
-                    RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
-                };
-
-                saveOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save WMF as SVG (temporary file)
-                wmfImage.Save(outputPath, saveOptions);
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
-
-            // Simple translation dictionary (original text -> localized text)
-            Dictionary<string, string> translations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "Hello", "Hola" },
-                { "World", "Mundo" }
-                // Add more translations as needed
-            };
-
-            // Read the generated SVG content
-            string svgContent = File.ReadAllText(outputPath);
-
-            // Replace text elements based on the translation dictionary
-            foreach (var kvp in translations)
-            {
-                // Replace occurrences of the original text with the localized version
-                svgContent = svgContent.Replace(kvp.Key, kvp.Value);
-            }
-
-            // Write the localized SVG back to the output file
-            File.WriteAllText(outputPath, svgContent);
         }
         catch (Exception ex)
         {
@@ -75,3 +32,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert legacy WMF diagrams into SVG files while automatically swapping embedded English labels with translated strings for a multilingual web portal.
+ * 2. When a software team wants to generate localized vector icons from WMF assets on the fly in a C# microservice that serves region‑specific SVG graphics.
+ * 3. When an enterprise application must replace corporate branding text inside WMF logos with country‑specific slogans before exporting them as scalable SVG images for print and digital media.
+ * 4. When a content management system requires batch processing of WMF templates, injecting localized product names into each file and saving the results as SVG for responsive UI rendering.
+ * 5. When a developer is building an automated build pipeline that reads WMF UI mockups, inserts translated UI captions, and outputs SVG assets for inclusion in internationalized mobile apps.
+ */

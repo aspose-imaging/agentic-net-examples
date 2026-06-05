@@ -2,61 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"c:\temp\concentric_ellipses.bmp";
+            // Output file path
+            string outputPath = @"C:\temp\concentric_ellipses.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Set BMP options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            int width = 500;
-            int height = 500;
-            int ellipseCount = 6;
-            int marginStep = 20;
-
-            // Create the image
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create image canvas
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
                 // Initialize graphics
                 Graphics graphics = new Graphics(image);
-
-                // Clear background
-                graphics.Clear(Aspose.Imaging.Color.White);
+                graphics.Clear(Color.White);
 
                 // Draw concentric ellipses with alternating colors
+                int ellipseCount = 5;
+                int marginStep = 20;
                 for (int i = 0; i < ellipseCount; i++)
                 {
                     int margin = i * marginStep;
-                    float rectX = margin;
-                    float rectY = margin;
-                    float rectWidth = width - 2 * margin;
-                    float rectHeight = height - 2 * margin;
-
-                    // Alternate between Red and Blue
-                    Aspose.Imaging.Color penColor = (i % 2 == 0) ? Aspose.Imaging.Color.Red : Aspose.Imaging.Color.Blue;
-                    Pen pen = new Pen(penColor, 2);
-
-                    // Draw the ellipse
-                    graphics.DrawEllipse(pen, new RectangleF(rectX, rectY, rectWidth, rectHeight));
+                    int size = 500 - 2 * margin;
+                    Rectangle rect = new Rectangle(margin, margin, size, size);
+                    Color penColor = (i % 2 == 0) ? Color.Red : Color.Blue;
+                    Pen pen = new Pen(penColor, 3);
+                    graphics.DrawEllipse(pen, rect);
                 }
 
-                // Save the image (writes to the path specified in FileCreateSource)
+                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -66,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a BMP file with a simple geometric pattern for testing image rendering pipelines.
+ * 2. When a developer wants to create a placeholder logo or watermark consisting of concentric ellipses with alternating colors for UI mockups.
+ * 3. When a developer must produce a series of BMP assets for a game’s level‑selection screen that uses concentric ellipse graphics as visual cues.
+ * 4. When a developer is building an automated report that embeds a BMP diagram of concentric ellipses to illustrate scaling or zoom concepts.
+ * 5. When a developer needs to benchmark the performance of Aspose.Imaging’s Graphics.DrawEllipse method on 24‑bit BMP images.
+ */

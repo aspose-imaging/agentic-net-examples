@@ -2,67 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output_grid.bmp";
-
         try
         {
-            // Verify input file existence (not used further, but required by the safety rules)
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            string outputPath = "output_grid.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Image dimensions and grid settings
-            int imageWidth = 500;
-            int imageHeight = 500;
+            int cellSize = 50;
             int rows = 10;
             int cols = 10;
-            int cellWidth = imageWidth / cols;
-            int cellHeight = imageHeight / rows;
+            int width = cellSize * cols;
+            int height = cellSize * rows;
 
-            // Create a new BMP image
-            BmpOptions bmpOptions = new BmpOptions
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                BitsPerPixel = 24
-            };
-            using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
-            {
-                // Initialize graphics object
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Pen for drawing grid lines
                 Pen pen = new Pen(Color.Black, 1);
 
-                // Draw vertical grid lines
                 for (int c = 0; c <= cols; c++)
                 {
-                    int x = c * cellWidth;
-                    graphics.DrawLine(pen, x, 0, x, imageHeight);
+                    int x = c * cellSize;
+                    graphics.DrawLine(pen, x, 0, x, height);
                 }
 
-                // Draw horizontal grid lines
                 for (int r = 0; r <= rows; r++)
                 {
-                    int y = r * cellHeight;
-                    graphics.DrawLine(pen, 0, y, imageWidth, y);
+                    int y = r * cellSize;
+                    graphics.DrawLine(pen, 0, y, width, y);
                 }
 
-                // Save the resulting image
-                image.Save(outputPath);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -71,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a printable BMP spreadsheet‑style layout for a game board or seating chart, they can use this code to draw a grid of equal cells.
+ * 2. When creating a background image for a UI control that requires a tiled pattern, the repeated DrawLine calls produce a BMP grid that can be tiled across the interface.
+ * 3. When exporting a data matrix to a BMP file for legacy systems that only accept bitmap images, this code quickly renders the rows and columns as a visual grid.
+ * 4. When building a simple image‑based maze or puzzle where walls are aligned on a regular grid, the grid‑drawing routine provides the base BMP canvas for further drawing.
+ * 5. When testing image processing pipelines or benchmarking Aspose.Imaging’s Graphics API, developers can use this code to generate a known‑size BMP grid for validation.
+ */

@@ -2,66 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input\\sample.eps";
-        string outputPath = "output\\result.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            string inputPath = "input.eps";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Rasterize EPS to PNG in memory
-                var rasterOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new EpsRasterizationOptions
-                    {
-                        PageWidth = epsImage.Width,
-                        PageHeight = epsImage.Height
-                    }
-                };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                using (var memoryStream = new MemoryStream())
-                {
-                    epsImage.Save(memoryStream, rasterOptions);
-                    memoryStream.Position = 0;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (var raster = (RasterImage)Image.Load(memoryStream))
+            using (Image epsImage = Image.Load(inputPath))
+            {
+                var pngOptions = new PngOptions();
+
+                using (var memory = new MemoryStream())
+                {
+                    epsImage.Save(memory, pngOptions);
+                    memory.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(memory))
                     {
-                        // Apply a simple vignette by drawing concentric semi‑transparent ellipses
-                        var graphics = new Graphics(raster);
-                        int width = raster.Width;
-                        int height = raster.Height;
+                        Graphics graphics = new Graphics(raster);
                         int steps = 10;
                         for (int i = 0; i < steps; i++)
                         {
-                            float opacityFactor = (float)(i + 1) / steps * 0.5f; // up to 50% opacity
-                            var brush = new SolidBrush(Color.Black)
-                            {
-                                Opacity = (int)(opacityFactor * 100)
-                            };
-                            int inset = i * Math.Min(width, height) / (steps * 2);
-                            var rect = new Rectangle(inset, inset, width - 2 * inset, height - 2 * inset);
-                            graphics.FillEllipse(brush, rect);
+                            double factor = 1.0 - i * 0.1;
+                            int ellipseWidth = (int)(raster.Width * factor);
+                            int ellipseHeight = (int)(raster.Height * factor);
+                            int x = (raster.Width - ellipseWidth) / 2;
+                            int y = (raster.Height - ellipseHeight) / 2;
+                            int alpha = (int)(255 * (1.0 - factor));
+                            Pen pen = new Pen(Color.FromArgb(alpha, 0, 0, 0));
+                            graphics.DrawEllipse(pen, new Rectangle(x, y, ellipseWidth, ellipseHeight));
                         }
 
-                        // Save the final PNG with transparency
-                        var finalOptions = new PngOptions();
-                        raster.Save(outputPath, finalOptions);
+                        raster.Save(outputPath, pngOptions);
                     }
                 }
             }
@@ -72,3 +57,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert vector EPS artwork into a web‑ready PNG with a subtle vignette border for a marketing banner.
+ * 2. When a C# application must display a printable EPS logo on a transparent background while adding a dark edge fade for a mobile app splash screen.
+ * 3. When an automated image‑processing pipeline requires rasterizing EPS files, applying an elliptical vignette effect, and saving the result as a PNG with alpha channel for UI overlays.
+ * 4. When a designer’s workflow involves programmatically adding a vignette to EPS illustrations before embedding them in PDF reports that use PNG thumbnails.
+ * 5. When a .NET service generates product thumbnails from EPS source files, adds a soft vignette to focus attention, and outputs PNG images with transparency for e‑commerce sites.
+ */

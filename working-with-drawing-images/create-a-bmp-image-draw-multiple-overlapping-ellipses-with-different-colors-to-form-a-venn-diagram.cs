@@ -1,58 +1,48 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded output path
+        string outputPath = @"c:\temp\venn.bmp";
+
         try
         {
-            string outputPath = @"c:\temp\venn_diagram.bmp";
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            // Set up BMP options
+            BmpOptions bmpOptions = new BmpOptions
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
 
+            // Create a 500x500 BMP image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
+            {
+                // Initialize graphics object
+                Graphics graphics = new Graphics(image);
+
+                // Clear background to white
+                graphics.Clear(Color.White);
+
+                // Draw three overlapping ellipses with different colors
                 // Red ellipse
-                using (SolidBrush brush1 = new SolidBrush())
-                {
-                    brush1.Color = Aspose.Imaging.Color.Red;
-                    brush1.Opacity = 50;
-                    graphics.FillEllipse(brush1, new Aspose.Imaging.Rectangle(50, 150, 200, 200));
-                }
+                graphics.DrawEllipse(new Pen(Color.Red, 5), new Rectangle(100, 150, 200, 200));
 
-                // Green ellipse
-                using (SolidBrush brush2 = new SolidBrush())
-                {
-                    brush2.Color = Aspose.Imaging.Color.Green;
-                    brush2.Opacity = 50;
-                    graphics.FillEllipse(brush2, new Aspose.Imaging.Rectangle(150, 150, 200, 200));
-                }
+                // Green ellipse (shifted right)
+                graphics.DrawEllipse(new Pen(Color.Green, 5), new Rectangle(200, 150, 200, 200));
 
-                // Blue ellipse
-                using (SolidBrush brush3 = new SolidBrush())
-                {
-                    brush3.Color = Aspose.Imaging.Color.Blue;
-                    brush3.Opacity = 50;
-                    graphics.FillEllipse(brush3, new Aspose.Imaging.Rectangle(100, 50, 200, 200));
-                }
+                // Blue ellipse (shifted down)
+                graphics.DrawEllipse(new Pen(Color.Blue, 5), new Rectangle(150, 250, 200, 200));
 
-                // Outline the ellipses
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(50, 150, 200, 200));
-                graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(150, 150, 200, 200));
-                graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(100, 50, 200, 200));
-
+                // Save the image
                 image.Save();
             }
         }
@@ -62,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a BMP file that visualizes overlapping data sets as a Venn diagram for inclusion in a Windows desktop report.
+ * 2. When an application must programmatically create a 500×500 bitmap with colored ellipses to illustrate set intersections in educational software without using external image editors.
+ * 3. When a C# service creates thumbnail previews of statistical diagrams by drawing red, green, and blue ellipses onto a white background using Aspose.Imaging.
+ * 4. When a legacy system requires BMP images with 24‑bit color depth for printing labels that contain simple geometric shapes representing product categories.
+ * 5. When an automated testing tool needs to produce sample BMP images with multiple overlapping shapes to validate image‑processing pipelines that handle ellipse detection.
+ */

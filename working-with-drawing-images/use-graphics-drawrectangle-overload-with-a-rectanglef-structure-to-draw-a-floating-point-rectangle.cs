@@ -1,42 +1,34 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            // Define output path
-            string outputPath = "output/output.png";
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a PNG image with a stream source
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            using (Image image = Image.Load(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(stream);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
-                {
-                    // Initialize graphics
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.Wheat);
+                Pen pen = new Pen(Color.Red, 2);
+                RectangleF rect = new RectangleF(50.5f, 30.5f, 200.75f, 150.25f);
+                graphics.DrawRectangle(pen, rect);
 
-                    // Define pen and floating‑point rectangle
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
-                    Aspose.Imaging.RectangleF rect = new Aspose.Imaging.RectangleF(50f, 50f, 200f, 150f);
-
-                    // Draw rectangle using RectangleF overload
-                    graphics.DrawRectangle(pen, rect);
-
-                    // Save the image (stream is already bound)
-                    image.Save();
-                }
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -45,3 +37,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to overlay a precise, sub‑pixel red rectangle on a PNG image for a UI mock‑up, they can use Graphics.DrawRectangle with a RectangleF to draw the floating‑point shape.
+ * 2. When generating automated test screenshots that require exact placement of annotations measured in fractions of a pixel, the code demonstrates how to draw a rectangle with decimal coordinates on an image loaded with Aspose.Imaging.
+ * 3. When creating a PDF thumbnail preview where the border must be drawn with a specific thickness and color on a PNG source, the RectangleF overload lets the developer specify floating‑point dimensions for high‑resolution rendering.
+ * 4. When building a web service that adds a red bounding box around detected objects in uploaded images, the example shows how to load the image, clear the background, and draw a rectangle using Aspose.Imaging’s Graphics class.
+ * 5. When implementing a batch image‑processing script that needs to mark regions of interest with sub‑pixel accuracy in various image formats (e.g., PNG, JPEG), the code illustrates the use of Pen, Color, and RectangleF with Graphics.DrawRectangle.
+ */

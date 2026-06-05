@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -10,8 +9,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\drawing.svg";
-            string outputPath = "Output\\styled.pdf";
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -21,39 +20,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                SvgImage svgImage = (SvgImage)image;
-
-                // Create PDF options with vector rasterization
                 PdfOptions pdfOptions = new PdfOptions();
-                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+
+                using (Image pdfImage = Image.Create(pdfOptions, vectorImage.Width, vectorImage.Height))
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height
-                };
-                pdfOptions.VectorRasterizationOptions = vectorOptions;
+                    Graphics graphics = new Graphics(pdfImage);
+                    graphics.Clear(Color.White);
+                    graphics.DrawImage(vectorImage, new Point(0, 0));
 
-                // Create SVG graphics to apply dash pattern
-                int width = svgImage.Width;
-                int height = svgImage.Height;
-                int dpi = 96;
+                    Pen dashPen = new Pen(Color.Red, 2);
+                    dashPen.DashPattern = new float[] { 5f, 3f, 2f, 3f };
+                    graphics.DrawRectangle(dashPen, new Rectangle(0, 0, vectorImage.Width, vectorImage.Height));
 
-                var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(width, height, dpi);
-
-                // Define a pen with custom dash pattern
-                Pen dashPen = new Pen(Color.Black, 2);
-                dashPen.DashPattern = new float[] { 5, 3 };
-
-                // Draw a rectangle overlay with dash pattern
-                graphics.DrawRectangle(dashPen, 0, 0, width, height);
-
-                // End recording to get a new SVG image
-                using (SvgImage styledSvg = graphics.EndRecording())
-                {
-                    // Save the styled SVG as PDF
-                    styledSvg.Save(outputPath, pdfOptions);
+                    pdfImage.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -63,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert an SVG vector drawing into a PDF report while adding a custom red dashed border around the artwork.
+ * 2. When an engineering application must export schematics as PDF files with highlighted outlines using a specific dash pattern for better visual distinction.
+ * 3. When a web service generates printable invoices from SVG logos and wants to emphasize the logo edges with a red dash style before saving as PDF.
+ * 4. When a desktop tool creates PDF portfolios of design assets and requires a consistent dashed frame around each vector image for branding purposes.
+ * 5. When an automated batch process converts multiple SVG files to PDF and applies a custom dash pattern to indicate revision status on the document borders.
+ */

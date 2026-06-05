@@ -1,75 +1,70 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Emf.Graphics;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.emf";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Rasterize EMF to PNG with default options
-                var rasterOptions = new EmfRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EMF image
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            {
+                // Set up vector rasterization options
+                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
                 {
-                    PageSize = ((EmfImage)image).Size,
-                    // Optional: set background to transparent to keep only drawing
-                    BackgroundColor = Color.Transparent
+                    PageSize = emfImage.Size
                 };
 
-                var pngOptions = new PngOptions
+                // Configure PNG options with vector rasterization
+                PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = vectorOptions
                 };
 
-                // Save rasterized PNG to a memory stream first
-                using (var ms = new MemoryStream())
+                // Save EMF as PNG (rasterized)
+                emfImage.Save(outputPath, pngOptions);
+            }
+
+            // Load the generated PNG to adjust opacity
+            using (RasterImage raster = (RasterImage)Image.Load(outputPath))
+            {
+                int width = raster.Width;
+                int height = raster.Height;
+                var rect = new Rectangle(0, 0, width, height);
+
+                // Load ARGB pixels
+                int[] pixels = raster.LoadArgb32Pixels(rect);
+
+                // Adjust alpha to 80% (204 out of 255)
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    image.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    // Load the rasterized PNG for pixel manipulation
-                    using (PngImage pngImage = (PngImage)Image.Load(ms))
-                    {
-                        // Adjust opacity of each pixel to 80%
-                        // 80% of 255 ≈ 204
-                        const byte targetAlpha = 204;
-
-                        for (int y = 0; y < pngImage.Height; y++)
-                        {
-                            for (int x = 0; x < pngImage.Width; x++)
-                            {
-                                Color pixel = pngImage.GetPixel(x, y);
-                                // Preserve original RGB, set new alpha
-                                Color newPixel = Color.FromArgb(targetAlpha, pixel.R, pixel.G, pixel.B);
-                                pngImage.SetPixel(x, y, newPixel);
-                            }
-                        }
-
-                        // Save the final PNG with adjusted opacity
-                        pngImage.Save(outputPath);
-                    }
+                    int pixel = pixels[i];
+                    int alpha = (pixel >> 24) & 0xFF;
+                    int newAlpha = (int)(alpha * 0.8);
+                    if (newAlpha > 255) newAlpha = 255;
+                    pixels[i] = (newAlpha << 24) | (pixel & 0x00FFFFFF);
                 }
+
+                // Save modified pixels back
+                raster.SaveArgb32Pixels(rect, pixels);
+                raster.Save();
             }
         }
         catch (Exception ex)
@@ -78,3 +73,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a vector‑based EMF logo into a semi‑transparent PNG for use as an overlay on web pages or marketing materials.
+ * 2. When a software solution must rasterize technical drawings from EMF files and reduce line opacity to 80 % so they appear as subtle background guides in a reporting dashboard.
+ * 3. When an application generates printable PDFs and requires EMF charts to be saved as PNG images with reduced opacity to act as watermarks without obscuring underlying content.
+ * 4. When a UI designer wants to create scalable icons from EMF assets and apply 80 % line transparency before embedding the PNGs into a Windows Forms or WPF application.
+ * 5. When a document‑processing pipeline needs to batch‑process EMF diagrams, rasterize them to PNG, and uniformly lower the alpha channel to 80 % for consistent visual styling across all generated assets.
+ */

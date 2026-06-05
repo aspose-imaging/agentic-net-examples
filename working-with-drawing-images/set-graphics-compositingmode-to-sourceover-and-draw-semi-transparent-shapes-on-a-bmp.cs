@@ -2,67 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output/output.bmp";
+
         try
         {
-            // Output BMP path
-            string outputPath = @"C:\temp\output.bmp";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options with file source
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
-            bmpOptions.BitsPerPixel = 32; // Enable alpha channel
 
-            // Create a 500x400 BMP image bound to the output file
-            using (Image image = Image.Create(bmpOptions, 500, 400))
+            using (Image image = Image.Create(bmpOptions, 400, 300))
             {
-                // Initialize graphics for the image
                 Graphics graphics = new Graphics(image);
 
-                // Clear background
-                graphics.Clear(Color.White);
-
-                // Draw semi‑transparent red rectangle
-                using (SolidBrush redBrush = new SolidBrush())
+                using (SolidBrush rectBrush = new SolidBrush(Color.Blue))
                 {
-                    redBrush.Color = Color.FromArgb(128, 255, 0, 0); // 50% opacity
-                    redBrush.Opacity = 0.5f;
-                    graphics.FillRectangle(redBrush, new Rectangle(50, 50, 200, 150));
+                    rectBrush.Opacity = 0.5f;
+                    graphics.FillRectangle(rectBrush, new Rectangle(50, 50, 200, 150));
                 }
 
-                // Draw semi‑transparent green ellipse
-                using (SolidBrush greenBrush = new SolidBrush())
+                using (SolidBrush ellipseBrush = new SolidBrush(Color.Red))
                 {
-                    greenBrush.Color = Color.FromArgb(128, 0, 255, 0);
-                    greenBrush.Opacity = 0.5f;
-                    graphics.FillEllipse(greenBrush, new Rectangle(150, 120, 200, 150));
+                    ellipseBrush.Opacity = 0.5f;
+                    graphics.FillEllipse(ellipseBrush, new Rectangle(150, 100, 200, 150));
                 }
 
-                // Draw semi‑transparent blue polygon
-                using (SolidBrush blueBrush = new SolidBrush())
-                {
-                    blueBrush.Color = Color.FromArgb(128, 0, 0, 255);
-                    blueBrush.Opacity = 0.5f;
-                    Point[] points = new Point[]
-                    {
-                        new Point(300, 50),
-                        new Point(400, 200),
-                        new Point(250, 300),
-                        new Point(150, 200)
-                    };
-                    graphics.FillPolygon(blueBrush, points);
-                }
-
-                // Save the bound image
                 image.Save();
             }
         }
@@ -72,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to add a semi‑transparent watermark to a BMP file for branding printed documents, they can use Aspose.Imaging’s Graphics with CompositingMode.SourceOver to overlay a blue rectangle and red ellipse with 50 % opacity.
+ * 2. When generating custom map tiles in a GIS application, a developer can draw translucent shapes on a BMP to highlight regions without obscuring the underlying raster data.
+ * 3. When creating UI mock‑ups or button icons in a Windows desktop app, a developer can use the code to compose overlapping semi‑transparent shapes on a BMP to preview visual hierarchy.
+ * 4. When producing printable reports that require highlighted sections, a developer can employ Aspose.Imaging to draw semi‑transparent rectangles on a BMP background to draw attention to key data.
+ * 5. When building a simple game asset pipeline, a developer can use the Graphics.FillEllipse and FillRectangle methods with SourceOver compositing to blend colored shapes into a BMP sprite sheet for later animation.
+ */

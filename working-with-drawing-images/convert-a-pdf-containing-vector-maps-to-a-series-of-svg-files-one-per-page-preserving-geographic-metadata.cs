@@ -2,63 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input PDF and output directory
-            string inputPath = @"C:\Data\maps.pdf";
-            string outputDir = @"C:\Data\MapsSvg";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Load the PDF document
-            using (Image pdfImage = Image.Load(inputPath))
+            if (!Directory.Exists(outputDirectory))
             {
-                // Cast to multipage interface to get page count
-                IMultipageImage multipage = pdfImage as IMultipageImage;
-                int pageCount = multipage?.PageCount ?? 1; // Fallback to 1 if not multipage
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                for (int i = 0; i < pageCount; i++)
+            string[] files = Directory.GetFiles(inputDirectory, "*.pdf");
+
+            foreach (string inputPath in files)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    // Build output file path for each page
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.svg");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Ensure directory for the output file exists (covers nested paths)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-                    // Prepare SVG save options
-                    SvgOptions svgOptions = new SvgOptions
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    using (PngOptions options = new PngOptions())
                     {
-                        KeepMetadata = true,               // Preserve geographic metadata
-                        TextAsShapes = true                // Render text as shapes (optional)
-                    };
-
-                    // Set vector rasterization options based on the source image
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
-                    {
-                        PageSize = pdfImage.Size,          // Preserve original page size
-                        BackgroundColor = Color.White      // Optional background
-                    };
-                    svgOptions.VectorRasterizationOptions = vectorOptions;
-
-                    // Export only the current page
-                    svgOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
-
-                    // Save the page as SVG
-                    pdfImage.Save(outputPath, svgOptions);
+                        image.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -68,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a GIS analyst needs to generate raster thumbnails of each page of a multi‑page PDF map for quick preview in a web portal, they can use this C# routine to batch‑convert the PDFs to PNG images.
+ * 2. When an e‑learning platform must display printable PDF worksheets as responsive images on mobile devices, the code can automatically transform the PDFs in an input folder into PNG files for faster loading.
+ * 3. When a document management system requires archiving scanned PDF contracts as lossless PNGs to preserve visual fidelity while enabling image‑based search, developers can employ this script to process all PDFs in a directory.
+ * 4. When a marketing team wants to repurpose PDF brochures as high‑resolution PNG assets for social media ads, the program provides a simple way to convert each brochure page to a PNG file.
+ * 5. When a legacy reporting tool only accepts PNG images for chart rendering, developers can use this code to convert generated PDF reports into PNGs before feeding them into the tool.
+ */

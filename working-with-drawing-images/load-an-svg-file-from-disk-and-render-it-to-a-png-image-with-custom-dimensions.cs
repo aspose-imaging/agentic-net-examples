@@ -1,20 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.png";
+            string inputPath = "input.svg";
+            string outputPath = "output/output.png";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,23 +27,24 @@ class Program
             // Load the SVG image
             using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                // Configure rasterization options with custom dimensions
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    // Set desired output size (e.g., 800x600)
-                    PageSize = new Size(800, 600),
+                // Desired output dimensions
+                int targetWidth = 800;
+                int targetHeight = 600;
 
-                    // Optional: set background color
+                // Configure rasterization options with custom size
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = new Size(targetWidth, targetHeight),
                     BackgroundColor = Color.White
                 };
 
                 // Set PNG save options and attach rasterization options
-                var pngOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the rasterized PNG
+                // Save the rendered PNG image
                 svgImage.Save(outputPath, pngOptions);
             }
         }
@@ -53,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to generate thumbnail previews of user‑uploaded SVG logos as 800×600 PNG files for display in a product catalog.
+ * 2. When an automated build pipeline must convert vector icons stored as SVG into raster PNG assets of specific size for inclusion in a mobile app’s resource bundle.
+ * 3. When a reporting service has to embed high‑resolution PNG charts derived from SVG diagrams into PDF invoices, requiring precise width and height control.
+ * 4. When a desktop utility processes a batch of SVG floor‑plan files and outputs them as white‑background PNG images sized to fit a predefined print layout.
+ * 5. When a content management system needs to render SVG illustrations to PNG on the fly, ensuring the output matches the exact pixel dimensions required by a responsive web page.
+ */

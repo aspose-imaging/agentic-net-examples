@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -10,45 +11,50 @@ class Program
     {
         try
         {
-            // Output directory for generated BMP files
-            string outputDir = @"C:\Temp\BmpBatch";
+            int fileCount = 5;
+            int width = 200;
+            int height = 200;
+            string outputDir = "Output";
+
             Directory.CreateDirectory(outputDir);
 
             Random rnd = new Random();
 
-            // Generate 5 BMP files with random line patterns
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < fileCount; i++)
             {
-                string outputPath = Path.Combine(outputDir, $"pattern_{i + 1}.bmp");
+                string outputPath = Path.Combine(outputDir, $"pattern_{i}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create BMP options with a file source
-                Source source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions
-                {
-                    Source = source,
-                    BitsPerPixel = 24
-                };
+                Source fileSource = new FileCreateSource(outputPath, false);
 
-                // Create a 500x500 BMP image
-                using (Image image = Image.Create(options, 500, 500))
+                using (BmpOptions bmpOptions = new BmpOptions())
                 {
-                    // Draw random lines on the image
-                    Graphics graphics = new Graphics(image);
-                    int lineCount = 10;
-                    for (int l = 0; l < lineCount; l++)
+                    bmpOptions.Source = fileSource;
+
+                    using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
                     {
-                        int x1 = rnd.Next(0, 500);
-                        int y1 = rnd.Next(0, 500);
-                        int x2 = rnd.Next(0, 500);
-                        int y2 = rnd.Next(0, 500);
-                        Color lineColor = Color.FromArgb(255, rnd.Next(256), rnd.Next(256), rnd.Next(256));
-                        Pen pen = new Pen(lineColor, 2);
-                        graphics.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
-                    }
+                        Graphics graphics = new Graphics(canvas);
 
-                    // Save the image (bound to the source)
-                    image.Save();
+                        int lineCount = 10;
+                        for (int j = 0; j < lineCount; j++)
+                        {
+                            int x1 = rnd.Next(width);
+                            int y1 = rnd.Next(height);
+                            int x2 = rnd.Next(width);
+                            int y2 = rnd.Next(height);
+
+                            Color lineColor = Color.FromArgb(
+                                255,
+                                (byte)rnd.Next(256),
+                                (byte)rnd.Next(256),
+                                (byte)rnd.Next(256));
+
+                            Pen pen = new Pen(lineColor, 1);
+                            graphics.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
+                        }
+
+                        canvas.Save();
+                    }
                 }
             }
         }
@@ -58,3 +64,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch generate BMP files with random line patterns for stress‑testing Aspose.Imaging image‑processing pipelines, this C# code provides a quick solution.
+ * 2. When creating sample data sets for computer‑vision algorithms that require diverse line‑based textures in BMP format, the code can automatically produce the required images.
+ * 3. When validating the performance of file‑IO operations and graphics rendering in a .NET application, developers can use this script to generate multiple random‑line BMP images on the fly.
+ * 4. When preparing visual assets for UI testing where each BMP must contain unique random lines to simulate user‑drawn sketches, the code creates the necessary files in a single loop.
+ * 5. When demonstrating Aspose.Imaging’s BmpOptions, Graphics, and Pen classes in tutorials or documentation, this example efficiently produces a set of distinct BMP images for illustration.
+ */

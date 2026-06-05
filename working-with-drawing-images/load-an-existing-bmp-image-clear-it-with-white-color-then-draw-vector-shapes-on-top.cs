@@ -5,8 +5,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.bmp";
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.bmp";
 
         try
         {
@@ -20,26 +20,18 @@ class Program
 
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                var raster = (Aspose.Imaging.RasterImage)image;
+
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(raster);
                 graphics.Clear(Aspose.Imaging.Color.White);
-
-                // Draw a blue rectangle
                 graphics.DrawRectangle(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3),
+                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
                     new Aspose.Imaging.Rectangle(50, 50, 200, 150));
-
-                // Draw a red ellipse
                 graphics.DrawEllipse(
                     new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 2),
-                    new Aspose.Imaging.Rectangle(300, 100, 100, 100));
+                    new Aspose.Imaging.Rectangle(100, 100, 150, 100));
 
-                // Draw a green diagonal line
-                graphics.DrawLine(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 4),
-                    new Aspose.Imaging.Point(0, 0),
-                    new Aspose.Imaging.Point(400, 300));
-
-                image.Save(outputPath);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -48,3 +40,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a white‑background BMP template and overlay simple vector shapes such as rectangles and ellipses for a quick mock‑up of a UI component.
+ * 2. When an automated reporting tool must take an existing BMP scan, erase its contents with a white fill, and annotate it with geometric markers to highlight regions of interest.
+ * 3. When a batch‑processing script has to prepare BMP assets for a game by clearing previous drawings and adding new shape outlines for collision boundaries.
+ * 4. When a legacy system that only accepts BMP files requires programmatic creation of a clean canvas with overlaid shapes for printing engineering diagrams.
+ * 5. When a C# application needs to programmatically reset a BMP image, draw measurement guides, and save the result for downstream image‑analysis pipelines.
+ */

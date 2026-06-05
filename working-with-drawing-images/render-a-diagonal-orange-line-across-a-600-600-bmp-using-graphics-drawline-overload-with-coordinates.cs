@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -8,31 +7,20 @@ class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
+
         try
         {
-            // Output file path (hardcoded)
-            string outputPath = "output.bmp";
-
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Set up BMP options with a file source bound to the output path
-            BmpOptions bmpOptions = new BmpOptions();
+            var bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 600x600 BMP image canvas
-            using (Image image = Image.Create(bmpOptions, 600, 600))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 600, 600))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-
-                // Create an orange pen
-                Pen pen = new Pen(Color.Orange, 1);
-
-                // Draw a diagonal line from top-left to bottom-right
-                graphics.DrawLine(pen, 0, 0, 599, 599);
-
-                // Save the image (output path is already bound)
+                var graphics = new Aspose.Imaging.Graphics(image);
+                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Orange, 2);
+                graphics.DrawLine(pen, 0, 0, 600, 600);
                 image.Save();
             }
         }
@@ -42,3 +30,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a simple diagnostic image, such as a 600 × 600 BMP with a diagonal orange line, to verify that the Aspose.Imaging Graphics.DrawLine overload works correctly.
+ * 2. When creating a placeholder thumbnail for a document management system, and the placeholder must be a BMP file with a visible orange diagonal marker to indicate missing content.
+ * 3. When building a test suite for image‑processing pipelines that requires a known BMP image with a specific line geometry to validate scaling or rotation algorithms.
+ * 4. When producing a quick visual cue for a UI mock‑up, such as an orange diagonal line across a 600 × 600 bitmap that can be overlaid on other graphics during prototyping.
+ * 5. When automating the generation of simple graphics for educational tutorials that demonstrate C# file I/O, Aspose.Imaging BmpOptions, and the use of Pen objects to draw lines.
+ */
