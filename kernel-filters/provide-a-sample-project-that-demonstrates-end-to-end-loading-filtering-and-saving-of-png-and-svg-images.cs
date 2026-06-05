@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 namespace AsposeImagingSample
 {
@@ -10,13 +11,16 @@ namespace AsposeImagingSample
     {
         static void Main()
         {
+            // Hard‑coded input and output file paths
+            string pngInputPath = @"C:\temp\sample.png";
+            string pngOutputPath = @"C:\temp\sample.grayscale.png";
+
+            string svgInputPath = @"C:\temp\sample.svg";
+            string svgOutputPath = @"C:\temp\sample_converted.png";
+
             try
             {
                 // ---------- PNG processing ----------
-                // Hard‑coded input and output paths
-                string pngInputPath = @"C:\temp\sample.png";
-                string pngOutputPath = @"C:\temp\sample.grayscale.png";
-
                 // Verify input file exists
                 if (!File.Exists(pngInputPath))
                 {
@@ -24,21 +28,17 @@ namespace AsposeImagingSample
                     return;
                 }
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
 
-                // Load PNG, apply grayscale filter, and save
+                // Load PNG, convert to grayscale, and save
                 using (PngImage pngImage = new PngImage(pngInputPath))
                 {
-                    pngImage.Grayscale();               // filter
-                    pngImage.Save(pngOutputPath);       // save
+                    pngImage.Grayscale();                     // Apply grayscale filter
+                    pngImage.Save(pngOutputPath);             // Save result
                 }
 
                 // ---------- SVG processing ----------
-                // Hard‑coded input and output paths
-                string svgInputPath = @"C:\temp\sample.svg";
-                string svgOutputPath = @"C:\temp\sample_converted.png";
-
                 // Verify input file exists
                 if (!File.Exists(svgInputPath))
                 {
@@ -46,27 +46,39 @@ namespace AsposeImagingSample
                     return;
                 }
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
 
-                // Load SVG (vector image) using the generic Image loader
+                // Load SVG (or any supported vector format) as a generic Image
                 using (Image svgImage = Image.Load(svgInputPath))
                 {
-                    // Define PNG save options (e.g., progressive loading)
+                    // Prepare PNG save options (e.g., enable progressive loading)
                     PngOptions pngOptions = new PngOptions
                     {
                         Progressive = true,
-                        ResolutionSettings = new ResolutionSetting(96.0, 96.0)
+                        // Optional: set resolution, compression, etc.
+                        CompressionLevel = 9,
+                        FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive
                     };
 
-                    // Save the SVG as a PNG using the defined options
+                    // Save the rendered SVG as a PNG file
                     svgImage.Save(svgOutputPath, pngOptions);
                 }
             }
             catch (Exception ex)
             {
+                // Unified error handling
                 Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to generate grayscale thumbnails from user‑uploaded PNG photos to reduce file size and improve page‑load performance.
+ * 2. When an e‑commerce platform must convert vendor‑supplied SVG logos into PNG images for inclusion in email newsletters and product listings.
+ * 3. When a reporting tool automatically normalizes PNG charts to grayscale before embedding them in printable PDF reports.
+ * 4. When a mobile app preprocesses PNG icons to grayscale to match a dark‑mode theme without maintaining separate asset files.
+ * 5. When a batch‑processing script transforms mixed PNG and SVG design files into standardized PNG images for archival storage and downstream workflows.
+ */
