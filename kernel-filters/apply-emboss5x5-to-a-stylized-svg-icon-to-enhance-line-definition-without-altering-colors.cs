@@ -2,9 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -23,33 +20,33 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for SVG to PNG conversion
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size
+                    PageSize = image.Size,
+                    BackgroundColor = Color.White
                 };
 
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Rasterize SVG into a memory stream
-                using (MemoryStream ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
-                    svgImage.Save(ms, pngOptions);
+                    image.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    // Load the rasterized image as RasterImage
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    using (Image rasterImage = Image.Load(ms))
                     {
-                        // Apply Emboss5x5 convolution filter
-                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                        var raster = (RasterImage)rasterImage;
 
-                        // Save the filtered image as PNG
-                        raster.Save(outputPath, new PngOptions());
+                        var embossKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(embossKernel);
+
+                        raster.Filter(raster.Bounds, filterOptions);
+                        raster.Save(outputPath);
                     }
                 }
             }
@@ -60,3 +57,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating a web‑app that converts brand SVG icons to high‑contrast PNG thumbnails, a developer can use this code to emboss the lines for sharper definition while keeping the original colors intact.
+ * 2. When generating printable assets from vector UI symbols, applying the Emboss5x5 filter after rasterizing the SVG ensures the output PNG has enhanced edge detail without modifying the icon’s palette.
+ * 3. When building a desktop tool that previews SVG icons as PNGs with a subtle 3‑D effect, the convolution emboss filter can be applied to improve line visibility on light backgrounds.
+ * 4. When preparing SVG‑based button graphics for a mobile game, developers can rasterize the SVG to PNG and run the Emboss5x5 filter to make the outlines pop on low‑resolution screens.
+ * 5. When automating a batch process that converts a library of stylized SVG logos to PNG for email signatures, the code’s emboss filter adds depth to the strokes while preserving the original color scheme.
+ */
