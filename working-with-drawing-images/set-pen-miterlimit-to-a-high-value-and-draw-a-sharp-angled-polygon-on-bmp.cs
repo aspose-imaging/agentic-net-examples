@@ -1,57 +1,51 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"C:\Temp\sharpPolygon.bmp";
-
         try
         {
+            // Hardcoded output path
+            string outputPath = @"C:\temp\sharp_polygon.bmp";
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options with a file source
-            var bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new image canvas
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            // Configure BMP options
+            var bmpOptions = new BmpOptions
             {
-                // Initialize graphics for drawing
-                var graphics = new Aspose.Imaging.Graphics(image);
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-                // Clear background to white
-                graphics.Clear(Aspose.Imaging.Color.White);
+            // Create a 400x400 BMP image
+            using (Image image = Image.Create(bmpOptions, 400, 400))
+            {
+                // Initialize graphics surface
+                var graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Create a pen with a high MiterLimit to preserve sharp angles
-                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                pen.MiterLimit = 10f; // high value for sharp‑angled joins
+                // Create a pen with a high MiterLimit
+                var pen = new Pen(Color.Black, 3);
+                pen.MiterLimit = 20f; // high value to handle sharp angles
 
-                // Define points of a sharp‑angled polygon (star‑like shape)
-                var points = new Aspose.Imaging.Point[]
+                // Define a sharp‑angled polygon (a thin triangle)
+                var points = new Point[]
                 {
-                    new Aspose.Imaging.Point(250, 10),
-                    new Aspose.Imaging.Point(260, 200),
-                    new Aspose.Imaging.Point(400, 210),
-                    new Aspose.Imaging.Point(280, 300),
-                    new Aspose.Imaging.Point(300, 490),
-                    new Aspose.Imaging.Point(250, 380),
-                    new Aspose.Imaging.Point(200, 490),
-                    new Aspose.Imaging.Point(220, 300),
-                    new Aspose.Imaging.Point(100, 210),
-                    new Aspose.Imaging.Point(240, 200)
+                    new Point(200, 10),   // top vertex
+                    new Point(210, 200),  // bottom right
+                    new Point(190, 200)   // bottom left
                 };
 
-                // Draw the polygon with the configured pen
+                // Draw the polygon
                 graphics.DrawPolygon(pen, points);
 
-                // Save the image (output file is already bound via FileCreateSource)
+                // Save the image
                 image.Save();
             }
         }
@@ -61,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a BMP technical diagram with ultra‑sharp corners—such as a thin triangular marker in engineering schematics—they can set Pen.MiterLimit high and draw the polygon to avoid corner gaps.
+ * 2. When creating custom Windows desktop UI icons or toolbar graphics in C#, a high MiterLimit ensures the sharp‑angled polygon renders cleanly in a 24‑bit BMP file.
+ * 3. When producing line‑art for laser‑cutting or CNC machining, using Aspose.Imaging to draw a precise acute‑angled shape with a high MiterLimit prevents unwanted bevels in the exported BMP.
+ * 4. When exporting GIS map symbols like arrowheads or spike markers to BMP, a developer can use a high Pen.MiterLimit to maintain the integrity of the sharp angles in the polygon.
+ * 5. When automating a batch image‑processing pipeline that adds a sharp‑angled watermark or badge to BMP files, setting a high MiterLimit guarantees the polygon’s corners stay crisp across all generated images.
+ */
