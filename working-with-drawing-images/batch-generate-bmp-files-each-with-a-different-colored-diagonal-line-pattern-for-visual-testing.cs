@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -11,54 +11,48 @@ class Program
         try
         {
             // Output directory for generated BMP files
-            string outputDir = @"C:\temp\BmpBatch";
+            string outputDir = @"C:\temp\DiagonalTest\";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Define colors for diagonal lines
-            List<Aspose.Imaging.Color> colors = new List<Aspose.Imaging.Color>
-            {
-                Aspose.Imaging.Color.Red,
-                Aspose.Imaging.Color.Green,
-                Aspose.Imaging.Color.Blue,
-                Aspose.Imaging.Color.Yellow,
-                Aspose.Imaging.Color.Purple
-            };
-
-            // Corresponding color names for file naming
-            List<string> colorNames = new List<string> { "Red", "Green", "Blue", "Yellow", "Purple" };
-
+            // Image dimensions
             int width = 200;
             int height = 200;
 
-            for (int i = 0; i < colors.Count; i++)
+            // Colors for each diagonal line pattern
+            Color[] colors = new Color[]
             {
-                // Build output file path
-                string outputPath = Path.Combine(outputDir, $"diag_{colorNames[i]}.bmp");
+                Color.Red,
+                Color.Green,
+                Color.Blue,
+                Color.Yellow,
+                Color.Magenta,
+                Color.Cyan
+            };
 
-                // Ensure the directory exists before saving
+            for (int i = 0; i < colors.Length; i++)
+            {
+                // Output file path for the current image
+                string outputPath = Path.Combine(outputDir, $"diagonal_{i + 1}.bmp");
+
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set up BMP creation options
-                BmpOptions bmpOptions = new BmpOptions
+                // Create BMP options with a bound file source
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions() { Source = source, BitsPerPixel = 24 };
+
+                // Create a raster canvas bound to the output file
+                using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
                 {
-                    BitsPerPixel = 24,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    // Draw a diagonal line across the canvas
+                    Graphics graphics = new Graphics(canvas);
+                    Pen pen = new Pen(colors[i], 5);
+                    graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
 
-                // Create a new image canvas
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
-                {
-                    // Initialize graphics for drawing
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-                    // Create a pen with the current color
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(colors[i], 5);
-
-                    // Draw a diagonal line from top-left to bottom-right
-                    graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width, height));
-
-                    // Save the image (output path is already bound via FileCreateSource)
-                    image.Save();
+                    // Save the bound image
+                    canvas.Save();
                 }
             }
         }
@@ -68,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a batch of 24‑bit BMP files with colored diagonal lines to verify that an image‑processing pipeline correctly reads and renders BMP images using Aspose.Imaging for .NET.
+ * 2. When creating sample assets for UI mockups or documentation that require distinct color‑coded diagonal patterns across multiple bitmap files generated programmatically in C#.
+ * 3. When performing automated visual regression testing of a graphics library and need to produce reference BMP images with known line colors and positions for comparison.
+ * 4. When building a diagnostic tool that writes BMP screenshots with diagonal markers to help locate rendering issues in a C# application using Aspose.Imaging’s raster canvas and graphics classes.
+ * 5. When preparing placeholder textures for a game or simulation that uses simple BMP textures with diagonal line overlays for debugging texture loading and display.
+ */
