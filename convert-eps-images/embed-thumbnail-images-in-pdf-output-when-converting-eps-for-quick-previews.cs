@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.eps";
-            string outputPath = "output/output.pdf";
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -21,9 +22,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image epsImage = Image.Load(inputPath))
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
                 var pdfOptions = new PdfOptions();
+
                 epsImage.Save(outputPath, pdfOptions);
             }
         }
