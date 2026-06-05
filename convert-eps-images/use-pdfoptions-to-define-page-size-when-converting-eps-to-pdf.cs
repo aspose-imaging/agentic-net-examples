@@ -8,11 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.eps";
+        string outputPath = "Output/sample.pdf";
+
         try
         {
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.pdf";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,9 +25,8 @@ class Program
             {
                 var options = new PdfOptions
                 {
-                    PageSize = new SizeF(600, 800) // Define page width and height
+                    PageSize = new SizeF(595, 842) // A4 size in points
                 };
-
                 image.Save(outputPath, options);
             }
         }
