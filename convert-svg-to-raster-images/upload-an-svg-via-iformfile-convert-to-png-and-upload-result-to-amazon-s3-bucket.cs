@@ -11,43 +11,35 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input/sample.svg";
-            string outputPath = "Output/sample.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            string outputPath = "Output/sample.png";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG from file stream and rasterize to PNG
             using (FileStream inputStream = File.OpenRead(inputPath))
             using (SvgImage svgImage = new SvgImage(inputStream))
             {
-                // Configure rasterization options
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var pngOptions = new PngOptions
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = svgImage.Size
+                    }
                 };
 
-                // Configure PNG save options
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save rasterized PNG
                 svgImage.Save(outputPath, pngOptions);
             }
 
-            // Placeholder for uploading the PNG to Amazon S3
-            // TODO: Implement S3 upload using AWS SDK (not included per constraints)
+            // Placeholder for S3 upload - not implemented due to library restrictions
+            using (FileStream pngStream = File.OpenRead(outputPath))
+            {
+                throw new NotSupportedException("Amazon S3 upload is not implemented in this example.");
+            }
         }
         catch (Exception ex)
         {
