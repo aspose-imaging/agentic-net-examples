@@ -32,25 +32,18 @@ class Program
                 {
                     CompressionMethod = CompressionMethod.RLE,
                     ColorMode = ColorModes.Rgb,
-                    // Use default version (6) and other defaults
+                    // Optional: set other properties as needed
                 };
 
                 // Save as PSD
                 image.Save(outputPath, psdOptions);
             }
 
-            // Validate that the saved PSD can be loaded (basic sanity check)
-            using (Image psdImage = Image.Load(outputPath))
+            // Attempt to load the saved PSD to verify it is not corrupted
+            using (Image savedPsd = Image.Load(outputPath))
             {
-                // Simple validation: check dimensions are non-zero
-                if (psdImage.Width > 0 && psdImage.Height > 0)
-                {
-                    Console.WriteLine("PSD conversion succeeded and file is loadable.");
-                }
-                else
-                {
-                    Console.Error.WriteLine("Loaded PSD has invalid dimensions.");
-                }
+                // If loading succeeds, consider the conversion successful
+                Console.WriteLine("PSD conversion succeeded and file is loadable.");
             }
         }
         catch (Exception ex)

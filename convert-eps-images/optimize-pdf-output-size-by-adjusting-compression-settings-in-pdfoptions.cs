@@ -6,14 +6,14 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\sample.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.jpg";
+            string outputPath = "Output/output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,18 +27,22 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with compression to reduce file size
-                var pdfOptions = new PdfOptions
+                // Configure PDF options with compression
+                using (var pdfOptions = new PdfOptions())
                 {
-                    PdfCoreOptions = new PdfCoreOptions
+                    var coreOptions = new PdfCoreOptions
                     {
-                        // Use Flate compression (good balance of size and speed)
-                        Compression = PdfImageCompressionOptions.Flate
-                    }
-                };
+                        // Use Flate compression for smaller PDF size
+                        Compression = PdfImageCompressionOptions.Flate,
+                        // Optionally, do not keep original metadata to reduce size
+                        // KeepMetadata = false
+                    };
 
-                // Save the image as PDF using the configured options
-                image.Save(outputPath, pdfOptions);
+                    pdfOptions.PdfCoreOptions = coreOptions;
+
+                    // Save the image as PDF with the specified options
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)

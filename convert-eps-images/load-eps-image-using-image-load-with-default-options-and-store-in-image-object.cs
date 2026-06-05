@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.eps";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "sample.eps";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,13 +20,13 @@ class Program
                 return;
             }
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load EPS image with default load options
             using (Image image = Image.Load(inputPath))
             {
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Example: save the loaded image as PNG
+                // Example processing: save the loaded image as PNG
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
