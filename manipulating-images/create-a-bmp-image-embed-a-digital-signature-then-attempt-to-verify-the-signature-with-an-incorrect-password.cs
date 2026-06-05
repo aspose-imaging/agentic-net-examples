@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
@@ -8,53 +10,36 @@ class Program
     {
         try
         {
-            string outputDir = "output";
-            string originalPath = Path.Combine(outputDir, "original.bmp");
-            string signedPath = Path.Combine(outputDir, "signed.bmp");
+            // Output file path
+            string outputPath = "output\\signed.bmp";
 
-            // Create BMP image
-            using (var bmpImage = new BmpImage(100, 100))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Define image dimensions (minimum 200x200 as required for digital signatures)
+            int width = 200;
+            int height = 200;
+
+            // Create BMP image and fill with a simple gradient
+            using (var bmpImage = new BmpImage(width, height))
             {
-                for (int y = 0; y < bmpImage.Height; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < bmpImage.Width; x++)
+                    for (int x = 0; x < width; x++)
                     {
-                        int hue = (255 * x) / bmpImage.Width;
-                        bmpImage.SetPixel(x, y, Aspose.Imaging.Color.FromArgb(255, hue, 0, 0));
+                        int hue = (255 * x) / width;
+                        bmpImage.SetPixel(x, y, Color.FromArgb(255, hue, 0, 0));
                     }
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(originalPath));
-                bmpImage.Save(originalPath);
-            }
+                // Embed digital signature with a valid password
+                bmpImage.EmbedDigitalSignature("secure123");
 
-            if (!File.Exists(originalPath))
-            {
-                Console.Error.WriteLine($"File not found: {originalPath}");
-                return;
-            }
+                // Save the signed image
+                bmpImage.Save(outputPath);
 
-            // Load image, embed digital signature, and save signed image
-            using (var image = Aspose.Imaging.Image.Load(originalPath))
-            {
-                var raster = (Aspose.Imaging.RasterImage)image;
-                raster.EmbedDigitalSignature("secure123");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(signedPath));
-                raster.Save(signedPath);
-            }
-
-            if (!File.Exists(signedPath))
-            {
-                Console.Error.WriteLine($"File not found: {signedPath}");
-                return;
-            }
-
-            // Verify signature with incorrect password
-            using (var signedImage = Aspose.Imaging.Image.Load(signedPath))
-            {
-                var rasterSigned = (Aspose.Imaging.RasterImage)signedImage;
-                bool isSigned = rasterSigned.IsDigitalSigned("123");
+                // Attempt to verify the signature with an incorrect password
+                bool isSigned = bmpImage.IsDigitalSigned("123");
                 Console.WriteLine($"Signature verification with incorrect password: {isSigned}");
             }
         }
