@@ -10,24 +10,24 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.webp";
-            string outputPath = @"C:\temp\output.pdf";
+            // Hardcoded input and output paths
+            string inputPath = "input.webp";
+            string outputPath = "output.pdf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the WebP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF conversion options: JPEG compression with 80% quality
+                // Configure PDF conversion options with JPEG compression at 80% quality
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
@@ -37,13 +37,12 @@ class Program
                     }
                 };
 
-                // Save the image as a PDF using the specified options
+                // Save the image as PDF using the configured options
                 image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
