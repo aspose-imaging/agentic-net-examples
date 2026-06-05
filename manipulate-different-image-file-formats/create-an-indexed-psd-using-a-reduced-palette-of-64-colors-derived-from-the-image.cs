@@ -8,37 +8,45 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.png";
-        string outputPath = @"C:\Images\output_64color.psd";
-
         try
         {
-            // Verify input file exists
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.psd";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access pixel data
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Create PSD save options
+                // Generate a palette with exactly 64 colors from the source image
+                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 64);
+
+                // Configure PSD save options
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    // Use 8 bits per channel (standard for PSD)
+                    // Assign the generated palette (inherited from ImageOptionsBase)
+                    Palette = palette,
+
+                    // Standard 8‑bit per channel
                     ChannelBitsCount = 8,
-                    // Set color mode to RGB (indexed PSD will use the palette)
+
+                    // Use RGB color mode; the palette will be applied for indexed data
                     ColorMode = ColorModes.Rgb,
-                    // Assign a reduced palette of 64 colors derived from the image
-                    Palette = ColorPaletteHelper.GetCloseImagePalette(rasterImage, 64)
+
+                    // Use RLE compression (optional)
+                    CompressionMethod = CompressionMethod.RLE
                 };
 
                 // Save the image as an indexed PSD
@@ -51,3 +59,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert high‑resolution PNG assets into a compact PSD for legacy Photoshop workflows that only support indexed color with a limited palette.
+ * 2. When generating web‑ready preview files where the PSD must be small in size, using a 64‑color palette to reduce file weight while preserving the original image’s visual essence.
+ * 3. When preparing artwork for printing processes that require indexed PSD files with a fixed palette, such as screen‑printing plates that can handle only 64 colors.
+ * 4. When building an automated asset pipeline that extracts color palettes from source images and stores them as indexed PSDs for use in game‑development texture atlases.
+ * 5. When creating archival copies of digital illustrations where the PSD format is required but storage constraints demand a reduced 64‑color indexed representation.
+ */
