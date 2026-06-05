@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\animation.webp";
-            string outputPath = @"C:\Images\animation_converted.gif";
+            string inputPath = @"C:\temp\animation.webp";
+            string outputPath = @"C:\temp\animation_converted.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,7 +23,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the animated WebP image (it implements IMultipageImage)
+            // Load the animated WebP image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure GIF options to preserve all frames
