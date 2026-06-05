@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
@@ -11,52 +10,52 @@ class Program
     {
         try
         {
-            // Output file path (hardcoded)
+            // Output file path (hard‑coded)
             string outputPath = @"c:\temp\star.png";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG options with file source bound to the output path
+            // Set up PNG options with a file create source
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
             // Create a 500x500 image
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
             {
                 // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Create a graphics path and a figure
-                GraphicsPath graphicsPath = new GraphicsPath();
-                Figure figure = new Figure();
+                // Prepare a graphics path and a figure
+                Aspose.Imaging.GraphicsPath graphicsPath = new Aspose.Imaging.GraphicsPath();
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-                // Define star points (10-pointed star)
-                PointF[] starPoints = new PointF[]
+                // Define points of a star shape
+                Aspose.Imaging.PointF[] starPoints = new Aspose.Imaging.PointF[]
                 {
-                    new PointF(250f, 50f),
-                    new PointF(300f, 200f),
-                    new PointF(450f, 200f),
-                    new PointF(325f, 300f),
-                    new PointF(375f, 450f),
-                    new PointF(250f, 350f),
-                    new PointF(125f, 450f),
-                    new PointF(175f, 300f),
-                    new PointF(50f, 200f),
-                    new PointF(200f, 200f)
+                    new Aspose.Imaging.PointF(250f, 50f),
+                    new Aspose.Imaging.PointF(280f, 180f),
+                    new Aspose.Imaging.PointF(400f, 180f),
+                    new Aspose.Imaging.PointF(300f, 250f),
+                    new Aspose.Imaging.PointF(340f, 380f),
+                    new Aspose.Imaging.PointF(250f, 300f),
+                    new Aspose.Imaging.PointF(160f, 380f),
+                    new Aspose.Imaging.PointF(200f, 250f),
+                    new Aspose.Imaging.PointF(100f, 180f),
+                    new Aspose.Imaging.PointF(220f, 180f)
                 };
 
-                // Add a closed polygon shape representing the star
+                // Add a closed polygon shape (the star) to the figure
                 figure.AddShape(new PolygonShape(starPoints, true));
 
                 // Add the figure to the graphics path
                 graphicsPath.AddFigure(figure);
 
                 // Draw the path with a black pen
-                graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
+                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicsPath);
 
-                // Save the image (file is already bound to the source)
+                // Save the image
                 image.Save();
             }
         }
@@ -66,3 +65,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a 500×500 PNG badge with a decorative star overlay for user profile pictures in a web application.
+ * 2. When an e‑commerce platform wants to programmatically add a star watermark to product thumbnail images to highlight featured items.
+ * 3. When a reporting tool must create a printable PNG star‑shaped diagram for inclusion in PDF reports or dashboards.
+ * 4. When a game developer wants to produce dynamic star icons at runtime without storing pre‑made image files.
+ * 5. When an automated email system needs to attach a custom star‑shaped PNG banner to promotional newsletters generated on the fly.
+ */
