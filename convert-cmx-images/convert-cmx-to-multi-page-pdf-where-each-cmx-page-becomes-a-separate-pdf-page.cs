@@ -2,39 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.cmx";
-        string outputPath = "Output/sample.pdf";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.cmx";
+            string outputPath = "output\\result.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                var pdfOptions = new PdfOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load CMX vector image
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            {
+                // Prepare PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Configure vector rasterization options for proper rendering
+                if (cmxImage is VectorImage)
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    var rasterOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
+                        PageWidth = cmxImage.Width,
+                        PageHeight = cmxImage.Height,
                         TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                         SmoothingMode = SmoothingMode.None
-                    }
-                };
+                    };
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+                }
 
-                image.Save(outputPath, pdfOptions);
+                // Save as PDF
+                cmxImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
