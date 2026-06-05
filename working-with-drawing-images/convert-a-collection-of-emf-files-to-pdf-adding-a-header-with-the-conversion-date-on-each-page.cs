@@ -1,10 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
 
 class Program
 {
@@ -12,63 +8,43 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\EmfFiles";
-            string outputFolder = @"C:\PdfOutput";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
-            if (!Directory.Exists(inputFolder))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputFolder);
-                Console.WriteLine($"Input directory created at: {inputFolder}. Add EMF files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Get all EMF files in the input folder
-            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
-
-            foreach (string inputPath in emfFiles)
+            if (!Directory.Exists(outputDirectory))
             {
-                // Validate each input file
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (string filePath in files)
+            {
+                string inputPath = filePath;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Prepare output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
-
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
-                    // Cast to EmfImage
-                    EmfImage emfImage = (EmfImage)image;
-
-                    // Obtain a graphics recorder for the EMF image
-                    EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
-
-                    // Draw header text with conversion date
-                    string headerText = $"Converted on {DateTime.Now:yyyy-MM-dd}";
-                    graphics.DrawString(headerText, new Font("Arial", 12), Color.Black, 10, 10);
-
-                    // End recording to get a new EMF image with the header
-                    using (EmfImage annotatedEmf = graphics.EndRecording())
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        // Save the annotated EMF as PDF
-                        PdfOptions pdfOptions = new PdfOptions();
-                        annotatedEmf.Save(outputPath, pdfOptions);
+                        image.Save(outputPath, pdfOptions);
                     }
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to PDF at '{outputPath}'.");
             }
         }
         catch (Exception ex)
@@ -77,3 +53,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert a folder of Windows Metafile (EMF) diagrams into PDF files while automatically inserting a “Converted on <date>” header on each page for audit‑trail purposes.
+ * 2. When an engineering application must export a collection of CAD‑style EMF schematics to PDF for client delivery, adding the conversion timestamp as a header to meet documentation standards.
+ * 3. When a reporting tool generates EMF charts at runtime and the team wants to compile them into a PDF portfolio, with each page labeled with the current date using Aspose.Imaging in C#.
+ * 4. When a legacy system stores printable forms as EMF files and a migration project requires converting them to PDF with a date header for regulatory compliance, leveraging Image.Load and PdfOptions.
+ * 5. When an automated build pipeline needs to process multiple EMF assets, convert them to PDF, and embed a conversion‑date header on every page to ensure version control and traceability.
+ */
