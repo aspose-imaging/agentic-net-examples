@@ -8,31 +8,41 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\outline.bmp";
-
         try
         {
-            // Ensure output directory exists
+            // Output BMP file path (hard‑coded)
+            string outputPath = @"C:\Temp\outline.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options with file source
+            // Create BMP options and bind the output file
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 200x200 BMP image
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            // Define image dimensions
+            int width = 300;
+            int height = 300;
+
+            // Create the image canvas
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
+                // Define line start and end points
+                Point start = new Point(50, 50);
+                Point end = new Point(250, 250);
+
                 // Draw a thick black line
-                graphics.DrawLine(new Pen(Color.Black, 10), new Point(20, 20), new Point(180, 180));
+                Pen blackPen = new Pen(Color.Black, 10);
+                graphics.DrawLine(blackPen, start, end);
 
                 // Overlay a thinner white line for outline effect
-                graphics.DrawLine(new Pen(Color.White, 4), new Point(20, 20), new Point(180, 180));
+                Pen whitePen = new Pen(Color.White, 2);
+                graphics.DrawLine(whitePen, start, end);
 
-                // Save the image
+                // Save the image (file is already bound to outputPath)
                 image.Save();
             }
         }
@@ -42,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a C# developer needs to generate a BMP file with a highlighted vector line for a technical diagram, they can use Aspose.Imaging to draw a thick black line and overlay a thin white line to create an outline effect.
+ * 2. When building a Windows desktop application that exports custom grid overlays as BMP images, this code lets you render bold black grid lines with a subtle white border for better visual contrast.
+ * 3. When creating printable engineering schematics in .NET where line visibility must be enhanced on monochrome BMP prints, the approach of drawing a thick black line followed by a thinner white line provides a clear outline.
+ * 4. When developing a game asset pipeline that requires BMP textures with stylized borders around path lines, the sample demonstrates how to use Aspose.Imaging graphics and pens to achieve the effect programmatically.
+ * 5. When automating the generation of BMP signatures or watermarks with a distinct outline for branding purposes, this code shows how to draw a solid black line and add a white outline using C# and Aspose.Imaging.
+ */
