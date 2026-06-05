@@ -8,12 +8,13 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.png";
+        string outputPath = @"C:\Images\output.svg";
+
+        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,20 +28,16 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for SVG conversion
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Configure SVG options, embed fonts as shapes
+                // Prepare SVG export options
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    TextAsShapes = true // embed font family by converting text to shapes
+                    // Keep text as text so fonts can be embedded
+                    TextAsShapes = false,
+                    // Use default callback which handles embedded resources (fonts, images)
+                    Callback = new SvgResourceKeeperCallback()
                 };
 
-                // Save as SVG with embedded fonts
+                // Save the image as SVG with embedded fonts
                 image.Save(outputPath, svgOptions);
             }
         }
