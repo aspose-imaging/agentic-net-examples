@@ -12,18 +12,11 @@ class Program
     {
         try
         {
-            // Hardcoded input image paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            // Hardcoded input and output paths
+            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "merged.jpg";
 
-            // Hardcoded output path
-            string outputPath = "output.jpg";
-
-            // Validate input files
+            // Validate each input file exists
             foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -33,11 +26,14 @@ class Program
                 }
             }
 
-            // Cancellation token source (can be triggered elsewhere if needed)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Cancellation token source (can be triggered elsewhere)
             var cts = new System.Threading.CancellationTokenSource();
 
             // Collect sizes of all input images
-            var sizes = new List<Aspose.Imaging.Size>();
+            var sizes = new List<Size>();
             foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
@@ -55,27 +51,25 @@ class Program
                 if (sz.Height > newHeight) newHeight = sz.Height;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create JPEG options with bound source
-            Source src = new FileCreateSource(outputPath, false);
+            // Create output source and JPEG options
+            Source outSource = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = src,
+                Source = outSource,
                 Quality = 90
             };
 
-            // Create canvas image
+            // Create bound JPEG canvas
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
                 foreach (var path in inputPaths)
                 {
+                    // Check for cancellation request
                     if (cts.Token.IsCancellationRequested)
                     {
                         Console.WriteLine("Operation cancelled.");
-                        break;
+                        return;
                     }
 
                     using (RasterImage img = (RasterImage)Image.Load(path))
@@ -86,7 +80,7 @@ class Program
                     }
                 }
 
-                // Save the bound image (already linked to outputPath)
+                // Save the bound image (output path already set in options)
                 canvas.Save();
             }
         }
@@ -96,3 +90,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a photo‑gallery web service needs to generate a single panoramic preview from several user‑uploaded JPEGs and must allow the request to be cancelled if the client disconnects.
+ * 2. When an automated reporting tool combines multiple chart images into a wide JPEG banner for a PDF report, using Aspose.Imaging for .NET and a cancellation token to stop the merge if the report generation times out.
+ * 3. When a desktop application creates a side‑by‑side product comparison image from three product photos and wants to abort the operation if the user presses a “Cancel” button during the long‑running merge.
+ * 4. When a cloud‑based image‑processing pipeline stitches together scanned document pages into a single JPEG strip and needs to respect cancellation signals from the orchestration service.
+ * 5. When a batch script processes thousands of advertisement banners by horizontally merging JPEG assets and employs a cancellation token to gracefully halt the job when system resources become constrained.
+ */
