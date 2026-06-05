@@ -9,40 +9,36 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "sample.odg";
-        string outputPath = "sample.png";
-
-        // Ensure the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputPath = "sample_converted.png";
 
         try
         {
-            // Load the ODG file
-            using (Image odgImage = Image.Load(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Save it as PNG (rasterization occurs during save)
-                var pngOptions = new PngOptions();
-                odgImage.Save(outputPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Reload the generated PNG to apply gamma correction
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG file and save it as PNG (rasterization occurs here)
+            using (Image odgImage = Image.Load(inputPath))
+            {
+                odgImage.Save(outputPath, new PngOptions());
+            }
+
+            // Load the generated PNG, apply gamma correction, and save again
             using (Image pngImage = Image.Load(outputPath))
             {
                 // Cast to RasterImage to access AdjustGamma
-                var raster = (RasterImage)pngImage;
-
-                // Apply gamma correction (example gamma value 2.2)
-                raster.AdjustGamma(2.2f);
-
-                // Save the gamma‑corrected image, overwriting the previous PNG
-                var pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                if (pngImage is RasterImage raster)
+                {
+                    // Apply gamma correction (example gamma value 2.2)
+                    raster.AdjustGamma(2.2f);
+                    raster.Save(outputPath, new PngOptions());
+                }
             }
         }
         catch (Exception ex)
