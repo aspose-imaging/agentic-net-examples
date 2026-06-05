@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample.jpg";
+        string inputPath = @"C:\input\sample.cdr";
+        string outputPath = @"C:\output\sample.jpg";
 
         try
         {
@@ -27,20 +27,26 @@ class Program
             // Load the CDR image
             using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Cache the whole document (optional but improves performance)
-                cdrImage.CacheData();
+                // Ensure the document has at least one page
+                if (cdrImage.PageCount == 0)
+                {
+                    Console.Error.WriteLine("The CDR file contains no pages.");
+                    return;
+                }
 
-                // Access the first (and only) page
+                // Get the first (single) page
                 CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+
+                // Cache page data to avoid further stream reads
                 page.CacheData();
 
                 // Set high‑quality JPEG options
-                JpegOptions jpegOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
                     Quality = 100 // maximum quality
                 };
 
-                // Save the page as JPEG
+                // Save the page as a JPEG file
                 page.Save(outputPath, jpegOptions);
             }
         }
