@@ -2,53 +2,85 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.png";
-            string rgbProfilePath = @"C:\Profiles\eciRGB_v2.icc";
-            string cmykProfilePath = @"C:\Profiles\ISOcoated_v2_FullGamut4.icc";
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.otg";
+            string rgbProfilePath = "Input/rgb.icc";
+            string cmykProfilePath = "Input/cmyk.icc";
+            string tempJpegPath = "Output/temp.jpg";
+            string outputPngPath = "Output/output.png";
 
-            // Verify input file exists
+            // Validate input files
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the OTG image
-            using (Image image = Image.Load(inputPath))
+            if (!File.Exists(rgbProfilePath))
             {
-                // Load ICC profile streams
-                using (Stream rgbProfileStream = File.OpenRead(rgbProfilePath))
-                using (Stream cmykProfileStream = File.OpenRead(cmykProfilePath))
-                {
-                    // Attempt to set ICC profiles via reflection (both JpegImage and OtgImage expose these properties)
-                    var rgbProp = image.GetType().GetProperty("RgbColorProfile");
-                    var cmykProp = image.GetType().GetProperty("CmykColorProfile");
+                Console.Error.WriteLine($"File not found: {rgbProfilePath}");
+                return;
+            }
+            if (!File.Exists(cmykProfilePath))
+            {
+                Console.Error.WriteLine($"File not found: {cmykProfilePath}");
+                return;
+            }
 
-                    if (rgbProp != null && cmykProp != null && rgbProp.CanWrite && cmykProp.CanWrite)
-                    {
-                        rgbProp.SetValue(image, new StreamSource(rgbProfileStream));
-                        cmykProp.SetValue(image, new StreamSource(cmykProfileStream));
-                    }
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPngPath));
+
+            // Load OTG image and rasterize to JPEG with ICC profiles
+            using (Image otgImage = Image.Load(inputPath))
+            {
+                // Set up rasterization options for OTG
+                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = otgImage.Size
+                };
+
+                // Configure JPEG options with ICC profiles
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    ColorType = JpegCompressionColorMode.Cmyk,
+                    VectorRasterizationOptions = otgRasterOptions
+                };
+
+                using (FileStream rgbStream = File.OpenRead(rgbProfilePath))
+                using (FileStream cmykStream = File.OpenRead(cmykProfilePath))
+                {
+                    jpegOptions.RgbColorProfile = new StreamSource(rgbStream);
+                    jpegOptions.CmykColorProfile = new StreamSource(cmykStream);
                 }
 
-                // Prepare PNG save options (no special ICC handling needed for PNG)
-                PngOptions pngOptions = new PngOptions();
+                // Save intermediate JPEG
+                otgImage.Save(tempJpegPath, jpegOptions);
+            }
 
-                // Save the image as PNG
-                image.Save(outputPath, pngOptions);
+            // Load the JPEG and save as PNG (ICC profiles already applied)
+            using (JpegImage jpegImage = (JpegImage)Image.Load(tempJpegPath))
+            {
+                // Re-assign ICC profiles to ensure they persist (optional)
+                using (FileStream rgbStream = File.OpenRead(rgbProfilePath))
+                using (FileStream cmykStream = File.OpenRead(cmykProfilePath))
+                {
+                    jpegImage.RgbColorProfile = new StreamSource(rgbStream);
+                    jpegImage.CmykColorProfile = new StreamSource(cmykStream);
+                }
+
+                // Save as PNG
+                PngOptions pngOptions = new PngOptions();
+                jpegImage.Save(outputPngPath, pngOptions);
             }
         }
         catch (Exception ex)
