@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.webp";
-            string outputPath = "C:\\temp\\output.gif";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.webp";
+            string outputPath = @"C:\temp\output.gif";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,18 +24,20 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image
-            using (Image image = Image.Load(inputPath))
+            using (Image webpImage = Image.Load(inputPath))
             {
-                // Configure GIF compression (lossy) via MaxDiff
+                // Configure GIF compression options
                 GifOptions gifOptions = new GifOptions
                 {
-                    // Recommended value for optimal lossy compression
+                    // Use lossy compression with a moderate MaxDiff value to reduce size
                     MaxDiff = 80
                 };
 
-                // Save as GIF with the specified compression options
-                image.Save(outputPath, gifOptions);
+                // Save the image as GIF with the specified options
+                webpImage.Save(outputPath, gifOptions);
             }
+
+            Console.WriteLine("Conversion completed successfully.");
         }
         catch (Exception ex)
         {

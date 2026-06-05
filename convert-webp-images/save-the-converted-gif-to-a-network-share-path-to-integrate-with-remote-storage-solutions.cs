@@ -8,7 +8,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.gif";
+        string inputPath = @"C:\Images\source.gif";
         string outputPath = @"\\NetworkShare\Images\output.gif";
 
         try
@@ -20,7 +20,7 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (creates if missing)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the GIF image
@@ -29,8 +29,6 @@ class Program
                 // Save the image to the network share path
                 image.Save(outputPath);
             }
-
-            Console.WriteLine("GIF saved successfully.");
         }
         catch (Exception ex)
         {

@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.webp";
-            string outputPath = @"c:\temp\output.gif";
+            string inputPath = @"C:\temp\input.webp";
+            string outputPath = @"C:\temp\output.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))

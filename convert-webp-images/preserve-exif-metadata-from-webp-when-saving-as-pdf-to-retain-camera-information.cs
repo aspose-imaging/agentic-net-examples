@@ -1,18 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Metadata;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.webp";
-            string outputPath = "C:\\temp\\output.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,20 +22,26 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image
-            using (Image image = Image.Load(inputPath))
+            using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Configure PDF options to keep original metadata (including EXIF)
+                // Prepare PDF options and preserve metadata
                 PdfOptions pdfOptions = new PdfOptions
                 {
                     KeepMetadata = true
                 };
 
-                // Save the image as PDF while preserving EXIF data
-                image.Save(outputPath, pdfOptions);
+                // Copy EXIF data from the WebP image to PDF options, if present
+                if (webPImage.Metadata is ImageMetadata imgMeta && imgMeta.ExifData != null)
+                {
+                    pdfOptions.ExifData = imgMeta.ExifData;
+                }
+
+                // Save as PDF with preserved EXIF metadata
+                webPImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

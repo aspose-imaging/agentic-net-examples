@@ -7,26 +7,26 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.gif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.webp";
-            string outputPath = "output.gif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the animated WebP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF options with infinite looping (0 means infinite)
+                // Configure GIF options with infinite loop count (0)
                 var gifOptions = new GifOptions
                 {
                     LoopsCount = 0

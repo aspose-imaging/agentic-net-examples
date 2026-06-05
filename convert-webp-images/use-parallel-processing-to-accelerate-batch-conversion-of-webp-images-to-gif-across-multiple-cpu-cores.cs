@@ -2,21 +2,21 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\inputWebP";
-        string outputDir = @"C:\outputGif";
-
         try
         {
-            // Get all WebP files recursively
-            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp", SearchOption.AllDirectories);
+            // Hardcoded input and output directories
+            string inputDir = @"c:\input\";
+            string outputDir = @"c:\output\";
+
+            // Get all WebP files in the input directory
+            string[] webpFiles = Directory.GetFiles(inputDir, "*.webp");
 
             // Process files in parallel
             Parallel.ForEach(webpFiles, inputPath =>
@@ -28,9 +28,8 @@ class Program
                     return;
                 }
 
-                // Determine output path preserving relative folder structure
-                string relativePath = Path.GetRelativePath(inputDir, inputPath);
-                string outputPath = Path.Combine(outputDir, Path.ChangeExtension(relativePath, ".gif"));
+                // Determine output path with .gif extension
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));

@@ -9,21 +9,31 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.webp";
-            string outputPath = "Output/sample.pdf";
+            // Hardcoded input and output paths
+            string inputPath = Path.Combine("Input", "sample.webp");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load WebP image from byte array (memory stream)
+            using (FileStream fileStream = File.OpenRead(inputPath))
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                fileStream.CopyTo(memoryStream);
+                memoryStream.Position = 0;
+
+                using (Image image = Image.Load(memoryStream))
                 {
+                    // Save as PDF
+                    var pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
             }
