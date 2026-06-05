@@ -2,55 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.otg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.otg";
-            string outputPath = "output\\converted.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            using (Image otgImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                int width = otgImage.Width;
+                int height = otgImage.Height;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                Source source = new FileCreateSource(outputPath, false);
+                PngOptions pngOptions = new PngOptions() { Source = source };
+                Aspose.Imaging.ImageOptions.OtgRasterizationOptions rasterOptions = new Aspose.Imaging.ImageOptions.OtgRasterizationOptions();
+                rasterOptions.PageSize = otgImage.Size;
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Load the OTG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Prepare PNG save options with OTG rasterization
-                PngOptions pngOptions = new PngOptions();
-                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
                 {
-                    PageSize = image.Size
-                };
-                pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
+                    Graphics graphics = new Graphics(canvas);
+                    // Draw watermark text at bottom-right corner
+                    string watermarkText = "Watermark";
+                    Font font = new Font("Arial", 48);
+                    SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.White));
+                    PointF position = new PointF(width - 250, height - 60);
+                    graphics.DrawString(watermarkText, font, brush, position);
 
-                // Draw watermark text onto the image
-                Graphics graphics = new Graphics(image);
-                Font font = new Font("Arial", 48);
-                using (SolidBrush brush = new SolidBrush())
-                {
-                    brush.Color = Color.White;
-                    brush.Opacity = 50; // semi‑transparent
-
-                    // Position the watermark near the bottom‑right corner
-                    float x = image.Width - 300;
-                    float y = image.Height - 60;
-                    graphics.DrawString("Watermark", font, brush, new PointF(x, y));
+                    // Save the bound image
+                    canvas.Save();
                 }
-
-                // Save the final PNG image
-                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
