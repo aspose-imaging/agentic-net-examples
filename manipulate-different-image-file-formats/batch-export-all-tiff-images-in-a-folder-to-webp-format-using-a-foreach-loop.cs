@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -9,15 +10,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "Input";
-            string outputDir = "Output";
+            // Define input and output directories (relative paths)
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
 
             foreach (string inputPath in tiffFiles)
             {
@@ -28,17 +32,20 @@ class Program
                     return;
                 }
 
-                // Build output file path with .webp extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Prepare output path with .webp extension
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
-                // Ensure the output directory for this file exists
+                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the TIFF image and save as WebP
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, new WebPOptions());
+                    using (WebPOptions options = new WebPOptions())
+                    {
+                        image.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -48,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert a folder of high‑resolution TIFF scans into smaller WebP files for faster web page loading using a foreach loop and Aspose.Imaging.
+ * 2. When an automated .NET image‑processing workflow must iterate over all *.tif and *.tiff files in a directory and save them as WebP to reduce storage space.
+ * 3. When a photo‑gallery application requires generating WebP thumbnails from existing TIFF assets by loading each image with Image.Load and exporting with WebPOptions.
+ * 4. When a migration script has to preserve original file names while converting legacy TIFF documents to the modern WebP format across an entire folder.
+ * 5. When a developer wants to integrate Aspose.Imaging into a C# service that validates each TIFF file, creates the output directory, and saves the image as WebP in a batch operation.
+ */
