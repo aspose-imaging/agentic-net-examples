@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,12 +10,16 @@ class Program
     {
         try
         {
-            // Hardcoded input PNG files
-            string[] inputFiles = new[]
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input\";
+            string outputDir = @"C:\Images\Output\";
+
+            // List of PNG files to process
+            string[] inputFiles = new string[]
             {
-                @"C:\Images\image1.png",
-                @"C:\Images\image2.png",
-                @"C:\Images\image3.png"
+                Path.Combine(inputDir, "image1.png"),
+                Path.Combine(inputDir, "image2.png"),
+                Path.Combine(inputDir, "image3.png")
             };
 
             foreach (string inputPath in inputFiles)
@@ -27,8 +31,9 @@ class Program
                     return;
                 }
 
-                // Determine output SVG path (same folder, same name, .svg extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".svg");
+                // Determine output SVG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -36,14 +41,13 @@ class Program
                 // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Apply sharpening filter if the image is raster based
-                    if (image is RasterImage rasterImage)
+                    // Apply sharpening filter if the image is raster
+                    if (image is RasterImage raster)
                     {
-                        // Sharpen with kernel size 5 and sigma 4.0
-                        rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                        raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
                     }
 
-                    // Save the processed image as SVG
+                    // Save the result as SVG
                     image.Save(outputPath, new SvgOptions());
                 }
             }
