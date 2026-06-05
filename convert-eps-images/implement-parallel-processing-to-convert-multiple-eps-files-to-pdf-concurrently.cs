@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -12,21 +12,16 @@ class Program
     {
         try
         {
-            // Hardcoded input EPS files
-            string[] inputFiles = new[]
+            // Hardcoded list of EPS files to convert
+            string[] inputPaths = new[]
             {
                 @"C:\Images\Input1.eps",
                 @"C:\Images\Input2.eps",
                 @"C:\Images\Input3.eps"
             };
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Images\PdfOutput";
-
-            // Ensure the output directory exists (will also handle subfolders)
-            Directory.CreateDirectory(outputDirectory);
-
-            Parallel.ForEach(inputFiles, inputPath =>
+            // Process each file in parallel
+            Parallel.ForEach(inputPaths, inputPath =>
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -35,17 +30,16 @@ class Program
                     return;
                 }
 
-                // Determine output PDF path
-                string outputPath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                // Determine output PDF path (same folder, same name with .pdf)
+                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
-                // Ensure the output directory for this file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image and save as PDF
+                // Load EPS image
                 using (var image = (EpsImage)Image.Load(inputPath))
                 {
+                    // Set PDF options (optional compliance setting)
                     var pdfOptions = new PdfOptions
                     {
                         PdfCoreOptions = new PdfCoreOptions
@@ -54,8 +48,11 @@ class Program
                         }
                     };
 
+                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             });
         }
         catch (Exception ex)
