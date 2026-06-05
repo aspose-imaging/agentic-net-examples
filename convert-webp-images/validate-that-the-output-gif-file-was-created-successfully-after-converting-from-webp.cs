@@ -38,7 +38,7 @@ class Program
             }
             else
             {
-                Console.Error.WriteLine($"Failed to create GIF file: {outputPath}");
+                Console.Error.WriteLine("Failed to create GIF file.");
             }
         }
         catch (Exception ex)
