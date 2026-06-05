@@ -21,17 +21,19 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Apply Gaussian blur to the entire image
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                // Cast to RasterImage to use filtering capabilities
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Save the processed image as GIF with default settings
-                image.Save(outputPath);
+                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the processed image as GIF using default settings
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -40,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging application needs to convert a DICOM scan to a lightweight GIF for quick preview in a web portal, applying a Gaussian blur to reduce noise before display.
+ * 2. When a radiology workflow requires batch processing of DICOM files to generate animated GIF thumbnails with softened edges for inclusion in patient reports.
+ * 3. When a healthcare mobile app must load a DICOM image, smooth it with a Gaussian blur to hide sensitive details, and save it as a GIF for secure sharing.
+ * 4. When a diagnostic software tool wants to demonstrate image filtering effects by loading a DICOM image, applying a blur filter, and exporting the result as a GIF for documentation.
+ * 5. When a C# developer needs to integrate Aspose.Imaging to read DICOM files, apply a Gaussian blur for visual enhancement, and output a GIF with default settings for compatibility with legacy systems.
+ */
