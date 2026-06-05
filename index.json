@@ -579,24 +579,20 @@
         "use-aspose-imaging-to-convert-cmx-stream-from-memory-to-tiff-without-temporary-files.cs"
       ],
       "required_namespaces": [
-        "Aspose.Imaging",
         "System",
         "System.IO",
+        "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Cmx",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "Aspose.Imaging.Sources",
         "Aspose.Imaging.FileFormats.Tiff",
-        "Aspose.Imaging.FileFormats.Jpeg",
-        "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.Sources",
         "Aspose.Imaging.ImageLoadOptions",
         "Aspose.Imaging.FileFormats.Png",
-        "System.Threading.Tasks",
-        "System.Linq",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Pdf",
         "System.Net.Http",
-        "Aspose.Imaging.FileFormats.Bmp",
-        "Aspose.Imaging.FileFormats.Gif",
-        "System.Collections.Generic"
+        "System.Threading.Tasks"
       ],
       "key_apis": [
         "BmpOptions",
