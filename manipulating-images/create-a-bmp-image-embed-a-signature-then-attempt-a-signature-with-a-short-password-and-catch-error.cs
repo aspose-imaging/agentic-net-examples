@@ -2,65 +2,62 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.CoreExceptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = "output.bmp";
+            // Define output path for the created BMP image
+            string outputPath = "output/valid.bmp";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a new BMP image (100x100 pixels, 24 bits per pixel)
-            var bmpOptions = new BmpOptions { BitsPerPixel = 24 };
-            using (Image image = Image.Create(bmpOptions, 100, 100))
+            // Create a BMP image of size 200x200 and fill it with white color
+            using (BmpImage bmpImage = new BmpImage(200, 200))
             {
-                // Cast to RasterImage to access digital signature methods
-                RasterImage raster = (RasterImage)image;
+                Graphics graphics = new Graphics(bmpImage);
+                graphics.Clear(Color.White);
 
-                // Embed a digital signature with a strong password
-                raster.EmbedDigitalSignature("StrongPassword123");
+                // Embed a digital signature with a valid password
+                bmpImage.EmbedDigitalSignature("secure123");
 
                 // Save the signed image
-                raster.Save(outputPath);
+                bmpImage.Save(outputPath, new BmpOptions());
             }
 
-            // Verify the file exists before loading
-            if (!File.Exists(outputPath))
+            // Path to the image that will be used for the invalid signature attempt
+            string inputPath = outputPath;
+
+            // Verify the input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {outputPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the image to attempt a signature with a short password
-            using (Image loadedImage = Image.Load(outputPath))
+            // Ensure the directory for the input path exists (required by the task)
+            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+
+            // Load the image and attempt to embed a signature with a short password
+            using (Image loadedImage = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)loadedImage;
                 try
                 {
-                    // Attempt to embed with a short password (expected to fail)
-                    raster.EmbedDigitalSignature("12");
+                    raster.EmbedDigitalSignature("123");
                 }
-                catch (DigitalSignatureException ex)
+                catch (Aspose.Imaging.CoreExceptions.ImageException ex)
                 {
-                    // Expected exception for an invalid/short password
-                    Console.WriteLine($"Caught DigitalSignatureException: {ex.Message}");
-                }
-                catch (ImageException ex)
-                {
-                    // Fallback for other image-related errors
-                    Console.WriteLine($"Caught ImageException: {ex.Message}");
+                    Console.WriteLine($"HANDLED: {ex.Message}");
                 }
             }
         }
         catch (Exception ex)
         {
-            // Global error handling
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
