@@ -2,23 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input\\image.jpg";
-            string outputPath = "output\\result.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,40 +23,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure PNG export options
-            var exportOptions = new PngOptions
+            // Load the image
+            using (Image image = Image.Load(inputPath))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new StreamSource(new MemoryStream())
-            };
-
-            // Prepare masking arguments (no user-defined strokes)
-            var maskingArgs = new AutoMaskingArgs();
-
-            // Set up masking options
-            var maskingOptions = new MaskingOptions
-            {
-                Method = SegmentationMethod.GraphCut,
-                Decompose = false,
-                Args = maskingArgs,
-                BackgroundReplacementColor = Color.Transparent,
-                ExportOptions = exportOptions
-            };
-
-            // Load the source image as a raster image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                // Perform background removal
-                var masking = new ImageMasking(image);
-                using (MaskingResult result = masking.Decompose(maskingOptions))
+                // Attempt background removal for vector types
+                if (image is Aspose.Imaging.VectorImage vectorImg)
                 {
-                    // Retrieve the foreground image (masked object)
-                    using (RasterImage foreground = (RasterImage)result[1].GetImage())
-                    {
-                        // Save the result as PNG
-                        foreground.Save(outputPath, exportOptions);
-                    }
+                    vectorImg.RemoveBackground();
                 }
+                else if (image is Aspose.Imaging.VectorMultipageImage multiImg)
+                {
+                    multiImg.RemoveBackground();
+                }
+
+                // Save the result as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
