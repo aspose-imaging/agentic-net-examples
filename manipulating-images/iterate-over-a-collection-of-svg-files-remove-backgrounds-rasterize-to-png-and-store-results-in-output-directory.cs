@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,47 +11,47 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\InputSvgs";
-            string outputDir = @"C:\OutputPngs";
+            string inputDirectory = @"C:\InputSvgs";
+            string outputDirectory = @"C:\OutputPngs";
 
             // Get all SVG files in the input directory
-            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
+            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
 
-            foreach (var inputPath in svgFiles)
+            foreach (string inputPath in svgFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PNG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+                // Determine output PNG path
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image
+                // Load SVG, remove background, rasterize to PNG, and save
                 using (SvgImage svgImage = new SvgImage(inputPath))
                 {
-                    // Remove any background from the SVG
+                    // Remove background from the SVG
                     svgImage.RemoveBackground();
 
-                    // Configure rasterization options
-                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                    // Set up rasterization options
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                     {
                         PageSize = svgImage.Size
                     };
 
-                    // Configure PNG save options
+                    // Set up PNG save options with rasterization options
                     PngOptions pngOptions = new PngOptions
                     {
-                        VectorRasterizationOptions = rasterizationOptions
+                        VectorRasterizationOptions = rasterOptions
                     };
 
-                    // Save the rasterized PNG
+                    // Save rasterized PNG
                     svgImage.Save(outputPath, pngOptions);
                 }
             }
