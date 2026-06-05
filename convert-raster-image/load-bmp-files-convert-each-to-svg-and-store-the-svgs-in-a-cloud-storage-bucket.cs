@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -9,16 +10,15 @@ class Program
     {
         try
         {
-            // Hard‑coded input BMP files
-            string[] inputFiles = {
-                @"C:\Images\sample1.bmp",
-                @"C:\Images\sample2.bmp"
-            };
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
+            string bucketName = "my-cloud-bucket";
 
-            // Hard‑coded output “bucket” folder for SVG files
-            string outputBucket = @"C:\CloudBucket\svgs";
+            // Get all BMP files in the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in bmpFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -27,33 +27,50 @@ class Program
                     return;
                 }
 
-                // Build output SVG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputBucket, fileNameWithoutExt + ".svg");
+                // Determine output SVG path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP and convert to SVG
+                // Load BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    var vectorOptions = new SvgRasterizationOptions
+                    // Prepare SVG rasterization options
+                    var vectorRasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     };
 
+                    // Save as SVG
                     var svgOptions = new SvgOptions
                     {
-                        VectorRasterizationOptions = vectorOptions
+                        VectorRasterizationOptions = vectorRasterizationOptions
                     };
 
                     image.Save(outputPath, svgOptions);
                 }
+
+                // Upload the generated SVG to cloud storage (placeholder implementation)
+                UploadToCloud(outputPath, bucketName);
             }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
+    }
+
+    // Placeholder method for uploading a file to a cloud storage bucket.
+    // Replace with actual SDK calls (e.g., AWS S3, Azure Blob, Google Cloud Storage) as needed.
+    static void UploadToCloud(string filePath, string bucketName)
+    {
+        // Example: using a cloud SDK to upload the file.
+        // CloudStorageClient client = new CloudStorageClient(...);
+        // client.UploadFile(bucketName, Path.GetFileName(filePath), File.OpenRead(filePath));
+
+        // For now, just indicate the upload step.
+        Console.WriteLine($"Uploaded '{filePath}' to bucket '{bucketName}'.");
     }
 }
