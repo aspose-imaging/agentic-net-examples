@@ -5,14 +5,14 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.dcm";
-        string outputPath = "output/sample.png";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = "Input/sample.dcm";
+            string outputPath = "Output/sample.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,29 +20,30 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DICOM image and convert to PNG
-            using (Image image = Image.Load(inputPath))
+            // Load the DICOM image
+            using (Image dicomImage = Image.Load(inputPath))
             {
-                image.Save(outputPath, new PngOptions());
+                // Convert and save as PNG
+                var pngOptions = new PngOptions();
+                dicomImage.Save(outputPath, pngOptions);
             }
 
-            // Compare file sizes
+            // Compare file sizes of the original DICOM and the generated PNG
             long dicomSize = new FileInfo(inputPath).Length;
             long pngSize = new FileInfo(outputPath).Length;
 
-            // Simple verification: PNG file must have non‑zero size
-            if (pngSize == 0)
-            {
-                Console.Error.WriteLine("Conversion failed: PNG file size is zero.");
-                return;
-            }
-
             Console.WriteLine($"DICOM size: {dicomSize} bytes");
-            Console.WriteLine($"PNG size:   {pngSize} bytes");
-            Console.WriteLine("Test passed.");
+            Console.WriteLine($"PNG size: {pngSize} bytes");
+
+            if (pngSize < dicomSize)
+                Console.WriteLine("PNG is smaller than DICOM.");
+            else if (pngSize > dicomSize)
+                Console.WriteLine("PNG is larger than DICOM.");
+            else
+                Console.WriteLine("PNG size equals DICOM size.");
         }
         catch (Exception ex)
         {

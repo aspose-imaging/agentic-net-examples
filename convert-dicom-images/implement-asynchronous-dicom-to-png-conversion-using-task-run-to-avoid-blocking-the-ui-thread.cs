@@ -13,20 +13,20 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.dcm";
-            string outputDir = "output";
+            string outputDirectory = "output";
 
-            // Verify input file exists
+            // Input file existence check
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists (will be called before each save as well)
+            Directory.CreateDirectory(outputDirectory);
 
-            // Perform conversion asynchronously
-            await ConvertDicomToPngAsync(inputPath, outputDir);
+            // Perform conversion asynchronously to avoid blocking the UI thread
+            await ConvertDicomToPngAsync(inputPath, outputDirectory);
         }
         catch (Exception ex)
         {
@@ -34,25 +34,29 @@ class Program
         }
     }
 
-    // Asynchronous conversion using Task.Run
-    static Task ConvertDicomToPngAsync(string inputPath, string outputDir)
+    private static Task ConvertDicomToPngAsync(string dicomPath, string outputDir)
     {
+        // Wrap the CPU‑bound conversion work in Task.Run
         return Task.Run(() =>
         {
-            // Load DICOM image from a file stream
-            using (Stream stream = File.OpenRead(inputPath))
-            using (DicomImage dicomImage = new DicomImage(stream))
+            // Open the DICOM file as a stream
+            using (Stream stream = File.OpenRead(dicomPath))
             {
-                // Iterate through each DICOM page and save as PNG
-                foreach (DicomPage page in dicomImage.DicomPages)
+                // Load the DICOM image from the stream
+                using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    string outputPath = Path.Combine(outputDir, $"page_{page.Index}.png");
+                    // Iterate through each page and save as PNG
+                    foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                    {
+                        // Build output file name
+                        string outputPath = Path.Combine(outputDir, $"page_{dicomPage.Index}.png");
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure the directory for this file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as PNG using provided save rule
-                    page.Save(outputPath, new PngOptions());
+                        // Save the page as PNG using Aspose.Imaging's PngOptions
+                        dicomPage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         });

@@ -10,30 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
+            string inputPath = "Input/sample.dcm";
+            string outputDirectory = "Output";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Prepare output directory
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
             Directory.CreateDirectory(outputDirectory);
 
-            // Load DICOM image
             using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                // Build output PNG path
                 string outputPath = Path.Combine(outputDirectory, "output.png");
-
-                // Ensure output directory exists before saving
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save as PNG
                 dicomImage.Save(outputPath, new PngOptions());
             }
         }

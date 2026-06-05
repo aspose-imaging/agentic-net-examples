@@ -8,11 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.dicom";
+        string outputDirectory = @"c:\temp\";
+
         try
         {
-            // Hardcoded input DICOM file path
-            string inputPath = @"C:\Temp\multiframe.dcm";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,26 +21,25 @@ class Program
                 return;
             }
 
-            // Hardcoded output directory for PNG files
-            string outputDir = @"C:\Temp\DICOM_Frames";
+            // Ensure the output directory exists (creates if missing)
+            Directory.CreateDirectory(outputDirectory);
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputDir));
-
-            // Load the DICOM image from a file stream
+            // Open the DICOM file as a stream
             using (Stream stream = File.OpenRead(inputPath))
             {
+                // Load the multi‑page DICOM image
                 using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    // Iterate through each page (frame) and save as PNG
+                    // Iterate through each page (frame) in the DICOM image
                     foreach (DicomPage dicomPage in dicomImage.DicomPages)
                     {
-                        string outputPath = Path.Combine(outputDir, $"frame_{dicomPage.Index}.png");
+                        // Build the output file name based on the page index
+                        string outputPath = Path.Combine(outputDirectory, $"sample.{dicomPage.Index}.png");
 
-                        // Ensure the directory for this file exists (covers cases where outputDir may include subfolders)
+                        // Ensure the directory for the output file exists (already created above)
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the current page as PNG
+                        // Save the current page as a PNG file
                         dicomPage.Save(outputPath, new PngOptions());
                     }
                 }
@@ -47,6 +47,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
