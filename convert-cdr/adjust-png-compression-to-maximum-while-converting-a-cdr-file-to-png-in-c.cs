@@ -11,10 +11,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.cdr";
-            string outputPath = "output\\sample.png";
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,21 +24,20 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR vector image
+            // Load CDR image and convert to PNG with maximum compression
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Configure PNG options with maximum compression
                 var pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9, // maximum compression (0-9)
+                    CompressionLevel = 9,
                     VectorRasterizationOptions = new CdrRasterizationOptions
                     {
+                        BackgroundColor = Color.White,
                         PageWidth = cdr.Width,
                         PageHeight = cdr.Height
                     }
                 };
 
-                // Save the rasterized PNG image
                 cdr.Save(outputPath, pngOptions);
             }
         }
