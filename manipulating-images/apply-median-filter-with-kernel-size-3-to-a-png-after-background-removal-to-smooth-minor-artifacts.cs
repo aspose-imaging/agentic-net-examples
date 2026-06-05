@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input\\sample.png";
-            string outputPath = "output\\sample_processed.png";
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,17 +23,15 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // ---- Background removal step (placeholder) ----
-                // Insert background removal logic here.
-                // Example: make all fully transparent pixels white, etc.
+                // Background removal step would go here (if needed)
+                // e.g., rasterImage.RemoveBackground(); // placeholder for actual implementation
 
-                // Apply median filter with kernel size 3 to the whole image
+                // Apply median filter with kernel size 3 to the entire image
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(3));
 
                 // Save the processed image
