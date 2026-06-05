@@ -26,8 +26,8 @@ class Program
             // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up SVG rasterization options based on source image size
-                var rasterOptions = new SvgRasterizationOptions
+                // Set up rasterization options for SVG conversion
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
@@ -35,7 +35,7 @@ class Program
                 // Configure SVG save options
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Save as SVG
@@ -43,21 +43,36 @@ class Program
             }
 
             // Embed a custom XML comment describing the conversion
-            string svgContent = File.ReadAllText(outputPath);
-            string comment = "<!-- Converted from BMP to SVG using Aspose.Imaging -->";
-
-            int insertPos = svgContent.IndexOf("?>");
-            if (insertPos != -1)
+            // Read the generated SVG content
+            string[] lines = File.ReadAllLines(outputPath);
+            using (var writer = new StreamWriter(outputPath, false))
             {
-                insertPos += 2; // Move past the XML declaration
-            }
-            else
-            {
-                insertPos = 0; // No XML declaration, insert at start
-            }
+                bool commentInserted = false;
+                foreach (string line in lines)
+                {
+                    // Write the XML declaration first, then insert comment
+                    if (!commentInserted && line.StartsWith("<?xml"))
+                    {
+                        writer.WriteLine(line);
+                        writer.WriteLine("<!-- Converted from BMP to SVG using Aspose.Imaging -->");
+                        commentInserted = true;
+                    }
+                    else
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
 
-            string newContent = svgContent.Insert(insertPos, "\n" + comment + "\n");
-            File.WriteAllText(outputPath, newContent);
+                // If the file didn't start with an XML declaration, prepend the comment
+                if (!commentInserted)
+                {
+                    writer.WriteLine("<!-- Converted from BMP to SVG using Aspose.Imaging -->");
+                    foreach (string line in lines)
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {
