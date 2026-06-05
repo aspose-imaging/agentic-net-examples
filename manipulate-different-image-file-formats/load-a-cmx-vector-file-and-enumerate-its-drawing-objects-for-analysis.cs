@@ -2,18 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Cmx.ObjectModel;
-using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cmx";
-            string outputPath = @"C:\Images\analysis.txt";
+            string inputPath = "sample.cmx";
+            string outputPath = "report.txt";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,52 +23,24 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image with default load options
-            var loadOptions = new CmxLoadOptions();
-            using (CmxImage image = (CmxImage)Image.Load(inputPath, loadOptions))
+            // Load CMX image
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                // Access the underlying CMX document
-                CmxDocument document = image.Document;
-
                 using (StreamWriter writer = new StreamWriter(outputPath))
                 {
-                    writer.WriteLine($"CMX Document contains {document.Pages.Count} page(s).");
-
                     int pageIndex = 0;
-                    foreach (var page in document.Pages)
+                    foreach (var page in cmx.Pages)
                     {
                         writer.WriteLine($"Page {pageIndex}:");
-
-                        // Attempt to enumerate drawing objects via reflection
-                        var objectsProp = page.GetType().GetProperty("Objects");
-                        if (objectsProp != null)
-                        {
-                            var objects = objectsProp.GetValue(page) as System.Collections.IEnumerable;
-                            if (objects != null)
-                            {
-                                int objIndex = 0;
-                                foreach (var obj in objects)
-                                {
-                                    writer.WriteLine($"  Object {objIndex}: {obj}");
-                                    objIndex++;
-                                }
-                            }
-                            else
-                            {
-                                writer.WriteLine("  Objects collection is empty.");
-                            }
-                        }
-                        else
-                        {
-                            writer.WriteLine("  No Objects collection found on this page.");
-                        }
-
+                        writer.WriteLine($"  Width: {page.Width}");
+                        writer.WriteLine($"  Height: {page.Height}");
+                        writer.WriteLine($"  Bounds: {page.Bounds}");
                         pageIndex++;
                     }
                 }
-            }
 
-            Console.WriteLine($"Analysis written to {outputPath}");
+                Console.WriteLine($"Enumeration completed. Report saved to {outputPath}");
+            }
         }
         catch (Exception ex)
         {
@@ -78,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract page dimensions and bounds from a CMX vector file to generate a printable layout report for a CAD workflow.
+ * 2. When an application must validate that all pages in a multi‑page CMX drawing meet specific size constraints before converting them to PDF.
+ * 3. When a quality‑control tool has to enumerate each page of a CMX file to log its width, height, and bounding box for downstream analytics.
+ * 4. When a migration script needs to read CMX files and produce a plain‑text inventory of page metadata to assist in bulk asset management.
+ * 5. When a C# service uses Aspose.Imaging to load CMX drawings and create a summary file that can be indexed by search engines for quick document discovery.
+ */
