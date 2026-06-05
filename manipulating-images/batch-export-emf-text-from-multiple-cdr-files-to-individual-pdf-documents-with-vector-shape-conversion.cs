@@ -10,7 +10,7 @@ class Program
     {
         try
         {
-            // Hard‑coded list of input CDR files
+            // Hard‑coded list of CDR files to process
             string[] inputFiles = new[]
             {
                 @"C:\Images\Sample1.cdr",
@@ -27,7 +27,7 @@ class Program
                     return;
                 }
 
-                // Build output PDF path (same folder, same name, .pdf extension)
+                // Determine output PDF path (same folder, same name, .pdf extension)
                 string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
                 // Ensure output directory exists
@@ -36,21 +36,21 @@ class Program
                 // Load the CDR image
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Prepare PDF options with CDR rasterization settings
-                    PdfOptions pdfOptions = new PdfOptions
+                    // Configure PDF export options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Configure rasterization options for vector conversion
+                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                     {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            // Render text as vector shapes (single‑bit per pixel rendering)
-                            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                            // Preserve original page size
-                            PageWidth = cdrImage.Width,
-                            PageHeight = cdrImage.Height
-                        }
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                        Positioning = Aspose.Imaging.ImageOptions.PositioningTypes.DefinedByDocument
                     };
 
-                    // Export the whole CDR document to a single PDF file
+                    // Assign rasterization options to PDF options
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                    // Export the entire CDR document (all pages) to PDF
                     cdrImage.Save(outputPath, pdfOptions);
                 }
             }
@@ -61,3 +61,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a design studio needs to convert a batch of CorelDRAW (.cdr) files into searchable PDF documents while preserving vector shapes for high‑resolution printing.
+ * 2. When an automated document workflow must extract EMF text from multiple CDR source files and generate individual PDF reports for archival compliance.
+ * 3. When a SaaS platform offers on‑the‑fly conversion of user‑uploaded CDR artwork to PDF, ensuring that text remains crisp by rasterizing vector content with specific rendering hints.
+ * 4. When a corporate branding team wants to mass‑export logo assets stored in CDR format to PDF for distribution to partners, maintaining exact positioning and smoothing settings.
+ * 5. When a batch processing script is required to validate the existence of CDR files, create corresponding PDF files in the same directory, and apply consistent rasterization options for consistent visual output across all pages.
+ */
