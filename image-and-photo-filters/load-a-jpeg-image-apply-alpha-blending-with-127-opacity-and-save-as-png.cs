@@ -1,40 +1,39 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the JPEG image
-            using (JpegImage jpegImage = new JpegImage(inputPath))
-            {
-                // Create a blank background image with the same dimensions
-                using (RasterImage background = (RasterImage)Image.Create(new PngOptions(), jpegImage.Width, jpegImage.Height))
-                {
-                    // Blend the JPEG onto the background with 127 (≈50%) opacity
-                    background.Blend(new Aspose.Imaging.Point(0, 0), jpegImage, 127);
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
 
-                    // Save the result as PNG
-                    background.Save(outputPath, new PngOptions());
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.RasterImage jpeg = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                int width = jpeg.Width;
+                int height = jpeg.Height;
+
+                FileCreateSource src = new FileCreateSource(outputPath, false);
+                PngOptions pngOptions = new PngOptions { Source = src };
+                using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pngOptions, width, height))
+                {
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                    graphics.Clear(Aspose.Imaging.Color.White);
+
+                    canvas.Blend(new Aspose.Imaging.Point(0, 0), jpeg, 127);
+                    canvas.Save();
                 }
             }
         }
