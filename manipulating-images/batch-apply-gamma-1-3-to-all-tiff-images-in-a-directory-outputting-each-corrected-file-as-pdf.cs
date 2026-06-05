@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
@@ -11,40 +12,34 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            string inputDir = "C:\\Temp\\TiffInput";
+            string outputDir = "C:\\Temp\\PdfOutput";
 
-            // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (string filePath in tiffFiles)
+            // Collect all .tif and .tiff files
+            var tiffFiles = new List<string>();
+            tiffFiles.AddRange(Directory.GetFiles(inputDir, "*.tif"));
+            tiffFiles.AddRange(Directory.GetFiles(inputDir, "*.tiff"));
+
+            foreach (var inputPath in tiffFiles)
             {
-                string extension = Path.GetExtension(filePath).ToLowerInvariant();
-                if (extension != ".tif" && extension != ".tiff")
-                    continue; // Skip non‑TIFF files
-
-                // Input path check
-                if (!File.Exists(filePath))
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path (same name, .pdf extension)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+                // Build output PDF path
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image
-                using (Image image = Image.Load(filePath))
+                // Load TIFF, apply gamma correction, and save as PDF
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to TiffImage to access AdjustGamma
                     TiffImage tiffImage = (TiffImage)image;
-
-                    // Apply gamma correction (1.3 for all channels)
                     tiffImage.AdjustGamma(1.3f);
-
-                    // Save as PDF
                     tiffImage.Save(outputPath, new PdfOptions());
                 }
             }
