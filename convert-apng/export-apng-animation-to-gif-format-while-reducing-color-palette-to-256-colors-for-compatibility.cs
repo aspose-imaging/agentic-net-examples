@@ -9,34 +9,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input/animation.apng";
-            string outputPath = "output/animation.gif";
+            // Hardcoded input and output file paths
+            string inputPath = "input.apng";
+            string outputPath = "output.gif";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the APNG animation
-            using (Image apngImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF options to reduce palette to 256 colors
-                GifOptions gifOptions = new GifOptions
+                // Configure GIF options to reduce the palette to 256 colors
+                var gifOptions = new GifOptions
                 {
-                    // Enable palette correction to build an optimal 256‑color palette
-                    DoPaletteCorrection = true,
-                    // Set color resolution (bits per color channel minus 1). 7 => 8 bits => 256 colors
-                    ColorResolution = 7
+                    DoPaletteCorrection = true // Enables palette analysis for optimal 256‑color palette
                 };
 
-                // Save as GIF using the configured options
-                apngImage.Save(outputPath, gifOptions);
+                // Save the animation as a GIF file
+                image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)

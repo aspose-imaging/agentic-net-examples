@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -14,56 +15,68 @@ class Program
         try
         {
             // Hardcoded paths
-            string sourcePath = "input.png";
-            string configPath = "config.json";
-            string outputPath = "output.apng";
+            string inputPath = "input.png";
+            string jsonPath = "config.json";
+            string outputPath = "output\\animation.apng";
 
-            // Input file existence checks
-            if (!File.Exists(sourcePath))
+            // Input validation
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {sourcePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-            if (!File.Exists(configPath))
+            if (!File.Exists(jsonPath))
             {
-                Console.Error.WriteLine($"File not found: {configPath}");
+                Console.Error.WriteLine($"File not found: {jsonPath}");
                 return;
             }
 
-            // Read and parse JSON configuration (expects an array of integers)
-            string json = File.ReadAllText(configPath);
-            int[] delays = json
-                .Split(new char[] { '[', ']', ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .Where(s => int.TryParse(s, out _))
-                .Select(s => int.Parse(s))
-                .ToArray();
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage sourceImage = (RasterImage)Image.Load(sourcePath))
+            // Load source raster image
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Read and parse JSON configuration for frame delays
+                string jsonContent = File.ReadAllText(jsonPath);
+                List<uint> frameDelays = jsonContent
+                    .Split(new char[] { '[', ']', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
+                    .Where(s => uint.TryParse(s, out _))
+                    .Select(s => uint.Parse(s))
+                    .ToList();
 
-                // Create APNG options
-                ApngOptions options = new ApngOptions
+                // Fallback to a default delay if none provided
+                if (frameDelays.Count == 0)
+                {
+                    frameDelays.Add(100); // 100 ms default
+                }
+
+                // Create APNG options with output binding
+                ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = delays.Length > 0 ? (uint)delays[0] : (uint)100
+                    DefaultFrameTime = 0 // will be overridden per frame
                 };
 
-                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+                // Create APNG image canvas
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    createOptions,
+                    sourceImage.Width,
+                    sourceImage.Height))
                 {
-                    apng.RemoveAllFrames();
+                    // Remove the default frame
+                    apngImage.RemoveAllFrames();
 
                     // Add frames with specific delays
-                    foreach (int delay in delays)
+                    foreach (uint delay in frameDelays)
                     {
-                        apng.AddFrame(sourceImage, (uint)delay);
+                        apngImage.AddFrame(sourceImage, delay);
                     }
 
-                    // Save the APNG
-                    apng.Save();
+                    // Save the APNG (output already bound)
+                    apngImage.Save();
                 }
             }
         }

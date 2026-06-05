@@ -2,9 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -14,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input\\multi.tif";
-            string outputPath = "Output\\animated.apng";
+            string inputPath = "Input\\multi_page.tif";
+            string outputPath = "Output\\animation.apng";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -30,39 +28,32 @@ class Program
             // Load the multi‑page TIFF
             using (Image tiffImage = Image.Load(inputPath))
             {
-                // Check that the loaded image supports multiple pages
-                if (tiffImage is IMultipageImage multiPage)
+                if (tiffImage is IMultipageImage multipage)
                 {
-                    // Use size of the first page for the APNG canvas
-                    int width = multiPage.Pages[0].Width;
-                    int height = multiPage.Pages[0].Height;
-
                     // Prepare APNG creation options
                     ApngOptions apngOptions = new ApngOptions
                     {
-                        Source = new FileCreateSource(outputPath, false),
-                        ColorType = PngColorType.TruecolorWithAlpha
+                        Source = new FileCreateSource(outputPath, false)
                     };
+
+                    // Use dimensions of the first page for the APNG canvas
+                    int width = multipage.Pages[0].Width;
+                    int height = multipage.Pages[0].Height;
 
                     // Create the APNG image
                     using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
                     {
-                        // Remove the default empty frame
+                        // Remove the default frame that exists upon creation
                         apngImage.RemoveAllFrames();
 
                         // Add each TIFF page as a frame with a unique delay
-                        for (int i = 0; i < multiPage.PageCount; i++)
+                        for (int i = 0; i < multipage.PageCount; i++)
                         {
-                            // Cast page to RasterImage and ensure it is cached
-                            RasterImage pageImage = (RasterImage)multiPage.Pages[i];
-                            if (!pageImage.IsCached)
-                                pageImage.CacheData();
-
-                            // Example unique delay: 100 ms increments
-                            uint frameDelay = (uint)((i + 1) * 100);
+                            RasterImage page = (RasterImage)multipage.Pages[i];
+                            uint frameDelay = (uint)((i + 1) * 100); // Example: 100 ms, 200 ms, ...
 
                             // Add the frame with the specified delay
-                            apngImage.AddFrame(pageImage, frameDelay);
+                            apngImage.AddFrame(page, frameDelay);
                         }
 
                         // Save the resulting APNG
@@ -71,7 +62,7 @@ class Program
                 }
                 else
                 {
-                    Console.Error.WriteLine("The input image is not a multipage image.");
+                    Console.Error.WriteLine("Loaded image is not a multipage image.");
                 }
             }
         }

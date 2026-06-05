@@ -1,20 +1,23 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input/animation.webp";
-        string outputPath = "output/animation_apng.png";
-
         try
         {
+            string inputPath = "input.webp";
+            string outputPath = "output.apng";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,23 +26,34 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WebPImage webp = new WebPImage(inputPath))
+            using (WebPImage webpImage = new WebPImage(inputPath))
             {
+                // Extract frames as RasterImage objects
+                List<RasterImage> frames = ((IMultipageImage)webpImage).Pages
+                    .Cast<RasterImage>()
+                    .ToList();
+
+                // Reverse frame order (example modification)
+                frames.Reverse();
+
+                // Prepare options for creating APNG
+                Source source = new FileCreateSource(outputPath, false);
                 ApngOptions apngOptions = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false)
+                    Source = source,
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, webp.Width, webp.Height))
+                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, webpImage.Width, webpImage.Height))
                 {
-                    apng.RemoveAllFrames();
+                    apngImage.RemoveAllFrames();
 
-                    foreach (RasterImage frame in webp.Pages)
+                    foreach (RasterImage frame in frames)
                     {
-                        apng.AddFrame(frame);
+                        apngImage.AddFrame(frame);
                     }
 
-                    apng.Save();
+                    apngImage.Save();
                 }
             }
         }

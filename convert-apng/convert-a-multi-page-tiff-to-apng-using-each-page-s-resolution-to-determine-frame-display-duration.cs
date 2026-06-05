@@ -11,64 +11,72 @@ class Program
     {
         try
         {
-            string inputPath = "Input/multipage.tif";
-            string outputPath = "Output/animation.apng";
+            // Hardcoded input and output paths
+            string inputPath = "Input\\multi.tif";
+            string outputPath = "Output\\output.apng";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int pageCount;
-            int width;
-            int height;
-
+            // Load the multi‑page TIFF
             using (Image tiffImage = Image.Load(inputPath))
             {
                 if (tiffImage is IMultipageImage multipage)
                 {
-                    pageCount = multipage.PageCount;
+                    // Determine canvas size from the first page
+                    Image firstPage = multipage.Pages[0];
+                    int canvasWidth = firstPage.Width;
+                    int canvasHeight = firstPage.Height;
+                    firstPage.Dispose();
+
+                    // Prepare APNG creation options
+                    ApngOptions createOptions = new ApngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    // Create APNG image
+                    using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, canvasWidth, canvasHeight))
+                    {
+                        // Remove the default frame
+                        apngImage.RemoveAllFrames();
+
+                        // Add each TIFF page as a frame with duration based on its resolution
+                        for (int i = 0; i < multipage.PageCount; i++)
+                        {
+                            Image page = multipage.Pages[i];
+                            RasterImage rasterPage = (RasterImage)page;
+
+                            // Add the raster page as a frame
+                            apngImage.AddFrame(rasterPage);
+
+                            // Retrieve the newly added frame
+                            ApngFrame apngFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+
+                            // Calculate frame duration (ms) from horizontal resolution; fallback to 72 DPI if undefined
+                            double hDpi = rasterPage.HorizontalResolution > 0 ? rasterPage.HorizontalResolution : 72;
+                            int frameDuration = (int)(1000 / hDpi);
+                            apngFrame.FrameTime = frameDuration;
+
+                            // Dispose the page after use
+                            rasterPage.Dispose();
+                        }
+
+                        // Save the APNG file
+                        apngImage.Save();
+                    }
                 }
                 else
                 {
-                    pageCount = 1;
+                    Console.Error.WriteLine("The loaded image is not a multipage image.");
                 }
-
-                width = tiffImage.Width;
-                height = tiffImage.Height;
-            }
-
-            ApngOptions apngOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
-            {
-                apngImage.RemoveAllFrames();
-
-                using (Image tiffImage = Image.Load(inputPath))
-                {
-                    IMultipageImage multipage = tiffImage as IMultipageImage;
-
-                    for (int i = 0; i < pageCount; i++)
-                    {
-                        using (Image page = multipage != null ? multipage.Pages[i] : Image.Load(inputPath))
-                        {
-                            RasterImage raster = (RasterImage)page;
-                            apngImage.AddFrame(raster);
-
-                            int duration = (int)Math.Max(1, 1000.0 / Math.Max(1, raster.HorizontalResolution));
-                            ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                            frame.FrameTime = duration;
-                        }
-                    }
-                }
-
-                apngImage.Save();
             }
         }
         catch (Exception ex)

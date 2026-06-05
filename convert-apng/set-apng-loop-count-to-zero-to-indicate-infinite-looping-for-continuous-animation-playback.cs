@@ -10,7 +10,7 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.webp";
+            string inputPath = "input.png";
             string outputPath = "output.png";
 
             // Verify input file exists
@@ -26,12 +26,13 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as APNG with infinite looping (NumPlays = 0)
+                // Set APNG options with infinite looping (NumPlays = 0)
                 var apngOptions = new ApngOptions
                 {
-                    NumPlays = 0 // 0 indicates infinite looping
+                    NumPlays = 0
                 };
 
+                // Save as APNG with the specified options
                 image.Save(outputPath, apngOptions);
             }
         }

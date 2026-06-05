@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 
@@ -9,30 +10,35 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.webp";
-            string outputPath = "output\\result.png";
+            string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WebPImage webp = new WebPImage(inputPath))
+            // Load animated WebP image
+            using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
             {
-                var colors = new Aspose.Imaging.Color[]
+                // Create a new grayscale palette (256 colors)
+                Aspose.Imaging.Color[] newPalette = new Aspose.Imaging.Color[256];
+                for (int i = 0; i < 256; i++)
                 {
-                    Aspose.Imaging.Color.FromArgb(255, 255, 0, 0),
-                    Aspose.Imaging.Color.FromArgb(255, 0, 255, 0),
-                    Aspose.Imaging.Color.FromArgb(255, 0, 0, 255)
-                };
+                    newPalette[i] = Aspose.Imaging.Color.FromArgb(i, i, i);
+                }
 
-                var palette = new Aspose.Imaging.ColorPalette(colors);
-                webp.Palette = palette;
+                // Apply the new palette to the image
+                webpImage.Palette = new ColorPalette(newPalette);
 
-                webp.Save(outputPath, new ApngOptions());
+                // Save the modified animation as APNG
+                webpImage.Save(outputPath, new ApngOptions());
             }
         }
         catch (Exception ex)

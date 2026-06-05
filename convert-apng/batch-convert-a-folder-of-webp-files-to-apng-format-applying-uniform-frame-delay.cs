@@ -7,17 +7,19 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
-
             // Ensure output directory exists
             Directory.CreateDirectory(outputFolder);
 
-            // Process each WEBP file in the input folder
-            foreach (string inputPath in Directory.GetFiles(inputFolder, "*.webp"))
+            // Get all WEBP files in the input folder
+            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
+
+            foreach (string inputPath in webpFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -26,15 +28,17 @@ class Program
                     return;
                 }
 
-                // Determine output file path (same name with .png extension)
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Build the output file path (same name with .png extension)
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
 
-                // Ensure the output directory exists
+                // Ensure the output directory exists (unconditional)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WEBP image and save as APNG with a uniform frame delay
+                // Load the WEBP image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Save as APNG with a uniform frame delay (e.g., 100 ms)
                     image.Save(outputPath, new ApngOptions() { DefaultFrameTime = 100 });
                 }
             }

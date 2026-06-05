@@ -7,23 +7,23 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.apng";
-        string outputPath = "Output/sample.gif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "Input\\animation.apng";
+            string outputPath = "Output\\animation.gif";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                GifOptions options = new GifOptions();
-                image.Save(outputPath, options);
+                GifOptions gifOptions = new GifOptions();
+                image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
