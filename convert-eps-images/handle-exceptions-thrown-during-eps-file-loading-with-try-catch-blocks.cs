@@ -1,20 +1,18 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.eps";
+            string outputPath = "output\\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,32 +23,15 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image with load options and handle loading exceptions
-            EpsImage epsImage;
-            try
+            // Load EPS image with exception handling
+            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                var loadOptions = new EpsLoadOptions(); // default options
-                epsImage = (EpsImage)Image.Load(inputPath, loadOptions);
-            }
-            catch (ImageLoadException ex)
-            {
-                Console.Error.WriteLine($"Error loading EPS file: {ex.Message}");
-                return;
-            }
-
-            // Process the image (e.g., resize) and save as PNG
-            using (epsImage)
-            {
-                // Example resize to 500x500 using Mitchell interpolation
-                epsImage.Resize(500, 500, ResizeType.Mitchell);
-
-                var pngOptions = new PngOptions();
-                epsImage.Save(outputPath, pngOptions);
+                // Save as PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
         {
-            // Catch any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
