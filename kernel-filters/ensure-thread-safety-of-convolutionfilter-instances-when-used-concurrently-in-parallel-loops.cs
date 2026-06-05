@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 
 class Program
@@ -8,18 +10,16 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output directories
-            string inputDir = "InputImages";
-            string outputDir = "OutputImages";
+            // Hardcoded input files
+            string[] inputFiles = new string[]
+            {
+                "input1.png",
+                "input2.png",
+                "input3.png"
+            };
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all PNG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.png");
-
-            // Process each file in parallel – each iteration creates its own filter instance
-            System.Threading.Tasks.Parallel.ForEach(inputFiles, inputPath =>
+            // Process each file in parallel using PLINQ
+            inputFiles.AsParallel().ForAll(inputPath =>
             {
                 // Validate input file existence
                 if (!File.Exists(inputPath))
@@ -28,24 +28,28 @@ class Program
                     return;
                 }
 
-                // Build output path and ensure its directory exists
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + "_sharpened.png");
+                // Prepare output path
+                string outputPath = Path.Combine("output", Path.GetFileNameWithoutExtension(inputPath) + "_filtered.png");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, apply a Sharpen filter, and save the result
+                // Load image, apply convolution filter, and save
                 using (Image img = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage for filtering
                     RasterImage raster = (RasterImage)img;
 
-                    // Each thread gets its own filter options instance (thread‑safe)
-                    var filter = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0);
+                    // Simple 3x3 averaging kernel
+                    double[,] kernel = new double[,]
+                    {
+                        { 1, 1, 1 },
+                        { 1, 1, 1 },
+                        { 1, 1, 1 }
+                    };
 
-                    // Apply the filter to the whole image
-                    raster.Filter(raster.Bounds, filter);
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 3);
 
-                    // Save the processed image
+                    raster.Filter(raster.Bounds, filterOptions);
                     raster.Save(outputPath);
                 }
             });
@@ -56,3 +60,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑process thousands of PNG product photos with a 3×3 averaging kernel before uploading them to an e‑commerce site, a thread‑safe ConvolutionFilter allows the PLINQ parallel loop to run without corrupting image data.
+ * 2. When an image‑analysis pipeline must preprocess a large collection of satellite JPEG tiles in parallel to accelerate terrain classification, ensuring the ConvolutionFilter instance is thread‑safe prevents race conditions during raster filtering.
+ * 3. When a medical‑imaging application generates filtered DICOM slices on multiple CPU cores to improve visual clarity for radiologists, using a thread‑safe ConvolutionFilter guarantees each slice is processed correctly without pixel artifacts.
+ * 4. When an automated content‑management system creates filtered thumbnails for user‑uploaded GIF and BMP files concurrently, thread safety of the ConvolutionFilter ensures every thumbnail is rendered accurately.
+ * 5. When a computer‑vision training workflow applies the same convolution kernel to thousands of PNG training images in parallel, a thread‑safe ConvolutionFilter provides consistent preprocessing across all threads.
+ */
