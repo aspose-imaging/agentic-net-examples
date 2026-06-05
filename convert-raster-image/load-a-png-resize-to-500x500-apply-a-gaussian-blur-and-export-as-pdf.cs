@@ -2,8 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.png";
-            string outputPath = "Output\\result.pdf";
+            string inputPath = "Input/input.png";
+            string outputPath = "Output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,19 +21,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                if (!image.IsCached)
-                    image.CacheData();
-
                 image.Resize(500, 500);
-                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions
-                {
-                    Radius = 5,
-                    Sigma = 1.0
-                });
 
-                image.Save(outputPath, new PdfOptions());
+                if (image is RasterImage raster)
+                {
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions());
+                }
+
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
