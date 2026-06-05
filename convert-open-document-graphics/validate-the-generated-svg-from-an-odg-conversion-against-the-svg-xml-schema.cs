@@ -1,20 +1,20 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using System.Xml;
 using System.Xml.Schema;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.odg";
+        string outputPath = "output.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Data\sample.odg";
-            string outputPath = @"C:\Data\sample.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,48 +23,62 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load ODG and convert to SVG
+            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                var vectorOptions = new SvgRasterizationOptions { PageSize = image.Size };
-                var svgOptions = new SvgOptions { VectorRasterizationOptions = vectorOptions };
+                // Prepare rasterization options for SVG export
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
+                // Save the image as SVG
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
                 image.Save(outputPath, svgOptions);
             }
 
-            // Path to SVG XML schema (XSD)
-            string schemaPath = @"C:\Data\svg.xsd";
-
-            // Verify schema file exists
+            // Validate the generated SVG against an XSD schema
+            // Assumes an SVG schema file named "svg.xsd" is located alongside the executable
+            string schemaPath = "svg.xsd";
             if (!File.Exists(schemaPath))
             {
                 Console.Error.WriteLine($"Schema file not found: {schemaPath}");
                 return;
             }
 
-            // Prepare schema set
-            XmlSchemaSet schemas = new XmlSchemaSet();
+            var settings = new XmlReaderSettings();
+            var schemas = new XmlSchemaSet();
             schemas.Add(null, schemaPath);
+            settings.Schemas = schemas;
+            settings.ValidationType = ValidationType.Schema;
+            settings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
 
-            // Configure XML reader for validation
-            XmlReaderSettings settings = new XmlReaderSettings
-            {
-                ValidationType = ValidationType.Schema,
-                Schemas = schemas
-            };
+            bool validationFailed = false;
             settings.ValidationEventHandler += (sender, e) =>
             {
                 Console.Error.WriteLine($"Validation {e.Severity}: {e.Message}");
+                validationFailed = true;
             };
 
-            // Validate the generated SVG
-            using (XmlReader reader = XmlReader.Create(outputPath, settings))
+            using (var reader = XmlReader.Create(outputPath, settings))
             {
                 while (reader.Read()) { }
             }
 
-            Console.WriteLine("SVG validation completed.");
+            if (validationFailed)
+            {
+                Console.Error.WriteLine("SVG validation failed.");
+            }
+            else
+            {
+                Console.WriteLine("SVG validation succeeded.");
+            }
         }
         catch (Exception ex)
         {
