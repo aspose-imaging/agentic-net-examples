@@ -20,13 +20,16 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the GIF image, flip horizontally, and save
+            // Load the GIF image
             using (GifImage image = (GifImage)Image.Load(inputPath))
             {
+                // Flip the active frame horizontally
                 image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                // Save the flipped image to the new location
                 image.Save(outputPath);
             }
         }
