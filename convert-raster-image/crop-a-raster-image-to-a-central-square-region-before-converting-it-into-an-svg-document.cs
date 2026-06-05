@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = @"C:\Images\input.png";
             string outputPath = @"C:\Images\output.svg";
 
@@ -21,28 +20,27 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for cropping
-                if (image is RasterImage rasterImage)
-                {
-                    // Determine central square region
-                    int side = Math.Min(rasterImage.Width, rasterImage.Height);
-                    int left = (rasterImage.Width - side) / 2;
-                    int top = (rasterImage.Height - side) / 2;
+                // Cast to RasterImage to access Crop
+                RasterImage raster = (RasterImage)image;
 
-                    // Crop to the central square
-                    var area = new Rectangle(left, top, side, side);
-                    rasterImage.Crop(area);
-                }
+                // Determine the size of the central square
+                int side = Math.Min(raster.Width, raster.Height);
+                int left = (raster.Width - side) / 2;
+                int top = (raster.Height - side) / 2;
 
-                // Save the (cropped) image as SVG
+                // Crop to the central square region
+                var area = new Rectangle(left, top, side, side);
+                raster.Crop(area);
+
+                // Convert and save as SVG
                 var svgOptions = new SvgOptions();
-                image.Save(outputPath, svgOptions);
+                raster.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
