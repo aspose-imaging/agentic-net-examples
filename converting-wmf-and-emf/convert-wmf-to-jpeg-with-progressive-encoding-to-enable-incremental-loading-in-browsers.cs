@@ -6,22 +6,22 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.wmf";
+        string outputPath = "Output/output.jpg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.wmf";
-            string outputPath = @"C:\Images\output.jpg";
-
-            // Verify that the input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WMF image
@@ -31,10 +31,10 @@ class Program
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     CompressionType = JpegCompressionMode.Progressive,
-                    Quality = 90 // Adjust quality as needed (1-100)
+                    Quality = 90 // Optional quality setting
                 };
 
-                // Save the image as a progressive JPEG
+                // Save as JPEG with the specified options
                 image.Save(outputPath, jpegOptions);
             }
         }
