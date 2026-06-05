@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -11,17 +13,19 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input JPEG file paths
             string[] inputPaths = new string[]
             {
                 "input1.jpg",
                 "input2.jpg",
                 "input3.jpg"
             };
-            string outputPath = "output\\merged.jpg";
+
+            // Hardcoded output path
+            string outputPath = "output/merged.jpg";
 
             // Validate input files
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -30,55 +34,52 @@ class Program
                 }
             }
 
-            // Collect image sizes
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (string path in inputPaths)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
+            foreach (var path in inputPaths)
             {
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Calculate canvas dimensions for vertical merge
-            int totalHeight = 0;
-            int maxWidth = 0;
-            foreach (Aspose.Imaging.Size sz in sizes)
-            {
-                totalHeight += sz.Height;
-                if (sz.Width > maxWidth) maxWidth = sz.Width;
-            }
+            // Determine canvas dimensions for vertical merge
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create JPEG canvas
-            FileCreateSource src = new FileCreateSource(outputPath, false);
+            // Create JPEG canvas with options
+            Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
                 Source = src,
                 Quality = 90
             };
 
-            using (Aspose.Imaging.FileFormats.Jpeg.JpegImage canvas = (Aspose.Imaging.FileFormats.Jpeg.JpegImage)Aspose.Imaging.Image.Create(jpegOptions, maxWidth, totalHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                for (int i = 0; i < inputPaths.Length; i++)
+                int processed = 0;
+                int total = inputPaths.Length;
+
+                foreach (var path in inputPaths)
                 {
-                    string path = inputPaths[i];
-                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
+                        Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetY += img.Height;
                     }
 
-                    // Log progress percentage
-                    int percent = (i + 1) * 100 / inputPaths.Length;
+                    processed++;
+                    int percent = (int)((processed * 100.0) / total);
                     Console.WriteLine($"Progress: {percent}%");
                 }
 
-                // Save the merged image
+                // Save the bound canvas
                 canvas.Save();
             }
         }
@@ -88,3 +89,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer creates a PDF‑to‑JPEG conversion tool that stacks scanned pages vertically and needs to log the progress percentage after each JPEG image is added to the canvas for user feedback.
+ * 2. When building an automated photo‑album generator that merges individual JPEG photos into a single tall image and wants to report the merge status in the console or UI.
+ * 3. When implementing a batch image‑processing pipeline that combines product catalog images into one JPEG banner and requires progress logging to monitor long‑running jobs.
+ * 4. When developing a server‑side service that assembles user‑uploaded JPEG screenshots into a vertical collage and needs to track and log each step to detect performance bottlenecks.
+ * 5. When designing a desktop application that merges multiple JPEG receipts into a single printable file and wants to display a percentage complete after each receipt is placed on the canvas.
+ */
