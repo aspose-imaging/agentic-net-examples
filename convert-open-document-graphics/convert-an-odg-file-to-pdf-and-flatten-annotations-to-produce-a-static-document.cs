@@ -2,51 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
-class Program
+namespace OdgToPdfConverter
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
             // Hardcoded input and output file paths
             string inputPath = @"C:\input\sample.odg";
             string outputPath = @"C:\output\sample.pdf";
 
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            try
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the ODG image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Configure rasterization options to flatten the document
+                    var rasterOptions = new OdgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White, // flatten annotations onto a white background
+                        PageSize = image.Size
+                    };
+
+                    // Set up PDF save options and attach rasterization options
+                    var pdfOptions = new PdfOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Save the image as a PDF
+                    image.Save(outputPath, pdfOptions);
+                }
             }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            catch (Exception ex)
             {
-                // Set up rasterization options to flatten the vector content
-                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // Configure PDF save options and attach the rasterization options
-                PdfOptions saveOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save the image as a flattened PDF
-                image.Save(outputPath, saveOptions);
+                // Report any runtime errors without crashing
+                Console.Error.WriteLine($"Error: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
