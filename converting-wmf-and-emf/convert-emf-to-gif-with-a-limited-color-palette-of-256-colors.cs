@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.emf";
             string outputPath = @"C:\Images\output.gif";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,22 +24,25 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (Image emfImage = Image.Load(inputPath))
             {
-                // Configure GIF options with palette correction (max 256 colors)
+                // Configure GIF options for a 256‑color palette
                 GifOptions gifOptions = new GifOptions
                 {
-                    DoPaletteCorrection = true,   // Analyze source colors to build optimal 256‑color palette
-                    ColorResolution = 7           // Maximum color resolution (8 bits per channel)
+                    // 7 bits per primary color (2^(7+1) = 256 colors)
+                    ColorResolution = 7,
+                    // Analyze source colors to build the best matching palette
+                    DoPaletteCorrection = true,
+                    // Use lossless compression
+                    MaxDiff = 0
                 };
 
-                // Save the image as GIF using the configured options
-                image.Save(outputPath, gifOptions);
+                // Save the image as GIF
+                emfImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
