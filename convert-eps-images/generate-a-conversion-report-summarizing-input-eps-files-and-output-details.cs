@@ -4,92 +4,80 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input EPS files
-            var inputFiles = new List<string>
+            // Define input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            // Ensure directories exist
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
+
+            // Get all EPS files in the input directory
+            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+
+            // Prepare a list to hold report lines
+            List<string> reportLines = new List<string>();
+            reportLines.Add("EPS Conversion Report");
+            reportLines.Add($"Generated on: {DateTime.Now}");
+            reportLines.Add("");
+
+            foreach (string epsPath in epsFiles)
             {
-                @"C:\Images\Input1.eps",
-                @"C:\Images\Input2.eps"
-            };
-
-            // Corresponding output PNG files
-            var outputFiles = new List<string>
-            {
-                @"C:\Images\Output\Result1.png",
-                @"C:\Images\Output\Result2.png"
-            };
-
-            // Report file path
-            var reportPath = @"C:\Images\Output\ConversionReport.txt";
-
-            // Ensure the report directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
-
-            using (var reportWriter = new StreamWriter(reportPath, false))
-            {
-                reportWriter.WriteLine("EPS Conversion Report");
-                reportWriter.WriteLine($"Generated on: {DateTime.Now}");
-                reportWriter.WriteLine(new string('=', 40));
-
-                for (int i = 0; i < inputFiles.Count; i++)
+                // Validate input file existence
+                if (!File.Exists(epsPath))
                 {
-                    string inputPath = inputFiles[i];
-                    string outputPath = outputFiles[i];
-
-                    // Verify input file existence
-                    if (!File.Exists(inputPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
-                    }
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Load EPS image
-                    using (var image = (EpsImage)Image.Load(inputPath))
-                    {
-                        // Gather metadata
-                        DateTime creationDate = image.CreationDate;
-                        string creator = image.Creator ?? "N/A";
-                        int width = image.Width;
-                        int height = image.Height;
-                        var boundingBox = image.BoundingBox;
-
-                        // Prepare PNG options with rasterization
-                        var pngOptions = new PngOptions
-                        {
-                            VectorRasterizationOptions = new EpsRasterizationOptions
-                            {
-                                PageWidth = width,
-                                PageHeight = height,
-                                BackgroundColor = Color.White
-                            }
-                        };
-
-                        // Save as PNG
-                        image.Save(outputPath, pngOptions);
-
-                        // Write entry to report
-                        reportWriter.WriteLine($"Input EPS: {inputPath}");
-                        reportWriter.WriteLine($"  Creator      : {creator}");
-                        reportWriter.WriteLine($"  CreationDate : {creationDate}");
-                        reportWriter.WriteLine($"  Dimensions   : {width}x{height}");
-                        reportWriter.WriteLine($"  BoundingBox  : {boundingBox}");
-                        reportWriter.WriteLine($"Output PNG: {outputPath}");
-                        reportWriter.WriteLine(new string('-', 30));
-                    }
+                    Console.Error.WriteLine($"File not found: {epsPath}");
+                    return;
                 }
 
-                reportWriter.WriteLine("Conversion completed successfully.");
+                // Load EPS image
+                using (EpsImage epsImage = (EpsImage)Image.Load(epsPath))
+                {
+                    // Extract metadata
+                    int width = epsImage.Width;
+                    int height = epsImage.Height;
+                    string title = epsImage.Title ?? "N/A";
+                    string creator = epsImage.Creator ?? "N/A";
+
+                    // Prepare output PNG path
+                    string pngFileName = Path.GetFileNameWithoutExtension(epsPath) + ".png";
+                    string pngPath = Path.Combine(outputDirectory, pngFileName);
+
+                    // Ensure output directory for PNG exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+
+                    // Save PNG preview
+                    epsImage.Save(pngPath, new PngOptions());
+
+                    // Add entry to report
+                    reportLines.Add($"File: {Path.GetFileName(epsPath)}");
+                    reportLines.Add($"  Dimensions: {width}x{height}");
+                    reportLines.Add($"  Title: {title}");
+                    reportLines.Add($"  Creator: {creator}");
+                    reportLines.Add($"  PNG Preview: {pngFileName}");
+                    reportLines.Add("");
+                }
             }
+
+            // Write report to file
+            string reportPath = Path.Combine(outputDirectory, "Report.txt");
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
+            using (StreamWriter writer = new StreamWriter(reportPath))
+            {
+                foreach (string line in reportLines)
+                {
+                    writer.WriteLine(line);
+                }
+            }
+
+            Console.WriteLine("Report generated successfully.");
         }
         catch (Exception ex)
         {
