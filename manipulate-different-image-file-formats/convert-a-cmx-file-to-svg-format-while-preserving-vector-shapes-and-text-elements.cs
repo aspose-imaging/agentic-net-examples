@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.cmx";
+        string outputPath = @"C:\temp\sample.svg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Temp\sample.cmx";
-            string outputPath = @"C:\Temp\sample.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,25 +27,26 @@ class Program
             // Load the CMX image
             using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
             {
-                // Prepare SVG save options
-                SvgOptions saveOptions = new SvgOptions
+                // Set up SVG save options
+                var svgOptions = new SvgOptions
                 {
-                    TextAsShapes = true // preserve text as vector shapes
+                    // Render text as vector shapes to preserve appearance
+                    TextAsShapes = true
                 };
 
                 // Configure rasterization options specific to CMX
-                CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
+                var rasterOptions = new CmxRasterizationOptions
                 {
-                    // Use the source image size as the page size
+                    // Use the source image size for the SVG page
                     PageSize = cmxImage.Size,
-                    // Optional: set background color if needed
+                    // Optional: set a background color if needed
                     BackgroundColor = Color.White
                 };
 
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as SVG
-                cmxImage.Save(outputPath, saveOptions);
+                // Save the image as SVG
+                cmxImage.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -54,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a CAD engineer needs to embed legacy CorelDRAW CMX drawings into a web page as scalable SVG graphics while preserving vector shapes and exact text appearance.
+ * 2. When a document conversion service must batch‑process CMX files into SVG to enable resolution‑independent printing and editing in vector editors using C# image processing APIs.
+ * 3. When a GIS application imports CMX map symbols and converts them to SVG so the symbols remain fully vectorized and text is rendered as shapes for responsive UI components.
+ * 4. When an e‑learning platform transforms CMX illustrations into SVG to support interactive scaling, accessibility, and cross‑browser rendering without rasterizing the original text.
+ * 5. When a legacy design workflow requires an automated C# script that preserves vector shapes and text while migrating CMX assets to modern SVG format for version control and collaborative editing.
+ */
