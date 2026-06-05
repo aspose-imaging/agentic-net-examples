@@ -2,74 +2,66 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ProgressManagement;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDir = @"C:\Images\Input";
+        string outputDir = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
-
-            // Verify input directory exists
-            if (!Directory.Exists(inputDirectory))
-            {
-                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
-                return;
-            }
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Get all PNG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png", SearchOption.AllDirectories);
-            int totalFiles = inputFiles.Length;
-            if (totalFiles == 0)
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.png");
+            int total = inputFiles.Length;
+            if (total == 0)
             {
                 Console.WriteLine("No PNG files found to process.");
                 return;
             }
 
-            // Process each file
-            for (int i = 0; i < totalFiles; i++)
+            for (int i = 0; i < total; i++)
             {
                 string inputPath = inputFiles[i];
-
-                // Input file existence check
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path preserving relative structure
-                string relativePath = Path.GetRelativePath(inputDirectory, inputPath);
-                string outputPath = Path.Combine(outputDirectory, relativePath);
+                // Build output file path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_processed.png";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
-                // Ensure output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
+                // Load the image, apply progressive PNG option, and save
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set progressive option for PNG saving
                     var pngOptions = new PngOptions
                     {
-                        Progressive = true,
-                        // Optional: you can set other options like CompressionLevel if desired
-                        CompressionLevel = 9
+                        Progressive = true
                     };
-
-                    // Save the image with progressive PNG options
                     image.Save(outputPath, pngOptions);
                 }
 
                 // Update simple progress bar
-                Console.Write($"\rProcessed {i + 1}/{totalFiles} files");
+                int progressBarWidth = 30;
+                double progressFraction = (i + 1) / (double)total;
+                int filledBars = (int)(progressFraction * progressBarWidth);
+                string bar = new string('#', filledBars).PadRight(progressBarWidth, '-');
+                Console.Write($"\rProcessing: [{bar}] {i + 1}/{total}");
             }
 
-            // Move to next line after progress bar completes
-            Console.WriteLine("\nProcessing completed.");
+            Console.WriteLine("\nProcessing completed successfully.");
         }
         catch (Exception ex)
         {
