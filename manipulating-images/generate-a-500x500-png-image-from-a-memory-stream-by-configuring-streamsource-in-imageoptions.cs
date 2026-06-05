@@ -1,38 +1,40 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string outputPath = "output.png";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Hardcoded output path
+            string outputPath = @"C:\temp\output.png";
 
-            // Create a memory stream to be used as the source
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Memory stream that will act as the source for the PNG image
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                // Configure PNG options with the stream source
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(memoryStream);
-
-                // Create a 500x500 PNG image using the options
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
+                // Configure PNG options with a StreamSource pointing to the memory stream
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Draw on the image
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.Wheat);
-                    graphics.DrawRectangle(
-                        new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2),
-                        new Aspose.Imaging.Rectangle(50, 50, 400, 400));
+                    Source = new StreamSource(memoryStream)
+                };
 
-                    // Save the image to the specified file
-                    image.Save(outputPath, pngOptions);
+                // Create a 500x500 PNG image using the configured options
+                using (Image image = Image.Create(pngOptions, 500, 500))
+                {
+                    // Optional: fill the image with a solid color
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.LightBlue);
+
+                    // Save the image to the hardcoded output path
+                    image.Save(outputPath);
                 }
             }
         }
