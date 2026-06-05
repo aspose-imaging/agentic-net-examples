@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -11,9 +11,8 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Sample.eps";
-            string outputPath = "Sample.pdf";
+            // Hardcoded input EPS file path
+            string inputPath = @"C:\Images\sample.eps";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,12 +21,16 @@ class Program
                 return;
             }
 
+            // Hardcoded output PDF file path
+            string outputPath = @"C:\Images\sample_converted.pdf";
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image and convert to PDF
+            // Load EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
             {
+                // Set PDF options (optional compliance setting)
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
@@ -36,15 +39,18 @@ class Program
                     }
                 };
 
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
 
-            // Compare file sizes
+            // Get file sizes
             long epsSize = new FileInfo(inputPath).Length;
             long pdfSize = new FileInfo(outputPath).Length;
 
-            Console.WriteLine($"EPS size: {epsSize} bytes");
-            Console.WriteLine($"PDF size: {pdfSize} bytes");
+            // Output comparison
+            Console.WriteLine($"EPS file size: {epsSize} bytes");
+            Console.WriteLine($"Converted PDF file size: {pdfSize} bytes");
+            Console.WriteLine($"Size difference: {pdfSize - epsSize} bytes");
         }
         catch (Exception ex)
         {
