@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -9,76 +10,89 @@ class Program
     {
         try
         {
-            // Hard‑coded input SVG files
-            string[] svgInputs = {
-                @"C:\Images\image1.svg",
-                @"C:\Images\image2.svg"
+            // Hard‑coded input vector images (SVG, WMF, etc.)
+            string[] vectorImagePaths = {
+                @"InputImages\Image1.svg",
+                @"InputImages\Image2.svg"
             };
 
-            // Corresponding HTML template files containing the placeholder token
-            string[] htmlTemplates = {
-                @"C:\Templates\page1.html",
-                @"C:\Templates\page2.html"
+            // Hard‑coded HTML template files containing the placeholder token
+            string[] htmlTemplatePaths = {
+                @"Templates\Page1.html",
+                @"Templates\Page2.html"
             };
 
-            // Desired output HTML files after embedding the canvas
-            string[] htmlOutputs = {
-                @"C:\Result\page1.html",
-                @"C:\Result\page2.html"
+            // Corresponding output HTML files
+            string[] outputHtmlPaths = {
+                @"Output\Page1.html",
+                @"Output\Page2.html"
             };
 
-            // Placeholder token to be replaced with the generated canvas markup
+            // Placeholder token that will be replaced by generated canvas markup
             const string placeholderToken = "{{CANVAS_PLACEHOLDER}}";
 
-            // Process each pair (SVG → HTML)
-            for (int i = 0; i < svgInputs.Length; i++)
+            // Validate existence of all vector image inputs
+            foreach (var vecPath in vectorImagePaths)
             {
-                string svgPath = svgInputs[i];
-                if (!File.Exists(svgPath))
+                if (!File.Exists(vecPath))
                 {
-                    Console.Error.WriteLine($"File not found: {svgPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {vecPath}");
+                    return;
                 }
+            }
 
-                // Temporary file that will hold only the canvas tag
-                string tempCanvasPath = Path.Combine(Path.GetTempPath(), $"canvas_{i}.html");
-                // Ensure the temp directory exists (it always does, but follow the rule)
-                Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
+            // Validate existence of all HTML template inputs
+            foreach (var tmplPath in htmlTemplatePaths)
+            {
+                if (!File.Exists(tmplPath))
+                {
+                    Console.Error.WriteLine($"File not found: {tmplPath}");
+                    return;
+                }
+            }
 
-                // Generate the canvas HTML from the SVG source
-                using (Image image = Image.Load(svgPath))
+            // Generate canvas fragments (only the <canvas> tag, not a full HTML page)
+            List<string> canvasFragments = new List<string>();
+            foreach (var vecPath in vectorImagePaths)
+            {
+                using (Image image = Image.Load(vecPath))
                 {
                     var options = new Html5CanvasOptions
                     {
                         VectorRasterizationOptions = new SvgRasterizationOptions(),
-                        FullHtmlPage = false // Export only the <canvas> element
+                        FullHtmlPage = false,
+                        Encoding = System.Text.Encoding.UTF8
                     };
-                    image.Save(tempCanvasPath, options);
-                }
 
-                // Read the generated canvas markup
-                string canvasHtml = File.ReadAllText(tempCanvasPath);
-
-                // Load the HTML template
-                string templatePath = htmlTemplates[i];
-                if (!File.Exists(templatePath))
-                {
-                    Console.Error.WriteLine($"File not found: {templatePath}");
-                    continue;
+                    using (var ms = new MemoryStream())
+                    {
+                        image.Save(ms, options);
+                        ms.Position = 0;
+                        using (var reader = new StreamReader(ms))
+                        {
+                            string canvasHtml = reader.ReadToEnd();
+                            canvasFragments.Add(canvasHtml);
+                        }
+                    }
                 }
+            }
+
+            // Combine all canvas fragments into a single string (separated by new lines)
+            string combinedCanvasHtml = string.Join(Environment.NewLine, canvasFragments);
+
+            // Process each HTML template, replace the placeholder, and write the result
+            for (int i = 0; i < htmlTemplatePaths.Length; i++)
+            {
+                string templatePath = htmlTemplatePaths[i];
+                string outputPath = outputHtmlPaths[i];
 
                 string templateContent = File.ReadAllText(templatePath);
+                string resultContent = templateContent.Replace(placeholderToken, combinedCanvasHtml);
 
-                // Replace the placeholder with the canvas markup
-                string resultContent = templateContent.Replace(placeholderToken, canvasHtml);
-
-                // Write the final HTML file
-                string outputPath = htmlOutputs[i];
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                File.WriteAllText(outputPath, resultContent);
 
-                // Clean up the temporary canvas file
-                try { File.Delete(tempCanvasPath); } catch { /* ignore cleanup errors */ }
+                File.WriteAllText(outputPath, resultContent);
             }
         }
         catch (Exception ex)
@@ -87,3 +101,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a set of SVG or WMF vector graphics into interactive HTML5 canvas elements and insert them into several product documentation pages that contain a {{CANVAS_PLACEHOLDER}} token.
+ * 2. When an e‑learning platform wants to automatically embed scalable illustrations as canvas markup into multiple lesson HTML templates without manually editing each file.
+ * 3. When a reporting tool generates charts as vector images and must batch‑replace placeholders in pre‑designed HTML report templates with canvas fragments for responsive web viewing.
+ * 4. When a marketing team maintains a library of promotional banners stored as SVG files and wants a C# script to embed them as HTML5 canvas tags into dozens of landing‑page HTML files using a placeholder token.
+ * 5. When a SaaS dashboard needs to programmatically update its UI by converting updated vector icons into canvas elements and injecting them into several HTML widget templates during a build process.
+ */
