@@ -3,45 +3,48 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.dcm";
+        string outputPath = "output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
-            string outputPath = "output/output.tif";
+            // Configure memory strategy with a buffer size hint (e.g., 256 KB)
+            LoadOptions loadOptions = new LoadOptions();
+            loadOptions.BufferSizeHint = 256 * 1024;
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DICOM image with memory strategy
+            // Load DICOM image from file stream using the memory strategy
             using (FileStream stream = File.OpenRead(inputPath))
+            using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
             {
-                var loadOptions = new LoadOptions
-                {
-                    BufferSizeHint = 256 * 1024 // 256 KB buffer size hint
-                };
+                // Adjust brightness (range -255 to 255)
+                dicomImage.AdjustBrightness(30);
 
-                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
-                {
-                    // Adjust brightness and contrast
-                    dicomImage.AdjustBrightness(50);      // Increase brightness
-                    dicomImage.AdjustContrast(30f);      // Increase contrast
+                // Adjust contrast (range -100 to 100)
+                dicomImage.AdjustContrast(20f);
 
-                    // Save as TIFF
-                    var tiffOptions = new TiffOptions();
-                    dicomImage.Save(outputPath, tiffOptions);
-                }
+                // Prepare TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the processed image as TIFF
+                dicomImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert DICOM scans to TIFF files for archival while adjusting brightness and contrast to improve visual clarity, developers can use this code.
- * 2. When a radiology workflow requires batch processing of large DICOM images on limited‑memory machines, the memory‑strategy loading and pixel‑level adjustments demonstrated here are essential.
- * 3. When a healthcare integration service needs to expose DICOM data to non‑DICOM‑aware systems, converting the image to a standard TIFF format with enhanced contrast ensures compatibility.
- * 4. When a diagnostic software must preprocess DICOM images before applying machine‑learning models, adjusting brightness and contrast programmatically using Aspose.Imaging simplifies the pipeline.
- * 5. When a hospital’s PACS export tool has to generate high‑quality printable TIFF copies of DICOM studies on the fly, this C# snippet provides a reliable way to load, enhance, and save the images.
+ * 1. When a medical imaging application needs to convert DICOM scans to high‑resolution TIFF files for archival while applying brightness and contrast corrections to improve visual quality, developers can use this code.
+ * 2. When a radiology workflow must process large DICOM images on a server with limited RAM, the memory‑buffer strategy in the example enables efficient loading before exporting the adjusted image as TIFF.
+ * 3. When a research project requires extracting DICOM data, enhancing the image for publication, and storing it in a widely supported TIFF format for downstream analysis, this C# snippet provides the necessary steps.
+ * 4. When a PACS integration needs to generate TIFF thumbnails with adjusted brightness and contrast for quick preview in a web portal, developers can employ the shown load‑adjust‑save pattern.
+ * 5. When a healthcare software vendor wants to implement a feature that reads DICOM files, applies standardized brightness/contrast settings, and outputs TIFF files compatible with third‑party reporting tools, the code demonstrates the required workflow.
  */
