@@ -9,50 +9,46 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.png";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.emf";
+            string outputPath = "output\\bordered.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int borderSize = 5;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Expand the canvas to accommodate the border
-                emfImage.ResizeCanvas(new Aspose.Imaging.Rectangle(
-                    -borderSize,
-                    -borderSize,
-                    emfImage.Width + 2 * borderSize,
-                    emfImage.Height + 2 * borderSize));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Obtain a graphics object to draw on the EMF
-                EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to MetaImage to modify the canvas
+                var metaImage = (Aspose.Imaging.FileFormats.Emf.MetaImage)image;
+                int border = 5;
+
+                // Expand canvas by 5 pixels on each side
+                metaImage.ResizeCanvas(new Rectangle(-border, -border,
+                    metaImage.Width + border * 2, metaImage.Height + border * 2));
 
                 // Draw a red rectangle as the border
-                graphics.DrawRectangle(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, borderSize),
-                    0,
-                    0,
-                    emfImage.Width,
-                    emfImage.Height);
+                var graphics = EmfRecorderGraphics2D.FromEmfImage((EmfImage)image);
+                int innerX = border;
+                int innerY = border;
+                int innerWidth = metaImage.Width - border * 2;
+                int innerHeight = metaImage.Height - border * 2;
+                graphics.DrawRectangle(new Pen(Color.Red, border), innerX, innerY, innerWidth, innerHeight);
 
-                // Finalize the recording and obtain the modified EMF image
+                // Finalize recording and save as PNG
                 using (EmfImage borderedEmf = graphics.EndRecording())
                 {
-                    // Save the result as PNG
-                    borderedEmf.Save(outputPath, new PngOptions());
+                    var pngOptions = new PngOptions();
+                    borderedEmf.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -62,3 +58,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert legacy EMF vector graphics into web‑friendly PNGs while adding a visible red border for branding or visual separation.
+ * 2. When an application must programmatically enlarge the canvas of an EMF file by a few pixels and draw a colored outline to meet printing margin requirements.
+ * 3. When a reporting tool generates EMF charts and the developer wants to automatically embed a 5‑pixel red frame before exporting the images as PNG for email attachments.
+ * 4. When a desktop utility processes batch EMF icons, adds a consistent red border for UI consistency, and saves the results as PNG thumbnails.
+ * 5. When a C# service integrates Aspose.Imaging to ensure that imported EMF diagrams are highlighted with a red border and stored in PNG format for downstream analytics pipelines.
+ */
