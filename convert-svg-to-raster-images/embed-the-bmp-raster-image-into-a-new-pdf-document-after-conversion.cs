@@ -9,9 +9,9 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Temp\sample.bmp";
-            string outputPath = @"C:\Temp\sample.pdf";
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,13 +24,13 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
-            using (Image bmpImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF export options
-                var pdfOptions = new PdfOptions();
+                // Set PDF export options (default options are sufficient)
+                PdfOptions pdfOptions = new PdfOptions();
 
                 // Save the image as a PDF document
-                bmpImage.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
