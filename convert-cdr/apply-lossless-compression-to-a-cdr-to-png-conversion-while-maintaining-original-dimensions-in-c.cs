@@ -3,8 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = Path.Combine("Input", "sample.cdr");
-            string outputPath = Path.Combine("Output", "sample.png");
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.png";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -26,24 +24,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR image
+            // Load CDR image and convert to PNG with lossless compression
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Configure PNG options with lossless maximum compression
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
-                    PngCompressionLevel = PngCompressionLevel.ZipLevel9,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    // Set vector rasterization options to preserve original dimensions
+                    VectorRasterizationOptions = new CdrRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
+                        PageHeight = cdr.Height
                     }
                 };
 
-                // Save as PNG while preserving original dimensions
+                // Save as PNG (lossless compression is default)
                 cdr.Save(outputPath, pngOptions);
             }
         }
