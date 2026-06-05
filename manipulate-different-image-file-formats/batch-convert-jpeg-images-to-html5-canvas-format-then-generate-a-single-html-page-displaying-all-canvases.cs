@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -10,77 +10,67 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-            string finalHtmlPath = Path.Combine(outputDir, "AllCanvases.html");
+            // Hardcoded input directory containing JPEG files
+            string inputDirectory = @"C:\Images\Input";
+            // Hardcoded output directory for canvas snippets and final HTML page
+            string outputDirectory = @"C:\Images\Output";
+            // Hardcoded path for the final combined HTML page
+            string finalHtmlPath = Path.Combine(outputDirectory, "AllCanvases.html");
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(finalHtmlPath));
-
-            // Collect canvas snippets
-            List<string> canvasSnippets = new List<string>();
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all JPEG files in the input directory
-            string[] jpegFiles = Directory.GetFiles(inputDir, "*.jpg");
-            int index = 0;
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            string[] jpegFilesAlt = Directory.GetFiles(inputDirectory, "*.jpeg");
+            string[] allJpegFiles = new string[jpegFiles.Length + jpegFilesAlt.Length];
+            jpegFiles.CopyTo(allJpegFiles, 0);
+            jpegFilesAlt.CopyTo(allJpegFiles, jpegFiles.Length);
 
-            foreach (string inputPath in jpegFiles)
+            // StringBuilder to accumulate canvas HTML snippets
+            StringBuilder canvasBuilder = new StringBuilder();
+
+            foreach (string jpegPath in allJpegFiles)
             {
                 // Verify input file exists
-                if (!File.Exists(inputPath))
+                if (!File.Exists(jpegPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {jpegPath}");
                     return;
                 }
 
                 // Load the JPEG image
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(jpegPath))
                 {
-                    // Define canvas output path
-                    string canvasFileName = Path.GetFileNameWithoutExtension(inputPath) + ".html";
-                    string canvasPath = Path.Combine(outputDir, canvasFileName);
+                    // Prepare canvas output path (individual snippet)
+                    string canvasFileName = Path.GetFileNameWithoutExtension(jpegPath) + "_canvas.html";
+                    string canvasPath = Path.Combine(outputDirectory, canvasFileName);
 
-                    // Ensure the directory for the canvas file exists
+                    // Ensure directory for canvas file exists (already created above)
                     Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
 
-                    // Save as HTML5 Canvas (only the canvas tag)
+                    // Save as HTML5 Canvas snippet (only the <canvas> tag)
                     var canvasOptions = new Html5CanvasOptions
                     {
                         FullHtmlPage = false,
-                        CanvasTagId = $"canvas_{index}"
+                        VectorRasterizationOptions = new SvgRasterizationOptions()
                     };
                     image.Save(canvasPath, canvasOptions);
-
-                    // Read the generated canvas snippet
-                    string canvasSnippet = File.ReadAllText(canvasPath);
-                    canvasSnippets.Add(canvasSnippet);
+                    
+                    // Read the generated canvas snippet and append to the builder
+                    string canvasHtml = File.ReadAllText(canvasPath);
+                    canvasBuilder.AppendLine(canvasHtml);
                 }
-
-                index++;
             }
 
             // Build the final HTML page containing all canvases
-            var htmlBuilder = new System.Text.StringBuilder();
-            htmlBuilder.AppendLine("<!DOCTYPE html>");
-            htmlBuilder.AppendLine("<html>");
-            htmlBuilder.AppendLine("<head>");
-            htmlBuilder.AppendLine("<meta charset=\"utf-8\"/>");
-            htmlBuilder.AppendLine("<title>All Canvases</title>");
-            htmlBuilder.AppendLine("</head>");
-            htmlBuilder.AppendLine("<body>");
+            string finalHtmlContent = $"<html><head><meta charset=\"utf-8\"><title>All Canvases</title></head><body>{canvasBuilder}</body></html>";
 
-            foreach (string snippet in canvasSnippets)
-            {
-                htmlBuilder.AppendLine(snippet);
-                htmlBuilder.AppendLine("<br/>");
-            }
+            // Ensure directory for final HTML exists (already created)
+            Directory.CreateDirectory(Path.GetDirectoryName(finalHtmlPath));
 
-            htmlBuilder.AppendLine("</body>");
-            htmlBuilder.AppendLine("</html>");
-
-            // Write the final HTML file
-            File.WriteAllText(finalHtmlPath, htmlBuilder.ToString());
+            // Write the combined HTML page
+            File.WriteAllText(finalHtmlPath, finalHtmlContent);
         }
         catch (Exception ex)
         {
@@ -88,3 +78,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a folder of JPEG photos into HTML5 Canvas snippets and combine them into a single web page for quick visual review without loading external image files.
+ * 2. When an e‑commerce platform wants to generate lightweight, script‑based product previews by batch processing JPEG product images into canvas elements embedded in one HTML catalog page.
+ * 3. When a digital archivist must create an offline HTML gallery that renders scanned JPEG documents on canvas to preserve layout while avoiding browser image caching issues.
+ * 4. When a marketing team requires an automated C# tool that transforms multiple JPEG assets into canvas code for embedding in email newsletters that only support HTML5 Canvas.
+ * 5. When a learning management system needs to batch convert lecture slide JPEGs into canvas elements and assemble them into a single HTML lesson page for seamless in‑browser playback.
+ */
