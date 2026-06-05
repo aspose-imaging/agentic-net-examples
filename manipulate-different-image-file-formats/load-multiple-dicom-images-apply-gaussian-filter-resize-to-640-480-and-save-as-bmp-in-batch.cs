@@ -3,7 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,56 +11,43 @@ class Program
     {
         try
         {
-            // Define base, input and output directories
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
+            if (!Directory.Exists(inputDir))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add DICOM files and rerun.");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
+            if (!Directory.Exists(outputDir))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDir);
             }
 
-            // Get all DICOM files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+            string[] files = Directory.GetFiles(inputDir, "*.dcm");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path with .bmp extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".bmp");
 
-                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DICOM image, apply Gaussian blur, resize, and save as BMP
-                using (DicomImage image = (DicomImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Apply Gaussian blur filter to the entire image
-                    image.Filter(image.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    DicomImage dicomImage = (DicomImage)image;
 
-                    // Resize to 640x480 using nearest neighbour resampling
-                    image.Resize(640, 480, ResizeType.NearestNeighbourResample);
+                    dicomImage.Resize(640, 480, ResizeType.NearestNeighbourResample);
 
-                    // Save the processed image as BMP
-                    BmpOptions bmpOptions = new BmpOptions();
-                    image.Save(outputPath, bmpOptions);
+                    dicomImage.Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -70,3 +57,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging application needs to convert a folder of DICOM scans into 640×480 BMP thumbnails for quick preview in a web portal.
+ * 2. When a radiology workflow requires batch processing of DICOM files to standardize image dimensions before archiving them in a BMP format compatible with legacy PACS systems.
+ * 3. When a research project must extract DICOM images from a scanner output directory, resize them for inclusion in a machine‑learning dataset, and store them as BMP files for consistent pixel format.
+ * 4. When a hospital IT team wants to automate the creation of BMP copies of DICOM studies for printing on non‑DICOM‑aware printers.
+ * 5. When a developer builds a C# utility that scans an input folder, loads each DICOM image, resizes it to 640×480, and saves the result as BMP to simplify downstream image analysis tools.
+ */
