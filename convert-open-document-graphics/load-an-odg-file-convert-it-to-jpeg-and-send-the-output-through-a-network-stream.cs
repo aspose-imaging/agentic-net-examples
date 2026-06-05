@@ -10,8 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input ODG file path
-            string inputPath = "sample.odg";
+            // Hardcoded paths and network endpoint
+            string inputPath = "input.odg";
+            string outputPath = "output.jpg";
+            string host = "localhost";
+            int port = 9000;
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,22 +23,37 @@ class Program
                 return;
             }
 
-            // Load the ODG image
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load ODG image
             using (Image odgImage = Image.Load(inputPath))
             {
                 // Prepare JPEG save options
                 var jpegOptions = new JpegOptions();
 
-                // Network destination (hardcoded host and port)
-                string host = "127.0.0.1";
-                int port = 9000;
-
-                // Connect and obtain a network stream
-                using (TcpClient client = new TcpClient(host, port))
-                using (NetworkStream networkStream = client.GetStream())
+                // Save JPEG to a memory stream
+                using (var memoryStream = new MemoryStream())
                 {
-                    // Send the JPEG data through the network stream
-                    odgImage.Save(networkStream, jpegOptions);
+                    odgImage.Save(memoryStream, jpegOptions);
+                    memoryStream.Position = 0;
+
+                    // Send JPEG data over network
+                    using (var client = new TcpClient())
+                    {
+                        client.Connect(host, port);
+                        using (NetworkStream networkStream = client.GetStream())
+                        {
+                            memoryStream.CopyTo(networkStream);
+                        }
+                    }
+
+                    // Also write JPEG to file system
+                    using (var fileStream = File.OpenWrite(outputPath))
+                    {
+                        memoryStream.Position = 0;
+                        memoryStream.CopyTo(fileStream);
+                    }
                 }
             }
         }
