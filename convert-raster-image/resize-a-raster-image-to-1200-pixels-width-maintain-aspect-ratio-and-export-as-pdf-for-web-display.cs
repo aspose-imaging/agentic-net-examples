@@ -7,36 +7,34 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.pdf";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output\\resized.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Desired width
+                // Calculate new height to maintain aspect ratio
                 int newWidth = 1200;
+                int newHeight = (int)(image.Height * (newWidth / (double)image.Width));
 
-                // Calculate proportional height
-                int newHeight = (int)((double)image.Height * newWidth / image.Width);
-
-                // Resize while maintaining aspect ratio
-                image.Resize(newWidth, newHeight);
+                // Resize the image with high quality resampling
+                image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
 
                 // Prepare PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
+                var pdfOptions = new PdfOptions();
 
                 // Save the resized image as PDF
                 image.Save(outputPath, pdfOptions);

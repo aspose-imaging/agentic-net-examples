@@ -9,46 +9,57 @@ class Program
     {
         try
         {
-            // Hardcoded input folder containing PNG files
-            string inputFolder = @"C:\Images\Input";
-
-            // Hardcoded output PDF file that will contain all PDFs concatenated
-            string outputPdfPath = @"C:\Images\Output\combined.pdf";
+            // Hard‑coded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+            Directory.CreateDirectory(outputDir);
 
-            // Get all PNG files in the input folder
-            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
+            // Get all PNG files in the input directory
+            string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
 
-            // Shared memory stream to aggregate PDF data
-            using (MemoryStream combinedStream = new MemoryStream())
+            // Shared memory stream that will hold all generated PDFs
+            using (MemoryStream sharedPdfStream = new MemoryStream())
             {
-                // PDF export options (default)
-                PdfOptions pdfOptions = new PdfOptions();
-
-                foreach (string pngPath in pngFiles)
+                foreach (string inputPath in pngFiles)
                 {
-                    // Verify the PNG file exists
-                    if (!File.Exists(pngPath))
+                    // Verify the input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        Console.Error.WriteLine($"File not found: {pngPath}");
+                        Console.Error.WriteLine($"File not found: {inputPath}");
                         return;
                     }
 
+                    // Build the output PDF path
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                     // Load the PNG image
-                    using (Image image = Image.Load(pngPath))
+                    using (Image image = Image.Load(inputPath))
                     {
-                        // Save the image as PDF into the shared memory stream
-                        image.Save(combinedStream, pdfOptions);
+                        // Prepare PDF export options (default settings)
+                        PdfOptions pdfOptions = new PdfOptions();
+
+                        // Save the PDF into the shared memory stream (appended)
+                        image.Save(sharedPdfStream, pdfOptions);
+
+                        // Also save the PDF to an individual file
+                        image.Save(outputPath, pdfOptions);
                     }
                 }
 
-                // Write the aggregated PDF data to the output file
-                combinedStream.Position = 0;
-                using (FileStream fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
+                // Optionally write the aggregated PDF stream to a single file
+                string aggregatedPath = Path.Combine(outputDir, "Aggregated.pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(aggregatedPath));
+                // Reset stream position before writing
+                sharedPdfStream.Position = 0;
+                using (FileStream file = new FileStream(aggregatedPath, FileMode.Create, FileAccess.Write))
                 {
-                    combinedStream.CopyTo(fileStream);
+                    sharedPdfStream.CopyTo(file);
                 }
             }
         }

@@ -13,10 +13,7 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Get all files in the input folder (non‑recursive)
+            // Get all files in the input folder
             string[] files = Directory.GetFiles(inputFolder);
 
             foreach (string inputPath in files)
@@ -28,17 +25,17 @@ class Program
                     return;
                 }
 
-                // Build the output PDF path preserving the original filename
+                // Build the output PDF path (preserve filename, change extension to .pdf)
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the raster image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare default PDF options
+                    // Set up default PDF export options
                     var pdfOptions = new PdfOptions();
 
                     // Save the image as PDF

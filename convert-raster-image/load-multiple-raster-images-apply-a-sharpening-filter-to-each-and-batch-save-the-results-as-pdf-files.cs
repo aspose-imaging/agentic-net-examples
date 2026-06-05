@@ -10,22 +10,27 @@ class Program
     {
         try
         {
-            // Hard‑coded input files
-            string[] inputFiles = new string[]
+            // Hardcoded input and output file paths
+            string[] inputPaths = new string[]
             {
-                @"C:\Images\sample1.png",
-                @"C:\Images\sample2.jpg",
-                @"C:\Images\sample3.tif"
+                @"C:\Images\image1.png",
+                @"C:\Images\image2.jpg",
+                @"C:\Images\image3.tif"
             };
 
-            // Hard‑coded output directory
-            string outputDirectory = @"C:\Images\Output";
-
-            // Ensure the output directory exists (will be called for each file)
-            Directory.CreateDirectory(outputDirectory);
-
-            foreach (string inputPath in inputFiles)
+            string[] outputPaths = new string[]
             {
+                @"C:\Output\image1.pdf",
+                @"C:\Output\image2.pdf",
+                @"C:\Output\image3.pdf"
+            };
+
+            // Process each image
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -33,23 +38,18 @@ class Program
                     return;
                 }
 
-                // Build output PDF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the raster image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply sharpening filter to the whole image
+                    // Apply sharpen filter to the whole image
                     rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Prepare PDF save options
+                    // Set up PDF save options
                     PdfOptions pdfOptions = new PdfOptions();
 
                     // Save the processed image as PDF

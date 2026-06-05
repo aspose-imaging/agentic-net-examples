@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.pdf";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.pdf";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,20 +26,20 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access Width/Height and Crop
+                // Cast to RasterImage to access cropping functionality
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Define the top‑right quadrant rectangle
-                int rectX = rasterImage.Width / 2;          // start at middle of width
-                int rectY = 0;                              // top edge
-                int rectWidth = rasterImage.Width / 2;      // half width
-                int rectHeight = rasterImage.Height / 2;    // half height
-                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(rectX, rectY, rectWidth, rectHeight);
+                // Define the rectangle for the top‑right quadrant
+                int left = rasterImage.Width / 2;
+                int top = 0;
+                int width = rasterImage.Width - left; // equivalent to rasterImage.Width / 2
+                int height = rasterImage.Height / 2;
+                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(left, top, width, height);
 
-                // Crop the image to the defined rectangle
+                // Crop the image to the defined area
                 rasterImage.Crop(cropArea);
 
-                // Prepare PDF save options
+                // Set up PDF save options
                 PdfOptions pdfOptions = new PdfOptions();
 
                 // Save the cropped image as a PDF document

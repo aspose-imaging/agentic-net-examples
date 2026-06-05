@@ -19,19 +19,20 @@ class Program
             // Get all PNG files in the input directory
             string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
 
-            int index = 1;
-            foreach (string inputPath in pngFiles)
+            // Process each PNG file
+            for (int i = 0; i < pngFiles.Length; i++)
             {
-                // Verify the input file exists
+                string inputPath = pngFiles[i];
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PDF file path with a sequential numeric suffix
-                string outputPath = Path.Combine(outputDirectory, $"output_{index}.pdf");
-                index++;
+                // Build output file path with sequential numeric suffix (starting at 1)
+                string outputPath = Path.Combine(outputDirectory, $"output_{i + 1}.pdf");
 
                 // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));

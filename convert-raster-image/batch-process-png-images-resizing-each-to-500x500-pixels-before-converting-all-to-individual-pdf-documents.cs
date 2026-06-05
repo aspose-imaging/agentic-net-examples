@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,13 +11,16 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputImages";
-            string outputDirectory = @"C:\OutputPdfs";
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all PNG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png");
+            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in pngFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -26,26 +30,23 @@ class Program
                 }
 
                 // Load the PNG image
-                using (Image image = Image.Load(inputPath))
+                using (PngImage pngImage = new PngImage(inputPath))
                 {
                     // Resize to 500x500 pixels
-                    if (image is RasterImage rasterImage)
-                    {
-                        rasterImage.Resize(500, 500);
-                    }
+                    pngImage.Resize(500, 500);
 
-                    // Prepare PDF export options
-                    PdfOptions pdfOptions = new PdfOptions();
+                    // Prepare output PDF path (same file name with .pdf extension)
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    // Determine output PDF path
-                    string outputPath = Path.Combine(outputDirectory,
-                        Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                    // Set PDF export options
+                    PdfOptions pdfOptions = new PdfOptions();
+
                     // Save the resized image as a PDF document
-                    image.Save(outputPath, pdfOptions);
+                    pngImage.Save(outputPath, pdfOptions);
                 }
             }
         }

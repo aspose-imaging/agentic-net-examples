@@ -1,7 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.svg";
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,22 +25,24 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
-            using (Image pngImage = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Set up SVG rasterization options with a viewbox matching the PNG dimensions
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = pngImage.Size // ViewBox = original dimensions
-                };
+                int width = raster.Width;
+                int height = raster.Height;
+                int dpi = 96; // Standard screen DPI
 
-                // Configure SVG save options
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                // Create an SVG graphics context with the same dimensions
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Save as SVG
-                pngImage.Save(outputPath, svgOptions);
+                // Draw the raster image onto the SVG canvas
+                graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
+
+                // Finalize the SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
+                    // Save the SVG file
+                    svgImage.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)

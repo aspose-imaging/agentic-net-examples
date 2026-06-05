@@ -9,31 +9,27 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.bmp";
-            string outputPath = "Output\\result.pdf";
+            string inputPath = "Input/input.bmp";
+            string outputPath = "Output/result.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP, resize, apply median filter, and save as PDF
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Resize to 640x480
-                image.Resize(640, 480);
+                RasterImage raster = (RasterImage)image;
 
-                // Apply median filter with size 5
-                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+                raster.Resize(640, 480);
 
-                // Save the processed image as PDF
-                image.Save(outputPath, new PdfOptions());
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+
+                var pdfOptions = new PdfOptions();
+                raster.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

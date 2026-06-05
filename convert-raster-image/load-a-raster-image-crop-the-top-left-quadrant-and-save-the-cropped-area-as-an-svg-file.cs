@@ -27,17 +27,22 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access cropping functionality
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage for cropping
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
                 // Define the top-left quadrant rectangle
-                var cropArea = new Rectangle(0, 0, raster.Width / 2, raster.Height / 2);
+                Rectangle cropRect = new Rectangle(0, 0, raster.Width / 2, raster.Height / 2);
 
                 // Crop the image
-                raster.Crop(cropArea);
+                raster.Crop(cropRect);
 
-                // Save the cropped image as SVG
-                var svgOptions = new SvgOptions();
+                // Save the cropped area as SVG
+                SvgOptions svgOptions = new SvgOptions();
                 raster.Save(outputPath, svgOptions);
             }
         }

@@ -10,33 +10,38 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = "input.png";
-            string outputPath = "output/result.pdf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string resizedPath = @"C:\Images\resized.png";
+            string outputPdfPath = @"C:\Images\output.pdf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(resizedPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Desired dimensions for the resized image (example: 800x600)
-                int newWidth = 800;
-                int newHeight = 600;
+                // Define new dimensions (example: double the size)
+                int newWidth = image.Width * 2;
+                int newHeight = image.Height * 2;
 
-                // Resize using bicubic interpolation (CubicConvolution provides high‑quality bicubic resampling)
+                // Resize using bicubic interpolation (CubicConvolution)
                 image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
 
-                // Save the resized image directly to PDF
+                // Save the resized image as PNG (optional intermediate step)
+                image.Save(resizedPath, new PngOptions());
+
+                // Convert the high‑quality resized image to PDF
                 var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPdfPath, pdfOptions);
             }
         }
         catch (Exception ex)

@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.svg";
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,25 +27,26 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for processing
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage to access raster-specific methods
+                var raster = (RasterImage)image;
 
-                // Resize to 1200x1200
-                rasterImage.Resize(1200, 1200);
+                // Resize to 1200x1200 pixels
+                raster.Resize(1200, 1200);
 
-                // Apply median filter with a kernel size of 5
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                // Apply a median filter with a kernel size of 5
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                // Prepare SVG save options with rasterization settings
-                var svgOptions = new SvgOptions();
-                var rasterizationOptions = new SvgRasterizationOptions
+                // Prepare SVG save options with appropriate page size
+                var svgOptions = new SvgOptions
                 {
-                    PageSize = rasterImage.Size // use the resized dimensions
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = raster.Size
+                    }
                 };
-                svgOptions.VectorRasterizationOptions = rasterizationOptions;
 
                 // Save the processed image as SVG
-                image.Save(outputPath, svgOptions);
+                raster.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)

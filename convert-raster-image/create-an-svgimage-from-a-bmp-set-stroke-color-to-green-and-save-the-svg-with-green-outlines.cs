@@ -3,7 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\sample.bmp";
-            string outputPath = "C:\\temp\\sample_green.svg";
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\sample_green.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,26 +25,27 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
+            // Load the BMP image as a raster image
             using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                int dpi = 96; // Default DPI
+                int dpi = 96;
 
-                // Create an SVG graphics context with the same dimensions
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+                // Create an SVG graphics canvas with the same dimensions as the BMP
+                var graphics = new SvgGraphics2D(width, height, dpi);
 
                 // Draw the raster image onto the SVG canvas
-                graphics.DrawImage(bmp, new Point(0, 0), new Size(width, height));
+                graphics.DrawImage(bmp, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
 
                 // Draw a green outline around the image
-                Pen greenPen = new Pen(Color.Green, 1);
+                var greenPen = new Pen(Color.Green, 1);
                 graphics.DrawRectangle(greenPen, 0, 0, width, height);
 
-                // Finalize the SVG image and save it
+                // Finalize the SVG image
                 using (SvgImage svg = graphics.EndRecording())
                 {
+                    // Save the SVG with green outlines
                     svg.Save(outputPath);
                 }
             }

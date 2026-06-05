@@ -10,7 +10,7 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output directories
+            // Hardcoded input and output directories
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
@@ -19,39 +19,39 @@ class Program
 
             foreach (string inputPath in bmpFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the BMP image
+                // Prepare output path with .svg extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Resize to 1024x768 using the RasterImage Resize method
+                    // Adjust brightness by +10 (if the image supports it)
                     if (image is RasterImage rasterImage)
                     {
-                        rasterImage.Resize(1024, 768);
+                        rasterImage.AdjustBrightness(10);
                     }
 
-                    // Build the output SVG file path
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Prepare SVG save options with rasterization settings matching the new size
+                    // Set up SVG save options with rasterization settings
                     var svgOptions = new SvgOptions
                     {
                         VectorRasterizationOptions = new SvgRasterizationOptions
                         {
-                            PageSize = new Size(1024, 768)
+                            PageSize = image.Size
                         }
                     };
 
-                    // Save the resized image as SVG
+                    // Save as SVG
                     image.Save(outputPath, svgOptions);
                 }
             }

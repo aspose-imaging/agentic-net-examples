@@ -10,16 +10,12 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // List of raster image files to process (add your file names here)
+            // Hardcoded input files (raster images)
             string[] inputFiles = new[]
             {
-                Path.Combine(inputDir, "image1.png"),
-                Path.Combine(inputDir, "image2.jpg"),
-                Path.Combine(inputDir, "image3.bmp")
+                @"C:\Images\sample1.png",
+                @"C:\Images\sample2.jpg",
+                @"C:\Images\sample3.bmp"
             };
 
             foreach (string inputPath in inputFiles)
@@ -31,9 +27,8 @@ class Program
                     return;
                 }
 
-                // Determine output path with .svg extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Determine output path (same folder, .svg extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".svg");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -50,14 +45,17 @@ class Program
                         rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
                     }
 
-                    // Save as SVG using vector rasterization options
+                    // Prepare SVG save options with rasterization settings
+                    var rasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = new Size(1024, 1024)
+                    };
                     var svgOptions = new SvgOptions
                     {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageSize = image.Size
-                        }
+                        VectorRasterizationOptions = rasterizationOptions
                     };
+
+                    // Save as SVG
                     image.Save(outputPath, svgOptions);
                 }
             }

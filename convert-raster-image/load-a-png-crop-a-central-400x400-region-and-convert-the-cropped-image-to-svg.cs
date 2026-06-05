@@ -3,18 +3,19 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.svg";
+            string inputPath = "input.png";
+            string outputPath = "Output\\cropped.svg";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,34 +25,37 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            // Load PNG as a raster image
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Determine central 400x400 rectangle
+                // Cache data for better performance
+                if (!raster.IsCached)
+                    raster.CacheData();
+
+                // Determine central 400x400 crop rectangle
                 int cropWidth = 400;
                 int cropHeight = 400;
-                int x = (image.Width - cropWidth) / 2;
-                int y = (image.Height - cropHeight) / 2;
+                int x = (raster.Width - cropWidth) / 2;
+                int y = (raster.Height - cropHeight) / 2;
+                if (x < 0) x = 0;
+                if (y < 0) y = 0;
+                Rectangle cropRect = new Rectangle(x, y, cropWidth, cropHeight);
 
-                // Guard against images smaller than the crop size
-                if (x < 0 || y < 0)
+                // Perform cropping
+                raster.Crop(cropRect);
+
+                // Create an SVG canvas matching the cropped size
+                int dpi = 96;
+                SvgGraphics2D svgGraphics = new SvgGraphics2D(raster.Width, raster.Height, dpi);
+
+                // Draw the cropped raster onto the SVG canvas
+                svgGraphics.DrawImage(raster, new Point(0, 0));
+
+                // Finalize and save the SVG image
+                using (SvgImage svgImage = svgGraphics.EndRecording())
                 {
-                    Console.Error.WriteLine("Source image is smaller than the required crop size.");
-                    return;
+                    svgImage.Save(outputPath);
                 }
-
-                // Crop the image
-                image.Crop(new Rectangle(x, y, cropWidth, cropHeight));
-
-                // Prepare SVG save options
-                var svgOptions = new SvgOptions
-                {
-                    // Rasterization options are required even when saving a raster image as SVG
-                    VectorRasterizationOptions = new SvgRasterizationOptions()
-                };
-
-                // Save the cropped image as SVG
-                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)

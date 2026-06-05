@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -9,21 +10,19 @@ class Program
     {
         try
         {
-            // Hardcoded input BMP file path
+            // Hardcoded input and output paths
             string inputPath = @"C:\temp\input.bmp";
+            string outputPdfPath = @"C:\temp\output.pdf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Hardcoded output PDF file path
-            string outputPath = @"C:\temp\output.pdf";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
@@ -32,12 +31,14 @@ class Program
                 int newWidth = image.Width / 2;
                 int newHeight = image.Height / 2;
 
-                // Resize using the default NearestNeighbourResample interpolation
-                image.Resize(newWidth, newHeight);
+                // Resize using nearest‑neighbor interpolation
+                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                // Prepare PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
 
                 // Save the resized image as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPdfPath, pdfOptions);
             }
         }
         catch (Exception ex)

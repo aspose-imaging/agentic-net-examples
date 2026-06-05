@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -17,38 +16,64 @@ class Program
             // Verify input directory exists
             if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"Directory not found: {inputDirectory}");
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
                 return;
             }
 
             // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
+            if (bmpFiles.Length == 0)
+            {
+                Console.Error.WriteLine("No BMP files found to process.");
+                return;
+            }
 
+            int index = 0;
             foreach (string bmpPath in bmpFiles)
             {
-                // Verify each BMP file exists
+                // Check that the BMP file exists
                 if (!File.Exists(bmpPath))
                 {
                     Console.Error.WriteLine($"File not found: {bmpPath}");
-                    return;
+                    continue;
                 }
 
-                // Load BMP image
-                using (BmpImage bmpImage = new BmpImage(bmpPath))
+                // Create a timestamp prefix for uniqueness
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                // In case processing is very fast, add an index to guarantee uniqueness
+                string prefix = $"{timestamp}_{index:D4}";
+                index++;
+
+                // Build the output SVG file path
+                string outputFileName = $"{prefix}_{Path.GetFileNameWithoutExtension(bmpPath)}.svg";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the BMP image
+                using (Image image = Image.Load(bmpPath))
                 {
-                    // Create a unique timestamp prefix
-                    string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                    // Prepare rasterization options matching the source image size
+                    var rasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
 
-                    // Build output file name with timestamp prefix
-                    string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(bmpPath)}.svg";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    // Configure SVG export options
+                    var svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = rasterizationOptions,
+                        // Optional: keep metadata, compress, etc.
+                        KeepMetadata = true,
+                        Compress = false
+                    };
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as SVG using default options
-                    bmpImage.Save(outputPath, new SvgOptions());
+                    // Save as SVG
+                    image.Save(outputPath, svgOptions);
                 }
+
+                Console.WriteLine($"Converted: {bmpPath} -> {outputPath}");
             }
         }
         catch (Exception ex)

@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\input.png";
-        string outputPath = @"C:\Temp\output.pdf";
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.pdf";
 
         try
         {
@@ -32,7 +32,7 @@ class Program
                 // Prepare PDF export options
                 var pdfOptions = new PdfOptions();
 
-                // Save the resized image directly as a PDF
+                // Save the image directly as a PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

@@ -3,48 +3,48 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "C:\\temp\\sample.bmp";
-        string outputPath = "C:\\temp\\output.svg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\sample.bmp";
+            string outputPath = "C:\\temp\\customized.svg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            // Load the BMP image
+            using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
             {
-                int width = raster.Width;
-                int height = raster.Height;
+                int width = bmp.Width;
+                int height = bmp.Height;
                 int dpi = 96;
 
+                // Create an SVG graphics context with the same dimensions
                 SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
+                // Draw the raster BMP onto the SVG canvas
+                graphics.DrawImage(bmp, new Point(0, 0), new Size(width, height));
 
-                Figure figure = new Figure { IsClosed = true };
-                GraphicsPath path = new GraphicsPath();
-                path.AddFigure(figure);
-                figure.AddShapes(new Shape[]
-                {
-                    new RectangleShape(new RectangleF(10, 10, width - 20, height - 20))
-                });
+                // Set a custom stroke width for a vector path (e.g., a rectangle border)
+                Pen thickPen = new Pen(Color.Black, 5); // 5-pixel stroke width
+                graphics.DrawRectangle(thickPen, 0, 0, width, height);
 
-                Pen vectorPen = new Pen(Color.Red, 5);
-                graphics.DrawPath(vectorPen, path);
-
+                // Finalize the SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
+                    // Save the customized SVG
                     svgImage.Save(outputPath);
                 }
             }

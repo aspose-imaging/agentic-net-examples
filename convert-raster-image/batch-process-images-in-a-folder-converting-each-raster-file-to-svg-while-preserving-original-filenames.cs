@@ -10,52 +10,57 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputFolder = @"C:\InputImages";
-            string outputFolder = @"C:\OutputSvgs";
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory exists
+            // Ensure the output folder exists (creates the directory if needed)
             Directory.CreateDirectory(outputFolder);
 
-            // Supported raster extensions
-            string[] extensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif", ".gif" };
+            // Define raster image extensions to process
+            string[] rasterExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".gif" };
 
             // Enumerate files in the input folder
-            foreach (string filePath in Directory.GetFiles(inputFolder))
+            foreach (string inputPath in Directory.GetFiles(inputFolder))
             {
-                // Skip files that are not raster images
-                if (Array.IndexOf(extensions, Path.GetExtension(filePath).ToLowerInvariant()) < 0)
-                    continue;
-
-                // Verify input file exists
-                if (!File.Exists(filePath))
+                // Check if the file has a supported raster extension
+                if (Array.IndexOf(rasterExtensions, Path.GetExtension(inputPath).ToLowerInvariant()) < 0)
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    continue; // Skip unsupported files
+                }
+
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output file path preserving original filename
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(filePath) + ".svg");
+                // Build the output SVG path preserving the original filename
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
 
-                // Ensure the output directory exists (unconditional)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the raster image and convert to SVG
-                using (Image image = Image.Load(filePath))
+                // Load the raster image
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Set up rasterization options based on the source image size
-                    var vectorRasterizationOptions = new SvgRasterizationOptions
+                    // Prepare vector rasterization options based on the source image size
+                    VectorRasterizationOptions vectorRasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     };
 
-                    // Save as SVG using the specified options
-                    image.Save(outputPath, new SvgOptions
+                    // Configure SVG save options
+                    SvgOptions svgOptions = new SvgOptions
                     {
-                        VectorRasterizationOptions = vectorRasterizationOptions
-                    });
-                }
+                        VectorRasterizationOptions = vectorRasterizationOptions,
+                        // Optional: set compression to false for plain SVG
+                        Compress = false
+                    };
 
-                Console.WriteLine($"Converted: {filePath} -> {outputPath}");
+                    // Save the image as SVG
+                    image.Save(outputPath, svgOptions);
+                }
             }
         }
         catch (Exception ex)

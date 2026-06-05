@@ -2,53 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
+
+            if (!File.Exists(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Crop a 400x400 region from the top‑left corner
-                var cropRect = new Rectangle(0, 0, 400, 400);
-                raster.Crop(cropRect);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            {
+                // Crop a 400x400 region from the top-left corner
+                image.Crop(new Rectangle(0, 0, 400, 400));
 
-                // Prepare SVG save options with rasterization settings
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = raster.Size
-                };
+                // Apply Gaussian blur filter
+                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                // Prepare SVG save options
+                var rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = image.Size;
+
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save the processed image as SVG
-                raster.Save(outputPath, svgOptions);
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)

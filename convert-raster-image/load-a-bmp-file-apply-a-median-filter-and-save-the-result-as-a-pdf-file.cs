@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,20 +27,19 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                var rasterImage = (RasterImage)image;
+                // Cast to RasterImage to access filtering methods
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply median filter with size 5 to the whole image
+                // Apply a median filter with size 5 to the entire image
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
                 // Save the processed image as PDF
-                var pdfOptions = new PdfOptions();
+                PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
