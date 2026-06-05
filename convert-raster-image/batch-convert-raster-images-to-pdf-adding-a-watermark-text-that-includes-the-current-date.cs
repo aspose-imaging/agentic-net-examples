@@ -10,7 +10,6 @@ class Program
     {
         try
         {
-            // Prepare input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -29,37 +28,33 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PDF path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-                // Ensure output directory exists
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Work with raster image
-                    RasterImage raster = (RasterImage)image;
-                    raster.CacheData();
+                    RasterImage raster = image as RasterImage;
+                    if (raster != null)
+                    {
+                        raster.CacheData();
 
-                    // Add watermark text with current date
-                    string watermarkText = $"Generated on {DateTime.Now:yyyy-MM-dd}";
-                    var font = new Font("Arial", 24);
-                    var brush = new SolidBrush(Color.Yellow);
-                    var graphics = new Graphics(raster);
-                    // Position watermark near bottom-right corner
-                    var position = new PointF(raster.Width - 300, raster.Height - 50);
-                    graphics.DrawString(watermarkText, font, brush, position);
+                        Graphics graphics = new Graphics(raster);
+                        Font font = new Font("Arial", 24);
+                        SolidBrush brush = new SolidBrush(Color.Black);
+                        string dateText = DateTime.Now.ToString("yyyy-MM-dd");
+                        graphics.DrawString(dateText, font, brush, new PointF(10, raster.Height - 30));
+                    }
 
-                    // Save as PDF
                     using (PdfOptions pdfOptions = new PdfOptions())
                     {
                         image.Save(outputPath, pdfOptions);
