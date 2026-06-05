@@ -10,8 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input EPS file path
-            string inputPath = @"C:\temp\sample.eps";
+            // Hardcoded input and output paths
+            string inputPath = @"input.eps";
+            string outputPath = @"output\converted.psd";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,12 +21,7 @@ class Program
                 return;
             }
 
-            // Create output PSD file path using a custom pattern
-            string outputPath = Path.Combine(
-                Path.GetDirectoryName(inputPath) ?? string.Empty,
-                Path.GetFileNameWithoutExtension(inputPath) + "_converted.psd");
-
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
@@ -37,15 +33,13 @@ class Program
                     // Example: use RLE compression and RGB color mode
                     CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
                     ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                    // Default version (6) is sufficient; can be set explicitly if needed
+                    // Default version (6) is fine; can be set explicitly if needed
                     Version = 6
                 };
 
-                // Save the image as PSD with the specified options
+                // Save as PSD with the specified options
                 image.Save(outputPath, psdOptions);
             }
-
-            Console.WriteLine($"Conversion completed: {outputPath}");
         }
         catch (Exception ex)
         {
