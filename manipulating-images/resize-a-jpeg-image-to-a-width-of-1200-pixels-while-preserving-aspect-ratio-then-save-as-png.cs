@@ -8,41 +8,39 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.jpg";
+            string outputPath = @"c:\temp\sample_resized.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image using the constructor that accepts a file path
+            // Load JPEG image
             using (JpegImage jpegImage = new JpegImage(inputPath))
             {
                 // Desired width
-                int targetWidth = 1200;
+                int newWidth = 1200;
+                // Calculate height to preserve aspect ratio
+                int newHeight = (int)((double)jpegImage.Height * newWidth / jpegImage.Width);
 
-                // Compute height to preserve aspect ratio
-                int targetHeight = (int)(jpegImage.Height * (targetWidth / (double)jpegImage.Width));
+                // Resize image
+                jpegImage.Resize(newWidth, newHeight);
 
-                // Resize the image (default nearest‑neighbour resample)
-                jpegImage.Resize(targetWidth, targetHeight);
-
-                // Save the resized image as PNG
+                // Save as PNG
                 jpegImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
