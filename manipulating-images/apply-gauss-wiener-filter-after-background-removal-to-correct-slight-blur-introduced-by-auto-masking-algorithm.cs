@@ -26,15 +26,15 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
+                // Cast to RasterImage for filtering operations
                 RasterImage rasterImage = (RasterImage)image;
 
-                // ----- Background removal step (placeholder) -----
-                // If a specific background removal filter is available, apply it here.
-                // Example (if such a filter existed):
-                // rasterImage.Filter(rasterImage.Bounds, new BackgroundRemovalFilterOptions());
+                // ---- Background removal step (placeholder) ----
+                // If a specific background removal API is available, invoke it here.
+                // Example (hypothetical): rasterImage.RemoveBackground();
+                // For now, this step is left as a comment placeholder.
 
-                // Apply Gauss‑Wiener filter to correct blur introduced by background removal
+                // Apply Gauss‑Wiener filter to correct blur
                 var gaussWienerOptions = new GaussWienerFilterOptions(5, 4.0);
                 rasterImage.Filter(rasterImage.Bounds, gaussWienerOptions);
 
