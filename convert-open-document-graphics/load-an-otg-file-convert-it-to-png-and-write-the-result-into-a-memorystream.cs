@@ -9,10 +9,10 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = "sample.otg";
+            // Hardcoded input OTG file path
+            string inputPath = @"C:\Images\sample.otg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,22 +20,25 @@ class Program
             }
 
             // Load the OTG image
-            using (Image image = Image.Load(inputPath))
+            using (Image otgImage = Image.Load(inputPath))
             {
                 // Prepare PNG save options with OTG rasterization settings
                 var pngOptions = new PngOptions();
+
                 var otgRasterization = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size
+                    // Preserve original size
+                    PageSize = otgImage.Size
                 };
+
                 pngOptions.VectorRasterizationOptions = otgRasterization;
 
-                // Save the converted PNG into a MemoryStream
+                // Save the image to a memory stream in PNG format
                 using (var memoryStream = new MemoryStream())
                 {
-                    image.Save(memoryStream, pngOptions);
+                    otgImage.Save(memoryStream, pngOptions);
 
-                    // Example usage of the resulting stream
+                    // Example usage of the resulting PNG data
                     Console.WriteLine($"PNG data size: {memoryStream.Length} bytes");
                 }
             }
