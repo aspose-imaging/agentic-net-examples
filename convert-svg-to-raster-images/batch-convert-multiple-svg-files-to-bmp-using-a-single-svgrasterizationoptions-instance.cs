@@ -6,49 +6,57 @@ using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input directory and list of SVG files
-            string inputDir = @"C:\Images\Input";
-            string[] svgFiles = new[] { "image1.svg", "image2.svg", "image3.svg" };
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Single instance of rasterization options reused for all conversions
-            var rasterizationOptions = new SvgRasterizationOptions();
-
-            // Hardcoded output directory
-            string outputDir = @"C:\Images\Output";
-
-            foreach (var fileName in svgFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                string inputPath = Path.Combine(inputDir, fileName);
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Single SvgRasterizationOptions instance reused for all conversions
+            var svgRasterOptions = new SvgRasterizationOptions
+            {
+                BackgroundColor = Color.White
+            };
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Load the SVG image
-                using (Image svgImage = Image.Load(inputPath))
-                {
-                    // Set page size based on the loaded image dimensions
-                    rasterizationOptions.PageSize = svgImage.Size;
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
 
-                    // Prepare BMP save options using the shared rasterization options
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Update page size for current image
+                    svgRasterOptions.PageSize = image.Size;
+
                     var bmpOptions = new BmpOptions
                     {
-                        VectorRasterizationOptions = rasterizationOptions
+                        VectorRasterizationOptions = svgRasterOptions
                     };
 
-                    // Build output path with .bmp extension
-                    string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".bmp");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the image as BMP
-                    svgImage.Save(outputPath, bmpOptions);
+                    image.Save(outputPath, bmpOptions);
                 }
             }
         }
