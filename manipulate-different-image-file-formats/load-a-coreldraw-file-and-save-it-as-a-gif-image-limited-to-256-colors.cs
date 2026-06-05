@@ -27,9 +27,9 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure GIF save options (256‑color palette)
-                GifOptions gifOptions = new GifOptions
+                var gifOptions = new GifOptions
                 {
-                    // Number of bits per primary color minus 1 (7 => 8 bits)
+                    // 7 means 8 bits per primary color (2^8 = 256 colors)
                     ColorResolution = 7,
                     // Analyze source colors to build the best matching palette
                     DoPaletteCorrection = true
@@ -46,3 +46,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert legacy CorelDRAW (CDR) artwork into a web‑friendly GIF with a 256‑color palette for embedding in HTML emails.
+ * 2. When an e‑commerce platform must generate low‑size product thumbnails from CDR source files to meet bandwidth constraints on mobile browsers.
+ * 3. When a marketing automation system automates the creation of animated GIF banners from designer‑provided CDR files while ensuring the GIF complies with the 256‑color limit of older browsers.
+ * 4. When a document management workflow requires batch conversion of archived CDR drawings to GIF for quick preview in file explorers that only support raster formats.
+ * 5. When a game development pipeline needs to import vector assets created in CorelDRAW and export them as indexed GIF sprites to reduce texture memory usage.
+ */
