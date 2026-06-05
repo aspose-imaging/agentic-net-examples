@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -9,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output\\result.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,13 +22,22 @@ class Program
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to PngImage for resolution handling
-                var pngImage = (Aspose.Imaging.FileFormats.Png.PngImage)image;
+                // Cast to the specific PNG type
+                PngImage pngImage = image as PngImage;
+                if (pngImage == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a PNG.");
+                    return;
+                }
 
                 // Align horizontal and vertical resolutions (make them equal)
                 double hRes = pngImage.HorizontalResolution;
@@ -38,9 +48,12 @@ class Program
                     pngImage.SetResolution(hRes, hRes);
                 }
 
-                // Apply bilateral smoothing filter to the entire image
-                var rasterImage = (RasterImage)pngImage;
-                rasterImage.Filter(rasterImage.Bounds, new BilateralSmoothingFilterOptions(5));
+                // Apply bilateral smoothing filter to the whole image
+                var raster = pngImage as RasterImage;
+                if (raster != null)
+                {
+                    raster.Filter(raster.Bounds, new BilateralSmoothingFilterOptions(5));
+                }
 
                 // Save the processed image
                 pngImage.Save(outputPath);
