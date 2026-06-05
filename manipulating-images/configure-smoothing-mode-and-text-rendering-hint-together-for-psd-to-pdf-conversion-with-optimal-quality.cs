@@ -27,23 +27,25 @@ class Program
             // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with high‑quality rasterization settings
+                // Prepare PDF options
                 var pdfOptions = new PdfOptions();
 
+                // Configure vector rasterization options for optimal quality
                 var rasterOptions = new VectorRasterizationOptions
                 {
-                    // Use a white background for the PDF pages
+                    // Use white background for the PDF page
                     BackgroundColor = Color.White,
                     // Match PDF page size to the source image dimensions
                     PageSize = new Size(image.Width, image.Height),
-                    // Optimal smoothing and text rendering for quality
+                    // High‑quality smoothing
                     SmoothingMode = SmoothingMode.AntiAlias,
+                    // High‑quality text rendering
                     TextRenderingHint = TextRenderingHint.AntiAlias
                 };
 
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as PDF
+                // Save the image as PDF with the configured options
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -53,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert layered Photoshop PSD files into printable PDF documents while preserving smooth edges and crisp text using Aspose.Imaging for .NET.
+ * 2. When an application must generate PDF reports from design assets stored as PSD images, ensuring anti‑aliased graphics and text for professional‑grade visual quality.
+ * 3. When a web service processes user‑uploaded PSD files and returns high‑resolution PDF previews with white backgrounds and page sizes that match the original image dimensions.
+ * 4. When a batch‑processing tool archives marketing assets by converting multiple PSD files to PDF with consistent smoothing and text rendering settings to maintain brand consistency.
+ * 5. When a desktop utility needs to export PSD artwork to PDF for legal or compliance documentation, requiring exact page size matching and anti‑aliasing to meet regulatory visual standards.
+ */
