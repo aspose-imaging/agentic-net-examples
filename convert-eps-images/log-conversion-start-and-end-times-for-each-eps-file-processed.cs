@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -9,10 +10,12 @@ class Program
     {
         try
         {
+            // Define base, input, and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
+            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -20,43 +23,41 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            // Get all EPS files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.eps");
 
             foreach (var file in files)
             {
-                if (!Path.GetExtension(file).Equals(".eps", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
+                // Verify the file exists
                 if (!File.Exists(file))
                 {
                     Console.Error.WriteLine($"File not found: {file}");
                     continue;
                 }
 
+                // Log start time
                 Console.WriteLine($"Processing started: {file} at {DateTime.Now}");
 
+                // Prepare output path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                // Ensure output directory for the file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load EPS image and save as PNG
                 using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(file))
                 {
-                    var options = new PngOptions
-                    {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        }
-                    };
-
-                    string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    image.Save(outputPath, options);
+                    image.Save(outputPath, new PngOptions());
                 }
 
+                // Log end time
                 Console.WriteLine($"Processing finished: {file} at {DateTime.Now}");
             }
         }
