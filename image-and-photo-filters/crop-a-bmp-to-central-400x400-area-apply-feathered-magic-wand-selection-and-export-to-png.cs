@@ -10,23 +10,19 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = "Input/input.bmp";
-        string outputPath = "Output/output.png";
-
-        // Input file validation
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load BMP as raster image
+            string inputPath = "Input\\sample.bmp";
+            string outputPath = "Output\\result.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
                 // Crop central 400x400 area
@@ -34,18 +30,16 @@ class Program
                 int cropHeight = 400;
                 int left = (image.Width - cropWidth) / 2;
                 int top = (image.Height - cropHeight) / 2;
-                Rectangle cropRect = new Rectangle(left, top, cropWidth, cropHeight);
+                var cropRect = new Rectangle(left, top, cropWidth, cropHeight);
                 image.Crop(cropRect);
 
-                // Apply feathered Magic Wand selection (center point, feather size 5)
-                int pointX = cropWidth / 2;
-                int pointY = cropHeight / 2;
-                MagicWandTool.Select(image, new MagicWandSettings(pointX, pointY))
+                // Apply feathered Magic Wand selection centered on the cropped image
+                MagicWandTool.Select(image, new MagicWandSettings(cropWidth / 2, cropHeight / 2))
                     .GetFeathered(new FeatheringSettings() { Size = 5 })
                     .Apply();
 
-                // Save as PNG with alpha support
-                PngOptions pngOptions = new PngOptions
+                // Save as PNG with alpha channel
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
