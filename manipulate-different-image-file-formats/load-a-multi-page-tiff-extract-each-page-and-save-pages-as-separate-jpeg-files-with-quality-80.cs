@@ -10,45 +10,41 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output locations
-            string inputPath = @"C:\temp\input.tif";
-            string outputDirectory = @"C:\temp\output";
+            // Hardcoded input and output directory paths
+            string inputPath = @"C:\Images\multipage.tif";
+            string outputDir = @"C:\Images\Output";
 
-            // Verify the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the multi‑page TIFF
-            using (Image image = Image.Load(inputPath))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the multi‑page TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Ensure the loaded image is a TIFF image
-                if (image is TiffImage tiffImage)
+                // JPEG save options with quality 80
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    // Iterate through each frame (page) in the TIFF
-                    for (int i = 0; i < tiffImage.Frames.Length; i++)
-                    {
-                        // Build the output JPEG file path
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.jpg");
+                    Quality = 80
+                };
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Configure JPEG options with quality 80
-                        JpegOptions jpegOptions = new JpegOptions
-                        {
-                            Quality = 80
-                        };
-
-                        // Save the current frame as a JPEG file
-                        tiffImage.Frames[i].Save(outputPath, jpegOptions);
-                    }
-                }
-                else
+                // Iterate through each frame (page) of the TIFF
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
-                    Console.Error.WriteLine("The loaded file is not a TIFF image.");
+                    // Build output file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.jpg");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the current frame as a JPEG file
+                    // TiffFrame can be saved directly using the same Save method as Image
+                    tiffImage.Frames[i].Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -58,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging system stores scanned documents as multi‑page TIFF files and needs to generate individual JPEG previews for web display at a specific quality setting.
+ * 2. When a document management workflow must extract each page of a multi‑page TIFF invoice and save them as separate JPEG files for OCR processing while controlling compression quality.
+ * 3. When a publishing application converts multi‑page TIFF artwork into high‑quality JPEG images for inclusion in an e‑catalog, using Aspose.Imaging for .NET in C#.
+ * 4. When a legacy archival archive contains multi‑page TIFF photographs that must be split into individual JPEG files for mobile app consumption, requiring a consistent quality level of 80.
+ * 5. When an automated batch job processes scanned multi‑page TIFF contracts and needs to output each page as a JPEG image with defined compression to reduce storage size.
+ */
