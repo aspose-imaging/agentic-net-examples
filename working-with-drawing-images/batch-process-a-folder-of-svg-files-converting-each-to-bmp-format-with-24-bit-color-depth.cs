@@ -9,10 +9,12 @@ class Program
     {
         try
         {
+            // Define base, input and output directories relative to current directory
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
+            // Ensure input directory exists; create if missing and exit
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -20,41 +22,45 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (var filePath in files)
             {
-                if (!File.Exists(inputPath))
+                // Process only SVG files
+                if (!filePath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // Verify the input file exists
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".bmp");
+                // Build output BMP file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
 
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                // Load the SVG image
+                using (Image image = Image.Load(filePath))
                 {
-                    BmpOptions bmpOptions = new BmpOptions();
-                    bmpOptions.BitsPerPixel = 24;
-
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions();
-                    vectorOptions.BackgroundColor = Color.White;
-                    vectorOptions.PageWidth = image.Width;
-                    vectorOptions.PageHeight = image.Height;
-                    vectorOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-                    vectorOptions.SmoothingMode = SmoothingMode.None;
-
-                    bmpOptions.VectorRasterizationOptions = vectorOptions;
-
-                    image.Save(outputPath, bmpOptions);
+                    // Configure BMP options for 24-bit color depth
+                    using (BmpOptions bmpOptions = new BmpOptions())
+                    {
+                        bmpOptions.BitsPerPixel = 24;
+                        // Save the image as BMP
+                        image.Save(outputPath, bmpOptions);
+                    }
                 }
             }
         }
@@ -64,3 +70,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate 24‑bit BMP thumbnails from a collection of vector SVG icons for legacy Windows applications.
+ * 2. When an e‑commerce platform must convert vendor‑supplied SVG product illustrations into BMP assets for email newsletters that only support raster images.
+ * 3. When a GIS system requires batch conversion of SVG map overlays into BMP files with consistent color depth for integration with older mapping software.
+ * 4. When a game studio automates the creation of BMP sprites from SVG artwork to meet the texture format requirements of a legacy game engine.
+ * 5. When a document management solution needs to archive SVG diagrams as BMP files with 24‑bit color to ensure compatibility with PDF generators that embed raster images.
+ */
