@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,7 +15,7 @@ class Program
             string inputPath = "input.bmp";
             string outputPath = "output.bmp";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,43 +28,94 @@ class Program
             // Load the BMP image as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Load all pixels as ARGB32 integers
-                var fullRect = new Rectangle(0, 0, image.Width, image.Height);
-                int[] pixels = image.LoadArgb32Pixels(fullRect);
                 int width = image.Width;
                 int height = image.Height;
 
-                // Assume the border color is the color of the top‑left pixel
+                // Load all pixels as ARGB integers
+                int[] pixels = image.LoadArgb32Pixels(new Rectangle(0, 0, width, height));
+
+                // Determine the border color (top-left pixel)
                 int borderColor = pixels[0];
 
-                // Determine the bounding rectangle of non‑border pixels
-                int minX = width - 1, maxX = 0, minY = height - 1, maxY = 0;
-                bool found = false;
+                int left = 0, right = 0, top = 0, bottom = 0;
 
-                for (int y = 0; y < height; y++)
+                // Find left border thickness
+                while (left < width / 2)
                 {
-                    int rowOffset = y * width;
-                    for (int x = 0; x < width; x++)
+                    bool columnIsBorder = true;
+                    for (int y = 0; y < height; y++)
                     {
-                        if (pixels[rowOffset + x] != borderColor)
+                        if (pixels[y * width + left] != borderColor)
                         {
-                            if (x < minX) minX = x;
-                            if (x > maxX) maxX = x;
-                            if (y < minY) minY = y;
-                            if (y > maxY) maxY = y;
-                            found = true;
+                            columnIsBorder = false;
+                            break;
                         }
                     }
+                    if (!columnIsBorder) break;
+                    left++;
                 }
 
-                // If non‑border pixels were found, crop to the bounding rectangle
-                if (found)
+                // Find right border thickness
+                while (right < width / 2)
                 {
-                    int cropWidth = maxX - minX + 1;
-                    int cropHeight = maxY - minY + 1;
-                    var cropRect = new Rectangle(minX, minY, cropWidth, cropHeight);
-                    image.Crop(cropRect);
+                    bool columnIsBorder = true;
+                    int colIndex = width - 1 - right;
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (pixels[y * width + colIndex] != borderColor)
+                        {
+                            columnIsBorder = false;
+                            break;
+                        }
+                    }
+                    if (!columnIsBorder) break;
+                    right++;
                 }
+
+                // Find top border thickness
+                while (top < height / 2)
+                {
+                    bool rowIsBorder = true;
+                    for (int x = left; x <= width - right - 1; x++)
+                    {
+                        if (pixels[top * width + x] != borderColor)
+                        {
+                            rowIsBorder = false;
+                            break;
+                        }
+                    }
+                    if (!rowIsBorder) break;
+                    top++;
+                }
+
+                // Find bottom border thickness
+                while (bottom < height / 2)
+                {
+                    bool rowIsBorder = true;
+                    int y = height - 1 - bottom;
+                    for (int x = left; x <= width - right - 1; x++)
+                    {
+                        if (pixels[y * width + x] != borderColor)
+                        {
+                            rowIsBorder = false;
+                            break;
+                        }
+                    }
+                    if (!rowIsBorder) break;
+                    bottom++;
+                }
+
+                // Calculate the cropping rectangle
+                int newWidth = width - left - right;
+                int newHeight = height - top - bottom;
+                if (newWidth <= 0 || newHeight <= 0)
+                {
+                    Console.Error.WriteLine("Unable to detect a valid inner area after border removal.");
+                    return;
+                }
+
+                var cropRect = new Rectangle(left, top, newWidth, newHeight);
+                image.Crop(cropRect);
 
                 // Save the cropped image as BMP
                 var bmpOptions = new BmpOptions();
@@ -76,3 +128,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer is importing scanned documents saved as BMP files that contain a uniform white margin, they can use this code to automatically trim the border before OCR processing.
+ * 2. When a game asset pipeline receives BMP sprites with a solid background color added by the artist, this routine can strip the colored frame so the sprite blends correctly in the game engine.
+ * 3. When a batch conversion tool needs to normalize BMP screenshots that include a black toolbar border, the code can detect and remove the border before converting to PNG.
+ * 4. When a medical imaging application receives BMP scans with a fixed gray border added by the scanner hardware, the developer can apply this method to crop the border before performing image analysis.
+ * 5. When an archival system stores legacy BMP images with a decorative solid color frame, the code enables automatic border removal to ensure consistent layout when generating thumbnails.
+ */
