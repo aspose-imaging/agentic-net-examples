@@ -1,57 +1,50 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = "InputJp2";
-            string outputDirectory = "OutputPng";
+            string inputDir = @"C:\temp\input";
+            string outputDir = @"C:\temp\output";
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Get all JPEG2000 files
-            string[] files = Directory.GetFiles(inputDirectory, "*.jp2");
+            // Get all JPEG2000 files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.jp2");
 
             // Process files in parallel
-            System.Threading.Tasks.Parallel.ForEach(files, inputPath =>
+            Parallel.ForEach(inputFiles, inputPath =>
             {
-                // Validate input file existence
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+                // Determine output path (convert to PNG)
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load JPEG2000 image and save as PNG
-                using (Jpeg2000Image jp2Image = new Jpeg2000Image(inputPath))
+                // Load JPEG2000 image with memory limit (BufferSizeHint in MB)
+                var loadOptions = new Jpeg2000LoadOptions
                 {
-                    jp2Image.Save(outputPath, new PngOptions());
+                    BufferSizeHint = 50 // limit internal buffers to 50 MB
+                };
+
+                using (Image image = Image.Load(inputPath, loadOptions))
+                {
+                    // Save as PNG
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
                 }
             });
         }
@@ -61,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert a large archive of high‑resolution JPEG2000 satellite images to PNG for web preview while keeping memory usage low by limiting internal buffers.
+ * 2. When a medical imaging application must process thousands of JPEG2000 DICOM scans in parallel on a server and store them as lossless PNG files without exhausting RAM.
+ * 3. When an e‑commerce platform wants to generate thumbnail PNGs from a collection of JPEG2000 product photos during nightly maintenance, using Aspose.Imaging’s BufferSizeHint to avoid out‑of‑memory errors.
+ * 4. When a digital archiving system has to migrate legacy JPEG2000 documents to PNG format on a multi‑core workstation, employing Parallel.ForEach and a 50 MB buffer limit for efficient CPU and memory utilization.
+ * 5. When a GIS tool needs to quickly render multiple JPEG2000 map tiles as PNG overlays for a web map service, ensuring each load operation respects a predefined memory budget.
+ */
