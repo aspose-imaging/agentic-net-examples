@@ -1,70 +1,59 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = @"output.bmp";
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Image dimensions
-            int width = 800;
-            int height = 600;
-
-            // Parallel line parameters
-            double angleDegrees = 45;          // Angle of the lines
-            int spacing = 20;                  // Distance between lines (pixels)
-            Color lineColor = Color.Black;     // Line color
-            int lineWidth = 2;                 // Line thickness
-
-            // Prepare BMP options with a FileCreateSource bound to the output file
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Pre‑compute trigonometric values
-                double rad = angleDegrees * Math.PI / 180.0;
-                double cos = Math.Cos(rad);
-                double sin = Math.Sin(rad);
+            // Load the BMP image
+            using (BmpImage bmp = (BmpImage)Image.Load(inputPath))
+            {
+                // Create a graphics object for drawing
+                Graphics graphics = new Graphics(bmp);
 
-                // Length sufficient to cover the whole canvas (diagonal)
-                double diag = Math.Sqrt(width * width + height * height);
-                int maxOffset = (int)diag;
+                // Pen used for drawing the lines
+                Pen pen = new Pen(Color.Black, 1);
 
-                // Pen for drawing lines
-                Pen pen = new Pen(lineColor, lineWidth);
+                // Angle of the parallel lines (in degrees) and spacing between them
+                double angleDeg = 45.0;
+                double rad = angleDeg * Math.PI / 180.0;
+                int spacing = 20; // pixels
 
-                // Draw parallel lines across the image
-                for (int offset = -maxOffset; offset <= maxOffset; offset += spacing)
+                int width = bmp.Width;
+                int height = bmp.Height;
+
+                // Draw a series of parallel lines that cover the whole image
+                for (int offset = -height; offset < height; offset += spacing)
                 {
-                    // Compute start point
-                    int startX = (int)(width / 2 + offset * -sin);
-                    int startY = (int)(height / 2 + offset * cos);
+                    int x1 = 0;
+                    int y1 = offset;
+                    int x2 = width;
+                    int y2 = offset + (int)(width * Math.Tan(rad));
 
-                    // Compute end point (extend by diagonal length)
-                    int endX = (int)(startX + diag * cos);
-                    int endY = (int)(startY + diag * sin);
-
-                    graphics.DrawLine(pen, new Point(startX, startY), new Point(endX, endY));
+                    graphics.DrawLine(pen, x1, y1, x2, y2);
                 }
 
-                // Save the image (output file already bound)
-                image.Save();
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified BMP image
+                bmp.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -73,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to add a diagonal parallel‑line watermark to a BMP file using the Aspose.Imaging library in C# for branding or security.
+ * 2. When generating printable engineering schematics that require evenly spaced hatch lines at a specific angle drawn onto a bitmap image with Aspose.Imaging.
+ * 3. When creating custom texture overlays for game assets by programmatically drawing angled parallel lines on a BMP using C# and Aspose.Imaging.
+ * 4. When preprocessing scanned documents to add visual guide lines at a chosen angle on the original BMP for manual annotation, leveraging Aspose.Imaging’s drawing API.
+ * 5. When automating the production of patterned background images for UI components by drawing spaced parallel lines at a configurable angle on BMP files with Aspose.Imaging in .NET.
+ */
