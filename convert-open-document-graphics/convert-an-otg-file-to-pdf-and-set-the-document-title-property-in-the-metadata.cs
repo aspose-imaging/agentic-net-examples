@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample_converted.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,7 +22,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
@@ -36,10 +36,10 @@ class Program
                     Title = "Converted OTG Document"
                 };
 
-                // Configure OTG rasterization options
+                // Configure vector rasterization for OTG
                 var otgRasterOptions = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size // preserve original size
+                    PageSize = image.Size
                 };
                 pdfOptions.VectorRasterizationOptions = otgRasterOptions;
 
