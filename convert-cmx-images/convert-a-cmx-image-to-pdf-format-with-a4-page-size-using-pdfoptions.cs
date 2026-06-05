@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
@@ -9,33 +10,43 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.cmx";
-            string outputPath = "Output/sample.pdf";
+            // Hardcoded input and output paths
+            string inputPath = Path.Combine("Input", "sample.cmx");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load CMX image
+            using (CmxImage image = (CmxImage)Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                // Configure PDF options with A4 page size
+                var pdfOptions = new PdfOptions
                 {
-                    // Set A4 page size (595x842 points)
-                    CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
-                    {
-                        PageSize = new SizeF(595, 842),
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        Positioning = PositioningTypes.DefinedByDocument
-                    };
+                    PageSize = new SizeF(8.27f, 11.69f) // A4 size in inches
+                };
 
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
-                    image.Save(outputPath, pdfOptions);
-                }
+                // Set vector rasterization options for proper rendering
+                var rasterOptions = new CmxRasterizationOptions
+                {
+                    PageSize = new SizeF(8.27f, 11.69f),
+                    BackgroundColor = Color.White,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument
+                };
+
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
