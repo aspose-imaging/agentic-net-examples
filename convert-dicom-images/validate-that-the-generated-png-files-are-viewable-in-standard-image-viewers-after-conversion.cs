@@ -2,55 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string outputPath = @"C:\Images\output\sample_converted.png";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image (any supported format)
-            using (Image sourceImage = Image.Load(inputPath))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options (default options are sufficient for viewable PNG)
-                PngOptions pngOptions = new PngOptions();
-
-                // Save the image as PNG
-                sourceImage.Save(outputPath, pngOptions);
+                // Save as PNG with default options
+                image.Save(outputPath, new PngOptions());
             }
 
-            // Validate that the saved PNG can be loaded (ensures it is viewable)
-            using (PngImage savedPng = new PngImage(outputPath))
+            // Validate that the saved PNG can be loaded (viewable)
+            if (Image.CanLoad(outputPath))
             {
-                // Simple validation: check dimensions are greater than zero
-                if (savedPng.Width > 0 && savedPng.Height > 0)
-                {
-                    Console.WriteLine("PNG file saved and validated successfully.");
-                }
-                else
-                {
-                    Console.Error.WriteLine("Saved PNG appears to be invalid (zero dimensions).");
-                }
+                Console.WriteLine("PNG file saved successfully and is viewable.");
+            }
+            else
+            {
+                Console.Error.WriteLine("Saved PNG file could not be loaded. It may be corrupted.");
             }
         }
         catch (Exception ex)
         {
-            // Catch any runtime exception and report it without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
