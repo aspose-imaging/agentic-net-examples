@@ -3,74 +3,51 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputDir = "Input";
-            string outputDir = "Output";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\large_input.tif";
+            string outputDirectory = @"C:\Images\WebP_Output";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Process .tif files
-            string[] tifFiles = Directory.GetFiles(inputDir, "*.tif");
-            foreach (string tiffPath in tifFiles)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                if (!File.Exists(tiffPath))
-                {
-                    Console.Error.WriteLine($"File not found: {tiffPath}");
-                    continue;
-                }
-
-                string baseName = Path.GetFileNameWithoutExtension(tiffPath);
-                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffPath))
-                {
-                    tiffImage.PageExportingAction = delegate (int index, Image page)
-                    {
-                        string outPath = Path.Combine(outputDir, $"{baseName}_page{index}.webp");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                        page.Save(outPath, new WebPOptions());
-                    };
-
-                    // Trigger sequential processing
-                    using (var ms = new MemoryStream())
-                    {
-                        tiffImage.Save(ms);
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Process .tiff files
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tiff");
-            foreach (string tiffPath in tiffFiles)
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the multi‑page TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                if (!File.Exists(tiffPath))
+                // Process each page sequentially to keep memory usage low
+                for (int pageIndex = 0; pageIndex < tiffImage.PageCount; pageIndex++)
                 {
-                    Console.Error.WriteLine($"File not found: {tiffPath}");
-                    continue;
-                }
-
-                string baseName = Path.GetFileNameWithoutExtension(tiffPath);
-                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffPath))
-                {
-                    tiffImage.PageExportingAction = delegate (int index, Image page)
+                    // Retrieve the current page
+                    using (Image page = tiffImage.Pages[pageIndex])
                     {
-                        string outPath = Path.Combine(outputDir, $"{baseName}_page{index}.webp");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                        page.Save(outPath, new WebPOptions());
-                    };
+                        // Build the output WebP file path for this page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.webp");
 
-                    // Trigger sequential processing
-                    using (var ms = new MemoryStream())
-                    {
-                        tiffImage.Save(ms);
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as WebP using default options
+                        page.Save(outputPath, new WebPOptions());
+
+                        // Explicitly release resources for the page
+                        ((RasterImage)page).Dispose();
                     }
+
+                    // Force garbage collection to free any lingering memory
+                    GC.Collect();
                 }
             }
         }
@@ -80,3 +57,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert each page of a multi‑page TIFF archive into separate WebP files while keeping memory usage low for large images.
+ * 2. When an application must batch‑export scanned documents stored as a single TIFF into web‑optimized WebP thumbnails on a server with limited RAM.
+ * 3. When a photo‑management tool processes high‑resolution TIFF slides and saves each slide as a WebP image for fast web delivery without loading the entire file into memory.
+ * 4. When an automated pipeline extracts individual pages from a multi‑page TIFF invoice and stores them as WebP files for inclusion in a web‑based reporting dashboard.
+ * 5. When a cloud service needs to sequentially read a massive TIFF map and generate lightweight WebP tiles for an interactive map viewer while preventing out‑of‑memory errors.
+ */

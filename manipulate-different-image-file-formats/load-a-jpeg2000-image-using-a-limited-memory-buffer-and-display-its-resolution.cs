@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
@@ -10,28 +10,31 @@ class Program
     {
         try
         {
-            string inputPath = "sample.jp2";
+            // Hardcoded input path
+            string inputPath = @"C:\temp\sample.jp2";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = "output.png";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load JPEG2000 image (buffer size hint can be set via options if needed for saving)
-            using (Jpeg2000Image image = new Jpeg2000Image(inputPath))
+            // Set a memory buffer limit (e.g., 10 MB)
+            var loadOptions = new Jpeg2000LoadOptions
             {
-                Console.WriteLine($"Width: {image.Width} px");
-                Console.WriteLine($"Height: {image.Height} px");
-                Console.WriteLine($"Horizontal Resolution: {image.HorizontalResolution} DPI");
-                Console.WriteLine($"Vertical Resolution: {image.VerticalResolution} DPI");
+                BufferSizeHint = 10
+            };
 
-                // Save as PNG (demonstrates usage of output path handling)
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.BufferSizeHint = 10 * 1024 * 1024; // 10 MB buffer for saving
-                image.Save(outputPath, pngOptions);
+            // Load the JPEG2000 image with limited memory buffer
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                // Cast to Jpeg2000Image to access resolution properties
+                var jpeg2000Image = (Jpeg2000Image)image;
+
+                // Display horizontal and vertical resolution (DPI)
+                Console.WriteLine($"Horizontal resolution: {jpeg2000Image.HorizontalResolution} DPI");
+                Console.WriteLine($"Vertical resolution: {jpeg2000Image.VerticalResolution} DPI");
             }
         }
         catch (Exception ex)
@@ -40,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a C# application must read large JPEG2000 medical images on a low‑memory server and needs to know the image DPI for accurate scaling.
+ * 2. When a .NET service processes satellite JPEG2000 tiles and wants to limit memory usage while extracting horizontal and vertical resolution for georeferencing.
+ * 3. When a desktop utility converts JPEG2000 scans to PDF and must verify the original resolution before embedding the image.
+ * 4. When a batch job validates archival JPEG2000 files by loading them with a buffer size hint and checking their DPI to ensure compliance with printing standards.
+ * 5. When a web API receives JPEG2000 uploads, loads them with a constrained memory buffer, and returns the image resolution to the client for preview layout calculations.
+ */

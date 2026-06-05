@@ -2,14 +2,14 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.tga";
-        string outputPath = "output/output.jpg";
+        string outputPath = "output.jpg";
 
         if (!File.Exists(inputPath))
         {
@@ -23,46 +23,26 @@ class Program
         {
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var bounds = image.Bounds;
-                int width = bounds.Width;
-                int height = bounds.Height;
-                int[] pixels = image.GetDefaultArgb32Pixels(bounds);
+                int width = image.Width;
+                int height = image.Height;
+                int minDim = Math.Min(width, height);
 
-                float centerX = width / 2f;
-                float centerY = height / 2f;
-                float maxDist = (float)Math.Sqrt(centerX * centerX + centerY * centerY);
-                float strength = 0.5f; // vignette strength
+                Graphics graphics = new Graphics(image);
 
-                for (int i = 0; i < pixels.Length; i++)
+                // Apply concentric ellipses with increasing opacity to simulate a vignette effect
+                for (int i = 0; i < 5; i++)
                 {
-                    int x = i % width;
-                    int y = i / width;
+                    int inset = i * (minDim / 20);
+                    int ellipseWidth = width - 2 * inset;
+                    int ellipseHeight = height - 2 * inset;
+                    if (ellipseWidth <= 0 || ellipseHeight <= 0) break;
 
-                    float dx = x - centerX;
-                    float dy = y - centerY;
-                    float dist = (float)Math.Sqrt(dx * dx + dy * dy);
-                    float factor = 1f - strength * (dist / maxDist);
-                    if (factor < 0f) factor = 0f;
-
-                    int argb = pixels[i];
-                    int a = (argb >> 24) & 0xFF;
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-
-                    r = (int)(r * factor);
-                    g = (int)(g * factor);
-                    b = (int)(b * factor);
-
-                    pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                    byte opacity = (byte)(30 + i * 40); // increase opacity for outer ellipses
+                    SolidBrush brush = new SolidBrush(Color.FromArgb(opacity, 0, 0, 0));
+                    graphics.FillEllipse(brush, inset, inset, ellipseWidth, ellipseHeight);
                 }
 
-                image.SaveArgb32Pixels(bounds, pixels);
-
-                var jpegOptions = new JpegOptions
-                {
-                    Quality = 90
-                };
+                JpegOptions jpegOptions = new JpegOptions();
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -72,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a game developer needs to convert legacy TGA textures to web‑friendly JPEGs while adding a subtle vignette to focus the viewer’s attention.
+ * 2. When a photo‑editing application must batch‑process high‑resolution TGA screenshots and output them as JPEGs with a darkened border for a cinematic look.
+ * 3. When an e‑commerce platform wants to display product mockups stored as TGA files with a soft vignette effect to blend them into the site’s design before saving as JPEG.
+ * 4. When a scientific imaging tool requires converting TGA microscopy images to JPEG for reports, adding concentric ellipses to mask edge artifacts.
+ * 5. When a digital asset pipeline needs to prepare TGA artwork for social media by applying a vignette and saving the result as a compressed JPEG using C# and Aspose.Imaging.
+ */

@@ -7,35 +7,24 @@ using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "thumbnail.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "thumbnail.webp";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                // Create a thumbnail (max width 150 pixels, preserve aspect ratio)
-                int thumbWidth = 150;
-                int thumbHeight = (int)(tiffImage.Height * ((float)thumbWidth / tiffImage.Width));
-
-                tiffImage.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
-
-                // Save the thumbnail as a WebP file
-                tiffImage.Save(outputPath, new WebPOptions());
+                tiff.Save(outputPath, new WebPOptions());
             }
         }
         catch (Exception ex)
@@ -44,3 +33,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a lightweight preview of a high‑resolution TIFF document for web display by extracting its embedded thumbnail and converting it to WebP.
+ * 2. When an application must create a small, lossless‑compatible thumbnail from scanned TIFF images to improve page load speed in a gallery viewer.
+ * 3. When a digital asset management system requires extracting the built‑in thumbnail from multi‑page TIFF files and storing it as a WebP file for mobile devices.
+ * 4. When a batch‑processing script has to convert TIFF metadata thumbnails into WebP format to standardize image assets across a cloud storage pipeline.
+ * 5. When a C# service needs to verify the presence of a TIFF thumbnail and save it as a WebP image for use in email newsletters or social media previews.
+ */

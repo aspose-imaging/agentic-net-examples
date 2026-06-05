@@ -2,55 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.gif";
-        string outputPath = "output.webp";
-
-        // Ensure input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the GIF image
-            using (Image gifImage = Image.Load(inputPath))
+            string inputPath = "Input/animation.gif";
+            string outputPath = "Output/frame5.webp";
+
+            if (!File.Exists(inputPath))
             {
-                // Cast to multipage image to access frames
-                IMultipageImage multipage = gifImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount < 5)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            {
+                if (gif.PageCount <= 4)
                 {
-                    Console.Error.WriteLine("The GIF does not contain at least five frames.");
+                    Console.Error.WriteLine("GIF does not contain a fifth frame.");
                     return;
                 }
 
-                // Get the fifth frame (zero‑based index 4)
-                RasterImage fifthFrame = (RasterImage)multipage.Pages[4];
+                gif.ActiveFrame = (GifFrameBlock)gif.Pages[4];
 
-                // Create a WebP image from the selected frame
-                using (WebPImage webPImage = new WebPImage(fifthFrame))
+                var options = new WebPOptions
                 {
-                    // Set lossless compression options
-                    var webpOptions = new WebPOptions
-                    {
-                        Lossless = true
-                    };
+                    Lossless = true
+                };
 
-                    // Save as lossless WebP
-                    webPImage.Save(outputPath, webpOptions);
-                }
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -59,3 +46,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract a specific frame from an animated GIF to use as a high‑quality thumbnail in a web application, they can load the GIF, select the fifth frame, and save it as a lossless WebP file.
+ * 2. When converting legacy animated GIF assets to modern web‑friendly formats, a developer may isolate the fifth frame and store it losslessly as WebP to preserve visual fidelity while reducing file size.
+ * 3. When generating preview images for a video editing tool that imports GIF animations, a developer can extract the fifth frame and save it as a lossless WebP to provide a crisp preview without compression artifacts.
+ * 4. When creating a sprite sheet from an animated GIF for a game, a developer might extract the fifth frame and convert it to lossless WebP to maintain exact colors and transparency for rendering.
+ * 5. When building an email marketing platform that supports WebP images, a developer can pull the fifth frame from a GIF banner and save it as a lossless WebP to ensure the image displays correctly across modern email clients.
+ */

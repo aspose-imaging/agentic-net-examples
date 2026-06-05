@@ -11,42 +11,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input\\sample.djvu";
-            string outputPath = "Output\\pages_4_6.gif";
+            string outputPath = "Output\\pages4to6.gif";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document from file stream
             using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvu = new DjvuImage(stream))
+            using (GifOptions gifOptions = new GifOptions())
             {
-                using (DjvuImage djvu = new DjvuImage(stream))
-                {
-                    // Select pages 4‑6 (zero‑based indexes 3,4,5)
-                    int[] pages = new int[] { 3, 4, 5 };
-                    var djvuMulti = new DjvuMultiPageOptions(pages)
-                    {
-                        // Set custom frame delay of 100 ms
-                        TimeInterval = new TimeInterval(0, 100)
-                    };
+                // Select pages 4‑6 (1‑based indexing) for export
+                gifOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(4, 6));
 
-                    // Configure GIF save options with the selected pages and frame delay
-                    var gifOptions = new GifOptions
-                    {
-                        MultiPageOptions = djvuMulti
-                    };
+                // Set custom frame delay of 100 ms
+                gifOptions.FullFrame = true;
+                gifOptions.MultiPageOptions.Mode = MultiPageMode.TimeInterval;
+                gifOptions.MultiPageOptions.TimeInterval = new TimeInterval(0, 100);
 
-                    // Save selected pages as an animated GIF
-                    djvu.Save(outputPath, gifOptions);
-                }
+                djvu.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -55,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract a specific range of pages (e.g., pages 4‑6) from a multi‑page DjVu document and create an animated GIF for web preview.
+ * 2. When an application must convert selected DjVu pages into a GIF animation with a custom 100 ms frame delay to control playback speed.
+ * 3. When building a document‑to‑media pipeline that reads DjVu files from disk, processes them in C# using Aspose.Imaging, and outputs a lightweight GIF for email attachments.
+ * 4. When a digital archive system requires converting only certain DjVu pages into a GIF while preserving the original order and setting a uniform time interval between frames.
+ * 5. When a developer wants to programmatically generate a short animated GIF from a DjVu e‑book chapter, ensuring each frame displays for exactly 0.1 seconds for consistent user experience.
+ */

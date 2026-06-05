@@ -1,88 +1,51 @@
 using System;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input directory and output zip file
-            string inputDirectory = "InputImages";
-            string outputZipPath = "Output/thumbnails.zip";
+            string inputDirectory = "Input";
+            string zipPath = "thumbnails.zip";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
+            // Ensure the directory for the zip file exists
+            Directory.CreateDirectory(Path.GetDirectoryName(zipPath) ?? ".");
 
-            // Get all JPEG files in the input directory
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-            string[] jpegFilesUpper = Directory.GetFiles(inputDirectory, "*.jpeg");
-            string[] allJpegFiles = new string[jpegFiles.Length + jpegFilesUpper.Length];
-            jpegFiles.CopyTo(allJpegFiles, 0);
-            jpegFilesUpper.CopyTo(allJpegFiles, jpegFiles.Length);
-
-            // Open (or create) the zip archive for updating
-            using (var zipStream = new FileStream(outputZipPath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
-            using (var zip = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Update))
+            using (var zip = ZipFile.Open(zipPath, ZipArchiveMode.Update))
             {
-                foreach (string inputPath in allJpegFiles)
+                var jpgFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+                var jpegFiles = Directory.GetFiles(inputDirectory, "*.jpeg");
+                var allFiles = jpgFiles.Concat(jpegFiles).ToArray();
+
+                foreach (var inputPath in allFiles)
                 {
-                    // Validate input file existence
                     if (!File.Exists(inputPath))
                     {
                         Console.Error.WriteLine($"File not found: {inputPath}");
                         return;
                     }
 
-                    // Load the JPEG image
-                    using (Image image = Image.Load(inputPath))
+                    using (RasterImage image = (RasterImage)Image.Load(inputPath))
                     {
-                        // Determine thumbnail size (max dimension 100 pixels)
-                        const int maxDim = 100;
-                        int thumbWidth = image.Width;
-                        int thumbHeight = image.Height;
-
-                        if (thumbWidth > thumbHeight)
-                        {
-                            if (thumbWidth > maxDim)
-                            {
-                                thumbHeight = thumbHeight * maxDim / thumbWidth;
-                                thumbWidth = maxDim;
-                            }
-                        }
-                        else
-                        {
-                            if (thumbHeight > maxDim)
-                            {
-                                thumbWidth = thumbWidth * maxDim / thumbHeight;
-                                thumbHeight = maxDim;
-                            }
-                        }
-
-                        // Resize to thumbnail dimensions
+                        int thumbWidth = 100;
+                        int thumbHeight = 100;
                         image.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
 
-                        // Prepare JPEG save options for the thumbnail
-                        JpegOptions jpegOptions = new JpegOptions
+                        string entryName = Path.GetFileNameWithoutExtension(inputPath) + "_thumb.jpg";
+                        var entry = zip.CreateEntry(entryName, CompressionLevel.Optimal);
+                        using (var entryStream = entry.Open())
                         {
-                            Quality = 80
-                        };
-
-                        // Save thumbnail to a memory stream
-                        using (var ms = new MemoryStream())
-                        {
-                            image.Save(ms, jpegOptions);
-                            ms.Position = 0;
-
-                            // Create a zip entry for the thumbnail
-                            string entryName = Path.GetFileNameWithoutExtension(inputPath) + "_thumb.jpg";
-                            var entry = zip.CreateEntry(entryName, System.IO.Compression.CompressionLevel.Optimal);
-                            using (var entryStream = entry.Open())
+                            JpegOptions jpegOptions = new JpegOptions
                             {
-                                ms.CopyTo(entryStream);
-                            }
+                                Quality = 80
+                            };
+                            image.Save(entryStream, jpegOptions);
                         }
                     }
                 }
@@ -94,3 +57,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to generate 100 × 100 pixel JPEG thumbnails of user‑uploaded photos and deliver them as a single zip archive for easy download.
+ * 2. When an e‑commerce site wants to create low‑resolution preview images for product photos stored in a folder, resize them with Aspose.Imaging, and bundle the thumbnails for batch upload.
+ * 3. When a digital asset management system must produce thumbnail versions of JPEG documents for quick browsing and archive them in a zip file for efficient storage.
+ * 4. When a photo‑sharing service has to process a batch of JPEG/JPEG images, resize each to a standard thumbnail size using C# and Aspose.Imaging, and provide the results as a compressed zip to clients.
+ * 5. When a desktop utility is required to scan a directory of JPEG images, generate thumbnails, and package them into a zip archive for backup or distribution.
+ */

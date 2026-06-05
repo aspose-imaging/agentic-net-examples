@@ -14,107 +14,72 @@ class Program
     {
         try
         {
-            // Define input and output directories
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputPath = "input.djvu";
+            string outputPdfPath = "merged.pdf";
 
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Input DjVu file path (hardcoded)
-            string inputPath = Path.Combine(inputDirectory, "document.djvu");
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // List to hold generated PNG file paths
-            List<string> pngPaths = new List<string>();
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-            // Load DjVu document and export pages 2‑4 as PNG
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            string[] pngPaths = new string[3];
+            for (int i = 0; i < 3; i++)
             {
-                for (int i = 2; i <= 4; i++)
+                pngPaths[i] = $"page{i + 2}.png";
+                Directory.CreateDirectory(Path.GetDirectoryName(pngPaths[i]));
+            }
+
+            using (DjvuImage djvu = (DjvuImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                for (int i = 0; i < 3; i++)
                 {
-                    if (i >= djvu.PageCount)
-                        break;
-
-                    string pngPath = Path.Combine(outputDirectory, $"page_{i}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
-
-                    PngOptions pngOptions = new PngOptions
+                    int pageIndex = i + 1; // pages 2‑4 (0‑based)
+                    using (DjvuPage page = (DjvuPage)djvu.Pages[pageIndex])
                     {
-                        Source = new FileCreateSource(pngPath, false)
-                    };
-
-                    ((DjvuPage)djvu.Pages[i]).Save(pngPath, pngOptions);
-                    pngPaths.Add(pngPath);
+                        Source pngSource = new FileCreateSource(pngPaths[i], false);
+                        PngOptions pngOptions = new PngOptions() { Source = pngSource };
+                        page.Save(pngPaths[i], pngOptions);
+                    }
                 }
             }
 
-            if (pngPaths.Count == 0)
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string pngPath in pngPaths)
             {
-                Console.WriteLine("No pages were exported.");
-                return;
+                using (RasterImage img = (RasterImage)Aspose.Imaging.Image.Load(pngPath))
+                {
+                    sizes.Add(new Aspose.Imaging.Size(img.Width, img.Height));
+                }
             }
 
-            // Calculate canvas size for vertical merge
             int canvasWidth = 0;
             int canvasHeight = 0;
-            foreach (string path in pngPaths)
+            foreach (var sz in sizes)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    if (img.Width > canvasWidth)
-                        canvasWidth = img.Width;
-                    canvasHeight += img.Height;
-                }
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                canvasHeight += sz.Height;
             }
 
-            // Create temporary merged PNG canvas
-            string tempCanvasPath = Path.Combine(outputDirectory, "merged_temp.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
-
-            PngOptions canvasOptions = new PngOptions
-            {
-                Source = new FileCreateSource(tempCanvasPath, false)
-            };
-
-            using (PngImage canvas = (PngImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
+            using (RasterImage canvas = (RasterImage)Aspose.Imaging.Image.Create(new PngOptions(), canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
                 foreach (string pngPath in pngPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(pngPath))
+                    using (RasterImage img = (RasterImage)Aspose.Imaging.Image.Load(pngPath))
                     {
-                        Rectangle destRect = new Rectangle(0, offsetY, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetY += img.Height;
                     }
                 }
 
-                // Save merged canvas as PDF
-                string pdfPath = Path.Combine(outputDirectory, "merged.pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
-
-                PdfOptions pdfOptions = new PdfOptions();
-                canvas.Save(pdfPath, pdfOptions);
+                Source pdfSource = new FileCreateSource(outputPdfPath, false);
+                PdfOptions pdfOptions = new PdfOptions() { Source = pdfSource };
+                canvas.Save(outputPdfPath, pdfOptions);
             }
-
-            Console.WriteLine($"PDF created at: {Path.Combine(outputDirectory, "merged.pdf")}");
         }
         catch (Exception ex)
         {
@@ -122,3 +87,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract specific pages (2‑4) from a multi‑page DjVu document, convert them to high‑quality PNG images, and then combine those images into a single PDF report for distribution.
+ * 2. When an archival system must transform selected DjVu pages into PNG thumbnails for preview and later bundle them into a PDF portfolio for client review.
+ * 3. When a document‑processing pipeline requires converting a range of DjVu pages to raster PNG files to apply image‑based analysis before merging the results into a consolidated PDF file.
+ * 4. When a web application wants to let users download a PDF that contains only the chosen pages of a DjVu e‑book, using C# and Aspose.Imaging to render those pages as PNG and assemble the final PDF.
+ * 5. When a batch job automates the conversion of specific DjVu pages into PNG assets for printing and then creates a printable PDF booklet from those assets using Aspose.Imaging’s image and PDF options.
+ */

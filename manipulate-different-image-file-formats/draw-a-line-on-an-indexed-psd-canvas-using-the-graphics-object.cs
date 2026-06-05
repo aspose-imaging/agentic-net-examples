@@ -2,47 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
+            // Output PSD file path
             string outputPath = "output.psd";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Create PSD options for an indexed image
-            PsdOptions psdOptions = new PsdOptions
+            // Configure PSD options for an indexed image
+            PsdOptions psdOptions = new PsdOptions();
+            psdOptions.Source = new FileCreateSource(outputPath, false);
+            psdOptions.ColorMode = ColorModes.Indexed;
+            psdOptions.CompressionMethod = CompressionMethod.RLE;
+            psdOptions.Version = 5;
+            psdOptions.ChannelBitsCount = (short)8; // 8 bits per channel
+            psdOptions.ChannelsCount = (short)1;    // Indexed uses a single channel
+
+            // Define a simple palette
+            Color[] paletteColors = new Color[]
             {
-                // Bind the output file
-                Source = new FileCreateSource(outputPath, false),
-
-                // Set indexed color mode
-                ColorMode = ColorModes.Indexed,
-
-                // Define a simple palette (black and white)
-                Palette = new ColorPalette(new Color[] { Color.Black, Color.White })
+                Color.Red,
+                Color.Green,
+                Color.Blue,
+                Color.White,
+                Color.Black
             };
+            psdOptions.Palette = new ColorPalette(paletteColors);
 
-            int width = 400;
-            int height = 300;
+            int width = 500;
+            int height = 500;
 
-            // Create a new PSD image with the specified options
+            // Create the PSD canvas
             using (Image image = Image.Create(psdOptions, width, height))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Draw a red line from (10,10) to (200,200)
-                graphics.DrawLine(new Pen(Color.Red, 2), new Point(10, 10), new Point(200, 200));
+                // Draw a black line from (50,50) to (450,450)
+                graphics.DrawLine(new Pen(Color.Black, 2), new Point(50, 50), new Point(450, 450));
 
-                // Save the image (output path already bound via FileCreateSource)
+                // Save the image (output is already bound to the file)
                 image.Save();
             }
         }
@@ -52,3 +59,12 @@ public class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating a lightweight PSD file with a limited color palette for a web‑based mockup and needing to programmatically add a diagonal guide line using Aspose.Imaging for .NET.
+ * 2. When generating indexed‑color Photoshop documents for printing proofs and you must draw precise vector lines (e.g., crop marks) directly onto the canvas via the Graphics object.
+ * 3. When automating the production of PSD assets for a game UI where memory constraints require an 8‑bit indexed image and you need to overlay a simple line to indicate alignment or boundaries.
+ * 4. When building a batch conversion tool that creates PSD files from scratch, sets a custom palette, and draws diagnostic lines to verify coordinate transformations in C#.
+ * 5. When developing a server‑side image processing service that outputs PSD files with RLE compression and includes a black line as a watermark or annotation on an indexed image.
+ */

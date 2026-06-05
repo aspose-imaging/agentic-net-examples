@@ -10,44 +10,36 @@ class Program
     {
         try
         {
-            // Hardcoded input WebP file path
+            // Hardcoded input and output paths
             string inputPath = "input.webp";
+            string outputDirectory = "frames";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Directory to store extracted frames
-            string outputDir = "frames";
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputDirectory));
 
-            // Load the animated WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            // Load the source WebP image
+            using (WebPImage webP = new WebPImage(inputPath))
             {
-                // Verify the image supports multiple pages/frames
-                IMultipageImage multipage = webPImage as IMultipageImage;
-                if (multipage == null)
-                {
-                    Console.Error.WriteLine("The loaded image is not a multipage WebP.");
-                    return;
-                }
+                int frameCount = webP.PageCount;
 
-                int pageCount = multipage.PageCount;
-                for (int i = 0; i < pageCount; i++)
+                for (int i = 0; i < frameCount; i++)
                 {
-                    // Retrieve the i‑th frame
-                    var frame = multipage.Pages[i];
+                    // Build output path for the current frame
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.png");
 
-                    // Cast the frame to RasterImage for saving
-                    using (RasterImage frameImage = (RasterImage)frame)
+                    // Ensure the directory for this frame exists (already created above)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Extract the frame as a RasterImage and save it individually
+                    using (WebPImage frameImage = new WebPImage((RasterImage)webP.Pages[i]))
                     {
-                        string outputPath = Path.Combine(outputDir, $"frame_{i}.png");
-                        // Ensure the directory for this frame exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the frame as PNG
                         frameImage.Save(outputPath, new PngOptions());
                     }
                 }
@@ -59,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract each frame from an animated WebP file and save them as separate PNG thumbnails for a web gallery while minimizing memory consumption.
+ * 2. When a mobile application processes large animated WebP stickers and must convert each frame to PNG on‑the‑fly without loading the entire animation into memory.
+ * 3. When a server‑side batch job converts animated WebP advertisements into individual PNG frames for analytics or further image manipulation, releasing resources after each save.
+ * 4. When a game engine imports animated WebP assets and requires per‑frame PNG textures for sprite animation while preventing memory leaks in C# code.
+ * 5. When a digital publishing workflow extracts frames from a WebP slideshow to generate printable PNG images on a low‑resource CI/CD build server.
+ */

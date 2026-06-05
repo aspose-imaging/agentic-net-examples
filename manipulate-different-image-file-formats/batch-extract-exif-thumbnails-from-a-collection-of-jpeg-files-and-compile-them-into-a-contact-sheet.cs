@@ -1,10 +1,11 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,65 +14,77 @@ class Program
     {
         try
         {
-            string inputDir = "Input";
-            string outputPath = "ContactSheet.jpg";
+            // Hardcoded input and output paths
+            string inputDirectory = "Input";
+            string outputPath = "Output/contact_sheet.png";
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var files = Directory.GetFiles(inputDir, "*.jpg");
+            // Get JPEG files
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
+                .ToArray();
 
-            var thumbSizes = new List<Size>();
-            var thumbFiles = new List<string>();
-
-            foreach (var file in files)
+            if (jpegFiles.Length == 0)
             {
-                if (!File.Exists(file))
+                Console.WriteLine("No JPEG files found in the input directory.");
+                return;
+            }
+
+            // First pass: collect thumbnail sizes
+            var thumbSizes = new List<(string FilePath, int Width, int Height)>();
+
+            foreach (string filePath in jpegFiles)
+            {
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                using (JpegImage jpeg = (JpegImage)Image.Load(file))
+                using (JpegImage jpeg = (JpegImage)Image.Load(filePath))
                 {
                     var thumb = jpeg.ExifData?.Thumbnail;
                     if (thumb != null)
                     {
-                        thumbSizes.Add(thumb.Size);
-                        thumbFiles.Add(file);
+                        thumbSizes.Add((filePath, thumb.Width, thumb.Height));
                     }
                 }
             }
 
-            if (thumbFiles.Count == 0)
+            if (thumbSizes.Count == 0)
             {
-                Console.WriteLine("No thumbnails found.");
+                Console.WriteLine("No EXIF thumbnails found in the JPEG files.");
                 return;
             }
 
-            int totalWidth = thumbSizes.Sum(s => s.Width);
-            int maxHeight = thumbSizes.Max(s => s.Height);
+            // Calculate canvas dimensions (horizontal layout)
+            int canvasWidth = thumbSizes.Sum(t => t.Width);
+            int canvasHeight = thumbSizes.Max(t => t.Height);
 
-            Source outSource = new FileCreateSource(outputPath, false);
-            JpegOptions outOptions = new JpegOptions() { Source = outSource, Quality = 90 };
-
-            using (JpegImage canvas = (JpegImage)Image.Create(outOptions, totalWidth, maxHeight))
+            // Create PNG canvas
+            Source outputSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions { Source = outputSource };
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                for (int i = 0; i < thumbFiles.Count; i++)
+                foreach (var (filePath, width, height) in thumbSizes)
                 {
-                    string file = thumbFiles[i];
-                    using (JpegImage jpeg = (JpegImage)Image.Load(file))
+                    using (JpegImage jpeg = (JpegImage)Image.Load(filePath))
                     {
                         var thumb = jpeg.ExifData?.Thumbnail;
                         if (thumb != null)
                         {
-                            Rectangle bounds = new Rectangle(offsetX, 0, thumb.Width, thumb.Height);
+                            // Copy thumbnail pixels onto the canvas
+                            var bounds = new Rectangle(offsetX, 0, thumb.Width, thumb.Height);
                             canvas.SaveArgb32Pixels(bounds, thumb.LoadArgb32Pixels(thumb.Bounds));
                             offsetX += thumb.Width;
                         }
                     }
                 }
 
+                // Save the contact sheet
                 canvas.Save();
             }
         }
@@ -81,3 +94,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a photographer wants to quickly preview the embedded EXIF thumbnails of a batch of JPEG images as a single PNG contact sheet for client review.
+ * 2. When a digital asset management system needs to generate a lightweight overview of thousands of uploaded photos without loading full‑resolution images.
+ * 3. When a web application must display a collage of product image previews extracted from EXIF data to reduce bandwidth usage.
+ * 4. When an e‑commerce platform wants to verify that uploaded JPEG files contain proper EXIF thumbnails and present them in a grid for quality control.
+ * 5. When a mobile app developer needs to create a printable contact sheet of camera‑generated thumbnails for archival documentation.
+ */

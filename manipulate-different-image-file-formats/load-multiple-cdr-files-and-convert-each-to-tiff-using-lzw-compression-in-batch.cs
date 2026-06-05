@@ -3,8 +3,9 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
@@ -12,16 +13,15 @@ class Program
     {
         try
         {
-            // Hard‑coded input CDR files
-            string[] inputPaths = new[]
+            // Hardcoded input CDR files
+            string[] inputPaths = new string[]
             {
-                @"C:\Input\sample1.cdr",
-                @"C:\Input\sample2.cdr",
-                @"C:\Input\sample3.cdr"
+                @"C:\input\file1.cdr",
+                @"C:\input\file2.cdr"
             };
 
-            // Hard‑coded output directory
-            string outputDirectory = @"C:\Output";
+            // Hardcoded output directory
+            string outputDirectory = @"C:\output";
 
             foreach (string inputPath in inputPaths)
             {
@@ -39,23 +39,27 @@ class Program
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load CDR image
-                using (FileStream stream = File.OpenRead(inputPath))
-                using (CdrImage cdrImage = new CdrImage(stream, new CdrLoadOptions()))
+                // Load CDR image with default load options
+                using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
                 {
-                    // Configure TIFF save options with LZW compression
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        BitsPerSample = new ushort[] { 8, 8, 8 },
-                        ByteOrder = TiffByteOrder.BigEndian,
-                        Compression = TiffCompressions.Lzw,
-                        Photometric = TiffPhotometrics.Rgb,
-                        PlanarConfiguration = TiffPlanarConfigs.Contiguous,
-                        Predictor = TiffPredictor.Horizontal
-                    };
+                    var loadOptions = new CdrLoadOptions();
 
-                    // Save as TIFF
-                    cdrImage.Save(outputPath, tiffOptions);
+                    using (CdrImage cdrImage = new CdrImage(stream, loadOptions))
+                    {
+                        // Configure TIFF save options with LZW compression
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                        {
+                            BitsPerSample = new ushort[] { 8, 8, 8 },
+                            ByteOrder = TiffByteOrder.BigEndian,
+                            Compression = TiffCompressions.Lzw,
+                            Photometric = TiffPhotometrics.Rgb,
+                            PlanarConfiguration = TiffPlanarConfigs.Contiguous,
+                            Predictor = TiffPredictor.Horizontal
+                        };
+
+                        // Save as TIFF
+                        cdrImage.Save(outputPath, tiffOptions);
+                    }
                 }
             }
         }
@@ -65,3 +69,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a print shop needs to archive multiple CorelDRAW (.cdr) designs as lossless TIFF files with LZW compression for long‑term storage.
+ * 2. When a document management system must batch‑convert incoming CDR artwork into TIFF images to embed them in PDFs without losing color fidelity.
+ * 3. When an e‑commerce platform automatically transforms supplier‑provided CDR product illustrations into web‑ready TIFF files with LZW compression for high‑quality thumbnails.
+ * 4. When a GIS application imports vector CDR maps and saves them as tiled TIFF files using LZW to reduce file size while preserving raster detail.
+ * 5. When a legal firm digitizes case‑related CDR diagrams and stores them as compressed TIFFs to meet court‑mandated electronic evidence standards.
+ */

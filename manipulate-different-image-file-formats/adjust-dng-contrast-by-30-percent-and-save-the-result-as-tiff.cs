@@ -4,48 +4,31 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.dng";
+        string outputPath = "output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.dng";
-            string outputPath = @"C:\Images\output.tif";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DNG image
-            using (Image dngImageBase = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                DngImage dngImage = (DngImage)dngImageBase;
-                int width = dngImage.Width;
-                int height = dngImage.Height;
+                RasterImage raster = (RasterImage)image;
+                raster.AdjustContrast(30f);
 
-                // Create a TIFF canvas with the same dimensions
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
-                {
-                    // Copy pixel data from DNG to TIFF
-                    tiffImage.SavePixels(tiffImage.Bounds, ((RasterImage)dngImage).LoadPixels(dngImage.Bounds));
-
-                    // Adjust contrast by 30 (range -100 to 100)
-                    tiffImage.AdjustContrast(30f);
-
-                    // Save the result as TIFF
-                    tiffImage.Save(outputPath);
-                }
+                raster.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -54,3 +37,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a photographer needs to batch‑process raw DNG files to increase contrast by 30 % and archive the results as lossless TIFFs for print production.
+ * 2. When a scientific imaging application must enhance the visual detail of raw sensor data (DNG) before converting it to a widely supported TIFF format for analysis in third‑party tools.
+ * 3. When a mobile app backend receives raw camera captures (DNG) and must apply a contrast boost and store the images as TIFF to preserve quality for later editing.
+ * 4. When an e‑commerce platform wants to automatically improve product photo contrast from raw DNG uploads and save them as TIFF files for high‑resolution catalog listings.
+ * 5. When a digital archiving system needs to normalize contrast across legacy DNG scans and convert them to TIFF to ensure long‑term compatibility with archival standards.
+ */

@@ -11,37 +11,45 @@ class Program
     {
         try
         {
-            string outputPath = "output.psd";
+            // Output PSD file path
+            string outputPath = @"C:\temp\output.psd";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            PsdOptions options = new PsdOptions();
-            options.Source = new FileCreateSource(outputPath, false);
-            options.ColorMode = ColorModes.Indexed;
-            options.CompressionMethod = CompressionMethod.RLE;
-            options.ChannelBitsCount = (short)8;
-            options.ChannelsCount = (short)1;
-            options.Version = 6;
+            // Define canvas size
+            int width = 500;
+            int height = 400;
 
-            Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[256];
-            for (int i = 0; i < 256; i++)
+            // Create PSD options for an indexed image
+            PsdOptions psdOptions = new PsdOptions();
+            psdOptions.Source = new FileCreateSource(outputPath, false);
+            psdOptions.ColorMode = ColorModes.Indexed;
+            psdOptions.CompressionMethod = CompressionMethod.RLE;
+            psdOptions.ChannelBitsCount = (short)8;   // 8 bits per channel
+            psdOptions.ChannelsCount = (short)1;      // Indexed images have 1 channel
+            psdOptions.Version = 6;                  // Default PSD version
+
+            // Define a simple palette (must contain at least one color)
+            psdOptions.Palette = new ColorPalette(new Color[]
             {
-                byte v = (byte)i;
-                paletteColors[i] = Aspose.Imaging.Color.FromArgb(v, v, v);
-            }
-            options.Palette = new Aspose.Imaging.ColorPalette(paletteColors);
+                Color.Black,
+                Color.White,
+                Color.Red,
+                Color.Green,
+                Color.Blue
+            });
 
-            int width = 200;
-            int height = 200;
-
-            using (Image canvas = Image.Create(options, width, height))
+            // Create the PSD canvas
+            using (Image psdImage = Image.Create(psdOptions, width, height))
             {
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                // Draw a rectangle on the canvas
+                Graphics graphics = new Graphics(psdImage);
+                Pen pen = new Pen(Color.Black, 3);
+                graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
 
-                Pen pen = new Pen(Aspose.Imaging.Color.Black, 2);
-                graphics.DrawRectangle(pen, new Rectangle(50, 50, 100, 100));
-
-                canvas.Save();
+                // Save the PSD file (output path already bound via FileCreateSource)
+                psdImage.Save();
             }
         }
         catch (Exception ex)
@@ -50,3 +58,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a thumbnail preview of a design in an indexed PSD file with a limited color palette for quick web display.
+ * 2. When an automated asset pipeline must add a bounding box rectangle to an indexed PSD canvas to indicate crop areas for a print‑ready workflow.
+ * 3. When a game‑engine tool creates level maps as indexed PSD images and draws rectangular zones to mark collision boundaries.
+ * 4. When a reporting system programmatically creates PSD charts using indexed colors and draws rectangles to highlight specific data ranges.
+ * 5. When a batch‑processing script adds a watermark rectangle to indexed PSD files before they are uploaded to a digital asset management system.
+ */

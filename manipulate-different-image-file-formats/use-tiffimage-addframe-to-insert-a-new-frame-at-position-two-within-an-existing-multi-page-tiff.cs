@@ -1,54 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.tif";
+            string outputPath = "C:\\temp\\output.tif";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load existing multi‑page TIFF
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            // Load the existing multi‑page TIFF
+            using (Image image = Image.Load(inputPath))
             {
-                // Determine size for the new frame (use size of first frame)
-                int width = tiffImage.Frames[0].Width;
-                int height = tiffImage.Frames[0].Height;
+                TiffImage tiffImage = (TiffImage)image;
 
-                // Create options for the new frame
+                // Define options for the new frame
                 TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
                 frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
                 frameOptions.Photometric = TiffPhotometrics.Rgb;
-                frameOptions.Compression = TiffCompressions.Lzw;
-                frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                frameOptions.Compression = TiffCompressions.None;
 
-                // Create a new blank frame
-                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
+                // Create a blank 100x100 frame
+                TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
 
-                // Fill the new frame with a solid color (light gray)
-                Graphics graphics = new Graphics(newFrame);
-                SolidBrush brush = new SolidBrush(Color.LightGray);
-                graphics.FillRectangle(brush, newFrame.Bounds);
+                // Insert the new frame at index 2 (third position)
+                tiffImage.InsertFrame(2, newFrame);
 
-                // Insert the new frame at position two (index 1)
-                tiffImage.InsertFrame(1, newFrame);
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save the modified TIFF
                 tiffImage.Save(outputPath);
@@ -60,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When generating a multi‑page scanned document and need to add a blank cover page as the third page of an existing TIFF file.
+ * 2. When creating a multi‑page TIFF for a medical imaging report and must insert a new 100×100 annotation frame between the second and third image slices.
+ * 3. When building a digital archive of engineering drawings and want to insert a placeholder frame at position two to reserve space for future revisions.
+ * 4. When processing satellite imagery stored as a multi‑page TIFF and need to add a calibration frame after the second band without re‑encoding the whole file.
+ * 5. When developing a C# application that merges PDF pages converted to TIFF and must insert an extra page at index two to comply with a regulatory page‑order requirement.
+ */

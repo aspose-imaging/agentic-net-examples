@@ -1,66 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded list of input CDR files
-            string[] inputFiles = new string[]
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
             {
-                @"C:\Input\file1.cdr",
-                @"C:\Input\file2.cdr",
-                @"C:\Input\file3.cdr"
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            // Hardcoded output directory
-            string outputDir = @"C:\Output";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(outputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+
+            foreach (var inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Process each page in the CDR file
-                    for (int i = 0; i < cdrImage.Pages.Length; i++)
+                    PdfOptions pdfOptions = new PdfOptions();
+                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                     {
-                        // Cast the page to CdrImagePage
-                        CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
-
-                        // Build output PDF file name for the current page
-                        string outputPath = Path.Combine(outputDir,
-                            $"{Path.GetFileNameWithoutExtension(inputPath)}.page{i}.pdf");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Set up PDF conversion options with default rasterization settings
-                        PdfOptions pdfOptions = new PdfOptions();
-                        CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                        {
-                            PageWidth = page.Width,
-                            PageHeight = page.Height
-                        };
-                        pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                        // Save the current page as a PDF file
-                        page.Save(outputPath, pdfOptions);
-                    }
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -70,3 +60,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a design studio needs to batch‑convert a folder of CorelDRAW (.cdr) drawings into searchable PDF documents for client delivery using C# and Aspose.Imaging.
+ * 2. When an automated build pipeline must generate PDF archives of all CDR assets in a repository to ensure version‑controlled documentation.
+ * 3. When a web service processes user‑uploaded CDR files and returns PDF previews without manual intervention, leveraging Image.Load and PdfOptions in .NET.
+ * 4. When a migration tool moves legacy CDR artwork to a PDF‑based workflow, looping through the input directory to preserve file names and folder structure.
+ * 5. When a desktop utility needs to rasterize multiple CDR files with default vector‑to‑raster settings and save them as PDFs for printing or electronic distribution.
+ */

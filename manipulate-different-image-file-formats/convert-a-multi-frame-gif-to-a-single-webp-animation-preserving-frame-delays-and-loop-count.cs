@@ -1,48 +1,38 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input\\animation.gif";
-        string outputPath = "Output\\animation.webp";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Aspose.Imaging.Image gifImage = Aspose.Imaging.Image.Load(inputPath))
+            string inputPath = Path.Combine("Input", "animation.gif");
+            string outputPath = Path.Combine("Output", "animation.webp");
+
+            if (!File.Exists(inputPath))
             {
-                var gif = (GifImage)gifImage;
-                int frameCount = gif.PageCount;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                var webpOptions = new WebPOptions();
-                // Preserve loop count if available; default is 1.
-                // webpOptions.AnimLoopCount = gif.LoopsCount; // Uncomment if GifImage exposes LoopsCount
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (WebPImage webp = new WebPImage(gif.Width, gif.Height, webpOptions))
+            using (Image image = Image.Load(inputPath))
+            {
+                GifImage gif = image as GifImage;
+                WebPOptions options = new WebPOptions();
+
+                if (gif != null)
                 {
-                    for (int i = 0; i < frameCount; i++)
-                    {
-                        gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-                        var block = new WebPFrameBlock((Aspose.Imaging.RasterImage)gif.ActiveFrame);
-                        // Frame delay preservation would be set here if WebPFrameBlock exposes a duration property.
-                        webp.AddBlock(block);
-                    }
-
-                    webp.Save(outputPath);
+                    options.AnimLoopCount = (ushort)gif.LoopsCount;
                 }
+
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -51,3 +41,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer wants to replace a multi‑frame GIF banner with a smaller WebP animation while keeping the original frame timing and loop settings, they can use this code.
+ * 2. When an e‑commerce platform needs to generate product showcase animations in WebP format from existing GIF assets to improve page load speed without losing animation fidelity, this snippet provides the conversion.
+ * 3. When a mobile app developer must batch‑process user‑uploaded GIF stickers into WebP animations for reduced storage and bandwidth on iOS/Android devices, the example shows how to preserve delays and loops.
+ * 4. When a content management system needs to automatically convert uploaded GIF memes into WebP for SEO‑friendly, high‑quality animated images, the code demonstrates the required C# operations.
+ * 5. When a digital marketing analyst wants to create lightweight animated ads by converting GIFs to WebP while maintaining the original animation loop count, this Aspose.Imaging routine handles the task.
+ */

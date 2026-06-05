@@ -8,12 +8,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputDirectory = @"C:\temp\output";
-
         try
         {
+            // Hardcoded input path
+            string inputPath = @"C:\Temp\sample.djvu";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,40 +20,51 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists (creates parent directories if needed)
-            Directory.CreateDirectory(outputDirectory);
+            // Hardcoded output directory
+            string outputDir = @"C:\Temp\GifOutput";
 
-            // Set up load options to limit memory usage (e.g., 1 MB buffer)
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Enable memory optimization by setting a buffer size hint
             LoadOptions loadOptions = new LoadOptions
             {
-                BufferSizeHint = 1 * 1024 * 1024 // 1 MB
+                BufferSizeHint = 2 * 1024 * 1024 // 2 MB
             };
 
-            // Open the DjVu file with memory‑optimized loading
+            // Load DjVu document from stream with the specified load options
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
             {
-                // Iterate through all pages and process pages 3‑7
-                foreach (DjvuPage page in djvuImage.Pages)
+                // Convert pages 3‑7 (inclusive) to GIF
+                for (int pageIndex = 3; pageIndex <= 7 && pageIndex <= djvuImage.PageCount; pageIndex++)
                 {
-                    if (page.PageNumber >= 3 && page.PageNumber <= 7)
-                    {
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
+                    // DjvuPages array is zero‑based, page numbers are 1‑based
+                    DjvuPage page = djvuImage.DjvuPages[pageIndex - 1];
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Build output file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.gif");
 
-                        // Save the page as a GIF image
-                        page.Save(outputPath, new GifOptions());
-                    }
+                    // Ensure the directory for the output file exists (already created above)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as a GIF image
+                    page.Save(outputPath, new GifOptions());
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a .NET application must extract a subset of pages (e.g., pages 3‑7) from a large DjVu document and save them as lightweight GIF files while minimizing memory usage with Aspose.Imaging’s BufferSizeHint.
+ * 2. When an archival system needs to generate preview thumbnails in GIF format for specific DjVu pages to display in a web portal without loading the entire document into memory.
+ * 3. When a document‑processing pipeline converts selected DjVu pages to GIF for inclusion in email newsletters, using C# and Aspose.Imaging’s memory‑optimized loading.
+ * 4. When a digital publishing tool batch‑converts a range of DjVu pages to GIF for faster client‑side rendering on low‑bandwidth devices, leveraging the LoadOptions buffer size hint.
+ * 5. When a forensic analyst extracts only the relevant pages from a multi‑page DjVu file and saves them as GIF images for evidence review, ensuring efficient memory consumption in a C# environment.
+ */

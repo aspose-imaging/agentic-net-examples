@@ -1,7 +1,10 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,21 +12,19 @@ class Program
     {
         try
         {
-            // Hardcoded input WebP file path
             string inputPath = "input.webp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the WebP image
-            using (WebPImage webP = new WebPImage(inputPath))
+            string outputDir = "frames";
+            Directory.CreateDirectory(outputDir);
+
+            using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Cast to multipage interface to access frames
-                var multipage = webP as Aspose.Imaging.IMultipageImage;
+                var multipage = webPImage as IMultipageImage;
                 if (multipage == null)
                 {
                     Console.Error.WriteLine("The loaded image does not support multiple frames.");
@@ -31,33 +32,19 @@ class Program
                 }
 
                 int pageCount = multipage.PageCount;
-
-                // Iterate through each frame
                 for (int i = 0; i < pageCount; i++)
                 {
-                    // Retrieve the frame
                     var frame = multipage.Pages[i];
+                    string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Cast frame to RasterImage for saving
-                    var raster = frame as Aspose.Imaging.RasterImage;
-                    if (raster == null)
+                    BmpOptions options = new BmpOptions();
+                    options.Source = new FileCreateSource(outputPath, false);
+
+                    using (Image frameImage = (Image)frame)
                     {
-                        Console.Error.WriteLine($"Frame {i} is not a raster image.");
-                        continue;
+                        frameImage.Save();
                     }
-
-                    // Define output BMP file path for the current frame
-                    string outputPath = $"frame_{i}.bmp";
-
-                    // Ensure the output directory exists (guard against null/empty)
-                    string outputDir = Path.GetDirectoryName(outputPath);
-                    if (!string.IsNullOrWhiteSpace(outputDir))
-                    {
-                        Directory.CreateDirectory(outputDir);
-                    }
-
-                    // Save the frame as BMP
-                    raster.Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -67,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract each frame from an animated WebP file and store them as individual BMP images for legacy Windows applications that only support BMP format.
+ * 2. When a .NET application must convert WebP animation frames into BMP files to generate thumbnails for a media catalog that requires uncompressed bitmap files.
+ * 3. When a game developer wants to preprocess animated WebP sprites by separating them into separate BMP assets for use in a sprite‑sheet pipeline that only accepts BMP inputs.
+ * 4. When an image‑processing service has to batch‑process uploaded WebP animations and archive each frame as BMP files for compliance with a document‑management system that stores images in BMP.
+ * 5. When a developer is building a diagnostic tool that reads a WebP image, enumerates its pages via IMultipageImage, and saves each page as a BMP to allow pixel‑perfect visual inspection in standard image viewers.
+ */

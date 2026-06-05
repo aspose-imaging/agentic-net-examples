@@ -1,61 +1,42 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input/sample.djvu";
+            string outputPath = "output/scaled.tiff";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DjVu document from file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                // Define a proportional scaling factor (e.g., 50%)
-                const double scaleFactor = 0.5;
+                int originalWidth = djvuImage.Width;
+                int originalHeight = djvuImage.Height;
+                Console.WriteLine($"Original size: {originalWidth}x{originalHeight}");
 
-                // Iterate through each page in the DjVu document
-                foreach (DjvuPage page in djvuImage.Pages)
-                {
-                    // Retrieve original dimensions
-                    int originalWidth = page.Width;
-                    int originalHeight = page.Height;
+                int newWidth = originalWidth * 2;
+                djvuImage.ResizeWidthProportionally(newWidth, ResizeType.NearestNeighbourResample);
 
-                    // Calculate new dimensions while preserving aspect ratio
-                    int newWidth = (int)(originalWidth * scaleFactor);
-                    int newHeight = (int)(originalHeight * scaleFactor);
-
-                    // Resize the page proportionally
-                    page.Resize(newWidth, newHeight);
-
-                    // Prepare output file path for the current page
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.tiff");
-
-                    // Ensure the directory for the output file exists (already created above)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the resized page as TIFF
-                    TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
-                    page.Save(outputPath, tiffOptions);
-                }
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                djvuImage.Save(outputPath, tiffOptions);
             }
+
+            Console.WriteLine("Conversion completed successfully.");
         }
         catch (Exception ex)
         {
@@ -63,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a digital archiving system needs to ingest high‑resolution DjVu scans, double their size while preserving aspect ratio, and store the result as a TIFF for compatibility with downstream document management tools.
+ * 2. When a publishing workflow requires converting multi‑page DjVu manuscripts into lossless TIFF images for print‑ready PDFs, and the images must be upscaled to meet minimum pixel dimensions.
+ * 3. When a legal e‑discovery platform must extract page dimensions from DjVu evidence files, enlarge them proportionally for better readability, and save them as TIFFs for court‑approved submission.
+ * 4. When a medical imaging application receives scanned DjVu reports, needs to increase their resolution for detailed analysis, and then converts them to TIFF to integrate with existing PACS systems.
+ * 5. When a GIS (geographic information system) processes DjVu map tiles, scales them uniformly to match higher‑resolution basemaps, and outputs TIFF files for use in GIS software that does not support DjVu.
+ */

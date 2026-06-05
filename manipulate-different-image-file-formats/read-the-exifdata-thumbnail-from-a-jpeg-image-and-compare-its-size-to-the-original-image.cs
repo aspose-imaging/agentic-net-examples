@@ -8,9 +8,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.jpg";
-        string thumbnailOutputPath = "output\\thumbnail.jpg";
+        // Hardcoded paths
+        string inputPath = @"C:\Images\sample.jpg";
+        string thumbnailOutputPath = @"C:\Images\thumbnail_output.jpg";
 
         try
         {
@@ -24,7 +24,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(thumbnailOutputPath));
 
-            // Load the JPEG image
+            // Load JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
                 // Original image dimensions
@@ -52,7 +52,7 @@ class Program
                             Console.WriteLine("Thumbnail is not smaller than the original image.");
                         }
 
-                        // Save the thumbnail to verify output handling
+                        // Save thumbnail to file
                         thumbnail.Save(thumbnailOutputPath);
                         Console.WriteLine($"Thumbnail saved to: {thumbnailOutputPath}");
                     }
@@ -69,3 +69,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When building a photo‑gallery web app that needs to verify that embedded EXIF thumbnails in JPEG files are smaller than the full‑resolution image before generating preview tiles.
+ * 2. When creating a digital asset management system that validates JPEG EXIF thumbnail dimensions to ensure quick loading of thumbnails on mobile devices.
+ * 3. When developing a batch‑processing tool that extracts JPEG EXIF thumbnails and compares their size to the original image to decide whether to replace them with higher‑quality previews.
+ * 4. When implementing an automated quality‑control script for a photography workflow that checks that the embedded EXIF thumbnail is indeed smaller than the source JPEG to avoid redundant storage.
+ * 5. When writing a C# utility using Aspose.Imaging to read JPEG EXIF data and confirm that the thumbnail dimensions meet the requirements of a third‑party image‑sharing API.
+ */

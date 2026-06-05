@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
@@ -9,16 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input CDR files
-            string[] inputPaths = {
+            // Hard‑coded list of input CDR files
+            string[] inputFiles = new string[]
+            {
                 @"C:\Images\sample1.cdr",
-                @"C:\Images\sample2.cdr"
+                @"C:\Images\sample2.cdr",
+                @"C:\Images\sample3.cdr"
             };
 
-            // Hardcoded output directory
-            string outputDir = @"C:\Images\Output";
+            // Hard‑coded output directory (PNG files will be placed here)
+            string outputDir = @"C:\Images\Converted";
 
-            foreach (string inputPath in inputPaths)
+            // Ensure the output directory exists once (additional calls are harmless)
+            Directory.CreateDirectory(outputDir);
+
+            foreach (string inputPath in inputFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -27,41 +33,23 @@ class Program
                     return;
                 }
 
-                // Build output PNG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+                // Derive output file name (same base name with .png extension)
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the CDR image
-                using (Image image = Image.Load(inputPath))
+                // Load the CDR file
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Cast to CdrImage to access pages
-                    CdrImage cdrImage = image as CdrImage;
-                    if (cdrImage == null)
-                    {
-                        Console.Error.WriteLine($"Unable to cast to CdrImage: {inputPath}");
-                        continue;
-                    }
-
-                    // Process the first page (or the whole image if no pages)
-                    if (cdrImage.Pages.Length > 0)
-                    {
-                        var page = cdrImage.Pages[0] as Aspose.Imaging.FileFormats.Cdr.CdrImagePage;
-                        if (page != null)
-                        {
-                            // Resize page to 800x600
-                            page.Resize(800, 600);
-                            // Save as PNG
-                            page.Save(outputPath);
-                            continue;
-                        }
-                    }
-
-                    // Fallback: resize the whole image and save
+                    // Resize the image to 800x600 (default NearestNeighbourResample)
                     cdrImage.Resize(800, 600);
-                    cdrImage.Save(outputPath);
+
+                    // Prepare PNG save options (optional, can be default)
+                    PngOptions pngOptions = new PngOptions();
+
+                    // Save as PNG
+                    cdrImage.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -71,3 +59,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert a collection of CorelDRAW (.cdr) design files into web‑ready PNG thumbnails of 800×600 pixels for an online portfolio.
+ * 2. When an e‑commerce platform must automatically generate uniformly sized product preview images from supplier‑provided CDR artwork during the import process.
+ * 3. When a digital asset management system requires a nightly job that transforms newly uploaded CDR logos into 800×600 PNG files for quick preview in the UI.
+ * 4. When a marketing automation tool has to resize and convert multiple CDR banner drafts into PNG format before sending them to an email‑campaign service.
+ * 5. When a desktop application needs to read several CDR files, downscale them to 800×600, and save them as PNGs for inclusion in a PDF report generated with Aspose.PDF.
+ */

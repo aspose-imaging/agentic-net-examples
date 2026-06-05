@@ -11,11 +11,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/portion.tiff";
+            // Hardcoded input and output file paths
+            string inputPath = "input.djvu";
+            string outputPath = "output/output.tiff";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,16 +25,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DjVu document
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            // Load DjVu document from file stream
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Define the rectangle area to export (x, y, width, height)
-                Rectangle exportArea = new Rectangle(100, 100, 200, 200);
-
-                // Configure TIFF save options
+                // Prepare TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Define the export rectangle (x, y, width, height)
+                Rectangle exportRect = new Rectangle(100, 100, 200, 200);
+
                 // Export only the first page (index 0) with the specified area
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(0, exportArea);
+                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(0, exportRect);
+                tiffOptions.MultiPageOptions = multiPageOptions;
 
                 // Save the selected portion as TIFF
                 djvuImage.Save(outputPath, tiffOptions);
@@ -46,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a legal firm needs to extract a specific page region from a scanned DjVu contract and store it as a high‑resolution TIFF for archival or e‑discovery purposes.
+ * 2. When a publishing company wants to generate a thumbnail TIFF of a selected illustration area inside a multi‑page DjVu manuscript for preview in an online catalog.
+ * 3. When a medical records system must isolate a diagnostic image region from a DjVu scan and convert it to TIFF to comply with DICOM‑compatible image workflows.
+ * 4. When a GIS analyst extracts a defined map segment from a DjVu file and saves it as a TIFF to overlay on other spatial data layers.
+ * 5. When an educational platform needs to crop a particular diagram from a DjVu textbook page and convert it to TIFF for inclusion in printable study guides.
+ */

@@ -10,57 +10,54 @@ class Program
     {
         try
         {
-            // Define the batch of BMP files to convert.
-            // Each entry specifies the input BMP path, the desired output PSD path,
-            // and the PSD compression method to use for that file.
-            var batch = new[]
+            // Define batch items: input BMP, output PSD, desired compression method
+            var batch = new (string inputPath, string outputPath, CompressionMethod compression)[]
             {
-                new
-                {
-                    InputPath = @"C:\Images\sample1.bmp",
-                    OutputPath = @"C:\Converted\sample1.psd",
-                    Compression = CompressionMethod.RLE // RLE compression
-                },
-                new
-                {
-                    InputPath = @"C:\Images\sample2.bmp",
-                    OutputPath = @"C:\Converted\sample2.psd",
-                    Compression = CompressionMethod.Raw // No compression
-                },
-                // Add more entries as needed.
+                (@"C:\Images\sample1.bmp", @"C:\Output\sample1_Raw.psd", CompressionMethod.Raw),
+                (@"C:\Images\sample2.bmp", @"C:\Output\sample2_RLE.psd", CompressionMethod.RLE),
+                // Add more entries as needed
             };
 
-            foreach (var item in batch)
+            foreach (var (inputPath, outputPath, compression) in batch)
             {
-                // Verify that the input file exists.
-                if (!File.Exists(item.InputPath))
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {item.InputPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure the output directory exists.
-                Directory.CreateDirectory(Path.GetDirectoryName(item.OutputPath));
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the BMP image.
-                using (Image image = Image.Load(item.InputPath))
+                // Load BMP image
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Configure PSD save options with the specified compression method.
+                    // Configure PSD options
                     var psdOptions = new PsdOptions
                     {
-                        CompressionMethod = item.Compression,
-                        // Optional: set other PSD options such as ColorMode, ChannelBitsCount, etc.
+                        CompressionMethod = compression,
+                        // Optional: set other options such as ColorMode if needed
+                        ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
                     };
 
-                    // Save the image as PSD using the configured options.
-                    image.Save(item.OutputPath, psdOptions);
+                    // Save as PSD with specified compression
+                    image.Save(outputPath, psdOptions);
                 }
             }
         }
         catch (Exception ex)
         {
-            // Any unexpected error is reported without crashing the application.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a graphics pipeline needs to convert a large collection of legacy BMP assets into Photoshop‑compatible PSD files while applying specific compression (Raw or RLE) to each file for optimal file size and performance.
+ * 2. When an e‑learning platform must automate the preparation of high‑resolution screenshots stored as BMPs into layered PSDs with different compression settings to meet varying bandwidth constraints for online delivery.
+ * 3. When a digital archiving system processes scanned BMP images in bulk and saves them as PSDs with chosen compression methods to preserve image fidelity while reducing storage costs.
+ * 4. When a game development studio wants to batch‑export character textures from BMP format to PSD, selecting Raw compression for texture maps that require lossless data and RLE for masks that benefit from run‑length encoding.
+ * 5. When a print shop integrates a C# service that reads BMP proofs, converts them to PSD using Aspose.Imaging, and applies per‑file compression strategies to ensure compatibility with downstream Photoshop workflows.
+ */
