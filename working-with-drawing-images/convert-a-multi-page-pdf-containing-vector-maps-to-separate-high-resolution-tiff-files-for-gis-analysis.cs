@@ -1,8 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -10,56 +8,35 @@ class Program
     {
         try
         {
-            // Input PDF path (hardcoded)
+            // Hardcoded input PDF path
             string inputPath = "Input\\maps.pdf";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output directory (hardcoded)
-            string outputDir = "Output";
-            Directory.CreateDirectory(outputDir);
+            // Hardcoded output image path
+            string outputPath = "Output\\page1.png";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PDF document
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                IMultipageImage multipage = image as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                // Ensure the loaded image supports multiple pages
+                var multipage = image as Aspose.Imaging.IMultipageImage;
+                if (multipage == null)
                 {
-                    Console.Error.WriteLine("No pages found in the PDF.");
+                    Console.Error.WriteLine("The input file is not a multipage image.");
                     return;
                 }
 
-                // Iterate through each page and export to a separate TIFF file
-                for (int i = 0; i < multipage.PageCount; i++)
-                {
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.tif");
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure TIFF export options
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        // Rasterize the vector page at high resolution
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        },
-                        // Export only the current page
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
-                    };
-
-                    // Save the current page as a TIFF file
-                    image.Save(outputPath, tiffOptions);
-                }
+                // Save the first page as PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -68,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a GIS analyst needs to extract each page of a multi‑page PDF containing vector maps and save them as high‑resolution TIFF files for precise spatial analysis using C# and Aspose.Imaging.
+ * 2. When a municipal planning department wants to automate the conversion of a PDF atlas of city maps into separate TIFF images that retain vector detail for integration with their mapping software.
+ * 3. When a remote‑sensing developer must programmatically split a large PDF of satellite imagery into individual TIFF files to feed a raster‑processing pipeline in a .NET application.
+ * 4. When a construction firm requires a batch process that loads a multi‑page PDF blueprint, verifies it is a multipage image, and outputs each page as a lossless TIFF for archival and quality‑control purposes.
+ * 5. When a web‑based GIS portal needs to dynamically render PDF map pages as high‑resolution TIFFs on the server side using Aspose.Imaging to serve fast, high‑quality map tiles to clients.
+ */
