@@ -1,65 +1,65 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string originalOutputPath = "original.png";
-            string blurredOutputPath = "blurred.png";
+            string outputOriginalPath = "output_original.png";
+            string outputBlurPath = "output_blur.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(originalOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(blurredOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputOriginalPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputBlurPath));
 
-            // Load SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            // Load the SVG image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Set up rasterization options for SVG to PNG conversion
+                Aspose.Imaging.FileFormats.Svg.SvgImage svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
+
+                // Configure rasterization options
                 SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // PNG save options with vector rasterization
-                PngOptions pngOptions = new PngOptions
+                // Rasterize SVG to a PNG in memory
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                // Save the original rasterized PNG
-                using (FileStream originalStream = new FileStream(originalOutputPath, FileMode.Create, FileAccess.Write))
-                {
-                    svgImage.Save(originalStream, pngOptions);
-                }
-            }
+                    // Load the rasterized image
+                    using (Aspose.Imaging.Image rasterImg = Aspose.Imaging.Image.Load(ms))
+                    {
+                        Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)rasterImg;
 
-            // Load the rasterized PNG as a RasterImage
-            using (Image loadedImage = Image.Load(originalOutputPath))
-            {
-                RasterImage rasterImage = (RasterImage)loadedImage;
+                        // Save the original raster image
+                        rasterImage.Save(outputOriginalPath, new PngOptions());
 
-                // Apply Gaussian blur filter (radius 5, sigma 4.0)
-                rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                        // Apply Gaussian blur filter
+                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the blurred image
-                using (FileStream blurredStream = new FileStream(blurredOutputPath, FileMode.Create, FileAccess.Write))
-                {
-                    rasterImage.Save(blurredStream, new PngOptions());
+                        // Save the blurred image
+                        rasterImage.Save(outputBlurPath, new PngOptions());
+                    }
                 }
             }
         }
@@ -69,3 +69,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to confirm that applying a Gaussian blur to a rasterized SVG does not create visual artifacts before publishing the PNG on a responsive website.
+ * 2. When a developer wants to automate regression testing of vector‑based logos by comparing the original rasterized PNG with a blurred version to ensure edge fidelity.
+ * 3. When a developer integrates Aspose.Imaging in a C# build pipeline to validate that SVG icons retain crispness after Gaussian blur processing for mobile app assets.
+ * 4. When a developer creates a quality‑control script that loads an SVG, rasterizes it to PNG, applies a blur filter, and checks for unwanted pixel distortion in printed marketing materials.
+ * 5. When a developer builds a preview tool that shows both the original and blurred PNG outputs of an SVG to verify that the blur effect does not introduce aliasing or color banding in UI components.
+ */
