@@ -1,18 +1,18 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputDirectory = "output_gifs";
-
         try
         {
+            // Hardcoded input DjVu file path
+            string inputPath = @"C:\Temp\sample.djvu";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,22 +20,19 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists (unconditional call as per safety rule)
-            Directory.CreateDirectory(outputDirectory);
-
             // Open the DjVu file stream
-            using (FileStream stream = File.OpenRead(inputPath))
+            using (Stream inputStream = File.OpenRead(inputPath))
             {
-                // Load DjVu image
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Load DjVu image from the stream
+                using (DjvuImage djvuImage = new DjvuImage(inputStream))
                 {
-                    // Iterate through each page
-                    for (int i = 0; i < djvuImage.PageCount; i++)
+                    int pageNumber = 1;
+                    foreach (var page in djvuImage.Pages)
                     {
-                        // Prepare output file path for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.gif");
+                        // Construct output path for each page
+                        string outputPath = $@"C:\Temp\output_page_{pageNumber}.gif";
 
-                        // Ensure the directory for the output file exists (unconditional)
+                        // Ensure the output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Configure GIF options with interlacing enabled
@@ -44,8 +41,10 @@ class Program
                             Interlaced = true
                         };
 
-                        // Save the current page as a GIF using the specified options
-                        djvuImage.Pages[i].Save(outputPath, gifOptions);
+                        // Save the current page as a GIF file
+                        page.Save(outputPath, gifOptions);
+
+                        pageNumber++;
                     }
                 }
             }
@@ -56,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract each page of a multi‑page DjVu document and create web‑friendly interlaced GIFs for faster progressive loading in browsers.
+ * 2. When an archival system must convert scanned DjVu files into GIF animations while preserving page order and ensuring the output files are stored in a specific folder structure.
+ * 3. When a document‑management application requires on‑the‑fly conversion of DjVu pages to interlaced GIFs to generate thumbnails that load incrementally for low‑bandwidth users.
+ * 4. When a batch‑processing tool has to read DjVu streams, apply custom GifOptions such as Interlaced = true, and save each page as a separate GIF for downstream image‑processing pipelines.
+ * 5. When a C# service needs to validate the existence of a DjVu source file, load it via Aspose.Imaging, and produce interlaced GIFs per page to meet client‑side animation standards.
+ */
