@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -11,25 +11,30 @@ class Program
     {
         try
         {
-            // Hard‑coded list of EPS files to convert
-            string[] inputFiles = new string[]
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputEps";
+            string outputFolder = @"C:\OutputPdf";
+
+            // List of EPS files to convert (file names only)
+            string[] epsFiles = new[]
             {
-                @"C:\Input\Sample1.eps",
-                @"C:\Input\Sample2.eps",
-                @"C:\Input\Sample3.eps"
+                "sample1.eps",
+                "sample2.eps",
+                "sample3.eps"
             };
 
-            foreach (var inputPath in inputFiles)
+            foreach (var fileName in epsFiles)
             {
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputFolder, fileName);
+                string outputPath = Path.Combine(outputFolder, Path.ChangeExtension(fileName, ".pdf"));
+
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
-
-                // Determine output PDF path (same folder, .pdf extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -41,13 +46,14 @@ class Program
                     {
                         PdfCoreOptions = new PdfCoreOptions
                         {
-                            // Example compliance; adjust as needed
                             PdfCompliance = PdfComplianceVersion.PdfA1b
                         }
                     };
 
                     image.Save(outputPath, pdfOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
