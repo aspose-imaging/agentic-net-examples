@@ -3,6 +3,8 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -11,45 +13,40 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\sample.bmp";
-            string outputPath = "C:\\temp\\output.svg";
+            string inputBmpPath = "C:\\temp\\sample.bmp";
+            string outputSvgPath = "C:\\temp\\output.svg";
 
             // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputBmpPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputBmpPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
 
-            // Load the BMP image
-            using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
+            // Load the BMP image as a raster image
+            using (RasterImage bmpImage = (RasterImage)Image.Load(inputBmpPath))
             {
-                int width = bmp.Width;
-                int height = bmp.Height;
-                int dpi = 96;
+                // Create an SVG graphics canvas with the same dimensions as the BMP
+                var graphics = new SvgGraphics2D(bmpImage.Width, bmpImage.Height, 96);
 
-                // Create an SVG graphics context with the same dimensions as the BMP
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+                // Create a pen with a dash pattern (5 units dash, 5 units gap)
+                var dashPen = new Pen(Color.Black, 2);
+                dashPen.DashPattern = new float[] { 5, 5 };
+
+                // Draw dashed diagonal lines on the SVG
+                graphics.DrawLine(dashPen, 0, 0, bmpImage.Width, bmpImage.Height);
+                graphics.DrawLine(dashPen, 0, bmpImage.Height, bmpImage.Width, 0);
 
                 // Draw the bitmap onto the SVG canvas
-                graphics.DrawImage(bmp, new Point(0, 0));
+                graphics.DrawImage(bmpImage, new Point(0, 0), new Size(bmpImage.Width, bmpImage.Height));
 
-                // Create a pen with a dashed stroke pattern
-                Pen dashedPen = new Pen(Color.Black, 2);
-                // 5 units on, 5 units off
-                dashedPen.DashPattern = new float[] { 5, 5 };
-
-                // Draw a diagonal line using the dashed pen
-                graphics.DrawLine(dashedPen, 0, 0, width, height);
-
-                // Finalize the SVG image
+                // Finalize the SVG image and save it
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
-                    // Save the SVG file
-                    svgImage.Save(outputPath);
+                    svgImage.Save(outputSvgPath);
                 }
             }
         }
