@@ -2,18 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,23 +26,19 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF save options
+                // Configure GIF save options with vector rasterization smoothing
                 GifOptions gifOptions = new GifOptions();
 
-                // Set up vector rasterization options with smoothing to improve animation quality
+                // Set up vector rasterization options
                 VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
                 {
-                    // Use antialiasing for smoother lines and curves
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    // Optional: set background color if needed
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    // Preserve original size
-                    PageSize = image.Size
+                    // Enable anti-aliasing to smooth lines and curves
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
                 };
 
                 gifOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as GIF with the configured options
+                // Save the image as GIF using the configured options
                 image.Save(outputPath, gifOptions);
             }
         }
@@ -53,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When converting high‑resolution PNG screenshots to animated GIFs for web tutorials, a developer can enable AntiAlias smoothing to keep lines and text crisp and avoid jagged edges.
+ * 2. When generating GIF previews of vector‑based diagrams from a CAD application, setting SmoothingMode to AntiAlias ensures the curves render smoothly in the final animation.
+ * 3. When creating lightweight GIF avatars from user‑uploaded PNG images in a social‑media app, applying vector rasterization smoothing reduces pixelation while keeping file size low.
+ * 4. When automating the production of GIF slideshows from a series of PNG assets for email newsletters, using Aspose.Imaging’s SmoothingMode improves visual quality on different email clients.
+ * 5. When building a C# service that converts PNG icons to animated GIFs for mobile UI kits, enabling anti‑aliasing via VectorRasterizationOptions delivers smoother transitions between frames.
+ */
