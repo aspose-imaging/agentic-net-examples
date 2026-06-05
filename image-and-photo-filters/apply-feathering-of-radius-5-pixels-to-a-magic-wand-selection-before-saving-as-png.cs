@@ -11,7 +11,7 @@ class Program
     {
         // Hardcoded input and output file paths
         string inputPath = "input.png";
-        string outputPath = "output.png";
+        string outputPath = "output/output.png";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,12 +25,12 @@ class Program
 
         try
         {
-            // Load the image as a RasterImage
+            // Load the image as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a magic wand selection at point (10,10), feather it with radius 5, and apply the mask
+                // Create a magic wand mask, feather it with a radius of 5 pixels, and apply to the image
                 MagicWandTool
-                    .Select(image, new MagicWandSettings(10, 10))
+                    .Select(image, new MagicWandSettings(0, 0)) // starting point for selection
                     .GetFeathered(new FeatheringSettings() { Size = 5 })
                     .Apply();
 
