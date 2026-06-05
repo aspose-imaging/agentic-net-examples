@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.bmp";
+            string outputPath = @"C:\Images\sample.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,27 +28,28 @@ class Program
             using (Image otgImage = Image.Load(inputPath))
             {
                 // Configure rasterization options for OTG
-                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
                 {
-                    // Preserve original page size
                     PageSize = otgImage.Size
                 };
 
-                // Set up BMP save options and attach rasterization options
-                BmpOptions bmpSaveOptions = new BmpOptions
+                // Set up BMP save options with the rasterization settings
+                BmpOptions bmpOptions = new BmpOptions
                 {
-                    VectorRasterizationOptions = otgRasterOptions
+                    VectorRasterizationOptions = otgRasterizationOptions
                 };
 
-                // Save as BMP (initial resolution may be default)
-                otgImage.Save(outputPath, bmpSaveOptions);
+                // Save the image as BMP
+                otgImage.Save(outputPath, bmpOptions);
             }
 
-            // Re-open the saved BMP to set custom resolution (150 DPI)
-            using (BmpImage bmpImage = new BmpImage(outputPath))
+            // Load the saved BMP to adjust its resolution
+            using (BmpImage bmpImage = (BmpImage)Image.Load(outputPath))
             {
+                // Set custom resolution to 150 DPI
                 bmpImage.SetResolution(150.0, 150.0);
-                // Overwrite the file with the new resolution
+
+                // Overwrite the BMP file with the new resolution
                 bmpImage.Save(outputPath);
             }
         }
