@@ -9,18 +9,20 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DjVu files
-        string[] inputFiles = new string[]
-        {
-            @"C:\DjvuFiles\doc1.djvu",
-            @"C:\DjvuFiles\doc2.djvu"
-        };
-
-        // Hardcoded root output directory
-        string outputRoot = @"C:\PngOutput";
-
         try
         {
+            // Hardcoded list of DjVu files to process
+            string[] inputFiles = new string[]
+            {
+                @"C:\Input\sample1.djvu",
+                @"C:\Input\sample2.djvu"
+                // Add more file paths as needed
+            };
+
+            // Output directory for PNG files
+            string outputDirectory = @"C:\Output";
+
+            // Process each DjVu file in parallel
             Parallel.ForEach(inputFiles, inputPath =>
             {
                 // Verify input file exists
@@ -30,24 +32,23 @@ class Program
                     return;
                 }
 
-                // Create a subdirectory for each DjVu file's pages
-                string fileBaseName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputDir = Path.Combine(outputRoot, fileBaseName);
-                Directory.CreateDirectory(outputDir);
-
                 // Open the DjVu file stream
-                using (FileStream stream = File.OpenRead(inputPath))
+                using (Stream stream = File.OpenRead(inputPath))
                 {
-                    // Load the DjVu document using the provided LoadDocument method
+                    // Load DjVu document
                     using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
                     {
-                        // Iterate through each page and save as PNG
+                        // Iterate through each page of the DjVu document
                         foreach (DjvuPage page in djvuImage.Pages)
                         {
-                            string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.png");
-                            // Ensure the directory for the output file exists
+                            // Build output file name: <originalname>_page<Number>.png
+                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.PageNumber}.png";
+                            string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                            // Ensure the output directory exists
                             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                            // Save the page as PNG using the provided Save method
+
+                            // Save the page as PNG
                             page.Save(outputPath, new PngOptions());
                         }
                     }
@@ -60,3 +61,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert a collection of multi‑page DjVu documents into individual PNG images for web preview, using C# and Aspose.Imaging with Parallel.ForEach to speed up the process.
+ * 2. When an archival system must extract each page of scanned DjVu files and store them as lossless PNG files for downstream OCR pipelines, leveraging parallel execution in .NET.
+ * 3. When a digital publishing workflow requires converting large DjVu e‑books into PNG page assets for mobile apps, and the developer wants to process many files concurrently to reduce conversion time.
+ * 4. When a document management solution has to generate thumbnail PNGs from every page of incoming DjVu uploads, using Aspose.Imaging's DjvuImage and parallel processing to handle high‑volume uploads.
+ * 5. When a migration tool needs to transform legacy DjVu assets into PNG format for compatibility with modern image viewers, and the developer wants to automate the task across multiple files with C# parallel loops.
+ */
