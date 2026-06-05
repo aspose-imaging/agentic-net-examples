@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output_softfocus.jpg";
+            string outputPath = @"C:\Images\output_soft_focus.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,37 +24,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            // Load JPEG image
+            using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage rasterImage = (RasterImage)jpegImage;
 
-                // Define a custom 7x7 kernel (example values)
-                double[] kernel = new double[]
-                {
-                    1, 1, 2, 2, 2, 1, 1,
-                    1, 2, 2, 4, 2, 2, 1,
-                    2, 2, 4, 8, 4, 2, 2,
-                    2, 4, 8,16, 8, 4, 2,
-                    2, 2, 4, 8, 4, 2, 2,
-                    1, 2, 2, 4, 2, 2, 1,
-                    1, 1, 2, 2, 2, 1, 1
-                };
-
-                // Normalize the kernel so that its sum equals 1 (neutral brightness)
-                double sum = kernel.Sum();
-                for (int i = 0; i < kernel.Length; i++)
-                {
-                    kernel[i] /= sum;
-                }
-
-                // Apply a soft‑focus effect using a Gaussian blur that matches the 7x7 size.
-                // The Gaussian blur internally creates a normalized kernel, achieving the desired effect.
-                var blurOptions = new GaussianBlurFilterOptions(7, 2.0);
-                raster.Filter(raster.Bounds, blurOptions);
+                // Apply a Gaussian blur with a 7x7 kernel (soft focus effect)
+                // Size = 7 (kernel dimension), Sigma = 1.0 (controls blur amount)
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(7, 1.0));
 
                 // Save the processed image
-                raster.Save(outputPath);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -63,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to add a soft‑focus effect to user‑uploaded JPEG photos in a web portal, they can use this Aspose.Imaging C# code to apply a normalized 7×7 Gaussian blur kernel before saving the image.
+ * 2. When building a desktop photo‑editing tool that lets photographers preview a subtle blur on high‑resolution JPEGs, the code demonstrates how to load, filter, and overwrite the file with a 7×7 kernel for neutral brightness.
+ * 3. When automating batch processing of product catalog images to create a gentle background blur while preserving color balance, the example shows how to apply a Gaussian blur filter with a 7×7 kernel to each JPEG file.
+ * 4. When integrating image preprocessing into a machine‑learning pipeline that requires uniformly softened JPEG inputs, this snippet illustrates how to normalize the kernel and apply the filter using Aspose.Imaging for .NET.
+ * 5. When developing a mobile‑backend service that receives raw JPEG uploads and needs to reduce sharp edges for a smoother UI experience, the code provides a straightforward way to apply a 7×7 Gaussian blur and save the softened image.
+ */

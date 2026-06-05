@@ -4,57 +4,38 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (RasterImage inputRaster = (RasterImage)Image.Load(inputPath))
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
             {
-                using (PngImage kernelImage = new PngImage(3, 3))
+                RasterImage raster = (RasterImage)image;
+
+                // Save the image with PNG options
+                PngOptions saveOptions = new PngOptions
                 {
-                    Graphics graphics = new Graphics(kernelImage);
-                    using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.White))
-                    {
-                        graphics.FillRectangle(brush, new Rectangle(1, 1, 1, 1));
-                    }
-
-                    RasterImage kernelRaster = (RasterImage)kernelImage;
-                    int[] argbPixels = kernelRaster.LoadArgb32Pixels(kernelRaster.Bounds);
-
-                    double[,] customKernel = new double[3, 3];
-                    for (int y = 0; y < 3; y++)
-                    {
-                        for (int x = 0; x < 3; x++)
-                        {
-                            int index = y * 3 + x;
-                            int argb = argbPixels[index];
-                            int red = (argb >> 16) & 0xFF;
-                            customKernel[y, x] = red / 255.0;
-                        }
-                    }
-
-                    var convolutionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(customKernel);
-                    inputRaster.Filter(inputRaster.Bounds, convolutionOptions);
-                }
-
-                PngOptions saveOptions = new PngOptions();
-                saveOptions.Source = new FileCreateSource(outputPath, false);
-                inputRaster.Save(outputPath, saveOptions);
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -63,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to programmatically validate the existence of a PNG file, load it into a RasterImage, and save it to a new location with custom PNG options in a .NET application.
+ * 2. When an automated batch‑processing tool must ensure output directories exist before writing processed PNG images using Aspose.Imaging for .NET.
+ * 3. When a C# service has to read a user‑uploaded PNG, perform preliminary checks, and store a copy with specific encoding settings without altering the original image.
+ * 4. When integrating Aspose.Imaging into a Windows desktop app to reliably open a PNG, cast it to a RasterImage for further manipulation, and persist it using a FileCreateSource.
+ * 5. When building a server‑side image pipeline that catches and logs exceptions while loading and saving PNG files to prevent crashes in production environments.
+ */

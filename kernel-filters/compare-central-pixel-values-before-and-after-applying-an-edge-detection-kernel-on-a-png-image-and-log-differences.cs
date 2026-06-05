@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -25,41 +26,38 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                int centerX = raster.Width / 2;
-                int centerY = raster.Height / 2;
-                var rect = new Rectangle(centerX, centerY, 1, 1);
+                int width = raster.Width;
+                int height = raster.Height;
+                int centerX = width / 2;
+                int centerY = height / 2;
 
-                // Load central pixel before filtering
-                int[] beforePixels = raster.LoadArgb32Pixels(rect);
-                int before = beforePixels[0];
+                var centerRect = new Rectangle(centerX, centerY, 1, 1);
+                int[] beforePixel = raster.LoadArgb32Pixels(centerRect);
 
-                // Edge‑detection kernel (Laplacian)
-                double[,] kernel = new double[,]
+                double[,] edgeKernel = new double[,]
                 {
-                    { 0, -1, 0 },
-                    { -1, 4, -1 },
-                    { 0, -1, 0 }
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
                 };
+                var convOptions = new ConvolutionFilterOptions(edgeKernel);
+                raster.Filter(raster.Bounds, convOptions);
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                raster.Filter(raster.Bounds, filterOptions);
+                int[] afterPixel = raster.LoadArgb32Pixels(centerRect);
 
-                // Load central pixel after filtering
-                int[] afterPixels = raster.LoadArgb32Pixels(rect);
-                int after = afterPixels[0];
+                Console.WriteLine($"Before ARGB: 0x{beforePixel[0]:X8}");
+                Console.WriteLine($"After ARGB: 0x{afterPixel[0]:X8}");
 
-                // Log difference
-                if (before != after)
+                if (beforePixel[0] != afterPixel[0])
                 {
-                    Console.WriteLine($"Central pixel changed from 0x{before:X8} to 0x{after:X8}");
+                    Console.WriteLine("Pixel value changed after edge detection.");
                 }
                 else
                 {
-                    Console.WriteLine("Central pixel unchanged.");
+                    Console.WriteLine("Pixel value unchanged.");
                 }
 
-                // Save the filtered image
-                raster.Save(outputPath);
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -68,3 +66,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to verify that applying a 3×3 edge‑detection convolution filter changes the central pixel of a PNG image for quality‑control testing.
+ * 2. When a developer wants to log the before‑and‑after ARGB values of a specific raster pixel to debug an image‑processing pipeline in C# using Aspose.Imaging.
+ * 3. When a developer must compare pixel intensity changes after applying an edge‑detection kernel to detect features in medical scans saved as PNG files.
+ * 4. When a developer is building an automated regression test that ensures a custom edge‑detection filter produces consistent central‑pixel results across image versions.
+ * 5. When a developer needs to extract and record pixel differences to generate a change‑report for surveillance footage processed with a convolution filter.
+ */

@@ -1,11 +1,10 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Text.Json;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -14,75 +13,66 @@ class Program
         try
         {
             // Hardcoded paths
-            string jsonConfigPath = "kernels.json";
-            string inputFolder = "input_svgs";
-            string outputFolder = "output_pngs";
+            string inputDir = @"C:\InputSvgs";
+            string outputDir = @"C:\OutputSvgs";
 
-            // Verify JSON configuration file
-            if (!File.Exists(jsonConfigPath))
+            if (!Directory.Exists(inputDir))
             {
-                Console.Error.WriteLine($"File not found: {jsonConfigPath}");
+                Console.Error.WriteLine($"Directory not found: {inputDir}");
                 return;
             }
 
-            // Load kernel definitions (dictionary: name -> 2D array)
-            string json = File.ReadAllText(jsonConfigPath);
-            var kernels = JsonSerializer.Deserialize<Dictionary<string, double[][]>>(json);
-            if (kernels == null || kernels.Count == 0)
-            {
-                Console.Error.WriteLine("No kernels found in configuration.");
-                return;
-            }
+            Directory.CreateDirectory(outputDir);
 
-            // Process each SVG file in the input folder
-            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
-            foreach (var svgPath in svgFiles)
+            // Define kernel definitions manually
+            var kernelDefs = new List<KernelDefinition>
             {
-                // Load SVG image
+                new KernelDefinition { Filter = "gaussian", Radius = 5, Sigma = 1.5 },
+                new KernelDefinition { Filter = "sharpen", Radius = 3, Sigma = 0.0 }
+            };
+
+            foreach (string svgPath in Directory.GetFiles(inputDir, "*.svg"))
+            {
+                if (!File.Exists(svgPath))
+                {
+                    Console.Error.WriteLine($"File not found: {svgPath}");
+                    continue;
+                }
+
                 using (Image svgImage = Image.Load(svgPath))
                 {
-                    // Rasterization options for SVG -> raster image
-                    var rasterOptions = new SvgRasterizationOptions
+                    var vectorOptions = new VectorRasterizationOptions
                     {
-                        PageSize = svgImage.Size
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Color.White
                     };
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
+                    var pngOptions = new PngOptions { VectorRasterizationOptions = vectorOptions };
 
-                    // Rasterize SVG into a memory stream
-                    using (MemoryStream rasterStream = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
-                        svgImage.Save(rasterStream, pngOptions);
-                        rasterStream.Position = 0;
+                        svgImage.Save(ms, pngOptions);
+                        ms.Position = 0;
 
-                        // Load rasterized image as RasterImage
-                        using (Image rasterImg = Image.Load(rasterStream))
+                        using (Image rasterImg = Image.Load(ms))
                         {
-                            RasterImage raster = (RasterImage)rasterImg;
+                            var raster = (RasterImage)rasterImg;
 
-                            // Apply each kernel from the configuration
-                            foreach (var kvp in kernels)
+                            foreach (var kd in kernelDefs)
                             {
-                                double[][] kernel2D = kvp.Value;
-                                int rows = kernel2D.Length;
-                                int cols = kernel2D[0].Length;
-                                double[,] kernel = new double[rows, cols];
-                                for (int i = 0; i < rows; i++)
-                                    for (int j = 0; j < cols; j++)
-                                        kernel[i, j] = kernel2D[i][j];
-
-                                var convOptions = new ConvolutionFilterOptions(kernel);
-                                raster.Filter(raster.Bounds, convOptions);
+                                if (kd.Filter.Equals("gaussian", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(kd.Radius, kd.Sigma));
+                                }
+                                else if (kd.Filter.Equals("sharpen", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    raster.Filter(raster.Bounds, new SharpenFilterOptions(kd.Radius, kd.Sigma));
+                                }
                             }
 
-                            // Prepare output path and ensure directory exists
-                            string fileName = Path.GetFileNameWithoutExtension(svgPath);
-                            string outputPath = Path.Combine(outputFolder, fileName + ".png");
+                            string fileName = Path.GetFileNameWithoutExtension(svgPath) + ".png";
+                            string outputPath = Path.Combine(outputDir, fileName);
                             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save the filtered raster image as PNG
                             raster.Save(outputPath, new PngOptions());
                         }
                     }
@@ -94,4 +84,20 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    private class KernelDefinition
+    {
+        public string Filter { get; set; }
+        public int Radius { get; set; }
+        public double Sigma { get; set; }
+    }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically apply Gaussian blur and sharpening kernels defined in a JSON file to a large collection of SVG graphics before converting them to high‑resolution PNGs for web publishing.
+ * 2. When an e‑commerce platform must batch‑process product illustration SVGs with custom filter settings stored in configuration to ensure consistent visual quality across all catalog images.
+ * 3. When a reporting tool generates SVG charts that must be rasterized and filtered using user‑specified kernel parameters from JSON to embed them as PNGs in PDF documents.
+ * 4. When a mobile app backend converts user‑uploaded SVG icons into optimized PNG assets while applying configurable blur or sharpen effects defined in a JSON configuration for brand consistency.
+ * 5. When a digital asset management system needs to re‑render archived SVG files with updated filter kernels from a JSON settings file to meet new branding guidelines without manual editing.
+ */

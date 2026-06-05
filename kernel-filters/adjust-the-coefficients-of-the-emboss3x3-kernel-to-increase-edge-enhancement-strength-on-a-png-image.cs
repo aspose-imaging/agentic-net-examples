@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,51 +9,37 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Retrieve the default Emboss3x3 kernel (2D array)
-                double[,] originalKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
-
-                // Increase edge enhancement strength by a factor (e.g., 2.0)
-                double factor = 2.0;
-                int rows = originalKernel.GetLength(0);
-                int cols = originalKernel.GetLength(1);
-                double[,] enhancedKernel = new double[rows, cols];
+                double[,] kernel = (double[,])Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3.Clone();
+                double strengthFactor = 1.5;
+                int rows = kernel.GetLength(0);
+                int cols = kernel.GetLength(1);
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < cols; j++)
                     {
-                        enhancedKernel[i, j] = originalKernel[i, j] * factor;
+                        kernel[i, j] *= strengthFactor;
                     }
                 }
 
-                // Apply the custom convolution filter with the enhanced kernel
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(enhancedKernel);
-                raster.Filter(raster.Bounds, filterOptions);
+                raster.Filter(raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
 
-                // Save the processed image as PNG
-                PngOptions saveOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                raster.Save(outputPath, saveOptions);
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -64,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer wants to enhance the edges of product photos in PNG format for an e‑commerce website, they can increase the strength of the Emboss3x3 kernel using Aspose.Imaging in C#.
+ * 2. When a desktop application needs to apply a stronger emboss effect to scanned documents before saving them as PNG files, the code can adjust the convolution kernel coefficients to boost edge definition.
+ * 3. When a game developer wants to preprocess sprite sheets by intensifying the emboss filter to make outlines more pronounced in PNG assets, they can use this C# snippet with Aspose.Imaging.
+ * 4. When an automated image‑processing pipeline must improve the visual contrast of architectural blueprints stored as PNGs by increasing edge enhancement, the adjustable kernel strength provides a simple solution.
+ * 5. When a photo‑editing tool requires a customizable emboss effect that can be tuned at runtime for PNG images, developers can modify the Emboss3x3 kernel coefficients as shown to control the intensity of the effect.
+ */

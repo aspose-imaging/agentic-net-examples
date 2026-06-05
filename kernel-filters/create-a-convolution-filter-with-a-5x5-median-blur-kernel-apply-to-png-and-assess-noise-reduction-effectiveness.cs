@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
 
 class Program
 {
@@ -12,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\noisy_input.png";
-            string outputPath = @"C:\Images\output\filtered_median.png";
+            string inputPath = @"C:\Images\noisy.png";
+            string outputPath = @"C:\Images\noisy_median.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,51 +24,46 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            // Load original image for quality assessment
+            using (Image originalImg = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Keep a copy of the original pixel data for assessment
-                int width = rasterImage.Width;
-                int height = rasterImage.Height;
-                int[,] originalR = new int[width, height];
-                int[,] originalG = new int[width, height];
-                int[,] originalB = new int[width, height];
-
-                for (int y = 0; y < height; y++)
+                // Load a second copy for filtering
+                using (Image filteredImg = Image.Load(inputPath))
                 {
-                    for (int x = 0; x < width; x++)
+                    // Cast to RasterImage to access filtering and pixel data
+                    RasterImage originalRaster = (RasterImage)originalImg;
+                    RasterImage filteredRaster = (RasterImage)filteredImg;
+
+                    // Apply a 5x5 median filter (median blur kernel)
+                    filteredRaster.Filter(filteredRaster.Bounds, new MedianFilterOptions(5));
+
+                    // Save the filtered image
+                    filteredRaster.Save(outputPath);
+
+                    // Assess noise reduction effectiveness
+                    // Compute average absolute difference per channel between original and filtered images
+                    long totalDiff = 0;
+                    int width = originalRaster.Width;
+                    int height = originalRaster.Height;
+                    int pixelCount = width * height;
+
+                    for (int y = 0; y < height; y++)
                     {
-                        Color pixel = rasterImage.GetPixel(x, y);
-                        originalR[x, y] = pixel.R;
-                        originalG[x, y] = pixel.G;
-                        originalB[x, y] = pixel.B;
+                        for (int x = 0; x < width; x++)
+                        {
+                            var origColor = originalRaster.GetPixel(x, y);
+                            var filtColor = filteredRaster.GetPixel(x, y);
+
+                            totalDiff += Math.Abs(origColor.R - filtColor.R);
+                            totalDiff += Math.Abs(origColor.G - filtColor.G);
+                            totalDiff += Math.Abs(origColor.B - filtColor.B);
+                            totalDiff += Math.Abs(origColor.A - filtColor.A);
+                        }
                     }
+
+                    double avgDiff = (double)totalDiff / (pixelCount * 4);
+                    Console.WriteLine($"Average per-channel absolute difference after median filtering: {avgDiff:F2}");
                 }
-
-                // Apply a median filter with a 5x5 kernel to the entire image
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-                // Save the filtered image
-                rasterImage.Save(outputPath);
-
-                // Assess noise reduction effectiveness by computing average absolute difference per channel
-                long totalDiff = 0;
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        Color filteredPixel = rasterImage.GetPixel(x, y);
-                        totalDiff += Math.Abs(filteredPixel.R - originalR[x, y]);
-                        totalDiff += Math.Abs(filteredPixel.G - originalG[x, y]);
-                        totalDiff += Math.Abs(filteredPixel.B - originalB[x, y]);
-                    }
-                }
-
-                double avgDiff = totalDiff / (double)(width * height * 3);
-                Console.WriteLine($"Average absolute per‑channel difference after median filtering: {avgDiff:F2}");
             }
         }
         catch (Exception ex)
@@ -78,3 +72,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to reduce salt‑and‑pepper noise in scanned PNG documents before OCR processing, they can use this 5×5 median blur filter with Aspose.Imaging for .NET.
+ * 2. When a C# application must improve the visual quality of noisy screenshots saved as PNG files for a reporting dashboard, the code demonstrates how to apply a median filter and save the cleaned image.
+ * 3. When a software engineer wants to compare the effectiveness of a denoising algorithm by computing average absolute pixel differences between the original and filtered PNG images, this example shows the necessary raster operations.
+ * 4. When an image‑processing pipeline requires automated batch processing of PNG assets stored on disk, the snippet illustrates loading, filtering, and ensuring output directories exist using Aspose.Imaging.
+ * 5. When a developer is building a diagnostic tool that evaluates noise reduction on medical PNG scans, the code provides a practical way to apply a 5×5 median kernel and quantify the improvement per color channel.
+ */

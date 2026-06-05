@@ -3,33 +3,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string outputPath = Path.Combine("Output", "drawing_filtered.png");
+            // Define output path
+            string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "Output", "filtered.png");
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            // Create a PNG image with a FileCreateSource (output is bound to the file)
+            using (PngOptions pngOptions = new PngOptions())
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-                graphics.DrawRectangle(new Pen(Color.Blue, 5), new Rectangle(50, 50, 200, 150));
-                graphics.DrawEllipse(new Pen(Color.Red, 3), new Rectangle(300, 100, 150, 100));
-                graphics.DrawLine(new Pen(Color.Green, 2), new Point(100, 400), new Point(400, 400));
+                pngOptions.Source = new FileCreateSource(outputPath, false);
+                using (Image image = Image.Create(pngOptions, 500, 500))
+                {
+                    // Draw on the image
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
+                    Pen pen = new Pen(Color.Black, 5);
+                    graphics.DrawRectangle(pen, new Rectangle(50, 50, 400, 400));
 
-                RasterImage raster = (RasterImage)image;
-                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(4, 135);
-                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                raster.Filter(raster.Bounds, convOptions);
+                    // Apply convolution filter (motion blur) to the entire image
+                    RasterImage raster = (RasterImage)image;
+                    int size = 4;
+                    double angle = 135.0;
+                    double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(size, angle);
+                    var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                    raster.Filter(raster.Bounds, convOptions);
 
-                image.Save();
+                    // Save the image (output file is already bound)
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -38,3 +47,12 @@ public class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a PNG thumbnail with a stylized motion‑blur rectangle for a web dashboard, they can use this code to draw the shape, apply a 4‑pixel, 135° blur, and save the result.
+ * 2. When building automated test data for image‑processing algorithms, a developer can create a synthetic PNG, draw a known geometric object, apply a motion‑blur convolution filter, and export it to verify detection robustness.
+ * 3. When creating custom UI icons that require a subtle diagonal blur effect, the code lets a C# developer render the icon on a white canvas, apply Aspose.Imaging’s GetBlurMotion filter, and output a PNG ready for inclusion in the application.
+ * 4. When preparing assets for a game’s loading screen where a rectangle should appear as if moving quickly, the developer can use this snippet to draw the rectangle, apply a 4‑pixel, 135° motion blur via ConvolutionFilterOptions, and save the PNG for the engine.
+ * 5. When a developer wants to demonstrate the impact of convolution filters in a tutorial or documentation, this example shows how to bind a FileCreateSource, draw graphics, apply a motion‑blur kernel, and export the processed image as a PNG file.
+ */

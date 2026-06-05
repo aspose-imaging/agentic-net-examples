@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,18 +9,24 @@ class Program
     {
         try
         {
-            // Hardcoded input path
+            // Hardcoded input and output paths
             string inputPath = "input.png";
+            string outputDirectory = "output";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the image
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the multi‑page PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Ensure the image supports multiple pages
+                // Cast to multipage interface
                 IMultipageImage multipage = image as IMultipageImage;
                 if (multipage == null)
                 {
@@ -29,51 +34,52 @@ class Program
                     return;
                 }
 
-                // Define a 3x3 kernel and normalize its sum to 1
+                // Define a custom 3x3 kernel (example values)
                 double[,] kernel = new double[,]
                 {
-                    { 1, 1, 1 },
-                    { 1, 1, 1 },
-                    { 1, 1, 1 }
+                    { 1, 2, 1 },
+                    { 2, 4, 2 },
+                    { 1, 2, 1 }
                 };
-                double sum = 0;
-                foreach (double v in kernel) sum += v;
-                for (int i = 0; i < kernel.GetLength(0); i++)
-                    for (int j = 0; j < kernel.GetLength(1); j++)
-                        kernel[i, j] /= sum;
 
-                // Output directory (ensured to exist)
-                string outputDir = "output";
-                Directory.CreateDirectory(outputDir);
+                // Normalize kernel so that sum equals 1
+                double sum = 0;
+                for (int y = 0; y < kernel.GetLength(0); y++)
+                {
+                    for (int x = 0; x < kernel.GetLength(1); x++)
+                    {
+                        sum += kernel[y, x];
+                    }
+                }
+                if (sum != 0)
+                {
+                    for (int y = 0; y < kernel.GetLength(0); y++)
+                    {
+                        for (int x = 0; x < kernel.GetLength(1); x++)
+                        {
+                            kernel[y, x] /= sum;
+                        }
+                    }
+                }
 
                 // Process each page
                 for (int i = 0; i < multipage.PageCount; i++)
                 {
-                    // Retrieve the page as a raster image
-                    Image pageImage = multipage.Pages[i];
-                    using (RasterImage raster = pageImage as RasterImage)
+                    // Retrieve the page as a RasterImage
+                    using (RasterImage raster = (RasterImage)multipage.Pages[i])
                     {
-                        if (raster == null)
-                        {
-                            Console.Error.WriteLine($"Page {i} is not a raster image.");
-                            continue;
-                        }
+                        // Apply convolution filter with the custom kernel
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                        raster.Filter(raster.Bounds, filterOptions);
 
-                        // Apply the custom convolution filter
-                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                        // Prepare output path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
 
-                        // Prepare output path for this page
-                        string outputPath = Path.Combine(outputDir, $"page_{i}.png");
-
-                        // Ensure the output directory exists (unconditional call)
+                        // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the processed page
-                        PngOptions options = new PngOptions
-                        {
-                            Source = new FileCreateSource(outputPath, false)
-                        };
-                        raster.Save(outputPath, options);
+                        // Save the processed page as PNG
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
             }
@@ -84,3 +90,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑process a multi‑page PNG (e.g., a scanned PDF saved as PNG) by applying a custom convolution kernel for uniform noise reduction before exporting each page as a separate image file.
+ * 2. When building a C# application that prepares multi‑frame PNG animations for web delivery, using Aspose.Imaging to apply a normalized blur kernel to each frame and save the processed frames individually.
+ * 3. When creating a medical imaging workflow that loads multi‑slice PNG scans, applies a custom edge‑enhancement kernel with sum = 1 to improve contrast, and writes each slice to a folder for further analysis.
+ * 4. When implementing a satellite‑imagery preprocessing pipeline that reads multi‑band PNG tiles, applies a custom smoothing kernel to each band to eliminate sensor noise, and stores the cleaned tiles as separate files.
+ * 5. When developing a document archival tool that extracts each page of a multi‑page PNG invoice, applies a standardized sharpening kernel to improve readability, and saves the sharpened pages to a designated output directory.
+ */

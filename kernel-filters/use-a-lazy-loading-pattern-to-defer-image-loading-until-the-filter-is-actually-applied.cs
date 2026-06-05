@@ -1,65 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-
-class LazyImage : IDisposable
-{
-    private readonly string _filePath;
-    private Image _image;
-
-    public LazyImage(string filePath)
-    {
-        _filePath = filePath;
-    }
-
-    // Loads the image only when an operation is requested
-    public void Apply(Action<Image> operation)
-    {
-        if (_image == null)
-        {
-            // Verify that the image can be loaded before attempting to load it
-            if (!Image.CanLoad(_filePath))
-                throw new InvalidOperationException($"Cannot load image from {_filePath}");
-
-            // Load the image lazily
-            _image = Image.Load(_filePath);
-        }
-
-        // Perform the supplied operation on the loaded image
-        operation(_image);
-    }
-
-    public void Dispose()
-    {
-        _image?.Dispose();
-    }
-}
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.png";
-
-        // Path‑safety checks as required
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Use lazy loading – the image is not loaded until the filter is applied
-            using (var lazyImage = new LazyImage(inputPath))
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Example filter: simply save the image (replace with real processing as needed)
-                lazyImage.Apply(img => img.Save(outputPath));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            Lazy<RasterImage> lazyImage = new Lazy<RasterImage>(() =>
+            {
+                Image img = Image.Load(inputPath);
+                RasterImage raster = (RasterImage)img;
+                if (!raster.IsCached)
+                    raster.CacheData();
+                return raster;
+            });
+
+            using (RasterImage raster = lazyImage.Value)
+            {
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -68,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to apply a sharpen filter to a PNG file while ensuring the image is loaded only after confirming the file exists, using lazy loading to reduce memory consumption.
+ * 2. When an application processes large batches of images and wants to defer loading each RasterImage until the filter operation is actually performed, improving performance on limited resources.
+ * 3. When a C# service must validate the input path, create the output directory, and then apply a customizable SharpenFilterOptions (strength 5, radius 4.0) to enhance image details on demand.
+ * 4. When a developer wants to guarantee that image data is cached before filtering, using Aspose.Imaging’s RasterImage.CacheData within a lazy‑initialized object to avoid repeated disk reads.
+ * 5. When an automated workflow needs to handle missing files gracefully, apply a filter only when necessary, and save the processed result as a PNG using PngOptions, all encapsulated in a try‑catch block.
+ */

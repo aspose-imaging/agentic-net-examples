@@ -2,48 +2,33 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input/multipage.png";
-            string outputPath = "output/blurred.png";
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Process only if the image supports multiple pages
-                if (image is IMultipageImage multipageImage)
+                PngOptions options = new PngOptions
                 {
-                    // Iterate through each page and apply Gaussian blur
-                    foreach (Image page in multipageImage.Pages)
-                    {
-                        if (page is RasterImage rasterPage)
-                        {
-                            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole page
-                            rasterPage.Filter(rasterPage.Bounds,
-                                new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                        }
-                    }
-                }
-
-                // Save the processed image as PNG
-                PngOptions saveOptions = new PngOptions();
-                image.Save(outputPath, saveOptions);
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,3 +37,12 @@ public class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically blur sensitive information across all pages of a multi‑page PNG invoice before sharing it with external partners.
+ * 2. When a C# application must prepare multi‑page PNG maps for a web portal by applying a Gaussian blur to each page to create a low‑resolution preview.
+ * 3. When a document management system requires batch processing of scanned multi‑page PNG forms, using Aspose.Imaging for .NET to add Gaussian blur for privacy compliance.
+ * 4. When an image‑processing pipeline in a .NET service needs to generate stylized thumbnails of each page in a multi‑page PNG brochure by applying a Gaussian blur filter.
+ * 5. When a developer wants to integrate Aspose.Imaging into a Windows desktop tool that sanitizes multi‑page PNG blueprints by blurring proprietary details on every page before export.
+ */

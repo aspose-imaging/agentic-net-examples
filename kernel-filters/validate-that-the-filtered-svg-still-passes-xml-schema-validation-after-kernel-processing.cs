@@ -1,70 +1,74 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using System.Xml;
 using System.Xml.Schema;
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
+    // Entry point
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
-        string schemaPath = "svg.xsd";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Schema file existence check (optional, but helpful for validation)
-        if (!File.Exists(schemaPath))
-        {
-            Console.Error.WriteLine($"Schema file not found: {schemaPath}");
-            return;
-        }
+        // Hardcoded paths
+        string inputPath = @"C:\Images\input.svg";
+        string outputPath = @"C:\Images\output.svg";
+        string schemaPath = @"C:\Images\svg.xsd";
 
         try
         {
-            // Load the SVG image using Aspose.Imaging
-            using (Image image = Image.Load(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Prepare SVG save options (no special processing)
-                SvgOptions svgOptions = new SvgOptions();
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the (potentially processed) SVG to the output path
-                image.Save(outputPath, svgOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Validate the saved SVG against the provided XSD schema
-            bool hasValidationError = false;
-            XmlReaderSettings settings = new XmlReaderSettings
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                ValidationType = ValidationType.Schema
+                // Example kernel processing: no changes, just re-save
+                // (Insert any SVG manipulation here if needed)
+
+                // Save the processed SVG
+                svgImage.Save(outputPath, new SvgOptions());
+            }
+
+            // Validate the saved SVG against the XSD schema
+            if (!File.Exists(schemaPath))
+            {
+                Console.Error.WriteLine($"Schema file not found: {schemaPath}");
+                return;
+            }
+
+            bool isValid = true;
+            ValidationEventHandler validationHandler = (sender, args) =>
+            {
+                isValid = false;
+                Console.Error.WriteLine($"Validation {args.Severity}: {args.Message}");
             };
+
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ValidationType = ValidationType.Schema;
             settings.Schemas.Add(null, schemaPath);
-            settings.ValidationEventHandler += (sender, args) =>
-            {
-                Console.Error.WriteLine($"Validation error: {args.Message}");
-                hasValidationError = true;
-            };
+            settings.ValidationEventHandler += validationHandler;
 
-            using (FileStream fs = File.OpenRead(outputPath))
-            using (XmlReader reader = XmlReader.Create(fs, settings))
+            using (XmlReader reader = XmlReader.Create(outputPath, settings))
             {
-                while (reader.Read()) { }
+                while (reader.Read()) { /* reading triggers validation */ }
             }
 
-            if (!hasValidationError)
+            if (isValid)
             {
-                Console.WriteLine("SVG validation passed.");
+                Console.WriteLine("SVG validation succeeded.");
+            }
+            else
+            {
+                Console.Error.WriteLine("SVG validation failed.");
             }
         }
         catch (Exception ex)
@@ -73,3 +77,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application generates SVG charts server‑side and must ensure the saved files conform to an SVG XSD before sending them to browsers.
+ * 2. When an automated build pipeline processes SVG assets (e.g., applying a custom kernel) and needs to verify that the output still passes XML schema validation to prevent runtime rendering errors.
+ * 3. When a desktop C# tool imports user‑provided SVG logos, applies transformations, and validates against a corporate SVG schema to guarantee brand compliance.
+ * 4. When a CI/CD workflow for a mobile app resizes and optimizes SVG icons and checks the resulting files against an XSD to catch malformed markup early.
+ * 5. When a cloud service that converts SVG to other formats (PNG, PDF) runs a pre‑flight check using XmlReaderSettings to confirm the processed SVG meets the required XML schema standards.
+ */

@@ -10,8 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input PNG file
-            string inputPath = @"C:\temp\sample.png";
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.png";
+            string outputDir = @"c:\temp\output\";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,16 +21,13 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists (Directory.CreateDirectory works even if the directory already exists)
+            Directory.CreateDirectory(outputDir);
+
             // Get original file size
             long originalSize = new FileInfo(inputPath).Length;
 
-            // Output directory for filtered images
-            string outputDir = @"C:\temp\filtered";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Define filter types to evaluate
+            // Define the filter types to test
             PngFilterType[] filterTypes = new PngFilterType[]
             {
                 PngFilterType.None,
@@ -40,35 +38,40 @@ class Program
                 PngFilterType.Adaptive
             };
 
-            foreach (PngFilterType filter in filterTypes)
+            // Load the original image once
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare output file path
-                string outputPath = Path.Combine(outputDir, $"sample_{filter}.png");
-
-                // Ensure directory for this output (redundant but follows rule)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load original image
-                using (Image image = Image.Load(inputPath))
+                foreach (PngFilterType filter in filterTypes)
                 {
-                    // Set PNG options with the current filter
+                    // Configure PNG save options
                     PngOptions options = new PngOptions
                     {
                         FilterType = filter,
-                        // Keep other options default; you may set CompressionLevel if desired
+                        CompressionLevel = 9,          // maximum compression
+                        Progressive = true,
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        BitDepth = 8
                     };
 
-                    // Save image with specified filter
+                    // Save to memory stream to obtain size without writing to disk
+                    long filteredSize;
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        image.Save(ms, options);
+                        filteredSize = ms.Length;
+                    }
+
+                    // Save to file for inspection
+                    string outputPath = Path.Combine(outputDir, $"{filter}.png");
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                     image.Save(outputPath, options);
+
+                    // Compute compression ratio (filtered/original)
+                    double ratio = (double)filteredSize / originalSize;
+
+                    Console.WriteLine($"Filter: {filter}, Size: {filteredSize} bytes, Ratio: {ratio:P2}");
                 }
-
-                // Get size of filtered image
-                long filteredSize = new FileInfo(outputPath).Length;
-
-                // Calculate compression ratio (original / filtered)
-                double ratio = (double)originalSize / filteredSize;
-
-                Console.WriteLine($"Filter: {filter}, Original: {originalSize} bytes, Filtered: {filteredSize} bytes, Ratio: {ratio:F3}");
             }
         }
         catch (Exception ex)
@@ -77,3 +80,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer wants to choose the optimal PNG filter to minimize bandwidth for high‑traffic image assets, they can run this code to compare original and filtered file sizes and select the most efficient setting.
+ * 2. When a mobile app team needs to reduce the app bundle size by compressing UI icons, they can use the code to evaluate how different PngFilterType options affect storage consumption on the device.
+ * 3. When a cloud‑based image storage service wants to estimate cost savings from applying maximum compression with various PNG filters, the snippet provides a quick way to measure the compression ratio for each filter.
+ * 4. When a digital archivist is preserving large collections of PNG photographs and must balance quality with archival storage limits, the program helps determine which filter yields the smallest file without altering color depth.
+ * 5. When a CI/CD pipeline includes automated image optimization checks, developers can integrate this code to automatically verify that newly added PNG assets meet predefined compression‑ratio thresholds before deployment.
+ */

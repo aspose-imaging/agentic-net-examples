@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -8,41 +9,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output\\output.png";
+            string outputPath = "output/output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image as a RasterImage
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Define a 3x3 edge‑detection kernel
-                double[,] edgeKernel = new double[,]
+                double[,] kernel = new double[,]
                 {
                     { -1, -1, -1 },
                     { -1,  8, -1 },
                     { -1, -1, -1 }
                 };
 
-                // Create convolution filter options
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel, 1.0, 0);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
 
-                // Apply the custom filter to the entire image
-                raster.Filter(raster.Bounds, filterOptions);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                // Save the processed image
-                raster.Save(outputPath);
+                var saveOptions = new PngOptions();
+                rasterImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -51,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to highlight object boundaries in a PNG photograph for a computer‑vision preprocessing step, they can apply this 3×3 edge‑detection kernel using Aspose.Imaging for .NET.
+ * 2. When building a document‑scanning application that must emphasize text edges before OCR, the code can run a convolution filter on the scanned image to improve character recognition.
+ * 3. When creating a visual‑effects pipeline that requires fast edge extraction from raster images without external libraries, the custom zero‑sum kernel provides a ready‑to‑use C# solution with Aspose.Imaging.
+ * 4. When generating thumbnails that need a clear outline of shapes for UI previews, developers can use this filter to convert any input PNG into an edge‑enhanced version before resizing.
+ * 5. When troubleshooting image‑processing algorithms and need a reproducible example of a zero‑sum convolution filter in C#, this snippet demonstrates loading, filtering, and saving a PNG with Aspose.Imaging’s FilterOptions.
+ */

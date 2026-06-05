@@ -3,19 +3,18 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output\\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -31,7 +30,7 @@ class Program
                 // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Define a custom diagonal edge‑detection kernel
+                // Define a diagonal edge‑detection kernel
                 double[,] kernel = new double[,]
                 {
                     { -1, 0, 1 },
@@ -39,13 +38,11 @@ class Program
                     {  1, 0,-1 }
                 };
 
-                // Apply the convolution filter with the custom kernel
+                // Apply the custom convolution filter to the entire image
                 raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                // Prepare PNG save options
+                // Save the processed image as PNG
                 PngOptions saveOptions = new PngOptions();
-
-                // Save the processed image
                 raster.Save(outputPath, saveOptions);
             }
         }
@@ -55,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer uses Aspose.Imaging for .NET to highlight diagonal edges in a PNG screenshot for visual inspection.
+ * 2. When an image‑processing workflow needs to apply a custom convolution kernel to PNG scans to enhance diagonal lines before OCR.
+ * 3. When a game‑asset pipeline uses C# and Aspose.Imaging to apply a diagonal edge‑detection filter to PNG textures prior to mipmap generation.
+ * 4. When a medical‑imaging application processes PNG X‑ray files with a custom diagonal edge‑detection filter to accentuate bone structures.
+ * 5. When a web service creates stylized PNG thumbnails by applying a diagonal edge‑detection convolution filter using Aspose.Imaging in C#.
+ */

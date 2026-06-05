@@ -1,51 +1,52 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Check input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image and cast to RasterImage
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
                 // Store original dimensions
-                int originalWidth = rasterImage.Width;
-                int originalHeight = rasterImage.Height;
+                int originalWidth = raster.Width;
+                int originalHeight = raster.Height;
 
-                // Apply a convolution filter (Gaussian blur as an example)
-                var filterOptions = new GaussianBlurFilterOptions(5, 4.0);
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                // Apply a convolution filter (Gaussian blur in this example)
+                raster.Filter(
+                    raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                // Verify dimensions remain unchanged
-                bool dimensionsUnchanged = rasterImage.Width == originalWidth && rasterImage.Height == originalHeight;
-                Console.WriteLine(dimensionsUnchanged
-                    ? "Image dimensions unchanged after filter."
-                    : "Image dimensions changed after filter.");
+                // Verify that dimensions have not changed
+                if (raster.Width == originalWidth && raster.Height == originalHeight)
+                {
+                    Console.WriteLine("Dimensions unchanged after filter.");
+                }
+                else
+                {
+                    Console.WriteLine($"Dimensions changed: before {originalWidth}x{originalHeight}, after {raster.Width}x{raster.Height}");
+                }
 
                 // Save the processed image
-                rasterImage.Save(outputPath);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -54,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a C# developer needs to apply a Gaussian blur to a PNG image while guaranteeing that the original width and height remain unchanged for downstream layout calculations.
+ * 2. When an image‑processing pipeline must validate that applying any convolution filter (e.g., sharpening, edge detection) does not alter the raster dimensions before saving the result to disk.
+ * 3. When a .NET application processes user‑uploaded photos and must ensure the output file preserves the original resolution so that UI components display it correctly.
+ * 4. When a batch job converts images to a different format (e.g., PNG to JPEG) and applies filters, it needs to confirm that the filter operation does not resize the image, avoiding layout breaks.
+ * 5. When debugging an Aspose.Imaging filter implementation, a developer wants to log a message if the filter unexpectedly changes the image size, helping to catch bugs early.
+ */

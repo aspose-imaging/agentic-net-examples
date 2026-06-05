@@ -1,49 +1,54 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.png";
+        string outputPath = @"c:\temp\sample.SharpenFilter.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-
-            // Ensure input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Base output directory
-            string outputDir = "output";
-            Directory.CreateDirectory(outputDir); // unconditional as per requirements
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access Filter method
+                RasterImage rasterImage = (RasterImage)image;
 
-                // ---------- Gaussian Blur ----------
-                var gaussianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0);
-                LogAndApplyFilter(raster, gaussianOptions, Path.Combine(outputDir, "gaussian.png"));
+                // Prepare sharpen filter options
+                int kernelSize = 5;
+                double sigma = 4.0;
+                var sharpenOptions = new SharpenFilterOptions(kernelSize, sigma);
 
-                // ---------- Sharpen ----------
-                var sharpenOptions = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0);
-                LogAndApplyFilter(raster, sharpenOptions, Path.Combine(outputDir, "sharpen.png"));
+                // Log kernel information
+                Console.WriteLine($"Applying Sharpen filter with kernel size {kernelSize} and sigma {sigma}.");
+                Console.WriteLine($"Kernel type: {sharpenOptions.Kernel?.GetType().Name ?? "null"}");
 
-                // ---------- Median ----------
-                var medianOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5);
-                LogAndApplyFilter(raster, medianOptions, Path.Combine(outputDir, "median.png"));
+                // Measure processing time
+                Stopwatch sw = Stopwatch.StartNew();
+                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
+                sw.Stop();
 
-                // ---------- Bilateral Smoothing ----------
-                var bilateralOptions = new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5);
-                LogAndApplyFilter(raster, bilateralOptions, Path.Combine(outputDir, "bilateral.png"));
+                Console.WriteLine($"Filter applied in {sw.ElapsedMilliseconds} ms.");
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
+                Console.WriteLine($"Saved sharpened image to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -51,37 +56,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Helper method to log kernel type, processing time and save the image
-    static void LogAndApplyFilter(RasterImage raster, Aspose.Imaging.ImageFilters.FilterOptions.FilterOptionsBase options, string outputPath)
-    {
-        // Log kernel type (if available)
-        string kernelInfo = "None";
-        try
-        {
-            var kernelProp = options.GetType().GetProperty("Kernel");
-            if (kernelProp != null)
-            {
-                var kernel = kernelProp.GetValue(options);
-                kernelInfo = kernel?.GetType().Name ?? "None";
-            }
-        }
-        catch { /* ignore reflection errors */ }
-
-        Console.WriteLine($"Applying {options.GetType().Name} (Kernel: {kernelInfo})");
-
-        // Measure processing time
-        DateTime start = DateTime.Now;
-        raster.Filter(raster.Bounds, options);
-        DateTime end = DateTime.Now;
-        TimeSpan duration = end - start;
-        Console.WriteLine($"Processing time: {duration.TotalMilliseconds} ms");
-
-        // Ensure output directory exists (already created in Main, but called as per rule)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Save the result as PNG
-        raster.Save(outputPath, new PngOptions());
-        Console.WriteLine($"Saved output to {outputPath}");
-    }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically sharpen high‑resolution PNG photos in a batch job and log the kernel parameters and processing time for performance monitoring.
+ * 2. When building a C# desktop application that lets users enhance scanned documents by applying a customizable sharpen filter and records the filter details for audit trails.
+ * 3. When integrating Aspose.Imaging into a server‑side service that receives uploaded images, applies a 5×5 Gaussian‑based sharpen filter, and logs execution time to optimize resource usage.
+ * 4. When creating a diagnostic tool that validates image‑processing pipelines by loading a PNG, applying a SharpenFilterOptions with specific sigma, and outputting kernel type and elapsed milliseconds to the console.
+ * 5. When developing an automated quality‑control script that processes product images, saves the sharpened result with a .SharpenFilter.png suffix, and captures detailed filter metadata for reporting.
+ */
