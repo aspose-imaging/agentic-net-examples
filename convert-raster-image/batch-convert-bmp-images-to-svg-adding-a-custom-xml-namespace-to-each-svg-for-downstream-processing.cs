@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -10,75 +11,53 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\InputBmp";
-            string outputDirectory = @"C:\Images\OutputSvg";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Get all BMP files in the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDir, "*.bmp");
 
-            // Custom XML namespace to add to each SVG
-            const string customNamespace = "http://example.com/custom";
-
-            // Process each BMP file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.bmp"))
+            foreach (string inputPath in bmpFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output SVG file path
+                // Determine output SVG path
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the BMP image
+                // Load BMP image and convert to SVG
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare SVG save options with default rasterization settings
-                    var rasterizationOptions = new SvgRasterizationOptions
+                    var vectorRasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     };
+
                     var svgOptions = new SvgOptions
                     {
-                        VectorRasterizationOptions = rasterizationOptions,
-                        // Keep metadata if needed
-                        KeepMetadata = true
+                        VectorRasterizationOptions = vectorRasterizationOptions
                     };
 
-                    // Save the image as SVG
                     image.Save(outputPath, svgOptions);
                 }
 
-                // Insert the custom XML namespace into the generated SVG file
-                try
+                // Add custom XML namespace to the generated SVG
+                XDocument xdoc = XDocument.Load(outputPath);
+                XNamespace customNs = "http://example.com/custom";
+                XElement root = xdoc.Root;
+                if (root != null && root.Attribute(XNamespace.Xmlns + "custom") == null)
                 {
-                    string svgContent = File.ReadAllText(outputPath);
-                    // Find the first occurrence of the <svg tag
-                    int svgTagEnd = svgContent.IndexOf('>');
-                    if (svgTagEnd > 0)
-                    {
-                        // Insert the namespace attribute before the closing '>'
-                        string before = svgContent.Substring(0, svgTagEnd);
-                        string after = svgContent.Substring(svgTagEnd);
-                        string namespaceAttribute = $" xmlns:custom=\"{customNamespace}\"";
-                        // Avoid duplicate insertion
-                        if (!before.Contains("xmlns:custom"))
-                        {
-                            svgContent = before + namespaceAttribute + after;
-                            File.WriteAllText(outputPath, svgContent);
-                        }
-                    }
+                    root.SetAttributeValue(XNamespace.Xmlns + "custom", customNs);
                 }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Failed to add namespace to {outputPath}: {ex.Message}");
-                }
+                xdoc.Save(outputPath);
             }
         }
         catch (Exception ex)
