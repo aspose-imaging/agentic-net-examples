@@ -7,40 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\sample.odg";
-        string outputPath = "output\\sample.pdf";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Temp\sample.odg";
+            string outputPath = @"C:\Temp\sample.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for ODG
-                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
+                // Configure rasterization options for ODG
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = image.Size
                 };
 
-                // Configure PDF save options and attach rasterization options
-                PdfOptions saveOptions = new PdfOptions
+                // Set up PDF save options
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save the image as PDF
-                image.Save(outputPath, saveOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
