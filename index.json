@@ -1465,18 +1465,18 @@
         "verify-that-the-webp-image-exists-before-conversion-to-avoid-filenotfound-exceptions.cs"
       ],
       "required_namespaces": [
-        "Aspose.Imaging",
         "System",
         "System.IO",
         "Aspose.Imaging.ImageOptions",
+        "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Webp",
         "Aspose.Imaging.FileFormats.Gif",
         "System.Threading.Tasks",
         "System.Diagnostics",
-        "Aspose.Imaging.FileFormats.Tiff",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
         "Aspose.Imaging.FileFormats.Gif.Blocks",
         "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.Metadata",
+        "System.Linq",
         "System.Threading",
         "Aspose.Imaging.Multithreading",
         "System.Text.Json"
