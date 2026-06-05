@@ -9,9 +9,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.png";
+            string outputPath = @"C:\Images\sample_converted.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,25 +20,26 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with maximum compression
-                PngOptions pngOptions = new PngOptions
+                // Prepare PNG save options with maximum compression
+                var pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9,          // Max compression (0-9)
-                    Progressive = true            // Optional: enable progressive loading
+                    CompressionLevel = 9, // maximum compression
+                    // Enable progressive loading (optional but common for PNG)
+                    Progressive = true
                 };
 
-                // Set rasterization options for vector OTG source
-                OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
+                // Configure rasterization options for vector OTG content
+                var otgRasterization = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size          // Preserve original size
+                    PageSize = image.Size // preserve original dimensions
                 };
-                pngOptions.VectorRasterizationOptions = otgRaster;
+                pngOptions.VectorRasterizationOptions = otgRasterization;
 
                 // Save the image as PNG
                 image.Save(outputPath, pngOptions);
