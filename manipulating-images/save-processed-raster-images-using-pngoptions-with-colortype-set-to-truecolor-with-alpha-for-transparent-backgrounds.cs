@@ -8,11 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Wrap the whole logic in a try/catch to handle unexpected errors gracefully
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.png";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output.png";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -24,16 +25,14 @@ class Program
             // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source raster image
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with Truecolor with Alpha (transparent background)
+                // Configure PNG save options with Truecolor with Alpha (transparent background support)
                 PngOptions pngOptions = new PngOptions
                 {
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
-                    BitDepth = 8,               // 8 bits per channel
-                    CompressionLevel = 9,       // Maximum compression
-                    Progressive = true          // Enable progressive loading
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    BitDepth = 8 // typical 8 bits per channel
                 };
 
                 // Save the image as PNG using the configured options
@@ -42,7 +41,7 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
+            // Output any error message without crashing the application
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
