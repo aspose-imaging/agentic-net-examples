@@ -11,20 +11,20 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string inputDirectory = @"C:\InputImages";
+            string outputDirectory = @"C:\OutputPdfs";
 
-            // Ensure the output directory exists (creates parent if needed)
+            // Ensure the output directory exists (will also handle subfolders)
             Directory.CreateDirectory(outputDirectory);
 
-            // Get all TIFF files in the input directory
+            // Get all TIFF files in the input directory (both .tif and .tiff)
             string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-            string[] tiffFilesUpper = Directory.GetFiles(inputDirectory, "*.tiff");
-            string[] allFiles = new string[tiffFiles.Length + tiffFilesUpper.Length];
-            tiffFiles.CopyTo(allFiles, 0);
-            tiffFilesUpper.CopyTo(allFiles, tiffFiles.Length);
+            string[] tiffFilesAlt = Directory.GetFiles(inputDirectory, "*.tiff");
+            string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
+            tiffFiles.CopyTo(allTiffFiles, 0);
+            tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
 
-            foreach (string inputPath in allFiles)
+            foreach (string inputPath in allTiffFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -39,17 +39,17 @@ class Program
                     // Cast to TiffImage to access AdjustContrast
                     TiffImage tiffImage = (TiffImage)image;
 
-                    // Increase contrast (value in range [-100, 100])
+                    // Increase contrast by 50 (range -100 to 100)
                     tiffImage.AdjustContrast(50f);
 
                     // Prepare output PDF path (same file name, .pdf extension)
                     string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
                     string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    // Ensure the output directory exists (unconditional as per rules)
+                    // Ensure the output directory exists (covers cases where outputPath may include subfolders)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save as PDF
+                    // Save the adjusted image as PDF
                     tiffImage.Save(outputPath, new PdfOptions());
                 }
             }
