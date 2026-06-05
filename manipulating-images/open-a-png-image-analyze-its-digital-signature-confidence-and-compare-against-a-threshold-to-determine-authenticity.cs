@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png; // For PNG support
 
 class Program
 {
@@ -8,9 +9,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output paths
             string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
+            string outputPath = @"C:\Images\result.txt";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -19,34 +20,45 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access digital signature methods
-                RasterImage rasterImage = image as RasterImage;
-                if (rasterImage == null)
+                string password = "myPassword";   // Password used for the digital signature
+                int threshold = 80;               // Desired confidence threshold (percentage)
+
+                bool isSigned = false;
+                int confidence = 0;
+
+                // Determine the concrete image type and invoke the appropriate methods
+                if (image is RasterImage rasterImage)
                 {
-                    Console.Error.WriteLine("Unsupported image type.");
-                    return;
+                    isSigned = rasterImage.IsDigitalSigned(password, threshold);
+                    confidence = rasterImage.AnalyzePercentageDigitalSignature(password);
+                }
+                else if (image is RasterCachedImage cachedImage)
+                {
+                    isSigned = cachedImage.IsDigitalSigned(password, threshold);
+                    confidence = cachedImage.AnalyzePercentageDigitalSignature(password);
+                }
+                else if (image is RasterCachedMultipageImage cachedMulti)
+                {
+                    isSigned = cachedMulti.IsDigitalSigned(password, threshold);
+                    confidence = cachedMulti.AnalyzePercentageDigitalSignature(password);
                 }
 
-                // Parameters for signature verification
-                string password = "secret";          // password used when the image was signed
-                int threshold = 80;                  // percentage threshold for authenticity
+                // Build the result message
+                string result = isSigned
+                    ? $"Image is authentic. Signature confidence: {confidence}% (>= {threshold}%)."
+                    : $"Image is NOT authentic. Signature confidence: {confidence}% (< {threshold}%).";
 
-                // Fast check: is the image considered digitally signed?
-                bool isSigned = rasterImage.IsDigitalSigned(password, threshold);
-                Console.WriteLine($"Is digitally signed (threshold {threshold}%): {isSigned}");
+                // Output to console
+                Console.WriteLine(result);
 
-                // Detailed analysis: actual similarity percentage
-                int similarity = rasterImage.AnalyzePercentageDigitalSignature(password);
-                Console.WriteLine($"Signature similarity: {similarity}%");
-
-                // Save a copy of the image (optional)
-                image.Save(outputPath);
+                // Save the result to a text file
+                File.WriteAllText(outputPath, result);
             }
         }
         catch (Exception ex)
